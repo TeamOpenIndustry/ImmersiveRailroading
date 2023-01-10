@@ -20,7 +20,7 @@ import java.util.List;
 
 public abstract class FreightTank extends Freight {
 	@TagField("tank")
-	public final FluidTank theTank = new FluidTank(null, 0);
+	public FluidTank theTank = new FluidTank(null, 0);
 
 	@TagSync
 	@TagField("FLUID_AMOUNT")

@@ -18,7 +18,6 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.*;
-import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -52,7 +51,7 @@ public class TrackGui implements IScreen {
 
 	private final List<ItemStack> oreDict;
 
-	private RailSettings.Builder settings;
+	private RailSettings.Mutable settings;
 
 	private ListSelector<Gauge> gaugeSelector;
 	private ListSelector<TrackItems> typeSelector;
@@ -73,7 +72,7 @@ public class TrackGui implements IScreen {
 
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
-		settings = RailSettings.from(stack).builder();
+		settings = RailSettings.from(stack).mutable();
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
 		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
@@ -316,9 +315,9 @@ public class TrackGui implements IScreen {
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings.build()).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.immutable()).sendToServer();
 			} else {
-				new ItemRailUpdatePacket(settings.build()).sendToServer();
+				new ItemRailUpdatePacket(settings.immutable()).sendToServer();
 			}
 		}
 	}
@@ -334,7 +333,13 @@ public class TrackGui implements IScreen {
 			double textScale = 1.5;
 			GUIHelpers.drawCenteredString(GuiText.SELECTOR_GAUGE.toString(settings.gauge.toString()), (int) ((300 + (GUIHelpers.getScreenWidth()-300) / 2) / textScale), (int) (10 / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
-			RailInfo info = new RailInfo(settings.build().withLength(5).withType(TrackItems.STRAIGHT), new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null), null, SwitchState.NONE, SwitchState.NONE, 0, true);
+			RailInfo info = new RailInfo(
+					settings.immutable().with(rendered -> {
+						rendered.length = 5;
+						rendered.type = TrackItems.STRAIGHT;
+					}),
+					new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null),
+					null, SwitchState.NONE, SwitchState.NONE, 0, true);
 
 			double scale = GUIHelpers.getScreenWidth() / 12.0 * zoom;
 
@@ -349,14 +354,11 @@ public class TrackGui implements IScreen {
 		}
 
 		if (trackSelector.isVisible() || railBedSelector.isVisible() || railBedFillSelector.isVisible()) {
-			ListSelector.ButtonRenderer<ItemStack> icons = new ListSelector.ButtonRenderer<ItemStack>() {
-				@Override
-				public void render(Button button, int x, int y, ItemStack value) {
-					Matrix4 zMatrix = new Matrix4();
-					zMatrix.translate(0, 0, 100);
+			ListSelector.ButtonRenderer<ItemStack> icons = (button, x, y, value) -> {
+				Matrix4 zMatrix = new Matrix4();
+				zMatrix.translate(0, 0, 100);
 
-					GUIHelpers.drawItem(value, x+2, y+2, zMatrix);
-				}
+				GUIHelpers.drawItem(value, x+2, y+2, zMatrix);
 			};
 
 			railBedSelector.render(icons);
@@ -370,7 +372,13 @@ public class TrackGui implements IScreen {
 
 			GUIHelpers.drawCenteredString(str, (int) ((450 + (GUIHelpers.getScreenWidth()-450) / 2) / textScale), (int) (10 / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
-			RailInfo info = new RailInfo(settings.build().withLength(3).withType(TrackItems.STRAIGHT), new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null), null, SwitchState.NONE, SwitchState.NONE, 0, true);
+			RailInfo info = new RailInfo(
+					settings.immutable().with(rendered -> {
+						rendered.length = 3;
+						rendered.type = TrackItems.STRAIGHT;
+					}),
+					new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null),
+					null, SwitchState.NONE, SwitchState.NONE, 0, true);
 
 			double scale = GUIHelpers.getScreenWidth() / 15.0 * zoom;
 
@@ -408,16 +416,21 @@ public class TrackGui implements IScreen {
 		}
 
 		// This could be more efficient...
-		int length = settings.length;
-		if (length < 5) {
-			length = 5;
-		}
-		if (settings.type == TrackItems.TURNTABLE) {
-			length = Math.min(25, Math.max(10, length));
-		}
+		RailInfo info = new RailInfo(
+				settings.immutable().with(b -> {
+					int length = b.length;
+					if (length < 5) {
+						length = 5;
+					}
+					if (settings.type == TrackItems.TURNTABLE) {
+						length = Math.min(25, Math.max(10, length));
+					}
+					b.length = length;
+				}),
+				new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null),
+				null, SwitchState.NONE, SwitchState.NONE, settings.type == TrackItems.TURNTABLE ? (frame / 2.0) % 360 : 0, true);
 
-		RailInfo info = new RailInfo(settings.build().withLength(length), new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null), null, SwitchState.NONE, SwitchState.NONE, settings.type == TrackItems.TURNTABLE ? (frame/2.0) % 360 : 0, true);
-
+		int length = info.settings.length;
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;
 		if (settings.type == TrackItems.TURNTABLE) {
 			scale /= 2;

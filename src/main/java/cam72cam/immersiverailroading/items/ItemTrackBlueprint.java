@@ -60,9 +60,9 @@ public class ItemTrackBlueprint extends CustomItem {
 		if (world.isServer && hand == Player.Hand.SECONDARY) {
 			ItemStack blockinfo = world.getItemStack(pos);
 			if (player.isCrouching()) {
-				stackInfo = stackInfo.withBedFill(blockinfo);
+				stackInfo = stackInfo.with(b -> b.railBedFill = blockinfo);
 			} else {
-				stackInfo = stackInfo.withBed(blockinfo);
+				stackInfo = stackInfo.with(b -> b.railBed = blockinfo);
 			}
 			stackInfo.write(stack);
 			return ClickResult.ACCEPTED;

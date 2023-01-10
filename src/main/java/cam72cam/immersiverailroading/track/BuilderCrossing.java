@@ -15,7 +15,7 @@ public class BuilderCrossing extends BuilderBase {
 	 */
 
 	public BuilderCrossing(RailInfo info, World world, Vec3i pos) {
-		super(info.withLength(3), world, pos);
+		super(info.withSettings(b -> b.length = 3), world, pos);
 
 		this.setParentPos(Vec3i.ZERO);
 		

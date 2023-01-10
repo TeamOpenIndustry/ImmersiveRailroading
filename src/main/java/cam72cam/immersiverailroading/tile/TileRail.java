@@ -47,7 +47,7 @@ public class TileRail extends TileRailBase {
 
 	public void setSwitchState(SwitchState state) {
 		if (state != info.switchState) {
-			info = new RailInfo(info.settings, info.placementInfo, info.customInfo, state, info.switchForced, info.tablePos);
+			info = info.with(b -> b.switchState = state);
 			this.markDirty();
 		}
 	}
@@ -55,7 +55,7 @@ public class TileRail extends TileRailBase {
 	public void nextTablePos(boolean back) {
 		float delta = 360 / (64f);
 		double tablePos = ((int)(info.tablePos / delta)) * delta + (back ? delta : -delta);
-		info = new RailInfo(info.settings, info.placementInfo, info.customInfo, info.switchState, info.switchForced, tablePos);
+		info = info.with(b -> b.tablePos = tablePos);
 		this.markDirty();
 		
 		List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);
@@ -125,10 +125,10 @@ public class TileRail extends TileRailBase {
 		}
 
 		if (tracks == null) {
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withType(TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
 			// This is just terrible
 			Vec3i offset = getPos().subtract(tracks.get(0).getPos());
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withType(TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
 		}
 
 

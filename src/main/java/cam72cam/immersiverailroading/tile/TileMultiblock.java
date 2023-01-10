@@ -43,9 +43,9 @@ public class TileMultiblock extends BlockEntityTickable {
 	@TagField("craftItem")
 	private ItemStack craftItem = ItemStack.EMPTY;
 	@TagField
-	private final ItemStackHandler container = new ItemStackHandler(0);
+	private ItemStackHandler container = new ItemStackHandler(0);
 	@TagField("energyStorage")
-    private final Energy energy = new Energy(0, 1000);
+    private Energy energy = new Energy(0, 1000);
 
 	public boolean isLoaded() {
 			//TODO FIX ME bad init

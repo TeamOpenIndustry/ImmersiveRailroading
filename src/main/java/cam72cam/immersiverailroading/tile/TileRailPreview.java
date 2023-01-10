@@ -73,17 +73,17 @@ public class TileRailPreview extends BlockEntityTickable {
 			RailSettings settings = RailSettings.from(item);
 			double lx = Math.abs(customInfo.placementPosition.x - placementInfo.placementPosition.x);
 			double lz = Math.abs(customInfo.placementPosition.z - placementInfo.placementPosition.z);
-			double length;
 			switch (settings.type) {
 				case TURN:
-					length = (lx + lz )/2+1;
-					length *= 90/settings.degrees;
-					settings = settings.withLength((int) Math.round(length));
+					settings = settings.with(b -> {
+						double length = (lx + lz )/2+1;
+						length *= 90/b.degrees;
+						b.length = (int) Math.round(length);
+					});
 					break;
 				case STRAIGHT:
 				case SLOPE:
-					length = Math.max(lx, lz) + 1;
-					settings = settings.withLength((int) Math.round(length));
+					settings = settings.with(b -> b.length = (int) Math.round(Math.max(lx, lz) + 1));
 			}
 
 			settings.write(item);

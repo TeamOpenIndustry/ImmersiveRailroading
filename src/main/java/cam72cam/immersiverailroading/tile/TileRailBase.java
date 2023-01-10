@@ -761,7 +761,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		TileRail tileSwitch = this.findSwitchParent();
 
 		if (tileSwitch != null && newForcedState != tileSwitch.info.switchForced) {
-			tileSwitch.info = new RailInfo(tileSwitch.info.settings, tileSwitch.info.placementInfo, tileSwitch.info.customInfo, tileSwitch.info.switchState, newForcedState, tileSwitch.info.tablePos);
+			tileSwitch.info =  tileSwitch.info.with(b -> b.switchForced = newForcedState);
 		}
 	}
 
@@ -845,7 +845,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			ItemStack railBed = stackData.railBed;
 			Gauge gauge = stackData.gauge;
 			if (!track.equals(tileRail.info.settings.track) || !railBed.equals(tileRail.info.settings.railBed) || !gauge.equals(tileRail.info.settings.gauge)) {
-				RailInfo info = tileRail.info.withTrack(track).withRailBed(railBed).withGauge(gauge);
+				RailInfo info = tileRail.info.withSettings(b -> {
+					b.track = track;
+					b.railBed = railBed;
+					b.gauge = gauge;
+				});
 				Audio.playSound(getWorld(), getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 0.3f, 0.2f);
 				if (!player.isCreative()) {
 					List<ItemStack> drops = tileRail.getDrops();

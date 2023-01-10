@@ -5,32 +5,22 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.*;
 
+import java.util.function.Consumer;
+
+@TagMapped(RailSettings.Mapper.class)
 public class RailSettings {
-    @TagField(value = "gauge")
     public final Gauge gauge;
-    @TagField("type")
     public final TrackItems type;
-    @TagField("length")
     public final int length;
-    @TagField(value = "degrees", mapper = DegreesMapper.class)
     public final float degrees;
-    @TagField("curvosity")
     public final float curvosity;
-    @TagField("pos_type")
     public final TrackPositionType posType;
-    @TagField(value = "smoothing", mapper = SmoothingMapper.class)
     public final TrackSmoothing smoothing;
-    @TagField("direction")
     public final TrackDirection direction;
-    @TagField("bedItem")
     public final ItemStack railBed;
-    @TagField("bedFill")
     public final ItemStack railBedFill;
-    @TagField("isPreview")
     public final boolean isPreview;
-    @TagField("isGradeCrossing")
     public final boolean isGradeCrossing;
-    @TagField("track")
     public final String track;
 
     public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
@@ -49,27 +39,10 @@ public class RailSettings {
         this.curvosity = curvosity;
     }
 
-    private RailSettings() {
-        // Serialization
-        gauge = Gauge.from(Gauge.STANDARD);
-        type = TrackItems.STRAIGHT;
-        track = "default";
-        length = 10;
-        degrees = 90;
-        posType = TrackPositionType.FIXED;
-        smoothing = TrackSmoothing.BOTH;
-        direction = TrackDirection.NONE;
-        railBed = ItemStack.EMPTY;
-        railBedFill = ItemStack.EMPTY;
-        isPreview = false;
-        isGradeCrossing = false;
-        curvosity = 1;
-    }
-
     public void write(ItemStack stack) {
         TagCompound data = new TagCompound();
         try {
-            TagSerializer.serialize(data, this);
+            TagSerializer.serialize(data, mutable());
         } catch (SerializationException e) {
             ImmersiveRailroading.catching(e);
         }
@@ -77,17 +50,21 @@ public class RailSettings {
     }
 
     public static RailSettings from(ItemStack stack) {
-        RailSettings res = new RailSettings();
         try {
-            TagSerializer.deserialize(stack.getTagCompound(), res);
+            return new Mutable(stack.getTagCompound()).immutable();
         } catch (SerializationException e) {
-            ImmersiveRailroading.catching(e);
+            throw new RuntimeException(e);
         }
-        return res;
     }
 
-    public Builder builder() {
-        return new Builder(this);
+    public Mutable mutable() {
+        return new Mutable(this);
+    }
+
+    public RailSettings with(Consumer<Mutable> mod) {
+        Mutable mutable = mutable();
+        mod.accept(mutable);
+        return mutable.immutable();
     }
 
     private static class DegreesMapper implements TagMapper<Float> {
@@ -127,22 +104,35 @@ public class RailSettings {
         }
     }
 
-    public static class Builder {
+    public static class Mutable {
+        @TagField(value = "gauge")
         public Gauge gauge;
+        @TagField("type")
         public TrackItems type;
+        @TagField("length")
         public int length;
+        @TagField(value = "degrees", mapper = DegreesMapper.class)
         public float degrees;
+        @TagField("curvosity")
         public float curvosity;
+        @TagField("pos_type")
         public TrackPositionType posType;
+        @TagField(value = "smoothing", mapper = SmoothingMapper.class)
         public TrackSmoothing smoothing;
+        @TagField("direction")
         public TrackDirection direction;
+        @TagField("bedItem")
         public ItemStack railBed;
+        @TagField("bedFill")
         public ItemStack railBedFill;
+        @TagField("isPreview")
         public boolean isPreview;
+        @TagField("isGradeCrossing")
         public boolean isGradeCrossing;
+        @TagField("track")
         public String track;
 
-        private Builder(RailSettings settings) {
+        private Mutable(RailSettings settings) {
             this.gauge = settings.gauge;
             this.track = settings.track;
             this.type = settings.type;
@@ -158,7 +148,26 @@ public class RailSettings {
             this.isGradeCrossing = settings.isGradeCrossing;
         }
 
-        public RailSettings build() {
+        private Mutable(TagCompound data) throws SerializationException {
+            // Defaults
+            gauge = Gauge.from(Gauge.STANDARD);
+            type = TrackItems.STRAIGHT;
+            track = "default";
+            length = 10;
+            degrees = 90;
+            posType = TrackPositionType.FIXED;
+            smoothing = TrackSmoothing.BOTH;
+            direction = TrackDirection.NONE;
+            railBed = ItemStack.EMPTY;
+            railBedFill = ItemStack.EMPTY;
+            isPreview = false;
+            isGradeCrossing = false;
+            curvosity = 1;
+
+            TagSerializer.deserialize(data, this);
+        }
+
+        public RailSettings immutable() {
             return new RailSettings(
                     gauge,
                     track,
@@ -177,112 +186,29 @@ public class RailSettings {
         }
     }
 
-    public RailSettings withLength(int length) {
-       return new RailSettings(
-				gauge,
-				track,
-				type,
-				length,
-                degrees,
-               curvosity,
-               posType,
-                smoothing,
-                direction,
-				railBed,
-				railBedFill,
-				isPreview,
-				isGradeCrossing
-       ) ;
-    }
-
-    public RailSettings withType(TrackItems type) {
-        return new RailSettings(
-                gauge,
-                track,
-                type,
-                length,
-                degrees,
-                curvosity,
-                posType,
-                smoothing,
-                direction,
-                railBed,
-                railBedFill,
-                isPreview,
-                isGradeCrossing
-        );
-    }
-    
-    public RailSettings withTrack(String track) {
-        return new RailSettings(
-                gauge,
-                track,
-                type,
-                length,
-                degrees,
-                curvosity,
-                posType,
-                smoothing,
-                direction,
-                railBed,
-                railBedFill,
-                isPreview,
-                isGradeCrossing
-        );
-    }
-
-    public RailSettings withBed(ItemStack railBed) {
-        return new RailSettings(
-                gauge,
-                track,
-                type,
-                length,
-                degrees,
-                curvosity,
-                posType,
-                smoothing,
-                direction,
-                railBed,
-                railBedFill,
-                isPreview,
-                isGradeCrossing
-        );
-    }
-
-    public RailSettings withBedFill(ItemStack railBedFill) {
-        return new RailSettings(
-                gauge,
-                track,
-                type,
-                length,
-                degrees,
-                curvosity,
-                posType,
-                smoothing,
-                direction,
-                railBed,
-                railBedFill,
-                isPreview,
-                isGradeCrossing
-        );
-    }
-
-
-    public RailSettings withGauge(Gauge gauge) {
-        return new RailSettings(
-                gauge,
-                track,
-                type,
-                length,
-                degrees,
-                curvosity,
-                posType,
-                smoothing,
-                direction,
-                railBed,
-                railBedFill,
-                isPreview,
-                isGradeCrossing
-        );
+    // This assumes that a null RailSettings is serialized.
+    public static class Mapper implements TagMapper<RailSettings> {
+        @Override
+        public TagAccessor<RailSettings> apply(Class<RailSettings> type, String fieldName, TagField tag) throws SerializationException {
+            return new TagAccessor<>(
+                    (d, o) -> {
+                        TagCompound target = new TagCompound();
+                        try {
+                            TagSerializer.serialize(target, o.mutable());
+                        } catch (SerializationException e) {
+                            // This is messy
+                            throw new RuntimeException(e);
+                        }
+                        d.set(fieldName, target);
+                    },
+                    d -> {
+                        try {
+                            return new Mutable(d.get(fieldName)).immutable();
+                        } catch (SerializationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+            );
+        }
     }
 }

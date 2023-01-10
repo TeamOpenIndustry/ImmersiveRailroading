@@ -21,29 +21,31 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	public BuilderSwitch(RailInfo info, World world, Vec3i pos) {
 		super(info, world, pos);
 		
-		RailInfo turnInfo = info.withType(info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
-		RailInfo straightInfo = info.clone();
+		RailInfo turnInfo = info.withSettings(b -> b.type = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
+		RailInfo straightInfo = info;
 
 		{
 			turnBuilder = (BuilderIterator) turnInfo.getBuilder(world, pos);
 			straightBuilder = new BuilderStraight(straightInfo, world, pos, true);
 			realStraightBuilder = new BuilderStraight(straightInfo, world, pos, true);
-			
-			double maxOverlap = 0;
-			
-			straightBuilder.positions.retainAll(turnBuilder.positions);
-			
-			for (Pair<Integer, Integer> straight : straightBuilder.positions) {
-				maxOverlap = Math.max(maxOverlap, new Vec3d(straight.getKey(), 0, straight.getValue()).length());
-			}
-			
-			maxOverlap *= 1.2;
-			straightInfo = straightInfo.withLength((int) Math.ceil(maxOverlap) + 3);
+
+			straightInfo = straightInfo.withSettings(b -> {
+				double maxOverlap = 0;
+
+				straightBuilder.positions.retainAll(turnBuilder.positions);
+
+				for (Pair<Integer, Integer> straight : straightBuilder.positions) {
+					maxOverlap = Math.max(maxOverlap, new Vec3d(straight.getKey(), 0, straight.getValue()).length());
+				}
+
+				maxOverlap *= 1.2;
+				b.length = (int) Math.ceil(maxOverlap) + 3;
+			});
 		}
 		
 
 		straightBuilder = new BuilderStraight(straightInfo, world, pos, true);
-		straightBuilderReal = new BuilderStraight(straightInfo.withType(TrackItems.STRAIGHT), world, pos, true);
+		straightBuilderReal = new BuilderStraight(straightInfo.withSettings(b -> b.type = TrackItems.STRAIGHT), world, pos, true);
 		
 		turnBuilder.overrideFlexible = true;
 		
