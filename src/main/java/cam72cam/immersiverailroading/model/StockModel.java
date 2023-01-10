@@ -33,6 +33,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     protected final List<Door<T>> doors;
     protected final List<Control<T>> controls;
     protected final List<Readout<T>> gauges;
+    protected final List<Seat<T>> seats;
 
     protected List<LightFlare<T>> headlights;
 
@@ -54,6 +55,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         this.hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
 
         this.doors = new ArrayList<>();
+        this.seats = new ArrayList<>();
         this.controls = new ArrayList<>();
         this.gauges = new ArrayList<>();
         this.headlights = new ArrayList<>();
@@ -125,6 +127,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         }
 
         addDoor(provider);
+        seats.addAll(Seat.get(provider));
 
         addHeadlight(def, provider, ModelComponentType.HEADLIGHT_X);
     }
@@ -261,6 +264,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         controls.forEach(c -> c.render(stock, draw));
         doors.forEach(c -> c.render(stock, draw));
         gauges.forEach(r -> r.render(stock, draw));
+        seats.forEach(r -> r.render(draw));
     }
 
     protected void postRender(T stock, RenderState state) {
@@ -284,5 +288,15 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         draggable.addAll(controls);
         draggable.addAll(doors);
         return draggable;
+    }
+
+    public List<Interactable<T>> getInteractable() {
+        List<Interactable<T>> interactable = new ArrayList<>(getDraggable());
+        interactable.addAll(seats);
+        return interactable;
+    }
+
+    public List<Seat<T>> getSeats() {
+        return seats;
     }
 }

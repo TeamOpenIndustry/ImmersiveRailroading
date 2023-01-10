@@ -5,17 +5,21 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Door;
+import cam72cam.immersiverailroading.model.part.Seat;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IRidable;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
 	public float getRidingSoundModifier() {
@@ -24,6 +28,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	@TagField(value = "payingPassengerPositions", mapper = PassengerMapper.class)
 	private final Map<UUID, Vec3d> payingPassengerPositions = new HashMap<>();
+
+	@TagField(value = "seatedPassengers", mapper = SeatedMapper.class)
+	@TagSync
+	private Map<String, UUID> seatedPassengers = new HashMap<>();
+
 
 	@Override
 	public ClickResult onClick(Player player, Player.Hand hand) {
@@ -44,15 +53,40 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 	}
 
+	private Vec3d getSeatPosition(UUID passenger) {
+		String seat = seatedPassengers.entrySet().stream()
+				.filter(x -> x.getValue().equals(passenger))
+				.map(Map.Entry::getKey).findFirst().orElse(null);
+		return this.getDefinition().getModel().getSeats().stream()
+				.filter(s -> s.part.key.equals(seat))
+				.map(s -> new Vec3d(s.part.center.z, s.part.min.y-0.5, -s.part.center.x))
+				.findFirst().orElse(null);
+	}
+
 	@Override
 	public Vec3d getMountOffset(Entity passenger, Vec3d off) {
 		if (passenger.isVillager() && !payingPassengerPositions.containsKey(passenger.getUUID())) {
 			payingPassengerPositions.put(passenger.getUUID(), passenger.getPosition());
 		}
 
+		if (passenger.isVillager() && !seatedPassengers.containsValue(passenger.getUUID())) {
+			for (Seat<?> seat : getDefinition().getModel().getSeats()) {
+				if (!seatedPassengers.containsKey(seat.part.key)) {
+					seatedPassengers.put(seat.part.key, passenger.getUUID());
+					break;
+				}
+			}
+		}
+
+		Vec3d seat = getSeatPosition(passenger.getUUID());
+		if (seat != null) {
+			return seat;
+		}
+
 		int wiggle = passenger.isVillager() ? 10 : 0;
 		off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
 		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger));
+
 		return off;
 	}
 
@@ -66,10 +100,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	
 	@Override
 	public boolean shouldRiderSit(Entity passenger) {
-		if (this.getDefinition().shouldSit != null) {
-			return this.getDefinition().shouldSit;
-		}
-		return this.gauge.shouldSit();
+		return Objects.equals(true, this.getDefinition().shouldSit) ||
+				this.gauge.shouldSit() ||
+				this.seatedPassengers.containsValue(passenger.getUUID());
 	}
 
 	@Override
@@ -78,7 +111,12 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			offset = playerMovement(passenger.asPlayer(), offset);
 		}
 
-		offset = this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(passenger));
+		Vec3d seat = getSeatPosition(passenger.getUUID());
+		if (seat != null) {
+			offset = seat;
+		} else {
+			offset = this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(passenger));
+		}
 		offset = offset.add(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0);
 
 		return offset;
@@ -166,6 +204,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	public Vec3d onDismountPassenger(Entity passenger, Vec3d offset) {
+		seatedPassengers.entrySet().stream().filter(x -> x.getValue().equals(passenger.getUUID()))
+				.map(Map.Entry::getKey).collect(Collectors.toList()).forEach(seatedPassengers::remove);
+
 		//TODO calculate better dismount offset
 		offset = new Vec3d(Math.copySign(getDefinition().getWidth(gauge)/2 + 1, offset.x), 0, offset.z);
 
@@ -188,12 +229,33 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
+	public void onSeatClick(String seat, Player player) {
+		List<String> seats = seatedPassengers.entrySet().stream().filter(x -> x.getValue().equals(player.getUUID()))
+				.map(Map.Entry::getKey).collect(Collectors.toList());
+		if (!seats.isEmpty()) {
+			seats.forEach(seatedPassengers::remove);
+			return;
+		}
+
+		seatedPassengers.put(seat, player.getUUID());
+	}
+
 	private static class PassengerMapper implements TagMapper<Map<UUID, Vec3d>> {
 		@Override
 		public TagAccessor<Map<UUID, Vec3d>> apply(Class<Map<UUID, Vec3d>> type, String fieldName, TagField tag) {
 			return new TagAccessor<>(
 					(d, o) -> d.setMap(fieldName, o, UUID::toString, (Vec3d pos) -> new TagCompound().setVec3d("pos", pos)),
 					d -> d.getMap(fieldName, UUID::fromString, t -> t.getVec3d("pos"))
+			);
+		}
+	}
+
+	private static class SeatedMapper implements TagMapper<Map<String, UUID>> {
+		@Override
+		public TagAccessor<Map<String, UUID>> apply(Class<Map<String, UUID>> type, String fieldName, TagField tag) throws SerializationException {
+			return new TagAccessor<>(
+					(d, o) -> d.setMap(fieldName, o, i -> i, u -> new TagCompound().setUUID("uuid", u)),
+					d -> d.getMap(fieldName, i -> i, t -> t.getUUID("uuid"))
 			);
 		}
 	}
