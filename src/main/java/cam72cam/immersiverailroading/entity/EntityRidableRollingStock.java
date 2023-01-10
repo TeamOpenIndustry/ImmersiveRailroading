@@ -64,7 +64,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				.map(Map.Entry::getKey).findFirst().orElse(null);
 		return this.getDefinition().getModel().getSeats().stream()
 				.filter(s -> s.part.key.equals(seat))
-				.map(s -> new Vec3d(s.part.center.z, s.part.min.y-0.5, -s.part.center.x))
+				.map(s -> new Vec3d(s.part.center.z, s.part.min.y, -s.part.center.x).scale(gauge.scale()).subtract(0, 0.6, 0))
 				.findFirst().orElse(null);
 	}
 
