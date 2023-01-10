@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.model.part.Seat;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IRidable;
@@ -32,6 +33,10 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	@TagField(value = "seatedPassengers", mapper = SeatedMapper.class)
 	@TagSync
 	private Map<String, UUID> seatedPassengers = new HashMap<>();
+
+	// Hack to remount players if they were seated
+	private Map<Player, Vec3d> remount = new HashMap<>();
+
 
 
 	@Override
@@ -195,6 +200,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		super.onTick();
 
 		if (getWorld().isServer) {
+			remount.forEach((player, pos) -> {
+				player.setPosition(pos);
+				player.startRiding(this);
+			});
+			remount.clear();
 			for (Player source : getWorld().getEntities(Player.class)) {
 				if (source.getRiding() == null && getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL))) {
 					this.addPassenger(source);
@@ -204,8 +214,14 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	}
 
 	public Vec3d onDismountPassenger(Entity passenger, Vec3d offset) {
-		seatedPassengers.entrySet().stream().filter(x -> x.getValue().equals(passenger.getUUID()))
-				.map(Map.Entry::getKey).collect(Collectors.toList()).forEach(seatedPassengers::remove);
+		List<String> seats = seatedPassengers.entrySet().stream().filter(x -> x.getValue().equals(passenger.getUUID()))
+				.map(Map.Entry::getKey).collect(Collectors.toList());
+		if (!seats.isEmpty()) {
+			seats.forEach(seatedPassengers::remove);
+			if (getWorld().isServer && passenger.isPlayer()) {
+				remount.put(passenger.asPlayer(), passenger.getPosition());
+			}
+		}
 
 		//TODO calculate better dismount offset
 		offset = new Vec3d(Math.copySign(getDefinition().getWidth(gauge)/2 + 1, offset.x), 0, offset.z);
