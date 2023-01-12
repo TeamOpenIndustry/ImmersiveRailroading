@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.rail.RailBaseRender;
 import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -105,7 +106,11 @@ public class TrackGui implements IScreen {
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			if (val > 0 && val <= 1000) {
+			int max = 1000;
+			if (settings.type == TrackItems.TURNTABLE) {
+				max = BuilderTurnTable.maxLength(settings.gauge);
+			}
+			if (val > 0 && val <= max) {
 				settings.length = val;
 				return true;
 			}
@@ -121,6 +126,9 @@ public class TrackGui implements IScreen {
 			public void onClick(Gauge gauge) {
 				settings.gauge = gauge;
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
+				if (settings.type == TrackItems.TURNTABLE) {
+					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), BuilderTurnTable.maxLength(settings.gauge))); // revalidate
+				}
 			}
 		};
 		gaugeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_GAUGE.toString(settings.gauge)) {
@@ -144,6 +152,9 @@ public class TrackGui implements IScreen {
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
+				if (settings.type == TrackItems.TURNTABLE) {
+					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), BuilderTurnTable.maxLength(settings.gauge))); // revalidate
+				}
 			}
 		};
 		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
