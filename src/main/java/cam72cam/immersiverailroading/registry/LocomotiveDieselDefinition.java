@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.ValveGearType;
+import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.DieselLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -141,8 +141,8 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
 
-    public ValveGearType getValveGear() {
-        return super.getValveGear() == null ? ValveGearType.CONNECTING : super.getValveGear();
+    public ValveGearConfig getValveGear() {
+        return super.getValveGear() == null ? new ValveGearConfig(ValveGearConfig.ValveGearType.CONNECTING.name()) : super.getValveGear();
     }
 
     public int getThrottleNotches() {

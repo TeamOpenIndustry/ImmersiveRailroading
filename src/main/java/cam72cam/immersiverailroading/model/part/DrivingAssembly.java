@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.model.part;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
-import cam72cam.immersiverailroading.library.ValveGearType;
+import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -17,11 +17,11 @@ public class DrivingAssembly {
     private final ValveGear left;
     private final ModelComponent steamChest;
 
-    public static DrivingAssembly get(ValveGearType type, ComponentProvider provider, float angleOffset) {
+    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, float angleOffset) {
         return get(type, provider, null, angleOffset);
     }
 
-    public static DrivingAssembly get(ValveGearType type, ComponentProvider provider, ModelPosition pos, float angleOffset) {
+    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelPosition pos, float angleOffset) {
         WheelSet wheels = WheelSet.get(provider, pos == null ? ModelComponentType.WHEEL_DRIVER_X : ModelComponentType.WHEEL_DRIVER_POS_X, pos, angleOffset);
         if (wheels == null) {
             return null;

@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.ValveGearType;
+import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
@@ -95,12 +95,12 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
     @Override
     protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        ValveGearType type = def.getValveGear();
+        ValveGearConfig type = def.getValveGear();
 
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
         cargoFillFront = CargoFill.get(provider, ModelPosition.FRONT);
         shellFront = provider.parse(ModelComponentType.FRONT_SHELL);
-        drivingWheelsFront = DrivingAssembly.get(type,provider, ModelPosition.FRONT, 0);
+        drivingWheelsFront = DrivingAssembly.get(type, provider, ModelPosition.FRONT, 0);
 
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
         cargoFillRear = CargoFill.get(provider, ModelPosition.REAR);

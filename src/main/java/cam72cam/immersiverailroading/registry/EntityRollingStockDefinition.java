@@ -62,7 +62,7 @@ public abstract class EntityRollingStockDefinition {
     private String name = "Unknown";
     private String modelerName = "N/A";
     private String packName = "N/A";
-    private ValveGearType valveGear;
+    private ValveGearConfig valveGear;
     public float darken;
     public Identifier modelLoc;
     protected StockModel<?> model;
@@ -288,7 +288,7 @@ public abstract class EntityRollingStockDefinition {
 
         JsonObject properties = data.get("properties").getAsJsonObject();
         weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
-        valveGear = properties.has("valve_gear") ? ValveGearType.from(properties.get("valve_gear").getAsString().toUpperCase(Locale.ROOT)) : null;
+        valveGear = properties.has("valve_gear") ? new ValveGearConfig(properties.get("valve_gear").getAsString()) : null;
         hasIndependentBrake = properties.has("independent_brake") ? properties.get("independent_brake").getAsBoolean() : independentBrakeDefault();
         // Locomotives default to linear brake control
         isLinearBrakeControl = properties.has("linear_brake_control") ? properties.get("linear_brake_control").getAsBoolean() : !(this instanceof LocomotiveDefinition);
@@ -633,7 +633,7 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    public ValveGearType getValveGear() {
+    public ValveGearConfig getValveGear() {
         return valveGear;
     }
 

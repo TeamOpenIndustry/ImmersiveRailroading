@@ -51,6 +51,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             lodSizes.add(LOD_SMALL);
             return lodSizes;
         });
+
         this.def = def;
         this.hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
 
