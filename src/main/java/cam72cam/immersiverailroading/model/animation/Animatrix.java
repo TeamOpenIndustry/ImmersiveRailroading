@@ -1,15 +1,13 @@
 package cam72cam.immersiverailroading.model.animation;
 
+import cam72cam.immersiverailroading.model.ComponentRenderer;
 import util.Matrix4;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Animatrix {
     private final Map<String, List<Matrix4>> map = new HashMap<>();
@@ -64,6 +62,10 @@ public class Animatrix {
         }
     }
 
+    public Set<String> groups() {
+        return map.keySet();
+    }
+
     public Matrix4 getMatrix(String group, float percent) {
         percent = percent % 1;
 
@@ -79,5 +81,9 @@ public class Animatrix {
             }
         }
         return null;
+    }
+
+    public ComponentRenderer.Animator animator(float percent) {
+        return group -> getMatrix(group, percent);
     }
 }

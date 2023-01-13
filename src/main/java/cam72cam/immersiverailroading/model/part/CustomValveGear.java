@@ -55,23 +55,9 @@ public class CustomValveGear implements ValveGear {
     @Override
     public void render(double distance, float reverser, ComponentRenderer draw) {
         float percent = angle(distance) / 360;
-        for (ModelComponent component : components) {
-            Matrix4 m = null;
-            for (OBJGroup group : component.groups()) {
-                m = animation.getMatrix(group.name, percent);
-                if (m != null) {
-                    break;
-                }
-            }
-            if (m != null) {
-                try (ComponentRenderer sub = draw.push()) {
-                    //sub.mult(ms);
-                    sub.mult(m);
-                    sub.render(component);
-                }
-            } else {
-                draw.render(component);
-            }
+
+        try (ComponentRenderer sub = draw.animation(animation.animator(percent))) {
+            sub.render(components);
         }
     }
 

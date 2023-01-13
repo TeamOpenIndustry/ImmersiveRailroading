@@ -24,11 +24,13 @@ public class ComponentRenderer implements Closeable {
     private final boolean hasInterior;
     private final EntityRollingStock stock;
 
+    private final List<Animator> animators;
+
     public ComponentRenderer(EntityRollingStock stock, OBJRender.Binding vbo, List<ModelComponentType> available, boolean hasInterior) {
-        this(stock, new Matrix4(), vbo, available, hasInterior, false, null, null);
+        this(stock, new Matrix4(), vbo, available, hasInterior, false, null, null, Collections.emptyList());
     }
 
-    public ComponentRenderer(EntityRollingStock stock, Matrix4 matrix, OBJRender.Binding vbo, List<ModelComponentType> available, boolean hasInterior, boolean fullbright, Float interiorLight, Float skyLight) {
+    public ComponentRenderer(EntityRollingStock stock, Matrix4 matrix, OBJRender.Binding vbo, List<ModelComponentType> available, boolean hasInterior, boolean fullbright, Float interiorLight, Float skyLight, List<Animator> animators) {
         this.vbo = vbo;
         this.available = available;
         this.fullbright = fullbright;
@@ -37,6 +39,12 @@ public class ComponentRenderer implements Closeable {
         this.skyLight = skyLight;
         this.matrix = matrix;
         this.stock = stock;
+        this.animators = animators;
+    }
+
+    @FunctionalInterface
+    public interface Animator {
+        Matrix4 getMatrix(String group);
     }
 
     public void render(ModelComponent component) {
@@ -58,18 +66,24 @@ public class ComponentRenderer implements Closeable {
     }
 
     public ComponentRenderer withBrightGroups(boolean fullbright) {
-        return new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight);
+        return new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight, animators);
     }
 
     public ComponentRenderer withInteriorLight(EntityRollingStock stock) {
         float interiorLight = stock.getDefinition().interiorLightLevel();
         float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
         float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
-        return blockLight < interiorLight ? new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight) : this;
+        return blockLight < interiorLight ? new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight, animators) : this;
     }
 
     public ComponentRenderer push() {
-        return new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight);
+        return new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight, animators);
+    }
+
+    public ComponentRenderer animation(Animator animation) {
+        List<Animator> animators = new ArrayList<>(this.animators);
+        animators.add(animation);
+        return new ComponentRenderer(stock, matrix, vbo, available, hasInterior, fullbright, interiorLight, skyLight, animators);
     }
 
     public void mult(Matrix4 transform) {
@@ -102,9 +116,35 @@ public class ComponentRenderer implements Closeable {
     }
 
     private void draw(Collection<String> groups) {
+        Map<String, Matrix4> animatedGroups = new HashMap<>();
+        for (Animator animator : animators) {
+            for (String group : groups) {
+                Matrix4 m = animator.getMatrix(group);
+                if (m != null) {
+                    if (!animatedGroups.containsKey(group)) {
+                        animatedGroups.put(group, matrix.copy());
+                    }
+                    animatedGroups.get(group).multiply(m);
+                }
+            }
+        }
+
         if (interiorLight == null && !fullbright) {
             // Skip any sort of lighting logic
-            vbo.draw(groups, s -> s.model_view().multiply(matrix));
+            if (animatedGroups.isEmpty()) {
+                vbo.draw(groups, s -> s.model_view().multiply(matrix));
+            } else {
+                List<String> animated = groups.stream().filter(g -> animatedGroups.containsKey(g)).collect(Collectors.toList());
+                List<String> notAnimated = groups.stream().filter(g -> !animatedGroups.containsKey(g)).collect(Collectors.toList());
+                if (!notAnimated.isEmpty()) {
+                    vbo.draw(notAnimated, state -> state.model_view().multiply(matrix));
+                }
+                if (!animated.isEmpty()) {
+                    animated.forEach(group -> {
+                        vbo.draw(Collections.singletonList(group), state -> state.model_view().multiply(animatedGroups.getOrDefault(group, matrix)));
+                    });
+                }
+            }
             return;
         }
 
@@ -141,14 +181,40 @@ public class ComponentRenderer implements Closeable {
             levels.computeIfAbsent(key, p -> new ArrayList<>()).add(group);
         }
 
-        levels.forEach((level, litGroups) -> {
-            vbo.draw(litGroups, state -> {
-                state.model_view().multiply(matrix);
-                if (level != null) {
-                    state.lightmap(level.getKey(), level.getValue());
+
+        if (animatedGroups.isEmpty()) {
+            levels.forEach((level, litGroups) -> {
+                vbo.draw(litGroups, state -> {
+                    state.model_view().multiply(matrix);
+                    if (level != null) {
+                        state.lightmap(level.getKey(), level.getValue());
+                    }
+                });
+            });
+        } else {
+            levels.forEach((level, litGroups) -> {
+                List<String> animated = litGroups.stream().filter(g -> animatedGroups.containsKey(g)).collect(Collectors.toList());
+                List<String> notAnimated = litGroups.stream().filter(g -> !animatedGroups.containsKey(g)).collect(Collectors.toList());
+                if (!notAnimated.isEmpty()) {
+                    vbo.draw(notAnimated, state -> {
+                        state.model_view().multiply(matrix);
+                        if (level != null) {
+                            state.lightmap(level.getKey(), level.getValue());
+                        }
+                    });
+                }
+                if (!animated.isEmpty()) {
+                    animated.forEach(group -> {
+                        vbo.draw(Collections.singletonList(group), state -> {
+                            state.model_view().multiply(animatedGroups.getOrDefault(group, matrix));
+                            if (level != null) {
+                                state.lightmap(level.getKey(), level.getValue());
+                            }
+                        });
+                    });
                 }
             });
-        });
+        }
     }
 
     @Override
