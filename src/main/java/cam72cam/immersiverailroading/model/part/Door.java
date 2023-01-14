@@ -38,7 +38,7 @@ public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
     }
 
     public Door(ModelComponent part, Function<T, Matrix4> loc) {
-        super(part, loc);
+        super(null, part, loc);
         type = part.modelIDs.stream().anyMatch(g -> g.contains("EXTERNAL")) ? Types.EXTERNAL :
                 part.modelIDs.stream().anyMatch(g -> g.contains("CONNECTING")) ? Types.CONNECTING :
                 Types.INTERNAL;
@@ -61,8 +61,8 @@ public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
             return false;
         }
         IBoundingBox bb = IBoundingBox.from(
-                transform(part.min, 0, (T)stock),
-                transform(part.max, 0, (T)stock)
+                transform(part.min, 0, (T)stock, true),
+                transform(part.max, 0, (T)stock, true)
         ).grow(new Vec3d(0.5, 0.5, 0.5));
         // The added velocity is due to a bug where the player may tick before or after the stock.
         // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities

@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ComponentRenderer;
+import cam72cam.immersiverailroading.model.animation.Animatrix;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.ControlSoundsDefinition;
@@ -24,6 +25,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import util.Matrix4;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -46,20 +48,21 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     private final Map<Axis, Float> translations = new HashMap<>();
     private final Map<Axis, Float> scales = new HashMap<>();
     private final Map<Axis, Float> scaleRot = new HashMap<>();
+    private final Animatrix animator;
     private final Map<UUID, Float> lastMoveSoundValue = new HashMap<>();
     private final Map<UUID, Boolean> wasSoundPressed = new HashMap<>();
     private final Map<UUID, List<ISound>> sounds = new HashMap<>();
     private final Function<T, Matrix4> location;
 
     public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(part1 -> new Control<T>(part1, null)).collect(Collectors.toList());
+        return provider.parseAll(type).stream().map(part1 -> new Control<T>(provider, part1, null)).collect(Collectors.toList());
     }
 
     public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelComponentType type, ModelPosition pos, Function<T, Matrix4> loc) {
-        return provider.parseAll(type, pos).stream().map(part1 -> new Control<>(part1, loc)).collect(Collectors.toList());
+        return provider.parseAll(type, pos).stream().map(part1 -> new Control<>(provider, part1, loc)).collect(Collectors.toList());
     }
 
-    public Control(ModelComponent part, Function<T, Matrix4> loc) {
+    public Control(ComponentProvider provider, ModelComponent part, Function<T, Matrix4> loc) {
         super(part);
         this.location = loc;
         this.controlGroup = part.modelIDs.stream().map(group -> {
@@ -130,6 +133,10 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                 }
             }
         }
+
+        // TODO instead base it in the control group!
+        //animator = provider == null ? null : provider.model.animations.stream().filter(a -> a.groups().stream().anyMatch(part.modelIDs::contains)).findFirst().orElse(null);
+        animator = provider == null || this.controlGroup == null ? null : provider.model.animations.stream().filter(a -> this.controlGroup.equals(a.cg)).findFirst().orElse(null);
     }
 
     private static String formatLabel(ModelComponentType label) {
@@ -142,6 +149,9 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             return;
         }
 
+        if (animator != null) {
+            animator.percent = getValue(stock);
+        }
 
         if (rotationPoint == null && translations.isEmpty() && scales.isEmpty() && location == null) {
             draw.render(part);
@@ -149,7 +159,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         }
 
         try (ComponentRenderer matrix = draw.push()) {
-            matrix.mult(transform(getValue(stock), new Matrix4(), stock));
+            matrix.mult(transform(getValue(stock), new Matrix4(), stock, false));
             matrix.render(part);
         }
     }
@@ -193,7 +203,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                 return;
             }
         }
-        Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()), stock).apply(center);
+        Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()), stock, true).apply(center);
         String labelstate = "";
         float percent = getValue(stock) - offset;
         switch (part.type) {
@@ -238,14 +248,14 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     }
 
     public Vec3d transform(Vec3d point, T stock) {
-        return transform(point, getValue(stock), stock);
+        return transform(point, getValue(stock), stock, true);
     }
 
-    protected Vec3d transform(Vec3d point, float valuePercent, T stock) {
-        return transform(valuePercent, stock.getModelMatrix(), stock).apply(point);
+    protected Vec3d transform(Vec3d point, float valuePercent, T stock, boolean includeAnimator) {
+        return transform(valuePercent, stock.getModelMatrix(), stock, includeAnimator).apply(point);
     }
 
-    protected Matrix4 transform(float valuePercent, Matrix4 m, T stock) {
+    protected Matrix4 transform(float valuePercent, Matrix4 m, T stock, boolean includeAnimator) {
         if (location != null) {
             m.multiply(location.apply(stock));
         }
@@ -297,6 +307,11 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             }
             m = m.translate(-part.center.x, -part.center.y, -part.center.z);
         }
+
+        if (animator != null && includeAnimator) {
+            // TODO non-looping animation
+            m = m.multiply(animator.getMatrix(animator.groups().stream().findFirst().orElse(null), valuePercent));
+        }
         return m;
     }
 
@@ -341,16 +356,16 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         if (lastClientLook != null) {
             Vec3d movement = current.subtract(lastClientLook);
             movement = movement.rotateYaw(-stock.getRotationYaw());
-            float applied = (float) (movement.length());
+            float applied = Math.min(0.1f, (float) (movement.length()*1));
             if (rotationDegrees <= 180) {
                 float value = getValue(stock);
-                Vec3d grabComponent = transform(center, value, stock).add(movement);
-                Vec3d grabComponentNext = transform(center, value + applied, stock);
-                Vec3d grabComponentPrev = transform(center, value - applied, stock);
+                Vec3d grabComponent = transform(center, value, stock, true).add(movement);
+                Vec3d grabComponentNext = transform(center, value + applied, stock, true);
+                Vec3d grabComponentPrev = transform(center, value - applied, stock, true);
                 if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
-                    delta += applied;
+                    delta += applied * movement.length() / grabComponent.distanceTo(grabComponentNext);
                 } else {
-                    delta -= applied;
+                    delta -= applied * movement.length() / grabComponent.distanceTo(grabComponentPrev);
                 }
             } else {
                 // hack spinning wheels

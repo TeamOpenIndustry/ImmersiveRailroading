@@ -26,8 +26,8 @@ public class ComponentRenderer implements Closeable {
 
     private final List<Animator> animators;
 
-    public ComponentRenderer(EntityRollingStock stock, OBJRender.Binding vbo, List<ModelComponentType> available, boolean hasInterior) {
-        this(stock, new Matrix4(), vbo, available, hasInterior, false, null, null, Collections.emptyList());
+    public ComponentRenderer(EntityRollingStock stock, OBJRender.Binding vbo, List<ModelComponentType> available, boolean hasInterior, List<Animator> animators) {
+        this(stock, new Matrix4(), vbo, available, hasInterior, false, null, null, animators);
     }
 
     public ComponentRenderer(EntityRollingStock stock, Matrix4 matrix, OBJRender.Binding vbo, List<ModelComponentType> available, boolean hasInterior, boolean fullbright, Float interiorLight, Float skyLight, List<Animator> animators) {
@@ -78,12 +78,6 @@ public class ComponentRenderer implements Closeable {
 
     public ComponentRenderer push() {
         return new ComponentRenderer(stock, matrix.copy(), vbo, available, hasInterior, fullbright, interiorLight, skyLight, animators);
-    }
-
-    public ComponentRenderer animation(Animator animation) {
-        List<Animator> animators = new ArrayList<>(this.animators);
-        animators.add(animation);
-        return new ComponentRenderer(stock, matrix, vbo, available, hasInterior, fullbright, interiorLight, skyLight, animators);
     }
 
     public void mult(Matrix4 transform) {

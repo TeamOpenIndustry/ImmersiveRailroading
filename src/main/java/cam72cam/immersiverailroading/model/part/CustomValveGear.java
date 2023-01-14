@@ -6,9 +6,7 @@ import cam72cam.immersiverailroading.model.ComponentRenderer;
 import cam72cam.immersiverailroading.model.animation.Animatrix;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.resource.Identifier;
-import util.Matrix4;
 
 import java.io.IOException;
 import java.util.*;
@@ -37,10 +35,10 @@ public class CustomValveGear implements ValveGear {
 
         components = components.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        return !components.isEmpty() ? new CustomValveGear(custom, wheels, components, angleOffset) : null;
+        return !components.isEmpty() ? new CustomValveGear(provider, custom, wheels, components, angleOffset) : null;
     }
 
-    public CustomValveGear(Identifier custom, WheelSet wheels, List<ModelComponent> components, float angleOffset) {
+    public CustomValveGear(ComponentProvider provider, Identifier custom, WheelSet wheels, List<ModelComponent> components, float angleOffset) {
         this.wheels = wheels;
         this.angleOffset = angleOffset;
         this.components = components;
@@ -50,15 +48,14 @@ public class CustomValveGear implements ValveGear {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        provider.model.animations.add(animation);
     }
 
     @Override
     public void render(double distance, float reverser, ComponentRenderer draw) {
-        float percent = angle(distance) / 360;
-
-        try (ComponentRenderer sub = draw.animation(animation.animator(percent))) {
-            sub.render(components);
-        }
+        animation.percent = angle(distance) / 360;
+        draw.render(components);
     }
 
     @Override

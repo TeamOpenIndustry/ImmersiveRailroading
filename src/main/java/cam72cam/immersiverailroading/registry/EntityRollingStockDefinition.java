@@ -96,6 +96,8 @@ public abstract class EntityRollingStockDefinition {
     private double swayMultiplier;
     private double tiltMultiplier;
 
+    public Map<String, Identifier> animations;
+
     public static class LightDefinition {
         public static final Identifier default_light_tex = new Identifier(ImmersiveRailroading.MODID, "textures/light.png");
 
@@ -238,6 +240,14 @@ public abstract class EntityRollingStockDefinition {
             JsonElement variants = data.get("tex_variants");
             for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
                 textureNames.put(variant.getValue().getAsString(), variant.getKey());
+            }
+        }
+
+        animations = new HashMap<>();
+        if (data.has("animations")) {
+            JsonObject aobj = data.get("animations").getAsJsonObject();
+            for (Entry<String, JsonElement> entry : aobj.entrySet()) {
+                animations.put(entry.getKey(), new Identifier(entry.getValue().getAsString()));
             }
         }
 

@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
+import cam72cam.immersiverailroading.model.animation.Animatrix;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
@@ -16,10 +17,12 @@ import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.resource.Identifier;
 import util.Matrix4;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
@@ -41,6 +44,8 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     private final TrackFollowers rearTrackers;
     private final boolean hasInterior;
 
+    public final List<Animatrix> animations;
+
     public static final int LOD_LARGE = 1024;
     public static final int LOD_SMALL = 512;
 
@@ -54,6 +59,13 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
         this.def = def;
         this.hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
+
+        this.animations = new ArrayList<>();
+        for (Map.Entry<String, Identifier> entry : def.animations.entrySet()) {
+            Animatrix anim = new Animatrix(entry.getValue().getResourceStream());
+            anim.cg = entry.getKey();
+            animations.add(anim);
+        }
 
         this.doors = new ArrayList<>();
         this.seats = new ArrayList<>();
@@ -78,6 +90,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         } else {
             rearTrackers = null;
         }
+
     }
 
     protected void addGauge(ComponentProvider provider, ModelComponentType type, Readouts value) {
@@ -194,7 +207,9 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
             distanceTraveled /= stock.gauge.scale();
 
             try (
-                    ComponentRenderer draw = new ComponentRenderer(stock, bound, available, hasInterior)
+                    ComponentRenderer draw = new ComponentRenderer(stock, bound, available, hasInterior,
+                            animations.stream().map(a -> (ComponentRenderer.Animator)a::getMatrix).collect(Collectors.toList())
+                    )
             ) {
                 //noinspection unchecked
                 render((T) stock, draw, distanceTraveled);

@@ -32,7 +32,7 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     }
 
     public Readout(ModelComponent part, Function<T, Float> position, Function<T, Matrix4> loc) {
-        super(part, loc);
+        super(null, part, loc);
         this.position = position;
 
         float min = 0;

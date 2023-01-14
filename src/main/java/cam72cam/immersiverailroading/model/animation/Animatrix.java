@@ -10,6 +10,9 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class Animatrix {
+    public float percent = 0;
+    public String cg; //TODO remove
+
     private final Map<String, List<Matrix4>> map = new HashMap<>();
 
     public Animatrix(InputStream in) throws IOException {
@@ -66,8 +69,11 @@ public class Animatrix {
         return map.keySet();
     }
 
+    public Matrix4 getMatrix(String group) {
+        return getMatrix(group, percent);
+    }
     public Matrix4 getMatrix(String group, float percent) {
-        percent = percent % 1;
+        percent = (percent % 1 + 1) % 1;
 
         for (Map.Entry<String, List<Matrix4>> x : map.entrySet()) {
             if (group.equals(x.getKey())) {
@@ -81,9 +87,5 @@ public class Animatrix {
             }
         }
         return null;
-    }
-
-    public ComponentRenderer.Animator animator(float percent) {
-        return group -> getMatrix(group, percent);
     }
 }
