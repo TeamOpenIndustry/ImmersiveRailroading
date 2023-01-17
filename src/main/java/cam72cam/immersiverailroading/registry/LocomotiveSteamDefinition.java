@@ -137,12 +137,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    protected StockModel<?> createModel() throws Exception {
+    protected StockModel<?, ?> createModel() throws Exception {
         return new SteamLocomotiveModel(this);
     }
 
     @Override
-    public SteamLocomotiveModel getModel() {
+    public StockModel<?, ?> getModel() {
         return (SteamLocomotiveModel) super.getModel();
     }
 

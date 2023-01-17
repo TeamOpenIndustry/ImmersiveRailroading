@@ -7,12 +7,11 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 
 import java.util.List;
 
-public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
+public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, LocomotiveSteamDefinition> {
     private List<ModelComponent> components;
 
     private Whistle whistle;
@@ -28,9 +27,9 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     }
 
     @Override
-    protected void parseControllable(ComponentProvider provider, EntityRollingStockDefinition def) {
+    protected void parseControllable(ComponentProvider provider, LocomotiveSteamDefinition def) {
         super.parseControllable(provider, def);
-        if (!((LocomotiveSteamDefinition)def).isCabCar()) {
+        if (!def.isCabCar()) {
             addGauge(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE);
             addGauge(provider, ModelComponentType.GAUGE_BOILER_PRESSURE_X, Readouts.BOILER_PRESSURE);
         }
@@ -39,8 +38,14 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
     }
 
     @Override
-    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+    protected void parseComponents(ComponentProvider provider, LocomotiveSteamDefinition def) {
         firebox = provider.parse(ModelComponentType.FIREBOX);
+        rocking.push(builder -> {
+            builder.add((ModelState.Lighter) stock -> {
+                return new ModelState.LightState(null, null, !Config.isFuelRequired(stock.gauge) || ((LocomotiveSteam)stock).getBurnTime().values().stream().anyMatch(x -> x > 1), null);
+            });
+        }).include(firebox);
+
         components = provider.parse(
                 ModelComponentType.SMOKEBOX,
                 ModelComponentType.PIPING
@@ -49,11 +54,12 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         components.addAll(provider.parseAll(
                 ModelComponentType.BOILER_SEGMENT_X
         ));
+        rocking.include(components);
 
-        whistle = Whistle.get(provider, ((LocomotiveSteamDefinition) def).quill, ((LocomotiveSteamDefinition) def).whistle);
+        whistle = Whistle.get(provider, rocking, def.quill, def.whistle);
 
         chimney = SteamChimney.get(provider);
-        pressureValve = PressureValve.get(provider, ((LocomotiveSteamDefinition) def).pressure);
+        pressureValve = PressureValve.get(provider, def.pressure);
 
         super.parseComponents(provider, def);
     }
@@ -96,26 +102,5 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam> {
         pressureValve.removed(stock);
         idleSounds.removed(stock);
         whistle.removed(stock);
-    }
-
-    @Override
-    protected void render(LocomotiveSteam stock, ComponentRenderer draw, double distanceTraveled) {
-        super.render(stock, draw, distanceTraveled);
-
-        if (!Config.isFuelRequired(stock.gauge) || stock.getBurnTime().values().stream().anyMatch(x -> x > 1)) {
-            try (ComponentRenderer light = draw.withBrightGroups(true).withInteriorLight(stock)) {
-                light.render(firebox);
-            }
-        } else {
-            draw.render(firebox);
-        }
-
-        whistle.render(draw);
-    }
-
-    @Override
-    protected void renderWithInteriorLighting(LocomotiveSteam stock, ComponentRenderer draw) {
-        super.renderWithInteriorLighting(stock, draw);
-        draw.render(components);
     }
 }

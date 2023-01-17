@@ -65,7 +65,7 @@ public abstract class EntityRollingStockDefinition {
     private ValveGearConfig valveGear;
     public float darken;
     public Identifier modelLoc;
-    protected StockModel<?> model;
+    protected StockModel<?, ?> model;
     private Vec3d passengerCenter = new Vec3d(0, 0, 0);
     private float bogeyFront;
     private float bogeyRear;
@@ -595,10 +595,10 @@ public abstract class EntityRollingStockDefinition {
         return tips;
     }
 
-    protected StockModel<?> createModel() throws Exception {
+    protected StockModel<?, ?> createModel() throws Exception {
         return new StockModel<>(this);
     }
-    public StockModel<?> getModel() {
+    public StockModel<?, ?> getModel() {
         return this.model;
     }
 

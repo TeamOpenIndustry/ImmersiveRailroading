@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.ValveGearConfig;
-import cam72cam.immersiverailroading.model.ComponentRenderer;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 
@@ -17,25 +17,28 @@ public class DrivingAssembly {
     private final ValveGear left;
     private final ModelComponent steamChest;
 
-    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, float angleOffset) {
-        return get(type, provider, null, angleOffset);
+    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelState state, float angleOffset) {
+        return get(type, provider, state, null, angleOffset);
     }
 
-    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelPosition pos, float angleOffset) {
-        WheelSet wheels = WheelSet.get(provider, pos == null ? ModelComponentType.WHEEL_DRIVER_X : ModelComponentType.WHEEL_DRIVER_POS_X, pos, angleOffset);
+    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelState state, ModelPosition pos, float angleOffset) {
+        WheelSet wheels = WheelSet.get(provider, state, pos == null ? ModelComponentType.WHEEL_DRIVER_X : ModelComponentType.WHEEL_DRIVER_POS_X, pos, angleOffset);
         if (wheels == null) {
             return null;
         }
 
-        ValveGear left = ValveGear.get(wheels, type, provider, ModelPosition.LEFT.and(pos), 0);
-        ValveGear inner_left = ValveGear.get(wheels, type, provider, ModelPosition.INNER_LEFT.and(pos), 180);
-        ValveGear center = ValveGear.get(wheels, type, provider, ModelPosition.CENTER.and(pos), -120);
-        ValveGear inner_right = ValveGear.get(wheels, type, provider, ModelPosition.INNER_RIGHT.and(pos), 90);
-        ValveGear right = ValveGear.get(wheels, type, provider, ModelPosition.RIGHT.and(pos), center == null ? -90 : -240);
+        ValveGear left = ValveGear.get(wheels, type, provider, state, ModelPosition.LEFT.and(pos), 0);
+        ValveGear inner_left = ValveGear.get(wheels, type, provider, state, ModelPosition.INNER_LEFT.and(pos), 180);
+        ValveGear center = ValveGear.get(wheels, type, provider, state, ModelPosition.CENTER.and(pos), -120);
+        ValveGear inner_right = ValveGear.get(wheels, type, provider, state, ModelPosition.INNER_RIGHT.and(pos), 90);
+        ValveGear right = ValveGear.get(wheels, type, provider, state, ModelPosition.RIGHT.and(pos), center == null ? -90 : -240);
 
         ModelComponent steamChest = pos == null ?
                 provider.parse(ModelComponentType.STEAM_CHEST) :
                 provider.parse(ModelComponentType.STEAM_CHEST_POS, pos);
+
+        // TODO this should rock
+        state.include(steamChest);
 
         return new DrivingAssembly(wheels, right, inner_right, center, inner_left, left, steamChest);
     }
@@ -75,25 +78,4 @@ public class DrivingAssembly {
             left.effects(stock, throttle);
         }
     }
-
-    public void render(double distance, float reverser, ComponentRenderer draw) {
-        wheels.render(distance, draw);
-        if (right != null) {
-            right.render(distance, reverser, draw);
-        }
-        if (inner_right != null) {
-            inner_right.render(distance, reverser, draw);
-        }
-        if (center != null) {
-            center.render(distance, reverser, draw);
-        }
-        if (inner_left != null) {
-            inner_left.render(distance, reverser, draw);
-        }
-        if (left != null) {
-            left.render(distance, reverser, draw);
-        }
-        draw.render(steamChest);
-    }
-
 }

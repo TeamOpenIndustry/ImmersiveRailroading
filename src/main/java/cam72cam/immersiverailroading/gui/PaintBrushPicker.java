@@ -124,7 +124,7 @@ public class PaintBrushPicker implements IScreen {
         GUIHelpers.drawCenteredString(stock.getDefinition().name(), (int) ((200 + (GUIHelpers.getScreenWidth()-200) / 2) / textScale), (int) (40 / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
         GUIHelpers.drawCenteredString(current, (int) ((200 + (GUIHelpers.getScreenWidth()-200) / 2) / textScale), (int) ((GUIHelpers.getScreenHeight() - 60) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
-        StockModel<?> model = stock.getDefinition().getModel();
+        StockModel<?, ?> model = stock.getDefinition().getModel();
 
         //int scale = 8;
         int scale = (int) (GUIHelpers.getScreenWidth() / 40 * zoom);

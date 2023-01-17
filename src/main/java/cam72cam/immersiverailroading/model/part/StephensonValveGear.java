@@ -7,7 +7,7 @@ import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Particles;
-import cam72cam.immersiverailroading.model.ComponentRenderer;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.render.ExpireableMap;
@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
+import util.Matrix4;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,16 +28,16 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
     protected final Vec3d drivenWheel;
 
-    public static StephensonValveGear get(WheelSet wheels, ComponentProvider provider, ModelPosition pos, float angleOffset) {
+    public static StephensonValveGear get(WheelSet wheels, ComponentProvider provider, ModelState state, ModelPosition pos, float angleOffset) {
         ModelComponent drivingRod = provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos);
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
         ModelComponent cylinder = provider.parse(ModelComponentType.CYLINDER_SIDE, pos);
         return drivingRod != null && connectingRod != null && pistonRod != null ?
-                new StephensonValveGear(wheels, drivingRod, connectingRod, pistonRod, cylinder, angleOffset) : null;
+                new StephensonValveGear(wheels, state, drivingRod, connectingRod, pistonRod, cylinder, angleOffset) : null;
     }
-    public StephensonValveGear(WheelSet wheels, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
-        super(wheels, connectingRod, angleOffset);
+    public StephensonValveGear(WheelSet wheels, ModelState state, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
+        super(wheels, state, connectingRod, angleOffset);
         this.drivingRod = drivingRod;
         this.pistonRod = pistonRod;
         this.cylinder = cylinder;
@@ -47,6 +48,47 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
         drivenWheel = wheels.wheels.stream().map(w -> w.wheel.center).min(Comparator.comparingDouble(w -> w.distanceTo(reverse ? drivingRod.min : drivingRod.max))).get();
         centerOfWheels = drivingRod.pos.equals(ModelPosition.CENTER) ? drivenWheel : center; // Bad hack for old TRI_WALSCHERTS code
+
+        state.include(cylinder);
+
+        state.push(builder -> builder.add((ModelState.Animator) stock -> {
+            Matrix4 matrix = new Matrix4();
+
+            Vec3d connRodMovment = connRodMovement(stock);
+
+            // X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
+            // Y: Center of the rod
+            // Z: does not really matter due to rotation axis
+            Vec3d drivingRodRotPoint = new Vec3d((reverse ? drivingRod.min.x + drivingRod.height()/2 : drivingRod.max.x - drivingRod.height()/2), drivingRod.center.y, reverse ? drivingRod.min.z : drivingRod.max.z);
+            // Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
+            float drivingRodAngle = (float) Math.toDegrees(Math.atan2((reverse ? -connRodMovment.z : connRodMovment.z), drivingRod.length() - drivingRod.height()));
+
+            // Move to conn rod center
+            matrix.translate(-connRodRadius, 0, 0);
+            // Apply conn rod movement
+            matrix.translate(connRodMovment.x, connRodMovment.z, 0);
+
+            // Move to rot point center
+            matrix.translate(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
+            // Rotate rod angle
+            matrix.rotate(Math.toRadians(drivingRodAngle), 0, 0, 1);
+            // Move back from rot point center
+            matrix.translate(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
+
+            return matrix;
+        })).include(drivingRod);
+
+        state.push(builder -> builder.add((ModelState.Animator) stock -> {
+            Matrix4 matrix = new Matrix4();
+
+            Vec3d connRodMovment = connRodMovement(stock);
+
+            // Piston movement is rod movement offset by the rotation radius
+            // Not 100% accurate, missing the offset due to angled driving rod
+            double pistonDelta = connRodMovment.x - connRodRadius;
+            matrix.translate(pistonDelta, 0, 0);
+            return matrix;
+        })).include(pistonRod);
     }
 
     protected double getStroke(EntityMoveableRollingStock stock, float throttle, int shift, boolean speedLimit) {
@@ -160,56 +202,4 @@ public class StephensonValveGear extends ConnectingRodValveGear {
             sound.update(getStroke(stock, throttle, -45, false) > 0.5);
         }
     }
-
-    public void render(double distance, float reverser, ComponentRenderer draw) {
-        super.render(distance, reverser, draw);
-
-        draw.render(cylinder);
-
-        float wheelAngle = angle(distance);
-
-        // Center of the connecting rod, may not line up with a wheel directly
-        Vec3d connRodPos = connectingRod.center;
-        // Wheel Center is the center of all wheels, may not line up with a wheel directly
-        // The difference between these centers is the radius of the connecting rod movement
-        double connRodRadius = connRodPos.x - centerOfWheels.x;
-        // Find new connecting rod pos based on the connecting rod rod radius
-        Vec3d connRodMovment = VecUtil.fromWrongYaw(connRodRadius, (float) wheelAngle);
-
-        // X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
-        // Y: Center of the rod
-        // Z: does not really matter due to rotation axis
-        Vec3d drivingRodRotPoint = new Vec3d((reverse ? drivingRod.min.x + drivingRod.height()/2 : drivingRod.max.x - drivingRod.height()/2), drivingRod.center.y, reverse ? drivingRod.min.z : drivingRod.max.z);
-        // Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
-        float drivingRodAngle = (float) Math.toDegrees(Math.atan2((reverse ? -connRodMovment.z : connRodMovment.z), drivingRod.length() - drivingRod.height()));
-
-        // Draw driving rod
-        try (ComponentRenderer matrix = draw.push()) {
-            // Move to conn rod center
-            matrix.translate(-connRodRadius, 0, 0);
-            // Apply conn rod movement
-            matrix.translate(connRodMovment.x, connRodMovment.z, 0);
-
-            // Move to rot point center
-            matrix.translate(drivingRodRotPoint.x, drivingRodRotPoint.y, drivingRodRotPoint.z);
-            // Rotate rod angle
-            matrix.rotate(drivingRodAngle, 0, 0, 1);
-            // Move back from rot point center
-            matrix.translate(-drivingRodRotPoint.x, -drivingRodRotPoint.y, -drivingRodRotPoint.z);
-
-            matrix.render(drivingRod);
-        }
-
-        // Piston movement is rod movement offset by the rotation radius
-        // Not 100% accurate, missing the offset due to angled driving rod
-        double pistonDelta = connRodMovment.x - connRodRadius;
-
-        // Draw piston rod and cross head
-        try (ComponentRenderer matrix = draw.push()) {
-            matrix.translate(pistonDelta, 0, 0);
-            matrix.render(pistonRod);
-        }
-
-    }
-
 }

@@ -5,8 +5,7 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
-import cam72cam.immersiverailroading.model.ComponentRenderer;
-import cam72cam.immersiverailroading.model.animation.Animatrix;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.ControlSoundsDefinition;
@@ -25,7 +24,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import util.Matrix4;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -42,29 +40,28 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     protected final float offset;
     private final boolean hide;
     private final Vec3d center;
+    private final ModelState state;
+    private final String modelId;
     private Vec3d rotationPoint = null;
     private float rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
     private final Map<Axis, Float> translations = new HashMap<>();
     private final Map<Axis, Float> scales = new HashMap<>();
     private final Map<Axis, Float> scaleRot = new HashMap<>();
-    private final Animatrix animator;
     private final Map<UUID, Float> lastMoveSoundValue = new HashMap<>();
     private final Map<UUID, Boolean> wasSoundPressed = new HashMap<>();
     private final Map<UUID, List<ISound>> sounds = new HashMap<>();
-    private final Function<T, Matrix4> location;
 
-    public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(part1 -> new Control<T>(provider, part1, null)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos) {
+        return provider.parseAll(type, pos).stream().map(part1 -> new Control<T>(part1, state)).collect(Collectors.toList());
     }
 
-    public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelComponentType type, ModelPosition pos, Function<T, Matrix4> loc) {
-        return provider.parseAll(type, pos).stream().map(part1 -> new Control<>(provider, part1, loc)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type) {
+        return provider.parseAll(type).stream().map(part1 -> new Control<T>(part1, state)).collect(Collectors.toList());
     }
 
-    public Control(ComponentProvider provider, ModelComponent part, Function<T, Matrix4> loc) {
+    public Control(ModelComponent part, ModelState state) {
         super(part);
-        this.location = loc;
         this.controlGroup = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_CG_([^_]+)").matcher(group);
             return matcher.find() ? matcher.group(1) : null;
@@ -134,34 +131,77 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             }
         }
 
-        // TODO instead base it in the control group!
-        //animator = provider == null ? null : provider.model.animations.stream().filter(a -> a.groups().stream().anyMatch(part.modelIDs::contains)).findFirst().orElse(null);
-        animator = provider == null || this.controlGroup == null ? null : provider.model.animations.stream().filter(a -> this.controlGroup.equals(a.cg)).findFirst().orElse(null);
+        if (hide) {
+            state = state.push(builder ->
+                    builder.add((ModelState.GroupVisibility) (stock, group) -> getValue(stock) != 1)
+            );
+        }
+
+        if (!(rotationPoint == null && translations.isEmpty() && scales.isEmpty())) {
+            state = state.push(builder -> {
+                builder.add((ModelState.GroupAnimator) (stock, group) -> {
+                    float valuePercent = getValue(stock);
+
+                    Matrix4 m = new Matrix4();
+
+                    for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
+                        Axis axis = entry.getKey();
+                        Float val = entry.getValue();
+                        m = m.translate(
+                                axis == Axis.X ? val * valuePercent : 0,
+                                axis == Axis.Y ? val * valuePercent : 0,
+                                axis == Axis.Z ? val * valuePercent : 0
+                        );
+                    }
+
+                    if (rotationPoint != null) {
+                        m = m.translate(rotationPoint.x, rotationPoint.y, rotationPoint.z);
+                        m = m.rotate(
+                                Math.toRadians(valuePercent * rotationDegrees),
+                                rotations.getOrDefault(Axis.X, 0f),
+                                rotations.getOrDefault(Axis.Y, 0f),
+                                rotations.getOrDefault(Axis.Z, 0f)
+                        );
+                        m = m.translate(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
+                    }
+                    if (!scales.isEmpty()) {
+                        m = m.translate(part.center.x, part.center.y, part.center.z);
+                        for (Map.Entry<Axis, Float> entry : scaleRot.entrySet()) {
+                            Axis axis = entry.getKey();
+                            m = m.rotate(Math.toRadians(
+                                            entry.getValue()),
+                                    axis == Axis.X ? 1 : 0,
+                                    axis == Axis.Y ? 1 : 0,
+                                    axis == Axis.Z ? 1 : 0
+                            );
+                        }
+                        m = m.scale(
+                                scales.containsKey(Axis.X) ? (1 - scales.get(Axis.X)) + (scales.get(Axis.X) * valuePercent) : 1,
+                                scales.containsKey(Axis.Y) ? (1 - scales.get(Axis.Y)) + (scales.get(Axis.Y) * valuePercent) : 1,
+                                scales.containsKey(Axis.Z) ? (1 - scales.get(Axis.Z)) + (scales.get(Axis.Z) * valuePercent) : 1
+                        );
+                        for (Map.Entry<Axis, Float> entry : scaleRot.entrySet()) {
+                            Axis axis = entry.getKey();
+                            m = m.rotate(Math.toRadians(
+                                            -entry.getValue()),
+                                    axis == Axis.X ? 1 : 0,
+                                    axis == Axis.Y ? 1 : 0,
+                                    axis == Axis.Z ? 1 : 0
+                            );
+                        }
+                        m = m.translate(-part.center.x, -part.center.y, -part.center.z);
+                    }
+                    return m;
+                });
+            });
+        }
+        this.state = state;
+        this.state.include(part);
+        this.modelId = part.modelIDs.stream().findFirst().get();
     }
 
     private static String formatLabel(ModelComponentType label) {
         return WordUtils.capitalizeFully(label.name().replace("_X", "").replaceAll("_CONTROL", "").replaceAll("_", " ").toLowerCase(Locale.ROOT));
-    }
-
-    public void render(T stock, ComponentRenderer draw) {
-        float valuePercent = getValue(stock);
-        if (hide && valuePercent == 1) {
-            return;
-        }
-
-        if (animator != null) {
-            animator.percent = getValue(stock);
-        }
-
-        if (rotationPoint == null && translations.isEmpty() && scales.isEmpty() && location == null) {
-            draw.render(part);
-            return;
-        }
-
-        try (ComponentRenderer matrix = draw.push()) {
-            matrix.mult(transform(getValue(stock), new Matrix4(), stock, false));
-            matrix.render(part);
-        }
     }
 
     public void postRender(T stock, RenderState state) {
@@ -203,7 +243,13 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                 return;
             }
         }
-        Vec3d pos = transform(getValue(stock), new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale()), stock, true).apply(center);
+
+        Matrix4 m = new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
+        Matrix4 gm = this.state.getGroupMatrix(stock, modelId);
+        if (gm != null) {
+            m = m.multiply(gm);
+        }
+        Vec3d pos = m.apply(center);
         String labelstate = "";
         float percent = getValue(stock) - offset;
         switch (part.type) {
@@ -242,77 +288,14 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         GlobalRender.drawText((label != null ? label : formatLabel(part.type)) + labelstate, state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
-    public float getValue(T stock) {
+    public float getValue(EntityMoveableRollingStock stock) {
         float pos = stock.getControlPosition(this) + offset;
         return (invert ? 1 - pos : pos) - (part.type == ModelComponentType.REVERSER_X || part.type == ModelComponentType.THROTTLE_BRAKE_X ? 0.5f : 0);
     }
 
     public Vec3d transform(Vec3d point, T stock) {
-        return transform(point, getValue(stock), stock, true);
-    }
-
-    protected Vec3d transform(Vec3d point, float valuePercent, T stock, boolean includeAnimator) {
-        return transform(valuePercent, stock.getModelMatrix(), stock, includeAnimator).apply(point);
-    }
-
-    protected Matrix4 transform(float valuePercent, Matrix4 m, T stock, boolean includeAnimator) {
-        if (location != null) {
-            m.multiply(location.apply(stock));
-        }
-
-        for (Map.Entry<Axis, Float> entry : translations.entrySet()) {
-            Axis axis = entry.getKey();
-            Float val = entry.getValue();
-            m = m.translate(
-                    axis == Axis.X ? val * valuePercent : 0,
-                    axis == Axis.Y ? val * valuePercent : 0,
-                    axis == Axis.Z ? val * valuePercent : 0
-            );
-        }
-
-        if (rotationPoint != null) {
-            m = m.translate(rotationPoint.x, rotationPoint.y, rotationPoint.z);
-            m = m.rotate(
-                    Math.toRadians(valuePercent * rotationDegrees),
-                    rotations.getOrDefault(Axis.X, 0f),
-                    rotations.getOrDefault(Axis.Y, 0f),
-                    rotations.getOrDefault(Axis.Z, 0f)
-            );
-            m = m.translate(-rotationPoint.x, -rotationPoint.y, -rotationPoint.z);
-        }
-        if (!scales.isEmpty()) {
-            m = m.translate(part.center.x, part.center.y, part.center.z);
-            for (Map.Entry<Axis, Float> entry : scaleRot.entrySet()) {
-                Axis axis = entry.getKey();
-                m = m.rotate(Math.toRadians(
-                        entry.getValue()),
-                        axis == Axis.X ? 1 : 0,
-                        axis == Axis.Y ? 1 : 0,
-                        axis == Axis.Z ? 1 : 0
-                );
-            }
-            m = m.scale(
-                    scales.containsKey(Axis.X) ? (1 - scales.get(Axis.X)) + (scales.get(Axis.X) * valuePercent) : 1,
-                    scales.containsKey(Axis.Y) ? (1 - scales.get(Axis.Y)) + (scales.get(Axis.Y) * valuePercent) : 1,
-                    scales.containsKey(Axis.Z) ? (1 - scales.get(Axis.Z)) + (scales.get(Axis.Z) * valuePercent) : 1
-            );
-            for (Map.Entry<Axis, Float> entry : scaleRot.entrySet()) {
-                Axis axis = entry.getKey();
-                m = m.rotate(Math.toRadians(
-                        -entry.getValue()),
-                        axis == Axis.X ? 1 : 0,
-                        axis == Axis.Y ? 1 : 0,
-                        axis == Axis.Z ? 1 : 0
-                );
-            }
-            m = m.translate(-part.center.x, -part.center.y, -part.center.z);
-        }
-
-        if (animator != null && includeAnimator) {
-            // TODO non-looping animation
-            m = m.multiply(animator.getMatrix(animator.groups().stream().findFirst().orElse(null), valuePercent));
-        }
-        return m;
+        Matrix4 m = state.getGroupMatrix(stock, modelId);
+        return m != null ? m.apply(point) : point;
     }
 
     @Override
@@ -358,10 +341,16 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             movement = movement.rotateYaw(-stock.getRotationYaw());
             float applied = Math.min(0.1f, (float) (movement.length()*1));
             if (rotationDegrees <= 180) {
-                float value = getValue(stock);
-                Vec3d grabComponent = transform(center, value, stock, true).add(movement);
-                Vec3d grabComponentNext = transform(center, value + applied, stock, true);
-                Vec3d grabComponentPrev = transform(center, value - applied, stock, true);
+                float value = getValue(stock);  // Does this work with invert???
+                Vec3d grabComponent = transform(center, stock).add(movement);
+
+                stock.setControlPosition(this, value + applied);
+                Vec3d grabComponentNext = transform(center, stock);
+                stock.setControlPosition(this, value - applied);
+                Vec3d grabComponentPrev = transform(center, stock);
+
+                stock.setControlPosition(this, value);
+
                 if (grabComponent.distanceTo(grabComponentNext) < grabComponent.distanceTo(grabComponentPrev)) {
                     delta += applied * movement.length() / grabComponent.distanceTo(grabComponentNext);
                 } else {

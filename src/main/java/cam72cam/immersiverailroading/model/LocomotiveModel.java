@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
@@ -9,13 +10,12 @@ import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import util.Matrix4;
 
 import java.util.List;
 
-public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
+public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends LocomotiveDefinition> extends FreightTankModel<ENTITY, DEFINITION> {
     private List<ModelComponent> components;
     private Bell bell;
 
@@ -29,10 +29,14 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     private ModelComponent shellFront;
     private ModelComponent shellRear;
 
+    protected ModelState frontLocomotive;
+    protected ModelState frontLocomotiveRocking;
+    protected ModelState rearLocomotive;
+    protected ModelState rearLocomotiveRocking;
     private final TrackFollowers frontTrackers;
     private final TrackFollowers rearTrackers;
 
-    public LocomotiveModel(LocomotiveDefinition def) throws Exception {
+    public LocomotiveModel(DEFINITION def) throws Exception {
         super(def);
         frontTrackers = frameFront != null ? new TrackFollowers(s -> frameFront.center) : null;
         rearTrackers = frameRear != null ? new TrackFollowers(s -> frameRear.center) : null;
@@ -40,38 +44,38 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
 
     @Override
     protected void addGauge(ComponentProvider provider, ModelComponentType type, Readouts value) {
-        gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.FRONT_LOCOMOTIVE, value, this::getFrontLocomotiveMatrix));
-        gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.REAR_LOCOMOTIVE, value, this::getRearLocomotiveMatrix));
+        gauges.addAll(Readout.getReadouts(provider, frontLocomotiveRocking, type, ModelPosition.FRONT_LOCOMOTIVE, value));
+        gauges.addAll(Readout.getReadouts(provider, rearLocomotiveRocking, type, ModelPosition.REAR_LOCOMOTIVE, value));
         super.addGauge(provider, type, value);
     }
 
     @Override
     protected void addControl(ComponentProvider provider, ModelComponentType type) {
-        controls.addAll(Control.get(provider, type, ModelPosition.FRONT_LOCOMOTIVE, this::getFrontLocomotiveMatrix));
-        controls.addAll(Control.get(provider, type, ModelPosition.REAR_LOCOMOTIVE, this::getRearLocomotiveMatrix));
+        controls.addAll(Control.get(provider, frontLocomotiveRocking, type, ModelPosition.FRONT_LOCOMOTIVE));
+        controls.addAll(Control.get(provider, rearLocomotiveRocking, type, ModelPosition.REAR_LOCOMOTIVE));
         super.addControl(provider, type);
     }
 
     @Override
     protected void addDoor(ComponentProvider provider) {
-        this.doors.addAll(Door.get(provider, ModelPosition.FRONT_LOCOMOTIVE, this::getFrontLocomotiveMatrix));
-        this.doors.addAll(Door.get(provider, ModelPosition.REAR_LOCOMOTIVE, this::getRearLocomotiveMatrix));
+        this.doors.addAll(Door.get(provider, frontLocomotiveRocking, ModelPosition.FRONT_LOCOMOTIVE));
+        this.doors.addAll(Door.get(provider, rearLocomotiveRocking, ModelPosition.REAR_LOCOMOTIVE));
         super.addDoor(provider);
     }
 
     @Override
-    protected void addHeadlight(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type) {
-        headlights.addAll(LightFlare.get(def, provider, type, ModelPosition.FRONT_LOCOMOTIVE, this::getFrontLocomotiveMatrix));
-        headlights.addAll(LightFlare.get(def, provider, type, ModelPosition.REAR_LOCOMOTIVE, this::getRearLocomotiveMatrix));
-        headlights.addAll(LightFlare.get(def, provider, type, ModelPosition.FRONT, this::getFrontLocomotiveMatrix));
-        headlights.addAll(LightFlare.get(def, provider, type, ModelPosition.REAR, this::getRearLocomotiveMatrix));
+    protected void addHeadlight(DEFINITION def, ComponentProvider provider, ModelComponentType type) {
+        headlights.addAll(LightFlare.get(def, provider, frontLocomotiveRocking, type, ModelPosition.FRONT_LOCOMOTIVE));
+        headlights.addAll(LightFlare.get(def, provider, rearLocomotiveRocking, type, ModelPosition.REAR_LOCOMOTIVE));
+        headlights.addAll(LightFlare.get(def, provider, frontLocomotiveRocking, type, ModelPosition.FRONT));
+        headlights.addAll(LightFlare.get(def, provider, rearLocomotiveRocking, type, ModelPosition.REAR));
         super.addHeadlight(def, provider, type);
     }
 
     @Override
-    protected void parseControllable(ComponentProvider provider, EntityRollingStockDefinition def) {
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.FRONT_LOCOMOTIVE, Readouts.COUPLED_FRONT, this::getFrontLocomotiveMatrix));
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.REAR_LOCOMOTIVE, Readouts.COUPLED_REAR, this::getRearLocomotiveMatrix));
+    protected void parseControllable(ComponentProvider provider, DEFINITION def) {
+        gauges.addAll(Readout.getReadouts(provider, frontLocomotiveRocking, ModelComponentType.COUPLED_X, ModelPosition.FRONT_LOCOMOTIVE, Readouts.COUPLED_FRONT));
+        gauges.addAll(Readout.getReadouts(provider, rearLocomotiveRocking, ModelComponentType.COUPLED_X, ModelPosition.REAR_LOCOMOTIVE, Readouts.COUPLED_REAR));
 
         super.parseControllable(provider, def);
 
@@ -94,41 +98,58 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
     }
 
     @Override
-    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+    protected void initStates() {
+        super.initStates();
+        frontLocomotive = base.push(settings -> settings.add(this::getFrontLocomotiveMatrix));
+        frontLocomotiveRocking = addRoll(frontLocomotive);
+        rearLocomotive = base.push(settings -> settings.add(this::getRearLocomotiveMatrix));
+        rearLocomotiveRocking = addRoll(rearLocomotive);
+    }
+
+    @Override
+    protected void parseComponents(ComponentProvider provider, DEFINITION def) {
         ValveGearConfig type = def.getValveGear();
+        boolean showCurrentLoadOnly = def.shouldShowCurrentLoadOnly();
 
         frameFront = provider.parse(ModelComponentType.FRONT_FRAME);
-        cargoFillFront = CargoFill.get(provider, ModelPosition.FRONT);
         shellFront = provider.parse(ModelComponentType.FRONT_SHELL);
-        drivingWheelsFront = DrivingAssembly.get(type, provider, ModelPosition.FRONT, 0);
+        frontLocomotiveRocking.include(frameFront);
+        frontLocomotiveRocking.include(shellFront);
+
+        cargoFillFront = CargoFill.get(provider, frontLocomotiveRocking, showCurrentLoadOnly, ModelPosition.FRONT);
+        drivingWheelsFront = DrivingAssembly.get(type, provider, frontLocomotive, ModelPosition.FRONT, 0);
+
 
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
-        cargoFillRear = CargoFill.get(provider, ModelPosition.REAR);
         shellRear = provider.parse(ModelComponentType.REAR_SHELL);
-        drivingWheelsRear = DrivingAssembly.get(type, provider, ModelPosition.REAR, 45);
+        rearLocomotiveRocking.include(frameRear);
+        rearLocomotiveRocking.include(shellRear);
 
-        drivingWheels = DrivingAssembly.get(type, provider, null, 0);
+        cargoFillRear = CargoFill.get(provider, rearLocomotiveRocking, showCurrentLoadOnly, ModelPosition.REAR);
+        drivingWheelsRear = DrivingAssembly.get(type, provider, rearLocomotive, ModelPosition.REAR, 45);
+
+        drivingWheels = DrivingAssembly.get(type, provider, base, 0);
 
         components = provider.parse(
                 new ModelComponentType[]{ModelComponentType.CAB}
         );
+        rocking.include(components);
         bell = Bell.get(
-                provider,
-                ((LocomotiveDefinition)def).bell
-        );
+                provider, rocking,
+                def.bell);
 
         super.parseComponents(provider, def);
     }
 
     // TODO rename to tick
     @Override
-    protected void effects(T stock) {
+    protected void effects(ENTITY stock) {
         super.effects(stock);
         bell.effects(stock, stock.getBell() > 0 ? 0.8f : 0);
     }
 
     @Override
-    protected void removed(T stock) {
+    protected void removed(ENTITY stock) {
         super.removed(stock);
 
         if (frontTrackers != null) {
@@ -141,62 +162,11 @@ public class LocomotiveModel<T extends Locomotive> extends FreightTankModel<T> {
         bell.removed(stock);
     }
 
-    private Matrix4 getFrontLocomotiveMatrix(T s) {
+    private Matrix4 getFrontLocomotiveMatrix(EntityMoveableRollingStock s) {
         return frontTrackers != null ? frontTrackers.get(s).getMatrix() : null;
     }
 
-    private Matrix4 getRearLocomotiveMatrix(T s) {
+    private Matrix4 getRearLocomotiveMatrix(EntityMoveableRollingStock s) {
         return rearTrackers != null ? rearTrackers.get(s).getMatrix() : null;
-    }
-
-    @Override
-    protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
-        super.render(stock, draw, distanceTraveled);
-        bell.render(draw);
-
-        if (drivingWheels != null) {
-            try (ComponentRenderer matrix = draw.push()) {
-                matrix.rotate(-stock.getRollDegrees(), 1, 0, 0);
-                drivingWheels.render(distanceTraveled, stock.getReverser(), matrix);
-            }
-        }
-        if (drivingWheelsFront != null) {
-            try (ComponentRenderer matrix = draw.push()) {
-                if (frontTrackers != null) {
-                    matrix.mult(frontTrackers.get(stock).getMatrix());
-                }
-                matrix.render(frameFront);
-                try (ComponentRenderer noSway = matrix.push()) {
-                    noSway.rotate(-stock.getRollDegrees(), 1, 0, 0);
-                    drivingWheelsFront.render(distanceTraveled, stock.getReverser(), noSway);
-                }
-                matrix.render(shellFront);
-                if (cargoFillFront != null) {
-                    cargoFillFront.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
-                }
-            }
-        }
-        if (drivingWheelsRear != null) {
-            try (ComponentRenderer matrix = draw.push()) {
-                if (rearTrackers != null) {
-                    matrix.mult(rearTrackers.get(stock).getMatrix());
-                }
-                matrix.render(frameRear);
-                try (ComponentRenderer noSway = matrix.push()) {
-                    noSway.rotate(-stock.getRollDegrees(), 1, 0, 0);
-                    drivingWheelsRear.render(distanceTraveled, stock.getReverser(), noSway);
-                }
-                matrix.render(shellRear);
-                if (cargoFillRear != null) {
-                    cargoFillRear.render(stock.getPercentCargoFull(), stock.getDefinition().shouldShowCurrentLoadOnly(), matrix);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void renderWithInteriorLighting(T stock, ComponentRenderer draw) {
-        super.renderWithInteriorLighting(stock, draw);
-        draw.render(components);
     }
 }

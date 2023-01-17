@@ -1,9 +1,10 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
-import cam72cam.immersiverailroading.model.ComponentRenderer;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -26,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static cam72cam.immersiverailroading.model.ComponentRenderer.lcgPattern;
+import static cam72cam.immersiverailroading.model.ModelState.lcgPattern;
 
 public class LightFlare<T extends EntityMoveableRollingStock> {
     private final ModelComponent component;
@@ -50,17 +51,16 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
 
     private static final Pattern rgb = Pattern.compile(String.format(".*_0[xX](%s%<s)(%<s%<s)(%<s%<s).*", "[0-9A-Fa-f]"));
 
-    public static <T extends EntityMoveableRollingStock> List<LightFlare<T>> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(c -> new LightFlare<T>(def, c, null)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<LightFlare<T>> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelState state, ModelComponentType type) {
+        return provider.parseAll(type).stream().map(c -> new LightFlare<T>(def, state, c)).collect(Collectors.toList());
     }
 
-    public static <T extends EntityMoveableRollingStock> List<LightFlare<T>> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type, ModelPosition pos, Function<T, Matrix4> loc) {
-        return provider.parseAll(type, pos).stream().map(c -> new LightFlare<>(def, c, loc)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<LightFlare<T>> get(EntityRollingStockDefinition def, ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos) {
+        return provider.parseAll(type, pos).stream().map(c -> new LightFlare<T>(def, state, c)).collect(Collectors.toList());
     }
 
-    private LightFlare(EntityRollingStockDefinition def, ModelComponent component, Function<T, Matrix4> loc) {
+    private LightFlare(EntityRollingStockDefinition def, ModelState state, ModelComponent component) {
         this.component = component;
-        this.location = loc;
         this.forward = component.center.x < 0;
         Matcher rgbValues = component.modelIDs.stream()
                 .map(rgb::matcher)
@@ -110,21 +110,20 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
             this.blinkFullBright = true;
             this.castsLights = true;
         }
+
+        ModelState mystate = state.push(builder -> builder
+                .add((ModelState.Lighter) (stock) ->
+                        new ModelState.LightState(null, null, blinkFullBright ? !isBlinkOff(stock) : !isLightOff(stock), null)
+                )
+        );
+        mystate.include(component);
+        location = mystate::getMatrix;
     }
 
-    public void render(ComponentRenderer draw, T stock) {
-        try (ComponentRenderer light = draw.withBrightGroups(blinkFullBright ? !isBlinkOff(stock) : !isLightOff(stock))) {
-            if (location != null) {
-                light.mult(location.apply(stock));
-            }
-            light.render(component);
-        }
-    }
-
-    private boolean isLightOff(T stock) {
+    private boolean isLightOff(EntityRollingStock stock) {
         return !stock.externalLightsEnabled() || (controlGroup != null && stock.getControlPosition(controlGroup) == (invert ? 1 : 0));
     }
-    private boolean isBlinkOff(T stock) {
+    private boolean isBlinkOff(EntityRollingStock stock) {
         return isLightOff(stock) || blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;
     }
 

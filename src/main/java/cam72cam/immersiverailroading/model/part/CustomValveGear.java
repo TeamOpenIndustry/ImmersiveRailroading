@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.model.ComponentRenderer;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.animation.Animatrix;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -19,7 +19,7 @@ public class CustomValveGear implements ValveGear {
 
     private final Animatrix animation;
 
-    public static CustomValveGear get(Identifier custom, WheelSet wheels, ComponentProvider provider, ModelComponentType.ModelPosition pos, float angleOffset) {
+    public static CustomValveGear get(Identifier custom, WheelSet wheels, ComponentProvider provider, ModelState state, ModelComponentType.ModelPosition pos, float angleOffset) {
         List<ModelComponent> components = new ArrayList<>();
 
         components.add(provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos));
@@ -35,10 +35,10 @@ public class CustomValveGear implements ValveGear {
 
         components = components.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        return !components.isEmpty() ? new CustomValveGear(provider, custom, wheels, components, angleOffset) : null;
+        return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components, angleOffset) : null;
     }
 
-    public CustomValveGear(ComponentProvider provider, Identifier custom, WheelSet wheels, List<ModelComponent> components, float angleOffset) {
+    public CustomValveGear(ModelState state, Identifier custom, WheelSet wheels, List<ModelComponent> components, float angleOffset) {
         this.wheels = wheels;
         this.angleOffset = angleOffset;
         this.components = components;
@@ -49,13 +49,9 @@ public class CustomValveGear implements ValveGear {
             throw new RuntimeException(e);
         }
 
-        provider.model.animations.add(animation);
-    }
-
-    @Override
-    public void render(double distance, float reverser, ComponentRenderer draw) {
-        animation.percent = angle(distance) / 360;
-        draw.render(components);
+        state.push(settings -> settings.add((ModelState.GroupAnimator) (stock, group) ->
+                animation.groups().contains(group) ? animation.getMatrix(group, angle(stock.distanceTraveled) / 360) : null)
+        ).include(components);
     }
 
     @Override

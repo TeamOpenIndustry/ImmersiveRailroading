@@ -111,7 +111,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    protected StockModel<?> createModel() throws Exception {
+    protected StockModel<?, ?> createModel() throws Exception {
         return new DieselLocomotiveModel(this);
     }
 
@@ -123,7 +123,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    public DieselLocomotiveModel getModel() {
+    public StockModel<?, ?> getModel() {
         return (DieselLocomotiveModel) super.getModel();
     }
 
