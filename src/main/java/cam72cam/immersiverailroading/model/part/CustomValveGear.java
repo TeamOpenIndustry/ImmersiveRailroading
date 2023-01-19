@@ -44,7 +44,7 @@ public class CustomValveGear implements ValveGear {
         this.components = components;
 
         try {
-            animation = new Animatrix(custom.getResourceStream());
+            animation = new Animatrix(custom.getResourceStream(), true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

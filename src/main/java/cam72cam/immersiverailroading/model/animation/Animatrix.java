@@ -10,8 +10,11 @@ import java.util.*;
 
 public class Animatrix {
     private final Map<String, List<Matrix4>> map = new HashMap<>();
+    private final boolean looping;
 
-    public Animatrix(InputStream in) throws IOException {
+    public Animatrix(InputStream in, boolean looping) throws IOException {
+        this.looping = looping;
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             List<String> names = new ArrayList<>();
             List<Matrix4> frames = new ArrayList<>();
@@ -66,11 +69,19 @@ public class Animatrix {
     }
 
     public Matrix4 getMatrix(String group, float percent) {
-        percent = (percent % 1 + 1) % 1;
-
         for (Map.Entry<String, List<Matrix4>> x : map.entrySet()) {
             if (group.equals(x.getKey())) {
                 List<Matrix4> frames = x.getValue();
+                if (!looping) {
+                    if (percent >= 1) {
+                        return frames.get(frames.size()-1);
+                    }
+                    if (percent <= 0){
+                        return frames.get(0);
+                    }
+                }
+
+                percent = (percent % 1 + 1) % 1;
                 double frame = (frames.size()) * percent;
                 Matrix4 ms = frames.get((int) Math.floor(frame) % (frames.size()));
                 Matrix4 me = frames.get((int) Math.ceil(frame) % (frames.size()));

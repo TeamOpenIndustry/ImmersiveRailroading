@@ -66,7 +66,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
         Map<String, Animatrix> animations = new HashMap<>();
         for (Map.Entry<String, Identifier> entry : def.animations.entrySet()) {
-            Animatrix anim = new Animatrix(entry.getValue().getResourceStream());
+            Animatrix anim = new Animatrix(entry.getValue().getResourceStream(), false);
             animations.put(entry.getKey(), anim);
         }
 
