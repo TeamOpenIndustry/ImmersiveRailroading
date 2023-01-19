@@ -21,6 +21,7 @@ import cam72cam.mod.resource.Identifier;
 import util.Matrix4;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,8 +50,6 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     private final TrackFollowers frontTrackers;
     private final TrackFollowers rearTrackers;
 
-    public final List<Animatrix> animations;
-
     public static final int LOD_LARGE = 1024;
     public static final int LOD_SMALL = 512;
 
@@ -65,11 +64,10 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         this.def = def;
         boolean hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
 
-        this.animations = new ArrayList<>();
+        Map<String, Animatrix> animations = new HashMap<>();
         for (Map.Entry<String, Identifier> entry : def.animations.entrySet()) {
             Animatrix anim = new Animatrix(entry.getValue().getResourceStream());
-            anim.cg = entry.getKey();
-            animations.add(anim);
+            animations.put(entry.getKey(), anim);
         }
 
         this.doors = new ArrayList<>();
@@ -90,10 +88,13 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             return blockLight < interiorLight ? base.merge(new ModelState.LightState(interiorLight, skyLight, true, null)) : base;
         };
         ModelState.GroupAnimator animators = (stock, group) -> {
+            // TODO this could be partially pre-baked
             Matrix4 m = null;
-            for (Animatrix animation : this.animations) {
+            for (Map.Entry<String, Animatrix> entry : animations.entrySet()) {
+                String cg = entry.getKey();
+                Animatrix animation = entry.getValue();
                 if (animation.groups().contains(group)) {
-                    Matrix4 found = animation.getMatrix(group, stock.getControlPosition(animation.cg));
+                    Matrix4 found = animation.getMatrix(group, stock.getControlPosition(cg));
                     if (m == null) {
                         m = found;
                     } else {

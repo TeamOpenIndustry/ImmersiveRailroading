@@ -295,7 +295,12 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
 
     public Vec3d transform(Vec3d point, T stock) {
         Matrix4 m = state.getGroupMatrix(stock, modelId);
-        return m != null ? m.apply(point) : point;
+        if (m == null) {
+            m = stock.getModelMatrix();
+        } else {
+            m = stock.getModelMatrix().multiply(m);
+        }
+        return m.apply(point);
     }
 
     @Override
@@ -341,7 +346,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             movement = movement.rotateYaw(-stock.getRotationYaw());
             float applied = Math.min(0.1f, (float) (movement.length()*1));
             if (rotationDegrees <= 180) {
-                float value = getValue(stock);  // Does this work with invert???
+                float value = stock.getControlPosition(this);//getValue(stock);  // Does this work with invert???
                 Vec3d grabComponent = transform(center, stock).add(movement);
 
                 stock.setControlPosition(this, value + applied);

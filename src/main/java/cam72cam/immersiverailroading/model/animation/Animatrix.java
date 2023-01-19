@@ -9,8 +9,6 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class Animatrix {
-    public String cg; //TODO remove
-
     private final Map<String, List<Matrix4>> map = new HashMap<>();
 
     public Animatrix(InputStream in) throws IOException {
