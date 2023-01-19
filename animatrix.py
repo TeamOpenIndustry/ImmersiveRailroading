@@ -42,6 +42,8 @@ class ExportAnimatrixData(Operator, ExportHelper):
     )
 
     def execute(self, context):
+        orig_frame = bpy.context.scene.frame_current
+
         with open(self.filepath, 'w', encoding='utf-8') as f:
             objs = bpy.context.selected_objects if self.use_setting == 'SELECTED' else bpy.context.scene.objects
             for obj in objs:
@@ -63,6 +65,8 @@ class ExportAnimatrixData(Operator, ExportHelper):
                     f.write("A " + obj.name + "_" + obj.data.name + '\n')
                     for line in data:
                         f.write(line)
+
+        bpy.context.scene.frame_set(orig_frame)
 
         return {'FINISHED'}
 
