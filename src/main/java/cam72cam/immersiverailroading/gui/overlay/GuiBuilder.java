@@ -1,9 +1,6 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
@@ -289,6 +286,10 @@ public class GuiBuilder {
                     case INDEPENDENT_BRAKE:
                     case COUPLER_FRONT:
                     case COUPLER_REAR:
+                    case BELL:
+                    case WHISTLE:
+                    case HORN:
+                    case ENGINE:
                         break;
                     default:
                         return null;
@@ -424,38 +425,7 @@ public class GuiBuilder {
                     }
                 }
                 if (readout != null) {
-                    switch (readout) {
-                        case THROTTLE:
-                            if (stock instanceof Locomotive) {
-                                ((Locomotive) stock).setThrottle(value);
-                            }
-                            break;
-                        case REVERSER:
-                            if (stock instanceof Locomotive) {
-                                ((Locomotive) stock).setReverser(value * 2 - 1);
-                            }
-                            break;
-                        case TRAIN_BRAKE:
-                            if (stock instanceof Locomotive) {
-                                ((Locomotive) stock).setTrainBrake(value);
-                            }
-                            break;
-                        case INDEPENDENT_BRAKE:
-                            if (stock instanceof EntityMoveableRollingStock) {
-                                ((Locomotive) stock).setIndependentBrake(value);
-                            }
-                            break;
-                        case COUPLER_FRONT:
-                            if (stock instanceof EntityCoupleableRollingStock) {
-                                ((EntityCoupleableRollingStock) stock).setCouplerEngaged(EntityCoupleableRollingStock.CouplerType.FRONT, value == 0);
-                            }
-                            break;
-                        case COUPLER_REAR:
-                            if (stock instanceof EntityCoupleableRollingStock) {
-                                ((EntityCoupleableRollingStock) stock).setCouplerEngaged(EntityCoupleableRollingStock.CouplerType.BACK, value == 0);
-                            }
-                            break;
-                    }
+                    readout.setValue(stock, value);
                 }
             }
         }

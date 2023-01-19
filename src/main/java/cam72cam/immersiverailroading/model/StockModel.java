@@ -17,13 +17,10 @@ import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.resource.Identifier;
 import util.Matrix4;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION extends EntityRollingStockDefinition> extends OBJModel {
@@ -64,12 +61,6 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         this.def = def;
         boolean hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
 
-        Map<String, Animatrix> animations = new HashMap<>();
-        for (Map.Entry<String, Identifier> entry : def.animations.entrySet()) {
-            Animatrix anim = new Animatrix(entry.getValue().getResourceStream(), false);
-            animations.put(entry.getKey(), anim);
-        }
-
         this.doors = new ArrayList<>();
         this.seats = new ArrayList<>();
         this.controls = new ArrayList<>();
@@ -90,11 +81,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         ModelState.GroupAnimator animators = (stock, group) -> {
             // TODO this could be partially pre-baked
             Matrix4 m = null;
-            for (Map.Entry<String, Animatrix> entry : animations.entrySet()) {
-                String cg = entry.getKey();
-                Animatrix animation = entry.getValue();
-                if (animation.groups().contains(group)) {
-                    Matrix4 found = animation.getMatrix(group, stock.getControlPosition(cg));
+            for (EntityRollingStockDefinition.AnimationDefinition animation : stock.getDefinition().animations) {
+                if (animation.valid() && animation.animatrix.groups().contains(group)) {
+                    Matrix4 found = animation.animatrix.getMatrix(group, animation.getPercent(stock));
                     if (m == null) {
                         m = found;
                     } else {

@@ -11,6 +11,7 @@ import java.util.*;
 public class Animatrix {
     private final Map<String, List<Matrix4>> map = new HashMap<>();
     private final boolean looping;
+    private final int frameCount;
 
     public Animatrix(InputStream in, boolean looping) throws IOException {
         this.looping = looping;
@@ -62,6 +63,7 @@ public class Animatrix {
                 }
             }
         }
+        this.frameCount = map.values().stream().mapToInt(List::size).max().getAsInt();
     }
 
     public Set<String> groups() {
@@ -91,5 +93,9 @@ public class Animatrix {
             }
         }
         return null;
+    }
+
+    public int frameCount() {
+        return frameCount;
     }
 }
