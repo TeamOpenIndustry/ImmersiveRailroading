@@ -2,7 +2,7 @@ bl_info = {
     "name":         "Animatrix Export",
     "author":       "cam72cam",
     "blender":      (3,4,0),
-    "version":      (1,0,0),
+    "version":      (1,0,2),
     "location":     "File > Import-Export",
     "description":  "Export Animatrix data",
     "category":     "Import-Export",
@@ -16,6 +16,7 @@ import math
 import mathutils
 
 # Inspired by FriedrichLP's render lib exporter
+
 
 class ExportAnimatrixData(Operator, ExportHelper):
     """Export Animatrix Data"""
@@ -52,11 +53,20 @@ class ExportAnimatrixData(Operator, ExportHelper):
                 data = []
                 bpy.context.scene.frame_set(bpy.context.scene.frame_start)
 
-                orig = obj.matrix_world.inverted()
+                def obj_matrix():
+                    res = obj.matrix_world
+
+                    for arm in [m.object for m in obj.modifiers if m.object.type == "ARMATURE"]:
+                        return arm.matrix_world @ arm.pose.bones[obj.vertex_groups[0].name].matrix
+
+                    return res
+
+
+                orig = obj_matrix().inverted()
                 for frame in range(bpy.context.scene.frame_start,bpy.context.scene.frame_end + 1):
                     bpy.context.scene.frame_set(frame)
 
-                    offset = obj.matrix_world @ orig
+                    offset = obj_matrix() @ orig
                     offset = offset @ (mathutils.Euler((math.radians(90), 0, 0)).to_matrix().to_4x4())
                     m = [offset[0], offset[2], [-z for z in offset[1]], offset[3]]
                     data.append("M " + ",".join(["%.32f" % y for x in m for y in x]) + '\n')
