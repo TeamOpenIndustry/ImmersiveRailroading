@@ -77,7 +77,7 @@ def menu_func_export(self, context):
 
 def register():
     bpy.utils.register_class(ExportAnimatrixData)
-    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
+    bpy.types.TOPBAR_MT_file_export.prepend(menu_func_export)
 
 
 def unregister():
