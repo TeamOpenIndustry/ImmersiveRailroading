@@ -14,12 +14,11 @@ import java.util.stream.Collectors;
 
 public class CustomValveGear implements ValveGear {
     private final WheelSet wheels;
-    private final float angleOffset;
     private final List<ModelComponent> components;
 
     private final Animatrix animation;
 
-    public static CustomValveGear get(Identifier custom, WheelSet wheels, ComponentProvider provider, ModelState state, ModelComponentType.ModelPosition pos, float angleOffset) {
+    public static CustomValveGear get(Identifier custom, WheelSet wheels, ComponentProvider provider, ModelState state, ModelComponentType.ModelPosition pos) {
         List<ModelComponent> components = new ArrayList<>();
 
         components.add(provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos));
@@ -35,12 +34,11 @@ public class CustomValveGear implements ValveGear {
 
         components = components.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components, angleOffset) : null;
+        return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components) : null;
     }
 
-    public CustomValveGear(ModelState state, Identifier custom, WheelSet wheels, List<ModelComponent> components, float angleOffset) {
+    public CustomValveGear(ModelState state, Identifier custom, WheelSet wheels, List<ModelComponent> components) {
         this.wheels = wheels;
-        this.angleOffset = angleOffset;
         this.components = components;
 
         try {
@@ -66,6 +64,6 @@ public class CustomValveGear implements ValveGear {
 
     @Override
     public float angle(double distance) {
-        return wheels.angle(distance) + angleOffset;
+        return wheels.angle(distance);
     }
 }

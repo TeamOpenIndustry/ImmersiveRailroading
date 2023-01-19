@@ -21,7 +21,7 @@ public interface ValveGear {
             case CONNECTING:
                 return ConnectingRodValveGear.get(wheels, provider, state, pos, angleOffset);
             case CUSTOM:
-                return CustomValveGear.get(type.custom, wheels, provider, state, pos, angleOffset);
+                return CustomValveGear.get(type.custom, wheels, provider, state, pos);
             case SHAY:
             case CLIMAX:
             case HIDDEN:
