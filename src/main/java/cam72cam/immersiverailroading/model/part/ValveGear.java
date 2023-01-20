@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
+import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -74,6 +75,31 @@ public abstract class ValveGear {
         return wheels.angle(distance) + angleOffset;
     }
 
+    private enum Direction {
+        FRONT(new Vec3d(-1, 0, 0)),
+        BACK(new Vec3d(1, 0, 0)),
+        UP(new Vec3d(0, 1, 0)),
+        DOWN(new Vec3d(0, -1, 0)),
+        LEFT(new Vec3d(0, 0, 1)),
+        RIGHT(new Vec3d(0, 0, -1));
+
+        private final Vec3d vec;
+
+        Direction(Vec3d vec) {
+            this.vec = vec;
+        }
+    }
+
+    private static Vec3d findDirection(String name) {
+        Vec3d result = Vec3d.ZERO;
+        for (Direction value : Direction.values()) {
+            if (name.contains("__" + value.name())) {
+                result = result.add(value.vec);
+            }
+        }
+        return result;
+    }
+
     public class Exhaust {
         public final Vec3d position;
         public final Vec3d direction;
@@ -90,6 +116,11 @@ public abstract class ValveGear {
             this.position = position;
             this.direction = direction;
             this.angle = angle;
+        }
+
+
+        public Exhaust(ModelComponent component, float angle) {
+            this(component.center, findDirection(component.key), angle);
         }
 
         public void effects(EntityMoveableRollingStock stock) {

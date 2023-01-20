@@ -33,6 +33,8 @@ public class WalschaertsValveGear extends StephensonValveGear {
         ModelComponent returnCrankRod = provider.parse(ModelComponentType.ECCENTRIC_ROD_SIDE, pos);
         ModelComponent slottedLink = provider.parse(ModelComponentType.EXPANSION_LINK_SIDE, pos);
         ModelComponent radiusBar = provider.parse(ModelComponentType.RADIUS_BAR_SIDE, pos);
+        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.A));
+        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.B));
 
         List<ModelComponent> todo = provider.parse(pos,
                 ModelComponentType.VALVE_STEM_SIDE,
@@ -43,7 +45,22 @@ public class WalschaertsValveGear extends StephensonValveGear {
 
         return drivingRod != null && connectingRod != null && pistonRod != null &&
                 crossHead != null && combinationLever != null && returnCrank != null && returnCrankRod != null && slottedLink != null && radiusBar != null ?
-                new WalschaertsValveGear(wheels, state, drivingRod, connectingRod, pistonRod, cylinder, angleOffset, crossHead, combinationLever, returnCrank, returnCrankRod, slottedLink, radiusBar, todo) : null;
+                new WalschaertsValveGear(wheels,
+                        state,
+                        drivingRod,
+                        connectingRod,
+                        pistonRod,
+                        cylinder,
+                        angleOffset,
+                        crossHead,
+                        combinationLever,
+                        returnCrank,
+                        returnCrankRod,
+                        slottedLink,
+                        radiusBar,
+                        todo,
+                        frontExhaust,
+                        rearExhaust) : null;
     }
 
     public WalschaertsValveGear(WheelSet wheels, ModelState state,
@@ -58,8 +75,9 @@ public class WalschaertsValveGear extends StephensonValveGear {
                                 ModelComponent returnCrankRod,
                                 ModelComponent slottedLink,
                                 ModelComponent radiusBar,
-                                List<ModelComponent> todo) {
-        super(wheels, state, drivingRod, connectingRod, pistonRod, cylinder, angleOffset);
+                                List<ModelComponent> todo,
+                                ModelComponent frontExhaust, ModelComponent rearExhaust) {
+        super(wheels, state, drivingRod, connectingRod, pistonRod, cylinder, angleOffset, frontExhaust, rearExhaust);
         this.crossHead = crossHead;
         this.combinationLever = combinationLever;
         this.returnCrank = returnCrank;

@@ -75,7 +75,8 @@ public enum ModelComponentType {
 	PARTICLE_CHIMNEY_X("CHIM[I]*NEY_#ID#", false),
 	PRESSURE_VALVE_X("PRESSURE_VALVE_#ID#", false),
 	DIESEL_EXHAUST_X("EXHAUST_#ID#", false),
-	
+	CYLINDER_EXHAUST_SIDE("(CYLINDER|DRAIN)_(COCK|EXHAUST)_#SIDE#", false),
+
 	// Cargo
 	CARGO_FILL_X("CARGO_FILL_#ID#", false),
 	CARGO_FILL_POS_X("CARGO_FILL_#POS#_#ID#", false),
@@ -148,6 +149,10 @@ public enum ModelComponentType {
 		public static final ModelPosition BOGEY_REAR = BOGEY.and(REAR);
 		public static final ModelPosition FRONT_LOCOMOTIVE = FRONT.and(LOCOMOTIVE);
 		public static final ModelPosition REAR_LOCOMOTIVE = REAR.and(LOCOMOTIVE);
+
+		public static final ModelPosition A = new ModelPosition("A");
+		public static final ModelPosition B = new ModelPosition("B");
+
 		private final String pos;
 
 		public ModelPosition(String pos) {

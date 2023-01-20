@@ -40,10 +40,13 @@ public class CustomValveGear extends ValveGear {
 
         components = components.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components) : null;
+        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.A));
+        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.B));
+
+        return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components, frontExhaust, rearExhaust) : null;
     }
 
-    public CustomValveGear(ModelState state, Identifier custom, WheelSet wheels, List<ModelComponent> components) {
+    public CustomValveGear(ModelState state, Identifier custom, WheelSet wheels, List<ModelComponent> components, ModelComponent frontExhaust, ModelComponent rearExhaust) {
         super(wheels, state, 0);
 
         try {
@@ -84,8 +87,15 @@ public class CustomValveGear extends ValveGear {
                 }
             }
 
-            frontExhaust = new Exhaust(pistonEndPos.add(pistonStartPos.subtract(pistonEndPos).scale(2)), pistonRod.pos, pistonStart * 360);
-            rearExhaust = new Exhaust(pistonStartPos, pistonRod.pos, pistonEnd * 360);
+            state.include(frontExhaust);
+            state.include(rearExhaust);
+
+            this.frontExhaust = frontExhaust != null ?
+                    new Exhaust(frontExhaust, pistonStart * 360) :
+                    new Exhaust(pistonEndPos.add(pistonStartPos.subtract(pistonEndPos).scale(2)), pistonRod.pos, pistonStart * 360);
+            this.rearExhaust = rearExhaust != null ?
+                    new Exhaust(rearExhaust, pistonEnd * 360) :
+                    new Exhaust(pistonStartPos, pistonRod.pos, pistonEnd * 360);
         }
     }
 }

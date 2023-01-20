@@ -24,10 +24,13 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
         ModelComponent cylinder = provider.parse(ModelComponentType.CYLINDER_SIDE, pos);
+        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.A));
+        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.B));
+
         return drivingRod != null && connectingRod != null && pistonRod != null ?
-                new StephensonValveGear(wheels, state, drivingRod, connectingRod, pistonRod, cylinder, angleOffset) : null;
+                new StephensonValveGear(wheels, state, drivingRod, connectingRod, pistonRod, cylinder, angleOffset, frontExhaust, rearExhaust) : null;
     }
-    public StephensonValveGear(WheelSet wheels, ModelState state, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset) {
+    public StephensonValveGear(WheelSet wheels, ModelState state, ModelComponent drivingRod, ModelComponent connectingRod, ModelComponent pistonRod, ModelComponent cylinder, float angleOffset, ModelComponent frontExhaust, ModelComponent rearExhaust) {
         super(wheels, state, connectingRod, angleOffset);
         this.drivingRod = drivingRod;
         this.pistonRod = pistonRod;
@@ -84,7 +87,11 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         })).include(pistonRod);
 
 
-        frontExhaust = new Exhaust(pistonRod.min, pistonRod.pos, 90);
-        rearExhaust = new Exhaust(pistonRod.min, pistonRod.pos, 270);
+        this.frontExhaust = frontExhaust != null ?
+                new Exhaust(frontExhaust, 90) :
+                new Exhaust(pistonRod.min, pistonRod.pos, 90);
+        this.rearExhaust = rearExhaust != null ?
+                new Exhaust(rearExhaust, 270) :
+                new Exhaust(pistonRod.min, pistonRod.pos, 270);
     }
 }
