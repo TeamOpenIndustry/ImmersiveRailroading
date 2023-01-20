@@ -75,19 +75,19 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
 
         float throttle = stock.getThrottle() * stock.getReverser();
         if (drivingWheels != null) {
-            drivingWheels.effects(stock, throttle);
+            drivingWheels.effects(stock);
         }
         if (drivingWheelsFront != null) {
-            drivingWheelsFront.effects(stock, throttle);
+            drivingWheelsFront.effects(stock);
         }
         if (drivingWheelsRear != null) {
-            drivingWheelsRear.effects(stock, throttle);
+            drivingWheelsRear.effects(stock);
         }
         if (chimney != null) {
             chimney.effects(stock,
-                    (drivingWheels != null && drivingWheels.isEndStroke(stock, throttle)) ||
-                            (drivingWheelsFront != null && drivingWheelsFront.isEndStroke(stock, throttle)) ||
-                            (drivingWheelsRear != null && drivingWheelsRear.isEndStroke(stock, throttle)));
+                    (drivingWheels != null && drivingWheels.isEndStroke(stock)) ||
+                            (drivingWheelsFront != null && drivingWheelsFront.isEndStroke(stock)) ||
+                            (drivingWheelsRear != null && drivingWheelsRear.isEndStroke(stock)));
         }
         pressureValve.effects(stock, stock.isOverpressure() && Config.isFuelRequired(stock.gauge));
 

@@ -12,12 +12,10 @@ import util.Matrix4;
 
 import java.util.stream.Collectors;
 
-public class ConnectingRodValveGear implements ValveGear {
-    protected final WheelSet wheels;
+public class ConnectingRodValveGear extends ValveGear {
     protected final double connRodRadius;
     protected Vec3d centerOfWheels;
     protected final ModelComponent connectingRod;
-    protected float angleOffset;
 
     public static ConnectingRodValveGear get(WheelSet wheels, ComponentProvider provider, ModelState state, ModelPosition pos, float angleOffset) {
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
@@ -25,9 +23,9 @@ public class ConnectingRodValveGear implements ValveGear {
     }
 
     public ConnectingRodValveGear(WheelSet wheels, ModelState state, ModelComponent connectingRod, float angleOffset) {
-        this.wheels = wheels;
+        super(wheels, state, angleOffset);
+
         this.connectingRod = connectingRod;
-        this.angleOffset = angleOffset;
         this.centerOfWheels = ModelComponent.center(wheels.wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
 
         // Center of the connecting rod, may not line up with a wheel directly
@@ -45,19 +43,5 @@ public class ConnectingRodValveGear implements ValveGear {
     /** Find new connecting rod pos based on the connecting rod radius */
     public Vec3d connRodMovement(EntityMoveableRollingStock stock) {
         return VecUtil.fromWrongYaw(connRodRadius, angle(stock.distanceTraveled));
-    }
-
-    public float angle(double distance) {
-        return wheels.angle(distance) + angleOffset;
-    }
-
-    @Override
-    public void effects(EntityMoveableRollingStock stock, float throttle) {
-
-    }
-
-    @Override
-    public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
-        return false;
     }
 }

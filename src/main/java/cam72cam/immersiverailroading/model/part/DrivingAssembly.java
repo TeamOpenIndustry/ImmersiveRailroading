@@ -52,30 +52,30 @@ public class DrivingAssembly {
         this.steamChest = steamChest;
     }
 
-    public boolean isEndStroke(EntityMoveableRollingStock stock, float throttle) {
-        boolean isEndStroke = right != null && right.isEndStroke(stock, throttle);
-        isEndStroke |= inner_right != null && inner_right.isEndStroke(stock, throttle);
-        isEndStroke |= center != null && center.isEndStroke(stock, throttle);
-        isEndStroke |= inner_left != null && inner_left.isEndStroke(stock, throttle);
-        isEndStroke |= inner_left != null && left.isEndStroke(stock, throttle);
+    public boolean isEndStroke(EntityMoveableRollingStock stock) {
+        boolean isEndStroke = right != null && right.isEndStroke(stock);
+        isEndStroke |= inner_right != null && inner_right.isEndStroke(stock);
+        isEndStroke |= center != null && center.isEndStroke(stock);
+        isEndStroke |= inner_left != null && inner_left.isEndStroke(stock);
+        isEndStroke |= inner_left != null && left.isEndStroke(stock);
         return isEndStroke;
     }
 
-    public void effects(EntityMoveableRollingStock stock, float throttle) {
+    public void effects(EntityMoveableRollingStock stock) {
         if (right != null) {
-            right.effects(stock, throttle);
+            right.effects(stock);
         }
         if (inner_right != null) {
-            inner_right.effects(stock, throttle);
+            inner_right.effects(stock);
         }
         if (center != null) {
-            center.effects(stock, throttle);
+            center.effects(stock);
         }
         if (inner_left != null) {
-            inner_left.effects(stock, throttle);
+            inner_left.effects(stock);
         }
         if (left != null) {
-            left.effects(stock, throttle);
+            left.effects(stock);
         }
     }
 }
