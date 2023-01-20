@@ -31,6 +31,11 @@ public class CustomValveGear implements ValveGear {
         components.add(provider.parse(ModelComponentType.ECCENTRIC_ROD_SIDE, pos));
         components.add(provider.parse(ModelComponentType.EXPANSION_LINK_SIDE, pos));
         components.add(provider.parse(ModelComponentType.RADIUS_BAR_SIDE, pos));
+        components.add(provider.parse(ModelComponentType.VALVE_STEM_SIDE, pos));
+        components.add(provider.parse(ModelComponentType.REVERSING_ARM_SIDE, pos));
+        components.add(provider.parse(ModelComponentType.LIFTING_LINK_SIDE, pos));
+        components.add(provider.parse(ModelComponentType.REACH_ROD_SIDE, pos));
+        components.addAll(provider.parseAll(ModelComponentType.VALVE_PART_SIDE_ID, pos));
 
         components = components.stream().filter(Objects::nonNull).collect(Collectors.toList());
 

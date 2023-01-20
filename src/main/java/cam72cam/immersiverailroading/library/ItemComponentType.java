@@ -73,7 +73,7 @@ public enum ItemComponentType {
 	REVERSING_ARM(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.REVERSING_ARM_SIDE),
 	LIFTING_LINK(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.LIFTING_LINK_SIDE),
 	REACH_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.REACH_ROD_SIDE),
-	
+
 	// LEGACY, how do we depricate this??
 	WALCHERTS_LINKAGE(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, 
 			ModelComponentType.UNION_LINK_SIDE,
@@ -90,6 +90,9 @@ public enum ItemComponentType {
 
 	FRONT_SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.FRONT_SHELL),
 	REAR_SHELL(AssemblyStep.SHELL, CraftingType.PLATE_LARGE, ModelComponentType.REAR_SHELL),
+
+	// NEW
+	VALVE_ROD(AssemblyStep.VALVE_GEAR, CraftingType.CASTING_HAMMER, ModelComponentType.VALVE_PART_SIDE_ID),
 	;
 	
 	public final AssemblyStep step;
