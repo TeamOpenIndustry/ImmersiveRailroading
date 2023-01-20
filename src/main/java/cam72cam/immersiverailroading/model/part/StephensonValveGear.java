@@ -109,7 +109,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         return stroke > 0.97;
     }
 
-    private static class ChuffSound {
+    public static class ChuffSound {
         private final LocomotiveSteam stock;
         private final float pitchOffset;
         private boolean pitchStroke;
@@ -117,7 +117,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         private final List<ISound> chuffs;
         private int chuffId;
 
-        ChuffSound(LocomotiveSteam stock) {
+        public ChuffSound(LocomotiveSteam stock) {
             chuffOn = false;
             chuffId = 0;
             chuffs = new ArrayList<>();
@@ -129,7 +129,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
             this.pitchStroke = false;
         }
 
-        void update(boolean enteredStroke) {
+        public void update(boolean enteredStroke) {
             if (!chuffOn) {
                 if (enteredStroke && Math.abs(stock.getThrottle() * stock.getReverser()) > 0) {
                     chuffOn = true;
@@ -171,7 +171,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         }
     }
 
-    ExpireableMap<String, ChuffSound> chuffSounds = new ExpireableMap<String, ChuffSound>() {
+    public static ExpireableMap<String, ChuffSound> chuffSounds = new ExpireableMap<String, ChuffSound>() {
         @Override
         public void onRemove(String key, ChuffSound value) {
             value.free();
