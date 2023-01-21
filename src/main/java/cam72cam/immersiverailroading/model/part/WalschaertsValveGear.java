@@ -33,8 +33,8 @@ public class WalschaertsValveGear extends StephensonValveGear {
         ModelComponent returnCrankRod = provider.parse(ModelComponentType.ECCENTRIC_ROD_SIDE, pos);
         ModelComponent slottedLink = provider.parse(ModelComponentType.EXPANSION_LINK_SIDE, pos);
         ModelComponent radiusBar = provider.parse(ModelComponentType.RADIUS_BAR_SIDE, pos);
-        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.A));
-        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.B));
+        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_DRAIN_SIDE, pos.and(ModelPosition.A));
+        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_DRAIN_SIDE, pos.and(ModelPosition.B));
 
         List<ModelComponent> todo = provider.parse(pos,
                 ModelComponentType.VALVE_STEM_SIDE,

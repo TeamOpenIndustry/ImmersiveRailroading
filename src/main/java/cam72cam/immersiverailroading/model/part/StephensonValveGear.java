@@ -24,8 +24,8 @@ public class StephensonValveGear extends ConnectingRodValveGear {
         ModelComponent connectingRod = provider.parse(ModelComponentType.SIDE_ROD_SIDE, pos);
         ModelComponent pistonRod = provider.parse(ModelComponentType.PISTON_ROD_SIDE, pos);
         ModelComponent cylinder = provider.parse(ModelComponentType.CYLINDER_SIDE, pos);
-        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.A));
-        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.B));
+        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_DRAIN_SIDE, pos.and(ModelPosition.A));
+        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_DRAIN_SIDE, pos.and(ModelPosition.B));
 
         return drivingRod != null && connectingRod != null && pistonRod != null ?
                 new StephensonValveGear(wheels, state, drivingRod, connectingRod, pistonRod, cylinder, angleOffset, frontExhaust, rearExhaust) : null;

@@ -40,8 +40,8 @@ public class CustomValveGear extends ValveGear {
 
         components = components.stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.A));
-        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_EXHAUST_SIDE, pos.and(ModelPosition.B));
+        ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_DRAIN_SIDE, pos.and(ModelPosition.A));
+        ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_DRAIN_SIDE, pos.and(ModelPosition.B));
 
         return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components, frontExhaust, rearExhaust) : null;
     }

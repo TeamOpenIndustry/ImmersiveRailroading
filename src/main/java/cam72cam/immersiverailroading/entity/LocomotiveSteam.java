@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
@@ -23,6 +24,7 @@ import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
@@ -398,5 +400,16 @@ public class LocomotiveSteam extends Locomotive {
 					})
 			);
 		}
+	}
+
+	public boolean cylinderDrainsEnabled() {
+		// This could be optimized to once-per-tick, but I'm not sure that is necessary
+		List<Control<?>> drains = getDefinition().getModel().getControls().stream().filter(x -> x.part.type == ModelComponentType.CYLINDER_DRAIN_CONTROL_X).collect(Collectors.toList());
+		if (drains.isEmpty()) {
+			double csm = Math.abs(getCurrentSpeed().metric()) / gauge.scale();
+			return csm < 20;
+		}
+
+		return drains.stream().anyMatch(c -> getControlPosition(c) == 1);
 	}
 }

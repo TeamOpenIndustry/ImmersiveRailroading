@@ -124,7 +124,7 @@ public abstract class ValveGear {
         }
 
         public void effects(EntityMoveableRollingStock stock) {
-            if (ConfigGraphics.particlesEnabled && isEndStroke(stock)) {
+            if (ConfigGraphics.particlesEnabled && isEndStroke(stock) && stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled()) {
                 Matrix4 m = state.getMatrix(stock);
                 if (m == null) {
                     // Just in case...
