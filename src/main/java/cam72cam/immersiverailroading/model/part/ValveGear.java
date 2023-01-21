@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
+import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 import java.util.ArrayList;
@@ -132,28 +133,37 @@ public abstract class ValveGear {
             this(component.center, findDirection(component.key), angle);
         }
 
+        private Pair<Matrix4, Vec3d> particlePos(EntityMoveableRollingStock stock) {
+            Matrix4 m = state.getMatrix(stock);
+            if (m == null) {
+                // Just in case...
+                m = new Matrix4();
+            }
+            return Pair.of(m, stock.getPosition().add(VecUtil.rotateWrongYaw(m.apply(position).scale(stock.gauge.scale()), stock.getRotationYaw() + 180)));
+
+        }
+
         public void effects(EntityMoveableRollingStock stock) {
             boolean drains_enabled = isEndStroke(stock) && stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled();
+            Pair<Matrix4, Vec3d> particlePos = null; //Lazy eval
             if (ConfigGraphics.particlesEnabled && drains_enabled) {
-                Matrix4 m = state.getMatrix(stock);
-                if (m == null) {
-                    // Just in case...
-                    m = new Matrix4();
-                }
-                Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(m.apply(position).scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
+                particlePos = particlePos(stock);
                 double accell = 0.3 * stock.gauge.scale();
-                Vec3d sideMotion = stock.getVelocity().add(VecUtil.rotateWrongYaw(m.apply(direction).scale(accell), stock.getRotationYaw()+180));
-                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale(), stock.getDefinition().steamParticleTexture));
+                Vec3d sideMotion = stock.getVelocity().add(VecUtil.rotateWrongYaw(particlePos.getLeft().apply(direction).scale(accell), stock.getRotationYaw()+180));
+                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos.getRight(), new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale(), stock.getDefinition().steamParticleTexture));
             }
 
             if (ConfigSound.soundEnabled && stock instanceof LocomotiveSteam) {
+                if (particlePos == null) {
+                    particlePos = particlePos(stock);
+                }
                 String key = String.format("%s-%s", stock.getUUID(), this.hashCode());
                 ChuffSound sound = chuffSounds.get(key);
                 if (sound == null) {
                     sound = new ChuffSound((LocomotiveSteam) stock);
                     chuffSounds.put(key, sound);
                 }
-                sound.update(isEndStroke(stock, 0.125f), drains_enabled);
+                sound.update(particlePos.getRight(), isEndStroke(stock, 0.125f), drains_enabled);
             }
         }
 
@@ -199,7 +209,7 @@ public abstract class ValveGear {
             chuffId = 0;
             chuffs = new ArrayList<>();
             for (int i = 0; i < 6; i++) {
-                chuffs.add(stock.createSound(stock.getDefinition().chuff, false, 80));
+                chuffs.add(stock.createSound(stock.getDefinition().chuff, false, 40));
             }
             cylinder_drain = stock.createSound(stock.getDefinition().cyliner_drain, true, 40);
             this.stock = stock;
@@ -207,9 +217,10 @@ public abstract class ValveGear {
             this.pitchStroke = false;
         }
 
-        public void update(boolean enteredStroke, boolean drain_enabled) {
+        public void update(Vec3d particlePos, boolean enteredStroke, boolean drain_enabled) {
             if (drain_enabled && !cylinder_drain.isPlaying()) {
-                cylinder_drain.play(stock.getPosition());
+                cylinder_drain.play(particlePos);
+                cylinder_drain.setPitch(1 + pitchOffset*5);
             }
             if (!drain_enabled && cylinder_drain.isPlaying()) {
                 cylinder_drain.stop();
@@ -230,7 +241,7 @@ public abstract class ValveGear {
                     ISound chuff = chuffs.get(chuffId);
                     chuff.setPitch(pitch + delta);
                     chuff.setVolume(volume + delta);
-                    chuff.play(stock.getPosition());
+                    chuff.play(particlePos);
 
                     chuffId = (chuffId + 1) % chuffs.size();
                 }
@@ -242,13 +253,13 @@ public abstract class ValveGear {
             }
             for (ISound chuff : chuffs) {
                 if (chuff.isPlaying()) {
-                    chuff.setPosition(stock.getPosition());
+                    chuff.setPosition(particlePos);
                     chuff.setVelocity(stock.getVelocity());
                     chuff.update();
                 }
                 if (cylinder_drain.isPlaying()) {
                     cylinder_drain.setVolume(stock.getThrottle());
-                    cylinder_drain.setPosition(stock.getPosition());
+                    cylinder_drain.setPosition(particlePos);
                     cylinder_drain.setVelocity(stock.getVelocity());
                     cylinder_drain.update();
                 }

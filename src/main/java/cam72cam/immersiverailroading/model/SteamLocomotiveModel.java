@@ -101,8 +101,14 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
         pressureValve.removed(stock);
         idleSounds.removed(stock);
         whistle.removed(stock);
-        drivingWheels.removed(stock);
-        drivingWheelsFront.removed(stock);
-        drivingWheelsRear.removed(stock);
+        if (drivingWheels != null) {
+            drivingWheels.removed(stock);
+        }
+        if (drivingWheelsFront != null) {
+            drivingWheelsFront.removed(stock);
+        }
+        if (drivingWheelsRear != null) {
+            drivingWheelsRear.removed(stock);
+        }
     }
 }
