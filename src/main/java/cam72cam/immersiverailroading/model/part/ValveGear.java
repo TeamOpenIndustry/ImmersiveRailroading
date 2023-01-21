@@ -211,7 +211,7 @@ public abstract class ValveGear {
             for (int i = 0; i < 6; i++) {
                 chuffs.add(stock.createSound(stock.getDefinition().chuff, false, 40));
             }
-            cylinder_drain = stock.createSound(stock.getDefinition().cyliner_drain, true, 40);
+            cylinder_drain = stock.createSound(stock.getDefinition().cylinder_drain, true, 40);
             this.stock = stock;
             this.pitchOffset = (float) (Math.random() / 50);
             this.pitchStroke = false;

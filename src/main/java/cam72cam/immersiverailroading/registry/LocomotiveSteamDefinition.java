@@ -25,7 +25,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public Identifier idle;
     public Identifier chuff;
     public Identifier pressure;
-    public Identifier cyliner_drain;
+    public Identifier cylinder_drain;
     private FluidQuantity tankCapacity;
     private int maxPSI;
     private int numSlots;
@@ -70,7 +70,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         chuff = default_chuff;
         pressure = default_pressure;
         bell = default_bell;
-        cyliner_drain = default_cylinder_drain;
+        cylinder_drain = default_cylinder_drain;
 
         boolean whistleSet = false;
 
@@ -98,7 +98,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
             }
 
             if (sounds.has("cylinder_drain")) {
-                cyliner_drain = new Identifier(ImmersiveRailroading.MODID, sounds.get("cylinder_drain").getAsString()).getOrDefault(default_cylinder_drain);
+                cylinder_drain = new Identifier(ImmersiveRailroading.MODID, sounds.get("cylinder_drain").getAsString()).getOrDefault(default_cylinder_drain);
             }
 
             if (sounds.has("quilling")) {
