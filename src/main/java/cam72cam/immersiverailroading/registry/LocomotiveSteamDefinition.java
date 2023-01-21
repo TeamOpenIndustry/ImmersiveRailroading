@@ -73,7 +73,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
                 quill = new Quilling(sounds.get("quilling").getAsJsonArray());
             }
         }
-        if (whistle != null && (quill == null || !quill.canLoad())) {
+        if (whistle == null && (quill == null || !quill.canLoad())) {
             quill = new Quilling(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
         }
 
