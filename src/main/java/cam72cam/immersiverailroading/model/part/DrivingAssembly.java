@@ -57,7 +57,7 @@ public class DrivingAssembly {
         isEndStroke |= inner_right != null && inner_right.isEndStroke(stock);
         isEndStroke |= center != null && center.isEndStroke(stock);
         isEndStroke |= inner_left != null && inner_left.isEndStroke(stock);
-        isEndStroke |= inner_left != null && left.isEndStroke(stock);
+        isEndStroke |= left != null && left.isEndStroke(stock);
         return isEndStroke;
     }
 

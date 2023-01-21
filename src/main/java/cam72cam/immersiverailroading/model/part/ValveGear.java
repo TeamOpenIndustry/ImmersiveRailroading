@@ -67,8 +67,8 @@ public abstract class ValveGear {
     }
 
     public boolean isEndStroke(EntityMoveableRollingStock stock) {
-        return frontExhaust != null && frontExhaust.isEndStroke(stock) ||
-                rearExhaust != null && rearExhaust.isEndStroke(stock);
+        return (frontExhaust != null && frontExhaust.isEndStroke(stock)) ||
+                (rearExhaust != null && rearExhaust.isEndStroke(stock));
     }
 
     float angle(double distance) {

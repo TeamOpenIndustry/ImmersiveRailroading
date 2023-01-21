@@ -18,12 +18,14 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private static Identifier default_chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
     private static Identifier default_pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
     private static Identifier default_bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
+    private static Identifier default_cylinder_drain = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/cylinder_drain.ogg");
 
     public Quilling quill;
     public Identifier whistle;
     public Identifier idle;
     public Identifier chuff;
     public Identifier pressure;
+    public Identifier cyliner_drain;
     private FluidQuantity tankCapacity;
     private int maxPSI;
     private int numSlots;
@@ -68,6 +70,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         chuff = default_chuff;
         pressure = default_pressure;
         bell = default_bell;
+        cyliner_drain = default_cylinder_drain;
 
         boolean whistleSet = false;
 
@@ -92,6 +95,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 
             if (sounds.has("bell")) {
                 bell = new Identifier(ImmersiveRailroading.MODID, sounds.get("bell").getAsString()).getOrDefault(default_bell);
+            }
+
+            if (sounds.has("cylinder_drain")) {
+                cyliner_drain = new Identifier(ImmersiveRailroading.MODID, sounds.get("cylinder_drain").getAsString()).getOrDefault(default_cylinder_drain);
             }
 
             if (sounds.has("quilling")) {
