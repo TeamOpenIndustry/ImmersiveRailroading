@@ -75,6 +75,15 @@ public abstract class ValveGear {
         return wheels.angle(distance) + angleOffset;
     }
 
+    public void removed(EntityMoveableRollingStock stock) {
+        if (frontExhaust != null) {
+            frontExhaust.removed(stock);
+        }
+        if (rearExhaust != null) {
+            rearExhaust.removed(stock);
+        }
+    }
+
     private enum Direction {
         FRONT(new Vec3d(-1, 0, 0)),
         BACK(new Vec3d(1, 0, 0)),
@@ -124,7 +133,8 @@ public abstract class ValveGear {
         }
 
         public void effects(EntityMoveableRollingStock stock) {
-            if (ConfigGraphics.particlesEnabled && isEndStroke(stock) && stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled()) {
+            boolean drains_enabled = isEndStroke(stock) && stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled();
+            if (ConfigGraphics.particlesEnabled && drains_enabled) {
                 Matrix4 m = state.getMatrix(stock);
                 if (m == null) {
                     // Just in case...
@@ -143,8 +153,13 @@ public abstract class ValveGear {
                     sound = new ChuffSound((LocomotiveSteam) stock);
                     chuffSounds.put(key, sound);
                 }
-                sound.update(isEndStroke(stock, 0.125f));
+                sound.update(isEndStroke(stock, 0.125f), drains_enabled);
             }
+        }
+
+        public void removed(EntityMoveableRollingStock stock) {
+            String key = String.format("%s-%s", stock.getUUID(), this.hashCode());
+            chuffSounds.remove(key);
         }
 
         public boolean isEndStroke(EntityMoveableRollingStock stock) {
@@ -176,6 +191,7 @@ public abstract class ValveGear {
         private boolean pitchStroke;
         private boolean chuffOn;
         private final List<ISound> chuffs;
+        private final ISound cylinder_drain;
         private int chuffId;
 
         public ChuffSound(LocomotiveSteam stock) {
@@ -185,12 +201,20 @@ public abstract class ValveGear {
             for (int i = 0; i < 6; i++) {
                 chuffs.add(stock.createSound(stock.getDefinition().chuff, false, 80));
             }
+            cylinder_drain = stock.createSound(stock.getDefinition().cyliner_drain, true, 40);
             this.stock = stock;
             this.pitchOffset = (float) (Math.random() / 50);
             this.pitchStroke = false;
         }
 
-        public void update(boolean enteredStroke) {
+        public void update(boolean enteredStroke, boolean drain_enabled) {
+            if (drain_enabled && !cylinder_drain.isPlaying()) {
+                cylinder_drain.play(stock.getPosition());
+            }
+            if (!drain_enabled && cylinder_drain.isPlaying()) {
+                cylinder_drain.stop();
+            }
+
             if (!chuffOn) {
                 if (enteredStroke && Math.abs(stock.getThrottle() * stock.getReverser()) > 0) {
                     chuffOn = true;
@@ -222,6 +246,12 @@ public abstract class ValveGear {
                     chuff.setVelocity(stock.getVelocity());
                     chuff.update();
                 }
+                if (cylinder_drain.isPlaying()) {
+                    cylinder_drain.setVolume(stock.getThrottle());
+                    cylinder_drain.setPosition(stock.getPosition());
+                    cylinder_drain.setVelocity(stock.getVelocity());
+                    cylinder_drain.update();
+                }
             }
         }
 
@@ -229,6 +259,7 @@ public abstract class ValveGear {
             for (ISound chuff : chuffs) {
                 chuff.terminate();
             }
+            cylinder_drain.terminate();
         }
     }
 

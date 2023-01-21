@@ -78,4 +78,22 @@ public class DrivingAssembly {
             left.effects(stock);
         }
     }
+
+    public void removed(EntityMoveableRollingStock stock) {
+        if (right != null) {
+            right.removed(stock);
+        }
+        if (inner_right != null) {
+            inner_right.removed(stock);
+        }
+        if (center != null) {
+            center.removed(stock);
+        }
+        if (inner_left != null) {
+            inner_left.removed(stock);
+        }
+        if (left != null) {
+            left.removed(stock);
+        }
+    }
 }

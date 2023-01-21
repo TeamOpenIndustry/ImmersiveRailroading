@@ -20,12 +20,10 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
     private ModelComponent firebox;
 
     private final PartSound idleSounds;
-    private final PartSound drainSounds;
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
         idleSounds = new PartSound(stock -> stock.createSound(def.idle, true, 40));
-        drainSounds = new PartSound(stock -> stock.createSound(def.cyliner_drain, true, 40));
     }
 
     @Override
@@ -76,9 +74,6 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
     protected void effects(LocomotiveSteam stock) {
         super.effects(stock);
 
-        boolean isEndStroke = (drivingWheels != null && drivingWheels.isEndStroke(stock)) ||
-                (drivingWheelsFront != null && drivingWheelsFront.isEndStroke(stock)) ||
-                (drivingWheelsRear != null && drivingWheelsRear.isEndStroke(stock));
         if (drivingWheels != null) {
             drivingWheels.effects(stock);
         }
@@ -89,10 +84,12 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
             drivingWheelsRear.effects(stock);
         }
         if (chimney != null) {
+            boolean isEndStroke = (drivingWheels != null && drivingWheels.isEndStroke(stock)) ||
+                    (drivingWheelsFront != null && drivingWheelsFront.isEndStroke(stock)) ||
+                    (drivingWheelsRear != null && drivingWheelsRear.isEndStroke(stock));
             chimney.effects(stock, isEndStroke);
         }
         pressureValve.effects(stock, stock.isOverpressure() && Config.isFuelRequired(stock.gauge));
-        drainSounds.effects(stock, isEndStroke && stock.cylinderDrainsEnabled() ? stock.getThrottle() : 0, 1);
         idleSounds.effects(stock, stock.getBoilerTemperature() > stock.ambientTemperature() + 5 ? 0.1f : 0);
         whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.isAutomatedHorn(), stock.getHornPlayer());
     }
@@ -104,5 +101,8 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
         pressureValve.removed(stock);
         idleSounds.removed(stock);
         whistle.removed(stock);
+        drivingWheels.removed(stock);
+        drivingWheelsFront.removed(stock);
+        drivingWheelsRear.removed(stock);
     }
 }
