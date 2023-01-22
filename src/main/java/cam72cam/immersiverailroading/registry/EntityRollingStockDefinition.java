@@ -362,7 +362,7 @@ public abstract class EntityRollingStockDefinition {
         }
         scalePitch = getOrDefault(data, "scale_pitch", true);
 
-        couplerSlackFront = couplerSlackRear = 0.05f;
+        couplerSlackFront = couplerSlackRear = 0.025f;
 
         if (data.has("couplers")) {
             JsonObject couplers = data.get("couplers").getAsJsonObject();
