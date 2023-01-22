@@ -182,22 +182,27 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		hadElectricalPower = hasElectricalPower();
 
-		if (this.getCurrentSpeed().minecraft() != 0 || ConfigDebug.keepStockLoaded) {
-			world.keepLoaded(getBlockPosition());
-			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
-			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
-			if (this.lastKnownFront != null) {
-				world.keepLoaded(this.lastKnownFront);
-			}
-			if (this.lastKnownRear != null) {
-				world.keepLoaded(this.lastKnownRear);
-			}
+		if (this.getCurrentState() != null && !this.getCurrentState().canBeUnloaded || ConfigDebug.keepStockLoaded) {
+			keepLoaded();
 		}
 
 		SimulationState state = getCurrentState();
 		if (state != null) {
 			setCoupledUUID(CouplerType.FRONT, state.interactingFront);
 			setCoupledUUID(CouplerType.BACK, state.interactingRear);
+		}
+	}
+
+	public void keepLoaded() {
+		World world = getWorld();
+		world.keepLoaded(getBlockPosition());
+		world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
+		world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
+		if (this.lastKnownFront != null) {
+			world.keepLoaded(this.lastKnownFront);
+		}
+		if (this.lastKnownRear != null) {
+			world.keepLoaded(this.lastKnownRear);
 		}
 	}
 

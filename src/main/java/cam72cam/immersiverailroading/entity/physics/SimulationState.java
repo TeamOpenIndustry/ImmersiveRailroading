@@ -56,6 +56,7 @@ public class SimulationState {
 
     public Configuration config;
     public boolean dirty = true;
+    public boolean canBeUnloaded = true;
 
     public static class Configuration {
         public UUID id;

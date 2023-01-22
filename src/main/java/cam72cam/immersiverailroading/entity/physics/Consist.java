@@ -321,6 +321,8 @@ public class Consist {
 
             // Propagate dirty flag
             boolean dirty = consist.stream().anyMatch(p -> p.state.dirty);
+            boolean canBeUnloaded = consist.stream().allMatch(p -> p.state.velocity == 0 && state.forcesNewtons() == 0);
+            consist.forEach(p -> p.state.canBeUnloaded = canBeUnloaded);
             if (dirty) {
                 consist.forEach(p -> p.state.dirty = true);
                 particles.addAll(consist);

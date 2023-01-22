@@ -12,9 +12,6 @@ import cam72cam.mod.world.World;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * TODO Waiting for chunk loading for long trains
- */
 public class Simulation {
 
     public static void simulate(World world) {
@@ -27,13 +24,14 @@ public class Simulation {
             return;
         }
 
-        if (ChronoState.getState(world).getTickID() < 20 * 2) {
-            // Wait for at least 2 seconds before starting simulation (for stock to load)
+        List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
+        if (allStock.isEmpty()) {
             return;
         }
 
-        List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
-        if (allStock.isEmpty()) {
+        if (ChronoState.getState(world).getTickID() < 20 * 2) {
+            // Wait for at least 2 seconds before starting simulation (for stock to load)
+            allStock.forEach(EntityCoupleableRollingStock::keepLoaded);
             return;
         }
 
