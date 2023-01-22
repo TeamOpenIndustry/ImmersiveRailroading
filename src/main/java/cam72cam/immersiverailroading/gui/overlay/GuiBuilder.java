@@ -134,7 +134,11 @@ public class GuiBuilder {
         if (data.has("elements")) {
             elements = new ArrayList<>();
             for (JsonElement element : data.get("elements").getAsJsonArray()) {
-                elements.add(new GuiBuilder(element.getAsJsonObject()));
+                if (element.isJsonObject()) {
+                    elements.add(new GuiBuilder(element.getAsJsonObject()));
+                } else {
+                    elements.add(parse(new Identifier(element.getAsString())));
+                }
             }
         } else {
             elements = Collections.emptyList();
