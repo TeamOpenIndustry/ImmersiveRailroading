@@ -269,7 +269,6 @@ public abstract class ValveGear {
                 cylinder_drain.stop();
             }
             if (cylinder_drain.isPlaying()) {
-                System.out.printf("%s %s %s %n", this.hashCode(), drain_volume, drain_enabled);
                 cylinder_drain.setVolume(drain_volume * stock.getThrottle());
                 cylinder_drain.setPosition(particlePos);
                 cylinder_drain.setVelocity(stock.getVelocity());
