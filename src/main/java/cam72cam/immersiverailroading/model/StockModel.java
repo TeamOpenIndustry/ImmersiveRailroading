@@ -241,9 +241,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         try (
                 OBJRender.Binding bound = binder.bind(state);
         ) {
-            float backup = stock.distanceTraveled;
+            double backup = stock.distanceTraveled;
 
-            stock.distanceTraveled = (float) (stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1);
+            stock.distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
             stock.distanceTraveled /= stock.gauge.scale();
 
 

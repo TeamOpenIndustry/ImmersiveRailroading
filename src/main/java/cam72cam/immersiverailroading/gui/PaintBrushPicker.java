@@ -134,7 +134,7 @@ public class PaintBrushPicker implements IScreen {
         state.scale(-scale, -scale, -scale);
         state.lightmap(1, 1);
 
-        float prevDist = stock.distanceTraveled;
+        double prevDist = stock.distanceTraveled;
         String prevTex = stock.getTexture();
         Gauge prevGauge = stock.gauge;
 
