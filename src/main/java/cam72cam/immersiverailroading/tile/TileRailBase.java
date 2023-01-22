@@ -74,6 +74,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private Gauge augmentGauge;
 	@TagField("stockTag")
 	private String stockTag;
+	private EntityMoveableRollingStock overhead;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -412,21 +413,18 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	 * Capabilities tie ins
 	 */
 
-	private Vec3d bbMin;
-	private Vec3d bbMax;
 	public <T extends EntityRollingStock> T getStockNearBy(Class<T> type){
-		return getWorld().getEntities((T stock) -> {
-			boolean defMatches = augmentFilterID == null || augmentFilterID.equals(stock.getDefinitionID());
-			boolean tagMatches = stockTag == null || stockTag.equals(stock.tag);
-			if (defMatches && tagMatches) {
-				if (bbMin == null) {
-					bbMax = new Vec3d(this.getPos().up(3).east().north()).max(new Vec3d(this.getPos().south().west()));
-					bbMin = new Vec3d(this.getPos().up(3).east().north()).min(new Vec3d(this.getPos().south().west()));
-				}
-				return stock.getPosition().distanceTo(new Vec3d(this.getPos())) < 32 && stock.getBounds().intersects(bbMin, bbMax);
-			}
-			return false;
-		}, type).stream().findFirst().orElse(null);
+		if (overhead == null) {
+			return null;
+		}
+		if (augmentFilterID != null && !augmentFilterID.equals(overhead.getDefinitionID())) {
+			return null;
+		}
+		if (stockTag != null && stockTag.equals(overhead.tag)) {
+			return null;
+		}
+
+		return overhead.as(type);
 	}
 
 	private boolean canOperate() {
@@ -443,7 +441,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 	}
 
-	private Freight cachedInventory = null;
 	@Override
 	public IInventory getInventory(Facing side) {
 		if (this.getAugment() != null) {
@@ -451,11 +448,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				case ITEM_LOADER:
 				case ITEM_UNLOADER:
 					if (canOperate()) {
-						if (getWorld().getTicks() % 10 == 0) {
-							cachedInventory = getStockNearBy(Freight.class);
-						}
-						if (cachedInventory != null && !cachedInventory.isDead()) {
-							return cachedInventory.cargoItems;
+						Freight freight = getStockNearBy(Freight.class);
+						if (freight != null && !freight.isDead()) {
+							return freight.cargoItems;
 						}
 					}
 					// placeholder for connections
@@ -537,6 +532,16 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		
 		if (this.augment == null) {
 			return;
+		}
+
+		if (overhead != null && ticksExisted % 5 == 0) {
+			if (!overhead.getBounds().intersects(
+					new Vec3d(this.getPos().up(3).east().north()).max(new Vec3d(this.getPos().south().west())),
+					new Vec3d(this.getPos().up(3).east().north()).min(new Vec3d(this.getPos().south().west()))
+			)) {
+				// Overhead moved somewhere else
+				overhead = null;
+			}
 		}
 
 		if (this.ticksExisted % 20 == 0) {
@@ -1028,4 +1033,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public int getTicksExisted() {
 		return ticksExisted;
 	}
+
+    public void stockOverhead(EntityMoveableRollingStock stock) {
+		this.overhead = stock;
+    }
 }

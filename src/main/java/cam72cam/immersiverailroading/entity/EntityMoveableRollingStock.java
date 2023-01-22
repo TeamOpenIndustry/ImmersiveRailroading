@@ -272,7 +272,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
                     if (te != null) {
                         te.cleanSnow();
-                        // TODO add train overhead logic!
+                        te.stockOverhead(this);
                     }
                 }
             }
