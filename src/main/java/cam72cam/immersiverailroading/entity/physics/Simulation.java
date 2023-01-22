@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity.physics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
+import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.mod.math.Vec3d;
@@ -46,6 +47,8 @@ public class Simulation {
 
         boolean anyStartedDirty = false;
 
+        ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
+
         for (EntityCoupleableRollingStock entity : allStock) {
             SimulationState current = entity.getCurrentState();
             if (current == null) {
@@ -60,9 +63,15 @@ public class Simulation {
                     anyStartedDirty = true;
                 } else {
                     // Copy from previous simulation
-                    int toCopy = Math.min(30, entity.states.size());
-                    for (int i = 0; i < toCopy; i++) {
-                        stateMaps.get(i).put(entity.getUUID(), entity.states.get(i));
+                    int i = 0;
+                    for (SimulationState state : entity.states) {
+                        i = state.tickID - chrono.getServerTickID();
+                        if (i >= 0) {
+                            stateMaps.get(i).put(entity.getUUID(), state);
+                        }
+                    }
+                    if (i < 20) {
+                        stateMaps.get(i).get(entity.getUUID()).dirty = true;
                     }
                 }
             }

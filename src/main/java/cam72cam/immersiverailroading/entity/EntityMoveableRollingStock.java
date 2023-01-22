@@ -158,10 +158,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     public SimulationState getCurrentState() {
         int tickID = ServerChronoState.getState(getWorld()).getServerTickID();
-        while (!states.isEmpty() && states.get(0).tickID < tickID) {
-            states.remove(0);
+        for (SimulationState state : states) {
+            if (state.tickID == tickID) {
+                return state;
+            }
         }
-        return states.isEmpty() ? null : states.get(0);
+        return null;
     }
 
     public TickPos getTickPos() {
