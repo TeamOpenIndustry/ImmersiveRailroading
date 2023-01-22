@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
@@ -77,9 +78,10 @@ public class SimulationState {
         public double couplerSlackRear;
 
         public double massKg;
-        // TODO these should probably be dynamic
         public double brakeAdhesionNewtons;
-        public double tractiveEffortNewtons;
+        // We don't actually want to use this value, it's only for dirty checking
+        private double tractiveEffortFactors;
+        private Function<Speed, Double> tractiveEffortNewtons;
 
         public Configuration(EntityCoupleableRollingStock stock) {
             id = stock.getUUID();
@@ -107,9 +109,12 @@ public class SimulationState {
             this.massKg = stock.getWeight();
 
             if (stock instanceof Locomotive) {
-                tractiveEffortNewtons = ((Locomotive) stock).getTractiveEffortNewtons(stock.getCurrentSpeed());
+                Locomotive locomotive = (Locomotive) stock;
+                tractiveEffortNewtons = locomotive::getTractiveEffortNewtons;
+                tractiveEffortFactors = locomotive.getThrottle() + (locomotive.getReverser() * 10);
             } else {
-                tractiveEffortNewtons = 0;
+                tractiveEffortNewtons = speed -> 0d;
+                tractiveEffortFactors = 0;
             }
 
             double totalAdhesionNewtons = stock.getWeight() * stock.getBrakeShoeFriction();
@@ -122,10 +127,14 @@ public class SimulationState {
                 Configuration other = (Configuration) o;
                 return couplerEngagedFront == other.couplerEngagedFront &&
                         couplerEngagedRear == other.couplerEngagedRear &&
-                        Math.abs(tractiveEffortNewtons - other.tractiveEffortNewtons)/massKg < 0.01 &&
+                        Math.abs(tractiveEffortFactors - other.tractiveEffortFactors) < 0.01 &&
                         Math.abs(brakeAdhesionNewtons - other.brakeAdhesionNewtons)/massKg < 0.01;
             }
             return false;
+        }
+
+        public double tractiveEffortNewtons(Speed speed) {
+            return this.tractiveEffortNewtons.apply(speed);
         }
     }
 
@@ -333,7 +342,7 @@ public class SimulationState {
 
     public double forcesNewtons() {
         double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitch)) * Config.ConfigBalance.slopeMultiplier;
-        return config.tractiveEffortNewtons + gradeForceNewtons;
+        return config.tractiveEffortNewtons(Speed.fromMinecraft(velocity)) + gradeForceNewtons;
     }
 
     public double frictionNewtons() {

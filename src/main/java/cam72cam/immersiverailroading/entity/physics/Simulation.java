@@ -13,14 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Bugs:
- * Turn tables
- * Waiting for chunk loading for long trains
- *
- * Todo:
- * Integrate block breaking forces (including snow clearing)
- * Optimizations
- *
+ * TODO Waiting for chunk loading for long trains
  */
 public class Simulation {
 
