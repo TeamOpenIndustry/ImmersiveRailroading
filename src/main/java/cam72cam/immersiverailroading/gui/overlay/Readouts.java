@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading.gui.overlay;
 
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.model.LocomotiveModel;
+import cam72cam.immersiverailroading.model.StockModel;
 
 public enum Readouts {
     LIQUID,
@@ -21,6 +23,10 @@ public enum Readouts {
     WHISTLE,
     HORN,
     ENGINE,
+    FRONT_BOGEY_ANGLE,
+    REAR_BOGEY_ANGLE,
+    FRONT_LOCOMOTIVE_ANGLE,
+    REAR_LOCOMOTIVE_ANGLE,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -67,9 +73,32 @@ public enum Readouts {
                 return stock instanceof Locomotive ? ((Locomotive) stock).getHornTime() > 0 ? 1 : 0 : 0;
             case ENGINE:
                 return stock instanceof LocomotiveDiesel ? ((LocomotiveDiesel) stock).isTurnedOn() ? 1 : 0 : 0;
+            case FRONT_BOGEY_ANGLE:
+                return yawToPercent(stock.getDefinition().getModel().getFrontYaw((EntityMoveableRollingStock) stock), 90);
+            case REAR_BOGEY_ANGLE:
+                return yawToPercent(stock.getDefinition().getModel().getRearYaw((EntityMoveableRollingStock) stock), 90);
+            case FRONT_LOCOMOTIVE_ANGLE:
+                StockModel<?, ?> front = stock.getDefinition().getModel();
+                return front instanceof LocomotiveModel ? yawToPercent(((LocomotiveModel<?, ?>)front).getFrontLocomotiveYaw((EntityMoveableRollingStock) stock), 90) : 0.5f;
+            case REAR_LOCOMOTIVE_ANGLE:
+                StockModel<?, ?> rear = stock.getDefinition().getModel();
+                return rear instanceof LocomotiveModel ? yawToPercent(((LocomotiveModel<?, ?>)rear).getRearLocomotiveYaw((EntityMoveableRollingStock) stock), 90) : 0.5f;
         }
         return 0;
     }
+
+    private float yawToPercent(float yaw, float deltaYaw) {
+        yaw = ((yaw % 360) + 360) % 360;
+        // Yaw is now between 0 and 360 degrees
+
+        if (yaw > 180) {
+            yaw = 360 - yaw;
+        }
+        // Yaw is now between -180 and 180
+
+        return 0.5f + yaw / deltaYaw;
+    }
+
     public void setValue(EntityRollingStock stock, float value) {
         switch (this) {
             case THROTTLE:

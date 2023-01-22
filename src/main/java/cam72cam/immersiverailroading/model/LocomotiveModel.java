@@ -166,7 +166,15 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         return frontTrackers != null ? frontTrackers.get(s).getMatrix() : null;
     }
 
+    public float getFrontLocomotiveYaw(EntityMoveableRollingStock s) {
+        return frontTrackers != null ? frontTrackers.get(s).toPointYaw + frontTrackers.get(s).atPointYaw : 0;
+    }
+
     private Matrix4 getRearLocomotiveMatrix(EntityMoveableRollingStock s) {
         return rearTrackers != null ? rearTrackers.get(s).getMatrix() : null;
+    }
+
+    public float getRearLocomotiveYaw(EntityMoveableRollingStock s) {
+        return rearTrackers != null ? rearTrackers.get(s).toPointYaw + rearTrackers.get(s).atPointYaw : 0;
     }
 }

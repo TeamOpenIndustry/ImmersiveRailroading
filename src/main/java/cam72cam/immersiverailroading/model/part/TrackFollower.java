@@ -18,9 +18,9 @@ public class TrackFollower {
     private Vec3d pos;
 
     private final Vec3d point;
-    float toPointYaw;
+    public float toPointYaw;
     float toPointPitch;
-    float atPointYaw;
+    public float atPointYaw;
     private Matrix4 matrix;
 
     public TrackFollower(EntityMoveableRollingStock stock, Vec3d point) {

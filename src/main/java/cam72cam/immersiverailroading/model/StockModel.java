@@ -270,6 +270,10 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         }
     }
 
+    public float getFrontYaw(EntityMoveableRollingStock stock) {
+        return frontTrackers != null ? frontTrackers.get(stock).toPointYaw + frontTrackers.get(stock).atPointYaw : stock.getFrontYaw();
+    }
+
     private Matrix4 getRearBogeyMatrix(EntityMoveableRollingStock stock) {
         if (rearTrackers != null) {
             return rearTrackers.get(stock).getMatrix();
@@ -280,6 +284,10 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             matrix.translate(def.getBogeyRear(Gauge.standard()), 0, 0);
             return matrix;
         }
+    }
+
+    public float getRearYaw(EntityMoveableRollingStock stock) {
+        return rearTrackers != null ? rearTrackers.get(stock).toPointYaw + rearTrackers.get(stock).atPointYaw : stock.getRearYaw();
     }
 
     protected void postRender(ENTITY stock, RenderState state) {
