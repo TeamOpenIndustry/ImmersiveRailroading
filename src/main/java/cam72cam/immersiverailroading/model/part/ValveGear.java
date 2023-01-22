@@ -203,6 +203,7 @@ public abstract class ValveGear {
         private final List<ISound> chuffs;
         private final ISound cylinder_drain;
         private int chuffId;
+        private float drain_volume = 0;
 
         public ChuffSound(LocomotiveSteam stock) {
             chuffOn = false;
@@ -218,14 +219,6 @@ public abstract class ValveGear {
         }
 
         public void update(Vec3d particlePos, boolean enteredStroke, boolean drain_enabled) {
-            if (drain_enabled && !cylinder_drain.isPlaying()) {
-                cylinder_drain.play(particlePos);
-                cylinder_drain.setPitch(1 + pitchOffset*5);
-            }
-            if (!drain_enabled && cylinder_drain.isPlaying()) {
-                cylinder_drain.stop();
-            }
-
             if (!chuffOn) {
                 if (enteredStroke && Math.abs(stock.getThrottle() * stock.getReverser()) > 0) {
                     chuffOn = true;
@@ -257,12 +250,30 @@ public abstract class ValveGear {
                     chuff.setVelocity(stock.getVelocity());
                     chuff.update();
                 }
-                if (cylinder_drain.isPlaying()) {
-                    cylinder_drain.setVolume(stock.getThrottle());
-                    cylinder_drain.setPosition(particlePos);
-                    cylinder_drain.setVelocity(stock.getVelocity());
-                    cylinder_drain.update();
-                }
+            }
+
+            if (drain_enabled){
+                drain_volume += 0.5f;
+                drain_volume = Math.min(1, drain_volume);
+            }
+            if (!drain_enabled && drain_volume > 0) {
+                drain_volume -= 0.2f;
+            }
+
+            if (drain_volume > 0 && !cylinder_drain.isPlaying()) {
+                cylinder_drain.setPitch(1 - pitchOffset*5);
+                cylinder_drain.setVolume(drain_volume * stock.getThrottle());
+                cylinder_drain.play(particlePos);
+            }
+            if (drain_volume <= 0 && cylinder_drain.isPlaying()) {
+                cylinder_drain.stop();
+            }
+            if (cylinder_drain.isPlaying()) {
+                System.out.printf("%s %s %s %n", this.hashCode(), drain_volume, drain_enabled);
+                cylinder_drain.setVolume(drain_volume * stock.getThrottle());
+                cylinder_drain.setPosition(particlePos);
+                cylinder_drain.setVelocity(stock.getVelocity());
+                cylinder_drain.update();
             }
         }
 
