@@ -2,7 +2,7 @@ bl_info = {
     "name":         "Animatrix Export",
     "author":       "cam72cam",
     "blender":      (3,4,0),
-    "version":      (1,0,2),
+    "version":      (1,0,3),
     "location":     "File > Import-Export",
     "description":  "Export Animatrix data",
     "category":     "Import-Export",
@@ -69,7 +69,7 @@ class ExportAnimatrixData(Operator, ExportHelper):
                     offset = obj_matrix() @ orig
                     offset = offset @ (mathutils.Euler((math.radians(90), 0, 0)).to_matrix().to_4x4())
                     m = [offset[0], offset[2], [-z for z in offset[1]], offset[3]]
-                    data.append("M " + ",".join(["%.32f" % y for x in m for y in x]) + '\n')
+                    data.append("M " + ",".join(["%.16f" % y for x in m for y in x]) + '\n')
                 if len([line for line in data if line != data[0]]) != 0:
                     f.write("O " + obj.name + '\n')
                     f.write("A " + obj.name + "_" + obj.data.name + '\n')
