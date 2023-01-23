@@ -146,7 +146,10 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         Vec3d flareOffset = new Vec3d(forward ? component.min.x - 0.01 : component.max.x + 0.01, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
         if (location != null) {
             // TODO this does not actually work
-            flareOffset = location.apply(stock).apply(flareOffset);
+            Matrix4 m = location.apply(stock);
+            if (m != null) {
+                flareOffset = m.apply(flareOffset);
+            }
         }
 
         Vec3d playerOffset = VecUtil.rotateWrongYaw(stock.getPosition().subtract(MinecraftClient.getPlayer().getPosition()), 180 - (stock.getRotationYaw())).
@@ -188,7 +191,10 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         matrix.translate(flareOffset.x, flareOffset.y, flareOffset.z);
         matrix.rotate(90, 0, 1, 0);
         if (location != null) {
-            matrix.model_view().multiply(location.apply(stock));
+            Matrix4 m = location.apply(stock);
+            if (m != null) {
+                matrix.model_view().multiply(m);
+            }
         }
         double scale = (component.max.z - component.min.z) / 1.5 * stock.gauge.scale();
         matrix.scale(scale, scale, scale);
@@ -243,7 +249,10 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
             } else {
                 Vec3d cpos = castPositions.get(stock.getUUID()).get(i);
                 if (location != null) {
-                    cpos = location.apply(stock).apply(cpos);
+                    Matrix4 m = location.apply(stock);
+                    if (m != null) {
+                        cpos = m.apply(cpos);
+                    }
                 }
                 Vec3d pos = stock.getPosition().add(VecUtil.rotateWrongYaw(cpos, stock.getRotationYaw()));
                 if (nop == null) {
@@ -259,7 +268,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         }
     }
 
-    public <T extends EntityMoveableRollingStock> void removed(T stock) {
+    public void removed(T stock) {
         if (castLights.containsKey(stock.getUUID())) {
             castLights.get(stock.getUUID()).forEach(Light::remove);
             castLights.remove(stock.getUUID());
