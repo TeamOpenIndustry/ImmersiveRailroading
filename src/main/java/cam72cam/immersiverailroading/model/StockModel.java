@@ -99,6 +99,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         parseControllable(provider, def);
 
         // Shay Hack...
+        // A proper dependency tree would be ideal...
         this.bogeyFront = Bogey.get(provider, front, unifiedBogies(), ModelPosition.FRONT);
         this.bogeyRear = Bogey.get(provider, rear, unifiedBogies(), ModelPosition.REAR);
 
