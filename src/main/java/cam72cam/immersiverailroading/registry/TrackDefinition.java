@@ -16,6 +16,8 @@ import java.util.Map;
 public class TrackDefinition {
     public final String trackID;
     public final String name;
+    public final String modelerName;
+    public final String packName;
     public final List<TrackModel> models;
     public final boolean clack;
     public final Map<TrackComponent, List<TrackMaterial>> materials = new HashMap<>();
@@ -25,6 +27,9 @@ public class TrackDefinition {
     TrackDefinition(String trackID, JsonObject object) throws Exception {
         this.trackID = trackID;
         this.name = object.get("name").getAsString();
+        this.modelerName = object.has("modeler") ? object.get("modeler").getAsString() : null;
+        this.packName = object.has("pack") ? object.get("pack").getAsString() : null;
+
         this.clack = !object.has("clack") || object.get("clack").getAsBoolean();
         this.bumpiness = object.has("bumpiness") ? object.get("bumpiness").getAsFloat() : clack ? 1f : 0f;
         this.cog = object.has("cog") && object.get("cog").getAsBoolean();

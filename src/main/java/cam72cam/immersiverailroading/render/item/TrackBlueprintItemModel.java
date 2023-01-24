@@ -25,7 +25,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	}
 	public static void render(ItemStack stack, World world, RenderState state) {
 		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null);
-		info = info.withLength(10);
+		info = info.withSettings(b -> b.length = 10);
 
 		state.cull_face(false);
 		state.lighting(false);

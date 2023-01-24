@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
@@ -20,8 +21,8 @@ public class BuilderTurnTable extends BuilderBase {
 	protected HashSet<Pair<Integer, Integer>> positions;
 	private Vec3i offset;
 
-	public BuilderTurnTable(RailInfo info, World world, Vec3i pos) {
-		super(info.withLength(Math.min(info.settings.length, (int)(30 * info.settings.gauge.scale()))), world, pos);
+	public BuilderTurnTable(RailInfo infoIn, World world, Vec3i pos) {
+		super(infoIn.withSettings(b -> b.length = Math.min(infoIn.settings.length, BuilderTurnTable.maxLength(infoIn.settings.gauge))), world, pos);
 
 		positions = new HashSet<>();
 		
@@ -116,5 +117,9 @@ public class BuilderTurnTable extends BuilderBase {
 			}
 		}
 		return (int)Math.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
+	}
+
+	public static int maxLength(Gauge gauge) {
+		return (int)(30 * gauge.scale());
 	}
 }

@@ -50,7 +50,11 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			if (railSlave != null) {
 				TileRail rail = railSlave.getParentTile();
 				if (rail != null) {
-					lookInfo = info.withTrack(rail.info.settings.track).withRailBed(rail.info.settings.railBed).withGauge(rail.info.settings.gauge);
+					lookInfo = info.withSettings(b -> {
+						b.track = rail.info.settings.track;
+						b.railBed = rail.info.settings.railBed;
+						b.gauge = rail.info.settings.gauge;
+					});
 				}
 			}
 		}

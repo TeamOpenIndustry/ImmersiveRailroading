@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -31,8 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Control<T extends EntityMoveableRollingStock>  {
-    public final ModelComponent part;
+public class Control<T extends EntityMoveableRollingStock> extends Interactable<T> {
     public final String controlGroup;
     public final String label;
     public final boolean toggle;
@@ -62,7 +60,7 @@ public class Control<T extends EntityMoveableRollingStock>  {
     }
 
     public Control(ModelComponent part, Function<T, Matrix4> loc) {
-        this.part = part;
+        super(part);
         this.location = loc;
         this.controlGroup = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_CG_([^_]+)").matcher(group);
@@ -302,10 +300,12 @@ public class Control<T extends EntityMoveableRollingStock>  {
         return m;
     }
 
+    @Override
     public Vec3d center(EntityRollingStock stock) {
         return transform(part.center, (T)stock);
     }
 
+    @Override
     public IBoundingBox getBoundingBox(EntityRollingStock stock) {
         return IBoundingBox.from(
                 transform(part.min, (T)stock),

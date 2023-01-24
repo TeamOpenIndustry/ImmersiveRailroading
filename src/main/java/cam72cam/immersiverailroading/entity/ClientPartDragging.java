@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.model.part.Interactable;
+import cam72cam.immersiverailroading.model.part.Seat;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -41,7 +43,7 @@ public class ClientPartDragging {
                             stock.getPosition().distanceTo(player.getPositionEyes()) < stock.getDefinition().getLength(stock.gauge)
                     )
                     .flatMap(stock ->
-                            stock.getDefinition().getModel().getDraggable().stream().map(c -> Pair.of(stock, c))
+                            stock.getDefinition().getModel().getInteractable().stream().map(c -> Pair.of(stock, c))
                     ).map(p -> {
                         double padding = 0.2 * p.getLeft().gauge.scale();
                         Double min = null;
@@ -59,9 +61,15 @@ public class ClientPartDragging {
                     .min(Comparator.comparingDouble(Pair::getLeft))
                     .map(Pair::getRight)
                     .ifPresent(found -> {
-                        this.stock = found.getLeft();
-                        this.component = found.getRight();
-                        new DragPacket(stock, component, true, 0, false).sendToServer();
+                        Interactable<?> interactable = found.getRight();
+                        if (interactable instanceof Control) {
+                            this.stock = found.getLeft();
+                            this.component = (Control<?>) interactable;
+                            new DragPacket(stock, component, true, 0, false).sendToServer();
+                        }
+                        if (interactable instanceof Seat) {
+                            new SeatPacket((EntityRidableRollingStock) found.getLeft(), (Seat)interactable).sendToServer();
+                        }
                     });
             return stock == null;
         }
@@ -103,6 +111,29 @@ public class ClientPartDragging {
                 stock.onDragRelease(control);
             } else {
                 stock.onDrag(control, newValue);
+            }
+        }
+    }
+
+    public static class SeatPacket extends Packet {
+        @TagField
+        private EntityRidableRollingStock stock;
+
+        @TagField
+        private String seat;
+
+        public SeatPacket() {
+            super(); // Reflection
+        }
+        public SeatPacket(EntityRidableRollingStock stock, Seat<?> seat) {
+            this.stock = stock;
+            this.seat = seat.part.key;
+        }
+
+        @Override
+        protected void handle() {
+            if (stock != null && getPlayer() != null) {
+                stock.onSeatClick(seat, getPlayer());
             }
         }
     }

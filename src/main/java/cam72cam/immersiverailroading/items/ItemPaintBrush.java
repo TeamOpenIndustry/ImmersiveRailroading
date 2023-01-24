@@ -2,8 +2,11 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.PaintBrushMode;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.CreativeTab;
@@ -11,13 +14,13 @@ import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.Recipes;
+import cam72cam.mod.net.Packet;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 public class ItemPaintBrush extends CustomItem {
@@ -45,8 +48,23 @@ public class ItemPaintBrush extends CustomItem {
 		PaintBrushMode pbm = new Data(stack).mode;
 		List<String> tips = new ArrayList<>();
 		tips.add(GuiText.PAINT_BRUSH_MODE_TOOLTIP.toString(pbm.toTranslatedString()));
-		tips.add(GuiText.PAINT_BRUSH_DESCRIPTION_TOOLTIP.toString(PaintBrushMode.SEQUENTIAL.toTranslatedString(), PaintBrushMode.RANDOM.toTranslatedString()));
+		tips.add(GuiText.PAINT_BRUSH_DESCRIPTION_TOOLTIP.toString());
 		return tips;
+	}
+
+	public static void onStockInteract(EntityRollingStock stock, Player player, Player.Hand hand) {
+		if (player.getWorld().isClient) {
+			Data data = new Data(player.getHeldItem(hand));
+			switch (data.mode) {
+				case GUI:
+					GuiTypes.PAINT_BRUSH.open(player);
+					break;
+				case RANDOM_SINGLE:
+				case RANDOM_COUPLED:
+					new PaintBrushPacket(stock, data.mode, null, false).sendToServer();
+					break;
+			}
+		}
 	}
 
 	@Override
@@ -62,53 +80,90 @@ public class ItemPaintBrush extends CustomItem {
 		}
 	}
 
-	public String selectNewTexture(Map<String, String> textures, String currentTexture, Player player, ItemStack stack) {
-		Data data = new Data(stack);
-		List<String> texNames = new ArrayList<>(textures.keySet());
-		int curIdx = texNames.indexOf(currentTexture);
-		int newIdx;
-		switch (data.mode) {
-			case SEQUENTIAL:
-				newIdx = selectNextTextureIndex(texNames.size(), curIdx, player);
-				break;
-			case RANDOM:
-				newIdx = selectRandomTextureIndex(texNames.size(), curIdx);
-				break;
-			default:
-				throw new IllegalStateException("Programmer error! invalid PaintBrush mode: " + data.mode + " is not supported");
+	public static String nextRandomTexture(EntityRollingStock stock, String current) {
+		List<String> choices = new ArrayList<>(stock.getDefinition().textureNames.keySet());
+		if (choices.size() > 1) {
+			choices.remove(current);
 		}
-
-		String newTexture = texNames.get(newIdx);
-		if (Config.ConfigDebug.debugPaintBrush) {
-			//This is a debug log so use the untranslated Mode name
-			player.sendMessage(ChatText.BRUSH_NEXT.getMessage(textures.get(newTexture), data.mode));
-		}
-		return newTexture;
+		return choices.get(rand.nextInt(choices.size()));
 	}
 
-	private int selectNextTextureIndex(int nTextures, int curIdx, Player player) {
-		return (curIdx + (player.isCrouching() ? -1 : 1) + nTextures) % (nTextures);
-	}
+	public static class PaintBrushPacket extends Packet {
 
-	private int selectRandomTextureIndex(int nTextures, int curIdx) {
-		// Avoid randomly selecting the current texture
-		int newIdx = curIdx;
-		while (newIdx == curIdx) {
-			newIdx = rand.nextInt(nTextures);
+		@TagField("stock")
+		public EntityRollingStock stock;
+
+		@TagField(value = "mode", typeHint = PaintBrushMode.class)
+		public PaintBrushMode mode;
+
+		@TagField("variant")
+		public String variant;
+
+		@TagField
+		public boolean gui_connected;
+
+		public PaintBrushPacket(EntityRollingStock stock, PaintBrushMode mode, String variant, boolean gui_connected) {
+			this.stock = stock;
+			this.mode = mode;
+			this.variant = variant;
+			this.gui_connected = gui_connected;
 		}
 
-		return newIdx;
+		public PaintBrushPacket() {
+		}
+
+		@Override
+		protected void handle() {
+			if (stock == null || getPlayer() == null) {
+				ImmersiveRailroading.warn("Invalid paint brush packet!");
+				return;
+			}
+			switch (mode) {
+				case GUI:
+					if (gui_connected) {
+						EntityCoupleableRollingStock coupled = (EntityCoupleableRollingStock) stock;
+						for (EntityCoupleableRollingStock stock : coupled.getTrain(false)) {
+							if (stock.getDefinition().textureNames.containsKey(variant)) {
+								stock.setTexture(variant);
+							}
+						}
+					} else {
+						stock.setTexture(variant);
+					}
+					break;
+				case RANDOM_SINGLE:
+					stock.setTexture(nextRandomTexture(stock, stock.getTexture()));
+					break;
+				case RANDOM_COUPLED:
+					EntityCoupleableRollingStock coupled = (EntityCoupleableRollingStock) stock;
+					for (EntityCoupleableRollingStock stock : coupled.getTrain(false)) {
+						stock.setTexture(nextRandomTexture(stock, stock.getTexture()));
+					}
+					break;
+			}
+
+			if (mode != PaintBrushMode.RANDOM_COUPLED) {
+				if (stock.getDefinition().textureNames.size() == 0) {
+					getPlayer().sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
+				} else if (Config.ConfigDebug.debugPaintBrush) {
+					//This is a debug log so use the untranslated Mode name
+					getPlayer().sendMessage(ChatText.BRUSH_NEXT.getMessage(
+							stock.getDefinition().textureNames.getOrDefault(stock.getTexture(), "Unknown"),
+							mode.toTranslatedString()));
+				}
+			}
+		}
 	}
 
 	public static class Data extends ItemDataSerializer {
-		@TagField(value = "mode")
+		@TagField(value = "mode", typeHint = PaintBrushMode.class)
 		public PaintBrushMode mode;
 
 		public Data(ItemStack stack) {
 			super(stack);
 
 			if (mode == null) {
-				mode = PaintBrushMode.SEQUENTIAL;
+				mode = PaintBrushMode.GUI;
 			}
 		}
 	}

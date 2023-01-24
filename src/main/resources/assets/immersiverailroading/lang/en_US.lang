@@ -51,10 +51,11 @@ chat.immersiverailroading:radio.unlink=Card unlinked from its locomotive
 chat.immersiverailroading:radio.nolink=Card has no linked locomotive
 chat.immersiverailroading:radio.cant_link=Locomotive %s does not have radio control equipment
 chat.immersiverailroading:brush.no.variants=This stock has no livery variants
-chat.immersiverailroading:brush.next=This stock's livery has been set to %s using mode: %s
+chat.immersiverailroading:brush.next=This stock's livery has been set to %s using %s
 chat.immersiverailroading:brush.mode.set=Mode changed to: %s
-chat.immersiverailroading:brush.mode.sequential=Sequential
-chat.immersiverailroading:brush.mode.random=Random
+chat.immersiverailroading:brush.mode.gui=Picker Menu
+chat.immersiverailroading:brush.mode.random_single=Random (stock)
+chat.immersiverailroading:brush.mode.random_coupled=Random (train)
 chat.immersiverailroading:switch_state.unlocked=Switch unlocked
 chat.immersiverailroading:switch_state.locked=Switch locked to %s
 chat.immersiverailroading:switch_state.reset=The last-locked switch has been wirelessly unlocked!
@@ -86,7 +87,7 @@ gui.immersiverailroading:item.switch_key.data=Last locked switch: %s in %s
 
 gui.immersiverailroading:item.track_exchanger=Right-Click in air to open the selection gui. Right-Click on a track to change it's track type to the one defined in the gui
 gui.immersiverailroading:item.paint_brush.mode=Current mode: %s
-gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click cycle modes between: [ %s, %s ]
+gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click cycle modes
 gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s
