@@ -30,7 +30,7 @@ public class HandCar extends Locomotive {
 	}
 
 	@Override
-	protected boolean linkThrottleReverser() {
+	protected boolean forceLinkThrottleReverser() {
 		// Always linked
 		return true;
 	}

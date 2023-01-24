@@ -13,6 +13,7 @@ import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.Recipes;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 
 import java.util.Collections;
@@ -56,7 +57,7 @@ public class ItemConductorWhistle extends CustomItem {
 			cooldown.put(player.getUUID(), player.getTickCount() + 40);
 			
 			SoundPacket packet = new SoundPacket(
-					ImmersiveRailroading.MODID + ":sounds/conductor_whistle.ogg",
+					new Identifier(ImmersiveRailroading.MODID, "sounds/conductor_whistle.ogg"),
 					player.getPosition(), Vec3d.ZERO,
 					0.7f, (float) (Math.random() / 4 + 0.75), 
 					(int) (Config.ConfigBalance.villagerConductorDistance * 1.2f), 

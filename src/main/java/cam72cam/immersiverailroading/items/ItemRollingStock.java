@@ -90,6 +90,9 @@ public class ItemRollingStock extends BaseItemRollingStock {
 			return Collections.emptyList();
 		}
 		EntityRollingStockDefinition def = new ItemRollingStockComponent.Data(stock).def;
+		if (def == null) {
+			return Collections.emptyList();
+		}
 		Gauge gauge = new ItemRollingStockComponent.Data(stock).gauge;
 		return def.getItemComponents().stream()
 				.filter(c -> !c.isWooden(def) &&

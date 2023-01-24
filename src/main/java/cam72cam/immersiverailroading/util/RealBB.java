@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -172,7 +173,6 @@ public class RealBB implements IBoundingBox {
 		return 0;
 	}
 
-	private Area myArea;
 	public Pair<Boolean, Double> intersectsAt(Vec3d min, Vec3d max, boolean useHeightmap) {
 		if (!(this.min.x < max.x && this.max.x > min.x && this.min.y < max.y && this.max.y > min.y && this.min.z < max.z && this.max.z > min.z)) {
 			return Pair.of(false, min.y);
@@ -191,23 +191,19 @@ public class RealBB implements IBoundingBox {
 			otherRect.add(max.x, max.z);
 		}
 
-		if (myArea == null) {
-			Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width / 2, 0, 0);
-			myRect.add(this.front, this.width / 2);
+		Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width / 2, 0, 0);
+		myRect.add(this.front, this.width / 2);
 
-			myArea = new Area(myRect);
-			AffineTransform myTransform = new AffineTransform();
-			myTransform.translate(this.centerX, this.centerZ);
-			myArea.transform(myTransform);
-		}
-
-		Area otherArea = new Area(otherRect);
+		AffineTransform myTransform = new AffineTransform();
+		myTransform.translate(this.centerX, this.centerZ);
+		// This works since we are just translating.  Should probably just offset the rectangle directly
+		myRect = myTransform.createTransformedShape(myRect).getBounds2D();
 
 		AffineTransform otherTransform = new AffineTransform();
 		otherTransform.rotate(Math.toRadians(180-yaw+90), this.centerX, this.centerZ);
-		otherArea.transform(otherTransform);
+		Shape otherShape = otherTransform.createTransformedShape(otherRect);
 
-		if (!otherArea.intersects(myArea.getBounds2D())) {
+		if (!otherShape.intersects(myRect.getBounds2D())) {
 			return Pair.of(false, min.y);
 		}
 		if (this.heightMap != null && useHeightmap) {
@@ -219,7 +215,7 @@ public class RealBB implements IBoundingBox {
 			actualYMin = this.centerY;
 			actualYMax = this.centerY;
 
-			Rectangle2D bds = otherArea.getBounds2D();
+			Rectangle2D bds = otherShape.getBounds2D();
 			
 
 			double px = bds.getMinX() - (this.centerX - length/2);

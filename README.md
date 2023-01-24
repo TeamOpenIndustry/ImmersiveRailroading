@@ -11,10 +11,10 @@
 
 <p align="center">
   <a href="https://minecraft.curseforge.com/projects/immersive-railroading">
-    <img src="http://cf.way2muchnoise.eu/full_immersive-railroading_downloads.svg">
+    <img src="http://cf.way2muchnoise.eu/full_277736_downloads.svg">
   </a>
   <a href="">
-     <img src="http://cf.way2muchnoise.eu/versions/For%20MC_immersive-railroading_all.svg">
+     <img src="http://cf.way2muchnoise.eu/versions/For%20MC_277736_all.svg">
   </a>
   <a href="">
     <img src="https://github.com/TeamOpenIndustry/ImmersiveRailroading/workflows/Immersive%20Railroading%20Build%20Pipeline/badge.svg">

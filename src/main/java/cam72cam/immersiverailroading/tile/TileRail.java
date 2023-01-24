@@ -57,10 +57,9 @@ public class TileRail extends TileRailBase {
 		double tablePos = ((int)(info.tablePos / delta)) * delta + (back ? delta : -delta);
 		info = info.with(b -> b.tablePos = tablePos);
 		this.markDirty();
-		
 		List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);
 		for(EntityCoupleableRollingStock stock : ents) {
-			stock.triggerResimulate();
+			stock.states.forEach(state -> state.dirty = true);
 		}
 	}
 
@@ -191,6 +190,14 @@ public class TileRail extends TileRailBase {
 			return 1;
 		}
 		return DefinitionManager.getTrack(info.settings.track).bumpiness;
+	}
+
+	@Override
+	public boolean isCog() {
+		if (info == null) {
+			return false;
+		}
+		return DefinitionManager.getTrack(info.settings.track).cog;
 	}
 
 	@Override

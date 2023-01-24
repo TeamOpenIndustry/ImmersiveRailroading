@@ -58,6 +58,9 @@ public class Config {
 		@Comment("Trains should break block")
 		public static boolean TrainsBreakBlocks = true;
 
+		@Comment("How hard are blocks to break by rolling stock?")
+		public static int blockHardness = 50;
+
 		@Comment("Break block around the border of the tracks in creative")
 		public static boolean enableSideBlockClearing = true;
 
@@ -157,8 +160,8 @@ public class Config {
 
 		@Comment("Allow diesel locomotive engine overheating")
 		public static boolean canDieselEnginesOverheat = true;
-		
-		public static List<ItemStack> getVillagerPayout() {
+
+        public static List<ItemStack> getVillagerPayout() {
 			return Arrays.stream(villagerPayoutItems).map(f -> f.example()).collect(Collectors.toList());
 		}
 		

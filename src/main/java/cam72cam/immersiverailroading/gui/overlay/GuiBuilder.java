@@ -295,11 +295,13 @@ public class GuiBuilder {
                         return null;
                 }
             }
-            matrix.invert();
-            Vec3d offset = matrix.apply(new Vec3d(x, y, 0));
             int border = 2;
-            if (offset.x >= -border && offset.x <= imageWidth + border && offset.y >= -border && offset.y <= imageHeight + border) {
-                return this;
+            Vec3d cornerA = matrix.apply(new Vec3d(-border, -border, 0));
+            Vec3d cornerB = matrix.apply(new Vec3d(imageWidth + border, imageHeight + border, 0));
+            if (x >= cornerA.x && x <= cornerB.x || x >= cornerB.x && x <= cornerA.x) {
+                if (y >= cornerA.y && y <= cornerB.y || y >= cornerB.y && y <= cornerA.y) {
+                    return this;
+                }
             }
         }
         return null;
@@ -336,8 +338,8 @@ public class GuiBuilder {
                     temp.scale(scalex != null ? scalex * checkValue : 1, scaley != null ? scaley * checkValue : 1, 1);
                 }
 
-                Vec3d checkMiddle = temp.apply(new Vec3d(1, 1, 1));
-                double delta = checkMiddle.distanceTo(new Vec3d(x, y, 1));
+                Vec3d checkMiddle = temp.apply(new Vec3d(1, 1, 0));
+                double delta = checkMiddle.distanceTo(new Vec3d(x, y, 0));
                 if (delta < closestDelta) {
                     closestDelta = delta;
                     closestValue = checkValue;
@@ -358,7 +360,7 @@ public class GuiBuilder {
     public boolean click(ClientEvents.MouseGuiEvent event, EntityRollingStock stock) {
         switch (event.action) {
             case CLICK:
-                target = find(stock, new Matrix4(), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, GUIHelpers.getScreenHeight() - event.y);
+                target = find(stock, new Matrix4(), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, event.y);
                 return target == null;
             case RELEASE:
                 if (target != null) {
@@ -371,7 +373,7 @@ public class GuiBuilder {
                 break;
             case MOVE:
                 if (target != null && target.hasMovement()) {
-                    onMouseMove(stock, new Matrix4(), target, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, GUIHelpers.getScreenHeight() - event.y);
+                    onMouseMove(stock, new Matrix4(), target, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, event.y);
                     return false;
                 }
                 break;
