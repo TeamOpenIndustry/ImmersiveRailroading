@@ -22,6 +22,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public boolean muliUnitCapable;
     private boolean isCabCar;
     private boolean isLinkedBrakeThrottle;
+    private boolean isCog;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
         super(type, defID, data);
@@ -56,6 +57,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         }
         isLinkedBrakeThrottle = properties.has("isLinkedBrakeThrottle") && properties.get("linked_brake_throttle").getAsBoolean();
         toggleBell = !properties.has("toggle_bell") || properties.get("toggle_bell").getAsBoolean();
+        isCog = getOrDefault(properties, "cog", false);
     }
 
     protected boolean readCabCarFlag(JsonObject data) {
@@ -116,5 +118,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     public boolean isCabCar() {
         return isCabCar;
+    }
+
+    public boolean isCog() {
+        return isCog;
     }
 }

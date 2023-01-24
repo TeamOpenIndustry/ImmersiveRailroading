@@ -25,8 +25,8 @@ public class SoundPacket extends Packet {
 	private float scale;
 
 	public SoundPacket() { }
-	public SoundPacket(String soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, float scale) {
-		this.file = soundfile;
+	public SoundPacket(Identifier soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, float scale) {
+		this.file = soundfile.toString();
 		this.pos = pos;
 		this.motion = motion;
 		this.volume = volume;

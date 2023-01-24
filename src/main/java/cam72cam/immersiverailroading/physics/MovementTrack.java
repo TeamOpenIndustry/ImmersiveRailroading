@@ -54,15 +54,16 @@ public class MovementTrack {
 
 	public static Vec3d nextPosition(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
 		if (distanceMeters > maxDistance) {
+			double step = maxDistance * 0.9;
 			double dist = 0;
-			while (dist < distanceMeters - maxDistance) {
-				dist += maxDistance;
+			while (dist < distanceMeters - step) {
+				dist += step;
 				ITrack te = findTrack(world, currentPosition, trainYaw, rail.getTrackGauge());
 				if (te == null) {
 					return currentPosition;
 				}
 				Vec3d pastPos = currentPosition;
-				currentPosition = te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(maxDistance, trainYaw));
+				currentPosition = te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(step, trainYaw));
 				trainYaw = VecUtil.toWrongYaw(currentPosition.subtract(pastPos));
 			}
 
@@ -70,7 +71,7 @@ public class MovementTrack {
 			if (te == null) {
 				return currentPosition;
 			}
-			return te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distanceMeters % maxDistance, trainYaw));
+			return te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distanceMeters % step, trainYaw));
 		} else {
 			return nextPositionDirect(world, currentPosition, rail, trainYaw, distanceMeters);
 		}

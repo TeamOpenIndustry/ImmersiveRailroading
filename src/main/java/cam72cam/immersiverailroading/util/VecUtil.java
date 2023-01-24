@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.FastMath;
 import util.Matrix4;
 
 public class VecUtil {
@@ -12,14 +13,26 @@ public class VecUtil {
 		return new Vec3d(Math.sin(Math.toRadians(yaw)) * distance, 0, Math.cos(Math.toRadians(yaw)) * distance);
 	}
 	public static float toYaw(Vec3d delta) {
-		float yaw = (float) Math.toDegrees(Math.atan2(delta.x, delta.z));
+		float yaw = (float) Math.toDegrees(FastMath.atan2(delta.x, delta.z));
 		return (yaw + 360f) % 360f;
 	}
 	public static Vec3d rotateYaw(Vec3d pos, float rotationYaw) {
-		//return fromYaw(pos.x, rotationYaw).add(fromYaw(pos.z, rotationYaw + 90).addVector(0, pos.y, 0));
-		return new Matrix4().rotate(Math.toRadians(rotationYaw-90), 0, 1, 0).apply(pos);
+		if (rotationYaw - 90 == 0) {
+			return pos;
+		}
+		//return new Matrix4().rotate(Math.toRadians(rotationYaw-90), 0, 1, 0).apply(pos);
+		double cos = Math.cos(Math.toRadians(rotationYaw - 90));
+		double sin = Math.sin(Math.toRadians(rotationYaw - 90));
+		return new Vec3d(
+				cos * pos.x + sin * pos.z,
+				pos.y,
+				-sin * pos.x + cos * pos.z
+		);
 	}
 	public static Vec3d rotatePitch(Vec3d pos, float rotationPitch) {
+		if (rotationPitch == 0) {
+			return pos;
+		}
 		return new Matrix4().rotate(Math.toRadians(rotationPitch), 0, 0, 1).apply(pos);
 	}
 
@@ -28,11 +41,11 @@ public class VecUtil {
 	}
 	
 	public static float toWrongYaw(Vec3d delta) {
-		float yaw = (float) Math.toDegrees(Math.atan2(-delta.x, delta.z));
+		float yaw = (float) Math.toDegrees(FastMath.atan2(-delta.x, delta.z));
 		return (yaw + 360f) % 360f;
 	}
 	public static float toPitch(Vec3d delta) {
-		float yaw = (float) Math.toDegrees(Math.atan2(Math.sqrt(delta.z * delta.z + delta.x * delta.x), delta.y));
+		float yaw = (float) Math.toDegrees(FastMath.atan2(Math.sqrt(delta.z * delta.z + delta.x * delta.x), delta.y));
 		return (yaw + 360f) % 360f;
 	}
 

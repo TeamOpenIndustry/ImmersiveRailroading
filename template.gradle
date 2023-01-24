@@ -44,7 +44,7 @@ task ('showBuildInfo') {
     doLast {
         String minecraftString = "#MINECRAFT#"
         String minecraftLoader = "#LOADER#"
-        String umcVersionString = "#MINECRAFT#-#LOADER#-#UMC#"
+        String umcVersionString = "#MINECRAFT#-#LOADER#-#UMC_VERSION#"
         System.out.println("Build for MC #MINECRAFT# (#LOADER#)")
         System.out.println("https://teamopenindustry.cc/maven/cam72cam/immersiverailroading/ImmersiveRailroading/${version}/ImmersiveRailroading-${version}.jar")
         System.out.println("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/${umcVersionString}/UniversalModCore-${umcVersionString}.jar")

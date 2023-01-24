@@ -141,34 +141,22 @@ public class LocomotiveDiesel extends Locomotive {
 
     @Override
 	protected float getReverserDelta() {
-		return linkThrottleReverser() ? super.getReverserDelta() : 0.51f;
+		return 0.51f;
 	}
 
 	@Override
 	public void setThrottle(float newThrottle) {
 		int notches = getDefinition().getThrottleNotches();
-		if (!linkThrottleReverser()) {
-			if (newThrottle > getThrottle()) {
-				super.setThrottle((float) (Math.ceil(newThrottle * notches) / notches));
-			} else {
-				super.setThrottle((float) (Math.floor(newThrottle * notches) / notches));
-			}
+		if (newThrottle > getThrottle()) {
+			super.setThrottle((float) (Math.ceil(newThrottle * notches) / notches));
 		} else {
-			super.setThrottle(newThrottle);
+			super.setThrottle((float) (Math.floor(newThrottle * notches) / notches));
 		}
 	}
 
 	@Override
 	public void setReverser(float newReverser) {
-		float value = newReverser;
-		if (!linkThrottleReverser()) {
-			if (getThrottle() > 0) {
-				value = 0;
-			} else {
-				value = Math.round(newReverser);
-			}
-		}
-		super.setReverser(value);
+		super.setReverser(Math.round(newReverser));
 
 	}
 

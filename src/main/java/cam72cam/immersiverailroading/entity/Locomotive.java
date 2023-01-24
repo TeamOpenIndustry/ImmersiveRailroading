@@ -2,13 +2,14 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
-import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -20,6 +21,8 @@ import cam72cam.mod.world.World;
 
 import java.util.OptionalDouble;
 import java.util.UUID;
+
+import static cam72cam.immersiverailroading.library.PhysicalMaterials.*;
 
 public abstract class Locomotive extends FreightTank {
 	private static final float throttleDelta = 0.04f;
@@ -56,6 +59,10 @@ public abstract class Locomotive extends FreightTank {
 	private boolean bellControl = false;
 
 	private int bellKeyTimeout;
+
+	@TagSync
+	@TagField("cogging")
+	private boolean cogging = false;
 
 	/*
 	 * 
@@ -119,6 +126,8 @@ public abstract class Locomotive extends FreightTank {
 			}
 		}
 
+		boolean linkThrottleReverser = forceLinkThrottleReverser() || disableIndependentThrottle;
+
 		switch(key) {
 			case HORN:
 				setHorn(10, source.getUUID());
@@ -143,13 +152,38 @@ public abstract class Locomotive extends FreightTank {
 			setThrottle(getThrottle() - throttleDelta);
 			break;
 		case REVERSER_UP:
-			setReverser(getReverser() + getReverserDelta());
+			if (linkThrottleReverser) {
+				float mixed = getThrottle() * (getReverser() >= 0 ? 1 : -1);
+				if (mixed < 0) {
+					setRealThrottle(-mixed - throttleDelta);
+					setReverser(-1);
+				} else {
+					setRealThrottle(mixed + throttleDelta);
+					setReverser(1);
+				}
+			} else {
+				setReverser(getReverser() + getReverserDelta());
+			}
 			break;
 		case REVERSER_ZERO:
+			if (linkThrottleReverser) {
+				setRealThrottle(0);
+			}
 			setReverser(0f);
 			break;
 		case REVERSER_DOWN:
-			setReverser(getReverser() - getReverserDelta());
+			if (linkThrottleReverser) {
+				float mixed = getThrottle() * (getReverser() >= 0 ? 1 : -1);
+				if (mixed > 0) {
+					setRealThrottle(mixed - throttleDelta);
+					setReverser(1);
+				} else {
+					setRealThrottle(-mixed + throttleDelta);
+					setReverser(-1);
+				}
+			} else {
+				setReverser(getReverser() - getReverserDelta());
+			}
 			break;
 		case TRAIN_BRAKE_UP:
 			setTrainBrake(getTrainBrake() + trainBrakeNotch);
@@ -176,8 +210,8 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	protected boolean linkThrottleReverser() {
-		return Config.ImmersionConfig.disableIndependentThrottle;
+	protected boolean forceLinkThrottleReverser() {
+		return false;
 	}
 
 	protected float getReverserDelta() {
@@ -337,10 +371,24 @@ public abstract class Locomotive extends FreightTank {
 			setControlPosition("REVERSERNEUTRAL", getReverser() == 0 ? 1 : 0);
 			setControlPosition("REVERSERBACKWARD", getReverser() < 0 ? 1 : 0);
 		}
+
+		if (getWorld().isServer) {
+			if (getDefinition().isCog() && getTickCount() % 20 == 0) {
+				SimulationState state = getCurrentState();
+				if (state != null) {
+					ITrack found = MovementTrack.findTrack(getWorld(), state.couplerPositionFront, state.yaw, gauge.value());
+					if (found instanceof TileRailBase) {
+						TileRailBase onTrack = (TileRailBase) found;
+						cogging = onTrack.isCog();
+					}
+				}
+			}
+		}
 	}
 
 	protected abstract int getAvailableHP();
-	
+
+	/** Force applied between the wheels and the rails */
 	private double getAppliedTractiveEffort(Speed speed) {
 		double locoEfficiency = 0.7f; //TODO config
 		double outputHorsepower = Math.abs(Math.pow(getThrottle() * getReverser(), 3) * getAvailableHP());
@@ -348,12 +396,22 @@ public abstract class Locomotive extends FreightTank {
 		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(1.4, Math.abs(speed.metric()))));
 		return tractiveEffortNewtons;
 	}
+
+	/** Maximum force that can be between the wheels and the rails before it slips */
+	private double getStaticTractiveEffort(Speed speed) {
+		return this.getDefinition().getStartingTractionNewtons(gauge) *
+				slipCoefficient(speed) *
+				Config.ConfigBalance.tractionMultiplier *
+				1.5; // mmmmm fudge....
+	}
 	
 	protected double simulateWheelSlip() {
-		double tractiveEffortNewtons = getAppliedTractiveEffort(getCurrentSpeed());
-		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient(getCurrentSpeed()) * Config.ConfigBalance.tractionMultiplier;
-		staticTractiveEffort *= 1.5; // Fudge factor
-		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
+		if (cogging) {
+			return 0;
+		}
+
+		double adhesionFactor = getAppliedTractiveEffort(getCurrentSpeed()) /
+								getStaticTractiveEffort(getCurrentSpeed());
 		if (adhesionFactor > 1) {
 			return Math.copySign(Math.min((adhesionFactor-1)/10, 1), getReverser());
 		}
@@ -364,25 +422,38 @@ public abstract class Locomotive extends FreightTank {
 		if (!this.isBuilt()) {
 			return 0;
 		}
-		
+
 		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
-		double staticTractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge) * slipCoefficient(speed) * Config.ConfigBalance.tractionMultiplier;
-		staticTractiveEffort *= 1.5; // Fudge factor
-		
-		double adhesionFactor = tractiveEffortNewtons / staticTractiveEffort;
-		
-		if (adhesionFactor > 1) {
-			// CRC Handbook of Physical Quantities. Boca Raton, FL: CRC Press, 1997: 145-156.
-			double us = 0.74;
-			double uk = 0.57;
-			tractiveEffortNewtons = staticTractiveEffort * (uk/us) / adhesionFactor;
-		}
-		
+
 		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
 			tractiveEffortNewtons = 0;
 		}
-		
+
+		if (!cogging && tractiveEffortNewtons > 0) {
+			double staticTractiveEffort = getStaticTractiveEffort(speed);
+
+			if (tractiveEffortNewtons > staticTractiveEffort) {
+				// This is a guess, but seems to be fairly accurate
+
+				// Reduce tractive effort to max static translated into kinetic
+				tractiveEffortNewtons = staticTractiveEffort /
+						STEEL.staticFriction(STEEL) *
+						STEEL.kineticFriction(STEEL);
+
+				// How badly tractive effort is overwhelming static effort
+				tractiveEffortNewtons *= staticTractiveEffort / tractiveEffortNewtons;
+			}
+		}
+
 		return Math.copySign(tractiveEffortNewtons, getReverser());
+	}
+
+	@Override
+	public double getBrakeShoeFriction() {
+		if (cogging) {
+			return 10;
+		}
+		return super.getBrakeShoeFriction();
 	}
 
 	/*
@@ -413,8 +484,6 @@ public abstract class Locomotive extends FreightTank {
 		if (this.getThrottle() != newThrottle) {
 			setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
 			throttle = newThrottle;
-			triggerResimulate();
-
 			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1- getTrainBrake())/2);
 		}
 	}
@@ -432,16 +501,8 @@ public abstract class Locomotive extends FreightTank {
 		newReverser = Math.min(1, Math.max(-1, newReverser));
 
 		if (this.getReverser() != newReverser) {
-			if (linkThrottleReverser()) {
-				// Slave throttle to reverser position
-				//setThrottle(Math.abs(newReverser));
-				float newThrottle = Math.abs(newReverser);
-				setControlPositions(ModelComponentType.THROTTLE_X, newThrottle);
-				throttle = newThrottle;
-			}
 			setControlPositions(ModelComponentType.REVERSER_X, newReverser/-2 + 0.5f);
 			reverser = newReverser;
-			triggerResimulate();
 		}
 	}
 
@@ -495,8 +556,6 @@ public abstract class Locomotive extends FreightTank {
 				setControlPositions(ModelComponentType.TRAIN_BRAKE_X, newTrainBrake);
 			}
 			trainBrake = newTrainBrake;
-			triggerResimulate();
-
 			setControlPositions(ModelComponentType.THROTTLE_BRAKE_X, getThrottle()/2 + (1- getTrainBrake())/2);
 		}
 	}

@@ -31,14 +31,12 @@ public class TrackFollower {
     public Matrix4 getMatrix() {
         Vec3d point = this.point.scale(stock.gauge.scale());
 
-        if (!stock.getPosition().equals(pos)) {
+        double recomputeDist = 0.1 * stock.gauge.scale();
+
+        if (pos == null || stock.getPosition().distanceToSquared(pos) > recomputeDist * recomputeDist) {
             pos = stock.getPosition();
 
-            Vec3d startPos = VecUtil.fromWrongYaw(-point.x, stock.getRotationYaw()).add(stock.getPosition());
-            Vec3d pointPos = nextPosition(stock.getWorld(), stock.gauge, startPos, stock.getRotationYaw(), stock.getRotationYaw(), -0.5 * stock.gauge.scale());
-            if (startPos.equals(pointPos)) {
-                pointPos = nextPosition(stock.getWorld(), stock.gauge, pos, stock.getRotationYaw(), stock.getRotationYaw(), -0.5 * stock.gauge.scale() - point.x);
-            }
+            Vec3d pointPos = nextPosition(stock.getWorld(), stock.gauge, pos, stock.getRotationYaw(), stock.getRotationYaw(), -0.5 * stock.gauge.scale() - point.x);
             Vec3d pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), stock.getRotationYaw(), 0.5 * stock.gauge.scale());
             Vec3d delta = pos.subtract(pointPos).scale(-point.x); // Scale copies sign
             if (pointPos.distanceTo(pointPosNext) > 0.1 * stock.gauge.scale()) {
