@@ -17,6 +17,10 @@ public enum Readouts {
     COUPLER_REAR,
     COUPLED_FRONT,
     COUPLED_REAR,
+    BELL,
+    WHISTLE,
+    HORN,
+    ENGINE,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -56,7 +60,64 @@ public enum Readouts {
                 return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.FRONT) ? 1 : 0 : 0;
             case COUPLED_REAR:
                 return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.BACK) ? 1 : 0 : 0;
+            case BELL:
+                return stock instanceof Locomotive ? ((Locomotive) stock).getBell() > 0 ? 1 : 0 : 0;
+            case WHISTLE:
+            case HORN:
+                return stock instanceof Locomotive ? ((Locomotive) stock).getHornTime() > 0 ? 1 : 0 : 0;
+            case ENGINE:
+                return stock instanceof LocomotiveDiesel ? ((LocomotiveDiesel) stock).isTurnedOn() ? 1 : 0 : 0;
         }
         return 0;
+    }
+    public void setValue(EntityRollingStock stock, float value) {
+        switch (this) {
+            case THROTTLE:
+                if (stock instanceof Locomotive) {
+                    ((Locomotive) stock).setThrottle(value);
+                }
+                break;
+            case REVERSER:
+                if (stock instanceof Locomotive) {
+                    ((Locomotive) stock).setReverser(value * 2 - 1);
+                }
+                break;
+            case TRAIN_BRAKE:
+                if (stock instanceof Locomotive) {
+                    ((Locomotive) stock).setTrainBrake(value);
+                }
+                break;
+            case INDEPENDENT_BRAKE:
+                if (stock instanceof EntityMoveableRollingStock) {
+                    ((Locomotive) stock).setIndependentBrake(value);
+                }
+                break;
+            case COUPLER_FRONT:
+                if (stock instanceof EntityCoupleableRollingStock) {
+                    ((EntityCoupleableRollingStock) stock).setCouplerEngaged(EntityCoupleableRollingStock.CouplerType.FRONT, value == 0);
+                }
+                break;
+            case COUPLER_REAR:
+                if (stock instanceof EntityCoupleableRollingStock) {
+                    ((EntityCoupleableRollingStock) stock).setCouplerEngaged(EntityCoupleableRollingStock.CouplerType.BACK, value == 0);
+                }
+                break;
+            case BELL:
+                if (stock instanceof Locomotive) {
+                    ((Locomotive) stock).setBell(10);
+                }
+                break;
+            case WHISTLE:
+            case HORN:
+                if (stock instanceof Locomotive) {
+                    ((Locomotive) stock).setHorn(40, Locomotive.AUTOMATED_PLAYER);
+                }
+                break;
+            case ENGINE:
+                if (stock instanceof LocomotiveDiesel) {
+                    ((LocomotiveDiesel) stock).setTurnedOn(!((LocomotiveDiesel) stock).isTurnedOn());
+                }
+                break;
+        }
     }
 }

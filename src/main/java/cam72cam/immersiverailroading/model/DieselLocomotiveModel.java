@@ -6,12 +6,11 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 
 import java.util.List;
 
-public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
+public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, LocomotiveDieselDefinition> {
     private List<ModelComponent> components;
     private DieselExhaust exhaust;
     private Horn horn;
@@ -29,7 +28,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     }
 
     @Override
-    protected void parseControllable(ComponentProvider provider, EntityRollingStockDefinition def) {
+    protected void parseControllable(ComponentProvider provider, LocomotiveDieselDefinition def) {
         super.parseControllable(provider, def);
         addGauge(provider, ModelComponentType.GAUGE_TEMPERATURE_X, Readouts.TEMPERATURE);
         addControl(provider, ModelComponentType.ENGINE_START_X);
@@ -37,7 +36,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
     }
 
     @Override
-    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+    protected void parseComponents(ComponentProvider provider, LocomotiveDieselDefinition def) {
         components = provider.parse(
                 ModelComponentType.FUEL_TANK,
                 ModelComponentType.ALTERNATOR,
@@ -58,7 +57,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         );
 
         exhaust = DieselExhaust.get(provider);
-        horn = Horn.get(provider, ((LocomotiveDieselDefinition)def).horn, ((LocomotiveDieselDefinition)def).getHornSus());
+        horn = Horn.get(provider, base, def.horn, def.getHornSus());
 
         super.parseComponents(provider, def);
     }
@@ -83,12 +82,5 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel> {
         if (idle != null) {
             idle.removed(stock);
         }
-    }
-
-    @Override
-    protected void render(LocomotiveDiesel stock, ComponentRenderer draw, double distanceTraveled) {
-        super.render(stock, draw, distanceTraveled);
-        draw.render(components);
-        horn.render(draw);
     }
 }

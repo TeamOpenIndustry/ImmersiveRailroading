@@ -61,6 +61,8 @@ public enum ModelComponentType {
 	REVERSING_ARM_SIDE("REVERSING_ARM_#SIDE#"),
 	LIFTING_LINK_SIDE("LIFTING_LINK_#SIDE#"),
 	REACH_ROD_SIDE("REACH_ROD_#SIDE#"),
+	VALVE_PART_SIDE_ID("VALVE_(PART|COMPONENT|ROD|GEAR)_#SIDE#_#ID#"),
+
 	
 	// MALLET
 	FRONT_FRAME("FRONT_(LOCOMOTIVE|FRAME)"),
@@ -73,7 +75,8 @@ public enum ModelComponentType {
 	PARTICLE_CHIMNEY_X("CHIM[I]*NEY_#ID#", false),
 	PRESSURE_VALVE_X("PRESSURE_VALVE_#ID#", false),
 	DIESEL_EXHAUST_X("EXHAUST_#ID#", false),
-	
+	CYLINDER_DRAIN_SIDE("(CYLINDER|DRAIN)_(COCK|EXHAUST)_#SIDE#", false),
+
 	// Cargo
 	CARGO_FILL_X("CARGO_FILL_#ID#", false),
 	CARGO_FILL_POS_X("CARGO_FILL_#POS#_#ID#", false),
@@ -97,6 +100,7 @@ public enum ModelComponentType {
 	HORN_CONTROL_X("HORN_CONTROL_#ID#"),
 	ENGINE_START_X("ENGINE_START_#ID#"),
 	COUPLER_ENGAGED_X("COUPLER_ENGAGED_#ID#"),
+	CYLINDER_DRAIN_CONTROL_X("(CYLINDER|DRAIN)_(COCK|EXHAUST)_CONTROL_#ID#"),
 
 	// Gauges
 	GAUGE_LIQUID_X("GAUGE_LIQUID_#ID#"),
@@ -146,6 +150,10 @@ public enum ModelComponentType {
 		public static final ModelPosition BOGEY_REAR = BOGEY.and(REAR);
 		public static final ModelPosition FRONT_LOCOMOTIVE = FRONT.and(LOCOMOTIVE);
 		public static final ModelPosition REAR_LOCOMOTIVE = REAR.and(LOCOMOTIVE);
+
+		public static final ModelPosition A = new ModelPosition("A");
+		public static final ModelPosition B = new ModelPosition("B");
+
 		private final String pos;
 
 		public ModelPosition(String pos) {

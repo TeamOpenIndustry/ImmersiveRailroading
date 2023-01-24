@@ -4,37 +4,25 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.part.CargoFill;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.model.part.CargoItems;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.mod.render.opengl.RenderState;
 
-public class FreightModel<T extends Freight> extends StockModel<T> {
-    private final FreightDefinition def;
-
+public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefinition> extends StockModel<ENTITY, DEFINITION> {
     private CargoFill cargoFill;
     private CargoItems cargoItems;
 
-    public FreightModel(FreightDefinition def) throws Exception {
+    public FreightModel(DEFINITION def) throws Exception {
         super(def);
-        this.def = def;
     }
 
-    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
+    protected void parseComponents(ComponentProvider provider, DEFINITION def) {
         super.parseComponents(provider, def);
-        this.cargoFill = CargoFill.get(provider, null);
+        this.cargoFill = CargoFill.get(provider, rocking, def.shouldShowCurrentLoadOnly(), null);
         this.cargoItems = CargoItems.get(provider);
     }
 
     @Override
-    protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
-        super.render(stock, draw, distanceTraveled);
-        if (cargoFill != null) {
-            cargoFill.render(stock.getPercentCargoFull(), def.shouldShowCurrentLoadOnly(), draw);
-        }
-    }
-
-    @Override
-    protected void postRender(T stock, RenderState state) {
+    protected void postRender(ENTITY stock, RenderState state) {
         super.postRender(stock, state);
 
         if (cargoItems != null) {

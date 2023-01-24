@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.Player;
@@ -15,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
@@ -29,16 +29,16 @@ public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
 
     public final Types type;
 
-    public static <T extends EntityMoveableRollingStock> List<Door<T>> get(ComponentProvider provider) {
-        return provider.parseAll(ModelComponentType.DOOR_X).stream().map(p -> new Door<T>(p, null)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<Door<T>> get(ComponentProvider provider, ModelState state) {
+        return provider.parseAll(ModelComponentType.DOOR_X).stream().map(p -> new Door<T>(p, state)).collect(Collectors.toList());
     }
 
-    public static <T extends EntityMoveableRollingStock> List<Door<T>> get(ComponentProvider provider, ModelPosition pos, Function<T, Matrix4> loc) {
-        return provider.parseAll(ModelComponentType.DOOR_X, pos).stream().map(p -> new Door<T>(p, loc)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<Door<T>> get(ComponentProvider provider, ModelState state, ModelPosition pos) {
+        return provider.parseAll(ModelComponentType.DOOR_X, pos).stream().map(p -> new Door<T>(p, state)).collect(Collectors.toList());
     }
 
-    public Door(ModelComponent part, Function<T, Matrix4> loc) {
-        super(part, loc);
+    public Door(ModelComponent part, ModelState state) {
+        super(part, state);
         type = part.modelIDs.stream().anyMatch(g -> g.contains("EXTERNAL")) ? Types.EXTERNAL :
                 part.modelIDs.stream().anyMatch(g -> g.contains("CONNECTING")) ? Types.CONNECTING :
                 Types.INTERNAL;
@@ -60,9 +60,14 @@ public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
         if (!isOpen(stock) || player.getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
             return false;
         }
+        Matrix4 model = stock.getModelMatrix();
+        Matrix4 delta = state.getMatrix((T) stock);
+        if (delta != null) {
+            model = model.multiply(delta);
+        }
         IBoundingBox bb = IBoundingBox.from(
-                transform(part.min, 0, (T)stock),
-                transform(part.max, 0, (T)stock)
+                model.apply(part.min),
+                model.apply(part.max)
         ).grow(new Vec3d(0.5, 0.5, 0.5));
         // The added velocity is due to a bug where the player may tick before or after the stock.
         // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities

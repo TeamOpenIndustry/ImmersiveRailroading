@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.model.FreightModel;
 import cam72cam.immersiverailroading.model.FreightTankModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -67,7 +66,7 @@ public class CarTankDefinition extends FreightDefinition {
     }
 
     @Override
-    protected StockModel<?> createModel() throws Exception {
+    protected StockModel<?, ?> createModel() throws Exception {
         return new FreightTankModel<>(this);
     }
 }

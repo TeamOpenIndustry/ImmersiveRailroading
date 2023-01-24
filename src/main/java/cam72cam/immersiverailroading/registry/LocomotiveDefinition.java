@@ -68,7 +68,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     protected abstract boolean multiUnitDefault();
 
     @Override
-    protected StockModel<?> createModel() throws Exception {
+    protected StockModel<?, ?> createModel() throws Exception {
         return new LocomotiveModel<>(this);
     }
 

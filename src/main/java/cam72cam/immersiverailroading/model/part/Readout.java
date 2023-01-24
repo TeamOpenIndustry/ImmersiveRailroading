@@ -4,9 +4,9 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import util.Matrix4;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,16 +23,16 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     private final float rangeMin;
     private final float rangeMax;
 
-    public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, Readouts value) {
-        return provider.parseAll(type).stream().map(p -> new Readout<>(p, (Function<T, Float>) value::getValue, null)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelState state, ModelComponentType type, Readouts value) {
+        return provider.parseAll(type).stream().map(p -> new Readout<T>(p, value::getValue, state)).collect(Collectors.toList());
     }
 
-    public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelComponentType type, ModelPosition pos, Readouts value, Function<T, Matrix4> loc) {
-        return provider.parseAll(type, pos).stream().map(p -> new Readout<>(p, value::getValue, loc)).collect(Collectors.toList());
+    public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos, Readouts value) {
+        return provider.parseAll(type, pos).stream().map(p -> new Readout<T>(p, value::getValue, state)).collect(Collectors.toList());
     }
 
-    public Readout(ModelComponent part, Function<T, Float> position, Function<T, Matrix4> loc) {
-        super(part, loc);
+    public Readout(ModelComponent part, Function<T, Float> position, ModelState state) {
+        super(part, state);
         this.position = position;
 
         float min = 0;
@@ -56,7 +56,7 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     }
 
     @Override
-    public float getValue(T stock) {
+    public float getValue(EntityMoveableRollingStock stock) {
         float pos = positions.getOrDefault(stock.getUUID(), 0f);
         pos = Math.min(1, Math.max(0, (pos - rangeMin) / (rangeMax - rangeMin)));
         pos = pos + offset;

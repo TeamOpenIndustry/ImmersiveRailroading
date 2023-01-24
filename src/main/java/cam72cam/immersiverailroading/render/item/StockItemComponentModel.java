@@ -32,7 +32,7 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             return;
         }
 
-        StockModel<?> model = data.def.getModel();
+        StockModel<?, ?> model = data.def.getModel();
         ArrayList<String> groups = new ArrayList<>();
 
         for (ModelComponentType r : data.componentType.render) {

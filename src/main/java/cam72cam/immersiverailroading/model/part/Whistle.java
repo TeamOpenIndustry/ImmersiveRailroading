@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Particles;
-import cam72cam.immersiverailroading.model.ComponentRenderer;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.Quilling;
@@ -26,14 +26,15 @@ public class Whistle {
     private final Quilling quilling;
     private final Identifier fallback;
 
-    public static Whistle get(ComponentProvider provider, Quilling quilling, Identifier fallback) {
-        return new Whistle(provider.parse(ModelComponentType.WHISTLE), quilling, fallback);
+    public static Whistle get(ComponentProvider provider, ModelState state, Quilling quilling, Identifier fallback) {
+        return new Whistle(provider.parse(ModelComponentType.WHISTLE), state, quilling, fallback);
     }
 
-    public Whistle(ModelComponent whistle, Quilling quilling, Identifier fallback) {
+    public Whistle(ModelComponent whistle, ModelState state, Quilling quilling, Identifier fallback) {
         this.whistle = whistle;
         this.quilling = quilling;
         this.fallback = fallback;
+        state.include(whistle);
     }
 
     private class SoundEffects {
@@ -205,9 +206,5 @@ public class Whistle {
         if (sound != null) {
             sound.terminate();
         }
-    }
-
-    public void render(ComponentRenderer draw) {
-        draw.render(whistle);
     }
 }

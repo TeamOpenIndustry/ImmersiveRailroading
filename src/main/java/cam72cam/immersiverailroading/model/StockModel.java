@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
+import cam72cam.immersiverailroading.model.animation.Animatrix;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
@@ -22,37 +23,43 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
-    private final EntityRollingStockDefinition def;
+public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION extends EntityRollingStockDefinition> extends OBJModel {
+    private final DEFINITION def;
     public final List<ModelComponent> allComponents;
+    protected ModelState base;
+    protected ModelState rocking;
+    protected ModelState front;
+    protected ModelState frontRocking;
+    protected ModelState rear;
+    protected ModelState rearRocking;
     private Frame frame;
     private Bogey bogeyFront;
     private Bogey bogeyRear;
     private ModelComponent shell;
     private ModelComponent remaining;
-    protected final List<Door<T>> doors;
-    protected final List<Control<T>> controls;
-    protected final List<Readout<T>> gauges;
-    protected final List<Seat<T>> seats;
+    protected final List<Door<ENTITY>> doors;
+    protected final List<Control<ENTITY>> controls;
+    protected final List<Readout<ENTITY>> gauges;
+    protected final List<Seat<ENTITY>> seats;
 
-    protected List<LightFlare<T>> headlights;
+    protected List<LightFlare<ENTITY>> headlights;
 
     private final TrackFollowers frontTrackers;
     private final TrackFollowers rearTrackers;
-    private final boolean hasInterior;
 
     public static final int LOD_LARGE = 1024;
     public static final int LOD_SMALL = 512;
 
-    public StockModel(EntityRollingStockDefinition def) throws Exception {
+    public StockModel(DEFINITION def) throws Exception {
         super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds, i -> {
             List<Integer> lodSizes = new ArrayList<>();
             lodSizes.add(LOD_LARGE);
             lodSizes.add(LOD_SMALL);
             return lodSizes;
         });
+
         this.def = def;
-        this.hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
+        boolean hasInterior = this.groups().stream().anyMatch(x -> x.contains("INTERIOR"));
 
         this.doors = new ArrayList<>();
         this.seats = new ArrayList<>();
@@ -60,11 +67,41 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         this.gauges = new ArrayList<>();
         this.headlights = new ArrayList<>();
 
+        ModelState.LightState base = new ModelState.LightState(null, null, null, hasInterior);
+
+        float interiorLight = def.interiorLightLevel();
+        ModelState.Lighter lighter = stock -> {
+            if (!stock.internalLightsEnabled()) {
+                return base;
+            }
+            float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
+            float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
+            return blockLight < interiorLight ? base.merge(new ModelState.LightState(interiorLight, skyLight, true, null)) : base;
+        };
+        ModelState.GroupAnimator animators = (stock, group) -> {
+            // TODO this could be partially pre-baked
+            Matrix4 m = null;
+            for (EntityRollingStockDefinition.AnimationDefinition animation : stock.getDefinition().animations) {
+                if (animation.valid() && animation.animatrix.groups().contains(group)) {
+                    Matrix4 found = animation.animatrix.getMatrix(group, animation.getPercent(stock));
+                    if (m == null) {
+                        m = found;
+                    } else {
+                        m.multiply(found);
+                    }
+                }
+            }
+            return m;
+        };
+        this.base = ModelState.construct(settings -> settings.add(animators).add(lighter));
+
         ComponentProvider provider = new ComponentProvider(this);
+        initStates();
         parseControllable(provider, def);
         parseComponents(provider, def);
         provider.parse(ModelComponentType.IMMERSIVERAILROADING_BASE_COMPONENT);
         this.remaining = provider.parse(ModelComponentType.REMAINING);
+        rocking.include(remaining);
         this.allComponents = provider.components();
 
         if (bogeyFront != null && Math.abs(def.getBogeyFront(Gauge.from(Gauge.STANDARD)) + bogeyFront.center().x) > 0.5) {
@@ -77,41 +114,55 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         } else {
             rearTrackers = null;
         }
+
+    }
+
+    public ModelState addRoll(ModelState state) {
+        return state.push(builder -> builder.add((ModelState.Animator) stock ->
+                new Matrix4().rotate(Math.toRadians(stock.getRollDegrees()), 1, 0, 0)));
+    }
+
+    protected void initStates() {
+        this.rocking = addRoll(this.base);
+        this.front = this.base.push(settings -> settings.add(this::getFrontBogeyMatrix));
+        this.frontRocking = addRoll(this.front);
+        this.rear = this.base.push(settings -> settings.add(this::getRearBogeyMatrix));
+        this.rearRocking = addRoll(this.rear);
     }
 
     protected void addGauge(ComponentProvider provider, ModelComponentType type, Readouts value) {
-        gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.BOGEY_FRONT, value, this::getFrontBogeyMatrix));
-        gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.BOGEY_REAR, value, this::getRearBogeyMatrix));
-        gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.FRONT, value, null));
-        gauges.addAll(Readout.getReadouts(provider, type, ModelPosition.REAR, value, null));
-        gauges.addAll(Readout.getReadouts(provider, type, value));
+        gauges.addAll(Readout.getReadouts(provider, frontRocking, type, ModelPosition.BOGEY_FRONT, value));
+        gauges.addAll(Readout.getReadouts(provider, rearRocking, type, ModelPosition.BOGEY_REAR, value));
+        gauges.addAll(Readout.getReadouts(provider, rocking, type, ModelPosition.FRONT, value));
+        gauges.addAll(Readout.getReadouts(provider, rocking, type, ModelPosition.REAR, value));
+        gauges.addAll(Readout.getReadouts(provider, rocking, type, value));
     }
 
     protected void addControl(ComponentProvider provider, ModelComponentType type) {
-        controls.addAll(Control.get(provider, type, ModelPosition.BOGEY_FRONT, this::getFrontBogeyMatrix));
-        controls.addAll(Control.get(provider, type, ModelPosition.BOGEY_REAR, this::getRearBogeyMatrix));
-        controls.addAll(Control.get(provider, type, ModelPosition.FRONT, null));
-        controls.addAll(Control.get(provider, type, ModelPosition.REAR, null));
-        controls.addAll(Control.get(provider, type));
+        controls.addAll(Control.get(provider, frontRocking, type, ModelPosition.BOGEY_FRONT));
+        controls.addAll(Control.get(provider, rearRocking, type, ModelPosition.BOGEY_REAR));
+        controls.addAll(Control.get(provider, rocking, type, ModelPosition.FRONT));
+        controls.addAll(Control.get(provider, rocking, type, ModelPosition.REAR));
+        controls.addAll(Control.get(provider, rocking, type));
     }
 
     protected void addDoor(ComponentProvider provider) {
-        this.doors.addAll(Door.get(provider, ModelPosition.BOGEY_FRONT, this::getFrontBogeyMatrix));
-        this.doors.addAll(Door.get(provider, ModelPosition.BOGEY_REAR, this::getRearBogeyMatrix));
-        this.doors.addAll(Door.get(provider));
+        this.doors.addAll(Door.get(provider, frontRocking, ModelPosition.BOGEY_FRONT));
+        this.doors.addAll(Door.get(provider, rearRocking, ModelPosition.BOGEY_REAR));
+        this.doors.addAll(Door.get(provider, rocking));
     }
 
-    protected void addHeadlight(EntityRollingStockDefinition def, ComponentProvider provider, ModelComponentType type) {
-        this.headlights.addAll(LightFlare.get(def, provider, type, ModelPosition.BOGEY_FRONT, this::getFrontBogeyMatrix));
-        this.headlights.addAll(LightFlare.get(def, provider, type, ModelPosition.BOGEY_REAR, this::getRearBogeyMatrix));
-        this.headlights.addAll(LightFlare.get(def, provider, type));
+    protected void addHeadlight(DEFINITION def, ComponentProvider provider, ModelComponentType type) {
+        this.headlights.addAll(LightFlare.get(def, provider, frontRocking, type, ModelPosition.BOGEY_FRONT));
+        this.headlights.addAll(LightFlare.get(def, provider, rearRocking, type, ModelPosition.BOGEY_REAR));
+        this.headlights.addAll(LightFlare.get(def, provider, rocking, type));
     }
 
-    protected void parseControllable(ComponentProvider provider, EntityRollingStockDefinition def) {
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.BOGEY_FRONT, Readouts.COUPLED_FRONT, this::getFrontBogeyMatrix));
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.BOGEY_REAR, Readouts.COUPLED_REAR, this::getRearBogeyMatrix));
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.FRONT, Readouts.COUPLED_FRONT, null));
-        gauges.addAll(Readout.getReadouts(provider, ModelComponentType.COUPLED_X, ModelPosition.REAR, Readouts.COUPLED_REAR, null));
+    protected void parseControllable(ComponentProvider provider, DEFINITION def) {
+        gauges.addAll(Readout.getReadouts(provider, frontRocking, ModelComponentType.COUPLED_X, ModelPosition.BOGEY_FRONT, Readouts.COUPLED_FRONT));
+        gauges.addAll(Readout.getReadouts(provider, rearRocking, ModelComponentType.COUPLED_X, ModelPosition.BOGEY_REAR, Readouts.COUPLED_REAR));
+        gauges.addAll(Readout.getReadouts(provider, rocking, ModelComponentType.COUPLED_X, ModelPosition.FRONT, Readouts.COUPLED_FRONT));
+        gauges.addAll(Readout.getReadouts(provider, rocking, ModelComponentType.COUPLED_X, ModelPosition.REAR, Readouts.COUPLED_REAR));
 
         addControl(provider, ModelComponentType.COUPLER_ENGAGED_X);
 
@@ -127,16 +178,17 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         }
 
         addDoor(provider);
-        seats.addAll(Seat.get(provider));
+        seats.addAll(Seat.get(provider, rocking));
 
         addHeadlight(def, provider, ModelComponentType.HEADLIGHT_X);
     }
 
-    protected void parseComponents(ComponentProvider provider, EntityRollingStockDefinition def) {
-        this.frame = new Frame(provider, def.defID, def.getValveGear());
+    protected void parseComponents(ComponentProvider provider, DEFINITION def) {
+        this.frame = new Frame(provider, base, rocking, def.defID, def.getValveGear());
         this.shell = provider.parse(ModelComponentType.SHELL);
-        this.bogeyFront = Bogey.get(provider, unifiedBogies(), ModelPosition.FRONT);
-        this.bogeyRear = Bogey.get(provider, unifiedBogies(), ModelPosition.REAR);
+        rocking.include(shell);
+        this.bogeyFront = Bogey.get(provider, front, unifiedBogies(), ModelPosition.FRONT);
+        this.bogeyRear = Bogey.get(provider, rear, unifiedBogies(), ModelPosition.REAR);
     }
 
     protected boolean unifiedBogies() {
@@ -145,10 +197,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
 
 
     public final void onClientTick(EntityMoveableRollingStock stock) {
-        effects((T) stock);
+        effects((ENTITY) stock);
     }
 
-    protected void effects(T stock) {
+    protected void effects(ENTITY stock) {
         headlights.forEach(x -> x.effects(stock));
         controls.forEach(c -> c.effects(stock));
         doors.forEach(c -> c.effects(stock));
@@ -156,10 +208,10 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
     }
 
     public final void onClientRemoved(EntityMoveableRollingStock stock) {
-        removed((T) stock);
+        removed((ENTITY) stock);
     }
 
-    protected void removed(T stock) {
+    protected void removed(ENTITY stock) {
         headlights.forEach(x -> x.removed(stock));
     }
 
@@ -189,24 +241,24 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         try (
                 OBJRender.Binding bound = binder.bind(state);
         ) {
-            double distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
-            distanceTraveled /= stock.gauge.scale();
+            float backup = stock.distanceTraveled;
 
-            try (
-                    ComponentRenderer draw = new ComponentRenderer(stock, bound, available, hasInterior)
-            ) {
-                //noinspection unchecked
-                render((T) stock, draw, distanceTraveled);
-            }
+            stock.distanceTraveled = (float) (stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1);
+            stock.distanceTraveled /= stock.gauge.scale();
+
+
+            base.render(bound, stock, available);
+
+            stock.distanceTraveled = backup;
         }
     }
 
     public void postRender(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
-        postRender((T) stock, state);
+        postRender((ENTITY) stock, state);
     }
 
     // TODO invert -> reinvert sway
-    private Matrix4 getFrontBogeyMatrix(T stock) {
+    private Matrix4 getFrontBogeyMatrix(EntityMoveableRollingStock stock) {
         if (frontTrackers != null) {
             return frontTrackers.get(stock).getMatrix();
         } else {
@@ -218,7 +270,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         }
     }
 
-    private Matrix4 getRearBogeyMatrix(T stock) {
+    private Matrix4 getRearBogeyMatrix(EntityMoveableRollingStock stock) {
         if (rearTrackers != null) {
             return rearTrackers.get(stock).getMatrix();
         } else {
@@ -230,44 +282,7 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         }
     }
 
-    protected void render(T stock, ComponentRenderer draw, double distanceTraveled) {
-        frame.render(distanceTraveled, draw);
-
-        try (ComponentRenderer light = draw.withBrightGroups(true)) {
-            headlights.forEach(x -> x.render(light, stock));
-        }
-
-        try (ComponentRenderer light = stock.internalLightsEnabled() ? draw.withBrightGroups(true).withInteriorLight(stock) : draw) {
-            renderWithInteriorLighting(stock, light);
-        }
-
-        if (bogeyFront != null) {
-            try (ComponentRenderer matrix = draw.push()) {
-                matrix.mult(getFrontBogeyMatrix(stock));
-                matrix.rotate(-stock.getRollDegrees(), 1, 0, 0);
-                bogeyFront.render(distanceTraveled, matrix);
-            }
-        }
-
-        if (bogeyRear != null) {
-            try (ComponentRenderer matrix = draw.push()) {
-                matrix.mult(getRearBogeyMatrix(stock));
-                matrix.rotate(-stock.getRollDegrees(), 1, 0, 0);
-                bogeyRear.render(distanceTraveled, matrix);
-            }
-        }
-    }
-
-    protected void renderWithInteriorLighting(T stock, ComponentRenderer draw) {
-        draw.render(shell);
-        draw.render(remaining);
-        controls.forEach(c -> c.render(stock, draw));
-        doors.forEach(c -> c.render(stock, draw));
-        gauges.forEach(r -> r.render(stock, draw));
-        seats.forEach(r -> r.render(draw));
-    }
-
-    protected void postRender(T stock, RenderState state) {
+    protected void postRender(ENTITY stock, RenderState state) {
         state.rotate(stock.getRollDegrees(), 1, 0, 0);
         controls.forEach(c -> c.postRender(stock, state));
         doors.forEach(c -> c.postRender(stock, state));
@@ -275,28 +290,28 @@ public class StockModel<T extends EntityMoveableRollingStock> extends OBJModel {
         headlights.forEach(x -> x.postRender(stock, state));
     }
 
-    public List<Control<T>> getControls() {
+    public List<Control<ENTITY>> getControls() {
         return controls;
     }
 
-    public List<Door<T>> getDoors() {
+    public List<Door<ENTITY>> getDoors() {
         return doors;
     }
 
-    public List<Control<T>> getDraggable() {
-        List<Control<T>> draggable = new ArrayList<>();
+    public List<Control<ENTITY>> getDraggable() {
+        List<Control<ENTITY>> draggable = new ArrayList<>();
         draggable.addAll(controls);
         draggable.addAll(doors);
         return draggable;
     }
 
-    public List<Interactable<T>> getInteractable() {
-        List<Interactable<T>> interactable = new ArrayList<>(getDraggable());
+    public List<Interactable<ENTITY>> getInteractable() {
+        List<Interactable<ENTITY>> interactable = new ArrayList<>(getDraggable());
         interactable.addAll(seats);
         return interactable;
     }
 
-    public List<Seat<T>> getSeats() {
+    public List<Seat<ENTITY>> getSeats() {
         return seats;
     }
 }
