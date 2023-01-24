@@ -92,7 +92,7 @@ public enum Readouts {
         // Yaw is now between 0 and 360 degrees
 
         if (yaw > 180) {
-            yaw = 360 - yaw;
+            yaw = yaw - 360;
         }
         // Yaw is now between -180 and 180
 
