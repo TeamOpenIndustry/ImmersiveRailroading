@@ -15,31 +15,38 @@ public class CarFreightDefinition extends FreightDefinition {
     private int width;
     private List<String> validCargo;
 
-    public CarFreightDefinition(String defID, JsonObject data) throws Exception {
-        super(CarFreight.class, defID, data);
+    public CarFreightDefinition(Class<? extends CarFreight> cls, String defID, JsonObject data) throws Exception {
+        super(cls, defID, data);
+    }
 
-        // Handle null data
-        if (validCargo == null) {
-            validCargo = new ArrayList<>();
-        }
+    public CarFreightDefinition(String defID, JsonObject data) throws Exception {
+        this(CarFreight.class, defID, data);
     }
 
     @Override
     public void parseJson(JsonObject data) throws Exception {
         super.parseJson(data);
-        JsonObject freight = data.get("freight").getAsJsonObject();
-        this.numSlots = (int) Math.ceil(freight.get("slots").getAsInt() * internal_inv_scale);
-        this.width = (int) Math.ceil(freight.get("width").getAsInt() * internal_inv_scale);
-        this.validCargo = new ArrayList<>();
-        for (JsonElement el : freight.get("cargo").getAsJsonArray()) {
-            validCargo.add(el.getAsString());
+        if (data.has("freight")) {
+            JsonObject freight = data.get("freight").getAsJsonObject();
+            this.numSlots = (int) Math.ceil(freight.get("slots").getAsInt() * internal_inv_scale);
+            this.width = (int) Math.ceil(freight.get("width").getAsInt() * internal_inv_scale);
+            this.validCargo = new ArrayList<>();
+            for (JsonElement el : freight.get("cargo").getAsJsonArray()) {
+                validCargo.add(el.getAsString());
+            }
+        } else {
+            this.numSlots = 0;
+            this.width = 0;
+            this.validCargo = null;
         }
     }
 
     @Override
     public List<String> getTooltip(Gauge gauge) {
         List<String> tips = super.getTooltip(gauge);
-        tips.add(GuiText.FREIGHT_CAPACITY_TOOLTIP.toString(this.getInventorySize(gauge)));
+        if (numSlots > 0) {
+            tips.add(GuiText.FREIGHT_CAPACITY_TOOLTIP.toString(this.getInventorySize(gauge)));
+        }
         return tips;
     }
 

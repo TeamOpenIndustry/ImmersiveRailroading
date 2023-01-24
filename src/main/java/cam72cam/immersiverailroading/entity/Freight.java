@@ -94,20 +94,20 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 					}
 				}
 			}
-		}
 
-		if (player.getHeldItem(hand).is(Fuzzy.LEAD)) {
-			for (Entity passenger : this.getPassengers()) {
-				if (passenger instanceof Living && !passenger.isVillager()) {
-					if (getWorld().isServer) {
-						Living living = (Living) passenger;
-						if (living.canBeLeashedTo(player)) {
-							this.removePassenger(living);
-							living.setLeashHolder(player);
-							player.getHeldItem(hand).shrink(1);
+			if (player.getHeldItem(hand).is(Fuzzy.LEAD)) {
+				for (Entity passenger : this.getPassengers()) {
+					if (passenger instanceof Living && !passenger.isVillager()) {
+						if (getWorld().isServer) {
+							Living living = (Living) passenger;
+							if (living.canBeLeashedTo(player)) {
+								this.removePassenger(living);
+								living.setLeashHolder(player);
+								player.getHeldItem(hand).shrink(1);
+							}
 						}
+						return ClickResult.ACCEPTED;
 					}
-					return ClickResult.ACCEPTED;
 				}
 			}
 		}
@@ -121,6 +121,9 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 
 	protected boolean openGui(Player player) {
+		if (getInventorySize() == 0) {
+			return false;
+		}
 		if (player.hasPermission(Permissions.FREIGHT_INVENTORY)) {
 			GuiTypes.FREIGHT.open(player, this);
 		}
@@ -140,7 +143,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 			}
 		}
 		itemCount = itemInsideCount;
-		percentFull = stacksWithStuff * 100 / this.getInventorySize();
+		percentFull = this.getInventorySize() > 0 ? stacksWithStuff * 100 / this.getInventorySize() : 100;
 	}
 	
 	public int getPercentCargoFull() {
