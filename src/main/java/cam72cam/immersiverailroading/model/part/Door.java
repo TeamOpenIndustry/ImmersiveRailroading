@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
+import util.Matrix4;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,11 +60,14 @@ public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
         if (!isOpen(stock) || player.getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
             return false;
         }
+        Matrix4 model = stock.getModelMatrix();
+        Matrix4 delta = state.getMatrix((T) stock);
+        if (delta != null) {
+            model = model.multiply(delta);
+        }
         IBoundingBox bb = IBoundingBox.from(
-                //TODO transform(part.min, 0, (T)stock, true),
-                //TODO transform(part.max, 0, (T)stock, true)
-                transform(part.min, (T) stock),
-                transform(part.max, (T) stock)
+                model.apply(part.min),
+                model.apply(part.max)
         ).grow(new Vec3d(0.5, 0.5, 0.5));
         // The added velocity is due to a bug where the player may tick before or after the stock.
         // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities

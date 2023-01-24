@@ -39,7 +39,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     protected final float offset;
     private final boolean hide;
     private final Vec3d center;
-    private final ModelState state;
+    protected final ModelState state;
     private final String modelId;
     private Vec3d rotationPoint = null;
     private float rotationDegrees = 0;
