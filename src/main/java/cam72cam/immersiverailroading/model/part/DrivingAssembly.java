@@ -17,12 +17,20 @@ public class DrivingAssembly {
     private final ValveGear left;
     private final ModelComponent steamChest;
 
-    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelState state, float angleOffset) {
-        return get(type, provider, state, null, angleOffset);
+    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelState state, float angleOffset, WheelSet... backups) {
+        return get(type, provider, state, null, angleOffset, backups);
     }
 
-    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelState state, ModelPosition pos, float angleOffset) {
+    public static DrivingAssembly get(ValveGearConfig type, ComponentProvider provider, ModelState state, ModelPosition pos, float angleOffset, WheelSet... backups) {
         WheelSet wheels = WheelSet.get(provider, state, pos == null ? ModelComponentType.WHEEL_DRIVER_X : ModelComponentType.WHEEL_DRIVER_POS_X, pos, angleOffset);
+        if (wheels == null) {
+            for (WheelSet backup : backups) {
+                if (backup != null) {
+                    wheels = backup;
+                    break;
+                }
+            }
+        }
         if (wheels == null) {
             return null;
         }

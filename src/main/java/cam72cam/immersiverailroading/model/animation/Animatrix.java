@@ -13,8 +13,13 @@ public class Animatrix {
     private final boolean looping;
     private final int frameCount;
 
-    public Animatrix(InputStream in, boolean looping) throws IOException {
+    public Animatrix(InputStream in, boolean looping, double internal_model_scale) throws IOException {
         this.looping = looping;
+
+        Matrix4 scale = new Matrix4();
+        scale.m33 = 1/internal_model_scale;
+        Matrix4 inv = scale.copy();
+        inv.m33 = internal_model_scale;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             List<String> names = new ArrayList<>();
@@ -51,7 +56,7 @@ public class Animatrix {
                             Double.parseDouble(mm[13]),
                             Double.parseDouble(mm[14]),
                             Double.parseDouble(mm[15])
-                    ));
+                    ).multiply(inv).leftMultiply(scale));
                 } else {
                     throw new RuntimeException("Invalid line '" + line + "'");
                 }
@@ -71,6 +76,8 @@ public class Animatrix {
     }
 
     public Matrix4 getMatrix(String group, float percent) {
+        //inv.invert();
+        //scale.scale(internal_model_scale, internal_model_scale, internal_model_scale);
         for (Map.Entry<String, List<Matrix4>> x : map.entrySet()) {
             if (group.equals(x.getKey())) {
                 List<Matrix4> frames = x.getValue();

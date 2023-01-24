@@ -12,13 +12,11 @@ import java.util.stream.Collectors;
 
 public class Bogey {
     private final ModelComponent bogey;
-    private final List<Wheel> wheels;
+    public final WheelSet wheels;
 
     public static Bogey get(ComponentProvider provider, ModelState state, boolean unified, ModelPosition pos) {
-        List<Wheel> wheels = (unified ?
-                provider.parseAll(ModelComponentType.BOGEY_POS_WHEEL_X, pos) :
-                provider.parseAll(pos == ModelPosition.FRONT ? ModelComponentType.BOGEY_FRONT_WHEEL_X : ModelComponentType.BOGEY_REAR_WHEEL_X)
-        ).stream().map((ModelComponent wheel) -> new Wheel(wheel, state, null)).collect(Collectors.toList());
+        WheelSet wheels = unified ? WheelSet.get(provider, state, ModelComponentType.BOGEY_POS_WHEEL_X, pos, 0) :
+                WheelSet.get(provider, state, pos == ModelPosition.FRONT ? ModelComponentType.BOGEY_FRONT_WHEEL_X : ModelComponentType.BOGEY_REAR_WHEEL_X, 0);
 
         ModelComponent bogey = unified ?
                 provider.parse(ModelComponentType.BOGEY_POS, pos) :
@@ -31,7 +29,7 @@ public class Bogey {
         return new Bogey(bogey, wheels);
     }
 
-    public Bogey(ModelComponent bogey, List<Wheel> wheels) {
+    public Bogey(ModelComponent bogey, WheelSet wheels) {
         this.bogey = bogey;
         this.wheels = wheels;
     }

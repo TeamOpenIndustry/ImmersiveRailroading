@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
-import cam72cam.immersiverailroading.model.animation.Animatrix;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
@@ -32,9 +31,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected ModelState frontRocking;
     protected ModelState rear;
     protected ModelState rearRocking;
-    private Frame frame;
-    private Bogey bogeyFront;
-    private Bogey bogeyRear;
+    protected Frame frame;
+    protected Bogey bogeyFront;
+    protected Bogey bogeyRear;
     private ModelComponent shell;
     private ModelComponent remaining;
     protected final List<Door<ENTITY>> doors;
@@ -95,9 +94,14 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         };
         this.base = ModelState.construct(settings -> settings.add(animators).add(lighter));
 
-        ComponentProvider provider = new ComponentProvider(this);
+        ComponentProvider provider = new ComponentProvider(this, def.internal_model_scale);
         initStates();
         parseControllable(provider, def);
+
+        // Shay Hack...
+        this.bogeyFront = Bogey.get(provider, front, unifiedBogies(), ModelPosition.FRONT);
+        this.bogeyRear = Bogey.get(provider, rear, unifiedBogies(), ModelPosition.REAR);
+
         parseComponents(provider, def);
         provider.parse(ModelComponentType.IMMERSIVERAILROADING_BASE_COMPONENT);
         this.remaining = provider.parse(ModelComponentType.REMAINING);
@@ -187,8 +191,6 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         this.frame = new Frame(provider, base, rocking, def.defID, def.getValveGear());
         this.shell = provider.parse(ModelComponentType.SHELL);
         rocking.include(shell);
-        this.bogeyFront = Bogey.get(provider, front, unifiedBogies(), ModelPosition.FRONT);
-        this.bogeyRear = Bogey.get(provider, rear, unifiedBogies(), ModelPosition.REAR);
     }
 
     protected boolean unifiedBogies() {
@@ -271,7 +273,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     }
 
     public float getFrontYaw(EntityMoveableRollingStock stock) {
-        return frontTrackers != null ? frontTrackers.get(stock).toPointYaw + frontTrackers.get(stock).atPointYaw : stock.getFrontYaw();
+        return frontTrackers != null ? frontTrackers.get(stock).toPointYaw + frontTrackers.get(stock).atPointYaw : stock.getRotationYaw() - stock.getFrontYaw();
     }
 
     private Matrix4 getRearBogeyMatrix(EntityMoveableRollingStock stock) {
@@ -287,7 +289,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     }
 
     public float getRearYaw(EntityMoveableRollingStock stock) {
-        return rearTrackers != null ? rearTrackers.get(stock).toPointYaw + rearTrackers.get(stock).atPointYaw : stock.getRearYaw();
+        return rearTrackers != null ? rearTrackers.get(stock).toPointYaw + rearTrackers.get(stock).atPointYaw : stock.getRotationYaw() - stock.getRearYaw();
     }
 
     protected void postRender(ENTITY stock, RenderState state) {

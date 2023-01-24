@@ -13,11 +13,13 @@ public class ComponentProvider {
     public final StockModel<?, ?> model;
     private final Set<String> groups;
     private final List<ModelComponent> components;
+    public double internal_model_scale;
 
-    public ComponentProvider(StockModel<?, ?> model) {
+    public ComponentProvider(StockModel<?, ?> model, double internal_model_scale) {
         this.model = model;
         this.groups = new HashSet<>(model.groups());
         this.components = new ArrayList<>();
+        this.internal_model_scale = internal_model_scale;
     }
 
     private Set<String> modelIDs(String pattern) {

@@ -114,11 +114,11 @@ public abstract class EntityRollingStockDefinition {
         public final boolean invert;
         public final float frames_per_tick;
 
-        public AnimationDefinition(JsonObject obj) throws IOException {
+        public AnimationDefinition(JsonObject obj, double internal_model_scale) throws IOException {
             control_group = obj.has("control_group") ? obj.get("control_group").getAsString() : null;
             mode = obj.has("mode") ? AnimationMode.valueOf(obj.get("mode").getAsString().toUpperCase(Locale.ROOT)) : null;
             readout = obj.has("readout") ? Readouts.valueOf(obj.get("readout").getAsString().toUpperCase(Locale.ROOT)) : null;
-            animatrix = obj.has("animatrix") ? new Animatrix(new Identifier(obj.get("animatrix").getAsString()).getResourceStream(), mode != AnimationMode.VALUE) : null;
+            animatrix = obj.has("animatrix") ? new Animatrix(new Identifier(obj.get("animatrix").getAsString()).getResourceStream(), mode != AnimationMode.VALUE, internal_model_scale) : null;
             offset = obj.has("offset") ? obj.get("offset").getAsFloat() : 0;
             invert = obj.has("invert") && obj.get("invert").getAsBoolean();
             frames_per_tick = obj.has("frames_per_tick") ? obj.get("frames_per_tick").getAsFloat() : 0;
@@ -438,7 +438,7 @@ public abstract class EntityRollingStockDefinition {
         if (data.has("animations")) {
             JsonArray aobj = data.getAsJsonArray("animations");
             for (JsonElement entry : aobj) {
-                animations.add(new AnimationDefinition(entry.getAsJsonObject()));
+                animations.add(new AnimationDefinition(entry.getAsJsonObject(), internal_model_scale));
             }
         }
     }

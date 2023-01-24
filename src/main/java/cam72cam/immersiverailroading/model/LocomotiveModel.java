@@ -128,7 +128,11 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         cargoFillRear = CargoFill.get(provider, rearLocomotiveRocking, showCurrentLoadOnly, ModelPosition.REAR);
         drivingWheelsRear = DrivingAssembly.get(type, provider, rearLocomotive, ModelPosition.REAR, 45);
 
-        drivingWheels = DrivingAssembly.get(type, provider, base, 0);
+        drivingWheels = DrivingAssembly.get(type, provider, base, 0,
+                frame != null ? frame.wheels : null,
+                bogeyFront != null ? bogeyFront.wheels : null,
+                bogeyRear != null ? bogeyRear.wheels : null
+        );
 
         components = provider.parse(
                 new ModelComponentType[]{ModelComponentType.CAB}

@@ -43,14 +43,14 @@ public class CustomValveGear extends ValveGear {
         ModelComponent frontExhaust = provider.parse(ModelComponentType.CYLINDER_DRAIN_SIDE, pos.and(ModelPosition.A));
         ModelComponent rearExhaust = provider.parse(ModelComponentType.CYLINDER_DRAIN_SIDE, pos.and(ModelPosition.B));
 
-        return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components, frontExhaust, rearExhaust) : null;
+        return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components, frontExhaust, rearExhaust, provider.internal_model_scale) : null;
     }
 
-    public CustomValveGear(ModelState state, Identifier custom, WheelSet wheels, List<ModelComponent> components, ModelComponent frontExhaust, ModelComponent rearExhaust) {
+    public CustomValveGear(ModelState state, Identifier custom, WheelSet wheels, List<ModelComponent> components, ModelComponent frontExhaust, ModelComponent rearExhaust, double internal_model_scale) {
         super(wheels, state, 0);
 
         try {
-            animation = new Animatrix(custom.getResourceStream(), true);
+            animation = new Animatrix(custom.getResourceStream(), true, internal_model_scale);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

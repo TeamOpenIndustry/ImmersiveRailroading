@@ -10,7 +10,7 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 
 public class Frame {
     private final ModelComponent frame;
-    private final WheelSet wheels;
+    public final WheelSet wheels;
     private final ValveGear valveGearRight;
     private final ValveGear valveGearLeft;
 
