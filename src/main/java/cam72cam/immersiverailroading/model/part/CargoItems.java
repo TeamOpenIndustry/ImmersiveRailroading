@@ -19,7 +19,7 @@ import java.util.*;
 
 public class CargoItems {
     private final Map<UUID, StandardModel> cache = new HashMap<>();
-    private long lastUpdate = 0;
+    private Map<UUID, Long> lastUpdate = new HashMap<>();
 
     private final List<ModelComponent> components;
 
@@ -33,9 +33,9 @@ public class CargoItems {
     }
 
     public <T extends Freight> void postRender(T stock, RenderState state) {
-        if (stock.getWorld().getTicks() > lastUpdate + 40) {
+        if (stock.getWorld().getTicks() > lastUpdate.getOrDefault(stock.getUUID(), 0L) + 40) {
             cache.clear();
-            lastUpdate = stock.getWorld().getTicks();
+            lastUpdate.put(stock.getUUID(), stock.getWorld().getTicks());
         }
 
         StandardModel model = cache.get(stock.getUUID());
