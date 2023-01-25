@@ -102,8 +102,12 @@ public abstract class EntityRollingStockDefinition {
     public List<AnimationDefinition> animations;
 
     public static class AnimationDefinition {
+
         public enum AnimationMode {
             VALUE,
+            PLAY_FORWARD,
+            PLAY_REVERSE,
+            PLAY_BOTH,
             LOOP,
             LOOP_SPEED
         }
@@ -115,15 +119,37 @@ public abstract class EntityRollingStockDefinition {
         public final boolean invert;
         public final float frames_per_tick;
 
+        private final Map<UUID, Integer> tickStart;
+        private final Map<UUID, Integer> tickStop;
+        private final boolean looping;
+
         public AnimationDefinition(JsonObject obj, double internal_model_scale) throws IOException {
             control_group = getOrDefault(obj, "control_group", (String)null);
             readout = obj.has("readout") ? Readouts.valueOf(obj.get("readout").getAsString().toUpperCase(Locale.ROOT)) : null;
+            if (control_group == null && readout == null) {
+                throw new IllegalArgumentException("Must specify either a control group or a readout for an animation");
+            }
             Identifier animatrixID = getOrDefault(obj, "animatrix", (Identifier) null);
             animatrix = animatrixID != null ? new Animatrix(animatrixID.getResourceStream(), internal_model_scale) : null;
-            mode = obj.has("mode") ? AnimationMode.valueOf(obj.get("mode").getAsString().toUpperCase(Locale.ROOT)) : null;
+            mode = AnimationMode.valueOf(obj.get("mode").getAsString().toUpperCase(Locale.ROOT));
             offset = getOrDefault(obj, "offset", 0f);
             invert = getOrDefault(obj, "invert", false);
             frames_per_tick = getOrDefault(obj, "frames_per_tick", 1f);
+
+            tickStart = new HashMap<>();
+            tickStop = new HashMap<>();
+            switch (mode) {
+                case VALUE:
+                case PLAY_FORWARD:
+                case PLAY_REVERSE:
+                case PLAY_BOTH:
+                    looping = false;
+                    break;
+                case LOOP:
+                case LOOP_SPEED:
+                default:
+                    looping = true;
+            }
         }
 
         public boolean valid() {
@@ -137,11 +163,46 @@ public abstract class EntityRollingStockDefinition {
                 value = 1-value;
             }
 
+            float total_ticks_per_loop = animatrix.frameCount() / frames_per_tick;
+            if (mode == AnimationMode.LOOP_SPEED) {
+                total_ticks_per_loop /= value;
+            }
+
             switch (mode) {
                 case VALUE:
                     return value;
+                case PLAY_FORWARD:
+                case PLAY_REVERSE:
+                case PLAY_BOTH:
+                    UUID key = stock.getUUID();
+                    float tickDelta;
+                    if (value >= 0.95) {
+                        // FORWARD
+                        if (!tickStart.containsKey(key)) {
+                            tickStart.put(key, stock.getTickCount());
+                            tickStop.remove(key);
+                        }
+                        if (mode == AnimationMode.PLAY_REVERSE) {
+                            return 1;
+                        }
+                        // 0 -> 1+
+                        tickDelta = stock.getTickCount() - tickStart.get(key);
+                    } else {
+                        // REVERSE
+                        if (!tickStop.containsKey(key)) {
+                            tickStop.put(key, stock.getTickCount());
+                            tickStart.remove(key);
+                        }
+                        if (mode == AnimationMode.PLAY_FORWARD) {
+                            return 0;
+                        }
+                        // 1 -> 0-
+                        tickDelta = total_ticks_per_loop - (stock.getTickCount() - tickStop.get(key));
+                    }
+                    // Clipped in getMatrix
+                    return tickDelta / total_ticks_per_loop;
                 case LOOP:
-                    if (value <= 0.95) {
+                    if (value < 0.95) {
                         return 0;
                     }
                     break;
@@ -152,15 +213,11 @@ public abstract class EntityRollingStockDefinition {
                     break;
             }
 
-            float total_ticks_per_loop = animatrix.frameCount() / frames_per_tick;
-            if (mode == AnimationMode.LOOP_SPEED) {
-                total_ticks_per_loop /= value;
-            }
             return (stock.getTickCount() % total_ticks_per_loop) / total_ticks_per_loop;
         }
 
         public Matrix4 getMatrix(EntityRollingStock stock, String group) {
-            return animatrix.getMatrix(group, getPercent(stock), mode != AnimationMode.VALUE);
+            return animatrix.getMatrix(group, getPercent(stock), looping);
         }
     }
 
