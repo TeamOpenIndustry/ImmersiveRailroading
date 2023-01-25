@@ -50,13 +50,13 @@ public class CustomValveGear extends ValveGear {
         super(wheels, state, 0);
 
         try {
-            animation = new Animatrix(custom.getResourceStream(), true, internal_model_scale);
+            animation = new Animatrix(custom.getResourceStream(), internal_model_scale);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         state.push(settings -> settings.add((ModelState.GroupAnimator) (stock, group) ->
-                animation.groups().contains(group) ? animation.getMatrix(group, angle(stock.distanceTraveled) / 360) : null)
+                animation.groups().contains(group) ? animation.getMatrix(group, angle(stock.distanceTraveled) / 360, true) : null)
         ).include(components);
 
         ModelComponent pistonRod = components.stream().filter(x -> x.type == ModelComponentType.PISTON_ROD_SIDE).findFirst().orElse(null);
@@ -66,11 +66,11 @@ public class CustomValveGear extends ValveGear {
 
             // Detect piston extents
             float pistonStart = 0f;
-            Vec3d initial = animation.getMatrix(pistonGroup, 0).apply(pistonRod.center);
+            Vec3d initial = animation.getMatrix(pistonGroup, 0, true).apply(pistonRod.center);
             Vec3d pistonStartPos = initial;
 
             for (float i = 0; i < 1; i+= 0.05) {
-                Vec3d pos = animation.getMatrix(pistonGroup, i).apply(pistonRod.center);
+                Vec3d pos = animation.getMatrix(pistonGroup, i, true).apply(pistonRod.center);
                 if (pos.distanceToSquared(initial) > pistonStartPos.distanceToSquared(initial)) {
                     pistonStartPos = pos;
                     pistonStart = i;
@@ -80,7 +80,7 @@ public class CustomValveGear extends ValveGear {
             float pistonEnd = 0f;
             Vec3d pistonEndPos = pistonStartPos;
             for (float i = 0; i < 1; i+= 0.05) {
-                Vec3d pos = animation.getMatrix(pistonGroup, i).apply(pistonRod.center);
+                Vec3d pos = animation.getMatrix(pistonGroup, i, true).apply(pistonRod.center);
                 if (pos.distanceToSquared(pistonStartPos) > pistonEndPos.distanceToSquared(pistonStartPos)) {
                     pistonEndPos = pos;
                     pistonEnd = i;

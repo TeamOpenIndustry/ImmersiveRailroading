@@ -82,7 +82,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             Matrix4 m = null;
             for (EntityRollingStockDefinition.AnimationDefinition animation : stock.getDefinition().animations) {
                 if (animation.valid() && animation.animatrix.groups().contains(group)) {
-                    Matrix4 found = animation.animatrix.getMatrix(group, animation.getPercent(stock));
+                    Matrix4 found = animation.getMatrix(stock , group);
                     if (m == null) {
                         m = found;
                     } else {

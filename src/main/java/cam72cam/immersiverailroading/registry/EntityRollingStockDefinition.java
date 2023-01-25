@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import util.Matrix4;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -115,13 +116,14 @@ public abstract class EntityRollingStockDefinition {
         public final float frames_per_tick;
 
         public AnimationDefinition(JsonObject obj, double internal_model_scale) throws IOException {
-            control_group = obj.has("control_group") ? obj.get("control_group").getAsString() : null;
-            mode = obj.has("mode") ? AnimationMode.valueOf(obj.get("mode").getAsString().toUpperCase(Locale.ROOT)) : null;
+            control_group = getOrDefault(obj, "control_group", (String)null);
             readout = obj.has("readout") ? Readouts.valueOf(obj.get("readout").getAsString().toUpperCase(Locale.ROOT)) : null;
-            animatrix = obj.has("animatrix") ? new Animatrix(new Identifier(obj.get("animatrix").getAsString()).getResourceStream(), mode != AnimationMode.VALUE, internal_model_scale) : null;
-            offset = obj.has("offset") ? obj.get("offset").getAsFloat() : 0;
-            invert = obj.has("invert") && obj.get("invert").getAsBoolean();
-            frames_per_tick = obj.has("frames_per_tick") ? obj.get("frames_per_tick").getAsFloat() : 1;
+            Identifier animatrixID = getOrDefault(obj, "animatrix", (Identifier) null);
+            animatrix = animatrixID != null ? new Animatrix(animatrixID.getResourceStream(), internal_model_scale) : null;
+            mode = obj.has("mode") ? AnimationMode.valueOf(obj.get("mode").getAsString().toUpperCase(Locale.ROOT)) : null;
+            offset = getOrDefault(obj, "offset", 0f);
+            invert = getOrDefault(obj, "invert", false);
+            frames_per_tick = getOrDefault(obj, "frames_per_tick", 1f);
         }
 
         public boolean valid() {
@@ -155,6 +157,10 @@ public abstract class EntityRollingStockDefinition {
                 total_ticks_per_loop /= value;
             }
             return (stock.getTickCount() % total_ticks_per_loop) / total_ticks_per_loop;
+        }
+
+        public Matrix4 getMatrix(EntityRollingStock stock, String group) {
+            return animatrix.getMatrix(group, getPercent(stock), mode != AnimationMode.VALUE);
         }
     }
 

@@ -10,12 +10,9 @@ import java.util.*;
 
 public class Animatrix {
     private final Map<String, List<Matrix4>> map = new HashMap<>();
-    private final boolean looping;
     private final int frameCount;
 
-    public Animatrix(InputStream in, boolean looping, double internal_model_scale) throws IOException {
-        this.looping = looping;
-
+    public Animatrix(InputStream in, double internal_model_scale) throws IOException {
         Matrix4 scale = new Matrix4();
         scale.m33 = 1/internal_model_scale;
         Matrix4 inv = scale.copy();
@@ -75,9 +72,7 @@ public class Animatrix {
         return map.keySet();
     }
 
-    public Matrix4 getMatrix(String group, float percent) {
-        //inv.invert();
-        //scale.scale(internal_model_scale, internal_model_scale, internal_model_scale);
+    public Matrix4 getMatrix(String group, float percent, boolean looping) {
         for (Map.Entry<String, List<Matrix4>> x : map.entrySet()) {
             if (group.equals(x.getKey())) {
                 List<Matrix4> frames = x.getValue();
