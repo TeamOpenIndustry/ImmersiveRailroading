@@ -121,7 +121,7 @@ public abstract class EntityRollingStockDefinition {
             animatrix = obj.has("animatrix") ? new Animatrix(new Identifier(obj.get("animatrix").getAsString()).getResourceStream(), mode != AnimationMode.VALUE, internal_model_scale) : null;
             offset = obj.has("offset") ? obj.get("offset").getAsFloat() : 0;
             invert = obj.has("invert") && obj.get("invert").getAsBoolean();
-            frames_per_tick = obj.has("frames_per_tick") ? obj.get("frames_per_tick").getAsFloat() : 0;
+            frames_per_tick = obj.has("frames_per_tick") ? obj.get("frames_per_tick").getAsFloat() : 1;
         }
 
         public boolean valid() {
