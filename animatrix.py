@@ -10,7 +10,7 @@ bl_info = {
 
 import bpy
 from bpy_extras.io_utils import ExportHelper
-from bpy.props import StringProperty, EnumProperty
+from bpy.props import StringProperty, BoolProperty, EnumProperty
 from bpy.types import Operator
 import math
 import mathutils
@@ -32,12 +32,18 @@ class ExportAnimatrixData(Operator, ExportHelper):
         maxlen=255,  # Max internal buffer length, longer would be clamped.
     )
 
+    skip_setting: BoolProperty(
+            name="Skip First Frame",
+            description="Skip the first animation frame which is typically used as a reference to the exported positions",
+            default=False,
+    )
+
     use_setting: EnumProperty(
         name="Export:",
         description="Choose between Scene/Selected",
         items=(
             ('SELECTED', "Selected Objects", "Only export selected objects"),
-            ('SCENE', "Scene Objects", "Export all objects in the scene"),
+            ('SCENE', "Entire Scene", "Export all objects in the scene"),
         ),
         default='SELECTED',
     )
@@ -56,14 +62,14 @@ class ExportAnimatrixData(Operator, ExportHelper):
                 def obj_matrix():
                     res = obj.matrix_world
 
-                    for arm in [m.object for m in obj.modifiers if m.object.type == "ARMATURE"]:
+                    for arm in [m.object for m in obj.modifiers if m.type == "ARMATURE"]:
                         return arm.matrix_world @ arm.pose.bones[obj.vertex_groups[0].name].matrix
 
                     return res
 
 
                 orig = obj_matrix().inverted()
-                for frame in range(bpy.context.scene.frame_start,bpy.context.scene.frame_end + 1):
+                for frame in range(bpy.context.scene.frame_start+(1 if self.skip_setting else 0),bpy.context.scene.frame_end + 1):
                     bpy.context.scene.frame_set(frame)
 
                     offset = obj_matrix() @ orig

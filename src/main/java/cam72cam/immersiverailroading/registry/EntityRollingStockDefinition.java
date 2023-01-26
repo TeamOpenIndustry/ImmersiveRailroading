@@ -437,7 +437,7 @@ public abstract class EntityRollingStockDefinition {
 
         JsonObject properties = data.get("properties").getAsJsonObject();
         weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
-        valveGear = properties.has("valve_gear") ? new ValveGearConfig(properties.get("valve_gear").getAsString()) : null;
+        valveGear = properties.has("valve_gear") ? new ValveGearConfig(properties.get("valve_gear")) : null;
         hasIndependentBrake = getOrDefault(properties, "independent_brake", independentBrakeDefault());
         // Locomotives default to linear brake control
         isLinearBrakeControl = getOrDefault(properties, "linear_brake_control", !(this instanceof LocomotiveDefinition));

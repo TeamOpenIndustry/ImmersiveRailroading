@@ -1,13 +1,14 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
+import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.ModelState;
-import cam72cam.immersiverailroading.model.animation.Animatrix;
+import cam72cam.immersiverailroading.model.animation.AnimatrixSet;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.resource.Identifier;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,9 +18,9 @@ import java.util.stream.Collectors;
 
 public class CustomValveGear extends ValveGear {
 
-    private final Animatrix animation;
+    private final AnimatrixSet animation;
 
-    public static CustomValveGear get(Identifier custom, WheelSet wheels, ComponentProvider provider, ModelState state, ModelPosition pos) {
+    public static CustomValveGear get(ValveGearConfig custom, WheelSet wheels, ComponentProvider provider, ModelState state, ModelPosition pos) {
         List<ModelComponent> components = new ArrayList<>();
 
         components.add(provider.parse(ModelComponentType.MAIN_ROD_SIDE, pos));
@@ -46,31 +47,36 @@ public class CustomValveGear extends ValveGear {
         return !components.isEmpty() ? new CustomValveGear(state, custom, wheels, components, frontExhaust, rearExhaust, provider.internal_model_scale) : null;
     }
 
-    public CustomValveGear(ModelState state, Identifier custom, WheelSet wheels, List<ModelComponent> components, ModelComponent frontExhaust, ModelComponent rearExhaust, double internal_model_scale) {
+    public CustomValveGear(ModelState state, ValveGearConfig custom, WheelSet wheels, List<ModelComponent> components, ModelComponent frontExhaust, ModelComponent rearExhaust, double internal_model_scale) {
         super(wheels, state, 0);
 
         try {
-            animation = new Animatrix(custom.getResourceStream(), internal_model_scale);
+            animation = new AnimatrixSet(custom.custom, internal_model_scale);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        state.push(settings -> settings.add((ModelState.GroupAnimator) (stock, group) ->
-                animation.groups().contains(group) ? animation.getMatrix(group, angle(stock.distanceTraveled) / 360, true) : null)
-        ).include(components);
+        state.push(settings -> settings.add((ModelState.GroupAnimator) (stock, group) -> animation.getMatrix(
+                group,
+                stock instanceof Locomotive ? ((Locomotive) stock).getReverser() : 0.0f,
+                angle(stock.distanceTraveled) / 360,
+                true
+        ))).include(components);
 
         ModelComponent pistonRod = components.stream().filter(x -> x.type == ModelComponentType.PISTON_ROD_SIDE).findFirst().orElse(null);
         if (pistonRod != null) {
+            float reverser = 1.0f;
+
             //noinspection OptionalGetWithoutIsPresent
             String pistonGroup = pistonRod.modelIDs.stream().findFirst().get();
 
             // Detect piston extents
             float pistonStart = 0f;
-            Vec3d initial = animation.getMatrix(pistonGroup, 0, true).apply(pistonRod.center);
+            Vec3d initial = animation.getMatrix(pistonGroup, reverser, 0,  true).apply(pistonRod.center);
             Vec3d pistonStartPos = initial;
 
             for (float i = 0; i < 1; i+= 0.05) {
-                Vec3d pos = animation.getMatrix(pistonGroup, i, true).apply(pistonRod.center);
+                Vec3d pos = animation.getMatrix(pistonGroup, reverser, i, true).apply(pistonRod.center);
                 if (pos.distanceToSquared(initial) > pistonStartPos.distanceToSquared(initial)) {
                     pistonStartPos = pos;
                     pistonStart = i;
@@ -80,7 +86,7 @@ public class CustomValveGear extends ValveGear {
             float pistonEnd = 0f;
             Vec3d pistonEndPos = pistonStartPos;
             for (float i = 0; i < 1; i+= 0.05) {
-                Vec3d pos = animation.getMatrix(pistonGroup, i, true).apply(pistonRod.center);
+                Vec3d pos = animation.getMatrix(pistonGroup, reverser, i, true).apply(pistonRod.center);
                 if (pos.distanceToSquared(pistonStartPos) > pistonEndPos.distanceToSquared(pistonStartPos)) {
                     pistonEndPos = pos;
                     pistonEnd = i;

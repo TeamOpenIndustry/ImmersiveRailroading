@@ -37,11 +37,11 @@ public abstract class ValveGear {
         this.rearExhaust = null;
     }
 
-    static ValveGear get(WheelSet wheels, ValveGearConfig type, ComponentProvider provider, ModelState state, ModelPosition pos, float angleOffset) {
-        if (type == null) {
+    static ValveGear get(WheelSet wheels, ValveGearConfig config, ComponentProvider provider, ModelState state, ModelPosition pos, float angleOffset) {
+        if (config == null) {
             return null;
         }
-        switch (type.type) {
+        switch (config.type) {
             case WALSCHAERTS:
                 return WalschaertsValveGear.get(wheels, provider, state, pos, angleOffset);
             case STEPHENSON:
@@ -49,7 +49,7 @@ public abstract class ValveGear {
             case CONNECTING:
                 return ConnectingRodValveGear.get(wheels, provider, state, pos, angleOffset);
             case CUSTOM:
-                return CustomValveGear.get(type.custom, wheels, provider, state, pos);
+                return CustomValveGear.get(config, wheels, provider, state, pos);
             case SHAY:
             case CLIMAX:
             case HIDDEN:

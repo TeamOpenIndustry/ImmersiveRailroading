@@ -119,7 +119,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
 
     public ValveGearConfig getValveGear() {
-        return super.getValveGear() == null ? new ValveGearConfig(ValveGearConfig.ValveGearType.CONNECTING.name()) : super.getValveGear();
+        return super.getValveGear() == null ? new ValveGearConfig(ValveGearConfig.ValveGearType.CONNECTING) : super.getValveGear();
     }
 
     public int getThrottleNotches() {

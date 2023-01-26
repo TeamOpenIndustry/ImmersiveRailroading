@@ -1,13 +1,17 @@
 package cam72cam.immersiverailroading.library;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.resource.Identifier;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class ValveGearConfig {
 	public final ValveGearType type;
-	public final Identifier custom;
+	public final Map<Float, Identifier> custom;
 
 	public enum ValveGearType {
 		CONNECTING,
@@ -37,17 +41,22 @@ public class ValveGearConfig {
 		}
 	}
 
-	public ValveGearConfig(String def) {
-		ValveGearType type;
-		Identifier custom = null;
-		try {
-			type = ValveGearType.from(def.toUpperCase(Locale.ROOT));
-		} catch (IllegalArgumentException ex) {
-			type = ValveGearType.CUSTOM;
-			custom = new Identifier(def);
-			custom = new Identifier(ImmersiveRailroading.MODID, custom.getPath());
-		}
+	public ValveGearConfig(ValveGearType type) {
 		this.type = type;
-		this.custom = custom;
+		this.custom = null;
+	}
+
+	public ValveGearConfig(JsonElement def) {
+		if (def.isJsonObject()) {
+			JsonObject anim = def.getAsJsonObject().get("animatrix").getAsJsonObject();
+			type = ValveGearType.CUSTOM;
+			custom = new HashMap<>();
+			for (Map.Entry<String, JsonElement> elem : anim.entrySet()) {
+				custom.put(Float.parseFloat(elem.getKey()), new Identifier(elem.getValue().getAsString()));
+			}
+		} else {
+			type = ValveGearType.from(def.getAsString().toUpperCase(Locale.ROOT));
+			custom = null;
+		}
 	}
 }
