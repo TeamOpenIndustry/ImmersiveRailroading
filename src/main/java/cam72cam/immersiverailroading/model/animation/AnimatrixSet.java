@@ -45,6 +45,12 @@ public class AnimatrixSet {
 
         Matrix4 ms = steps.get(min).getMatrix(group, percent, looping);
         Matrix4 me = steps.get(max).getMatrix(group, percent, looping);
+        if (ms == null) {
+            return me;
+        }
+        if (me == null) {
+            return ms;
+        }
         float lerp = (index - min) / (max - min);
         return ms.slerp(me, lerp);
     }
