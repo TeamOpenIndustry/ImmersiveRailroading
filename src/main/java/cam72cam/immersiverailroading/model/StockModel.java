@@ -226,7 +226,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         state.lighting(true)
                 .cull_face(false)
                 .rescale_normal(true)
-                .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())
+                .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
 
         if ((ConfigGraphics.OptifineEntityShaderOverrideAll || !normals.isEmpty() || !speculars.isEmpty()) &&
                 ConfigGraphics.OptiFineEntityShader != OptiFine.Shaders.Entities) {
