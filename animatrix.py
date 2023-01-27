@@ -2,7 +2,7 @@ bl_info = {
     "name":         "Animatrix Export",
     "author":       "cam72cam",
     "blender":      (3,4,0),
-    "version":      (1,0,3),
+    "version":      (1,0,4),
     "location":     "File > Import-Export",
     "description":  "Export Animatrix data",
     "category":     "Import-Export",
@@ -69,7 +69,7 @@ class ExportAnimatrixData(Operator, ExportHelper):
 
 
                 orig = obj_matrix().inverted()
-                for frame in range(bpy.context.scene.frame_start+(1 if self.skip_setting else 0),bpy.context.scene.frame_end + 1):
+                for frame in range(bpy.context.scene.frame_start,bpy.context.scene.frame_end + 1):
                     bpy.context.scene.frame_set(frame)
 
                     offset = obj_matrix() @ orig
@@ -79,6 +79,8 @@ class ExportAnimatrixData(Operator, ExportHelper):
                 if len([line for line in data if line != data[0]]) != 0:
                     f.write("O " + obj.name + '\n')
                     f.write("A " + obj.name + "_" + obj.data.name + '\n')
+                    if self.skip_setting:
+                        del data[0]
                     for line in data:
                         f.write(line)
 
