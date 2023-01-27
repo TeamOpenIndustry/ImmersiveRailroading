@@ -196,8 +196,12 @@ public abstract class EntityRollingStockDefinition {
                         if (mode == AnimationMode.PLAY_FORWARD) {
                             return 0;
                         }
-                        // 1 -> 0-
-                        tickDelta = total_ticks_per_loop - (stock.getTickCount() - tickStop.get(key));
+                        // 0 -> 1+
+                        tickDelta = stock.getTickCount() - tickStop.get(key);
+                        if (mode == AnimationMode.PLAY_BOTH) {
+                            // 1 -> 0-
+                            tickDelta = total_ticks_per_loop - tickDelta;
+                        }
                     }
                     // Clipped in getMatrix
                     return tickDelta / total_ticks_per_loop;

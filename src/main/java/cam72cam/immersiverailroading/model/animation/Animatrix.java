@@ -73,28 +73,26 @@ public class Animatrix {
     }
 
     public Matrix4 getMatrix(String group, float percent, boolean looping) {
-        for (Map.Entry<String, List<Matrix4>> x : map.entrySet()) {
-            if (group.equals(x.getKey())) {
-                List<Matrix4> frames = x.getValue();
-                if (!looping) {
-                    if (percent >= 1) {
-                        return frames.get(frames.size()-1);
-                    }
-                    if (percent <= 0){
-                        return frames.get(0);
-                    }
-                }
-
-                percent = (percent % 1 + 1) % 1;
-                double frame = (frames.size()) * percent;
-                Matrix4 ms = frames.get((int) Math.floor(frame) % (frames.size()));
-                Matrix4 me = frames.get((int) Math.ceil(frame) % (frames.size()));
-                float lerp = (float) (frame - Math.floor(frame));
-
-                return ms.slerp(me, lerp);
+        List<Matrix4> frames = map.get(group);
+        if (frames == null) {
+            return null;
+        }
+        if (!looping) {
+            if (percent >= (frames.size()-1f)/frames.size()) {
+                return frames.get(frames.size()-1).copy();
+            }
+            if (percent <= 0){
+                return frames.get(0).copy();
             }
         }
-        return null;
+
+        percent = (percent % 1 + 1) % 1;
+        double frame = (frames.size()) * percent;
+        Matrix4 ms = frames.get((int) Math.floor(frame) % (frames.size()));
+        Matrix4 me = frames.get((int) Math.ceil(frame) % (frames.size()));
+        float lerp = (float) (frame - Math.floor(frame));
+
+        return ms.slerp(me, lerp);
     }
 
     public int frameCount() {
