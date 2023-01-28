@@ -50,6 +50,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     public static final int LOD_LARGE = 1024;
     public static final int LOD_SMALL = 512;
 
+    private final List<StockAnimation> animations;
+
     public StockModel(DEFINITION def) throws Exception {
         super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds, i -> {
             List<Integer> lodSizes = new ArrayList<>();
@@ -79,7 +81,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             return blockLight < interiorLight ? base.merge(new ModelState.LightState(interiorLight, skyLight, true, null)) : base;
         };
 
-        List<StockAnimation> animations = new ArrayList<>();
+        animations = new ArrayList<>();
         for (EntityRollingStockDefinition.AnimationDefinition animDef : def.animations) {
             if (animDef.valid()) {
                 animations.add(new StockAnimation(animDef, def.internal_model_scale));
@@ -215,6 +217,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         controls.forEach(c -> c.effects(stock));
         doors.forEach(c -> c.effects(stock));
         gauges.forEach(c -> c.effects(stock));
+        animations.forEach(c -> c.effects(stock));
     }
 
     public final void onClientRemoved(EntityMoveableRollingStock stock) {

@@ -129,7 +129,7 @@ public abstract class EntityRollingStockDefinition {
             } else {
                 // Simple
                 start = null;
-                main = new Identifier(elem.getAsString());
+                main = new Identifier(ImmersiveRailroading.MODID, new Identifier(elem.getAsString()).getPath());
                 looping = true;
                 stop = null;
                 distance = null;
@@ -154,6 +154,7 @@ public abstract class EntityRollingStockDefinition {
         public final float offset;
         public final boolean invert;
         public final float frames_per_tick;
+        public final SoundDefinition sound;
 
         public AnimationDefinition(JsonObject obj) {
             control_group = getOrDefault(obj, "control_group", (String)null);
@@ -166,7 +167,7 @@ public abstract class EntityRollingStockDefinition {
             offset = getOrDefault(obj, "offset", 0f);
             invert = getOrDefault(obj, "invert", false);
             frames_per_tick = getOrDefault(obj, "frames_per_tick", 1f);
-
+            sound = getOrDefault(obj, "sound", (SoundDefinition) null);
         }
 
         public boolean valid() {
