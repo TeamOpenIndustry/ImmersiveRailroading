@@ -2,32 +2,25 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.sound.ISound;
 
 import java.util.UUID;
-import java.util.function.Function;
 
 public class PartSound {
-    private final Function<EntityMoveableRollingStock, ISound> startCreate;
-    private final Function<EntityMoveableRollingStock, ISound> loopCreate;
-    private final Function<EntityMoveableRollingStock, ISound> endCreate;
+    private final SoundDefinition def;
+    private final boolean canLoop;
+    private final float attenuationDistance;
 
-    public PartSound(Function<EntityMoveableRollingStock, ISound> loopCreate) {
-        this(null, loopCreate, null);
+
+    public PartSound(SoundDefinition def, boolean canLoop, float attenuationDistance) {
+        this.def = def;
+        this.canLoop = canLoop;
+        this.attenuationDistance = attenuationDistance;
     }
 
-    public PartSound(Function<EntityMoveableRollingStock, ISound> startCreate, Function<EntityMoveableRollingStock, ISound> loopCreate) {
-        this(startCreate, loopCreate, null);
-    }
-
-    public PartSound(Function<EntityMoveableRollingStock, ISound> startCreate, Function<EntityMoveableRollingStock, ISound> loopCreate, Function<EntityMoveableRollingStock, ISound> endCreate) {
-        this.startCreate = startCreate;
-        this.loopCreate = loopCreate;
-        this.endCreate = endCreate;
-    }
-
-    enum SoundState {
+    private enum SoundState {
         STARTING,
         PLAYING,
         STOPPING,
@@ -37,25 +30,26 @@ public class PartSound {
     private class Sounds {
         SoundState state;
         final ISound start;
-        final ISound loop;
-        final ISound end;
+        final ISound main;
+        final ISound stop;
 
         public Sounds(EntityMoveableRollingStock stock) {
             state = SoundState.STOPPED;
-            start = startCreate != null ? startCreate.apply(stock) : null;
-            loop = loopCreate != null ? loopCreate.apply(stock) : null;
-            end = endCreate != null ? endCreate.apply(stock) : null;
+            float distance = def.distance != null ? def.distance : attenuationDistance;
+            start = def.start != null ? stock.createSound(def.start, false, distance) : null;
+            main = def.main != null ? stock.createSound(def.main, canLoop && def.looping, distance) : null;
+            stop = def.stop != null ? stock.createSound(def.stop, false, distance) : null;
         }
 
         public void terminate() {
             if (start != null) {
                 start.terminate();
             }
-            if (loop != null) {
-                loop.terminate();
+            if (main != null) {
+                main.terminate();
             }
-            if (end != null) {
-                end.terminate();
+            if (stop != null) {
+                stop.terminate();
             }
         }
     }
@@ -76,10 +70,9 @@ public class PartSound {
     }
 
     public void effects(EntityMoveableRollingStock stock, float volume, float pitch) {
-        if (!ConfigSound.soundEnabled) {
+        if (!ConfigSound.soundEnabled || def == null) {
             return;
         }
-
 
         Sounds sounds = entitySounds.get(stock.getUUID());
         if(sounds == null) {
@@ -92,8 +85,8 @@ public class PartSound {
             // Playing
             switch (sounds.state) {
                 case STOPPING:
-                    if (sounds.end != null) {
-                        sounds.end.stop();
+                    if (sounds.stop != null) {
+                        sounds.stop.stop();
                     }
                 case STOPPED:
                     // Start from the beginning
@@ -111,15 +104,15 @@ public class PartSound {
                     }
                     // Start has finished
                     sounds.state = SoundState.PLAYING;
-                    if (sounds.loop != null) {
-                        toUpdate = sounds.loop;
+                    if (sounds.main != null) {
+                        toUpdate = sounds.main;
                         toUpdate.play(stock.getPosition());
                         break;
                     }
                 case PLAYING:
                     // Keep looping until loop is stopped
-                    if (sounds.loop != null && sounds.loop.isPlaying()) {
-                        toUpdate = sounds.loop;
+                    if (sounds.main != null && sounds.main.isPlaying()) {
+                        toUpdate = sounds.main;
                         break;
                     }
                     // Loop Finished, wait for shutoff to play outro
@@ -127,21 +120,18 @@ public class PartSound {
 
             // Update all sounds to current volume
             // Does not actually change until update is called below on the sound that is playing
+            float currentVolume = volume * def.volume;
             if (sounds.start != null) {
-                sounds.start.setVolume(volume);
+                sounds.start.setVolume(currentVolume);
                 sounds.start.setPitch(pitch);
             }
-            if (sounds.start != null) {
-                sounds.start.setVolume(volume);
-                sounds.start.setPitch(pitch);
+            if (sounds.main != null) {
+                sounds.main.setVolume(currentVolume);
+                sounds.main.setPitch(pitch);
             }
-            if (sounds.loop != null) {
-                sounds.loop.setVolume(volume);
-                sounds.loop.setPitch(pitch);
-            }
-            if (sounds.end != null) {
-                sounds.end.setVolume(volume);
-                sounds.end.setPitch(pitch);
+            if (sounds.stop != null) {
+                sounds.stop.setVolume(currentVolume);
+                sounds.stop.setPitch(pitch);
             }
         } else {
             // Stopping
@@ -151,19 +141,19 @@ public class PartSound {
                     if (sounds.start != null) {
                         sounds.start.stop();
                     }
-                    if (sounds.loop != null) {
-                        sounds.loop.stop();
+                    if (sounds.main != null) {
+                        sounds.main.stop();
                     }
                     // Play the outro
                     sounds.state = SoundState.STOPPING;
-                    if (sounds.end != null) {
-                        toUpdate = sounds.end;
+                    if (sounds.stop != null) {
+                        toUpdate = sounds.stop;
                         toUpdate.play(stock.getPosition());
                         break;
                     }
                 case STOPPING:
-                    if (sounds.end != null && sounds.end.isPlaying()) {
-                        toUpdate = sounds.end;
+                    if (sounds.stop != null && sounds.stop.isPlaying()) {
+                        toUpdate = sounds.stop;
                         break;
                     }
                     sounds.state = SoundState.STOPPED;

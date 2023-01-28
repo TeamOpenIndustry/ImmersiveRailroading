@@ -14,10 +14,8 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
-    public Identifier idle;
-    public Identifier start;
-    public Identifier stop;
-    public Identifier horn;
+    public SoundDefinition idle;
+    public SoundDefinition horn;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
     private boolean hornSus;
@@ -43,16 +41,12 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         hornSus = getOrDefault(properties, "horn_sustained", false);
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
 
-        idle = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg");
-        start = null;
-        stop = null;
-        horn = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg");
-        bell = new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg");
+        idle = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg"));
+        horn = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg"));
+        bell = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg"));
 
-        if(sounds != null){
+        if(sounds != null) {
             idle = getOrDefault(sounds, "idle", idle);
-            start = getOrDefault(sounds, "start", start);
-            stop = getOrDefault(sounds, "stop", stop);
             horn = getOrDefault(sounds, "horn", horn);
             bell = getOrDefault(sounds, "bell", bell);
         }

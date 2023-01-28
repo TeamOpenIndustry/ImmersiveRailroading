@@ -99,6 +99,45 @@ public abstract class EntityRollingStockDefinition {
 
     public List<AnimationDefinition> animations;
 
+    public static class SoundDefinition {
+        public final Identifier start;
+        public final Identifier main;
+        public final boolean looping;
+        public final Identifier stop;
+        public final Float distance;
+        public final float volume;
+
+        public SoundDefinition(Identifier fallback) {
+            // Simple
+            start = null;
+            main = fallback;
+            looping = true;
+            stop = null;
+            distance = null;
+            volume = 1;
+        }
+
+        public SoundDefinition(JsonElement elem) {
+            if (elem.isJsonObject()) {
+                JsonObject obj = elem.getAsJsonObject();
+                start = getOrDefault(obj, "start", (Identifier) null);
+                main = getOrDefault(obj, "main", (Identifier) null);
+                looping = getOrDefault(obj, "looping", true);
+                stop = getOrDefault(obj, "stop", (Identifier) null);
+                distance = getOrDefault(obj, "distance", (Float) null);
+                volume = getOrDefault(obj, "volume", 1.0f);
+            } else {
+                // Simple
+                start = null;
+                main = new Identifier(elem.getAsString());
+                looping = true;
+                stop = null;
+                distance = null;
+                volume = 1;
+            }
+        }
+    }
+
     public static class AnimationDefinition {
         public enum AnimationMode {
             VALUE,
@@ -275,6 +314,9 @@ public abstract class EntityRollingStockDefinition {
             return new Identifier(ImmersiveRailroading.MODID, found.getPath());
         }
         return fallback;
+    }
+    protected static SoundDefinition getOrDefault(JsonObject data, String field, SoundDefinition fallback) {
+        return data.has(field) ? new SoundDefinition(data.get(field)) : fallback;
     }
 
 

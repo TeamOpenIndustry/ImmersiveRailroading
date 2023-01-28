@@ -23,7 +23,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
-        idleSounds = new PartSound(stock -> stock.createSound(def.idle, true, 40));
+        idleSounds = new PartSound(def.idle, true, 40);
     }
 
     @Override

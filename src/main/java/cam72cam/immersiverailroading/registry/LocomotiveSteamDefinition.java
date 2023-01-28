@@ -15,7 +15,7 @@ import java.io.IOException;
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public Quilling quill;
     public Identifier whistle;
-    public Identifier idle;
+    public SoundDefinition idle;
     public Identifier chuff;
     public Identifier pressure;
     public Identifier cylinder_drain;
@@ -53,10 +53,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 
         //sets default sounds
         whistle = null; //new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
-        idle = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg");
+        idle = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg"));
         chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
         pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
-        bell = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg");
+        bell = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg"));
         cylinder_drain = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/cylinder_drain.ogg");
 
         JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
