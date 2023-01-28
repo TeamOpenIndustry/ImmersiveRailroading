@@ -22,7 +22,7 @@ public class ClientChronoState implements ChronoState {
     }
 
     private void tick() {
-        tickID += tickSkew / 2; // PRE/POST tick
+        tickID += tickSkew;
     }
 
     @Override
@@ -67,12 +67,17 @@ public class ClientChronoState implements ChronoState {
         }
     }
 
+    private static long lastWorldTickId = -1;
     static {
         ClientEvents.TICK.subscribe(() -> {
             if (MinecraftClient.isReady()) {
-                ClientChronoState state = getState(MinecraftClient.getPlayer().getWorld());
-                if (state != null) {
-                    state.tick();
+                long currWorldTickId = MinecraftClient.getPlayer().getWorld().getTicks();
+                if (currWorldTickId != lastWorldTickId) { // Handles paused singleplayer vs multiplayer
+                    lastWorldTickId = currWorldTickId;
+                    ClientChronoState state = getState(MinecraftClient.getPlayer().getWorld());
+                    if (state != null) {
+                        state.tick();
+                    }
                 }
             }
         });
