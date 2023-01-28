@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
-import cam72cam.immersiverailroading.model.animation.Animatrix;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
@@ -28,7 +27,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import util.Matrix4;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -102,7 +100,6 @@ public abstract class EntityRollingStockDefinition {
     public List<AnimationDefinition> animations;
 
     public static class AnimationDefinition {
-
         public enum AnimationMode {
             VALUE,
             PLAY_FORWARD,
@@ -114,114 +111,27 @@ public abstract class EntityRollingStockDefinition {
         public final String control_group;
         public final AnimationMode mode;
         public final Readouts readout;
-        public final Animatrix animatrix;
+        public final Identifier animatrix;
         public final float offset;
         public final boolean invert;
         public final float frames_per_tick;
 
-        private final Map<UUID, Integer> tickStart;
-        private final Map<UUID, Integer> tickStop;
-        private final boolean looping;
-
-        public AnimationDefinition(JsonObject obj, double internal_model_scale) throws IOException {
+        public AnimationDefinition(JsonObject obj) {
             control_group = getOrDefault(obj, "control_group", (String)null);
             readout = obj.has("readout") ? Readouts.valueOf(obj.get("readout").getAsString().toUpperCase(Locale.ROOT)) : null;
             if (control_group == null && readout == null) {
                 throw new IllegalArgumentException("Must specify either a control group or a readout for an animation");
             }
-            Identifier animatrixID = getOrDefault(obj, "animatrix", (Identifier) null);
-            animatrix = animatrixID != null ? new Animatrix(animatrixID.getResourceStream(), internal_model_scale) : null;
+            animatrix = getOrDefault(obj, "animatrix", (Identifier) null);
             mode = AnimationMode.valueOf(obj.get("mode").getAsString().toUpperCase(Locale.ROOT));
             offset = getOrDefault(obj, "offset", 0f);
             invert = getOrDefault(obj, "invert", false);
             frames_per_tick = getOrDefault(obj, "frames_per_tick", 1f);
 
-            tickStart = new HashMap<>();
-            tickStop = new HashMap<>();
-            switch (mode) {
-                case VALUE:
-                case PLAY_FORWARD:
-                case PLAY_REVERSE:
-                case PLAY_BOTH:
-                    looping = false;
-                    break;
-                case LOOP:
-                case LOOP_SPEED:
-                default:
-                    looping = true;
-            }
         }
 
         public boolean valid() {
             return animatrix != null && (control_group != null || readout != null);
-        }
-
-        public float getPercent(EntityRollingStock stock) {
-            float value = control_group != null ? stock.getControlPosition(control_group) : readout.getValue(stock);
-            value += offset;
-            if (invert) {
-                value = 1-value;
-            }
-
-            float total_ticks_per_loop = animatrix.frameCount() / frames_per_tick;
-            if (mode == AnimationMode.LOOP_SPEED) {
-                total_ticks_per_loop /= value;
-            }
-
-            switch (mode) {
-                case VALUE:
-                    return value;
-                case PLAY_FORWARD:
-                case PLAY_REVERSE:
-                case PLAY_BOTH:
-                    UUID key = stock.getUUID();
-                    float tickDelta;
-                    if (value >= 0.95) {
-                        // FORWARD
-                        if (!tickStart.containsKey(key)) {
-                            tickStart.put(key, stock.getTickCount());
-                            tickStop.remove(key);
-                        }
-                        if (mode == AnimationMode.PLAY_REVERSE) {
-                            return 1;
-                        }
-                        // 0 -> 1+
-                        tickDelta = stock.getTickCount() - tickStart.get(key);
-                    } else {
-                        // REVERSE
-                        if (!tickStop.containsKey(key)) {
-                            tickStop.put(key, stock.getTickCount());
-                            tickStart.remove(key);
-                        }
-                        if (mode == AnimationMode.PLAY_FORWARD) {
-                            return 0;
-                        }
-                        // 0 -> 1+
-                        tickDelta = stock.getTickCount() - tickStop.get(key);
-                        if (mode == AnimationMode.PLAY_BOTH) {
-                            // 1 -> 0-
-                            tickDelta = total_ticks_per_loop - tickDelta;
-                        }
-                    }
-                    // Clipped in getMatrix
-                    return tickDelta / total_ticks_per_loop;
-                case LOOP:
-                    if (value < 0.95) {
-                        return 0;
-                    }
-                    break;
-                case LOOP_SPEED:
-                    if (value == 0) {
-                        return 0;
-                    }
-                    break;
-            }
-
-            return (stock.getTickCount() % total_ticks_per_loop) / total_ticks_per_loop;
-        }
-
-        public Matrix4 getMatrix(EntityRollingStock stock, String group) {
-            return animatrix.getMatrix(group, getPercent(stock), looping);
         }
     }
 
@@ -505,7 +415,7 @@ public abstract class EntityRollingStockDefinition {
         if (data.has("animations")) {
             JsonArray aobj = data.getAsJsonArray("animations");
             for (JsonElement entry : aobj) {
-                animations.add(new AnimationDefinition(entry.getAsJsonObject(), internal_model_scale));
+                animations.add(new AnimationDefinition(entry.getAsJsonObject()));
             }
         }
     }

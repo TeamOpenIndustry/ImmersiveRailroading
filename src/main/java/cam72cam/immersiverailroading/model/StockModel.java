@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
+import cam72cam.immersiverailroading.model.animation.StockAnimation;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
@@ -77,12 +78,18 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
             return blockLight < interiorLight ? base.merge(new ModelState.LightState(interiorLight, skyLight, true, null)) : base;
         };
+
+        List<StockAnimation> animations = new ArrayList<>();
+        for (EntityRollingStockDefinition.AnimationDefinition animDef : def.animations) {
+            if (animDef.valid()) {
+                animations.add(new StockAnimation(animDef, def.internal_model_scale));
+            }
+        }
         ModelState.GroupAnimator animators = (stock, group) -> {
-            // TODO this could be partially pre-baked
             Matrix4 m = null;
-            for (EntityRollingStockDefinition.AnimationDefinition animation : stock.getDefinition().animations) {
-                if (animation.valid() && animation.animatrix.groups().contains(group)) {
-                    Matrix4 found = animation.getMatrix(stock , group);
+            for (StockAnimation animation : animations) {
+                Matrix4 found = animation.getMatrix(stock , group);
+                if (found != null) {
                     if (m == null) {
                         m = found;
                     } else {
