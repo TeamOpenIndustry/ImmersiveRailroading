@@ -326,7 +326,7 @@ public abstract class EntityRollingStockDefinition {
             //ignore
         }
 
-        modelLoc = new Identifier(data.getValue("model").getString());
+        modelLoc = data.getValue("model").getIdentifier();
 
         DataBlock passenger = data.getBlock("passenger");
         passengerCenter = new Vec3d(0, passenger.getValue("center_y").getDouble() - 0.35, passenger.getValue("center_x").getDouble()).scale(internal_model_scale);

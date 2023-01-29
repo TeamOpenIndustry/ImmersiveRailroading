@@ -46,10 +46,10 @@ public class CAML {
     }
 
     private static class Block implements DataBlock {
-        private final Map<String, Value> primitives = new HashMap<>();
-        private final Map<String, List<Value>> primitiveSets = new HashMap<>();
-        private final Map<String, DataBlock> blocks = new HashMap<>();
-        private final Map<String, List<DataBlock>> blockSets = new HashMap<>();
+        private final Map<String, Value> primitives = new LinkedHashMap<>();
+        private final Map<String, List<Value>> primitiveSets = new LinkedHashMap<>();
+        private final Map<String, DataBlock> blocks = new LinkedHashMap<>();
+        private final Map<String, List<DataBlock>> blockSets = new LinkedHashMap<>();
 
         private Block(List<String> lines) throws IOException {
             String spaces = null;

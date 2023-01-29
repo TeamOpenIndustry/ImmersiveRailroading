@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
@@ -158,10 +159,10 @@ public interface DataBlock {
     static DataBlock wrapJSON(JsonObject obj) {
         Map<String, Value> primitives = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonPrimitive())
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonPrimitive())));
+                .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonPrimitive()), (u, v) -> u, LinkedHashMap::new));
         Map<String, DataBlock> blocks = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonObject())
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonObject())));
+                .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonObject()), (u, v) -> u, LinkedHashMap::new));
         Map<String, List<Value>> primitiveSets = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonArray() && (e.getValue().getAsJsonArray().size() == 0 || e.getValue().getAsJsonArray().get(0).isJsonPrimitive()))
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> {
@@ -170,7 +171,7 @@ public interface DataBlock {
                         result.add(wrapJSON(elem.getAsJsonPrimitive()));
                     }
                     return result;
-                }));
+                }, (u, v) -> u, LinkedHashMap::new));
         Map<String, List<DataBlock>> blockSets = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonArray() && (e.getValue().getAsJsonArray().size() == 0 || e.getValue().getAsJsonArray().get(0).isJsonObject()))
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> {
@@ -179,7 +180,7 @@ public interface DataBlock {
                         result.add(wrapJSON(elem.getAsJsonObject()));
                     }
                     return result;
-                }));
+                }, (u, v) -> u, LinkedHashMap::new));
 
         return new DataBlock() {
             @Override
