@@ -1,12 +1,11 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.gui.overlay.DataBlock;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,28 +23,30 @@ public class TrackDefinition {
     public final float bumpiness;
     public final boolean cog;
 
-    TrackDefinition(String trackID, JsonObject object) throws Exception {
+    TrackDefinition(String trackID, DataBlock object) throws Exception {
         this.trackID = trackID;
-        this.name = object.get("name").getAsString();
-        this.modelerName = object.has("modeler") ? object.get("modeler").getAsString() : null;
-        this.packName = object.has("pack") ? object.get("pack").getAsString() : null;
+        this.name = object.getString("name");
+        this.modelerName = object.getString("modeler");
+        this.packName = object.getString("pack");
 
-        this.clack = !object.has("clack") || object.get("clack").getAsBoolean();
-        this.bumpiness = object.has("bumpiness") ? object.get("bumpiness").getAsFloat() : clack ? 1f : 0f;
-        this.cog = object.has("cog") && object.get("cog").getAsBoolean();
+        this.clack = object.getBoolean("clack", true);
+        this.bumpiness = object.getFloat("bumpiness", clack ? 1f : 0f);
+        this.cog = object.getBoolean("cog", false);
         this.models = new ArrayList<>();
-        for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("models").entrySet()) {
-            models.add(new TrackModel(entry.getKey(), entry.getValue().getAsString()));
+        DataBlock models = object.getBlock("models");
+        for (String key : models.getPrimitiveKeys()) {
+            this.models.add(new TrackModel(key, models.getString(key)));
         }
 
-        JsonObject mats = object.getAsJsonObject("materials");
+        DataBlock mats = object.getBlock("materials");
         for (TrackComponent comp : TrackComponent.values()) {
-            if (mats.has(comp.name())) {
+            List<DataBlock> blocks = mats.getBlocks(comp.name());
+            if (blocks != null) {
                 List<TrackMaterial> parts = new ArrayList<>();
-                for (JsonElement part : mats.get(comp.name()).getAsJsonArray()) {
+                for (DataBlock part : blocks) {
                     parts.add(new TrackMaterial(
-                            part.getAsJsonObject().get("item").getAsString(),
-                            part.getAsJsonObject().get("cost").getAsFloat()
+                            part.getString("item"),
+                            part.getFloat("cost")
                     ));
                 }
                 if (parts.size() > 0) {

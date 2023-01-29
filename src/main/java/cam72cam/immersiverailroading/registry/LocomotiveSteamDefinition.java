@@ -2,15 +2,16 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
+import cam72cam.immersiverailroading.gui.overlay.DataBlock;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.SteamLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
-import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.util.List;
 
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public Quilling quill;
@@ -26,14 +27,14 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public boolean tender_auto_feed;
     public boolean cab_forward;
 
-    public LocomotiveSteamDefinition(String defID, JsonObject data) throws Exception {
+    public LocomotiveSteamDefinition(String defID, DataBlock data) throws Exception {
         super(LocomotiveSteam.class, defID, data);
     }
 
     @Override
-    public void parseJson(JsonObject data) throws Exception {
+    public void parseJson(DataBlock data) throws Exception {
         super.parseJson(data);
-        JsonObject properties = data.get("properties").getAsJsonObject();
+        DataBlock properties = data.getBlock("properties");
         if (isCabCar()) {
             tankCapacity = FluidQuantity.ZERO;
             maxPSI = 0;
@@ -41,15 +42,15 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
             width = 0;
             tender_auto_feed = false;
         } else {
-            JsonObject firebox = data.get("firebox").getAsJsonObject();
+            DataBlock firebox = data.getBlock("firebox");
 
-            tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("water_capacity_l").getAsInt() * internal_inv_scale));
-            maxPSI = (int) Math.ceil(properties.get("max_psi").getAsInt() * internal_inv_scale);
-            numSlots = (int) Math.ceil(firebox.get("slots").getAsInt() * internal_inv_scale);
-            width = (int) Math.ceil(firebox.get("width").getAsInt() * internal_inv_scale);
-            tender_auto_feed = getOrDefault(properties, "tender_auto_feed", true);
+            tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.getInteger("water_capacity_l") * internal_inv_scale));
+            maxPSI = (int) Math.ceil(properties.getInteger("max_psi") * internal_inv_scale);
+            numSlots = (int) Math.ceil(firebox.getInteger("slots") * internal_inv_scale);
+            width = (int) Math.ceil(firebox.getInteger("width") * internal_inv_scale);
+            tender_auto_feed = properties.getBoolean("tender_auto_feed", true);
         }
-        cab_forward = getOrDefault(properties, "cab_forward", false);
+        cab_forward = properties.getBoolean("cab_forward", false);
 
         //sets default sounds
         whistle = null; //new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
@@ -59,18 +60,19 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         bell = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg"));
         cylinder_drain = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/cylinder_drain.ogg");
 
-        JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
+        DataBlock sounds = data.getBlock("sounds");
         //overrides original sounds with added sounds
         if (sounds != null) {
-            whistle = getOrDefault(sounds, "whistle", whistle);
-            idle = getOrDefault(sounds, "idle", idle);
-            chuff = getOrDefault(sounds, "chuff", chuff);
-            pressure = getOrDefault(sounds, "pressure", pressure);
-            bell = getOrDefault(sounds, "bell", bell);
-            cylinder_drain = getOrDefault(sounds, "cylinder_drain", cylinder_drain);
+            whistle = sounds.getIdentifier("whistle", whistle);
+            idle = SoundDefinition.getOrDefault(sounds, "idle", idle);
+            chuff = sounds.getIdentifier("chuff", chuff);
+            pressure = sounds.getIdentifier("pressure", pressure);
+            bell = SoundDefinition.getOrDefault(sounds, "bell", bell);
+            cylinder_drain = sounds.getIdentifier("cylinder_drain", cylinder_drain);
 
-            if (sounds.has("quilling")) {
-                quill = new Quilling(sounds.get("quilling").getAsJsonArray());
+            List<DataBlock> quilling = sounds.getBlocks("quilling");
+            if (quilling != null) {
+                quill = new Quilling(quilling);
             }
         }
         if (whistle == null && (quill == null || !quill.canLoad())) {
@@ -121,7 +123,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    protected GuiBuilder getDefaultOverlay(JsonObject data) throws IOException {
+    protected GuiBuilder getDefaultOverlay(DataBlock data) throws IOException {
         return readCabCarFlag(data) ?
                 GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/cab_car.json")) :
                 GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/steam.json"));

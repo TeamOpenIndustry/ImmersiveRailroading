@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.resource.Identifier;
 import com.google.gson.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -13,13 +14,19 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public interface DataBlock {
     DataBlock getBlock(String key);
-    List<? extends DataBlock> getBlocks(String key);
+    List<DataBlock> getBlocks(String key);
 
     List<String> getSet(String key);
 
     Boolean getBoolean(String key);
     default boolean getBoolean(String key, boolean fallback) {
         Boolean val = getBoolean(key);
+        return val != null ? val : fallback;
+    }
+
+    Integer getInteger(String key);
+    default int getInteger(String key, int fallback) {
+        Integer val = getInteger(key);
         return val != null ? val : fallback;
     }
 
@@ -48,17 +55,37 @@ public interface DataBlock {
     Collection<String> getBlockKeys();
     Collection<String> getSetKeys();
 
-
-    static DataBlock parseJson(InputStream stream) {
-        return wrap(new JsonParser().parse(new InputStreamReader(stream)).getAsJsonObject());
+    static DataBlock load(Identifier ident) throws IOException {
+        return load(ident, false);
     }
-    static DataBlock wrap(JsonObject obj) {
+
+    static DataBlock load(Identifier ident, boolean last) throws IOException {
+        InputStream stream = last ? ident.getLastResourceStream() : ident.getResourceStream();
+        if (ident.getPath().toLowerCase(Locale.ROOT).endsWith(".caml")) {
+            return parseCAML(stream);
+        }
+        if (!ident.getPath().toLowerCase(Locale.ROOT).endsWith(".json")) {
+            ImmersiveRailroading.warn("Unexpected file extension '%s', trying JSON...", ident.toString());
+        }
+        return parseJSON(stream);
+    }
+    static DataBlock parseCAML(InputStream stream) throws IOException {
+        DataBlock parse = CAML.parse(stream);
+        stream.close();
+        return parse;
+    }
+    static DataBlock parseJSON(InputStream stream) throws IOException {
+        DataBlock parse = wrapJSON(new JsonParser().parse(new InputStreamReader(stream)).getAsJsonObject());
+        stream.close();
+        return parse;
+    }
+    static DataBlock wrapJSON(JsonObject obj) {
         Map<String, JsonPrimitive> primitives = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonPrimitive())
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> t.getValue().getAsJsonPrimitive()));
         Map<String, List<DataBlock>> blocks = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonObject())
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> Collections.singletonList(wrap(t.getValue().getAsJsonObject()))));
+                .collect(Collectors.toMap(Map.Entry::getKey, t -> Collections.singletonList(wrapJSON(t.getValue().getAsJsonObject()))));
         Map<String, List<String>> sets = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonArray() && (e.getValue().getAsJsonArray().size() == 0 || e.getValue().getAsJsonArray().get(0).isJsonPrimitive()))
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> {
@@ -73,7 +100,7 @@ public interface DataBlock {
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> {
                     List<DataBlock> result = new ArrayList<>();
                     for (JsonElement elem : t.getValue().getAsJsonArray()) {
-                        result.add(wrap(elem.getAsJsonObject()));
+                        result.add(wrapJSON(elem.getAsJsonObject()));
                     }
                     return result;
                 })));
@@ -85,7 +112,7 @@ public interface DataBlock {
             }
 
             @Override
-            public List<? extends DataBlock> getBlocks(String key) {
+            public List<DataBlock> getBlocks(String key) {
                 return blocks.get(key);
             }
 
@@ -97,6 +124,11 @@ public interface DataBlock {
             @Override
             public Boolean getBoolean(String key) {
                 return primitives.containsKey(key) ? primitives.get(key).getAsBoolean() : null;
+            }
+
+            @Override
+            public Integer getInteger(String key) {
+                return primitives.containsKey(key) ? primitives.get(key).getAsInt() : null;
             }
 
             @Override

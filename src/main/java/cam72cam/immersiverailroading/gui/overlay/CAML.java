@@ -6,8 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,12 +13,6 @@ import java.util.stream.Collectors;
 
 /** Cam's Awesome Markup Language */
 public class CAML {
-
-    public static void main(String[] args) throws IOException {
-        Block root = parse(Files.newInputStream(Paths.get("/home/cmesh/Games/Minecraft/ImmersiveRailroading/github/ImmersiveRailroading/src/main/resources/assets/immersiverailroading/gui/default/steam.caml")));
-        System.out.println(root);
-    }
-
     private static final Pattern base = Pattern.compile("(\\s*)(\\S+)\\s*([=:])\\s?(.*)");
     public static Block parse(InputStream stream) throws IOException {
         List<String> lines = IOUtils.readLines(stream, StandardCharsets.UTF_8).stream()
@@ -33,7 +25,7 @@ public class CAML {
 
     public static class Block implements DataBlock {
         private final Map<String, String> values = new HashMap<>();
-        private final Map<String, List<Block>> blocks = new HashMap<>();
+        private final Map<String, List<DataBlock>> blocks = new HashMap<>();
         private final Map<String, List<String>> sets = new HashMap<>();
 
         private Block(List<String> lines) throws IOException {
@@ -82,18 +74,23 @@ public class CAML {
         }
 
         @Override
-        public Block getBlock(String key) {
+        public DataBlock getBlock(String key) {
             return blocks.containsKey(key) ? blocks.get(key).get(0) : null;
         }
 
         @Override
-        public List<Block> getBlocks(String key) {
+        public List<DataBlock> getBlocks(String key) {
             return blocks.get(key);
         }
 
         @Override
         public Boolean getBoolean(String key) {
             return values.containsKey(key) ? Boolean.parseBoolean(values.get(key)) : null;
+        }
+
+        @Override
+        public Integer getInteger(String key) {
+            return values.containsKey(key) ? Integer.parseInt(values.get(key)) : null;
         }
 
         @Override

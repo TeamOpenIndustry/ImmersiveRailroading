@@ -135,7 +135,7 @@ public class GuiBuilder {
         elements = new ArrayList<>();
 
         // Children
-        List<? extends DataBlock> elem = data.getBlocks("elements");
+        List<DataBlock> elem = data.getBlocks("elements");
         if (elem == null) {
             elem = data.getBlocks("element");
         }
@@ -153,10 +153,7 @@ public class GuiBuilder {
     }
 
     public static GuiBuilder parse(Identifier overlay) throws IOException {
-        if (overlay.getPath().toLowerCase(Locale.ROOT).endsWith(".caml")) {
-            return new GuiBuilder(CAML.parse(overlay.getResourceStream()));
-        }
-        return new GuiBuilder(DataBlock.parseJson(overlay.getResourceStream()));
+        return new GuiBuilder(DataBlock.load(overlay));
     }
 
     private void applyPosition(Matrix4 matrix, int maxx, int maxy) {

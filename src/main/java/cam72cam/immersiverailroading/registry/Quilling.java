@@ -1,10 +1,7 @@
 package cam72cam.immersiverailroading.registry;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.gui.overlay.DataBlock;
 import cam72cam.mod.resource.Identifier;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +10,9 @@ public class Quilling {
     public List<Chime> chimes = new ArrayList<>();
     public double maxPull;
 
-    Quilling(JsonArray jsonElement) {
-        for (JsonElement quill : jsonElement) {
-            Chime chime = new Chime(quill.getAsJsonObject());
+    Quilling(List<DataBlock> quilling) {
+        for (DataBlock quill : quilling) {
+            Chime chime = new Chime(quill);
             chimes.add(chime);
             maxPull = Math.max(maxPull, chime.pull_end);
         }
@@ -35,19 +32,19 @@ public class Quilling {
         return true;
     }
 
-    public class Chime {
+    public static class Chime {
         public final double pull_start;
         public final double pull_end;
         public final double pitch_start;
         public final double pitch_end;
         public final Identifier sample;
 
-        Chime(JsonObject data) {
-            pull_start = data.get("pull_start").getAsDouble();
-            pull_end = data.get("pull_end").getAsDouble();
-            pitch_start = data.get("pitch_start").getAsDouble();
-            pitch_end = data.get("pitch_end").getAsDouble();
-            sample = new Identifier(ImmersiveRailroading.MODID, data.get("sample").getAsString());
+        Chime(DataBlock data) {
+            pull_start = data.getFloat("pull_start");
+            pull_end = data.getFloat("pull_end");
+            pitch_start = data.getFloat("pitch_start");
+            pitch_end = data.getFloat("pitch_end");
+            sample = data.getIdentifier("sample");
         }
 
         Chime(double pull_start, double pull_end, double pitch_start, double pitch_end, Identifier sample) {

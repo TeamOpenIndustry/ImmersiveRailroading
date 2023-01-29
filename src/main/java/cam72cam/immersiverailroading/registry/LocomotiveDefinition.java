@@ -1,12 +1,12 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.gui.overlay.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.LocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.Speed;
-import com.google.gson.JsonObject;
 
 import java.util.List;
 
@@ -23,19 +23,19 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private boolean isLinkedBrakeThrottle;
     private boolean isCog;
 
-    LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
+    LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, DataBlock data) throws Exception {
         super(type, defID, data);
     }
 
     @Override
-    public void parseJson(JsonObject data) throws Exception {
+    public void parseJson(DataBlock data) throws Exception {
         super.parseJson(data);
 
-        works = data.get("works").getAsString();
+        works = data.getString("works");
 
-        JsonObject properties = data.get("properties").getAsJsonObject();
+        DataBlock properties = data.getBlock("properties");
 
-        hasRadioEquipment = getOrDefault(properties, "radio_equipped", false);
+        hasRadioEquipment = properties.getBoolean("radio_equipped", false);
 
         isCabCar = readCabCarFlag(data);
         if (isCabCar) {
@@ -44,19 +44,18 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
             maxSpeed = Speed.ZERO;
             muliUnitCapable = true;
         } else {
-            power = (int) Math.ceil(properties.get("horsepower").getAsInt() * internal_inv_scale);
-            traction = (int) Math.ceil(properties.get("tractive_effort_lbf").getAsInt() * internal_inv_scale);
-            maxSpeed = Speed.fromMetric(properties.get("max_speed_kmh").getAsDouble() * internal_inv_scale);
-            muliUnitCapable = getOrDefault(properties, "multi_unit_capable", this.multiUnitDefault());
+            power = (int) Math.ceil(properties.getInteger("horsepower") * internal_inv_scale);
+            traction = (int) Math.ceil(properties.getInteger("tractive_effort_lbf") * internal_inv_scale);
+            maxSpeed = Speed.fromMetric(properties.getFloat("max_speed_kmh") * internal_inv_scale);
+            muliUnitCapable = properties.getBoolean("multi_unit_capable", this.multiUnitDefault());
         }
-        isLinkedBrakeThrottle = getOrDefault(properties, "isLinkedBrakeThrottle", false);
-        toggleBell = getOrDefault(properties, "toggle_bell", true);
-        isCog = getOrDefault(properties, "cog", false);
+        isLinkedBrakeThrottle = properties.getBoolean("isLinkedBrakeThrottle", false);
+        toggleBell = properties.getBoolean("toggle_bell", true);
+        isCog = properties.getBoolean("cog", false);
     }
 
-    protected boolean readCabCarFlag(JsonObject data) {
-        JsonObject properties = data.get("properties").getAsJsonObject();
-        return getOrDefault(properties, "cab_car", false);
+    protected boolean readCabCarFlag(DataBlock data) {
+        return data.getBlock("properties").getBoolean("cab_car", false);
     }
 
     protected abstract boolean multiUnitDefault();

@@ -1,10 +1,8 @@
 package cam72cam.immersiverailroading.library;
 
+import cam72cam.immersiverailroading.gui.overlay.DataBlock;
 import cam72cam.mod.resource.Identifier;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -41,22 +39,26 @@ public class ValveGearConfig {
 		}
 	}
 
-	public ValveGearConfig(ValveGearType type) {
+	public ValveGearConfig(ValveGearType type, Map<Float, Identifier> custom) {
 		this.type = type;
-		this.custom = null;
+		this.custom = custom;
 	}
 
-	public ValveGearConfig(JsonElement def) {
-		if (def.isJsonObject()) {
-			JsonObject anim = def.getAsJsonObject().get("animatrix").getAsJsonObject();
-			type = ValveGearType.CUSTOM;
-			custom = new HashMap<>();
-			for (Map.Entry<String, JsonElement> elem : anim.entrySet()) {
-				custom.put(Float.parseFloat(elem.getKey()), new Identifier(elem.getValue().getAsString()));
+	public static ValveGearConfig get(DataBlock def, String key) {
+		DataBlock block = def.getBlock(key);
+		if (block != null) {
+			DataBlock anim = block.getBlock("animatrix");
+			Map<Float, Identifier> custom = new HashMap<>();
+			for (String percent : anim.getPrimitiveKeys()) {
+				custom.put(Float.parseFloat(percent), anim.getIdentifier(percent));
 			}
-		} else {
-			type = ValveGearType.from(def.getAsString().toUpperCase(Locale.ROOT));
-			custom = null;
+			return new ValveGearConfig(ValveGearType.CUSTOM, custom);
 		}
+		String name = def.getString(key);
+		if (name != null) {
+			return new ValveGearConfig(ValveGearType.from(name.toUpperCase(Locale.ROOT)), null);
+		}
+
+		return null;
 	}
 }

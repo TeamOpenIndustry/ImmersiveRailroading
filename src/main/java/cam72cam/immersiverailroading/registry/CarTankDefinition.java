@@ -2,14 +2,13 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarTank;
+import cam72cam.immersiverailroading.gui.overlay.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.FreightTankModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.fluid.Fluid;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,25 +18,26 @@ public class CarTankDefinition extends FreightDefinition {
     private List<Fluid> fluidFilter; // null == no filter
     private FluidQuantity capacity;
 
-    public CarTankDefinition(String defID, JsonObject data) throws Exception {
+    public CarTankDefinition(String defID, DataBlock data) throws Exception {
         this(CarTank.class, defID, data);
     }
 
-    CarTankDefinition(Class<? extends CarTank> type, String defID, JsonObject data) throws Exception {
+    CarTankDefinition(Class<? extends CarTank> type, String defID, DataBlock data) throws Exception {
         super(type, defID, data);
     }
 
     @Override
-    public void parseJson(JsonObject data) throws Exception {
+    public void parseJson(DataBlock data) throws Exception {
         super.parseJson(data);
-        JsonObject tank = data.get("tank").getAsJsonObject();
-        capacity = FluidQuantity.FromLiters((int) Math.ceil(tank.get("capacity_l").getAsInt() * internal_inv_scale));
-        if (tank.has("whitelist")) {
+        DataBlock tank = data.getBlock("tank");
+        capacity = FluidQuantity.FromLiters((int) Math.ceil(tank.getInteger("capacity_l") * internal_inv_scale));
+        List<String> whitelist = tank.getSet("whitelist");
+        if (whitelist != null) {
             fluidFilter = new ArrayList<>();
-            for (JsonElement allowed : tank.get("whitelist").getAsJsonArray()) {
-                Fluid allowedFluid = Fluid.getFluid(allowed.getAsString());
+            for (String allowed : whitelist) {
+                Fluid allowedFluid = Fluid.getFluid(allowed);
                 if (allowedFluid == null) {
-                    ImmersiveRailroading.warn("Skipping unknown whitelisted fluid: " + allowed.getAsString());
+                    ImmersiveRailroading.warn("Skipping unknown whitelisted fluid: " + allowed);
                     continue;
                 }
                 fluidFilter.add(allowedFluid);
