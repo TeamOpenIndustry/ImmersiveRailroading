@@ -1,23 +1,23 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
-import cam72cam.immersiverailroading.entity.*;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
-import cam72cam.mod.render.opengl.*;
+import cam72cam.mod.render.opengl.BlendMode;
+import cam72cam.mod.render.opengl.DirectDraw;
+import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.TagField;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import util.Matrix4;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 
 public class GuiBuilder {
@@ -50,20 +50,20 @@ public class GuiBuilder {
 
     private final List<GuiBuilder> elements;
 
-    protected GuiBuilder(JsonObject data) throws IOException {
+    protected GuiBuilder(DataBlock data) throws IOException {
         // common stuff
-        this.x = data.has("x") ? data.get("x").getAsFloat() : 0;
-        this.y = data.has("y") ? data.get("y").getAsFloat() : 0;
-        if (data.has("centered")) {
-            JsonObject centered = data.get("centered").getAsJsonObject();
-            this.centerx = centered.has("x") && centered.get("x").getAsBoolean();
-            this.centery = centered.has("y") && centered.get("y").getAsBoolean();
+        this.x = data.getFloat("x", 0f);
+        this.y = data.getFloat("y", 0f);
+        DataBlock centered = data.getBlock("centered");
+        if (centered != null) {
+            this.centerx = centered.getBoolean("x", false);
+            this.centery = centered.getBoolean("y", false);
         } else {
             this.centerx = this.centery = false;
         }
 
         // Image stuff
-        this.image = data.has("image") ? new Identifier(data.get("image").getAsString()) : null;
+        this.image = data.getIdentifier("image", (Identifier) null);
         if (image != null) {
             BufferedImage tmp = ImageIO.read(this.image.getResourceStream());
             imageWidth = tmp.getWidth();
@@ -74,35 +74,36 @@ public class GuiBuilder {
         }
 
         // Text stuff
-        if (data.has("text")) {
-            JsonObject txt = data.get("text").getAsJsonObject();
-            text = txt.get("value").getAsString();
-            textHeight = txt.has("height") ? txt.get("height").getAsFloat() : 8;
+        DataBlock txt = data.getBlock("text");
+        if (txt != null) {
+            text = txt.getString("value");
+            textHeight = txt.getFloat("height", 0f);
         } else {
             text = null;
             textHeight = 0;
         }
 
         // Controls
-        this.readout = data.has("readout") ? Readouts.valueOf(data.get("readout").getAsString().toUpperCase(Locale.ROOT)) : null;
-        this.control = data.has("control") ? data.get("control").getAsString() : null;
-        this.invert = data.has("invert") && data.get("invert").getAsBoolean();
-        this.hide = data.has("hide") && data.get("hide").getAsBoolean();
+        String readout = data.getString("readout");
+        this.readout = readout != null ? Readouts.valueOf(readout.toUpperCase(Locale.ROOT)) : null;
+        this.control = data.getString("control");
+        this.invert = data.getBoolean("invert", false);
+        this.hide = data.getBoolean("hide", false);
 
-        if (data.has("translate")) {
-            JsonObject tl = data.get("translate").getAsJsonObject();
-            this.tlx = tl.has("x") ? tl.get("x").getAsFloat() : 0;
-            this.tly = tl.has("y") ? tl.get("y").getAsFloat() : 0;
+        DataBlock tl = data.getBlock("translate");
+        if (tl != null) {
+            this.tlx = tl.getFloat("x", 0);
+            this.tly = tl.getFloat("y", 0);
         } else {
             tlx = tly = 0;
         }
 
-        if (data.has("rotate")) {
-            JsonObject rot = data.get("rotate").getAsJsonObject();
-            this.rotx = rot.has("x") ? rot.get("x").getAsFloat() : 0;
-            this.roty = rot.has("y") ? rot.get("y").getAsFloat() : 0;
-            this.rotdeg = rot.has("degrees") ? rot.get("degrees").getAsFloat() : 360;
-            this.rotoff = rot.has("offset") ? rot.get("offset").getAsFloat() : 0;
+        DataBlock rot = data.getBlock("rotate");
+        if (rot != null) {
+            this.rotx = rot.getFloat("x", 0);
+            this.roty = rot.getFloat("y", 0);
+            this.rotdeg = rot.getFloat("degrees", 360);
+            this.rotoff = rot.getFloat("offset", 0);
         } else {
             this.rotx = 0;
             this.roty = 0;
@@ -110,43 +111,52 @@ public class GuiBuilder {
             this.rotoff = 0;
         }
 
-        if (data.has("scale")) {
-            JsonObject scale = data.get("scale").getAsJsonObject();
-            this.scalex = scale.has("x") ? scale.get("x").getAsFloat() : null;
-            this.scaley = scale.has("y") ? scale.get("y").getAsFloat() : null;
+        DataBlock scale = data.getBlock("scale");
+        if (scale != null) {
+            this.scalex = scale.getFloat("x");
+            this.scaley = scale.getFloat("y");
         } else {
             this.scalex = null;
             this.scaley = null;
         }
 
-        if (data.has("color")) {
-            for (Map.Entry<String, JsonElement> entry : data.get("color").getAsJsonObject().entrySet()) {
-                String hex = entry.getValue().getAsString();
+        DataBlock color = data.getBlock("color");
+        if (color != null) {
+            for (String key : color.getPrimitiveKeys()) {
+                String hex = color.getString(key);
                 if (hex.length() == 8) {
                     hex = hex.replace("0x", "0xFF");
                     hex = hex.replace("0X", "0XFF");
                 }
-                colors.put(Float.parseFloat(entry.getKey()), (int)(long)Long.decode(hex));
+                colors.put(Float.parseFloat(key), (int)(long)Long.decode(hex));
             }
         }
 
+        elements = new ArrayList<>();
+
         // Children
-        if (data.has("elements")) {
-            elements = new ArrayList<>();
-            for (JsonElement element : data.get("elements").getAsJsonArray()) {
-                if (element.isJsonObject()) {
-                    elements.add(new GuiBuilder(element.getAsJsonObject()));
-                } else {
-                    elements.add(parse(new Identifier(element.getAsString())));
-                }
+        List<? extends DataBlock> elem = data.getBlocks("elements");
+        if (elem == null) {
+            elem = data.getBlocks("element");
+        }
+        if (elem != null) {
+            for (DataBlock element : elem) {
+                elements.add(new GuiBuilder(element));
             }
-        } else {
-            elements = Collections.emptyList();
+        }
+        List<String> imports = data.getSet("import");
+        if (imports != null) {
+            for (String imp : imports) {
+                elements.add(parse(new Identifier(ImmersiveRailroading.MODID, new Identifier(imp).getPath())));
+            }
         }
     }
 
     public static GuiBuilder parse(Identifier overlay) throws IOException {
-        return new GuiBuilder(new JsonParser().parse(new InputStreamReader(overlay.getResourceStream())).getAsJsonObject());
+        if (overlay.getPath().toLowerCase(Locale.ROOT).endsWith(".caml")) {
+            return new GuiBuilder(CAML.parse(overlay.getResourceStream()));
+        }
+        return new GuiBuilder(DataBlock.parseJson(overlay.getResourceStream()));
     }
 
     private void applyPosition(Matrix4 matrix, int maxx, int maxy) {
