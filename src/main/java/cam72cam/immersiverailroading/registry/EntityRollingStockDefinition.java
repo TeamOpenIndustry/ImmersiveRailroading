@@ -310,20 +310,25 @@ public abstract class EntityRollingStockDefinition {
             tex_variants.getValueMap().forEach((key, value) -> textureNames.put(value.asString(), key));
         }
 
-        Identifier alt_textures = new Identifier(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
         try {
+            List<DataBlock> alternates = new ArrayList<>();
+
+            Identifier alt_textures = new Identifier(ImmersiveRailroading.MODID, defID.replace(".caml", ".json").replace(".json", "_variants.json"));
             List<InputStream> alts = alt_textures.getResourceStreamAll();
             for (InputStream input : alts) {
-                /* TODO
-                JsonParser parser = new JsonParser();
-                JsonElement variants = parser.parse(new InputStreamReader(input));
-                for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
-                    textureNames.put(variant.getValue().getAsString(), variant.getKey());
-                }
-                 */
+                alternates.add(DataBlock.parseJSON(input));
+            }
+
+            alt_textures = new Identifier(alt_textures.getDomain(), alt_textures.getPath().replace(".json", ".caml"));
+            alts = alt_textures.getResourceStreamAll();
+            for (InputStream input : alts) {
+                alternates.add(DataBlock.parseJSON(input));
+            }
+            for (DataBlock alternate : alternates) {
+                alternate.getValueMap().forEach((key, value) -> textureNames.put(value.asString(), key));
             }
         } catch (java.io.FileNotFoundException ex) {
-            //ignore
+            ImmersiveRailroading.catching(ex);
         }
 
         modelLoc = data.getValue("model").asIdentifier();

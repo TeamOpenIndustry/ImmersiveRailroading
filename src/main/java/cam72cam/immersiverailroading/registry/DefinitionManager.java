@@ -164,7 +164,7 @@ public class DefinitionManager {
         List<String> blacklist = getModelBlacklist(defTypes);
 
         LinkedHashMap<String, String> definitionIDMap = new LinkedHashMap<>();
-        Map<String, String> definitionIDPacks = new HashMap<>();
+        Map<String, DataBlock.Value> definitionIDPacks = new HashMap<>();
 
         List<DataBlock> blocks = new ArrayList<>();
 
@@ -197,8 +197,8 @@ public class DefinitionManager {
                         }
 
                         definitionIDMap.put(defID, defType);
-                        String pack = stock.getValue("pack").asString();
-                        if (pack != null) {
+                        DataBlock.Value pack = stock.getValue("pack");
+                        if (pack.asString() != null) {
                             definitionIDPacks.put(defID, pack);
                         }
                     }
@@ -224,11 +224,14 @@ public class DefinitionManager {
                     return null;
                 }
 
-                /* TODO if (definitionIDPacks.containsKey(defID) && !jsonData.has("pack")) {
-                    jsonData.addProperty("pack", definitionIDPacks.get(defID));
-                }*/
+                DataBlock block = DataBlock.load(resource);
 
-                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, DataBlock.load(resource));
+                if (definitionIDPacks.containsKey(defID) && block.getValue("pack").asString() == null) {
+                    // This is kind of a nasty hack...
+                    block.getValueMap().put("pack", definitionIDPacks.get(defID));
+                }
+
+                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, block);
 
                 Runtime runtime = Runtime.getRuntime();
                 if (runtime.freeMemory() < runtime.maxMemory() * 0.25) {
@@ -324,12 +327,14 @@ public class DefinitionManager {
                     continue;
                 }
 
-                /* TODO if (track.has("pack") && !trackData.has("pack")) {
+                DataBlock block = DataBlock.load(identifier);
+
+                if (track.getValue("pack").asString() != null && block.getValue("pack").asString() != null) {
                     // Copy in the pack name if not specified
-                    trackData.add("pack", track.get("pack"));
-                }*/
+                    block.getValueMap().put("pack", track.getValue("pack"));
+                }
                 try {
-                    tracks.put(trackID, new TrackDefinition(trackID, DataBlock.load(identifier)));
+                    tracks.put(trackID, new TrackDefinition(trackID, block));
                 } catch (Exception e) {
                     ImmersiveRailroading.catching(e);
                 }
