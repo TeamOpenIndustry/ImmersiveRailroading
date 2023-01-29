@@ -42,131 +42,128 @@ public class CAML {
                 .filter(s -> !StringUtils.isWhitespace(s))
                 .collect(Collectors.toList());
 
-        return new Block(lines);
+        return createBlock(lines);
     }
 
-    private static class Block implements DataBlock {
-        private final Map<String, Value> primitives = new LinkedHashMap<>();
-        private final Map<String, List<Value>> primitiveSets = new LinkedHashMap<>();
-        private final Map<String, DataBlock> blocks = new LinkedHashMap<>();
-        private final Map<String, List<DataBlock>> blockSets = new LinkedHashMap<>();
+    private static DataBlock createBlock(List<String> lines) throws IOException {
+        Map<String, DataBlock.Value> primitives = new LinkedHashMap<>();
+        Map<String, List<DataBlock.Value>> primitiveSets = new LinkedHashMap<>();
+        Map<String, DataBlock> blocks = new LinkedHashMap<>();
+        Map<String, List<DataBlock>> blockSets = new LinkedHashMap<>();
 
-        private Block(List<String> lines) throws IOException {
-            String spaces = null;
-            while (!lines.isEmpty()) {
-                String line = lines.get(0);
-                Matcher m = base.matcher(line);
-                if (!m.matches()) {
-                    throw new IOException(String.format("Invalid Block line '%s'", line));
-                }
+        String spaces = null;
+        while (!lines.isEmpty()) {
+            String line = lines.get(0);
+            Matcher m = base.matcher(line);
+            if (!m.matches()) {
+                throw new IOException(String.format("Invalid Block line '%s'", line));
+            }
 
-                String pre = m.group(1);
-                String key = m.group(2);
-                String mod = m.group(3);
-                String val = m.group(4);
+            String pre = m.group(1);
+            String key = m.group(2);
+            String mod = m.group(3);
+            String val = m.group(4);
 
-                if (spaces == null) {
-                    spaces = pre;
-                }
+            if (spaces == null) {
+                spaces = pre;
+            }
 
-                if (!pre.startsWith(spaces) && !spaces.startsWith(pre)) {
-                    throw new IOException(String.format("Invalid Block line '%s' mismatched indentation '%s' vs '%s'", line, spaces, pre));
-                }
+            if (!pre.startsWith(spaces) && !spaces.startsWith(pre)) {
+                throw new IOException(String.format("Invalid Block line '%s' mismatched indentation '%s' vs '%s'", line, spaces, pre));
+            }
 
-                if (spaces.length() > pre.length()) {
-                    // Reduced indentation
-                    return;
-                }
-                if (!spaces.equals(pre)) {
-                    throw new IOException(String.format("Invalid Block line '%s' invalid indentation '%s' vs '%s'", line, spaces, pre));
-                }
+            if (spaces.length() > pre.length()) {
+                // Reduced indentation
+                break;
+            }
+            if (!spaces.equals(pre)) {
+                throw new IOException(String.format("Invalid Block line '%s' invalid indentation '%s' vs '%s'", line, spaces, pre));
+            }
 
-                lines.remove(0);
+            lines.remove(0);
 
-                String trimmed = val.trim();
-                if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
-                    val = val.substring(1, val.length()-1);
-                }
+            String trimmed = val.trim();
+            if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+                val = val.substring(1, val.length() - 1);
+            }
 
-                if (StringUtils.isWhitespace(val)) {
-                    Block block = new Block(lines);
-                    if (mod.equals("=")) {
-                        if (blocks.containsKey(key) || blockSets.containsKey(key)) {
-                            throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
-                        }
-                        blocks.put(key, block);
-                    } else {
-                        if (blocks.containsKey(key)) {
-                            throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
-                        }
-                        blockSets.computeIfAbsent(key, k -> new ArrayList<>()).add(block);
+            if (StringUtils.isWhitespace(val)) {
+                DataBlock block = createBlock(lines);
+                if (mod.equals("=")) {
+                    if (blocks.containsKey(key) || blockSets.containsKey(key)) {
+                        throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                     }
+                    blocks.put(key, block);
                 } else {
-                    if (mod.equals("=")) {
-                        if (primitives.containsKey(key) || primitiveSets.containsKey(key)) {
-                            throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
-                        }
-                        primitives.put(key, new CAML.Value(val));
-                    } else {
-                        if (primitives.containsKey(key)) {
-                            throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
-                        }
-                        primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(new CAML.Value(val));
+                    if (blocks.containsKey(key)) {
+                        throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                     }
+                    blockSets.computeIfAbsent(key, k -> new ArrayList<>()).add(block);
+                }
+            } else {
+                if (mod.equals("=")) {
+                    if (primitives.containsKey(key) || primitiveSets.containsKey(key)) {
+                        throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                    }
+                    primitives.put(key, createValue(val));
+                } else {
+                    if (primitives.containsKey(key)) {
+                        throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                    }
+                    primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(createValue(val));
                 }
             }
         }
 
-        @Override
-        public Map<String, Value> getValueMap() {
-            return primitives;
-        }
+        return new DataBlock() {
+            @Override
+            public Map<String, Value> getValueMap() {
+                return primitives;
+            }
 
-        @Override
-        public Map<String, List<Value>> getValuesMap() {
-            return primitiveSets;
-        }
+            @Override
+            public Map<String, List<Value>> getValuesMap() {
+                return primitiveSets;
+            }
 
-        @Override
-        public Map<String, DataBlock> getBlockMap() {
-            return blocks;
-        }
+            @Override
+            public Map<String, DataBlock> getBlockMap() {
+                return blocks;
+            }
 
-        @Override
-        public Map<String, List<DataBlock>> getBlocksMap() {
-            return blockSets;
-        }
+            @Override
+            public Map<String, List<DataBlock>> getBlocksMap() {
+                return blockSets;
+            }
+        };
     }
-    private static class Value implements DataBlock.Value {
-        private final String value;
 
-        private Value(String value) {
-            this.value = value;
-        }
+    private static DataBlock.Value createValue(String value) {
+            return new DataBlock.Value() {
+                @Override
+                public Boolean asBoolean() {
+                    return value == null ? null : Boolean.parseBoolean(value);
+                }
 
-        @Override
-        public Boolean asBoolean() {
-            return value == null ? null : Boolean.parseBoolean(value);
-        }
+                @Override
+                public Integer asInteger() {
+                    return value == null ? null : Integer.parseInt(value);
+                }
 
-        @Override
-        public Integer asInteger() {
-            return value == null ? null : Integer.parseInt(value);
-        }
+                @Override
+                public Float asFloat() {
+                    return value == null ? null : Float.parseFloat(value);
+                }
 
-        @Override
-        public Float asFloat() {
-            return value == null ? null : Float.parseFloat(value);
-        }
+                @Override
+                public Double asDouble() {
+                    return value == null ? null : Double.parseDouble(value);
+                }
 
-        @Override
-        public Double asDouble() {
-            return value == null ? null : Double.parseDouble(value);
-        }
-
-        @Override
-        public String asString() {
-            return value;
-        }
+                @Override
+                public String asString() {
+                    return value;
+                }
+            };
     }
 }
