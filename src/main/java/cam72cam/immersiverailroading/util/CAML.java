@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * */
 public class CAML {
     private static final Pattern base = Pattern.compile("(\\s*)(\\S+)\\s*([=:])\\s?(.*)");
-    public static Block parse(InputStream stream) throws IOException {
+    public static DataBlock parse(InputStream stream) throws IOException {
         List<String> lines = IOUtils.readLines(stream, StandardCharsets.UTF_8).stream()
                 .map(s -> s.replaceFirst("#.*", ""))
                 .filter(s -> !StringUtils.isWhitespace(s))
@@ -45,9 +45,9 @@ public class CAML {
         return new Block(lines);
     }
 
-    public static class Block implements DataBlock {
-        private final Map<String, String> primitives = new HashMap<>();
-        private final Map<String, List<String>> primitiveSets = new HashMap<>();
+    private static class Block implements DataBlock {
+        private final Map<String, Value> primitives = new HashMap<>();
+        private final Map<String, List<Value>> primitiveSets = new HashMap<>();
         private final Map<String, DataBlock> blocks = new HashMap<>();
         private final Map<String, List<DataBlock>> blockSets = new HashMap<>();
 
@@ -106,70 +106,67 @@ public class CAML {
                         if (primitives.containsKey(key) || primitiveSets.containsKey(key)) {
                             throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                         }
-                        primitives.put(key, val);
+                        primitives.put(key, new CAML.Value(val));
                     } else {
                         if (primitives.containsKey(key)) {
                             throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                         }
-                        primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(val);
+                        primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(new CAML.Value(val));
                     }
                 }
             }
         }
 
         @Override
-        public DataBlock getBlock(String key) {
-            return blocks.get(key);
+        public Map<String, Value> getValueMap() {
+            return primitives;
         }
 
         @Override
-        public List<DataBlock> getBlocks(String key) {
-            return blockSets.get(key);
+        public Map<String, List<Value>> getValuesMap() {
+            return primitiveSets;
         }
 
         @Override
-        public Boolean getBoolean(String key) {
-            return primitives.containsKey(key) ? Boolean.parseBoolean(primitives.get(key)) : null;
+        public Map<String, DataBlock> getBlockMap() {
+            return blocks;
         }
 
         @Override
-        public Integer getInteger(String key) {
-            return primitives.containsKey(key) ? Integer.parseInt(primitives.get(key)) : null;
+        public Map<String, List<DataBlock>> getBlocksMap() {
+            return blockSets;
+        }
+    }
+    private static class Value implements DataBlock.Value {
+        private final String value;
+
+        private Value(String value) {
+            this.value = value;
         }
 
         @Override
-        public Float getFloat(String key) {
-            return primitives.containsKey(key) ? Float.parseFloat(primitives.get(key)) : null;
+        public Boolean getBoolean() {
+            return value == null ? null : Boolean.parseBoolean(value);
         }
 
         @Override
-        public String getString(String key) {
-            return primitives.get(key);
+        public Integer getInteger() {
+            return value == null ? null : Integer.parseInt(value);
         }
 
         @Override
-        public List<String> getPrimitives(String key) {
-            return primitiveSets.get(key);
+        public Float getFloat() {
+            return value == null ? null : Float.parseFloat(value);
         }
 
         @Override
-        public Set<String> getPrimitiveKeys() {
-            return primitives.keySet();
+        public Double getDouble() {
+            return value == null ? null : Double.parseDouble(value);
         }
 
         @Override
-        public Collection<String> getPrimitiveSetsKeys() {
-            return primitiveSets.keySet();
-        }
-
-        @Override
-        public Collection<String> getBlockKeys() {
-            return blockSets.keySet();
-        }
-
-        @Override
-        public Collection<String> getBlockSetsKeys() {
-            return blockSets.keySet();
+        public String getString() {
+            return value;
         }
     }
 }

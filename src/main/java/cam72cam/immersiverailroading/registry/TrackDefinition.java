@@ -25,17 +25,17 @@ public class TrackDefinition {
 
     TrackDefinition(String trackID, DataBlock object) throws Exception {
         this.trackID = trackID;
-        this.name = object.getString("name");
-        this.modelerName = object.getString("modeler");
-        this.packName = object.getString("pack");
+        this.name = object.getValue("name").getString();
+        this.modelerName = object.getValue("modeler").getString();
+        this.packName = object.getValue("pack").getString();
 
-        this.clack = object.getBoolean("clack", true);
-        this.bumpiness = object.getFloat("bumpiness", clack ? 1f : 0f);
-        this.cog = object.getBoolean("cog", false);
+        this.clack = object.getValue("clack").getBoolean(true);
+        this.bumpiness = object.getValue("bumpiness").getFloat(clack ? 1f : 0f);
+        this.cog = object.getValue("cog").getBoolean(false);
         this.models = new ArrayList<>();
         DataBlock models = object.getBlock("models");
-        for (String key : models.getPrimitiveKeys()) {
-            this.models.add(new TrackModel(key, models.getString(key)));
+        for (Map.Entry<String, DataBlock.Value> entry : models.getValueMap().entrySet()) {
+            this.models.add(new TrackModel(entry.getKey(), entry.getValue().getIdentifier()));
         }
 
         DataBlock mats = object.getBlock("materials");
@@ -45,8 +45,8 @@ public class TrackDefinition {
                 List<TrackMaterial> parts = new ArrayList<>();
                 for (DataBlock part : blocks) {
                     parts.add(new TrackMaterial(
-                            part.getString("item"),
-                            part.getFloat("cost")
+                            part.getValue("item").getString(),
+                            part.getValue("cost").getFloat()
                     ));
                 }
                 if (parts.size() > 0) {

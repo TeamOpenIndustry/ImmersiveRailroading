@@ -30,12 +30,12 @@ public class CarTankDefinition extends FreightDefinition {
     public void parseJson(DataBlock data) throws Exception {
         super.parseJson(data);
         DataBlock tank = data.getBlock("tank");
-        capacity = FluidQuantity.FromLiters((int) Math.ceil(tank.getInteger("capacity_l") * internal_inv_scale));
-        List<String> whitelist = tank.getPrimitives("whitelist");
+        capacity = FluidQuantity.FromLiters((int) Math.ceil(tank.getValue("capacity_l").getInteger() * internal_inv_scale));
+        List<DataBlock.Value> whitelist = tank.getValues("whitelist");
         if (whitelist != null) {
             fluidFilter = new ArrayList<>();
-            for (String allowed : whitelist) {
-                Fluid allowedFluid = Fluid.getFluid(allowed);
+            for (DataBlock.Value allowed : whitelist) {
+                Fluid allowedFluid = Fluid.getFluid(allowed.getString());
                 if (allowedFluid == null) {
                     ImmersiveRailroading.warn("Skipping unknown whitelisted fluid: " + allowed);
                     continue;

@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.library.GuiText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CarFreightDefinition extends FreightDefinition {
 
@@ -27,9 +28,9 @@ public class CarFreightDefinition extends FreightDefinition {
         super.parseJson(data);
         DataBlock freight = data.getBlock("freight");
         if (freight != null) {
-            this.numSlots = (int) Math.ceil(freight.getInteger("slots") * internal_inv_scale);
-            this.width = (int) Math.ceil(freight.getInteger("width") * internal_inv_scale);
-            this.validCargo = new ArrayList<>(freight.getPrimitives("cargo"));
+            this.numSlots = (int) Math.ceil(freight.getValue("slots").getInteger() * internal_inv_scale);
+            this.width = (int) Math.ceil(freight.getValue("width").getInteger() * internal_inv_scale);
+            this.validCargo = freight.getValues("cargo").stream().map(DataBlock.Value::getString).collect(Collectors.toList());
         } else {
             this.numSlots = 0;
             this.width = 0;

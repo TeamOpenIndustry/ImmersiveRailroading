@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.util.DataBlock;
@@ -53,18 +52,18 @@ public class GuiBuilder {
 
     protected GuiBuilder(DataBlock data) throws IOException {
         // common stuff
-        this.x = data.getFloat("x", 0f);
-        this.y = data.getFloat("y", 0f);
+        this.x = data.getValue("x").getFloat(0f);
+        this.y = data.getValue("y").getFloat(0f);
         DataBlock centered = data.getBlock("centered");
         if (centered != null) {
-            this.centerx = centered.getBoolean("x", false);
-            this.centery = centered.getBoolean("y", false);
+            this.centerx = centered.getValue("x").getBoolean(false);
+            this.centery = centered.getValue("y").getBoolean(false);
         } else {
             this.centerx = this.centery = false;
         }
 
         // Image stuff
-        this.image = data.getIdentifier("image", (Identifier) null);
+        this.image = data.getValue("image").getIdentifier(null);
         if (image != null) {
             BufferedImage tmp = ImageIO.read(this.image.getResourceStream());
             imageWidth = tmp.getWidth();
@@ -77,34 +76,34 @@ public class GuiBuilder {
         // Text stuff
         DataBlock txt = data.getBlock("text");
         if (txt != null) {
-            text = txt.getString("value");
-            textHeight = txt.getFloat("height", 0f);
+            text = txt.getValue("value").getString();
+            textHeight = txt.getValue("height").getFloat(0f);
         } else {
             text = null;
             textHeight = 0;
         }
 
         // Controls
-        String readout = data.getString("readout");
+        String readout = data.getValue("readout").getString();
         this.readout = readout != null ? Readouts.valueOf(readout.toUpperCase(Locale.ROOT)) : null;
-        this.control = data.getString("control");
-        this.invert = data.getBoolean("invert", false);
-        this.hide = data.getBoolean("hide", false);
+        this.control = data.getValue("control").getString();
+        this.invert = data.getValue("invert").getBoolean(false);
+        this.hide = data.getValue("hide").getBoolean(false);
 
         DataBlock tl = data.getBlock("translate");
         if (tl != null) {
-            this.tlx = tl.getFloat("x", 0);
-            this.tly = tl.getFloat("y", 0);
+            this.tlx = tl.getValue("x").getFloat(0);
+            this.tly = tl.getValue("y").getFloat(0);
         } else {
             tlx = tly = 0;
         }
 
         DataBlock rot = data.getBlock("rotate");
         if (rot != null) {
-            this.rotx = rot.getFloat("x", 0);
-            this.roty = rot.getFloat("y", 0);
-            this.rotdeg = rot.getFloat("degrees", 360);
-            this.rotoff = rot.getFloat("offset", 0);
+            this.rotx = rot.getValue("x").getFloat(0);
+            this.roty = rot.getValue("y").getFloat(0);
+            this.rotdeg = rot.getValue("degrees").getFloat(360);
+            this.rotoff = rot.getValue("offset").getFloat(0);
         } else {
             this.rotx = 0;
             this.roty = 0;
@@ -114,8 +113,8 @@ public class GuiBuilder {
 
         DataBlock scale = data.getBlock("scale");
         if (scale != null) {
-            this.scalex = scale.getFloat("x");
-            this.scaley = scale.getFloat("y");
+            this.scalex = scale.getValue("x").getFloat();
+            this.scaley = scale.getValue("y").getFloat();
         } else {
             this.scalex = null;
             this.scaley = null;
@@ -123,14 +122,14 @@ public class GuiBuilder {
 
         DataBlock color = data.getBlock("color");
         if (color != null) {
-            for (String key : color.getPrimitiveKeys()) {
-                String hex = color.getString(key);
+            color.getValueMap().forEach((key, value) -> {
+                String hex = value.getString();
                 if (hex.length() == 8) {
                     hex = hex.replace("0x", "0xFF");
                     hex = hex.replace("0X", "0XFF");
                 }
                 colors.put(Float.parseFloat(key), (int)(long)Long.decode(hex));
-            }
+            });
         }
 
         elements = new ArrayList<>();
@@ -145,10 +144,10 @@ public class GuiBuilder {
                 elements.add(new GuiBuilder(element));
             }
         }
-        List<String> imports = data.getPrimitives("import");
+        List<DataBlock.Value> imports = data.getValues("import");
         if (imports != null) {
-            for (String imp : imports) {
-                elements.add(parse(new Identifier(ImmersiveRailroading.MODID, new Identifier(imp).getPath())));
+            for (DataBlock.Value imp : imports) {
+                elements.add(parse(imp.getIdentifier()));
             }
         }
     }

@@ -44,13 +44,13 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         } else {
             DataBlock firebox = data.getBlock("firebox");
 
-            tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.getInteger("water_capacity_l") * internal_inv_scale));
-            maxPSI = (int) Math.ceil(properties.getInteger("max_psi") * internal_inv_scale);
-            numSlots = (int) Math.ceil(firebox.getInteger("slots") * internal_inv_scale);
-            width = (int) Math.ceil(firebox.getInteger("width") * internal_inv_scale);
-            tender_auto_feed = properties.getBoolean("tender_auto_feed", true);
+            tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.getValue("water_capacity_l").getInteger() * internal_inv_scale));
+            maxPSI = (int) Math.ceil(properties.getValue("max_psi").getInteger() * internal_inv_scale);
+            numSlots = (int) Math.ceil(firebox.getValue("slots").getInteger() * internal_inv_scale);
+            width = (int) Math.ceil(firebox.getValue("width").getInteger() * internal_inv_scale);
+            tender_auto_feed = properties.getValue("tender_auto_feed").getBoolean(true);
         }
-        cab_forward = properties.getBoolean("cab_forward", false);
+        cab_forward = properties.getValue("cab_forward").getBoolean(false);
 
         //sets default sounds
         whistle = null; //new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
@@ -63,12 +63,12 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         DataBlock sounds = data.getBlock("sounds");
         //overrides original sounds with added sounds
         if (sounds != null) {
-            whistle = sounds.getIdentifier("whistle", whistle);
+            whistle = sounds.getValue("whistle").getIdentifier(whistle);
             idle = SoundDefinition.getOrDefault(sounds, "idle", idle);
-            chuff = sounds.getIdentifier("chuff", chuff);
-            pressure = sounds.getIdentifier("pressure", pressure);
+            chuff = sounds.getValue("chuff").getIdentifier(chuff);
+            pressure = sounds.getValue("pressure").getIdentifier(pressure);
             bell = SoundDefinition.getOrDefault(sounds, "bell", bell);
-            cylinder_drain = sounds.getIdentifier("cylinder_drain", cylinder_drain);
+            cylinder_drain = sounds.getValue("cylinder_drain").getIdentifier(cylinder_drain);
 
             List<DataBlock> quilling = sounds.getBlocks("quilling");
             if (quilling != null) {

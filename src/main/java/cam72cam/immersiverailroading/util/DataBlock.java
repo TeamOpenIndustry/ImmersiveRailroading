@@ -12,48 +12,95 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public interface DataBlock {
-    DataBlock getBlock(String key);
-    List<DataBlock> getBlocks(String key);
+    Map<String, Value> getValueMap();
+    Map<String, List<Value>> getValuesMap();
+    Map<String, DataBlock> getBlockMap();
+    Map<String, List<DataBlock>> getBlocksMap();
 
-    List<String> getPrimitives(String key);
-
-    Boolean getBoolean(String key);
-    default boolean getBoolean(String key, boolean fallback) {
-        Boolean val = getBoolean(key);
-        return val != null ? val : fallback;
+    default DataBlock getBlock(String key) {
+        return getBlockMap().get(key);
     }
 
-    Integer getInteger(String key);
-    default int getInteger(String key, int fallback) {
-        Integer val = getInteger(key);
-        return val != null ? val : fallback;
+    default List<DataBlock> getBlocks(String key) {
+        return getBlocksMap().get(key);
     }
 
-    Float getFloat(String key);
-    default float getFloat(String key, float fallback) {
-        Float val = getFloat(key);
-        return val != null ? val : fallback;
+    default Value getValue(String key) {
+        return getValueMap().getOrDefault(key, new Value() {
+            @Override
+            public Boolean getBoolean() {
+                return null;
+            }
+
+            @Override
+            public Integer getInteger() {
+                return null;
+            }
+
+            @Override
+            public Float getFloat() {
+                return null;
+            }
+
+            @Override
+            public Double getDouble() {
+                return null;
+            }
+
+            @Override
+            public String getString() {
+                return null;
+            }
+        });
     }
 
-    String getString(String key);
-    default String getString(String key, String fallback) {
-        String val = getString(key);
-        return val != null ? val : fallback;
+    default List<Value> getValues(String key) {
+        return getValuesMap().get(key);
     }
 
-    default Identifier getIdentifier(String key) {
-        String value = getString(key);
-        return value != null ? new Identifier(ImmersiveRailroading.MODID, new Identifier(value).getPath()) : null;
-    }
-    default Identifier getIdentifier(String key, Identifier fallback) {
-        Identifier val = getIdentifier(key);
-        return val != null ? val : fallback;
+    interface Value {
+        Boolean getBoolean();
+        default boolean getBoolean(boolean fallback) {
+            Boolean val = getBoolean();
+            return val != null ? val : fallback;
+        }
+
+        Integer getInteger();
+        default int getInteger(int fallback) {
+            Integer val = getInteger();
+            return val != null ? val : fallback;
+        }
+
+        Float getFloat();
+        default float getFloat(float fallback) {
+            Float val = getFloat();
+            return val != null ? val : fallback;
+        }
+
+        Double getDouble();
+        default double getDouble(double fallback) {
+            Double val = getDouble();
+            return val != null ? val : fallback;
+        }
+
+        String getString();
+        default String getString(String fallback) {
+            String val = getString();
+            return val != null ? val : fallback;
+        }
+
+        default Identifier getIdentifier() {
+            String value = getString();
+            return value != null ? new Identifier(ImmersiveRailroading.MODID, new Identifier(value).getPath()) : null;
+        }
+        default Identifier getIdentifier(Identifier fallback) {
+            Identifier val = getIdentifier();
+            return val != null ? val : fallback;
+        }
     }
 
-    Collection<String> getPrimitiveKeys();
-    Collection<String> getPrimitiveSetsKeys();
-    Collection<String> getBlockKeys();
-    Collection<String> getBlockSetsKeys();
+
+
 
     static DataBlock load(Identifier ident) throws IOException {
         return load(ident, false);
@@ -79,19 +126,48 @@ public interface DataBlock {
         stream.close();
         return parse;
     }
+
+    static Value wrapJSON(JsonPrimitive primitive) {
+        return new Value() {
+            @Override
+            public Boolean getBoolean() {
+                return primitive == null ? null : primitive.getAsBoolean();
+            }
+
+            @Override
+            public Integer getInteger() {
+                return primitive == null ? null : primitive.getAsInt();
+            }
+
+            @Override
+            public Float getFloat() {
+                return primitive == null ? null : primitive.getAsFloat();
+            }
+
+            @Override
+            public Double getDouble() {
+                return primitive == null ? null : primitive.getAsDouble();
+            }
+
+            @Override
+            public String getString() {
+                return primitive == null ? null : primitive.getAsString();
+            }
+        };
+    }
     static DataBlock wrapJSON(JsonObject obj) {
-        Map<String, JsonPrimitive> primitives = obj.entrySet().stream()
+        Map<String, Value> primitives = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonPrimitive())
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> t.getValue().getAsJsonPrimitive()));
+                .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonPrimitive())));
         Map<String, DataBlock> blocks = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonObject())
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonObject())));
-        Map<String, List<String>> primitiveSets = obj.entrySet().stream()
+        Map<String, List<Value>> primitiveSets = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonArray() && (e.getValue().getAsJsonArray().size() == 0 || e.getValue().getAsJsonArray().get(0).isJsonPrimitive()))
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> {
-                    List<String> result = new ArrayList<>();
+                    List<Value> result = new ArrayList<>();
                     for (JsonElement elem : t.getValue().getAsJsonArray()) {
-                        result.add(elem.getAsString());
+                        result.add(wrapJSON(elem.getAsJsonPrimitive()));
                     }
                     return result;
                 }));
@@ -107,59 +183,25 @@ public interface DataBlock {
 
         return new DataBlock() {
             @Override
-            public DataBlock getBlock(String key) {
-                return blocks.get(key);
+            public Map<String, Value> getValueMap() {
+                return primitives;
             }
 
             @Override
-            public List<DataBlock> getBlocks(String key) {
-                return blockSets.get(key);
+            public Map<String, List<Value>> getValuesMap() {
+                return primitiveSets;
             }
 
             @Override
-            public List<String> getPrimitives(String key) {
-                return primitiveSets.get(key);
+            public Map<String, DataBlock> getBlockMap() {
+                return blocks;
             }
 
             @Override
-            public Boolean getBoolean(String key) {
-                return primitives.containsKey(key) ? primitives.get(key).getAsBoolean() : null;
+            public Map<String, List<DataBlock>> getBlocksMap() {
+                return blockSets;
             }
 
-            @Override
-            public Integer getInteger(String key) {
-                return primitives.containsKey(key) ? primitives.get(key).getAsInt() : null;
-            }
-
-            @Override
-            public Float getFloat(String key) {
-                return primitives.containsKey(key) ? primitives.get(key).getAsFloat() : null;
-            }
-
-            @Override
-            public String getString(String key) {
-                return primitives.containsKey(key) ? primitives.get(key).getAsString() : null;
-            }
-
-            @Override
-            public Collection<String> getPrimitiveKeys() {
-                return primitives.keySet();
-            }
-
-            @Override
-            public Collection<String> getPrimitiveSetsKeys() {
-                return primitiveSets.keySet();
-            }
-
-            @Override
-            public Collection<String> getBlockKeys() {
-                return blocks.keySet();
-            }
-
-            @Override
-            public Collection<String> getBlockSetsKeys() {
-                return blockSets.keySet();
-            }
         };
     }
 }
