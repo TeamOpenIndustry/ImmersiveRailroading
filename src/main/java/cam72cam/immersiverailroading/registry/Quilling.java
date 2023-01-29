@@ -40,10 +40,10 @@ public class Quilling {
         public final Identifier sample;
 
         Chime(DataBlock data) {
-            pull_start = data.getValue("pull_start").getFloat();
-            pull_end = data.getValue("pull_end").getFloat();
-            pitch_start = data.getValue("pitch_start").getFloat();
-            pitch_end = data.getValue("pitch_end").getFloat();
+            pull_start = data.getValue("pull_start").getDouble();
+            pull_end = data.getValue("pull_end").getDouble();
+            pitch_start = data.getValue("pitch_start").getDouble();
+            pitch_end = data.getValue("pitch_end").getDouble();
             sample = data.getValue("sample").getIdentifier();
         }
 

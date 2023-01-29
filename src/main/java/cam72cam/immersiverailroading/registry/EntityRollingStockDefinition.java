@@ -290,12 +290,12 @@ public abstract class EntityRollingStockDefinition {
         internal_inv_scale = 1;
         // TODO Gauge.from(Gauge.STANDARD).value() what happens when != Gauge.STANDARD
         this.recommended_gauge = Gauge.from(Gauge.STANDARD);
-        Float model_gauge_m = data.getValue("model_gauge_m").getFloat();
+        Double model_gauge_m = data.getValue("model_gauge_m").getDouble();
         if (model_gauge_m != null) {
             this.recommended_gauge = Gauge.from(model_gauge_m);
             internal_model_scale = Gauge.STANDARD / model_gauge_m;
         }
-        Float recommended_gauge_m = data.getValue("recommended_gauge_m").getFloat();
+        Double recommended_gauge_m = data.getValue("recommended_gauge_m").getDouble();
         if (recommended_gauge_m != null) {
             this.recommended_gauge = Gauge.from(recommended_gauge_m);
         }
@@ -330,8 +330,8 @@ public abstract class EntityRollingStockDefinition {
 
         DataBlock passenger = data.getBlock("passenger");
         passengerCenter = new Vec3d(0, passenger.getValue("center_y").getDouble() - 0.35, passenger.getValue("center_x").getDouble()).scale(internal_model_scale);
-        passengerCompartmentLength = passenger.getValue("length").getFloat() * internal_model_scale;
-        passengerCompartmentWidth = passenger.getValue("width").getFloat() * internal_model_scale;
+        passengerCompartmentLength = passenger.getValue("length").getDouble() * internal_model_scale;
+        passengerCompartmentWidth = passenger.getValue("width").getDouble() * internal_model_scale;
         maxPassengers = passenger.getValue("slots").getInteger();
         shouldSit = passenger.getValue("should_sit").getBoolean();
 
@@ -367,8 +367,8 @@ public abstract class EntityRollingStockDefinition {
         }
         interiorLightLevel = properties.getValue("interior_light_level").getFloat(6 / 15f);
         hasInternalLighting = properties.getValue("internalLighting").getBoolean(this instanceof CarPassengerDefinition);
-        swayMultiplier = properties.getValue("swayMultiplier").getFloat(1f);
-        tiltMultiplier = properties.getValue("tiltMultiplier").getFloat(0f);
+        swayMultiplier = properties.getValue("swayMultiplier").getDouble(1);
+        tiltMultiplier = properties.getValue("tiltMultiplier").getDouble(0);
 
         brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
         try {

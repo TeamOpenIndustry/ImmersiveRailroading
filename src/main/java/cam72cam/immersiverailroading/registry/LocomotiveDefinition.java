@@ -46,7 +46,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         } else {
             power = (int) Math.ceil(properties.getValue("horsepower").getInteger() * internal_inv_scale);
             traction = (int) Math.ceil(properties.getValue("tractive_effort_lbf").getInteger() * internal_inv_scale);
-            maxSpeed = Speed.fromMetric(properties.getValue("max_speed_kmh").getFloat() * internal_inv_scale);
+            maxSpeed = Speed.fromMetric(properties.getValue("max_speed_kmh").getDouble() * internal_inv_scale);
             muliUnitCapable = properties.getValue("multi_unit_capable").getBoolean(this.multiUnitDefault());
         }
         isLinkedBrakeThrottle = properties.getValue("isLinkedBrakeThrottle").getBoolean(false);
