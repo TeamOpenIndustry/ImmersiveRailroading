@@ -27,27 +27,27 @@ public interface DataBlock {
     default Value getValue(String key) {
         return getValueMap().getOrDefault(key, new Value() {
             @Override
-            public Boolean getBoolean() {
+            public Boolean asBoolean() {
                 return null;
             }
 
             @Override
-            public Integer getInteger() {
+            public Integer asInteger() {
                 return null;
             }
 
             @Override
-            public Float getFloat() {
+            public Float asFloat() {
                 return null;
             }
 
             @Override
-            public Double getDouble() {
+            public Double asDouble() {
                 return null;
             }
 
             @Override
-            public String getString() {
+            public String asString() {
                 return null;
             }
         });
@@ -58,42 +58,42 @@ public interface DataBlock {
     }
 
     interface Value {
-        Boolean getBoolean();
-        default boolean getBoolean(boolean fallback) {
-            Boolean val = getBoolean();
+        Boolean asBoolean();
+        default boolean asBoolean(boolean fallback) {
+            Boolean val = asBoolean();
             return val != null ? val : fallback;
         }
 
-        Integer getInteger();
-        default int getInteger(int fallback) {
-            Integer val = getInteger();
+        Integer asInteger();
+        default int asInteger(int fallback) {
+            Integer val = asInteger();
             return val != null ? val : fallback;
         }
 
-        Float getFloat();
-        default float getFloat(float fallback) {
-            Float val = getFloat();
+        Float asFloat();
+        default float asFloat(float fallback) {
+            Float val = asFloat();
             return val != null ? val : fallback;
         }
 
-        Double getDouble();
-        default double getDouble(double fallback) {
-            Double val = getDouble();
+        Double asDouble();
+        default double asDouble(double fallback) {
+            Double val = asDouble();
             return val != null ? val : fallback;
         }
 
-        String getString();
-        default String getString(String fallback) {
-            String val = getString();
+        String asString();
+        default String asString(String fallback) {
+            String val = asString();
             return val != null ? val : fallback;
         }
 
-        default Identifier getIdentifier() {
-            String value = getString();
+        default Identifier asIdentifier() {
+            String value = asString();
             return value != null ? new Identifier(ImmersiveRailroading.MODID, new Identifier(value).getPath()) : null;
         }
-        default Identifier getIdentifier(Identifier fallback) {
-            Identifier val = getIdentifier();
+        default Identifier asIdentifier(Identifier fallback) {
+            Identifier val = asIdentifier();
             return val != null ? val : fallback;
         }
     }
@@ -129,27 +129,27 @@ public interface DataBlock {
     static Value wrapJSON(JsonPrimitive primitive) {
         return new Value() {
             @Override
-            public Boolean getBoolean() {
+            public Boolean asBoolean() {
                 return primitive == null ? null : primitive.getAsBoolean();
             }
 
             @Override
-            public Integer getInteger() {
+            public Integer asInteger() {
                 return primitive == null ? null : primitive.getAsInt();
             }
 
             @Override
-            public Float getFloat() {
+            public Float asFloat() {
                 return primitive == null ? null : primitive.getAsFloat();
             }
 
             @Override
-            public Double getDouble() {
+            public Double asDouble() {
                 return primitive == null ? null : primitive.getAsDouble();
             }
 
             @Override
-            public String getString() {
+            public String asString() {
                 return primitive == null ? null : primitive.getAsString();
             }
         };

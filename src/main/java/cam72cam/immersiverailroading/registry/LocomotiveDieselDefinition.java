@@ -31,14 +31,14 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
         DataBlock properties = data.getBlock("properties");
         if (!isCabCar()) {
-            fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.getValue("fuel_capacity_l").getInteger() * internal_inv_scale * 10));
-            fuelEfficiency = properties.getValue("fuel_efficiency_%").getInteger();
+            fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.getValue("fuel_capacity_l").asInteger() * internal_inv_scale * 10));
+            fuelEfficiency = properties.getValue("fuel_efficiency_%").asInteger();
         } else {
             fuelCapacity = FluidQuantity.ZERO;
         }
-        notches = properties.getValue("throttle_notches").getInteger(8);
+        notches = properties.getValue("throttle_notches").asInteger(8);
 
-        hornSus = properties.getValue("horn_sustained").getBoolean(false);
+        hornSus = properties.getValue("horn_sustained").asBoolean(false);
 
         idle = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg"));
         horn = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg"));

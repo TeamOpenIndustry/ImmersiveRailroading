@@ -52,18 +52,18 @@ public class GuiBuilder {
 
     protected GuiBuilder(DataBlock data) throws IOException {
         // common stuff
-        this.x = data.getValue("x").getFloat(0f);
-        this.y = data.getValue("y").getFloat(0f);
+        this.x = data.getValue("x").asFloat(0f);
+        this.y = data.getValue("y").asFloat(0f);
         DataBlock centered = data.getBlock("centered");
         if (centered != null) {
-            this.centerx = centered.getValue("x").getBoolean(false);
-            this.centery = centered.getValue("y").getBoolean(false);
+            this.centerx = centered.getValue("x").asBoolean(false);
+            this.centery = centered.getValue("y").asBoolean(false);
         } else {
             this.centerx = this.centery = false;
         }
 
         // Image stuff
-        this.image = data.getValue("image").getIdentifier(null);
+        this.image = data.getValue("image").asIdentifier(null);
         if (image != null) {
             BufferedImage tmp = ImageIO.read(this.image.getResourceStream());
             imageWidth = tmp.getWidth();
@@ -76,34 +76,34 @@ public class GuiBuilder {
         // Text stuff
         DataBlock txt = data.getBlock("text");
         if (txt != null) {
-            text = txt.getValue("value").getString();
-            textHeight = txt.getValue("height").getFloat(0f);
+            text = txt.getValue("value").asString();
+            textHeight = txt.getValue("height").asFloat(0f);
         } else {
             text = null;
             textHeight = 0;
         }
 
         // Controls
-        String readout = data.getValue("readout").getString();
+        String readout = data.getValue("readout").asString();
         this.readout = readout != null ? Readouts.valueOf(readout.toUpperCase(Locale.ROOT)) : null;
-        this.control = data.getValue("control").getString();
-        this.invert = data.getValue("invert").getBoolean(false);
-        this.hide = data.getValue("hide").getBoolean(false);
+        this.control = data.getValue("control").asString();
+        this.invert = data.getValue("invert").asBoolean(false);
+        this.hide = data.getValue("hide").asBoolean(false);
 
         DataBlock tl = data.getBlock("translate");
         if (tl != null) {
-            this.tlx = tl.getValue("x").getFloat(0);
-            this.tly = tl.getValue("y").getFloat(0);
+            this.tlx = tl.getValue("x").asFloat(0);
+            this.tly = tl.getValue("y").asFloat(0);
         } else {
             tlx = tly = 0;
         }
 
         DataBlock rot = data.getBlock("rotate");
         if (rot != null) {
-            this.rotx = rot.getValue("x").getFloat(0);
-            this.roty = rot.getValue("y").getFloat(0);
-            this.rotdeg = rot.getValue("degrees").getFloat(360);
-            this.rotoff = rot.getValue("offset").getFloat(0);
+            this.rotx = rot.getValue("x").asFloat(0);
+            this.roty = rot.getValue("y").asFloat(0);
+            this.rotdeg = rot.getValue("degrees").asFloat(360);
+            this.rotoff = rot.getValue("offset").asFloat(0);
         } else {
             this.rotx = 0;
             this.roty = 0;
@@ -113,8 +113,8 @@ public class GuiBuilder {
 
         DataBlock scale = data.getBlock("scale");
         if (scale != null) {
-            this.scalex = scale.getValue("x").getFloat();
-            this.scaley = scale.getValue("y").getFloat();
+            this.scalex = scale.getValue("x").asFloat();
+            this.scaley = scale.getValue("y").asFloat();
         } else {
             this.scalex = null;
             this.scaley = null;
@@ -123,7 +123,7 @@ public class GuiBuilder {
         DataBlock color = data.getBlock("color");
         if (color != null) {
             color.getValueMap().forEach((key, value) -> {
-                String hex = value.getString();
+                String hex = value.asString();
                 if (hex.length() == 8) {
                     hex = hex.replace("0x", "0xFF");
                     hex = hex.replace("0X", "0XFF");
@@ -147,7 +147,7 @@ public class GuiBuilder {
         List<DataBlock.Value> imports = data.getValues("import");
         if (imports != null) {
             for (DataBlock.Value imp : imports) {
-                elements.add(parse(imp.getIdentifier()));
+                elements.add(parse(imp.asIdentifier()));
             }
         }
     }

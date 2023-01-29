@@ -49,10 +49,10 @@ public class ValveGearConfig {
 		if (block != null) {
 			DataBlock animatrix = block.getBlock("animatrix");
 			Map<Float, Identifier> custom = new HashMap<>();
-			animatrix.getValueMap().forEach((percent, anim) -> custom.put(Float.parseFloat(percent), anim.getIdentifier()));
+			animatrix.getValueMap().forEach((percent, anim) -> custom.put(Float.parseFloat(percent), anim.asIdentifier()));
 			return new ValveGearConfig(ValveGearType.CUSTOM, custom);
 		}
-		String name = def.getValue(key).getString();
+		String name = def.getValue(key).asString();
 		if (name != null) {
 			return new ValveGearConfig(ValveGearType.from(name.toUpperCase(Locale.ROOT)), null);
 		}

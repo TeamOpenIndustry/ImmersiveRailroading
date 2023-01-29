@@ -27,7 +27,7 @@ public class DefinitionManager {
     static {
         jsonLoaders = new LinkedHashMap<>();
         jsonLoaders.put("locomotives", (String defID, DataBlock data) -> {
-            String era = data.getValue("era").getString();
+            String era = data.getValue("era").asString();
             switch (era) {
                 case "steam":
                     return new LocomotiveSteamDefinition(defID, data);
@@ -70,12 +70,12 @@ public class DefinitionManager {
         for (DataBlock gauges : blocks) {
             DataBlock register = gauges.getBlock("register");
             if (register != null) {
-                register.getValueMap().forEach((key, value) -> Gauge.register(value.getDouble(), key));
+                register.getValueMap().forEach((key, value) -> Gauge.register(value.asDouble(), key));
             }
             List<DataBlock.Value> remove = gauges.getValues("remove");
             if (remove != null) {
                 for (DataBlock.Value gauge : remove) {
-                    toRemove.add(gauge.getDouble());
+                    toRemove.add(gauge.asDouble());
                 }
             }
         }
@@ -185,7 +185,7 @@ public class DefinitionManager {
             for (String defType : defTypes) {
                 List<DataBlock.Value> names = stock.getValues(defType);
                 if (names != null) {
-                    for (String defName : names.stream().map(DataBlock.Value::getString).collect(Collectors.toList())) {
+                    for (String defName : names.stream().map(DataBlock.Value::asString).collect(Collectors.toList())) {
                         if (blacklist.contains(defName)) {
                             ImmersiveRailroading.info("Skipping blacklisted %s", defName);
                             continue;
@@ -197,7 +197,7 @@ public class DefinitionManager {
                         }
 
                         definitionIDMap.put(defID, defType);
-                        String pack = stock.getValue("pack").getString();
+                        String pack = stock.getValue("pack").asString();
                         if (pack != null) {
                             definitionIDPacks.put(defID, pack);
                         }
@@ -276,7 +276,7 @@ public class DefinitionManager {
             for (String defType : defTypes) {
                 List<DataBlock.Value> found = block.getValues(defType);
                 if (found != null) {
-                    blacklist.addAll(found.stream().map(DataBlock.Value::getString).collect(Collectors.toList()));
+                    blacklist.addAll(found.stream().map(DataBlock.Value::asString).collect(Collectors.toList()));
                 }
             }
         }
@@ -305,7 +305,7 @@ public class DefinitionManager {
 
 
         for (DataBlock track : blocks) {
-            List<String> types = track.getValues("types").stream().map(DataBlock.Value::getString).collect(Collectors.toList());
+            List<String> types = track.getValues("types").stream().map(DataBlock.Value::asString).collect(Collectors.toList());
             Progress.Bar bar = Progress.push("Loading Tracks", types.size());
 
             for (String def : types) {

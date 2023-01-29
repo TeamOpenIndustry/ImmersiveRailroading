@@ -31,11 +31,11 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public void parseJson(DataBlock data) throws Exception {
         super.parseJson(data);
 
-        works = data.getValue("works").getString();
+        works = data.getValue("works").asString();
 
         DataBlock properties = data.getBlock("properties");
 
-        hasRadioEquipment = properties.getValue("radio_equipped").getBoolean(false);
+        hasRadioEquipment = properties.getValue("radio_equipped").asBoolean(false);
 
         isCabCar = readCabCarFlag(data);
         if (isCabCar) {
@@ -44,18 +44,18 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
             maxSpeed = Speed.ZERO;
             muliUnitCapable = true;
         } else {
-            power = (int) Math.ceil(properties.getValue("horsepower").getInteger() * internal_inv_scale);
-            traction = (int) Math.ceil(properties.getValue("tractive_effort_lbf").getInteger() * internal_inv_scale);
-            maxSpeed = Speed.fromMetric(properties.getValue("max_speed_kmh").getDouble() * internal_inv_scale);
-            muliUnitCapable = properties.getValue("multi_unit_capable").getBoolean(this.multiUnitDefault());
+            power = (int) Math.ceil(properties.getValue("horsepower").asInteger() * internal_inv_scale);
+            traction = (int) Math.ceil(properties.getValue("tractive_effort_lbf").asInteger() * internal_inv_scale);
+            maxSpeed = Speed.fromMetric(properties.getValue("max_speed_kmh").asDouble() * internal_inv_scale);
+            muliUnitCapable = properties.getValue("multi_unit_capable").asBoolean(this.multiUnitDefault());
         }
-        isLinkedBrakeThrottle = properties.getValue("isLinkedBrakeThrottle").getBoolean(false);
-        toggleBell = properties.getValue("toggle_bell").getBoolean(true);
-        isCog = properties.getValue("cog").getBoolean(false);
+        isLinkedBrakeThrottle = properties.getValue("isLinkedBrakeThrottle").asBoolean(false);
+        toggleBell = properties.getValue("toggle_bell").asBoolean(true);
+        isCog = properties.getValue("cog").asBoolean(false);
     }
 
     protected boolean readCabCarFlag(DataBlock data) {
-        return data.getBlock("properties").getValue("cab_car").getBoolean(false);
+        return data.getBlock("properties").getValue("cab_car").asBoolean(false);
     }
 
     protected abstract boolean multiUnitDefault();

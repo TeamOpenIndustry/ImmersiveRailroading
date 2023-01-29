@@ -145,27 +145,27 @@ public class CAML {
         }
 
         @Override
-        public Boolean getBoolean() {
+        public Boolean asBoolean() {
             return value == null ? null : Boolean.parseBoolean(value);
         }
 
         @Override
-        public Integer getInteger() {
+        public Integer asInteger() {
             return value == null ? null : Integer.parseInt(value);
         }
 
         @Override
-        public Float getFloat() {
+        public Float asFloat() {
             return value == null ? null : Float.parseFloat(value);
         }
 
         @Override
-        public Double getDouble() {
+        public Double asDouble() {
             return value == null ? null : Double.parseDouble(value);
         }
 
         @Override
-        public String getString() {
+        public String asString() {
             return value;
         }
     }
