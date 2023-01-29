@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.gui.overlay.DataBlock;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.mod.item.Fuzzy;

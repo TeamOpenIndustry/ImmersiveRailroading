@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.gui.overlay;
+package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.resource.Identifier;

@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.entity.Tender;
-import cam72cam.immersiverailroading.gui.overlay.DataBlock;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.FreightTankModel;

@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.library;
 
-import cam72cam.immersiverailroading.gui.overlay.DataBlock;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.resource.Identifier;
 
 import java.util.HashMap;
