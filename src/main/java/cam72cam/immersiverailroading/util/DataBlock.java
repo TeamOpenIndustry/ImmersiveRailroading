@@ -105,15 +105,11 @@ public interface DataBlock {
     static DataBlock load(Identifier ident, boolean last) throws IOException {
         InputStream stream = last ? ident.getLastResourceStream() : ident.getResourceStream();
         if (ident.getPath().toLowerCase(Locale.ROOT).endsWith(".caml")) {
-            DataBlock parse = CAML.parse(stream);
-            stream.close();
-            return parse;
+            return CAML.parse(stream);
         }
         if (!ident.getPath().toLowerCase(Locale.ROOT).endsWith(".json")) {
             ImmersiveRailroading.warn("Unexpected file extension '%s', trying JSON...", ident.toString());
         }
-        DataBlock parse = JSON.parse(stream);
-        stream.close();
-        return parse;
+        return JSON.parse(stream);
     }
 }

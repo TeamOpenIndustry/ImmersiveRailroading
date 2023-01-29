@@ -2,9 +2,11 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.util.CAML;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
+import cam72cam.immersiverailroading.util.JSON;
 import cam72cam.mod.gui.Progress;
 import cam72cam.mod.resource.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
@@ -56,13 +58,13 @@ public class DefinitionManager {
         Identifier gauges_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/gauges.json");
         List<InputStream> inputs = gauges_json.getResourceStreamAll();
         for (InputStream input : inputs) {
-            blocks.add(DataBlock.parseJSON(input));
+            blocks.add(JSON.parse(input));
         }
 
         Identifier gauges_caml = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/gauges.caml");
         inputs = gauges_caml.getResourceStreamAll();
         for (InputStream input : inputs) {
-            blocks.add(DataBlock.parseCAML(input));
+            blocks.add(CAML.parse(input));
         }
 
         List<Double> toRemove = new ArrayList<>();
@@ -171,13 +173,13 @@ public class DefinitionManager {
         Identifier stock_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/stock.json");
         List<InputStream> inputs = stock_json.getResourceStreamAll();
         for (InputStream input : inputs) {
-            blocks.add(DataBlock.parseJSON(input));
+            blocks.add(JSON.parse(input));
         }
 
         Identifier stock_caml = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/stock.caml");
         inputs = stock_caml.getResourceStreamAll();
         for (InputStream input : inputs) {
-            blocks.add(DataBlock.parseCAML(input));
+            blocks.add(CAML.parse(input));
         }
 
 
@@ -266,13 +268,13 @@ public class DefinitionManager {
         Identifier blacklist_json = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/blacklist.json");
         List<InputStream> inputs = blacklist_json.getResourceStreamAll();
         for (InputStream input : inputs) {
-            blocks.add(DataBlock.parseJSON(input));
+            blocks.add(JSON.parse(input));
         }
 
         Identifier blacklist_caml = new Identifier(ImmersiveRailroading.MODID, "rolling_stock/blacklist.caml");
         inputs = blacklist_caml.getResourceStreamAll();
         for (InputStream input : inputs) {
-            blocks.add(DataBlock.parseCAML(input));
+            blocks.add(CAML.parse(input));
         }
 
         for (DataBlock block : blocks) {
@@ -297,13 +299,13 @@ public class DefinitionManager {
         Identifier track_json = new Identifier(ImmersiveRailroading.MODID, "track/track.json");
         List<InputStream> inputs = track_json.getResourceStreamAll();
         for (InputStream input : inputs) {
-            blocks.add(DataBlock.parseJSON(input));
+            blocks.add(JSON.parse(input));
         }
 
         Identifier track_caml = new Identifier(ImmersiveRailroading.MODID, "track/track.caml");
         inputs = track_caml.getResourceStreamAll();
         for (InputStream input : inputs) {
-            blocks.add(DataBlock.parseCAML(input));
+            blocks.add(CAML.parse(input));
         }
 
 

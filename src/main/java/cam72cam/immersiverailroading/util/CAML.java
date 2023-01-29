@@ -41,6 +41,7 @@ public class CAML {
                 .map(s -> s.replaceFirst("#.*", ""))
                 .filter(s -> !StringUtils.isWhitespace(s))
                 .collect(Collectors.toList());
+        stream.close();
 
         return createBlock(lines);
     }

@@ -16,7 +16,11 @@ import java.util.Map;
 /** Helper class to turn JSON into DataBlocks */
 public class JSON {
     public static DataBlock parse(InputStream stream) throws IOException {
-        return wrapObject(new JsonParser().parse(new InputStreamReader(stream)).getAsJsonObject());
+        try {
+            return wrapObject(new JsonParser().parse(new InputStreamReader(stream)).getAsJsonObject());
+        } finally {
+            stream.close();
+        }
     }
 
     private static DataBlock wrapObject(JsonObject obj) {
