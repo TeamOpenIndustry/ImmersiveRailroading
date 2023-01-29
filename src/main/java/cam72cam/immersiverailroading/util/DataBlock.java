@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.function.BinaryOperator;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public interface DataBlock {
@@ -157,30 +155,31 @@ public interface DataBlock {
         };
     }
     static DataBlock wrapJSON(JsonObject obj) {
-        Map<String, Value> primitives = obj.entrySet().stream()
-                .filter(e -> e.getValue().isJsonPrimitive())
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonPrimitive()), (u, v) -> u, LinkedHashMap::new));
-        Map<String, DataBlock> blocks = obj.entrySet().stream()
-                .filter(e -> e.getValue().isJsonObject())
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonObject()), (u, v) -> u, LinkedHashMap::new));
-        Map<String, List<Value>> primitiveSets = obj.entrySet().stream()
-                .filter(e -> e.getValue().isJsonArray() && (e.getValue().getAsJsonArray().size() == 0 || e.getValue().getAsJsonArray().get(0).isJsonPrimitive()))
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> {
-                    List<Value> result = new ArrayList<>();
-                    for (JsonElement elem : t.getValue().getAsJsonArray()) {
-                        result.add(wrapJSON(elem.getAsJsonPrimitive()));
+        Map<String, Value> primitives = new LinkedHashMap<>();
+        Map<String, DataBlock> blocks = new LinkedHashMap<>();
+        for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+            if (entry.getValue().isJsonPrimitive()) {
+                primitives.put(entry.getKey(), wrapJSON(entry.getValue().getAsJsonPrimitive()));
+            }
+            if (entry.getValue().isJsonObject()) {
+                blocks.put(entry.getKey(), wrapJSON(entry.getValue().getAsJsonObject()));
+            }
+        }
+        Map<String, List<Value>> primitiveSets = new LinkedHashMap<>();
+        Map<String, List<DataBlock>> blockSets = new LinkedHashMap<>();
+        for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+            if (entry.getValue().isJsonArray()) {
+                for (JsonElement element : entry.getValue().getAsJsonArray()) {
+                    if (element.isJsonPrimitive()) {
+                        primitiveSets.computeIfAbsent(entry.getKey(), key -> new ArrayList<>()).add(wrapJSON(element.getAsJsonPrimitive()));
                     }
-                    return result;
-                }, (u, v) -> u, LinkedHashMap::new));
-        Map<String, List<DataBlock>> blockSets = obj.entrySet().stream()
-                .filter(e -> e.getValue().isJsonArray() && (e.getValue().getAsJsonArray().size() == 0 || e.getValue().getAsJsonArray().get(0).isJsonObject()))
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> {
-                    List<DataBlock> result = new ArrayList<>();
-                    for (JsonElement elem : t.getValue().getAsJsonArray()) {
-                        result.add(wrapJSON(elem.getAsJsonObject()));
+                    if (element.isJsonObject()) {
+                        blockSets.computeIfAbsent(entry.getKey(), key -> new ArrayList<>()).add(wrapJSON(element.getAsJsonObject()));
                     }
-                    return result;
-                }, (u, v) -> u, LinkedHashMap::new));
+                    // TODO Nested Arrays are Ignored for not
+                }
+            }
+        }
 
         return new DataBlock() {
             @Override
