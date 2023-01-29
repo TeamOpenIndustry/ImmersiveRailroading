@@ -31,7 +31,7 @@ public class CarTankDefinition extends FreightDefinition {
         super.parseJson(data);
         DataBlock tank = data.getBlock("tank");
         capacity = FluidQuantity.FromLiters((int) Math.ceil(tank.getInteger("capacity_l") * internal_inv_scale));
-        List<String> whitelist = tank.getSet("whitelist");
+        List<String> whitelist = tank.getPrimitives("whitelist");
         if (whitelist != null) {
             fluidFilter = new ArrayList<>();
             for (String allowed : whitelist) {

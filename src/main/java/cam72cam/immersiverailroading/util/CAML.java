@@ -11,7 +11,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-/** Cam's Awesome Markup Language */
+/*
+ * CAML =
+ *      # Cam's Awesome Markup Language V1
+ *      description: CAML is an incredibly simple markup language, with a very small rule set.
+ *      description: It is an indentation based format, which allows both tabs and spaces, as long as they are consistent.
+ *      formatting =
+ *          comment = "Any character that follows a # is ignored, unless it is a contained in a quoted string"
+ *          whitespace = Any combination of spaces and tabs
+ *          key =
+ *              # An identifier made up of any non-whitespace character followed by a '=' or ':'
+ *              set: When a key is followed by ':' there can be multiple keys with that name which are grouped in a collection
+ *              single = When a key is followed by '=' there can only be a single key with that name.
+ *          string = Any sequence of characters that is optionally wrapped in "quotation marks"
+ *      types =
+ *          # There are two types in CAML
+ *          blocks =
+ *              description = A block is a named container
+ *              format = A block is started with a key at the current indentation level
+ *              contents = Any subsequent lines at a deeper indentation level are read and then added to the block as their respective types.
+ *
+ *          primitive = A key followed by a value
+ *
+ * */
 public class CAML {
     private static final Pattern base = Pattern.compile("(\\s*)(\\S+)\\s*([=:])\\s?(.*)");
     public static Block parse(InputStream stream) throws IOException {
@@ -24,12 +46,13 @@ public class CAML {
     }
 
     public static class Block implements DataBlock {
-        private final Map<String, String> values = new HashMap<>();
-        private final Map<String, List<DataBlock>> blocks = new HashMap<>();
-        private final Map<String, List<String>> sets = new HashMap<>();
+        private final Map<String, String> primitives = new HashMap<>();
+        private final Map<String, List<String>> primitiveSets = new HashMap<>();
+        private final Map<String, DataBlock> blocks = new HashMap<>();
+        private final Map<String, List<DataBlock>> blockSets = new HashMap<>();
 
         private Block(List<String> lines) throws IOException {
-            int spaces = -1;
+            String spaces = null;
             while (!lines.isEmpty()) {
                 String line = lines.get(0);
                 Matcher m = base.matcher(line);
@@ -37,90 +60,116 @@ public class CAML {
                     throw new IOException(String.format("Invalid Block line '%s'", line));
                 }
 
-                int pre = m.group(1).length();
+                String pre = m.group(1);
                 String key = m.group(2);
                 String mod = m.group(3);
                 String val = m.group(4);
 
-                if (spaces == -1) {
+                if (spaces == null) {
                     spaces = pre;
                 }
 
-                if (spaces > pre) {
+                if (!pre.startsWith(spaces) && !spaces.startsWith(pre)) {
+                    throw new IOException(String.format("Invalid Block line '%s' mismatched indentation '%s' vs '%s'", line, spaces, pre));
+                }
+
+                if (spaces.length() > pre.length()) {
                     // Reduced indentation
                     return;
                 }
-                if (spaces < pre) {
-                    throw new IOException(String.format("Invalid Block line '%s' mismatched spaces %s vs %s", line, spaces, pre));
+                if (!spaces.equals(pre)) {
+                    throw new IOException(String.format("Invalid Block line '%s' invalid indentation '%s' vs '%s'", line, spaces, pre));
                 }
 
                 lines.remove(0);
 
-                switch (mod) {
-                    case "=":
-                        values.put(key, val);
-                        break;
-                    case ":":
-                        if (StringUtils.isWhitespace(val)) {
-                            blocks.computeIfAbsent(key, k -> new ArrayList<>()).add(new Block(lines));
-                        } else {
-                            sets.computeIfAbsent(key, k -> new ArrayList<>()).add(val);
+                String trimmed = val.trim();
+                if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+                    val = val.substring(1, val.length()-1);
+                }
+
+                if (StringUtils.isWhitespace(val)) {
+                    Block block = new Block(lines);
+                    if (mod.equals("=")) {
+                        if (blocks.containsKey(key) || blockSets.containsKey(key)) {
+                            throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                         }
-                        break;
-                    default:
-                        throw new IOException(String.format("Invalid Block line '%s'", line));
+                        blocks.put(key, block);
+                    } else {
+                        if (blocks.containsKey(key)) {
+                            throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        }
+                        blockSets.computeIfAbsent(key, k -> new ArrayList<>()).add(block);
+                    }
+                } else {
+                    if (mod.equals("=")) {
+                        if (primitives.containsKey(key) || primitiveSets.containsKey(key)) {
+                            throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        }
+                        primitives.put(key, val);
+                    } else {
+                        if (primitives.containsKey(key)) {
+                            throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        }
+                        primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(val);
+                    }
                 }
             }
         }
 
         @Override
         public DataBlock getBlock(String key) {
-            return blocks.containsKey(key) ? blocks.get(key).get(0) : null;
-        }
-
-        @Override
-        public List<DataBlock> getBlocks(String key) {
             return blocks.get(key);
         }
 
         @Override
+        public List<DataBlock> getBlocks(String key) {
+            return blockSets.get(key);
+        }
+
+        @Override
         public Boolean getBoolean(String key) {
-            return values.containsKey(key) ? Boolean.parseBoolean(values.get(key)) : null;
+            return primitives.containsKey(key) ? Boolean.parseBoolean(primitives.get(key)) : null;
         }
 
         @Override
         public Integer getInteger(String key) {
-            return values.containsKey(key) ? Integer.parseInt(values.get(key)) : null;
+            return primitives.containsKey(key) ? Integer.parseInt(primitives.get(key)) : null;
         }
 
         @Override
         public Float getFloat(String key) {
-            return values.containsKey(key) ? Float.parseFloat(values.get(key)) : null;
+            return primitives.containsKey(key) ? Float.parseFloat(primitives.get(key)) : null;
         }
 
         @Override
         public String getString(String key) {
-            return values.get(key);
+            return primitives.get(key);
         }
 
         @Override
-        public List<String> getSet(String key) {
-            return sets.get(key);
+        public List<String> getPrimitives(String key) {
+            return primitiveSets.get(key);
         }
 
         @Override
         public Set<String> getPrimitiveKeys() {
-            return values.keySet();
+            return primitives.keySet();
+        }
+
+        @Override
+        public Collection<String> getPrimitiveSetsKeys() {
+            return primitiveSets.keySet();
         }
 
         @Override
         public Collection<String> getBlockKeys() {
-            return blocks.keySet();
+            return blockSets.keySet();
         }
 
         @Override
-        public Collection<String> getSetKeys() {
-            return sets.keySet();
+        public Collection<String> getBlockSetsKeys() {
+            return blockSets.keySet();
         }
     }
 }

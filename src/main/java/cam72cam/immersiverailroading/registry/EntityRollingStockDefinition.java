@@ -403,7 +403,7 @@ public abstract class EntityRollingStockDefinition {
 
         Identifier overlay = data.getIdentifier("overlay");
         this.overlay = overlay != null ? GuiBuilder.parse(overlay) : getDefaultOverlay(data);
-        List<String> extra_tooltip_info = data.getSet("extra_tooltip_info");
+        List<String> extra_tooltip_info = data.getPrimitives("extra_tooltip_info");
         if (extra_tooltip_info != null) {
             extraTooltipInfo = new ArrayList<>(extra_tooltip_info);
         } else {

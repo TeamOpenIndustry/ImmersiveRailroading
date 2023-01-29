@@ -10,13 +10,12 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/** TODO multi dimensional arrays... */
 @SuppressWarnings("unused")
 public interface DataBlock {
     DataBlock getBlock(String key);
     List<DataBlock> getBlocks(String key);
 
-    List<String> getSet(String key);
+    List<String> getPrimitives(String key);
 
     Boolean getBoolean(String key);
     default boolean getBoolean(String key, boolean fallback) {
@@ -52,8 +51,9 @@ public interface DataBlock {
     }
 
     Collection<String> getPrimitiveKeys();
+    Collection<String> getPrimitiveSetsKeys();
     Collection<String> getBlockKeys();
-    Collection<String> getSetKeys();
+    Collection<String> getBlockSetsKeys();
 
     static DataBlock load(Identifier ident) throws IOException {
         return load(ident, false);
@@ -83,10 +83,10 @@ public interface DataBlock {
         Map<String, JsonPrimitive> primitives = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonPrimitive())
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> t.getValue().getAsJsonPrimitive()));
-        Map<String, List<DataBlock>> blocks = obj.entrySet().stream()
+        Map<String, DataBlock> blocks = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonObject())
-                .collect(Collectors.toMap(Map.Entry::getKey, t -> Collections.singletonList(wrapJSON(t.getValue().getAsJsonObject()))));
-        Map<String, List<String>> sets = obj.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, t -> wrapJSON(t.getValue().getAsJsonObject())));
+        Map<String, List<String>> primitiveSets = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonArray() && (e.getValue().getAsJsonArray().size() == 0 || e.getValue().getAsJsonArray().get(0).isJsonPrimitive()))
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> {
                     List<String> result = new ArrayList<>();
@@ -95,7 +95,7 @@ public interface DataBlock {
                     }
                     return result;
                 }));
-        blocks.putAll(obj.entrySet().stream()
+        Map<String, List<DataBlock>> blockSets = obj.entrySet().stream()
                 .filter(e -> e.getValue().isJsonArray() && (e.getValue().getAsJsonArray().size() == 0 || e.getValue().getAsJsonArray().get(0).isJsonObject()))
                 .collect(Collectors.toMap(Map.Entry::getKey, t -> {
                     List<DataBlock> result = new ArrayList<>();
@@ -103,22 +103,22 @@ public interface DataBlock {
                         result.add(wrapJSON(elem.getAsJsonObject()));
                     }
                     return result;
-                })));
+                }));
 
         return new DataBlock() {
             @Override
             public DataBlock getBlock(String key) {
-                return blocks.containsKey(key) ? blocks.get(key).get(0) : null;
-            }
-
-            @Override
-            public List<DataBlock> getBlocks(String key) {
                 return blocks.get(key);
             }
 
             @Override
-            public List<String> getSet(String key) {
-                return sets.get(key);
+            public List<DataBlock> getBlocks(String key) {
+                return blockSets.get(key);
+            }
+
+            @Override
+            public List<String> getPrimitives(String key) {
+                return primitiveSets.get(key);
             }
 
             @Override
@@ -147,13 +147,18 @@ public interface DataBlock {
             }
 
             @Override
+            public Collection<String> getPrimitiveSetsKeys() {
+                return primitiveSets.keySet();
+            }
+
+            @Override
             public Collection<String> getBlockKeys() {
                 return blocks.keySet();
             }
 
             @Override
-            public Collection<String> getSetKeys() {
-                return sets.keySet();
+            public Collection<String> getBlockSetsKeys() {
+                return blockSets.keySet();
             }
         };
     }

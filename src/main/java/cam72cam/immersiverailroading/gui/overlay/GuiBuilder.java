@@ -145,7 +145,7 @@ public class GuiBuilder {
                 elements.add(new GuiBuilder(element));
             }
         }
-        List<String> imports = data.getSet("import");
+        List<String> imports = data.getPrimitives("import");
         if (imports != null) {
             for (String imp : imports) {
                 elements.add(parse(new Identifier(ImmersiveRailroading.MODID, new Identifier(imp).getPath())));

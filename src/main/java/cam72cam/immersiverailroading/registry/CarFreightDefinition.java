@@ -29,7 +29,7 @@ public class CarFreightDefinition extends FreightDefinition {
         if (freight != null) {
             this.numSlots = (int) Math.ceil(freight.getInteger("slots") * internal_inv_scale);
             this.width = (int) Math.ceil(freight.getInteger("width") * internal_inv_scale);
-            this.validCargo = new ArrayList<>(freight.getSet("cargo"));
+            this.validCargo = new ArrayList<>(freight.getPrimitives("cargo"));
         } else {
             this.numSlots = 0;
             this.width = 0;

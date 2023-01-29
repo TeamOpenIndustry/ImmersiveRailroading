@@ -74,7 +74,7 @@ public class DefinitionManager {
                     Gauge.register(register.getFloat(key), key);
                 }
             }
-            List<String> remove = gauges.getSet("remove");
+            List<String> remove = gauges.getPrimitives("remove");
             if (remove != null) {
                 for (String gauge : remove) {
                     toRemove.add(Double.parseDouble(gauge));
@@ -185,7 +185,7 @@ public class DefinitionManager {
 
         for (DataBlock stock : blocks) {
             for (String defType : defTypes) {
-                List<String> names = stock.getSet(defType);
+                List<String> names = stock.getPrimitives(defType);
                 if (names != null) {
                     for (String defName : names) {
                         if (blacklist.contains(defName)) {
@@ -276,7 +276,7 @@ public class DefinitionManager {
 
         for (DataBlock block : blocks) {
             for (String defType : defTypes) {
-                List<String> found = block.getSet(defType);
+                List<String> found = block.getPrimitives(defType);
                 if (found != null) {
                     blacklist.addAll(found);
                 }
@@ -307,7 +307,7 @@ public class DefinitionManager {
 
 
         for (DataBlock track : blocks) {
-            List<String> types = track.getSet("types");
+            List<String> types = track.getPrimitives("types");
             Progress.Bar bar = Progress.push("Loading Tracks", types.size());
 
             for (String def : types) {
