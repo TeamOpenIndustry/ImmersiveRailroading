@@ -22,11 +22,11 @@ import java.util.stream.Stream;
 public class DefinitionManager {
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static Map<String, TrackDefinition> tracks;
-    private static Map<String, JsonLoader> jsonLoaders;
+    private static final Map<String, StockLoader> stockLoaders;
 
     static {
-        jsonLoaders = new LinkedHashMap<>();
-        jsonLoaders.put("locomotives", (String defID, DataBlock data) -> {
+        stockLoaders = new LinkedHashMap<>();
+        stockLoaders.put("locomotives", (String defID, DataBlock data) -> {
             String era = data.getValue("era").asString();
             switch (era) {
                 case "steam":
@@ -39,11 +39,11 @@ public class DefinitionManager {
             }
         });
 
-        jsonLoaders.put("tender", TenderDefinition::new);
-        jsonLoaders.put("passenger", CarPassengerDefinition::new);
-        jsonLoaders.put("freight", CarFreightDefinition::new);
-        jsonLoaders.put("tank", CarTankDefinition::new);
-        jsonLoaders.put("hand_car", HandCarDefinition::new);
+        stockLoaders.put("tender", TenderDefinition::new);
+        stockLoaders.put("passenger", CarPassengerDefinition::new);
+        stockLoaders.put("freight", CarFreightDefinition::new);
+        stockLoaders.put("tank", CarTankDefinition::new);
+        stockLoaders.put("hand_car", HandCarDefinition::new);
     }
 
     private static void initGauges() throws IOException {
@@ -160,7 +160,7 @@ public class DefinitionManager {
     private static void initModels() throws IOException {
         ImmersiveRailroading.info("Loading stock models.");
 
-        Set<String> defTypes = jsonLoaders.keySet();
+        Set<String> defTypes = stockLoaders.keySet();
         List<String> blacklist = getModelBlacklist(defTypes);
 
         LinkedHashMap<String, String> definitionIDMap = new LinkedHashMap<>();
@@ -231,7 +231,7 @@ public class DefinitionManager {
                     block.getValueMap().put("pack", definitionIDPacks.get(defID));
                 }
 
-                EntityRollingStockDefinition stockDefinition = jsonLoaders.get(defType).apply(defID, block);
+                EntityRollingStockDefinition stockDefinition = stockLoaders.get(defType).apply(defID, block);
 
                 Runtime runtime = Runtime.getRuntime();
                 if (runtime.freeMemory() < runtime.maxMemory() * 0.25) {
@@ -391,7 +391,7 @@ public class DefinitionManager {
     }
 
     @FunctionalInterface
-    private interface JsonLoader {
+    private interface StockLoader {
         EntityRollingStockDefinition apply(String defID, DataBlock data) throws Exception;
     }
 

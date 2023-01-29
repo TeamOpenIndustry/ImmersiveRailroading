@@ -23,8 +23,8 @@ public class CarFreightDefinition extends FreightDefinition {
     }
 
     @Override
-    public void parseJson(DataBlock data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
         DataBlock freight = data.getBlock("freight");
         if (freight != null) {
             this.numSlots = (int) Math.ceil(freight.getValue("slots").asInteger() * internal_inv_scale);

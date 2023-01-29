@@ -28,8 +28,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     }
 
     @Override
-    public void parseJson(DataBlock data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
 
         works = data.getValue("works").asString();
 

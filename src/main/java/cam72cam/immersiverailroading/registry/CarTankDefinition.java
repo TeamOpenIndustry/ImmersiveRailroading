@@ -27,8 +27,8 @@ public class CarTankDefinition extends FreightDefinition {
     }
 
     @Override
-    public void parseJson(DataBlock data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
         DataBlock tank = data.getBlock("tank");
         capacity = FluidQuantity.FromLiters((int) Math.ceil(tank.getValue("capacity_l").asInteger() * internal_inv_scale));
         List<DataBlock.Value> whitelist = tank.getValues("whitelist");

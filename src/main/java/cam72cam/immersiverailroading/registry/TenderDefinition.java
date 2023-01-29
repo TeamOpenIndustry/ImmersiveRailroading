@@ -19,8 +19,8 @@ public class TenderDefinition extends CarTankDefinition {
     }
 
     @Override
-    public void parseJson(DataBlock data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
 
         DataBlock tender = data.getBlock("tender");
         this.numSlots = (int) Math.ceil(tender.getValue("slots").asInteger() * internal_inv_scale);

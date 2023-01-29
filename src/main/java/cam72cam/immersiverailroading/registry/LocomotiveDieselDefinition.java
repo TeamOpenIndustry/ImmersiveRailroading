@@ -26,8 +26,8 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    public void parseJson(DataBlock data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
 
         DataBlock properties = data.getBlock("properties");
         if (!isCabCar()) {

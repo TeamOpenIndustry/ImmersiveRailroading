@@ -10,8 +10,8 @@ public class CarPassengerDefinition extends CarFreightDefinition {
     }
 
     @Override
-    public void parseJson(DataBlock data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
     }
 
     @Override

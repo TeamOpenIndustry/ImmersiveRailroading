@@ -218,7 +218,7 @@ public abstract class EntityRollingStockDefinition {
         this.defID = defID;
 
 
-        parseJson(data);
+        loadData(data);
 
         this.model = createModel();
         this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.shouldRender(x)).collect(Collectors.toList());
@@ -281,7 +281,7 @@ public abstract class EntityRollingStockDefinition {
         return ConfigSound.scaleSoundToGauge && scalePitch;
     }
 
-    public void parseJson(DataBlock data) throws Exception {
+    public void loadData(DataBlock data) throws Exception {
         name = data.getValue("name").asString();
         modelerName = data.getValue("modeler").asString("N/A");
         packName = data.getValue("pack").asString("N/A");
