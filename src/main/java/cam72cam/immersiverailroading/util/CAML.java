@@ -35,18 +35,17 @@ import java.util.stream.Collectors;
  *
  * */
 public class CAML {
-    private static final Pattern base = Pattern.compile("(\\s*)(\\S+)\\s*([=:])\\s?(.*)");
+    private static final Pattern base = Pattern.compile("(\\s*)(\\S+)\\s*([=:])\\s?(\"[^\"]*\"|[^#]*)(#.*)?");
     public static DataBlock parse(InputStream stream) throws IOException {
         List<String> lines = IOUtils.readLines(stream, StandardCharsets.UTF_8).stream()
-                .map(s -> s.replaceFirst("#.*", ""))
-                .filter(s -> !StringUtils.isWhitespace(s))
+                .filter(s -> !StringUtils.isWhitespace(s.replaceFirst("#.*", "")))
                 .collect(Collectors.toList());
         stream.close();
 
-        return createBlock(lines);
+        return createBlock(lines, "");
     }
 
-    private static DataBlock createBlock(List<String> lines) throws ParseException {
+    private static DataBlock createBlock(List<String> lines, String context) throws ParseException {
         Map<String, DataBlock.Value> primitives = new LinkedHashMap<>();
         Map<String, List<DataBlock.Value>> primitiveSets = new LinkedHashMap<>();
         Map<String, DataBlock> blocks = new LinkedHashMap<>();
@@ -89,27 +88,27 @@ public class CAML {
             }
 
             if (StringUtils.isWhitespace(val)) {
-                DataBlock block = createBlock(lines);
+                DataBlock block = createBlock(lines, String.format("%s > %s", context, key));
                 if (mod.equals("=")) {
                     if (blocks.containsKey(key) || blockSets.containsKey(key)) {
-                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times at %s", line, context));
                     }
                     blocks.put(key, block);
                 } else {
                     if (blocks.containsKey(key)) {
-                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times %s", line, context));
                     }
                     blockSets.computeIfAbsent(key, k -> new ArrayList<>()).add(block);
                 }
             } else {
                 if (mod.equals("=")) {
                     if (primitives.containsKey(key) || primitiveSets.containsKey(key)) {
-                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times %s", line, context));
                     }
                     primitives.put(key, createValue(val));
                 } else {
                     if (primitives.containsKey(key)) {
-                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times %s", line, context));
                     }
                     primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(createValue(val));
                 }
@@ -136,11 +135,54 @@ public class CAML {
             public Map<String, List<DataBlock>> getBlocksMap() {
                 return blockSets;
             }
+
+            @Override
+            public Value getValue(String key) {
+                Value value = DataBlock.super.getValue(key);
+                if (value.asString() == null && getValuesMap().containsKey(key)) {
+                    throw new FormatException("Error in CAML file: expected single value '=' but found multiple ':' for key %s '%s'", context, key);
+                }
+                return value;
+            }
+
+            @Override
+            public List<Value> getValues(String key) {
+                List<Value> values = DataBlock.super.getValues(key);
+                if (values == null && getValueMap().containsKey(key)) {
+                    throw new FormatException("Error in CAML file: multiple values ':' but found single value '=' for key %s '%s'", context, key);
+                }
+                return values;
+            }
+
+            @Override
+            public DataBlock getBlock(String key) {
+                DataBlock block = DataBlock.super.getBlock(key);
+                if (block == null && getBlocksMap().containsKey(key)) {
+                    throw new FormatException("Error in CAML file: expected single block '=' but found multiple ':' for key %s '%s'", context, key);
+                }
+                return block;
+            }
+
+            @Override
+            public List<DataBlock> getBlocks(String key) {
+                List<DataBlock> blocks = DataBlock.super.getBlocks(key);
+                if (blocks == null && getBlockMap().containsKey(key)) {
+                    throw new FormatException("Error in CAML file: multiple blocks ':' but found single value '=' for key %s '%s'", context, key);
+                }
+                return blocks;
+            }
+
         };
     }
 
     public static class ParseException extends RuntimeException {
         public ParseException(String text, Object... params) {
+            super(String.format(text, params));
+        }
+    }
+
+    public static class FormatException extends RuntimeException {
+        public FormatException(String text, Object... params) {
             super(String.format(text, params));
         }
     }
