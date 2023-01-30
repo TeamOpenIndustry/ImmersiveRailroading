@@ -46,7 +46,7 @@ public class CAML {
         return createBlock(lines);
     }
 
-    private static DataBlock createBlock(List<String> lines) throws IOException {
+    private static DataBlock createBlock(List<String> lines) throws ParseException {
         Map<String, DataBlock.Value> primitives = new LinkedHashMap<>();
         Map<String, List<DataBlock.Value>> primitiveSets = new LinkedHashMap<>();
         Map<String, DataBlock> blocks = new LinkedHashMap<>();
@@ -57,7 +57,7 @@ public class CAML {
             String line = lines.get(0);
             Matcher m = base.matcher(line);
             if (!m.matches()) {
-                throw new IOException(String.format("Invalid Block line '%s'", line));
+                throw new ParseException(String.format("Invalid Block line '%s'", line));
             }
 
             String pre = m.group(1);
@@ -70,7 +70,7 @@ public class CAML {
             }
 
             if (!pre.startsWith(spaces) && !spaces.startsWith(pre)) {
-                throw new IOException(String.format("Invalid Block line '%s' mismatched indentation '%s' vs '%s'", line, spaces, pre));
+                throw new ParseException(String.format("Invalid Block line '%s' mismatched indentation '%s' vs '%s'", line, spaces, pre));
             }
 
             if (spaces.length() > pre.length()) {
@@ -78,7 +78,7 @@ public class CAML {
                 break;
             }
             if (!spaces.equals(pre)) {
-                throw new IOException(String.format("Invalid Block line '%s' invalid indentation '%s' vs '%s'", line, spaces, pre));
+                throw new ParseException(String.format("Invalid Block line '%s' invalid indentation '%s' vs '%s'", line, spaces, pre));
             }
 
             lines.remove(0);
@@ -92,24 +92,24 @@ public class CAML {
                 DataBlock block = createBlock(lines);
                 if (mod.equals("=")) {
                     if (blocks.containsKey(key) || blockSets.containsKey(key)) {
-                        throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                     }
                     blocks.put(key, block);
                 } else {
                     if (blocks.containsKey(key)) {
-                        throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                     }
                     blockSets.computeIfAbsent(key, k -> new ArrayList<>()).add(block);
                 }
             } else {
                 if (mod.equals("=")) {
                     if (primitives.containsKey(key) || primitiveSets.containsKey(key)) {
-                        throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                     }
                     primitives.put(key, createValue(val));
                 } else {
                     if (primitives.containsKey(key)) {
-                        throw new IOException(String.format("Invalid line: '%s' can not be specified multiple times", line));
+                        throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times", line));
                     }
                     primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(createValue(val));
                 }
@@ -137,6 +137,12 @@ public class CAML {
                 return blockSets;
             }
         };
+    }
+
+    public static class ParseException extends RuntimeException {
+        public ParseException(String text, Object... params) {
+            super(String.format(text, params));
+        }
     }
 
     private static DataBlock.Value createValue(String value) {
