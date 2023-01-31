@@ -59,6 +59,8 @@ public class StephensonValveGear extends ConnectingRodValveGear {
             // Angle for movement height vs driving rod length (adjusted for assumed diameter == height, both sides == 2r)
             float drivingRodAngle = (float) Math.toDegrees(Math.atan2((reverse ? -connRodMovment.z : connRodMovment.z), drivingRod.length() - drivingRod.height()));
 
+            double connRodRadius = connRodRadius();
+
             // Move to conn rod center
             matrix.translate(-connRodRadius, 0, 0);
             // Apply conn rod movement
@@ -81,7 +83,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
             // Piston movement is rod movement offset by the rotation radius
             // Not 100% accurate, missing the offset due to angled driving rod
-            double pistonDelta = connRodMovment.x - connRodRadius;
+            double pistonDelta = connRodMovment.x - connRodRadius();
             matrix.translate(pistonDelta, 0, 0);
             return matrix;
         })).include(pistonRod);

@@ -13,7 +13,6 @@ import util.Matrix4;
 import java.util.stream.Collectors;
 
 public class ConnectingRodValveGear extends ValveGear {
-    protected final double connRodRadius;
     protected Vec3d centerOfWheels;
     protected final ModelComponent connectingRod;
 
@@ -28,20 +27,23 @@ public class ConnectingRodValveGear extends ValveGear {
         this.connectingRod = connectingRod;
         this.centerOfWheels = ModelComponent.center(wheels.wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
 
-        // Center of the connecting rod, may not line up with a wheel directly
-        Vec3d connRodPos = connectingRod.center;
-        // Wheel Center is the center of all wheels, may not line up with a wheel directly
-        // The difference between these centers is the radius of the connecting rod movement
-        connRodRadius = connRodPos.x - centerOfWheels.x;
-
         state.push(settings -> settings.add((ModelState.Animator) stock -> {
             Vec3d connRodMovment = connRodMovement(stock);
-            return new Matrix4().translate(-connRodRadius, 0, 0).translate(connRodMovment.x, connRodMovment.z, 0);
+            return new Matrix4().translate(-connRodRadius(), 0, 0).translate(connRodMovment.x, connRodMovment.z, 0);
         })).include(connectingRod);
     }
 
     /** Find new connecting rod pos based on the connecting rod radius */
     public Vec3d connRodMovement(EntityMoveableRollingStock stock) {
-        return VecUtil.fromWrongYaw(connRodRadius, angle(stock.distanceTraveled));
+        return VecUtil.fromWrongYaw(connRodRadius(), angle(stock.distanceTraveled));
+    }
+
+    public double connRodRadius() {
+        // Center of the connecting rod, may not line up with a wheel directly
+        Vec3d connRodPos = connectingRod.center;
+        // Wheel Center is the center of all wheels, may not line up with a wheel directly
+        // The difference between these centers is the radius of the connecting rod movement
+
+        return connRodPos.x - centerOfWheels.x;
     }
 }
