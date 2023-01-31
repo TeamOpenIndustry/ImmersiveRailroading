@@ -72,13 +72,14 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         ModelState.LightState base = new ModelState.LightState(null, null, null, hasInterior);
 
         float interiorLight = def.interiorLightLevel();
-        ModelState.Lighter lighter = stock -> {
+        ModelState.Lighter interiorLit = stock -> {
             if (!stock.internalLightsEnabled()) {
                 return base;
             }
             float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
             float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
-            return blockLight < interiorLight ? base.merge(new ModelState.LightState(interiorLight, skyLight, true, null)) : base;
+            boolean brighter = blockLight < interiorLight;
+            return base.merge(new ModelState.LightState(brighter ? interiorLight : null, brighter ? skyLight : null, true, null));
         };
 
         animations = new ArrayList<>();
@@ -101,7 +102,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             }
             return m;
         };
-        this.base = ModelState.construct(settings -> settings.add(animators).add(lighter));
+        this.base = ModelState.construct(settings -> settings.add(animators).add(interiorLit));
 
         ComponentProvider provider = new ComponentProvider(this, def.internal_model_scale);
         initStates();
