@@ -50,8 +50,10 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
                 )
         );
 
+        rocking.include(components);
+
         exhaust = DieselExhaust.get(provider);
-        horn = Horn.get(provider, base, def.horn, def.getHornSus());
+        horn = Horn.get(provider, rocking, def.horn, def.getHornSus());
 
         super.parseComponents(provider, def);
     }
