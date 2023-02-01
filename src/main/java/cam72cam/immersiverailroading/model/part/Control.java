@@ -265,6 +265,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             case WHISTLE_CONTROL_X:
             case HORN_CONTROL_X:
             case ENGINE_START_X:
+            case CYLINDER_DRAIN_CONTROL_X:
                 if (part.type == ModelComponentType.REVERSER_X) {
                     percent *= -2;
                 }
