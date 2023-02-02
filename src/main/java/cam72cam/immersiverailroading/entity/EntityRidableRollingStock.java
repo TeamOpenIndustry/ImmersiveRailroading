@@ -105,8 +105,10 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	
 	@Override
 	public boolean shouldRiderSit(Entity passenger) {
-		return Objects.equals(true, this.getDefinition().shouldSit) ||
-				this.gauge.shouldSit() ||
+		if (this.getDefinition().shouldSit != null) {
+			return this.getDefinition().shouldSit;
+		}
+		return this.gauge.shouldSit() ||
 				this.seatedPassengers.containsValue(passenger.getUUID());
 	}
 
