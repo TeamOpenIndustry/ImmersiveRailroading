@@ -66,7 +66,7 @@ public interface DataBlock {
         }
         default Identifier asIdentifier(Identifier fallback) {
             Identifier val = asIdentifier();
-            return val != null ? val : fallback;
+            return val != null && val.canLoad() ? val : fallback;
         }
 
         Value NULL = new Value() {
