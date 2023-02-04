@@ -323,7 +323,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 	}
 
-	private Double cachedGauge = null;
+	protected Double cachedGauge = null;
 	@Override
 	public double getTrackGauge() {
 		if (cachedGauge == null && getParent() != null) {

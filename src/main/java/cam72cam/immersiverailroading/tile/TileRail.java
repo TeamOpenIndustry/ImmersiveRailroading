@@ -156,6 +156,7 @@ public class TileRail extends TileRailBase {
 			TileRailBase be = getWorld().getBlockEntity(tpos, TileRailBase.class);
 			if (be != null) {
 				be.railBedCache = info.settings.railBed;
+				be.cachedGauge = info.settings.gauge.value();
 				be.markDirty();
 			}
 		}
