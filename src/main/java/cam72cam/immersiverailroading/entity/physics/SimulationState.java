@@ -265,7 +265,7 @@ public class SimulationState {
     public void update(EntityCoupleableRollingStock stock) {
         Configuration oldConfig = config;
         config = new Configuration(stock);
-        dirty = !config.equals(oldConfig);
+        dirty = dirty || !config.equals(oldConfig);
     }
 
     private void moveAlongTrack(double distance) {

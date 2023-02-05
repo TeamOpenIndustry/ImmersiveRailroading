@@ -1,7 +1,9 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
@@ -21,6 +23,10 @@ import java.util.List;
 public class TileRail extends TileRailBase {
 	@TagField("info")
 	public RailInfo info;
+
+	@TagField("tableIndex")
+	private int tableIndex;
+
 	@TagField(value = "drops", typeHint = ItemStack.class, mapper = DropsMapper.class)
 	private List<ItemStack> drops;
 
@@ -53,13 +59,30 @@ public class TileRail extends TileRailBase {
 	}
 
 	public void nextTablePos(boolean back) {
-		float delta = 360 / (64f);
-		double tablePos = ((int)(info.tablePos / delta)) * delta + (back ? delta : -delta);
-		info = info.with(b -> b.tablePos = tablePos);
-		this.markDirty();
-		List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);
-		for(EntityCoupleableRollingStock stock : ents) {
-			stock.states.forEach(state -> state.dirty = true);
+		this.tableIndex += back ? -1 : 1;
+	}
+
+	@Override
+	public void update() {
+		super.update();
+
+		if (getWorld().isServer && info.settings.type == TrackItems.TURNTABLE) {
+			int slotsPerCircle = Config.ConfigBalance.AnglePlacementSegmentation * 4;
+			float desiredPosition = (360f / slotsPerCircle) * tableIndex;
+			double speed = 0.2;
+			if (desiredPosition != info.tablePos) {
+				if (Math.abs(desiredPosition - info.tablePos) < speed) {
+					info = info.with(b -> b.tablePos = desiredPosition);
+				} else {
+					info = info.with(b -> b.tablePos += Math.copySign(speed, desiredPosition - info.tablePos));
+				}
+				this.markDirty();
+				List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);
+				for(EntityCoupleableRollingStock stock : ents) {
+					stock.states.forEach(state -> state.dirty = true);
+					Simulation.forceQuickUpdates = true;
+				}
+			}
 		}
 	}
 

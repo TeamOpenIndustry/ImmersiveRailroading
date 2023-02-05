@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 public class Simulation {
 
+    public static boolean forceQuickUpdates = false;
+
     public static void simulate(World world) {
         // 100KM/h ~= 28m/s which means non-loaded stationary stock may be phased through at that speed
         // I'm OK with that for now
@@ -22,7 +24,11 @@ public class Simulation {
 
         if (world.getTicks() % 5 != 0) {
             // Only re-check every 5 ticks
-            return;
+            if (!forceQuickUpdates) {
+                return;
+            }
+        } else {
+            forceQuickUpdates = false;
         }
 
         List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
