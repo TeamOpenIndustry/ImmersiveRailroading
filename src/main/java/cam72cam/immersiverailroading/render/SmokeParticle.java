@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.render;
 
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.Particle;
-import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.DirectDraw;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.render.opengl.Texture;
@@ -50,9 +49,7 @@ public class SmokeParticle extends Particle {
     }
 
     public static void renderAll(List<SmokeParticle> particles, RenderState state, float partialTicks) {
-        state.lighting(false)
-                .cull_face(false)
-                .blend(new BlendMode(BlendMode.GL_SRC_ALPHA, BlendMode.GL_ONE_MINUS_SRC_ALPHA));
+        state.cull_face(false);
 
         Map<Identifier, List<SmokeParticle>> partitioned = particles.stream().collect(Collectors.groupingBy(p -> p.data.texture));
         for (Identifier texture : partitioned.keySet()) {
