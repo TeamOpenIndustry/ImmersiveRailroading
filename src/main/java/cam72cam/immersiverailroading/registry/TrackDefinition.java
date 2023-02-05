@@ -1,8 +1,12 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.ItemRail;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
+import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import com.google.gson.JsonElement;
@@ -81,12 +85,19 @@ public class TrackDefinition {
             this.cost = cost;
         }
 
-        public List<ItemStack> examples() {
+        public List<ItemStack> examples(Gauge gauge) {
             List<ItemStack> examples = new ArrayList<>();
 
             if (item.startsWith("ore:")) {
                 String oreName = item.replace("ore:", "");
                 examples.addAll(Fuzzy.get(oreName).enumerate());
+                for (ItemStack example : examples) {
+                    if (example.is(IRItems.ITEM_RAIL)) {
+                        ItemRail.Data data = new ItemRail.Data(example);
+                        data.gauge = gauge;
+                        data.write();
+                    }
+                }
             } else {
                 examples.add(new ItemStack(this.item, 1, meta));
             }

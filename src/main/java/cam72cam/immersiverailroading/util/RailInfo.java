@@ -220,14 +220,9 @@ public class RailInfo {
 			}
 
 			if (found < count) {
-				Set<String> exStrs = Arrays.stream(examples).map(ItemStack::getDisplayName).limit(3).collect(Collectors.toSet());
-				String example = String.join(" | ", exStrs);
-				if (exStrs.size() > 1) {
-					if (exStrs.size() > 3) {
-						example = "[ " + example + ", ... ]";
-					} else {
-						example = "[ " + example + " ]";
-					}
+				String example = Arrays.stream(examples).map(ItemStack::getDisplayName).limit(5).collect(Collectors.joining(" | "));
+				if (examples.length > 3) {
+					example = example + ", ... ";
 				}
 				player.sendMessage(ChatText.BUILD_MISSING.getMessage(count - found, example));
 				return false;
@@ -305,17 +300,17 @@ public class RailInfo {
 
 				if (tieParts != null) {
 					for (TrackDefinition.TrackMaterial tiePart : tieParts) {
-						materials.add(new MaterialManager((int) Math.ceil(builder.costTies() * tiePart.cost), tiePart::matches, tiePart.examples()));
+						materials.add(new MaterialManager((int) Math.ceil(builder.costTies() * tiePart.cost), tiePart::matches, tiePart.examples(settings.gauge)));
 					}
 				}
 				if (railParts != null) {
 					for (TrackDefinition.TrackMaterial railPart : railParts) {
-						materials.add(new MaterialManager((int) Math.ceil(builder.costRails() * railPart.cost), railPart::matches, railPart.examples()));
+						materials.add(new MaterialManager((int) Math.ceil(builder.costRails() * railPart.cost), railPart::matches, railPart.examples(settings.gauge)));
 					}
 				}
 				if (bedParts != null) {
 					for (TrackDefinition.TrackMaterial bedPart : bedParts) {
-						materials.add(new MaterialManager((int) Math.ceil(builder.costBed() * bedPart.cost), bedPart::matches, bedPart.examples()));
+						materials.add(new MaterialManager((int) Math.ceil(builder.costBed() * bedPart.cost), bedPart::matches, bedPart.examples(settings.gauge)));
 					}
 				}
 
