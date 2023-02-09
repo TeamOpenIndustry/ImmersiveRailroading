@@ -15,7 +15,7 @@ import java.util.List;
 
 public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public Quilling quill;
-    public Identifier whistle;
+    public SoundDefinition whistle;
     public SoundDefinition idle;
     public Identifier chuff;
     public Identifier pressure;
@@ -63,7 +63,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         DataBlock sounds = data.getBlock("sounds");
         //overrides original sounds with added sounds
         if (sounds != null) {
-            whistle = sounds.getValue("whistle").asIdentifier(whistle);
+            whistle = SoundDefinition.getOrDefault(sounds, "whistle", whistle);
             idle = SoundDefinition.getOrDefault(sounds, "idle", idle);
             chuff = sounds.getValue("chuff").asIdentifier(chuff);
             pressure = sounds.getValue("pressure").asIdentifier(pressure);
