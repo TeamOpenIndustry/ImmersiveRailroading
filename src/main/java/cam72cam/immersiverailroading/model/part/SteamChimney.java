@@ -60,7 +60,7 @@ public class SteamChimney {
                 particlePos = particlePos.subtract(fakeMotion);
                 isSmokeParticle = !isSmokeParticle;
                 Identifier particleTex = isSmokeParticle ? stock.getDefinition().smokeParticleTexture : stock.getDefinition().steamParticleTexture;
-                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , isSmokeParticle ? darken : 0, thickness, size, particleTex));
+                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan , darken, thickness, size, particleTex));
             }
         }
     }
