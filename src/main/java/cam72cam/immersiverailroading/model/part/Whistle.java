@@ -33,7 +33,7 @@ public class Whistle {
     public Whistle(ModelComponent whistle, ModelState state, Quilling quilling, EntityRollingStockDefinition.SoundDefinition fallback) {
         this.component = whistle;
         this.quilling = quilling;
-        this.whistle = new PartSound(fallback, false, 150);
+        this.whistle = new PartSound(fallback, true, 150);
         state.include(whistle);
     }
 

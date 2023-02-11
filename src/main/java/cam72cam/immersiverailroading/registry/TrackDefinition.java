@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import trackapi.lib.Gauges;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class TrackDefinition {
     public final Map<TrackComponent, List<TrackMaterial>> materials = new HashMap<>();
     public final float bumpiness;
     public final boolean cog;
+    public final double model_gauge_m;
 
     TrackDefinition(String trackID, DataBlock object) throws Exception {
         this.trackID = trackID;
@@ -35,10 +37,12 @@ public class TrackDefinition {
         this.clack = object.getValue("clack").asBoolean(true);
         this.bumpiness = object.getValue("bumpiness").asFloat(clack ? 1f : 0f);
         this.cog = object.getValue("cog").asBoolean(false);
+        this.model_gauge_m = object.getValue("model_gauge_m").asDouble(Gauges.STANDARD);
+
         this.models = new ArrayList<>();
         DataBlock models = object.getBlock("models");
         for (Map.Entry<String, DataBlock.Value> entry : models.getValueMap().entrySet()) {
-            this.models.add(new TrackModel(entry.getKey(), entry.getValue().asIdentifier()));
+            this.models.add(new TrackModel(entry.getKey(), entry.getValue().asIdentifier(), model_gauge_m));
         }
 
         DataBlock mats = object.getBlock("materials");
