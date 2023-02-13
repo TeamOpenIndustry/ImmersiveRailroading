@@ -129,7 +129,7 @@ public abstract class EntityRollingStockDefinition {
                 return new SoundDefinition(found);
             }
             Identifier ident = block.getValue(key).asIdentifier();
-            if (ident != null) {
+            if (ident != null && ident.canLoad()) {
                 return new SoundDefinition(ident);
             }
             return fallback;
