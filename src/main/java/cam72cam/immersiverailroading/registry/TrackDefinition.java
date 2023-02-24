@@ -9,12 +9,11 @@ import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import org.apache.commons.lang3.tuple.Pair;
 import trackapi.lib.Gauges;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TrackDefinition {
     public final String trackID;
@@ -73,12 +72,10 @@ public class TrackDefinition {
         return models.get(0);
     }
 
-    public static class TrackMaterial {
-        public final String item;
-        public final float cost;
-        public final int meta;
-
-        TrackMaterial(String item, float cost) {
+    public static class ItemType {
+        final String item;
+        final int meta;
+        public ItemType(String item) {
             if (item.contains("|")) {
                 this.item = item.split("\\|")[0];
                 this.meta = Integer.parseInt(item.split("\\|")[1]);
@@ -86,7 +83,6 @@ public class TrackDefinition {
                 this.item = item;
                 this.meta = 0;
             }
-            this.cost = cost;
         }
 
         public List<ItemStack> examples(Gauge gauge) {
@@ -114,6 +110,22 @@ public class TrackDefinition {
                 return Fuzzy.get(oreName).matches(stack);
             }
             return stack.is(new ItemStack(item, 1, meta));
+        }
+    }
+
+    public static class TrackMaterial {
+        private List<ItemType> items;
+        public final float cost;
+        TrackMaterial(String item, float cost) {
+            this.items = Arrays.stream(item.split(",")).map(s -> s.trim()).map(ItemType::new).collect(Collectors.toList());
+            this.cost = cost;
+        }
+
+        public List<ItemStack> examples(Gauge gauge) {
+            return items.stream().flatMap(i -> i.examples(gauge).stream()).collect(Collectors.toList());
+        }
+        public boolean matches(ItemStack stack) {
+            return items.stream().anyMatch(i -> i.matches(stack));
         }
     }
 }
