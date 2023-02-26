@@ -182,6 +182,9 @@ public class Config {
 
 		@Comment("Machine power factor (0 means no power required)")
 		public static float machinePowerFactor = 1.0f;
+
+		@Comment("Angles per tick to rotate turntables (used server side)")
+		public static double TurnTableSpeed = 0.4;
 	}
 
 	@Name("performance")

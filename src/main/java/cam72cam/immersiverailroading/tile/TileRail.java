@@ -93,7 +93,7 @@ public class TileRail extends TileRailBase {
 		if (getWorld().isServer && info != null && info.settings.type == TrackItems.TURNTABLE) {
 			int slotsPerCircle = Config.ConfigBalance.AnglePlacementSegmentation * 4;
 			float desiredPosition = (360f / slotsPerCircle) * tableIndex;
-			double speed = 0.4;
+			double speed = Config.ConfigBalance.TurnTableSpeed;
 			if (desiredPosition != info.tablePos) {
 				if (Math.abs(desiredPosition - info.tablePos) < speed) {
 					info = info.with(b -> b.tablePos = desiredPosition);
