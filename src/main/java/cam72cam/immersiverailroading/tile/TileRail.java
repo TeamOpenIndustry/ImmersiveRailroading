@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.track.TrackBase;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
@@ -58,23 +59,54 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
-	public void nextTablePos(boolean back) {
-		this.tableIndex += back ? -1 : 1;
+	public void setTablePosition(float angle) {
+
+		angle = ((angle % 360) + 360) % 360;
+		int slotsPerCircle = Config.ConfigBalance.AnglePlacementSegmentation * 4;
+		// 0 -> slotsPerCircle
+		int dest = Math.round((angle / (360f / slotsPerCircle)));
+
+		// This is probably stupidly overcomplicated, but it works...
+		int delta = MathUtil.deltaMod(tableIndex, dest, slotsPerCircle);
+		int deltaOpp = MathUtil.deltaMod(tableIndex + slotsPerCircle/2, dest, slotsPerCircle);
+		if (Math.abs(MathUtil.deltaMod(0, delta + slotsPerCircle, slotsPerCircle)) < Math.abs(MathUtil.deltaMod(0, deltaOpp + slotsPerCircle, slotsPerCircle))) {
+			dest = (tableIndex + delta) % slotsPerCircle;
+		} else {
+			dest = (tableIndex + deltaOpp) % slotsPerCircle;
+		}
+
+		// Force 180
+		if (dest == tableIndex) {
+			dest = dest + slotsPerCircle/2;
+		}
+
+		// Normalize
+		dest = (dest + slotsPerCircle) % slotsPerCircle;
+
+		this.tableIndex = dest;
 	}
 
 	@Override
 	public void update() {
 		super.update();
 
-		if (getWorld().isServer && info.settings.type == TrackItems.TURNTABLE) {
+		if (getWorld().isServer && info != null && info.settings.type == TrackItems.TURNTABLE) {
 			int slotsPerCircle = Config.ConfigBalance.AnglePlacementSegmentation * 4;
 			float desiredPosition = (360f / slotsPerCircle) * tableIndex;
-			double speed = 0.2;
+			double speed = Config.ConfigBalance.TurnTableSpeed;
 			if (desiredPosition != info.tablePos) {
 				if (Math.abs(desiredPosition - info.tablePos) < speed) {
 					info = info.with(b -> b.tablePos = desiredPosition);
 				} else {
-					info = info.with(b -> b.tablePos += Math.copySign(speed, desiredPosition - info.tablePos));
+					// Again, this math is horrific and is probably wayyyyy overcomplicated
+					double dp = MathUtil.deltaAngle(info.tablePos + speed, desiredPosition);
+					double dn = MathUtil.deltaAngle(info.tablePos - speed, desiredPosition);
+					dp = MathUtil.deltaAngle(0, dp + 360);
+					dn = MathUtil.deltaAngle(0, dn + 360);
+					double delta = Math.abs(dp) <
+							Math.abs(dn) ?
+							speed : -speed;
+					info = info.with(b -> b.tablePos = (((b.tablePos + delta) % 360) + 360) % 360);
 				}
 				this.markDirty();
 				List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);

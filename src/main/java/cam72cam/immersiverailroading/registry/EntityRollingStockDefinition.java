@@ -5,11 +5,14 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.util.CAML;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.util.JSON;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
@@ -23,18 +26,12 @@ import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.world.World;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -117,24 +114,25 @@ public abstract class EntityRollingStockDefinition {
             volume = 1;
         }
 
-        public SoundDefinition(JsonElement elem) {
-            if (elem.isJsonObject()) {
-                JsonObject obj = elem.getAsJsonObject();
-                start = getOrDefault(obj, "start", (Identifier) null);
-                main = getOrDefault(obj, "main", (Identifier) null);
-                looping = getOrDefault(obj, "looping", true);
-                stop = getOrDefault(obj, "stop", (Identifier) null);
-                distance = getOrDefault(obj, "distance", (Float) null);
-                volume = getOrDefault(obj, "volume", 1.0f);
-            } else {
-                // Simple
-                start = null;
-                main = new Identifier(ImmersiveRailroading.MODID, new Identifier(elem.getAsString()).getPath());
-                looping = true;
-                stop = null;
-                distance = null;
-                volume = 1;
+        public SoundDefinition(DataBlock obj) {
+            start = obj.getValue("start").asIdentifier();
+            main = obj.getValue("main").asIdentifier();
+            looping = obj.getValue("looping").asBoolean(true);
+            stop = obj.getValue("stop").asIdentifier();
+            distance = obj.getValue("distance").asFloat();
+            volume = obj.getValue("volume").asFloat(1.0f);
+        }
+
+        public static SoundDefinition getOrDefault(DataBlock block, String key, SoundDefinition fallback) {
+            DataBlock found = block.getBlock(key);
+            if (found != null) {
+                return new SoundDefinition(found);
             }
+            Identifier ident = block.getValue(key).asIdentifier();
+            if (ident != null && ident.canLoad()) {
+                return new SoundDefinition(ident);
+            }
+            return fallback;
         }
     }
 
@@ -156,18 +154,19 @@ public abstract class EntityRollingStockDefinition {
         public final float frames_per_tick;
         public final SoundDefinition sound;
 
-        public AnimationDefinition(JsonObject obj) {
-            control_group = getOrDefault(obj, "control_group", (String)null);
-            readout = obj.has("readout") ? Readouts.valueOf(obj.get("readout").getAsString().toUpperCase(Locale.ROOT)) : null;
+        public AnimationDefinition(DataBlock obj) {
+            control_group = obj.getValue("control_group").asString();
+            String readout = obj.getValue("readout").asString();
+            this.readout = readout != null ? Readouts.valueOf(readout.toUpperCase(Locale.ROOT)) : null;
             if (control_group == null && readout == null) {
                 throw new IllegalArgumentException("Must specify either a control group or a readout for an animation");
             }
-            animatrix = getOrDefault(obj, "animatrix", (Identifier) null);
-            mode = AnimationMode.valueOf(obj.get("mode").getAsString().toUpperCase(Locale.ROOT));
-            offset = getOrDefault(obj, "offset", 0f);
-            invert = getOrDefault(obj, "invert", false);
-            frames_per_tick = getOrDefault(obj, "frames_per_tick", 1f);
-            sound = getOrDefault(obj, "sound", (SoundDefinition) null);
+            animatrix = obj.getValue("animatrix").asIdentifier();
+            mode = AnimationMode.valueOf(obj.getValue("mode").asString().toUpperCase(Locale.ROOT));
+            offset = obj.getValue("offset").asFloat(0f);
+            invert = obj.getValue("invert").asBoolean(false);
+            frames_per_tick = obj.getValue("frames_per_tick").asFloat(1f);
+            sound = SoundDefinition.getOrDefault(obj, "sound", null);
         }
 
         public boolean valid() {
@@ -185,13 +184,13 @@ public abstract class EntityRollingStockDefinition {
         public final Identifier lightTex;
         public final boolean castsLight;
 
-        private LightDefinition(JsonObject data) {
-            blinkIntervalSeconds = getOrDefault(data, "blinkIntervalSeconds", 0f);
-            blinkOffsetSeconds = getOrDefault(data, "blinkOffsetSeconds", 0f);
-            blinkFullBright = getOrDefault(data, "blinkFullBright", true);
-            reverseColor = getOrDefault(data, "reverseColor", (String)null);
-            lightTex = getOrDefault(data, "texture", default_light_tex);
-            castsLight = getOrDefault(data, "castsLight", true);
+        private LightDefinition(DataBlock data) {
+            blinkIntervalSeconds = data.getValue("blinkIntervalSeconds").asFloat(0f);
+            blinkOffsetSeconds = data.getValue("blinkOffsetSeconds").asFloat(0f);
+            blinkFullBright = data.getValue("blinkFullBright").asBoolean(true);
+            reverseColor = data.getValue("reverseColor").asString();
+            lightTex = data.getValue("texture").asIdentifier(default_light_tex);
+            castsLight = data.getValue("castsLight").asBoolean(true);
         }
     }
 
@@ -208,20 +207,20 @@ public abstract class EntityRollingStockDefinition {
             this.disengage = disengage;
         }
 
-        private ControlSoundsDefinition(JsonObject data) {
-            engage = getOrDefault(data, "engage", (Identifier) null);
-            move = getOrDefault(data, "move", (Identifier) null);
-            movePercent = getOrDefault(data, "movePercent", (Float) null);
-            disengage = getOrDefault(data, "disengage", (Identifier) null);
+        private ControlSoundsDefinition(DataBlock data) {
+            engage = data.getValue("engage").asIdentifier();
+            move = data.getValue("move").asIdentifier();
+            movePercent = data.getValue("movePercent").asFloat();
+            disengage = data.getValue("disengage").asIdentifier();
         }
     }
 
-    public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, JsonObject data) throws Exception {
+    public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, DataBlock data) throws Exception {
         this.type = type;
         this.defID = defID;
 
 
-        parseJson(data);
+        loadData(data);
 
         this.model = createModel();
         this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.shouldRender(x)).collect(Collectors.toList());
@@ -284,58 +283,23 @@ public abstract class EntityRollingStockDefinition {
         return ConfigSound.scaleSoundToGauge && scalePitch;
     }
 
-    protected static String getOrDefault(JsonObject data, String field, String fallback) {
-        return data.has(field) ? data.get(field).getAsString() : fallback;
-    }
-    protected static boolean getOrDefault(JsonObject data, String field, boolean fallback) {
-        return data.has(field) ? data.get(field).getAsBoolean() : fallback;
-    }
-    protected static Boolean getOrDefault(JsonObject data, String field, Boolean fallback) {
-        return data.has(field) ? (Boolean) data.get(field).getAsBoolean() : fallback;
-    }
-    protected static int getOrDefault(JsonObject data, String field, int fallback) {
-        return data.has(field) ? data.get(field).getAsInt() : fallback;
-    }
-    protected static Integer getOrDefault(JsonObject data, String field, Integer fallback) {
-        return data.has(field) ? (Integer) data.get(field).getAsInt() : fallback;
-    }
-    protected static float getOrDefault(JsonObject data, String field, float fallback) {
-        return data.has(field) ? data.get(field).getAsFloat() : fallback;
-    }
-    protected static Float getOrDefault(JsonObject data, String field, Float fallback) {
-        return data.has(field) ? (Float) data.get(field).getAsFloat() : fallback;
-    }
-    protected static double getOrDefault(JsonObject data, String field, double fallback) {
-        return data.has(field) ? data.get(field).getAsDouble() : fallback;
-    }
-    protected static Identifier getOrDefault(JsonObject data, String field, Identifier fallback) {
-        if (data.has(field)) {
-            Identifier found = new Identifier(data.get(field).getAsString());
-            // Force IR modid
-            return new Identifier(ImmersiveRailroading.MODID, found.getPath());
-        }
-        return fallback;
-    }
-    protected static SoundDefinition getOrDefault(JsonObject data, String field, SoundDefinition fallback) {
-        return data.has(field) ? new SoundDefinition(data.get(field)) : fallback;
-    }
-
-
-    public void parseJson(JsonObject data) throws Exception {
-        name = data.get("name").getAsString();
-        modelerName = getOrDefault(data, "modeler", "N/A");
-        packName = getOrDefault(data, "pack", "N/A");
-        darken = getOrDefault(data, "darken_model", 0f);
+    public void loadData(DataBlock data) throws Exception {
+        name = data.getValue("name").asString();
+        modelerName = data.getValue("modeler").asString("N/A");
+        packName = data.getValue("pack").asString("N/A");
+        darken = data.getValue("darken_model").asFloat(0f);
         internal_model_scale = 1;
         internal_inv_scale = 1;
         // TODO Gauge.from(Gauge.STANDARD).value() what happens when != Gauge.STANDARD
         this.recommended_gauge = Gauge.from(Gauge.STANDARD);
-        if (data.has("model_gauge_m")) {
-            this.recommended_gauge = Gauge.from(data.get("model_gauge_m").getAsDouble());
-            internal_model_scale = Gauge.STANDARD / data.get("model_gauge_m").getAsDouble();
+        Double model_gauge_m = data.getValue("model_gauge_m").asDouble();
+        if (model_gauge_m != null) {
+            this.recommended_gauge = Gauge.from(model_gauge_m);
+            internal_model_scale = Gauge.STANDARD / model_gauge_m;
         }
-        if (data.has("recommended_gauge_m")) {
-            this.recommended_gauge = Gauge.from(data.get("recommended_gauge_m").getAsDouble());
+        Double recommended_gauge_m = data.getValue("recommended_gauge_m").asDouble();
+        if (recommended_gauge_m != null) {
+            this.recommended_gauge = Gauge.from(recommended_gauge_m);
         }
         if (this.recommended_gauge != Gauge.from(Gauge.STANDARD)) {
             internal_inv_scale = Gauge.STANDARD / recommended_gauge.value();
@@ -343,122 +307,128 @@ public abstract class EntityRollingStockDefinition {
 
         textureNames = new LinkedHashMap<>();
         textureNames.put("", "Default");
-        if (data.has("tex_variants")) {
-            JsonElement variants = data.get("tex_variants");
-            for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
-                textureNames.put(variant.getValue().getAsString(), variant.getKey());
-            }
+        DataBlock tex_variants = data.getBlock("tex_variants");
+        if (tex_variants != null) {
+            tex_variants.getValueMap().forEach((key, value) -> textureNames.put(value.asString(), key));
         }
 
-        Identifier alt_textures = new Identifier(ImmersiveRailroading.MODID, defID.replace(".json", "_variants.json"));
         try {
+            List<DataBlock> alternates = new ArrayList<>();
+
+            Identifier alt_textures = new Identifier(ImmersiveRailroading.MODID, defID.replace(".caml", ".json").replace(".json", "_variants.json"));
             List<InputStream> alts = alt_textures.getResourceStreamAll();
             for (InputStream input : alts) {
-                JsonParser parser = new JsonParser();
-                JsonElement variants = parser.parse(new InputStreamReader(input));
-                for (Entry<String, JsonElement> variant : variants.getAsJsonObject().entrySet()) {
-                    textureNames.put(variant.getValue().getAsString(), variant.getKey());
-                }
+                alternates.add(JSON.parse(input));
+            }
+
+            alt_textures = new Identifier(alt_textures.getDomain(), alt_textures.getPath().replace(".json", ".caml"));
+            alts = alt_textures.getResourceStreamAll();
+            for (InputStream input : alts) {
+                alternates.add(CAML.parse(input));
+            }
+            for (DataBlock alternate : alternates) {
+                alternate.getValueMap().forEach((key, value) -> textureNames.put(value.asString(), key));
             }
         } catch (java.io.FileNotFoundException ex) {
-            //ignore
+            ImmersiveRailroading.catching(ex);
         }
 
-        modelLoc = new Identifier(data.get("model").getAsString());
+        modelLoc = data.getValue("model").asIdentifier();
 
-        JsonObject passenger = data.get("passenger").getAsJsonObject();
-        passengerCenter = new Vec3d(0, passenger.get("center_y").getAsDouble() - 0.35, passenger.get("center_x").getAsDouble()).scale(internal_model_scale);
-        passengerCompartmentLength = passenger.get("length").getAsDouble() * internal_model_scale;
-        passengerCompartmentWidth = passenger.get("width").getAsDouble() * internal_model_scale;
-        maxPassengers = passenger.get("slots").getAsInt();
-        shouldSit = getOrDefault(passenger, "should_sit", (Boolean) null);
+        DataBlock passenger = data.getBlock("passenger");
+        passengerCenter = new Vec3d(0, passenger.getValue("center_y").asDouble() - 0.35, passenger.getValue("center_x").asDouble()).scale(internal_model_scale);
+        passengerCompartmentLength = passenger.getValue("length").asDouble() * internal_model_scale;
+        passengerCompartmentWidth = passenger.getValue("width").asDouble() * internal_model_scale;
+        maxPassengers = passenger.getValue("slots").asInteger();
+        shouldSit = passenger.getValue("should_sit").asBoolean();
 
-        bogeyFront = data.get("trucks").getAsJsonObject().get("front").getAsFloat() * (float) internal_model_scale;
-        bogeyRear = data.get("trucks").getAsJsonObject().get("rear").getAsFloat() * (float) internal_model_scale;
+        bogeyFront = data.getBlock("trucks").getValue("front").asFloat() * (float) internal_model_scale;
+        bogeyRear = data.getBlock("trucks").getValue("rear").asFloat() * (float) internal_model_scale;
 
-        dampeningAmount = getOrDefault(data, "sound_dampening_percentage", 0.75f);
+        dampeningAmount = data.getValue("sound_dampening_percentage").asFloat(0.75f);
         if (dampeningAmount < 0 || dampeningAmount > 1) {
             dampeningAmount = 0.75f;
         }
-        scalePitch = getOrDefault(data, "scale_pitch", true);
+        scalePitch = data.getValue("scale_pitch").asBoolean(true);
 
         couplerSlackFront = couplerSlackRear = 0.025f;
 
-        if (data.has("couplers")) {
-            JsonObject couplers = data.get("couplers").getAsJsonObject();
-            couplerOffsetFront = getOrDefault(couplers, "front_offset", 0f) * (float) internal_model_scale;
-            couplerOffsetRear = getOrDefault(couplers, "rear_offset", 0f) * (float) internal_model_scale;
-            couplerSlackFront = getOrDefault(couplers, "front_slack", couplerSlackFront) * (float) internal_model_scale;
-            couplerSlackRear = getOrDefault(couplers, "rear_slack", couplerSlackRear) * (float) internal_model_scale;
+        DataBlock couplers = data.getBlock("couplers");
+        if (couplers != null) {
+            couplerOffsetFront = couplers.getValue("front_offset").asFloat(0f) * (float) internal_model_scale;
+            couplerOffsetRear = couplers.getValue("rear_offset").asFloat(0f) * (float) internal_model_scale;
+            couplerSlackFront = couplers.getValue("front_slack").asFloat(couplerSlackFront) * (float) internal_model_scale;
+            couplerSlackRear = couplers.getValue("rear_slack").asFloat(couplerSlackRear) * (float) internal_model_scale;
         }
 
-        JsonObject properties = data.get("properties").getAsJsonObject();
-        weight = (int) Math.ceil(properties.get("weight_kg").getAsInt() * internal_inv_scale);
-        valveGear = properties.has("valve_gear") ? new ValveGearConfig(properties.get("valve_gear")) : null;
-        hasIndependentBrake = getOrDefault(properties, "independent_brake", independentBrakeDefault());
+        DataBlock properties = data.getBlock("properties");
+        weight = (int) Math.ceil(properties.getValue("weight_kg").asInteger() * internal_inv_scale);
+        valveGear = ValveGearConfig.get(properties, "valve_gear");
+        hasIndependentBrake = properties.getValue("independent_brake").asBoolean(independentBrakeDefault());
         // Locomotives default to linear brake control
-        isLinearBrakeControl = getOrDefault(properties, "linear_brake_control", !(this instanceof LocomotiveDefinition));
+        isLinearBrakeControl = properties.getValue("linear_brake_control").asBoolean(!(this instanceof LocomotiveDefinition));
 
-        if (data.has("lights")) {
-            for (Entry<String, JsonElement> entry : data.get("lights").getAsJsonObject().entrySet()) {
-                lights.put(entry.getKey(), new LightDefinition(entry.getValue().getAsJsonObject()));
-            }
+        DataBlock lights = data.getBlock("lights");
+        if (lights != null) {
+            lights.getBlockMap().forEach((key, block) -> this.lights.put(key, new LightDefinition(block)));
         }
-        interiorLightLevel = getOrDefault(properties, "interior_light_level", 6 / 15f);
-        hasInternalLighting = getOrDefault(properties, "internalLighting", this instanceof CarPassengerDefinition);
-        swayMultiplier = getOrDefault(properties, "swayMultiplier", 1d);
-        tiltMultiplier = getOrDefault(properties, "tiltMultiplier", 0d);
+        interiorLightLevel = properties.getValue("interior_light_level").asFloat(6 / 15f);
+        hasInternalLighting = properties.getValue("internalLighting").asBoolean(this instanceof CarPassengerDefinition);
+        swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
+        tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
 
         brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
         try {
-            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(getOrDefault(properties, "brake_shoe_material", "CAST_IRON")));
+            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString("CAST_IRON")));
         } catch (Exception ex) {
             ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
         }
-        brakeCoefficient = getOrDefault(properties, "brake_friction_coefficient", brakeCoefficient);
+        brakeCoefficient = properties.getValue("brake_friction_coefficient").asFloat(brakeCoefficient);
 
         wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
         clackFront = clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
         couple_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/coupling.ogg");
 
-        JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
+        DataBlock sounds = data.getBlock("sounds");
         if (sounds != null) {
-            wheel_sound = getOrDefault(sounds, "wheels", wheel_sound);
-            clackFront = clackRear = getOrDefault(sounds, "clack", clackFront);
-            clackFront = getOrDefault(sounds, "clack_front", clackFront);
-            clackRear = getOrDefault(sounds, "clack_rear", clackRear);
-            couple_sound = getOrDefault(sounds, "couple", couple_sound);
-            if (sounds.has("controls")) {
-                for (Entry<String, JsonElement> entry : sounds.get("controls").getAsJsonObject().entrySet()) {
-                    controlSounds.put(entry.getKey(), new ControlSoundsDefinition(entry.getValue().getAsJsonObject()));
-                }
+            wheel_sound = sounds.getValue("wheels").asIdentifier(wheel_sound);
+            clackFront = clackRear = sounds.getValue("clack").asIdentifier(clackFront);
+            clackFront = sounds.getValue("clack_front").asIdentifier(clackFront);
+            clackRear = sounds.getValue("clack_rear").asIdentifier(clackRear);
+            couple_sound = sounds.getValue("couple").asIdentifier(couple_sound);
+            DataBlock controls = sounds.getBlock("controls");
+            if (controls != null) {
+                controls.getBlockMap().forEach((key, block) -> controlSounds.put(key, new ControlSoundsDefinition(block)));
             }
         }
 
-        overlay = data.has("overlay") ? GuiBuilder.parse(new Identifier(data.get("overlay").getAsString())) : getDefaultOverlay(data);
-        if (data.has("extra_tooltip_info")) {
-            extraTooltipInfo = new ArrayList<>();
-            data.getAsJsonArray("extra_tooltip_info").forEach(jsonElement -> extraTooltipInfo.add(jsonElement.getAsString()));
-        } else {
-            extraTooltipInfo = Collections.emptyList();
+        Identifier overlay = data.getValue("overlay").asIdentifier();
+        this.overlay = overlay != null ? GuiBuilder.parse(overlay) : getDefaultOverlay(data);
+
+        extraTooltipInfo = new ArrayList<>();
+        List<DataBlock.Value> extra_tooltip_info = data.getValues("extra_tooltip_info");
+        if (extra_tooltip_info != null) {
+            extra_tooltip_info.forEach(value -> extraTooltipInfo.add(value.asString()));
         }
 
         smokeParticleTexture = steamParticleTexture = DEFAULT_PARTICLE_TEXTURE;
-        if (data.has("particles")) {
-            JsonObject particles = data.get("particles").getAsJsonObject();
-            if (particles.has("smoke")) {
-                smokeParticleTexture = new Identifier(particles.get("smoke").getAsJsonObject().get("texture").getAsString());
+        DataBlock particles = data.getBlock("particles");
+        if (particles != null) {
+            DataBlock smoke = particles.getBlock("smoke");
+            if (smoke != null) {
+                smokeParticleTexture = new Identifier(smoke.getValue("texture").asString());
             }
-            if (particles.has("steam")) {
-                steamParticleTexture = new Identifier(particles.get("steam").getAsJsonObject().get("texture").getAsString());
+            DataBlock steam = particles.getBlock("steam");
+            if (steam != null) {
+                steamParticleTexture = new Identifier(steam.getValue("texture").asString());
             }
         }
 
-        animations = new ArrayList<>();
-        if (data.has("animations")) {
-            JsonArray aobj = data.getAsJsonArray("animations");
-            for (JsonElement entry : aobj) {
-                animations.add(new AnimationDefinition(entry.getAsJsonObject()));
+        List<DataBlock> aobjs = data.getBlocks("animations");
+        this.animations = new ArrayList<>();
+        if (aobjs != null) {
+            for (DataBlock entry : aobjs) {
+                animations.add(new AnimationDefinition(entry));
             }
         }
     }
@@ -779,7 +749,7 @@ public abstract class EntityRollingStockDefinition {
         return isLinearBrakeControl;
     }
 
-    protected GuiBuilder getDefaultOverlay(JsonObject data) throws IOException {
+    protected GuiBuilder getDefaultOverlay(DataBlock data) throws IOException {
         return hasIndependentBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.json")) : null;
     }
 

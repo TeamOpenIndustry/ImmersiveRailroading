@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ValveGearConfig;
@@ -9,7 +10,6 @@ import cam72cam.immersiverailroading.model.DieselLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.resource.Identifier;
-import com.google.gson.JsonObject;
 
 import java.io.IOException;
 
@@ -21,34 +21,34 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private boolean hornSus;
     private int notches;
 
-    public LocomotiveDieselDefinition(String defID, JsonObject data) throws Exception {
+    public LocomotiveDieselDefinition(String defID, DataBlock data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
     }
 
     @Override
-    public void parseJson(JsonObject data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
 
-        JsonObject properties = data.get("properties").getAsJsonObject();
+        DataBlock properties = data.getBlock("properties");
         if (!isCabCar()) {
-            fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.get("fuel_capacity_l").getAsInt() * internal_inv_scale * 10));
-            fuelEfficiency = properties.get("fuel_efficiency_%").getAsInt();
+            fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.getValue("fuel_capacity_l").asInteger() * internal_inv_scale * 10));
+            fuelEfficiency = properties.getValue("fuel_efficiency_%").asInteger();
         } else {
             fuelCapacity = FluidQuantity.ZERO;
         }
-        notches = getOrDefault(properties, "throttle_notches", 8);
+        notches = properties.getValue("throttle_notches").asInteger(8);
 
-        hornSus = getOrDefault(properties, "horn_sustained", false);
-        JsonObject sounds = data.has("sounds") ? data.get("sounds").getAsJsonObject() : null;
+        hornSus = properties.getValue("horn_sustained").asBoolean(false);
 
         idle = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg"));
         horn = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg"));
         bell = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg"));
 
+        DataBlock sounds = data.getBlock("sounds");
         if(sounds != null) {
-            idle = getOrDefault(sounds, "idle", idle);
-            horn = getOrDefault(sounds, "horn", horn);
-            bell = getOrDefault(sounds, "bell", bell);
+            idle = SoundDefinition.getOrDefault(sounds, "idle", idle);
+            horn = SoundDefinition.getOrDefault(sounds, "horn", horn);
+            bell = SoundDefinition.getOrDefault(sounds, "bell", bell);
         }
 
         if (controlSounds.isEmpty()) {
@@ -90,7 +90,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
     @Override
-    protected GuiBuilder getDefaultOverlay(JsonObject data) throws IOException {
+    protected GuiBuilder getDefaultOverlay(DataBlock data) throws IOException {
         return readCabCarFlag(data) ?
                 GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/cab_car.json")) :
                 GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/diesel.json"));
@@ -116,7 +116,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
 
     public ValveGearConfig getValveGear() {
-        return super.getValveGear() == null ? new ValveGearConfig(ValveGearConfig.ValveGearType.CONNECTING) : super.getValveGear();
+        return super.getValveGear() == null ? new ValveGearConfig(ValveGearConfig.ValveGearType.CONNECTING, null) : super.getValveGear();
     }
 
     public int getThrottleNotches() {

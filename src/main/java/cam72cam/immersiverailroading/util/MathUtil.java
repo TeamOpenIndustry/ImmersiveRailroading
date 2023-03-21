@@ -20,4 +20,21 @@ public class MathUtil {
 		}
 		return res;
 	}
+
+	public static double deltaAngle(double source, double target) {
+		return deltaMod(source, target, 360);
+	}
+
+	public static double deltaMod(double source, double target, double mod) {
+		double a = target - source;
+		a -= a > mod/2 ? mod : 0;
+		a += a < -mod ? mod : 0;
+		return a;
+	}
+	public static int deltaMod(int source, int target, int mod) {
+		int a = target - source;
+		a -= a > mod/2 ? mod : 0;
+		a += a < -mod ? mod : 0;
+		return a;
+	}
 }

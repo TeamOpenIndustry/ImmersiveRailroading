@@ -1,11 +1,11 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.entity.Tender;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.FreightTankModel;
 import cam72cam.immersiverailroading.model.StockModel;
-import com.google.gson.JsonObject;
 
 import java.util.List;
 
@@ -14,18 +14,18 @@ public class TenderDefinition extends CarTankDefinition {
     private int width;
     private boolean showCurrentLoadOnly;
 
-    public TenderDefinition(String defID, JsonObject data) throws Exception {
+    public TenderDefinition(String defID, DataBlock data) throws Exception {
         super(Tender.class, defID, data);
     }
 
     @Override
-    public void parseJson(JsonObject data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
 
-        JsonObject tender = data.get("tender").getAsJsonObject();
-        this.numSlots = (int) Math.ceil(tender.get("slots").getAsInt() * internal_inv_scale);
-        this.width = (int) Math.ceil(tender.get("width").getAsInt() * internal_inv_scale);
-        this.showCurrentLoadOnly = getOrDefault(tender, "show_current_load_only", false);
+        DataBlock tender = data.getBlock("tender");
+        this.numSlots = (int) Math.ceil(tender.getValue("slots").asInteger() * internal_inv_scale);
+        this.width = (int) Math.ceil(tender.getValue("width").asInteger() * internal_inv_scale);
+        this.showCurrentLoadOnly = tender.getValue("show_current_load_only").asBoolean(false);
     }
 
     @Override

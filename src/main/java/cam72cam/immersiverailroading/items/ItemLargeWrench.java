@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
@@ -65,7 +66,7 @@ public class ItemLargeWrench extends CustomItem {
 				TileRail parent = te.getParentTile();
 				if (world.isServer) {
 					if (parent != null && parent.info.settings.type == TrackItems.TURNTABLE) {
-						parent.nextTablePos(player.isCrouching());
+						parent.setTablePosition(VecUtil.toWrongYaw(new Vec3d(parent.getPos()).add(0.5, 0, 0.5).subtract(hit.add(pos))) + parent.info.placementInfo.yaw);
 					}
 				}
 			}

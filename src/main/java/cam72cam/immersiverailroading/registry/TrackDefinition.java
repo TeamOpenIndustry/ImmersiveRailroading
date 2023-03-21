@@ -2,20 +2,18 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
-import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import org.apache.commons.lang3.tuple.Pair;
+import trackapi.lib.Gauges;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TrackDefinition {
     public final String trackID;
@@ -27,29 +25,34 @@ public class TrackDefinition {
     public final Map<TrackComponent, List<TrackMaterial>> materials = new HashMap<>();
     public final float bumpiness;
     public final boolean cog;
+    public final double model_gauge_m;
 
-    TrackDefinition(String trackID, JsonObject object) throws Exception {
+    TrackDefinition(String trackID, DataBlock object) throws Exception {
         this.trackID = trackID;
-        this.name = object.get("name").getAsString();
-        this.modelerName = object.has("modeler") ? object.get("modeler").getAsString() : null;
-        this.packName = object.has("pack") ? object.get("pack").getAsString() : null;
+        this.name = object.getValue("name").asString();
+        this.modelerName = object.getValue("modeler").asString();
+        this.packName = object.getValue("pack").asString();
 
-        this.clack = !object.has("clack") || object.get("clack").getAsBoolean();
-        this.bumpiness = object.has("bumpiness") ? object.get("bumpiness").getAsFloat() : clack ? 1f : 0f;
-        this.cog = object.has("cog") && object.get("cog").getAsBoolean();
+        this.clack = object.getValue("clack").asBoolean(true);
+        this.bumpiness = object.getValue("bumpiness").asFloat(clack ? 1f : 0f);
+        this.cog = object.getValue("cog").asBoolean(false);
+        this.model_gauge_m = object.getValue("model_gauge_m").asDouble(Gauges.STANDARD);
+
         this.models = new ArrayList<>();
-        for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("models").entrySet()) {
-            models.add(new TrackModel(entry.getKey(), entry.getValue().getAsString()));
+        DataBlock models = object.getBlock("models");
+        for (Map.Entry<String, DataBlock.Value> entry : models.getValueMap().entrySet()) {
+            this.models.add(new TrackModel(entry.getKey(), entry.getValue().asIdentifier(), model_gauge_m));
         }
 
-        JsonObject mats = object.getAsJsonObject("materials");
+        DataBlock mats = object.getBlock("materials");
         for (TrackComponent comp : TrackComponent.values()) {
-            if (mats.has(comp.name())) {
+            List<DataBlock> blocks = mats.getBlocks(comp.name());
+            if (blocks != null) {
                 List<TrackMaterial> parts = new ArrayList<>();
-                for (JsonElement part : mats.get(comp.name()).getAsJsonArray()) {
+                for (DataBlock part : blocks) {
                     parts.add(new TrackMaterial(
-                            part.getAsJsonObject().get("item").getAsString(),
-                            part.getAsJsonObject().get("cost").getAsFloat()
+                            part.getValue("item").asString(),
+                            part.getValue("cost").asFloat()
                     ));
                 }
                 if (parts.size() > 0) {
@@ -69,12 +72,10 @@ public class TrackDefinition {
         return models.get(0);
     }
 
-    public static class TrackMaterial {
-        public final String item;
-        public final float cost;
-        public final int meta;
-
-        TrackMaterial(String item, float cost) {
+    public static class ItemType {
+        final String item;
+        final int meta;
+        public ItemType(String item) {
             if (item.contains("|")) {
                 this.item = item.split("\\|")[0];
                 this.meta = Integer.parseInt(item.split("\\|")[1]);
@@ -82,7 +83,6 @@ public class TrackDefinition {
                 this.item = item;
                 this.meta = 0;
             }
-            this.cost = cost;
         }
 
         public List<ItemStack> examples(Gauge gauge) {
@@ -110,6 +110,22 @@ public class TrackDefinition {
                 return Fuzzy.get(oreName).matches(stack);
             }
             return stack.is(new ItemStack(item, 1, meta));
+        }
+    }
+
+    public static class TrackMaterial {
+        private List<ItemType> items;
+        public final float cost;
+        TrackMaterial(String item, float cost) {
+            this.items = Arrays.stream(item.split(",")).map(s -> s.trim()).map(ItemType::new).collect(Collectors.toList());
+            this.cost = cost;
+        }
+
+        public List<ItemStack> examples(Gauge gauge) {
+            return items.stream().flatMap(i -> i.examples(gauge).stream()).collect(Collectors.toList());
+        }
+        public boolean matches(ItemStack stack) {
+            return items.stream().anyMatch(i -> i.matches(stack));
         }
     }
 }

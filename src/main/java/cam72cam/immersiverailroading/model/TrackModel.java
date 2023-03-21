@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model;
 
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.resource.Identifier;
+import trackapi.lib.Gauges;
 
 import java.util.ArrayList;
 
@@ -10,8 +11,8 @@ public class TrackModel extends OBJModel {
     private final double size;
     private final double height;
 
-    public TrackModel(String condition, String resource) throws Exception {
-        super(new Identifier(resource), 0, null);
+    public TrackModel(String condition, Identifier resource, double model_gauge_m) throws Exception {
+        super(resource, 0, Gauges.STANDARD / model_gauge_m);
         this.compare = condition.substring(0, 1);
         this.size = Double.parseDouble(condition.substring(1));
         ArrayList<String> groups = new ArrayList<>();

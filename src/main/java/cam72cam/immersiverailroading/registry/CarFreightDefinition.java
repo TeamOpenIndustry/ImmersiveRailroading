@@ -1,13 +1,12 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.entity.CarFreight;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CarFreightDefinition extends FreightDefinition {
 
@@ -15,25 +14,22 @@ public class CarFreightDefinition extends FreightDefinition {
     private int width;
     private List<String> validCargo;
 
-    public CarFreightDefinition(Class<? extends CarFreight> cls, String defID, JsonObject data) throws Exception {
+    public CarFreightDefinition(Class<? extends CarFreight> cls, String defID, DataBlock data) throws Exception {
         super(cls, defID, data);
     }
 
-    public CarFreightDefinition(String defID, JsonObject data) throws Exception {
+    public CarFreightDefinition(String defID, DataBlock data) throws Exception {
         this(CarFreight.class, defID, data);
     }
 
     @Override
-    public void parseJson(JsonObject data) throws Exception {
-        super.parseJson(data);
-        if (data.has("freight")) {
-            JsonObject freight = data.get("freight").getAsJsonObject();
-            this.numSlots = (int) Math.ceil(freight.get("slots").getAsInt() * internal_inv_scale);
-            this.width = (int) Math.ceil(freight.get("width").getAsInt() * internal_inv_scale);
-            this.validCargo = new ArrayList<>();
-            for (JsonElement el : freight.get("cargo").getAsJsonArray()) {
-                validCargo.add(el.getAsString());
-            }
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
+        DataBlock freight = data.getBlock("freight");
+        if (freight != null) {
+            this.numSlots = (int) Math.ceil(freight.getValue("slots").asInteger() * internal_inv_scale);
+            this.width = (int) Math.ceil(freight.getValue("width").asInteger() * internal_inv_scale);
+            this.validCargo = freight.getValues("cargo").stream().map(DataBlock.Value::asString).collect(Collectors.toList());
         } else {
             this.numSlots = 0;
             this.width = 0;

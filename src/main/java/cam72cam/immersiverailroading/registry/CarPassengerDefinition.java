@@ -1,17 +1,17 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.entity.CarPassenger;
-import com.google.gson.JsonObject;
+import cam72cam.immersiverailroading.util.DataBlock;
 
 public class CarPassengerDefinition extends CarFreightDefinition {
 
-    public CarPassengerDefinition(String defID, JsonObject data) throws Exception {
+    public CarPassengerDefinition(String defID, DataBlock data) throws Exception {
         super(CarPassenger.class, defID, data);
     }
 
     @Override
-    public void parseJson(JsonObject data) throws Exception {
-        super.parseJson(data);
+    public void loadData(DataBlock data) throws Exception {
+        super.loadData(data);
     }
 
     @Override
