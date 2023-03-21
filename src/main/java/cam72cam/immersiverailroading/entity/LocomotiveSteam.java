@@ -310,12 +310,12 @@ public class LocomotiveSteam extends Locomotive {
 
 	@Override
 	public boolean hasElectricalPower() {
-		return getAvailableHP() > 0;
+		return getAvailableHP() > 0 || super.hasElectricalPower();
 	}
 
 	@Override
     public boolean internalLightsEnabled() {
-		return hasElectricalPower();
+		return getAvailableHP() > 0 || super.internalLightsEnabled();
     }
 
     @Override

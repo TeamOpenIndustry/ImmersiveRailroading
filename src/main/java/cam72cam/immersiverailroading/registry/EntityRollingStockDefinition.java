@@ -373,7 +373,7 @@ public abstract class EntityRollingStockDefinition {
             lights.getBlockMap().forEach((key, block) -> this.lights.put(key, new LightDefinition(block)));
         }
         interiorLightLevel = properties.getValue("interior_light_level").asFloat(6 / 15f);
-        hasInternalLighting = properties.getValue("internalLighting").asBoolean(this instanceof CarPassengerDefinition);
+        hasInternalLighting = properties.getValue("internalLighting").asBoolean(this instanceof CarPassengerDefinition || this instanceof LocomotiveDefinition);
         swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
         tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
 

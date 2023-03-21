@@ -47,11 +47,6 @@ public class Tender extends CarTank {
 	}
 
 	@Override
-	public boolean internalLightsEnabled() {
-		return hasElectricalPower();
-	}
-
-	@Override
 	protected int[] getContainerInputSlots() {
 		return new int[] { 0 };
 	}

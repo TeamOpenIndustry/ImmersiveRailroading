@@ -131,12 +131,12 @@ public class LocomotiveDiesel extends Locomotive {
 
 	@Override
 	public boolean hasElectricalPower() {
-		return this.isRunning();
+		return this.isRunning() || super.hasElectricalPower();
 	}
 
 	@Override
     public boolean internalLightsEnabled() {
-		return this.hasElectricalPower();
+		return this.isRunning() || super.internalLightsEnabled();
     }
 
     @Override
