@@ -22,7 +22,7 @@ public class ConfigSound {
 	public static boolean scaleSoundToGauge = true;
 
 	//@RequiresMcRestart
-	@Comment("Re-configure the sound system to use more audo channels (fixes audio cutting out at high speed)")
-	public static boolean overrideSoundChannels = true;
+	@Comment("Re-configure the sound system to use more audo channels (fixes audio cutting out at high speed).  Disabled with a value less than 32")
+	public static int customAudioChannels = 128;
 
 }

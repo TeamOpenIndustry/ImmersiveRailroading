@@ -20,6 +20,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.ISound;
+import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.tuple.Pair;
@@ -207,7 +208,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 
 	public ISound createSound(Identifier oggLocation, boolean repeats, double attenuationDistance) {
 		return Audio.newSound(
-				oggLocation, Identifier::getResourceStream,
+				oggLocation, SoundCategory.AMBIENT,
 				repeats,
 				(float) (attenuationDistance * ConfigSound.soundDistanceScale * gauge.scale()),
 				soundScale()

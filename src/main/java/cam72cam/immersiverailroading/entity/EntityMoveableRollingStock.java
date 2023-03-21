@@ -310,7 +310,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
                     wheel_sound.setPosition(getPosition());
                     wheel_sound.setVelocity(getVelocity());
-                    wheel_sound.update();
                 } else {
                     if (wheel_sound.isPlaying()) {
                         wheel_sound.stop();
