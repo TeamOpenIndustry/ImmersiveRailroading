@@ -710,6 +710,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					break;
 				}
 			}
+				break;
 			case ACTUATOR: {
 				EntityRollingStock stock = this.getStockNearBy(EntityRollingStock.class);
 				if (stock != null) {
@@ -721,6 +722,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					}
 				}
 			}
+				break;
 			default:
 				break;
 			}
