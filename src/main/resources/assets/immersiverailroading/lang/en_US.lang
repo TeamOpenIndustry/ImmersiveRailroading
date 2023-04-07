@@ -19,6 +19,7 @@ item.immersiverailroading:item_golden_spike.name=Golden Spike
 item.immersiverailroading:item_radio_control_card.name=Train Radio-control Card
 item.immersiverailroading:item_switch_key.name=Switch Key
 item.immersiverailroading:item_track_exchanger.name=Track Exchanger
+item.immersiverailroading:item_debug_stick.name=Debug Stick
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
@@ -61,6 +62,9 @@ chat.immersiverailroading:switch_state.locked=Switch locked to %s
 chat.immersiverailroading:switch_state.reset=The last-locked switch has been wirelessly unlocked!
 chat.immersiverailroading:switch_state.cant_reset=You haven't locked any switches with this key!
 chat.immersiverailroading:switch_state.already_reset=The last-locked switch is already unlocked!
+chat.immersiverailroading:debug_stick.save_position=Saved home position
+chat.immersiverailroading:debug_stick.clear_position=Cleared home position
+
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle

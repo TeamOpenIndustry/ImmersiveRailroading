@@ -16,6 +16,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.serialization.StrictTagMapper;
+import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 
@@ -284,6 +285,18 @@ public abstract class Locomotive extends FreightTank {
 				return true;
 		}
     }
+
+	@Override
+	public void load(TagCompound data) {
+		// if a train has a home we should reset the controls
+		if (homePosition != null) {
+			setThrottle(0);
+			setReverser(0);
+			setTrainBrake(0);
+			setIndependentBrake(0);
+		}
+		super.load(data);
+	}
 
     public ClickResult onClick(Player player, Player.Hand hand) {
 		if (player.getHeldItem(hand).is(IRItems.ITEM_RADIO_CONTROL_CARD) && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {

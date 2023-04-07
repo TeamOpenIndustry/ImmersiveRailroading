@@ -36,6 +36,8 @@ public enum ChatText {
 	SWITCH_RESET("switch_state.reset"),
 	SWITCH_CANT_RESET("switch_state.cant_reset"),
 	SWITCH_ALREADY_RESET("switch_state.already_reset"),
+	DEBUG_STICK_SAVE_POSITION("debug_stick.save_position"),
+	DEBUG_STICK_CLEAR_POSITION("debug_stick.clear_position"),
 	;
 	
 	private String value;

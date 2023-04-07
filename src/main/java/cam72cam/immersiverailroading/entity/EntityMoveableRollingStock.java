@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
@@ -19,8 +20,10 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.ICollision;
 import cam72cam.mod.entity.sync.TagSync;
+import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
@@ -44,6 +47,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private Speed currentSpeed;
     @TagField(value = "positions", mapper = TickPos.ListTagMapper.class)
     public List<TickPos> positions = new ArrayList<>();
+
+    @TagField(value = "homePosition", mapper = StrictTagMapper.class)
+    public Vec3d homePosition = null;
+    @TagField(value = "homePitch", mapper = StrictTagMapper.class)
+    public Float homePitch = null;
+    @TagField(value = "homeYaw", mapper = StrictTagMapper.class)
+    public Float homeYaw = null;
+    private boolean homePositionApplied =false;
+
     public List<SimulationState> states = new ArrayList<>();
     private RealBB boundingBox;
     private float[][] heightMapCache;
@@ -76,6 +88,47 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (rearYaw == null) {
             rearYaw = getRotationYaw();
         }
+    }
+
+    @Override
+    public ClickResult onClick(Player player, Player.Hand hand) {
+        if (getWorld().isServer && player.getHeldItem(hand).is(IRItems.ITEM_DEBUG_STICK)) {
+            boolean hasHomePosition = homePosition != null;
+            if (this instanceof EntityCoupleableRollingStock) { // if the stock is coupled, set the home position for all coupled stock
+                EntityCoupleableRollingStock stock = (EntityCoupleableRollingStock) this;
+                stock.getTrain().forEach((s) -> {
+                    if (hasHomePosition) {
+                        s.clearHomeLocation();
+                    } else {
+                        s.setHomeLocation();
+                    }
+                });
+            } else { // otherwise just set the home position for this stock
+                if (hasHomePosition) {
+                    clearHomeLocation();
+                } else {
+                    setHomeLocation();
+                }
+            }
+            // send a message to the player
+            if (!hasHomePosition) {
+                player.sendMessage(ChatText.DEBUG_STICK_SAVE_POSITION.getMessage());
+            } else {
+                player.sendMessage(ChatText.DEBUG_STICK_CLEAR_POSITION.getMessage());
+            }
+            return ClickResult.ACCEPTED;
+        }
+        return super.onClick(player, hand);
+    }
+
+    protected void setHomeLocation() {
+        homePosition = getPosition();
+        homePitch = getRotationPitch();
+        homeYaw = getRotationYaw();
+    }
+
+    protected void clearHomeLocation() {
+        homePosition = null;
     }
 
     public void initPositions(TickPos tp) {
@@ -232,6 +285,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         super.onTick();
 
         if (getWorld().isServer) {
+            // if we have a home position, teleport the train to it on the first tick
+            if (!homePositionApplied && homePosition != null) {
+                homePositionApplied = true;
+                setPosition(homePosition);
+                setRotationPitch(homePitch);
+                setRotationYaw(homeYaw);
+                setVelocity(Vec3d.ZERO);
+            }
+
             if (getDefinition().hasIndependentBrake()) {
                 for (Control<?> control : getDefinition().getModel().getControls()) {
                     if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
@@ -391,73 +453,73 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         }
 
         if (Math.abs(this.getCurrentSpeed().metric()) > 1) {
-			List<Entity> entitiesWithin = getWorld().getEntities((Entity entity) -> (entity.isLiving() || entity.isPlayer()) && this.getCollision().intersects(entity.getBounds()), Entity.class);
-			for (Entity entity : entitiesWithin) {
-				if (entity instanceof EntityMoveableRollingStock) {
-					// rolling stock collisions handled by looking at the front and
-					// rear coupler offsets
-					continue;
-				} 
-	
-				if (entity.getRiding() instanceof EntityMoveableRollingStock) {
-					// Don't apply bb to passengers
-					continue;
-				}
-				
-				if (entity.isPlayer()) {
-					if (entity.getTickCount() < 20 * 5) {
-						// Give the internal a chance to getContents out of the way
-						continue;
-					}
-				}
-	
-				
-				// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
-				// We need to do a forward lookup
+            List<Entity> entitiesWithin = getWorld().getEntities((Entity entity) -> (entity.isLiving() || entity.isPlayer()) && this.getCollision().intersects(entity.getBounds()), Entity.class);
+            for (Entity entity : entitiesWithin) {
+                if (entity instanceof EntityMoveableRollingStock) {
+                    // rolling stock collisions handled by looking at the front and
+                    // rear coupler offsets
+                    continue;
+                }
+
+                if (entity.getRiding() instanceof EntityMoveableRollingStock) {
+                    // Don't apply bb to passengers
+                    continue;
+                }
+
+                if (entity.isPlayer()) {
+                    if (entity.getTickCount() < 20 * 5) {
+                        // Give the internal a chance to getContents out of the way
+                        continue;
+                    }
+                }
+
+
+                // Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
+                // We need to do a forward lookup
                 // TODO move this to UMC?
-				if (!this.getCollision().intersects(entity.getBounds())) {
-					// miss
-					continue;
-				}
-	
-				// Move entity
+                if (!this.getCollision().intersects(entity.getBounds())) {
+                    // miss
+                    continue;
+                }
 
-				entity.setVelocity(this.getVelocity().scale(2));
-				// Force update
-				//TODO entity.onUpdate();
-	
-				double speedDamage = Math.abs(this.getCurrentSpeed().metric()) / Config.ConfigDamage.entitySpeedDamage;
-				if (speedDamage > 1) {
-				    boolean isDark = Math.max(getWorld().getSkyLightLevel(entity.getBlockPosition()), getWorld().getBlockLightLevel(entity.getBlockPosition())) < 8.0F;
-				    entity.directDamage(isDark ? DAMAGE_SOURCE_HIT_IN_DARKNESS : DAMAGE_SOURCE_HIT, speedDamage);
-				}
-			}
-	
-			// Riding on top of cars
-			final RealBB bb = this.getCollision().offset(new Vec3d(0, gauge.scale()*2, 0));
+                // Move entity
+
+                entity.setVelocity(this.getVelocity().scale(2));
+                // Force update
+                //TODO entity.onUpdate();
+
+                double speedDamage = Math.abs(this.getCurrentSpeed().metric()) / Config.ConfigDamage.entitySpeedDamage;
+                if (speedDamage > 1) {
+                    boolean isDark = Math.max(getWorld().getSkyLightLevel(entity.getBlockPosition()), getWorld().getBlockLightLevel(entity.getBlockPosition())) < 8.0F;
+                    entity.directDamage(isDark ? DAMAGE_SOURCE_HIT_IN_DARKNESS : DAMAGE_SOURCE_HIT, speedDamage);
+                }
+            }
+
+            // Riding on top of cars
+            final RealBB bb = this.getCollision().offset(new Vec3d(0, gauge.scale()*2, 0));
             List<Entity> entitiesAbove = getWorld().getEntities((Entity entity) -> (entity.isLiving() || entity.isPlayer()) && bb.intersects(entity.getBounds()), Entity.class);
-			for (Entity entity : entitiesAbove) {
-				if (entity instanceof EntityMoveableRollingStock) {
-					continue;
-				}
-				if (entity.getRiding() instanceof EntityMoveableRollingStock) {
-					continue;
-				}
-	
-				// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
-				// We need to do a forward lookup
-				if (!bb.intersects(entity.getBounds())) {
-					// miss
-					continue;
-				}
-				
-				//Vec3d pos = entity.getPositionVector();
-				//pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
-				//entity.setPosition(pos.x, pos.y, pos.z);
+            for (Entity entity : entitiesAbove) {
+                if (entity instanceof EntityMoveableRollingStock) {
+                    continue;
+                }
+                if (entity.getRiding() instanceof EntityMoveableRollingStock) {
+                    continue;
+                }
 
-				entity.setVelocity(this.getVelocity().add(0, entity.getVelocity().y, 0));
-			}
-	    }
+                // Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
+                // We need to do a forward lookup
+                if (!bb.intersects(entity.getBounds())) {
+                    // miss
+                    continue;
+                }
+
+                //Vec3d pos = entity.getPositionVector();
+                //pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
+                //entity.setPosition(pos.x, pos.y, pos.z);
+
+                entity.setVelocity(this.getVelocity().add(0, entity.getVelocity().y, 0));
+            }
+        }
 
         if (getWorld().isServer) {
             setControlPosition("MOVINGFORWARD", getCurrentSpeed().minecraft() > 0 ? 1 : 0);
