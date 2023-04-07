@@ -26,6 +26,7 @@ import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -65,6 +66,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     private double swayMagnitude;
     private double swayImpulse;
+
+    private HashSet<TileRailBase> railCache = new HashSet<>();
 
     @Override
     public void load(TagCompound data) {
@@ -268,11 +271,19 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 for (Vec3i bp : state.blocksToBreak) {
                     getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !getWorld().isSnow(bp));
                 }
+                HashSet<TileRailBase> oldRailCache = railCache;
+                railCache = new HashSet<>();
                 for (Vec3i bp : state.trackToUpdate) {
                     TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
                     if (te != null) {
                         te.cleanSnow();
                         te.stockOverhead(this);
+                        railCache.add(te);
+                    }
+                }
+                for (TileRailBase te : oldRailCache) {
+                    if (!railCache.contains(te)) {
+                        te.stockOverhead(null);
                     }
                 }
             }
@@ -555,6 +566,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         }
         if (this.clackFront != null) {
             clackFront.stop();
+        }
+        for (TileRailBase te : railCache) {
+            te.stockOverhead(null);
         }
     }
 

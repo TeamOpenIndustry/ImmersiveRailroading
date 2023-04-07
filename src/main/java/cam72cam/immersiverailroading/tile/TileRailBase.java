@@ -534,16 +534,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return;
 		}
 
-		if (overhead != null && ticksExisted % 5 == 0) {
-			if (!overhead.getBounds().intersects(
-					new Vec3d(this.getPos().up(3).east().north()).max(new Vec3d(this.getPos().south().west())),
-					new Vec3d(this.getPos().up(3).east().north()).min(new Vec3d(this.getPos().south().west()))
-			)) {
-				// Overhead moved somewhere else
-				overhead = null;
-			}
-		}
-
 		if (this.ticksExisted % 20 == 0) {
 			switch (augment) {
 				case ITEM_LOADER:
