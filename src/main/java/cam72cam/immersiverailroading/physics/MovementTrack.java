@@ -109,7 +109,7 @@ public class MovementTrack {
 			Vec3d forward = center.add(VecUtil.fromWrongYaw(fromCenter, angle));
 			Vec3d backward = center.add(VecUtil.fromWrongYaw(fromCenter, angle + 180));
 			
-			if (forward.distanceTo(currentPosition) < backward.distanceTo(currentPosition)) {
+			if (forward.distanceToSquared(currentPosition) < backward.distanceToSquared(currentPosition)) {
 				return forward;
 			} else {
 				return backward;
@@ -126,7 +126,7 @@ public class MovementTrack {
 			Vec3d relative = currentPosition.subtract(center);
 			PosStep close = positions.get(0);
 			for (PosStep pos : positions) {
-				if (close.distanceTo(relative) > pos.distanceTo(relative)) {
+				if (close.distanceToSquared(relative) > pos.distanceToSquared(relative)) {
 					close = pos;
 				}
 			}
@@ -145,7 +145,7 @@ public class MovementTrack {
 
 
 
-			if (forward.distanceTo(estimatedPosition) < backward.distanceTo(estimatedPosition)) {
+			if (forward.distanceToSquared(estimatedPosition) < backward.distanceToSquared(estimatedPosition)) {
 				return forward;
 			} else {
 				return backward;

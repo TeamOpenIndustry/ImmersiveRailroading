@@ -12,17 +12,17 @@ public interface IIterableTrack {
     List<BuilderBase> getSubBuilders();
 
     default double offsetFromTrack(RailInfo info, Vec3i pos, Vec3d position) {
-        double dist = 100;
+        double distSquared = 10000;
 
         // Convert to relative
         position = position.subtract(info.placementInfo.placementPosition).subtract(pos);
 
         for (Vec3d gagPos : getPath(info.settings.gauge.scale()/8)) {
-            double off = gagPos.distanceTo(position.add(0, -(position.y % 1), 0));
-            if (off < dist) {
-                dist = off;
+            double offSquared = gagPos.distanceToSquared(position.add(0, -(position.y % 1), 0));
+            if (offSquared < distSquared) {
+                distSquared = offSquared;
             }
         }
-        return dist;
+        return distSquared;
     }
 }

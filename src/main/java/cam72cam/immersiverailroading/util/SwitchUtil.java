@@ -30,7 +30,7 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 
-		if (position != null && parent.info != null) {
+		if (position != null) {
 			IIterableTrack switchBuilder = (IIterableTrack) parent.info.getBuilder(rail.getWorld());
 			IIterableTrack turnBuilder = (IIterableTrack) rail.info.getBuilder(rail.getWorld());
 			double isOnStraight = switchBuilder.offsetFromTrack(parent.info, parent.getPos(), position);

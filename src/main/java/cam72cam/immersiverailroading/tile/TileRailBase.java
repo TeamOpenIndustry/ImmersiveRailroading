@@ -377,7 +377,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					}
 				}
 				// If we are not on a switch curve and closer to our target (or are on the first iteration)
-				if (!hasSwitchSet && potential.distanceTo(predictedPos) < nextPos.distanceTo(predictedPos) ||
+				if (!hasSwitchSet && potential.distanceToSquared(predictedPos) < nextPos.distanceToSquared(predictedPos) ||
 						currentPosition == nextPos) {
 					nextPos = potential;
 				}
