@@ -248,7 +248,6 @@ public abstract class ValveGear {
                 if (chuff.isPlaying()) {
                     chuff.setPosition(particlePos);
                     chuff.setVelocity(stock.getVelocity());
-                    chuff.update();
                 }
             }
 
@@ -272,15 +271,14 @@ public abstract class ValveGear {
                 cylinder_drain.setVolume(drain_volume * stock.getThrottle());
                 cylinder_drain.setPosition(particlePos);
                 cylinder_drain.setVelocity(stock.getVelocity());
-                cylinder_drain.update();
             }
         }
 
         void free() {
             for (ISound chuff : chuffs) {
-                chuff.terminate();
+                chuff.stop();
             }
-            cylinder_drain.terminate();
+            cylinder_drain.stop();
         }
     }
 

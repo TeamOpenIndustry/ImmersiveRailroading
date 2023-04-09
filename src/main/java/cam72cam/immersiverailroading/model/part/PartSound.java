@@ -43,13 +43,13 @@ public class PartSound {
 
         public void terminate() {
             if (start != null) {
-                start.terminate();
+                start.stop();
             }
             if (main != null) {
-                main.terminate();
+                main.stop();
             }
             if (stop != null) {
-                stop.terminate();
+                stop.stop();
             }
         }
     }
@@ -166,7 +166,6 @@ public class PartSound {
         if (toUpdate != null) {
             toUpdate.setPosition(stock.getPosition());
             toUpdate.setVelocity(stock.getVelocity());
-            toUpdate.update();
         }
     }
 

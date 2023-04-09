@@ -34,7 +34,7 @@ public class PressureValve {
     private final ExpireableMap<UUID, ISound> sounds = new ExpireableMap<UUID, ISound>() {
         @Override
         public void onRemove(UUID key, ISound value) {
-            value.terminate();
+            value.stop();
         }
     };
 
@@ -54,7 +54,6 @@ public class PressureValve {
 
                 sound.setPosition(stock.getPosition());
                 sound.setVelocity(stock.getVelocity());
-                sound.update();
             } else {
                 sound.stop();
             }
@@ -73,7 +72,7 @@ public class PressureValve {
     public void removed(EntityMoveableRollingStock stock) {
         ISound sound = sounds.get(stock.getUUID());
         if (sound != null) {
-            sound.terminate();
+            sound.stop();
         }
     }
 }

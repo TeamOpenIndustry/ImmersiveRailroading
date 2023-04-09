@@ -119,8 +119,6 @@ public class Whistle {
 
                         if (!sound.isPlaying()) {
                             sound.play(stock.getPosition());
-                        } else {
-                            sound.update();
                         }
                     } else {
                         if (sound.isPlaying()) {
@@ -134,7 +132,7 @@ public class Whistle {
         public void terminate() {
             if (chimes != null) {
                 for (ISound chime : chimes) {
-                    chime.terminate();
+                    chime.stop();
                 }
             }
         }

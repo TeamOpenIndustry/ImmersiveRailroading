@@ -7,6 +7,7 @@ import cam72cam.mod.sound.ISound;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.sound.SoundCategory;
 
 public class SoundPacket extends Packet {
 	@TagField
@@ -37,11 +38,10 @@ public class SoundPacket extends Packet {
 
 	@Override
 	public void handle() {
-		ISound snd = Audio.newSound(new Identifier(file), Identifier::getResourceStream, false, (float) (distance * ConfigSound.soundDistanceScale), scale);
+		ISound snd = Audio.newSound(new Identifier(file), SoundCategory.AMBIENT, false, (float) (distance * ConfigSound.soundDistanceScale), scale);
 		snd.setVelocity(motion);
 		snd.setVolume(volume);
 		snd.setPitch(pitch);
-		snd.disposable();
 		snd.play(pos);
 	}
 }

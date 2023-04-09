@@ -391,7 +391,6 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         snd.setVelocity(stock.getVelocity());
         snd.setVolume(1);
         snd.setPitch(1f);
-        snd.disposable();
         snd.play(center(stock));
         sounds.computeIfAbsent(stock.getUUID(), k -> new ArrayList<>()).add(snd);
     }
@@ -428,7 +427,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                 // Release
                 if (this.sounds.containsKey(stock.getUUID())) {
                     for (ISound snd : this.sounds.get(stock.getUUID())) {
-                        snd.terminate();
+                        snd.stop();
                     }
                 }
                 createSound(stock, sounds.disengage, false);
