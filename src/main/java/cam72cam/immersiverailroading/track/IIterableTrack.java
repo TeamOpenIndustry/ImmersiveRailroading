@@ -12,7 +12,7 @@ public interface IIterableTrack {
     List<BuilderBase> getSubBuilders();
 
     default double offsetFromTrack(RailInfo info, Vec3i pos, Vec3d position) {
-        double distSquared = 10000;
+        double distSquared = 100 * 100;
 
         // Convert to relative
         position = position.subtract(info.placementInfo.placementPosition).subtract(pos);
@@ -23,6 +23,6 @@ public interface IIterableTrack {
                 distSquared = offSquared;
             }
         }
-        return distSquared;
+        return Math.sqrt(distSquared);
     }
 }
