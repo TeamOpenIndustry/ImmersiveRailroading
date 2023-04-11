@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.*;
@@ -535,11 +536,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 		if (overhead != null && ticksExisted % 5 == 0) {
-			if (!overhead.getBounds().intersects(
-					new Vec3d(this.getPos().up(3).east().north()).max(new Vec3d(this.getPos().south().west())),
-					new Vec3d(this.getPos().up(3).east().north()).min(new Vec3d(this.getPos().south().west()))
-			)) {
-				// Overhead moved somewhere else
+			SimulationState state = overhead.getCurrentState();
+			if (state == null || !state.trackToUpdate.contains(getPos())) {
 				overhead = null;
 			}
 		}
