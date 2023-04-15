@@ -1,11 +1,13 @@
 package cam72cam.immersiverailroading.entity.physics;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.util.PhysicsThread;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
@@ -18,11 +20,25 @@ public class Simulation {
     public static boolean forceQuickUpdates = false;
 
     public static void simulate(World world) {
+        long tick = world.getTicks();
+        ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
+        List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
+
+        if (Config.ConfigPerformance.multithreadedPhysics) {
+            PhysicsThread.run(() -> simulateInternal(tick, chrono, allStock));
+        } else {
+            simulateInternal(tick, chrono, allStock);
+        }
+    }
+
+    private static void simulateInternal(long tick, ServerChronoState chrono , List<EntityCoupleableRollingStock> allStock) {
+        // TODO: check potential thread safety issues and dispatch to main thread if needed
+
         // 100KM/h ~= 28m/s which means non-loaded stationary stock may be phased through at that speed
         // I'm OK with that for now
         // We might want to chunk-load ahead of the train just to be safe?
 
-        if (world.getTicks() % 5 != 0) {
+        if (tick % 5 != 0) {
             // Only re-check every 5 ticks
             if (!forceQuickUpdates) {
                 return;
@@ -31,18 +47,18 @@ public class Simulation {
             forceQuickUpdates = false;
         }
 
-        List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
         if (allStock.isEmpty()) {
             return;
         }
 
-        if (ChronoState.getState(world).getTickID() < 20 * 2) {
+        double tickId = chrono.getTickID();
+        if (tickId < 20 * 2) {
             // Wait for at least 2 seconds before starting simulation (for stock to load)
             allStock.forEach(EntityCoupleableRollingStock::keepLoaded);
             return;
         }
 
-        int pass = (int) ChronoState.getState(world).getTickID();
+        int pass = (int) tickId;
 
         List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
         List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
@@ -52,8 +68,6 @@ public class Simulation {
         }
 
         boolean anyStartedDirty = false;
-
-        ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
 
         for (EntityCoupleableRollingStock entity : allStock) {
             SimulationState current = entity.getCurrentState();
@@ -284,7 +298,7 @@ public class Simulation {
                 state.dirty = false;
             }
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
-            if (world.getTicks() % 20 == 0 || anyStartedDirty) {
+            if (tick % 20 == 0 || anyStartedDirty) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }
         }

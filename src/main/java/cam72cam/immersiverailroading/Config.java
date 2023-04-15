@@ -194,6 +194,9 @@ public class Config {
 
 		@Comment("How many MB of memory to reserve for stock loading per thread, higher numbers = safer but slower")
 		public static int megabytesReservedPerStockLoadingThread = 1024;
+
+		@Comment("Enable multithreaded physics. This is experimental and may cause issues.")
+		public static boolean multithreadedPhysics = false;
 	}
 
 	@Name("debug")
