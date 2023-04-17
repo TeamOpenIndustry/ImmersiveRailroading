@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.entity.physics;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
@@ -24,11 +23,7 @@ public class Simulation {
         ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
         List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
 
-        if (Config.ConfigPerformance.multithreadedPhysics) {
-            PhysicsThread.run(() -> simulateInternal(tick, chrono, allStock));
-        } else {
-            simulateInternal(tick, chrono, allStock);
-        }
+        PhysicsThread.run(() -> simulateInternal(tick, chrono, allStock));
     }
 
     private static void simulateInternal(long tick, ServerChronoState chrono , List<EntityCoupleableRollingStock> allStock) {
