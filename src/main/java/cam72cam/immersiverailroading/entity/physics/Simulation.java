@@ -25,10 +25,11 @@ public class Simulation {
      */
     public static void simulate(World world) {
         long tick = world.getTicks();
-        ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
-        List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
 
         if (shouldSimulate(tick)) {
+            ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
+            List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
+
             PhysicsThread.run(world, () -> simulateInternal(tick, chrono, allStock));
         }
     }
