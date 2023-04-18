@@ -35,6 +35,10 @@ public class MovementTrack {
 		};
 		
 		for (Vec3d pos : positions) {
+			if (Thread.currentThread().getName().contains("ImmersiveRailroading") && !world.isBlockLoaded(new Vec3i(pos))) {
+				// We can't load chunks on any of the "IR" threads
+				continue;
+			}
 			for (double height : heightSkew) {
 				ITrack te = ITrack.get(world, pos.add(0, height + (currentPosition.y%1), 0), true);
 				if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {

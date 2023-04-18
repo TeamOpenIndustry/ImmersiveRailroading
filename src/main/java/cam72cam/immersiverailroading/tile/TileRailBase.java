@@ -264,6 +264,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (this.getParent() == null) {
 			return null;
 		}
+
+		if (Thread.currentThread().getName().contains("ImmersiveRailroading") && !getWorld().isBlockLoaded(getParent())) {
+			// We can't load chunks on any of the "IR" threads
+			return null;
+		}
+
 		TileRail te = getWorld().getBlockEntity(this.getParent(), TileRail.class);
 		if (te == null || te.info == null) {
 			return null;
