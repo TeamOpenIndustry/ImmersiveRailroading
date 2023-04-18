@@ -23,7 +23,7 @@ public class PhysicsThread {
     /**
      * The last job submitted to the physics thread by dimension id.
      */
-    private static final HashMap<Integer, Future<?>> lastJobs = new HashMap<Integer, Future<?>>();
+    private static final HashMap<Object, Future<?>> lastJobs = new HashMap<>();
 
     /**
      * Gets or creates the physics thread, if enabled, or null if disabled.
