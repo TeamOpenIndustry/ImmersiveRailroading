@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
-import cam72cam.immersiverailroading.util.PhysicsThread;
+import cam72cam.immersiverailroading.physics.PhysicsThread;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
@@ -18,29 +18,53 @@ public class Simulation {
 
     public static boolean forceQuickUpdates = false;
 
+    /**
+     * Performs physics simulation for all stock in the specified world.
+     * Automatically dispatches physics simulation to a separate thread if enabled.
+     * @param world The world to simulate.
+     */
     public static void simulate(World world) {
         long tick = world.getTicks();
         ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
         List<EntityCoupleableRollingStock> allStock = world.getEntities(EntityCoupleableRollingStock.class);
 
-        PhysicsThread.run(() -> simulateInternal(tick, chrono, allStock));
+        if (shouldSimulate(tick)) {
+            PhysicsThread.run(world, () -> simulateInternal(tick, chrono, allStock));
+        }
     }
 
+    /**
+     * Returns true if we should simulate this tick.
+     * Physics is only simulated every 5 ticks, unless forceQuickUpdates is set.
+     * If quick updates are forced the flag is reset.
+     * @param tick The current tick.
+     * @return True if we should simulate this tick and false otherwise.
+     */
+    private static boolean shouldSimulate(long tick) {
+        if (tick % 5 != 0) {
+            // Only re-check every 5 ticks
+            if (!forceQuickUpdates) {
+                return false;
+            }
+        } else {
+            forceQuickUpdates = false;
+        }
+        return true;
+    }
+
+    /**
+     * Performs the actual physics simulation for all specified stock.
+     * Supplied stock must be in the same world.
+     * @param tick The current tick.
+     * @param chrono The current chrono state.
+     * @param allStock The stock to simulate.
+     */
     private static void simulateInternal(long tick, ServerChronoState chrono , List<EntityCoupleableRollingStock> allStock) {
         // TODO: check potential thread safety issues and dispatch to main thread if needed
 
         // 100KM/h ~= 28m/s which means non-loaded stationary stock may be phased through at that speed
         // I'm OK with that for now
         // We might want to chunk-load ahead of the train just to be safe?
-
-        if (tick % 5 != 0) {
-            // Only re-check every 5 ticks
-            if (!forceQuickUpdates) {
-                return;
-            }
-        } else {
-            forceQuickUpdates = false;
-        }
 
         if (allStock.isEmpty()) {
             return;

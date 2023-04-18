@@ -23,7 +23,6 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.immersiverailroading.util.PhysicsThread;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.ModEvent;
@@ -111,8 +110,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
 				IRFuzzy.applyFallbacks();
 				break;
-			case START:
-				PhysicsThread.start();
 		}
 
 	}
