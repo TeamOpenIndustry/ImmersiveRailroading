@@ -77,7 +77,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private String stockTag;
 	private EntityMoveableRollingStock overhead;
 	@TagField("pushPull")
-	private boolean pushPull = true;
+	private boolean pushPull = ConfigDebug.defaultAugmentPushPull;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;

@@ -234,6 +234,9 @@ public class Config {
 
 		@Comment("Default Augments to Computer Mode")
 		public static boolean defaultAugmentComputer = false;
+
+		@Comment("Default Augments to Push/Pull mode")
+		public static boolean defaultAugmentPushPull = true;
     }
 
 	public static boolean isFuelRequired(Gauge gauge) {
