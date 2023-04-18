@@ -31,10 +31,10 @@ public class PhysicsThread {
      */
     @Nullable
     private static ExecutorService getExecutor() {
-        if (ConfigPerformance.multithreadedPhysics) {
+        if (ConfigPerformance.physicsThreads > 0) {
             if (executor == null) {
-                ImmersiveRailroading.info("Starting physics thread");
-                executor = Executors.newSingleThreadExecutor((t) -> new Thread(t, "ImmersiveRailroading Physics Thread"));
+                ImmersiveRailroading.info("Starting physics %d thread(s)", ConfigPerformance.physicsThreads);
+                executor = Executors.newFixedThreadPool(ConfigPerformance.physicsThreads, (t) -> new Thread(t, "ImmersiveRailroading Physics Thread"));
             }
             return executor;
         } else {
