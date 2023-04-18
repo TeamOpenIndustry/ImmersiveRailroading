@@ -1,11 +1,12 @@
 package cam72cam.immersiverailroading.entity.physics;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -159,7 +160,7 @@ public class Consist {
         }
 
 
-        public SimulationState applyToState(List<Vec3i> blocksAlreadyBroken) {
+        public SimulationState applyToState(Simulation.BlockCollector blocksAlreadyBroken) {
             double velocityMPT = Speed.fromMetric(this.velocity).minecraft(); // per 1 tick
 
             // Calculate the applied velocity from this particle.  This should not include the coupler adjustment speed/distance below
@@ -242,9 +243,9 @@ public class Consist {
         }
     }
 
-    public static Map<UUID, SimulationState> iterate(Map<UUID, SimulationState> states, List<Vec3i> blocksAlreadyBroken) {
+    public static Map<UUID, SimulationState> iterate(Map<UUID, SimulationState> states, Simulation.BlockCollector blocksAlreadyBroken) {
         // ordered
-        List<Particle> particles = new ArrayList<>();
+        List<List<Particle>> consists = new ArrayList<>();
 
         List<SimulationState> used = new ArrayList<>();
 
@@ -325,7 +326,7 @@ public class Consist {
             consist.forEach(p -> p.state.canBeUnloaded = canBeUnloaded);
             if (dirty) {
                 consist.forEach(p -> p.state.dirty = true);
-                particles.addAll(consist);
+                consists.add(consist);
             }
 
             // Make sure we can't accidentally hook into any of the processed states from this consist
@@ -336,23 +337,55 @@ public class Consist {
         // Do we need to reverse it?
         //Collections.reverse(particles);
 
-        // Spread forces
-        particles.forEach(Particle::applyNextCollision);
-        particles.forEach(Particle::applyAcceleration);
-        particles.forEach(Particle::applyFriction);
-
-        // Generate new states
         try {
-            return particles.stream().map(particle -> particle.applyToState(blocksAlreadyBroken)).collect(Collectors.toMap(s -> s.config.id, s -> s));
+            if (Config.ConfigPerformance.consistThreads > 0) {
+                synchronized (Consist.class) {
+                    if (consistExecutor == null) {
+                        consistExecutor = new ForkJoinPool(Config.ConfigPerformance.consistThreads, pool -> {
+                            final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+                            worker.setName("ImmersiveRailroadingConsist-" + worker.getPoolIndex());
+                            return worker;
+                        }, null, false);
+                    }
+                }
+
+                return consists.stream()
+                        .map(particles -> consistExecutor.submit(() -> processConsist(particles, blocksAlreadyBroken)))
+                        .collect(Collectors.toList()).stream() // Force stream termination
+                        .flatMap(task -> {
+                            try {
+                                return task.get().stream();
+                            } catch (InterruptedException | ExecutionException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }).collect(Collectors.toMap(s -> s.config.id, s -> s));
+            } else {
+                return consists.stream()
+                        .flatMap(particles -> processConsist(particles, blocksAlreadyBroken).stream())
+                        .collect(Collectors.toMap(s -> s.config.id, s -> s));
+            }
         } catch (Exception ex) {
             for (SimulationState state : states.values()) {
                 ImmersiveRailroading.debug("State: %s (%s, %s)", state.config.id, state.interactingFront, state.interactingRear);
             }
-            for (Particle particle : particles) {
-                ImmersiveRailroading.debug("Particle: %s (%s, %s)", particle.state.config.id, particle.state.interactingFront, particle.state.interactingRear);
+            for (List<Particle> particles : consists) {
+                for (Particle particle : particles) {
+                    ImmersiveRailroading.debug("Particle: %s (%s, %s)", particle.state.config.id, particle.state.interactingFront, particle.state.interactingRear);
+                }
             }
 
             throw ex;
         }
     }
+
+    private static List<SimulationState> processConsist(List<Particle> particles, Simulation.BlockCollector blocksAlreadyBroken) {
+        // Spread forces
+        particles.forEach(Particle::applyNextCollision);
+        particles.forEach(Particle::applyAcceleration);
+        particles.forEach(Particle::applyFriction);
+        // Generate new states
+        return particles.stream().map(particle -> particle.applyToState(blocksAlreadyBroken)).collect(Collectors.toList());
+    }
+
+    private static ExecutorService consistExecutor = null;
 }

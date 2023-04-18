@@ -6,6 +6,7 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.ChatText;
@@ -52,7 +53,7 @@ public class SpawnUtil {
 				for (int i = 0; i <= 90; i+= 5) {
 					for (int j = -1; j <= 1; j += 2) {
 						ecrs.setRotationYaw(yaw + i * j);
-						SimulationState state = new SimulationState(ecrs).next(offset, new ArrayList<>());
+						SimulationState state = new SimulationState(ecrs).next(offset, new Simulation.BlockCollector());
 						if (state.position.distanceTo(ecrs.getPosition()) > offset/2) {
 							ecrs.setPosition(state.position);
 							ecrs.setRotationYaw(state.yaw);
