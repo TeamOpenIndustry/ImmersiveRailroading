@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.physics;
+package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;

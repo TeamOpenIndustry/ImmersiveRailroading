@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
-import cam72cam.immersiverailroading.physics.PhysicsThread;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
