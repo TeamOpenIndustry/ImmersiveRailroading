@@ -76,6 +76,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@TagField("stockTag")
 	private String stockTag;
 	private EntityMoveableRollingStock overhead;
+	@TagField("pushPull")
+	private boolean pushPull = true;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -136,7 +138,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		this.markDirty();
 		return this.augmentFilterID != null;
 	}
-	public PlayerMessage nextAugmentRedstoneMode(boolean crouching) {
+
+	public PlayerMessage nextAugmentRedstoneMode(boolean isPiston) {
 		if (this.augment == null) {
 			return null;
 		}
@@ -148,7 +151,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				controlMode = LocoControlMode.values()[((controlMode.ordinal() + 1) % (LocoControlMode.values().length))];
 				return PlayerMessage.translate(controlMode.toString());
 			case COUPLER:
-				if (! crouching) {
+				if (isPiston) {
 					couplerMode = CouplerAugmentMode.values()[((couplerMode.ordinal() + 1) % (CouplerAugmentMode.values().length))];
 					return PlayerMessage.translate(couplerMode.toString());
 				}
@@ -157,8 +160,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			case ITEM_UNLOADER:
 			case FLUID_LOADER:
 			case FLUID_UNLOADER:
-				this.redstoneMode = RedstoneMode.values()[(redstoneMode.ordinal() + 1) % RedstoneMode.values().length];
-				return PlayerMessage.translate(redstoneMode.toString());
+				if (isPiston) {
+					this.pushPull = !this.pushPull;
+					return PlayerMessage.translate("immersiverailroading:augment.pushpull." + (this.pushPull ? "enabled" : "disabled"));
+				} else {
+					this.redstoneMode = RedstoneMode.values()[(redstoneMode.ordinal() + 1) % RedstoneMode.values().length];
+					return PlayerMessage.translate(redstoneMode.toString());
+				}
 			default:
 				return null;
 		}
@@ -560,7 +568,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		try {
 			switch (this.augment) {
             case ITEM_LOADER:
-			{
+			if (pushPull) {
 				Freight freight = this.getStockNearBy(Freight.class);
 				if (freight == null) {
 					break;
@@ -573,7 +581,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 			break;
-			case ITEM_UNLOADER: {
+			case ITEM_UNLOADER:
+			if (pushPull) {
 				Freight freight = this.getStockNearBy(Freight.class);
 				if (freight == null) {
 					break;
@@ -586,7 +595,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 			break;
-			case FLUID_LOADER: {
+			case FLUID_LOADER:
+			if (pushPull) {
 				FreightTank stock = this.getStockNearBy(FreightTank.class);
 				if (stock == null) {
 					break;
@@ -598,8 +608,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					}
 				}
 			}
-				break;
-			case FLUID_UNLOADER: {
+			break;
+			case FLUID_UNLOADER:
+			if (pushPull) {
 				FreightTank stock = this.getStockNearBy(FreightTank.class);
 				if (stock == null) {
 					break;
@@ -611,8 +622,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					}
 				}
 			}
-				
-				break;
+			break;
 			case WATER_TROUGH:
 				/*
 				if (this.augmentTank == null) {
@@ -891,8 +901,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 			return true;
 		}
-		if (player.hasPermission(Permissions.AUGMENT_TRACK) && (stack.is(Fuzzy.REDSTONE_TORCH) || stack.is(Fuzzy.REDSTONE_DUST))) {
-			PlayerMessage next = this.nextAugmentRedstoneMode(stack.is(Fuzzy.REDSTONE_DUST));
+		if (player.hasPermission(Permissions.AUGMENT_TRACK) && (stack.is(Fuzzy.REDSTONE_TORCH) || stack.is(Fuzzy.REDSTONE_DUST) || stack.is(Fuzzy.PISTON))) {
+			PlayerMessage next = this.nextAugmentRedstoneMode(stack.is(Fuzzy.PISTON));
 			if (next != null) {
 				if (this.getWorld().isServer) {
 					player.sendMessage(next);
