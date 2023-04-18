@@ -197,6 +197,9 @@ public class Config {
 
 		@Comment("Number of physics threads to use, 0 = disabled (This is experimental and may cause issues)")
 		public static int physicsThreads = 0;
+
+		@Comment("Number of consist threads to use, 0 = disabled (This is experimental and may cause issues)")
+		public static int consistThreads = 0;
 	}
 
 	@Name("debug")

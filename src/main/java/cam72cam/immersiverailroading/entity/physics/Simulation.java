@@ -81,7 +81,7 @@ public class Simulation {
         int pass = (int) tickId;
 
         List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
-        List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
+        BlockCollector blocksAlreadyBroken = new BlockCollector();
 
         for (int i = 0; i < 40; i++) {
             stateMaps.add(new HashMap<>());
@@ -320,6 +320,22 @@ public class Simulation {
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
             if (tick % 20 == 0 || anyStartedDirty) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
+            }
+        }
+    }
+
+    public static class BlockCollector {
+        private final List<Vec3i> blocks = new ArrayList<>();
+
+        public void addAll(List<Vec3i> blocksToBreak) {
+            synchronized (blocks) {
+                blocks.addAll(blocksToBreak);
+            }
+        }
+
+        public boolean contains(Vec3i bp) {
+            synchronized (blocks) {
+                return blocks.contains(bp);
             }
         }
     }
