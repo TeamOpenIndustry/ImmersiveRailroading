@@ -2,13 +2,14 @@ package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
+import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  * Utility class for the physics thread.
@@ -19,6 +20,12 @@ public class PhysicsThread {
      */
     @Nullable
     private static ExecutorService executor;
+
+    /**
+     * The minecraft server instance.
+     */
+    // TODO: Get this using UniversalModCore
+    private static final MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
     /**
      * The last job submitted to the physics thread by dimension id.
@@ -58,6 +65,18 @@ public class PhysicsThread {
             } else {
                 lastJobs.put(world.getId(), executor.submit(task));
             }
+        }
+    }
+
+    /**
+     * Assures that the given block is loaded.
+     * If the position is not loaded, the position is loaded on the server thread and the method waits for the result.
+     * @param world The world to load the block in.
+     * @param pos The position of the block to load.
+     */
+    public static void assureLoaded(World world, Vec3i pos) throws ExecutionException, InterruptedException, TimeoutException {
+        if (!server.isCallingFromMinecraftThread() && !world.isBlockLoaded(pos)) {
+            server.addScheduledTask(() -> world.keepLoaded(pos)).get(1, TimeUnit.SECONDS);
         }
     }
 }

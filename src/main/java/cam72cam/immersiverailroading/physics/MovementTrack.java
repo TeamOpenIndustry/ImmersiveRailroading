@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.physics.PhysicsThread;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -14,6 +16,8 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public class MovementTrack {
 
@@ -35,16 +39,22 @@ public class MovementTrack {
 		};
 		
 		for (Vec3d pos : positions) {
-			for (double height : heightSkew) {
-				ITrack te = ITrack.get(world, pos.add(0, height + (currentPosition.y%1), 0), true);
-				if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
-					return te;
+			try {
+				PhysicsThread.assureLoaded(world, new Vec3i(pos));
+				for (double height : heightSkew) {
+					ITrack te = ITrack.get(world, pos.add(0, height + (currentPosition.y % 1), 0), true);
+					if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
+						return te;
+					}
+					// HACK for cross gauge
+					TileRailBase rail = world.getBlockEntity(new Vec3i(pos).add(new Vec3i(0, (int) (height + (currentPosition.y % 1)), 0)), TileRailBase.class);
+					if (rail != null && rail.getParentReplaced() != null) {
+						return rail;
+					}
 				}
-				// HACK for cross gauge
-				TileRailBase rail = world.getBlockEntity(new Vec3i(pos).add(new Vec3i(0, (int)(height + (currentPosition.y%1)), 0)), TileRailBase.class);
-				if (rail != null && rail.getParentReplaced() != null) {
-					return rail;
-				}
+			} catch (ExecutionException | InterruptedException | TimeoutException ex) {
+				ImmersiveRailroading.warn("Failed to load position for %s", pos);
+				ImmersiveRailroading.catching(ex);
 			}
 		}
 		return null;
