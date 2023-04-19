@@ -267,6 +267,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (Thread.currentThread().getName().contains("ImmersiveRailroading") && !getWorld().isBlockLoaded(getParent())) {
 			// We can't load chunks on any of the "IR" threads
+			ImmersiveRailroading.warn("Unable to load chunks on custom IR threads!");
 			return null;
 		}
 

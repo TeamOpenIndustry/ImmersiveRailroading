@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -37,6 +38,7 @@ public class MovementTrack {
 		for (Vec3d pos : positions) {
 			if (Thread.currentThread().getName().contains("ImmersiveRailroading") && !world.isBlockLoaded(new Vec3i(pos))) {
 				// We can't load chunks on any of the "IR" threads
+				ImmersiveRailroading.warn("Unable to load chunks on custom IR threads!");
 				continue;
 			}
 			for (double height : heightSkew) {
