@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class Simulation {
 
     public static boolean forceQuickUpdates = false;
+    public static boolean chunksStillLoading = false;
 
     /**
      * Performs physics simulation for all stock in the specified world.
@@ -312,15 +313,19 @@ public class Simulation {
 
         // Apply new states
         for (EntityCoupleableRollingStock stock : allStock) {
+            if (chunksStillLoading) {
+                ImmersiveRailroading.info("wooooo");
+            }
             stock.states = stateMaps.stream().map(m -> m.get(stock.getUUID())).filter(Objects::nonNull).collect(Collectors.toList());
             for (SimulationState state : stock.states) {
-                state.dirty = false;
+                state.dirty = chunksStillLoading;
             }
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
             if (tick % 20 == 0 || anyStartedDirty) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }
         }
+        chunksStillLoading = false;
     }
 
     public static class BlockCollector {

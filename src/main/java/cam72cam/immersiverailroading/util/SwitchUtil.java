@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -70,6 +71,7 @@ public class SwitchUtil {
 				if (Thread.currentThread().getName().contains("ImmersiveRailroading") && !rail.getWorld().isBlockLoaded(gagPos)) {
 					// We can't load chunks on any of the "IR" threads
 					ImmersiveRailroading.warn("Unable to load chunks (isRailPowered) on custom IR threads!");
+					Simulation.chunksStillLoading = true;
 					continue;
 				}
 				TileRailBase gagRail = rail.getWorld().getBlockEntity(gagPos, TileRailBase.class);

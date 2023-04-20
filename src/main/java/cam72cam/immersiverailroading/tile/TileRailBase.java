@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
@@ -273,6 +274,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (!getWorld().isBlockLoaded(getParent())) {
 				// We can't load chunks on any of the "IR" threads
 				ImmersiveRailroading.warn("Unable to load chunks (getParentTile) on custom IR threads!");
+				Simulation.chunksStillLoading = true;
 				return null;
 			}
 		}
