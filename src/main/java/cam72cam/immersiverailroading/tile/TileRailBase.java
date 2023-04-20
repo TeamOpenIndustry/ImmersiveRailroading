@@ -41,7 +41,7 @@ import static cam72cam.immersiverailroading.entity.Locomotive.AUTOMATED_PLAYER;
 
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	@TagField("parent")
-	private Vec3i parent;
+	protected Vec3i parent;
 	@TagField("height")
 	private float bedHeight = 0;
 	@TagField("railHeight")
@@ -78,6 +78,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private EntityMoveableRollingStock overhead;
 	@TagField("pushPull")
 	private boolean pushPull = true;
+
+	// HAXXX
+	private int keepParentsLoaded = 0;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -265,10 +268,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return null;
 		}
 
-		if (Thread.currentThread().getName().contains("ImmersiveRailroading") && !getWorld().isBlockLoaded(getParent())) {
-			// We can't load chunks on any of the "IR" threads
-			ImmersiveRailroading.warn("Unable to load chunks on custom IR threads!");
-			return null;
+		if (Thread.currentThread().getName().contains("ImmersiveRailroading")) {
+			keepParentsLoaded = 20;
+			if (!getWorld().isBlockLoaded(getParent())) {
+				// We can't load chunks on any of the "IR" threads
+				ImmersiveRailroading.warn("Unable to load chunks (getParentTile) on custom IR threads!");
+				return null;
+			}
 		}
 
 		TileRail te = getWorld().getBlockEntity(this.getParent(), TileRail.class);
@@ -499,6 +505,45 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void update() {
 		if (this.getWorld().isClient) {
 			return;
+		}
+
+		if (keepParentsLoaded > 0) {
+			this.keepParentsLoaded--;
+
+			TileRailBase self = this;
+			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
+
+			// This terrible logic was copied from getNextPosition and should be fixed in kind
+			while(tile != null) {
+				SwitchState state = SwitchUtil.getSwitchState(tile, null);
+
+				if (state == SwitchState.STRAIGHT) {
+					tile = tile.getParentTile();
+				}
+
+				if (self.getReplaced() == null) {
+					break;
+				}
+
+				if (self.getParentTile() == null) {
+					// Still loading
+					ImmersiveRailroading.warn("Unloaded parent at %s", self.getParent());
+					break;
+				}
+
+				tile = null;
+				Vec3i currentParent = self.getParentTile().getParent();
+				for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
+					self = (TileRailBase) getWorld().reconstituteBlockEntity(data);
+					if (self == null) {
+						break;
+					}
+					if (!currentParent.equals(self.getParent())) {
+						tile = self.getParentTile();
+						break;
+					}
+				}
+			}
 		}
 		
 		ticksExisted += 1;
