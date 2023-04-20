@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -66,6 +67,11 @@ public class SwitchUtil {
 		for (int x = -scale; x <= scale; x++) {
 			for (int z = -scale; z <= scale; z++) {
 				Vec3i gagPos = new Vec3i(redstoneOrigin.add(new Vec3d(x, 0, z)));
+				if (Thread.currentThread().getName().contains("ImmersiveRailroading") && !rail.getWorld().isBlockLoaded(gagPos)) {
+					// We can't load chunks on any of the "IR" threads
+					ImmersiveRailroading.warn("Unable to load chunks (isRailPowered) on custom IR threads!");
+					continue;
+				}
 				TileRailBase gagRail = rail.getWorld().getBlockEntity(gagPos, TileRailBase.class);
 				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
 					if (rail.getWorld().getRedstone(gagPos) > 0) {
