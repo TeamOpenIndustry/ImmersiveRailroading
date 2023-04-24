@@ -38,8 +38,8 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
 
     public LocomotiveModel(DEFINITION def) throws Exception {
         super(def);
-        frontTrackers = frameFront != null ? new TrackFollowers(s -> frameFront.center) : null;
-        rearTrackers = frameRear != null ? new TrackFollowers(s -> frameRear.center) : null;
+        frontTrackers = frameFront != null ? new TrackFollowers(s -> new TrackFollower(s, frameFront.center, def.getBogeyFront(s.gauge))) : null;
+        rearTrackers = frameRear != null ? new TrackFollowers(s -> new TrackFollower(s, frameRear.center, def.getBogeyRear(s.gauge))) : null;
     }
 
     @Override

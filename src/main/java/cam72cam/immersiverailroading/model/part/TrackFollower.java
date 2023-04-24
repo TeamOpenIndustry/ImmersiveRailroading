@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 public class TrackFollower {
     private final EntityMoveableRollingStock stock;
+    private final float offset;
     private Vec3d pos;
 
     private final Vec3d point;
@@ -23,20 +24,24 @@ public class TrackFollower {
     public float atPointYaw;
     private Matrix4 matrix;
 
-    public TrackFollower(EntityMoveableRollingStock stock, Vec3d point) {
+    public TrackFollower(EntityMoveableRollingStock stock, Vec3d point, float offset) {
         this.stock = stock;
         this.point = point;
+        this.offset = offset;
     }
 
     public Matrix4 getMatrix() {
-        Vec3d point = this.point.scale(stock.gauge.scale());
-
         double recomputeDist = 0.1 * stock.gauge.scale();
 
         if (pos == null || stock.getPosition().distanceToSquared(pos) > recomputeDist * recomputeDist) {
-            pos = stock.getPosition();
+            Vec3d point = this.point.scale(stock.gauge.scale());
 
-            Vec3d pointPos = nextPosition(stock.getWorld(), stock.gauge, pos, stock.getRotationYaw(), stock.getRotationYaw(), -0.5 * stock.gauge.scale() - point.x);
+            pos = stock.getPosition();
+            // Don't need to path to a point that's already on the track.  TODO This can also be used to improve accuracy of the offset rendering
+            Vec3d offsetPos = pos.add(VecUtil.fromWrongYaw(offset, stock.getRotationYaw()));
+            double distance = (-point.x) - offset;
+
+            Vec3d pointPos = nextPosition(stock.getWorld(), stock.gauge, offsetPos, stock.getRotationYaw(), stock.getRotationYaw(), -0.5 * stock.gauge.scale() + distance);
             Vec3d pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), stock.getRotationYaw(), 0.5 * stock.gauge.scale());
             Vec3d delta = pos.subtract(pointPos).scale(-point.x); // Scale copies sign
             if (pointPos.distanceTo(pointPosNext) > 0.1 * stock.gauge.scale()) {
@@ -73,16 +78,16 @@ public class TrackFollower {
 
     public static class TrackFollowers {
         private final ExpireableMap<UUID, TrackFollower> trackers = new ExpireableMap<>();
-        private final Function<EntityMoveableRollingStock, Vec3d> point;
+        private final Function<EntityMoveableRollingStock, TrackFollower> point;
 
-        public TrackFollowers(Function<EntityMoveableRollingStock, Vec3d> point) {
+        public TrackFollowers(Function<EntityMoveableRollingStock, TrackFollower> point) {
             this.point = point;
         }
 
         public TrackFollower get(EntityMoveableRollingStock stock) {
             TrackFollower tracker = trackers.get(stock.getUUID());
             if (tracker == null) {
-                tracker = new TrackFollower(stock, point.apply(stock));
+                tracker = point.apply(stock);
                 trackers.put(stock.getUUID(), tracker);
             }
             return tracker;
