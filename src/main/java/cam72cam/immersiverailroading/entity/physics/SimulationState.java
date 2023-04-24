@@ -273,8 +273,8 @@ public class SimulationState {
         Vec3d positionRear = VecUtil.fromWrongYawPitch(config.offsetRear, yaw, pitch).add(position);
 
         // Find tracks
-        ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yaw, config.gauge.value());
-        ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
+        ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yawFront, config.gauge.value());
+        ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yawRear, config.gauge.value());
         if (trackFront == null || trackRear == null) {
             return;
         }

@@ -50,36 +50,33 @@ public class MovementTrack {
 		return null;
 	}
 
-	public static final double maxDistance = 0.5;
+	public static Vec3d iterativePathing(World world, Vec3d currentPosition, double gauge, Vec3d motion, double maxDistance) {
+		Vec3d startPos = currentPosition;
+		Vec3d prevPosition = currentPosition;
+		double totalDistance = motion.length();
+		double totalDistanceSquared = totalDistance * totalDistance;
+		double maxDistanceSquared = maxDistance * maxDistance;
 
-	public static Vec3d nextPosition(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
-		if (distanceMeters > maxDistance) {
-			double step = maxDistance * 0.9;
-			double dist = 0;
-			while (dist < distanceMeters - step) {
-				dist += step;
-				ITrack te = findTrack(world, currentPosition, trainYaw, rail.getTrackGauge());
-				if (te == null) {
-					return currentPosition;
-				}
-				Vec3d pastPos = currentPosition;
-				currentPosition = te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(step, trainYaw));
-				trainYaw = VecUtil.toWrongYaw(currentPosition.subtract(pastPos));
-			}
-
-			ITrack te = findTrack(world, currentPosition, trainYaw, rail.getTrackGauge());
+		while (startPos.distanceToSquared(currentPosition) < totalDistanceSquared) {
+			ITrack te = findTrack(world, currentPosition, VecUtil.toWrongYaw(motion), gauge);
 			if (te == null) {
 				return currentPosition;
 			}
-			return te.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distanceMeters % step, trainYaw));
-		} else {
-			return nextPositionDirect(world, currentPosition, rail, trainYaw, distanceMeters);
+
+			if (motion.lengthSquared() > maxDistanceSquared) {
+				motion = motion.scale(maxDistance / motion.length());
+			}
+
+			prevPosition = currentPosition;
+			currentPosition = te.getNextPosition(currentPosition, motion);
+			motion = currentPosition.subtract(prevPosition);
 		}
+
+		// prevPosition + motion scaled to remaining distance
+		return prevPosition.add(motion.scale((totalDistance - startPos.distanceTo(prevPosition)) / motion.length()));
 	}
 
-	public static Vec3d nextPositionDirect(World world, Vec3d currentPosition, TileRail rail, float trainYaw, double distanceMeters) {
-		Vec3d delta = VecUtil.fromWrongYaw(distanceMeters, trainYaw);
-		
+	public static Vec3d nextPositionDirect(World world, Vec3d currentPosition, TileRail rail, Vec3d delta) {
 		if (rail == null) {
 			if (world.isServer) {
 				return null; // OFF TRACK
@@ -93,7 +90,7 @@ public class MovementTrack {
 		double heightOffset = railHeight * rail.info.settings.gauge.scale();
 
 		if (rail.info.settings.type == TrackItems.CROSSING) {
-			delta = VecUtil.fromWrongYaw(distance, Facing.fromAngle(trainYaw).getAngle());
+			delta = VecUtil.fromWrongYaw(distance, Facing.fromAngle(VecUtil.toWrongYaw(delta)).getAngle());
 			return currentPosition.add(delta);
 		} else if (rail.info.settings.type == TrackItems.TURNTABLE) {
 			double tablePos = rail.getParentTile().info.tablePos;

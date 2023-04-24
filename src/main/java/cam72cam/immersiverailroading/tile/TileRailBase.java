@@ -35,7 +35,7 @@ import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.List;
+import java.util.*;
 
 import static cam72cam.immersiverailroading.entity.Locomotive.AUTOMATED_PLAYER;
 
@@ -277,6 +277,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return replaced;
 	}
 
+	public TileRailBase getReplacedTile() {
+		return replaced != null ? (TileRailBase) getWorld().reconstituteBlockEntity(replaced) : null;
+	}
+
 	/* TODO HACKS
 	@Override
 	public boolean shouldRefresh(net.minecraft.world.World world, net.minecraft.util.math.BlockPos pos, net.minecraft.block.state.IBlockState oldState, net.minecraft.block.state.IBlockState newState) {
@@ -347,32 +351,46 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		float rotationYaw = VecUtil.toWrongYaw(motion);
+		double distanceMeters = motion.length();
+
+
+		double maxDistance = 0.25;
+		if (distanceMeters > maxDistance) {
+			return MovementTrack.iterativePathing(getWorld(), currentPosition, getTrackGauge(), motion, maxDistance);
+		}
+
+		Collection<TileRail> tiles;
+		if (this.getReplaced() == null) {
+			// Simple common case, maybe this does not need to be optimized out of the for loop below?
+			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
+			if (tile == null) {
+				return currentPosition;
+			}
+			tiles = Collections.singletonList(tile);
+		} else {
+			// Complex case with overlapping segments
+			Map<Vec3i, TileRail> tileMap = new HashMap<>();
+			for (TileRailBase current = this; current != null; current = current.getReplacedTile()) {
+				TileRail tile = current instanceof TileRail ? (TileRail) current : current.getParentTile();
+				if (tile != null) {
+					tileMap.put(tile.getPos(), tile);
+				}
+			}
+			tiles = tileMap.values();
+		}
+
 		Vec3d nextPos = currentPosition;
 		Vec3d predictedPos = currentPosition.add(motion);
 		boolean hasSwitchSet = false;
 
-		TileRailBase self = this;
-		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
-
-		if (tile == null) {
-			// Can happen due to track in progress of breaking
-			return currentPosition;
-		}
-
-		double distanceMeters = motion.length();
-		if (distanceMeters > MovementTrack.maxDistance) {
-			return MovementTrack.nextPosition(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
-		}
-
-		while(tile != null) {
+		for (TileRail tile : tiles) {
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
 
 			if (state == SwitchState.STRAIGHT) {
 				tile = tile.getParentTile();
 			}
 
-
-			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
+			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
 			if (potential != null) {
 				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
 				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
@@ -389,29 +407,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				if (!hasSwitchSet && potential.distanceToSquared(predictedPos) < nextPos.distanceToSquared(predictedPos) ||
 						currentPosition == nextPos) {
 					nextPos = potential;
-				}
-			}
-
-			if (self.getReplaced() == null) {
-				break;
-			}
-
-			if (self.getParentTile() == null) {
-				// Still loading
-				ImmersiveRailroading.warn("Unloaded parent at %s", self.getParent());
-				break;
-			}
-
-            tile = null;
-			Vec3i currentParent = self.getParentTile().getParent();
-			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
-				self = (TileRailBase) getWorld().reconstituteBlockEntity(data);
-				if (self == null) {
-					break;
-				}
-				if (!currentParent.equals(self.getParent())) {
-					tile = self.getParentTile();
-					break;
 				}
 			}
 		}
