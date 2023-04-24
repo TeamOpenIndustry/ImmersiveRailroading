@@ -372,8 +372,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			Map<Vec3i, TileRail> tileMap = new HashMap<>();
 			for (TileRailBase current = this; current != null; current = current.getReplacedTile()) {
 				TileRail tile = current instanceof TileRail ? (TileRail) current : current.getParentTile();
-				if (tile != null) {
-					tileMap.put(tile.getPos(), tile);
+				TileRail parent = tile;
+				while (parent != null && !parent.getPos().equals(parent.getParent())) {
+					// Move to root of switch (if applicable)
+					parent = parent.getParentTile();
+				}
+				if (tile != null && parent != null) {
+					tileMap.putIfAbsent(parent.getPos(), tile);
 				}
 			}
 			tiles = tileMap.values();
@@ -395,6 +400,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
 				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
 				if (state == SwitchState.TURN) {
+					// This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
 					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
 					double diff = MathUtil.trueModulus(other - rotationYaw, 360);
 					diff = Math.min(360-diff, diff);
