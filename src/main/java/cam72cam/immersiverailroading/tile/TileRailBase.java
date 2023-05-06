@@ -356,7 +356,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		double maxDistance = 0.25;
 		if (distanceMeters > maxDistance) {
-			return MovementTrack.iterativePathing(getWorld(), currentPosition, getTrackGauge(), motion, maxDistance);
+			return MovementTrack.iterativePathing(getWorld(), currentPosition, getTrackGauge(), motion, maxDistance * 0.9);
 		}
 
 		Collection<TileRail> tiles;

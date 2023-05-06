@@ -54,26 +54,38 @@ public class MovementTrack {
 		Vec3d startPos = currentPosition;
 		Vec3d prevPosition = currentPosition;
 		double totalDistance = motion.length();
-		double totalDistanceSquared = totalDistance * totalDistance;
 		double maxDistanceSquared = maxDistance * maxDistance;
+		double motionLengthSquared = motion.lengthSquared();
 
-		while (startPos.distanceToSquared(currentPosition) < totalDistanceSquared) {
+		for (double currentDistance = 0; currentDistance < totalDistance; currentDistance += maxDistance) {
 			ITrack te = findTrack(world, currentPosition, VecUtil.toWrongYaw(motion), gauge);
 			if (te == null) {
+				// Stuck
 				return currentPosition;
 			}
 
-			if (motion.lengthSquared() > maxDistanceSquared) {
-				motion = motion.scale(maxDistance / motion.length());
+			// Correct motion length (if off by 5%)
+			if (motionLengthSquared > maxDistanceSquared || motionLengthSquared < maxDistanceSquared * 0.95) {
+				motion = motion.scale(maxDistance / Math.sqrt(motionLengthSquared));
 			}
 
 			prevPosition = currentPosition;
 			currentPosition = te.getNextPosition(currentPosition, motion);
 			motion = currentPosition.subtract(prevPosition);
+			motionLengthSquared = motion.lengthSquared();
+
+			if (motionLengthSquared == 0) {
+				// Stuck
+				return prevPosition;
+			}
 		}
 
 		// prevPosition + motion scaled to remaining distance
-		return prevPosition.add(motion.scale((totalDistance - startPos.distanceTo(prevPosition)) / motion.length()));
+		double scale = (totalDistance - startPos.distanceTo(prevPosition)) / motion.length();
+		if (scale > 0.1 && scale < 1) {
+			currentPosition = prevPosition.add(motion.scale(scale));
+		}
+		return currentPosition;
 	}
 
 	public static Vec3d nextPositionDirect(World world, Vec3d currentPosition, TileRail rail, Vec3d delta) {
