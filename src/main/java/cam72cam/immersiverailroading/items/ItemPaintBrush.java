@@ -114,7 +114,7 @@ public class ItemPaintBrush extends CustomItem {
 
 		@Override
 		protected void handle() {
-			if (stock == null || getPlayer() == null) {
+			if (stock == null) {
 				ImmersiveRailroading.warn("Invalid paint brush packet!");
 				return;
 			}
