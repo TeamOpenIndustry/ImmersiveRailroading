@@ -196,21 +196,22 @@ public class SimulationState {
     public void calculateCouplerPositions() {
         Vec3d bogeyFront = VecUtil.fromWrongYawPitch(config.offsetFront, yaw, pitch);
         Vec3d bogeyRear = VecUtil.fromWrongYawPitch(config.offsetRear, yaw, pitch);
+
         Vec3d positionFront = position.add(bogeyFront);
         Vec3d positionRear = position.add(bogeyRear);
-
-        Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw);
-        Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw);
 
         ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yaw, config.gauge.value());
         ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
 
         if (trackFront != null && trackRear != null) {
-            couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront.subtract(bogeyFront));
-            couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear.subtract(bogeyRear));
+            Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront - config.offsetFront, yawFront);
+            Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear - config.offsetRear, yawRear);
+
+            couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront);
+            couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear);
         } else {
-            couplerPositionFront = position.add(couplerVecFront);
-            couplerPositionRear = position.add(couplerVecRear);
+            couplerPositionFront = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
+            couplerPositionRear = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
         }
     }
 
