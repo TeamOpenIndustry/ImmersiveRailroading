@@ -57,11 +57,19 @@ public class MovementTrack {
 		double maxDistanceSquared = maxDistance * maxDistance;
 		double motionLengthSquared = motion.lengthSquared();
 
+		Vec3i teBlockPosition = null;
+		ITrack te = null;
+
 		for (double currentDistance = 0; currentDistance < totalDistance; currentDistance += maxDistance) {
-			ITrack te = findTrack(world, currentPosition, VecUtil.toWrongYaw(motion), gauge);
-			if (te == null) {
-				// Stuck
-				return currentPosition;
+			Vec3i currentBlockPosition = new Vec3i(currentPosition);
+			if (!currentBlockPosition.equals(teBlockPosition)) {
+				teBlockPosition = currentBlockPosition;
+
+				te = findTrack(world, currentPosition, VecUtil.toWrongYaw(motion), gauge);
+				if (te == null) {
+					// Stuck
+					return currentPosition;
+				}
 			}
 
 			// Correct motion length (if off by 5%)
