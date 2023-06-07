@@ -225,7 +225,13 @@ public abstract class FreightTank extends Freight {
 		}
 		return fLoad;
 	}
-	
+
+	@Override
+	public double getMaxWeight() {
+		double waterDensity = 1000;
+		return super.getMaxWeight() + getTankCapacity().Buckets() * waterDensity;
+	}
+
 	public int getPercentLiquidFull() {
 		return this.getLiquidAmount() * 100 / this.getTankCapacity().MilliBuckets();
 	}

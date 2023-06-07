@@ -1,10 +1,12 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.PhysicalMaterials;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
@@ -109,6 +111,7 @@ public class SimulationState {
             couplerSlackRear = stock.getDefinition().getCouplerSlack(EntityCoupleableRollingStock.CouplerType.BACK, gauge);
 
             this.massKg = stock.getWeight();
+            double designMassKg = stock.getMaxWeight();
 
             if (stock instanceof Locomotive) {
                 Locomotive locomotive = (Locomotive) stock;
@@ -119,8 +122,19 @@ public class SimulationState {
                 tractiveEffortFactors = 0;
             }
 
-            double totalAdhesionNewtons = stock.getWeight() * stock.getBrakeShoeFriction();
-            brakeAdhesionNewtons = totalAdhesionNewtons * stock.getTotalBrake() * Config.ConfigBalance.brakeMultiplier;
+            double staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL);
+            double kineticFriction = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.STEEL);
+
+            double maximumAdhesionNewtons = massKg * staticFriction;
+            double designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
+            brakeAdhesionNewtons = designAdhesionNewtons * stock.getTotalBrake();
+
+            if (brakeAdhesionNewtons > maximumAdhesionNewtons && Math.abs(stock.getCurrentSpeed().metric()) > 0.1) {
+                // WWWWWHHHEEEEE!!! SLIDING!!!!
+                this.brakeAdhesionNewtons = massKg * kineticFriction;
+            }
+
+            this.brakeAdhesionNewtons *= Config.ConfigBalance.brakeMultiplier;
         }
 
         @Override

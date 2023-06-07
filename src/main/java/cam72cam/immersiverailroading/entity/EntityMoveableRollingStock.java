@@ -601,7 +601,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return getTickPos();
     }
 
-    public double getBrakeShoeFriction() {
-        return getDefinition().getBrakeShoeFriction();
+    /**
+     * This assumes that the brake system is designed to apply a percentage of the total adhesion
+     * That percentage was improved over time, with the materials used (friction coefficient) helping inform our guess
+     * Though, I'm going to limit it to 75% of the total possible adhesion
+     */
+    public double getBrakeSystemEfficiency() {
+        return Math.min(0.75, Math.pow(getDefinition().getBrakeShoeFriction(), 1/2.5));
     }
 }

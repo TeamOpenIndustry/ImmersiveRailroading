@@ -149,7 +149,7 @@ public class Consist {
         public void applyFriction() {
             List<Particle> affected = new ArrayList<>();
             affected.add(this);
-            findAffectedByForce(-friction, affected, true);
+            findAffectedByForce(-velocity, affected, true);
             double totalMassKg = affected.stream().mapToDouble(p -> p.state.config.massKg).sum();
 
             // This could probably be improved, but is good enough for now.

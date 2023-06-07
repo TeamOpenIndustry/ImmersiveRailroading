@@ -184,6 +184,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return this.getDefinition().getWeight(gauge);
 	}
 
+	public double getMaxWeight() {
+		return getWeight();
+	}
+
 	/*
 	 * Helpers
 	 */
