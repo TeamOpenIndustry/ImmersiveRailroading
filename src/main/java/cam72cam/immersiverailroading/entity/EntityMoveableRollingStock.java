@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
@@ -54,6 +55,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @TagSync
     @TagField("TOTAL_BRAKE")
     private float totalBrake = 0;
+
+    private float trainBrakeTarget = 0;
+    @TagSync
+    @TagField("BRAKE_PRESSURE")
+    private float trainBrakePressure = 0;
 
     private float sndRand;
 
@@ -247,10 +253,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             }
 
             if (this.getTickCount() % 5 == 0) {
-                float trainBrake = 0;
+                trainBrakeTarget = 0;
                 if (this instanceof EntityCoupleableRollingStock) {
                     // This could be slow, but I don't want to do this properly till the next despaghettification
-                    trainBrake = (float) ((EntityCoupleableRollingStock) this).getDirectionalTrain(false).stream()
+                    trainBrakeTarget = (float) ((EntityCoupleableRollingStock) this).getDirectionalTrain(false).stream()
                             .map(m -> m.stock)
                             .map(s -> s instanceof Locomotive ? (Locomotive) s : null)
                             .filter(Objects::nonNull)
@@ -258,8 +264,18 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                             .max().orElse(0);
 
                 }
-                this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrake));
             }
+
+            double brakeDeltaPerTick = 0.002; // 25s for full application
+            if (trainBrakeTarget > trainBrakePressure + brakeDeltaPerTick) {
+                trainBrakePressure += brakeDeltaPerTick;
+            } else if (trainBrakeTarget < trainBrakePressure - brakeDeltaPerTick) {
+                trainBrakePressure -= brakeDeltaPerTick;
+            } else {
+                trainBrakePressure = trainBrakeTarget;
+            }
+
+            this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrakePressure));
 
 
 
@@ -594,6 +610,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
     public float getTotalBrake() {
         return totalBrake;
+    }
+
+    public float getBrakePressure() {
+        return trainBrakePressure;
     }
 
     @Deprecated

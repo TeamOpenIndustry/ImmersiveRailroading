@@ -122,8 +122,9 @@ public class SimulationState {
                 tractiveEffortFactors = 0;
             }
 
-            double staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL);
-            double kineticFriction = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.STEEL);
+            double fudge = 0.8;
+            double staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL) * fudge;
+            double kineticFriction = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.STEEL) * fudge;
 
             double maximumAdhesionNewtons = massKg * staticFriction;
             double designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
