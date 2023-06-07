@@ -132,7 +132,7 @@ public class ClientPartDragging {
 
         @Override
         protected void handle() {
-            if (stock != null && getPlayer() != null) {
+            if (stock != null) {
                 stock.onSeatClick(seat, getPlayer());
             }
         }

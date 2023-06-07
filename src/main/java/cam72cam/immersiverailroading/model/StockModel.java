@@ -120,12 +120,12 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         this.allComponents = provider.components();
 
         if (bogeyFront != null && Math.abs(def.getBogeyFront(Gauge.from(Gauge.STANDARD)) + bogeyFront.center().x) > 0.5) {
-            frontTrackers = new TrackFollowers(s -> bogeyFront.center());
+            frontTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyFront.center(), def.getBogeyFront(s.gauge)));
         } else {
             frontTrackers = null;
         }
         if (bogeyRear != null && Math.abs(def.getBogeyRear(Gauge.from(Gauge.STANDARD)) + bogeyRear.center().x) > 0.5) {
-            rearTrackers = new TrackFollowers(s -> bogeyRear.center());
+            rearTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyRear.center(), def.getBogeyRear(s.gauge)));
         } else {
             rearTrackers = null;
         }

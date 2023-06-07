@@ -452,4 +452,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 						((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0
 		);
 	}
+
+	@Override
+	public boolean externalLightsEnabled() {
+		return hasElectricalPower() && (
+				gotElectricalPowerTick == -1 ||
+						getTickCount() - gotElectricalPowerTick > 15 ||
+						((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0
+		);
+	}
 }
