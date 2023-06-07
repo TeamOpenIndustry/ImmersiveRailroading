@@ -82,6 +82,9 @@ public class Config {
 		@Comment("Old style throttle/reverser control which uses the throttle as the reverser")
 		@Name("Disable Independent Throttle")
 		public static boolean disableIndependentThrottle = true;
+
+		@Comment("Old style brake control")
+		@Name("Instant Brake Pressure")
 		public static boolean instantBrakePressure = false;
     }
 
