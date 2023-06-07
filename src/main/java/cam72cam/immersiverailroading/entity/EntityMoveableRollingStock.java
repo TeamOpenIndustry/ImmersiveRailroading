@@ -252,6 +252,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 lastRetarderPos = null;
             }
 
+            // This is a very basic brake system.  Eventually this should all be migrated into the SimulationState system
             if (this.getTickCount() % 5 == 0) {
                 trainBrakeTarget = 0;
                 if (this instanceof EntityCoupleableRollingStock) {
