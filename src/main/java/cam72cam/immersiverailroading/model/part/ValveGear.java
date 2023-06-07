@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.model.part;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Particles;
@@ -145,6 +146,11 @@ public abstract class ValveGear {
 
         public void effects(EntityMoveableRollingStock stock) {
             boolean drains_enabled = isEndStroke(stock) && stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled();
+
+            if (stock instanceof Locomotive && ((Locomotive)stock).getAvailableHP() <= 0) {
+                return;
+            }
+
             Pair<Matrix4, Vec3d> particlePos = null; //Lazy eval
             if (ConfigGraphics.particlesEnabled && drains_enabled) {
                 particlePos = particlePos(stock);

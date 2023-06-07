@@ -386,7 +386,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	protected abstract int getAvailableHP();
+	public abstract int getAvailableHP();
 
 	/** Force applied between the wheels and the rails */
 	private double getAppliedTractiveEffort(Speed speed) {

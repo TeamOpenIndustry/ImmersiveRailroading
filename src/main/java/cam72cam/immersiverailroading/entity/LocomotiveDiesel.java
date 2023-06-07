@@ -161,7 +161,7 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-	protected int getAvailableHP() {
+    public int getAvailableHP() {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
