@@ -268,12 +268,16 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             }
 
             double brakeDeltaPerTick = 0.002; // 25s for full application
-            if (trainBrakeTarget > trainBrakePressure + brakeDeltaPerTick) {
-                trainBrakePressure += brakeDeltaPerTick;
-            } else if (trainBrakeTarget < trainBrakePressure - brakeDeltaPerTick) {
-                trainBrakePressure -= brakeDeltaPerTick;
-            } else {
+            if (Config.ImmersionConfig.instantBrakePressure) {
                 trainBrakePressure = trainBrakeTarget;
+            } else {
+                if (trainBrakeTarget > trainBrakePressure + brakeDeltaPerTick) {
+                    trainBrakePressure += brakeDeltaPerTick;
+                } else if (trainBrakeTarget < trainBrakePressure - brakeDeltaPerTick) {
+                    trainBrakePressure -= brakeDeltaPerTick;
+                } else {
+                    trainBrakePressure = trainBrakeTarget;
+                }
             }
 
             this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrakePressure));
