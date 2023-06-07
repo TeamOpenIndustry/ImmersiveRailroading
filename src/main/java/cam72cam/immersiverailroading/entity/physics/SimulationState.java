@@ -211,7 +211,7 @@ public class SimulationState {
             couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear);
         } else {
             couplerPositionFront = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
-            couplerPositionRear = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
+            couplerPositionRear = position.add(VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw));
         }
     }
 
