@@ -4,5 +4,5 @@ show_current_load_only = False  # Controls how the CARGO_FILL_PERCENTAGE model g
 
 # Freight cars only:
 freight =
-    slots = null  # Required: Number of slots in this container
-    width = null  # Required: Width of the container, recommended to be a numeric factor of the width ex: 32 and 8
+    slots = 0  # Required: Number of slots in this container
+    width = 8  # Required: Width of the container, recommended to be a numeric factor of the width ex: 32 and 8

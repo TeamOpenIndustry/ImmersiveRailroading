@@ -84,7 +84,7 @@ public class CAML {
 
             String trimmed = val.trim();
             if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
-                val = val.substring(1, val.length() - 1);
+                trimmed = trimmed.substring(1, trimmed.length() - 1);
             }
 
             if (StringUtils.isWhitespace(val)) {
@@ -105,12 +105,12 @@ public class CAML {
                     if (primitives.containsKey(key) || primitiveSets.containsKey(key)) {
                         throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times %s", line, context));
                     }
-                    primitives.put(key, createValue(val));
+                    primitives.put(key, createValue(trimmed));
                 } else {
                     if (primitives.containsKey(key)) {
                         throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times %s", line, context));
                     }
-                    primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(createValue(val));
+                    primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(createValue(trimmed));
                 }
             }
         }

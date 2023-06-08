@@ -40,9 +40,9 @@ couplers =                  # Optional: modifications to coupler defaults
 properties =                # Required:
     weight = null               # Required: Weight of stock in KG
 
-    valveGear = null            # Optional: Type of generic valve gear or Animatrix definition
-#   valveGear = WALSCHAERTS     # Generic Example
-#   valveGear =                 # Animatrix Example
+    valve_gear = null            # Optional: Type of generic valve gear or Animatrix definition
+#   valve_gear = WALSCHAERTS     # Generic Example
+#   valve_gear =                 # Animatrix Example
 #       # More steps are recommended, but this should work
 #       0.0 = immersiverailroading:some/path/animation_0.0.anim # Reverse
 #       0.5 = immersiverailroading:some/path/animation_0.5.anim # Neutral
