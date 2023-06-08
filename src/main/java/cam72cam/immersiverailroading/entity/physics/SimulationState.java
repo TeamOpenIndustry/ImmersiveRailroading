@@ -91,6 +91,7 @@ public class SimulationState {
         private Function<Speed, Double> tractiveEffortNewtons;
 
         public double desiredBrakePressure;
+        public double independentBrakePosition;
 
         public Configuration(EntityCoupleableRollingStock stock) {
             id = stock.getUUID();
@@ -134,6 +135,7 @@ public class SimulationState {
             double staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL);
             this.maximumAdhesionNewtons = massKg * staticFriction;
             this.designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
+            this.independentBrakePosition = stock.getIndependentBrake();
         }
 
         @Override
@@ -144,7 +146,8 @@ public class SimulationState {
                         couplerEngagedRear == other.couplerEngagedRear &&
                         Math.abs(tractiveEffortFactors - other.tractiveEffortFactors) < 0.01 &&
                         Math.abs(massKg - other.massKg)/massKg < 0.01 &&
-                        Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.01;
+                        Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.01 &&
+                        Math.abs(independentBrakePosition - other.independentBrakePosition) < 0.01;
             }
             return false;
         }
@@ -372,7 +375,7 @@ public class SimulationState {
         // TODO This is kinda directional?
         double blockResistanceNewtons = interferingResistance * 1000 * Config.ConfigDamage.blockHardness;
 
-        double brakeAdhesionNewtons = config.designAdhesionNewtons * brakePressure;
+        double brakeAdhesionNewtons = config.designAdhesionNewtons * Math.min(1, Math.max(brakePressure, config.independentBrakePosition));
 
         if (brakeAdhesionNewtons > config.maximumAdhesionNewtons && Math.abs(velocity) > 0.1) {
             // WWWWWHHHEEEEE!!! SLIDING!!!!

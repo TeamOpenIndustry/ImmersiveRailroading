@@ -53,10 +53,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private float independentBrake = 0;
 
     @TagSync
-    @TagField("TOTAL_BRAKE")
-    private float totalBrake = 0;
-
-    @TagSync
     @TagField("BRAKE_PRESSURE")
     private float trainBrakePressure = 0;
 
@@ -266,8 +262,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
             }
-
-            this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrakePressure));
         }
 
         if (getWorld().isClient) {
@@ -583,9 +577,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             }
             independentBrake = newIndependentBrake;
         }
-    }
-    public float getTotalBrake() {
-        return totalBrake;
     }
 
     public float getBrakePressure() {

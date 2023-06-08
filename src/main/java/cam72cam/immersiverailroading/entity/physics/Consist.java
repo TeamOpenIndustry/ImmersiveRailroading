@@ -321,31 +321,36 @@ public class Consist {
             }
 
             // Propagate dirty flag
-            boolean dirty = consist.stream().anyMatch(p -> p.state.dirty);
             boolean canBeUnloaded = consist.stream().allMatch(p -> p.state.velocity == 0 && state.forcesNewtons() == 0);
             consist.forEach(p -> p.state.canBeUnloaded = canBeUnloaded);
+
+            boolean dirty = consist.stream().anyMatch(p -> p.state.dirty);
+
+            // Spread the brake pressure evenly.  TODO spread it from the suppliers (requires complete rethink of brake controls)
+            float desiredBrakePressure = (float) consist.stream().mapToDouble(x -> x.state.config.desiredBrakePressure).max().orElse(0);
+            boolean needsBrakeEqualization = consist.stream().anyMatch(x -> Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.001);
+            if (needsBrakeEqualization) {
+                dirty = true;
+                double brakePressureDelta = 0.05 / consist.size();
+                consist.forEach(p -> {
+                    if (Config.ImmersionConfig.instantBrakePressure) {
+                        p.state.brakePressure = desiredBrakePressure;
+                    } else {
+                        if (p.state.brakePressure > desiredBrakePressure + brakePressureDelta) {
+                            p.state.brakePressure -= brakePressureDelta;
+                        } else if (p.state.brakePressure < desiredBrakePressure - brakePressureDelta) {
+                            p.state.brakePressure += brakePressureDelta;
+                        } else {
+                            p.state.brakePressure = desiredBrakePressure;
+                        }
+                    }
+                });
+            }
+
             if (dirty) {
                 consist.forEach(p -> p.state.dirty = true);
                 particles.addAll(consist);
             }
-
-            // Spread the brake pressure evenly.  TODO spread it from the suppliers (requires complete rethink of brake controls)
-            float desiredBrakePressure = (float) consist.stream().mapToDouble(x -> x.state.config.desiredBrakePressure).max().orElse(0);
-            //double avgBrakePressure = consist.stream().mapToDouble(x -> x.state.brakePressure).average().orElse(0);
-            double brakePressureDelta = 0.05/consist.size();
-            consist.forEach(p -> {
-                if (Config.ImmersionConfig.instantBrakePressure) {
-                    p.state.brakePressure = desiredBrakePressure;
-                } else {
-                    if (p.state.brakePressure > desiredBrakePressure + brakePressureDelta) {
-                        p.state.brakePressure -= brakePressureDelta;
-                    } else if (p.state.brakePressure < desiredBrakePressure - brakePressureDelta) {
-                        p.state.brakePressure += brakePressureDelta;
-                    } else {
-                        p.state.brakePressure = desiredBrakePressure;
-                    }
-                }
-            });
 
             // Make sure we can't accidentally hook into any of the processed states from this consist
             used.addAll(visited);
