@@ -56,7 +56,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @TagField("TOTAL_BRAKE")
     private float totalBrake = 0;
 
-    private float trainBrakeTarget = 0;
     @TagSync
     @TagField("BRAKE_PRESSURE")
     private float trainBrakePressure = 0;
@@ -252,40 +251,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 lastRetarderPos = null;
             }
 
-            // This is a very basic brake system.  Eventually this should all be migrated into the SimulationState system
-            if (this.getTickCount() % 5 == 0) {
-                trainBrakeTarget = 0;
-                if (this instanceof EntityCoupleableRollingStock) {
-                    // This could be slow, but I don't want to do this properly till the next despaghettification
-                    trainBrakeTarget = (float) ((EntityCoupleableRollingStock) this).getDirectionalTrain(false).stream()
-                            .map(m -> m.stock)
-                            .map(s -> s instanceof Locomotive ? (Locomotive) s : null)
-                            .filter(Objects::nonNull)
-                            .mapToDouble(Locomotive::getTrainBrake)
-                            .max().orElse(0);
-
-                }
-            }
-
-            double brakeDeltaPerTick = 0.002; // 25s for full application
-            if (Config.ImmersionConfig.instantBrakePressure) {
-                trainBrakePressure = trainBrakeTarget;
-            } else {
-                if (trainBrakeTarget > trainBrakePressure + brakeDeltaPerTick) {
-                    trainBrakePressure += brakeDeltaPerTick;
-                } else if (trainBrakeTarget < trainBrakePressure - brakeDeltaPerTick) {
-                    trainBrakePressure -= brakeDeltaPerTick;
-                } else {
-                    trainBrakePressure = trainBrakeTarget;
-                }
-            }
-
-            this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrakePressure));
-
-
-
             SimulationState state = getCurrentState();
             if (state != null) {
+                this.trainBrakePressure = state.brakePressure;
+
                 for (Vec3i bp : state.blocksToBreak) {
                     getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !getWorld().isSnow(bp));
                 }
@@ -297,6 +266,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
             }
+
+            this.totalBrake = Math.min(1, Math.max(getIndependentBrake(), trainBrakePressure));
         }
 
         if (getWorld().isClient) {

@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
@@ -327,6 +328,24 @@ public class Consist {
                 consist.forEach(p -> p.state.dirty = true);
                 particles.addAll(consist);
             }
+
+            // Spread the brake pressure evenly.  TODO spread it from the suppliers (requires complete rethink of brake controls)
+            float desiredBrakePressure = (float) consist.stream().mapToDouble(x -> x.state.config.desiredBrakePressure).max().orElse(0);
+            //double avgBrakePressure = consist.stream().mapToDouble(x -> x.state.brakePressure).average().orElse(0);
+            double brakePressureDelta = 0.05/consist.size();
+            consist.forEach(p -> {
+                if (Config.ImmersionConfig.instantBrakePressure) {
+                    p.state.brakePressure = desiredBrakePressure;
+                } else {
+                    if (p.state.brakePressure > desiredBrakePressure + brakePressureDelta) {
+                        p.state.brakePressure -= brakePressureDelta;
+                    } else if (p.state.brakePressure < desiredBrakePressure - brakePressureDelta) {
+                        p.state.brakePressure += brakePressureDelta;
+                    } else {
+                        p.state.brakePressure = desiredBrakePressure;
+                    }
+                }
+            });
 
             // Make sure we can't accidentally hook into any of the processed states from this consist
             used.addAll(visited);
