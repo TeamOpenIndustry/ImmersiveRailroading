@@ -79,6 +79,7 @@ public abstract class EntityRollingStockDefinition {
     private int maxPassengers;
     private float interiorLightLevel;
     private boolean hasIndependentBrake;
+    private boolean hasPressureBrake;
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
@@ -365,6 +366,7 @@ public abstract class EntityRollingStockDefinition {
         weight = (int) Math.ceil(properties.getValue("weight_kg").asInteger() * internal_inv_scale);
         valveGear = ValveGearConfig.get(properties, "valve_gear");
         hasIndependentBrake = properties.getValue("independent_brake").asBoolean(independentBrakeDefault());
+        hasPressureBrake = properties.getValue("pressure_brake").asBoolean(pressureBrakeDefault());
         // Locomotives default to linear brake control
         isLinearBrakeControl = properties.getValue("linear_brake_control").asBoolean(!(this instanceof LocomotiveDefinition));
 
@@ -506,6 +508,10 @@ public abstract class EntityRollingStockDefinition {
 
     public boolean hasIndependentBrake() {
         return hasIndependentBrake;
+    }
+
+    public boolean hasPressureBrake() {
+        return hasPressureBrake;
     }
 
     private static class HeightMapData {
@@ -743,6 +749,10 @@ public abstract class EntityRollingStockDefinition {
 
     protected boolean independentBrakeDefault() {
         return false;
+    }
+
+    protected boolean pressureBrakeDefault() {
+        return true;
     }
 
     public boolean isLinearBrakeControl() {

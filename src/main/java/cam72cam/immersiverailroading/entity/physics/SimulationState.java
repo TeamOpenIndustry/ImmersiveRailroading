@@ -93,6 +93,8 @@ public class SimulationState {
         public double desiredBrakePressure;
         public double independentBrakePosition;
 
+        public boolean hasPressureBrake;
+
         public Configuration(EntityCoupleableRollingStock stock) {
             id = stock.getUUID();
             gauge = stock.gauge;
@@ -136,6 +138,7 @@ public class SimulationState {
             this.maximumAdhesionNewtons = massKg * staticFriction;
             this.designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
             this.independentBrakePosition = stock.getIndependentBrake();
+            this.hasPressureBrake = stock.getDefinition().hasPressureBrake();
         }
 
         @Override

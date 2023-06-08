@@ -328,20 +328,22 @@ public class Consist {
 
             // Spread the brake pressure evenly.  TODO spread it from the suppliers (requires complete rethink of brake controls)
             float desiredBrakePressure = (float) consist.stream().mapToDouble(x -> x.state.config.desiredBrakePressure).max().orElse(0);
-            boolean needsBrakeEqualization = consist.stream().anyMatch(x -> Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.001);
+            boolean needsBrakeEqualization = consist.stream().anyMatch(x -> x.state.config.hasPressureBrake && Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.001);
             if (needsBrakeEqualization) {
                 dirty = true;
-                double brakePressureDelta = 0.05 / consist.size();
+                double brakePressureDelta = 0.05 / consist.stream().filter(x -> x.state.config.hasPressureBrake).count();
                 consist.forEach(p -> {
-                    if (Config.ImmersionConfig.instantBrakePressure) {
-                        p.state.brakePressure = desiredBrakePressure;
-                    } else {
-                        if (p.state.brakePressure > desiredBrakePressure + brakePressureDelta) {
-                            p.state.brakePressure -= brakePressureDelta;
-                        } else if (p.state.brakePressure < desiredBrakePressure - brakePressureDelta) {
-                            p.state.brakePressure += brakePressureDelta;
-                        } else {
+                    if (p.state.config.hasPressureBrake) {
+                        if (Config.ImmersionConfig.instantBrakePressure) {
                             p.state.brakePressure = desiredBrakePressure;
+                        } else {
+                            if (p.state.brakePressure > desiredBrakePressure + brakePressureDelta) {
+                                p.state.brakePressure -= brakePressureDelta;
+                            } else if (p.state.brakePressure < desiredBrakePressure - brakePressureDelta) {
+                                p.state.brakePressure += brakePressureDelta;
+                            } else {
+                                p.state.brakePressure = desiredBrakePressure;
+                            }
                         }
                     }
                 });

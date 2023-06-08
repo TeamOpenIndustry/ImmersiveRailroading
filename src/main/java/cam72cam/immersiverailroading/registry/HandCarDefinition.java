@@ -22,4 +22,9 @@ public class HandCarDefinition extends LocomotiveDefinition {
     protected boolean multiUnitDefault() {
         return false;
     }
+
+    @Override
+    protected boolean pressureBrakeDefault() {
+        return false;
+    }
 }
