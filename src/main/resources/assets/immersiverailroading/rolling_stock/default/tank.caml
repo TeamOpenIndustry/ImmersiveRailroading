@@ -1,0 +1,8 @@
+import: "immersiverailroading:rolling_stock/default/base.caml"
+
+#tank =
+#    capacity_l = 42 # Capacity in liters
+#    whitelist: WATER
+#    whitelist: OIL
+#    whitelist: etc...
+#    In JSON, whitelist = ["WATER", "OIL", "etc..."]

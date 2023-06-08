@@ -343,8 +343,12 @@ public abstract class EntityRollingStockDefinition {
         maxPassengers = passenger.getValue("slots").asInteger();
         shouldSit = passenger.getValue("should_sit").asBoolean();
 
-        bogeyFront = data.getBlock("trucks").getValue("front").asFloat() * (float) internal_model_scale;
-        bogeyRear = data.getBlock("trucks").getValue("rear").asFloat() * (float) internal_model_scale;
+        DataBlock pivot = data.getBlock("trucks"); // Legacy
+        if (pivot == null) {
+            pivot = data.getBlock("pivot");
+        }
+        bogeyFront = pivot.getValue("front").asFloat() * (float) internal_model_scale;
+        bogeyRear = pivot.getValue("rear").asFloat() * (float) internal_model_scale;
 
         dampeningAmount = data.getValue("sound_dampening_percentage").asFloat(0.75f);
         if (dampeningAmount < 0 || dampeningAmount > 1) {
@@ -370,15 +374,6 @@ public abstract class EntityRollingStockDefinition {
         // Locomotives default to linear brake control
         isLinearBrakeControl = properties.getValue("linear_brake_control").asBoolean(!(this instanceof LocomotiveDefinition));
 
-        DataBlock lights = data.getBlock("lights");
-        if (lights != null) {
-            lights.getBlockMap().forEach((key, block) -> this.lights.put(key, new LightDefinition(block)));
-        }
-        interiorLightLevel = properties.getValue("interior_light_level").asFloat(6 / 15f);
-        hasInternalLighting = properties.getValue("internalLighting").asBoolean(this instanceof CarPassengerDefinition || this instanceof LocomotiveDefinition);
-        swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
-        tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
-
         brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
         try {
             brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString("CAST_IRON")));
@@ -386,6 +381,17 @@ public abstract class EntityRollingStockDefinition {
             ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
         }
         brakeCoefficient = properties.getValue("brake_friction_coefficient").asFloat(brakeCoefficient);
+
+        swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
+        tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
+
+        interiorLightLevel = properties.getValue("interior_light_level").asFloat(6 / 15f);
+        hasInternalLighting = properties.getValue("internalLighting").asBoolean(this instanceof CarPassengerDefinition || this instanceof LocomotiveDefinition);
+
+        DataBlock lights = data.getBlock("lights");
+        if (lights != null) {
+            lights.getBlockMap().forEach((key, block) -> this.lights.put(key, new LightDefinition(block)));
+        }
 
         wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
         clackFront = clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
@@ -426,8 +432,11 @@ public abstract class EntityRollingStockDefinition {
             }
         }
 
-        List<DataBlock> aobjs = data.getBlocks("animations");
         this.animations = new ArrayList<>();
+        List<DataBlock> aobjs = data.getBlocks("animations");
+        if (aobjs == null) {
+            aobjs = data.getBlocks("animation");
+        }
         if (aobjs != null) {
             for (DataBlock entry : aobjs) {
                 animations.add(new AnimationDefinition(entry));

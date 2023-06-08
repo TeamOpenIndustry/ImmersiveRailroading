@@ -1,0 +1,34 @@
+import: "immersiverailroading:rolling_stock/default/locomotive.caml"
+
+properties =
+    # The following is ignored if cab_car is set to True
+    water_capacity_l = null   # Required: Boiler fluid capacity in liters
+    max_psi = null            # Required: Maximum boiler pressure in PSI
+    firebox =                 # Firebox Properties
+        slots = null              # Required: Number of slots in this container
+        width = null              # Required: Width of the container, recommended to be a numeric factor of the width ex: 32 and 8
+    tender_auto_feed = True   # Optional: Should this locomotive auto pull fuel from tenders?
+
+    cab_forward = False       # Optional: Flip the locomotion direction to more accurately simulate a cab forward type locomotive
+
+sounds =
+    # Specify either a whistle or multiple quilling chimes
+    # whistle = "immersiverailroading:sounds/steam/default/whistle.ogg"
+    # quilling:
+    #     pull_start = 0.35   # What percentage should this sound engage at?
+    #     pull_end = 0.55     # What percentage should this sound stop increasing at?
+    #     pitch_start = 0.95  # What pitch should this sound start playing at?
+    #     pitch_end = 1.0     # What's the max of this sound's pitch?
+    #     sample = "immersiverailroading:sounds/steam/a1_peppercorn/quill.ogg" # The sound sample to play
+    # quilling:
+    #     pull_start = 0.6
+    #     pull_end = 0.7
+    #     pitch_start = 0.95
+    #     pitch_end = 1
+    #     sample = "immersiverailroading:sounds/steam/a1_peppercorn/quill_high.ogg"
+
+    idle = "immersiverailroading:sounds/steam/default/idle.ogg"                     # Optional: See sound_definition.caml for details
+    chuff = "immersiverailroading:sounds/steam/default/chuff.ogg"                   # Optional: chuff sample OGG
+    pressure = "immersiverailroading:sounds/steam/default/pressure.ogg"             # Optional: pressure release sample OGG
+    bell = "immersiverailroading:sounds/steam/default/bell.ogg"                     # Optional: See sound_definition.caml for details
+    cylinder_drain = "immersiverailroading:sounds/steam/default/cylinder_drain.ogg" # Optional: cylinder drain OGG

@@ -1,0 +1,121 @@
+# Basic information
+name = null      # Required: Stock Name
+modeler = "N/A"  # Optional: Modeler Name
+pack = "N/A"     # Optional: Pack Name
+
+# Model information
+darken_model = 0            # Deprecated: legacy feature
+model = null                # Required: Location of the obj model, "immersiverailroading:..."
+model_gauge_m = null        # Optional: Gauge in meters that the model is scaled to, defaults to standard gauge
+recommended_gauge_m = null  # Optional: Gauge to show as the default for the piece of stock
+tex_variants =              # Optional: List of texture variants for this stock
+    Default = ""                # Format: Name With Spaces = resource_folder_name
+
+# Passenger information
+passenger =                 # Required: Passenger compartment configuration
+    slots = 0                   # Number of entities that can ride at the same time
+    should_sit = True           # Should the riders always be in the sitting position?
+    center_x = 0                # X Center of passenger compartment
+    center_y = 0                # Y Center of passenger compartment
+    length = 1                  # Y Size
+    width = 1                   # X Size
+
+# Track follower / rotation information
+pivot =                    # Required: Pivot points, legacy name "trucks"
+    front = null                # Distance in meters from the center of the model to the front pivot point
+    rear = null                 # Distance in meters (usually negative) from the center of the model to the rear pivot point
+
+# Sound settings
+sound_dampening_percentage = 0.75   # Optional: How much riding this piece of stock reduces sound volumes (percentage)
+scale_pitch = True                  # Optional: Scale any sounds emitted by this stock by the gauge it's placed on
+
+# Coupler Settings
+couplers =                  # Optional: modifications to coupler defaults
+    front_offset = null         # Distance in meters to offset the front coupler from the front of the model
+    front_slack = 0.025f        # Amount of slack present in the front coupler
+    rear_offset = null          # Distance in meters to offset the rear coupler from the rear of the model
+    rear_slack = 0.025f         # Amount of slack present in the rear coupler
+
+# Misc Properties
+properties =                # Required:
+    weight = null               # Required: Weight of stock in KG
+
+    valveGear = null            # Optional: Type of generic valve gear or Animatrix definition
+#   valveGear = WALSCHAERTS     # Generic Example
+#   valveGear =                 # Animatrix Example
+#       # More steps are recommended, but this should work
+#       0.0 = immersiverailroading:some/path/animation_0.0.anim # Reverse
+#       0.5 = immersiverailroading:some/path/animation_0.5.anim # Neutral
+#       1.0 = immersiverailroading:some/path/animation_1.0.anim # Forward
+
+    independent_brake = False           # Optional: Does this piece of stock have an independent brake?  Usually False except for Locomotives
+    pressure_brake = True               # Optional: Does this piece of stock have a pressure brake?  Usually True except for Hand Cars
+    linear_brake_control = null         # Optional: Make brakes move in a linear fashion, TODO FIX/REMOVE THIS
+    brake_shoe_material = CAST_IRON     # Optional: How well the brakes should work/last (STEEL/CAST_IRON/WOOD)
+    brake_friction_coefficient = null   # Optional: Override the generic brake shoe materials with a specific coefficient of friction
+
+    swayMultiplier = 1  # Optional: How much the stock should sway when going over bumpy tracks / joints
+    tiltMultiplier = 0  # Optional: How much the stock should tilt into curves
+
+    interior_light_level = 0.4  # Optional: How bright the interior should be by default
+    internalLighting = False    # Optional: Does this piece of stock have internal lighting?
+
+# Exterior Light Properties
+#lights =                    # Optional: Map for lights in the model
+#    HEADLIGHT_POS_ID =          # Example: HEADLIGHT_1, HEADLIGHT_REAR_4, HEADLIGHT_FRONT_LOCOMOTIVE_7
+#        blinkIntervalSeconds = 0    # Optional: How often this should blink
+#        blinkOffsetSeconds = 0      # Optional: How much to offset the start of blinking from other lights
+#        blinkFullBright = True      # Optional: Should this add the emissive modifier when enabled?
+#        reverseColor = null         # Optional: How to tint the light when the stock is in reverse, red example: 0xFF2222
+#        castsLight = True           # Optional: If optifine is installed, should we try to fake real lighting?  Too many of these can cause performance issues!
+#        lightTex = "immersiverailroading:textures/light.png"    # Optional: light flare texture
+
+# Sound Events
+sounds = # Optional
+    wheels = "immersiverailroading:sounds/default/track_wheels.ogg"     # Optional: Short sound loop of the wheels moving on flat tracks
+    clack = "immersiverailroading:sounds/default/clack.ogg"             # Optional: Clack when crossing between rail joints
+    clack_front = null                                                  # Optional: Clack for front wheels
+    clack_rear = null                                                   # Optional: Clack for rear wheels
+    couple_sound = "immersiverailroading:sounds/default/coupling.ogg"   # Optional: Played when coupling occurs
+
+#    controls =              # Optional: Map of model controls to sound properties
+#        MODEL_TYPE_ID =         # Example: model group k4_REVERSER_1_Cube would map to REVERSER_1
+#            engage = null           # Optional: Sound to play when the user presses this control
+#            move = null             # Optional: Sound to play when the user moves this control, ex: johnson bar ratcheting
+#            movePercent = null      # Required if move specified: how far must the control move before playing the accompanying sound
+#            disengage = null        # Optional: Sound to play when the user releases this control
+
+# GUI/Item stuff
+overlay = null  # Optional: Custom in-game overlay GUI.  See examples in immersiverailroading:gui/default/.  TODO link to GUI documentation
+# extra_tooltip_info: Optional, add info to the item tooltip here
+# extra_tooltip_info: In CAML, specify this multiple times for multiple lines
+# extra_tooltip_info: In JSON, specify this as ["line 1", "line 2", "etc..."]
+
+
+particles = # Optional: Configure general particle emitter settings
+    smoke =
+        texture = "immersiverailroading:textures/light.png"
+    steam =
+        texture = "immersiverailroading:textures/light.png"
+
+# Each animation in CAML will have it's own animation: block
+# While in JSON it will be in the [{"properties": "values"}, {"properties": "values"}] format
+#animation:
+#    # Either control_group or readout are Required
+#    control_group = null    # Model Control Group to use as the animation driver
+#    readout = null          # Model Readout to use as the animation driver.  Readouts can be found in src/main/java/cam72cam/immersiverailroading/gui/overlay/Readouts.java
+#
+#    animatrix = "immersiverailroading:some/path/file.anim"  # Required: Animatrix file exported from your modeling program
+#
+#    # Choose ONE of the following modes:
+#    mode = VALUE            # The value of the animation driver directly corresponds to the percentage the animation is displayed at
+#    mode = PLAY_FORWARD     # Play the animation when the animation driver is greater than 75%
+#    mode = PLAY_REVERSE     # Play the animation in reverse when the animation driver is less than 75%
+#    mode = PLAY_BOTH        # Play the animation forward when greater than 75% and then reverse when less than 75%
+#    mode = LOOP             # Loop the animation when the animation driver is more than 95%
+#    mode = LOOP_SPEED       # Loop the animation, but scale the speed to the percentage of the animation driver
+#
+#    offset = 0.0            # Offset the animation driver by a decimal percentage
+#    invert = False          # Invert the animation driver
+#    frames_per_tick = 1.0   # How many frames to play per tick (can be greater or less than 1)
+#    sound = null # Optional: See sound_definition.caml for details

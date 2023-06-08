@@ -188,31 +188,34 @@ public class CAML {
     }
 
     private static DataBlock.Value createValue(String value) {
-            return new DataBlock.Value() {
-                @Override
-                public Boolean asBoolean() {
-                    return value == null ? null : Boolean.parseBoolean(value);
-                }
+        if (value == null || value.equalsIgnoreCase("null")) {
+            return DataBlock.Value.NULL;
+        }
+        return new DataBlock.Value() {
+            @Override
+            public Boolean asBoolean() {
+                                     return Boolean.parseBoolean(value);
+                                                                                               }
 
-                @Override
-                public Integer asInteger() {
-                    return value == null ? null : Integer.parseInt(value);
-                }
+            @Override
+            public Integer asInteger() {
+                                     return Integer.parseInt(value);
+                                                                                           }
 
-                @Override
-                public Float asFloat() {
-                    return value == null ? null : Float.parseFloat(value);
-                }
+            @Override
+            public Float asFloat() {
+                                 return Float.parseFloat(value);
+                                                                                       }
 
-                @Override
-                public Double asDouble() {
-                    return value == null ? null : Double.parseDouble(value);
-                }
+            @Override
+            public Double asDouble() {
+                                   return Double.parseDouble(value);
+                                                                                           }
 
-                @Override
-                public String asString() {
-                    return value;
-                }
-            };
+            @Override
+            public String asString() {
+                return value;
+            }
+        };
     }
 }

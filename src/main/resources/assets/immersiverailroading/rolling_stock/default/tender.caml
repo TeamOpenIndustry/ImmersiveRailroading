@@ -1,0 +1,6 @@
+import: "immersiverailroading:rolling_stock/default/tank.caml"
+
+tender =
+    slots = null  # Required: Number of slots in this container
+    width = null  # Required: Width of the container, recommended to be a numeric factor of the width ex: 32 and 8
+    show_current_load_only = False  # Controls how the CARGO_FILL_PERCENTAGE model groups are shown
