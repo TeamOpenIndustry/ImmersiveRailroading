@@ -5,13 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Merged implements DataBlock {
+public class MergedBlocks implements DataBlock {
     Map<String, DataBlock.Value> primitives;
     Map<String, List<DataBlock.Value>> primitiveSets;
     Map<String, DataBlock> blocks;
     Map<String, List<DataBlock>> blockSets;
 
-    public Merged(DataBlock base, DataBlock override) {
+    public MergedBlocks(DataBlock base, DataBlock override) {
         this.primitives = new LinkedHashMap<>(base.getValueMap());
         this.primitiveSets = new LinkedHashMap<>(base.getValuesMap());
         this.blocks = new LinkedHashMap<>(base.getBlockMap());
@@ -28,7 +28,7 @@ public class Merged implements DataBlock {
         });
         override.getBlockMap().forEach((key, block) -> {
             if (blocks.containsKey(key)) {
-                block = new Merged(blocks.get(key), block);
+                block = new MergedBlocks(blocks.get(key), block);
             }
             blocks.put(key, block);
         });
