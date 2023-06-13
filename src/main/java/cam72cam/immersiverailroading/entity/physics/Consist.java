@@ -48,7 +48,7 @@ public class Consist {
 
         public void findAffectedByForce(double force, List<Particle> output, boolean recursive) {
             if (prevLink != null) {
-                if (force > 0 && prevLink.isPulling || force < 0 && prevLink.isPushing) {
+                if (prevLink.isPulling(force) || prevLink.isPushing(force)) {
                     if (!output.contains(prevLink.prevParticle)) {
                         output.add(prevLink.prevParticle);
                         if (recursive) {
@@ -58,7 +58,7 @@ public class Consist {
                 }
             }
             if (nextLink != null) {
-                if (force < 0 && nextLink.isPulling || force > 0 && nextLink.isPushing) {
+                if (nextLink.isPulling(force) || nextLink.isPushing(force)) {
                     if (!output.contains(nextLink.nextParticle)) {
                         output.add(nextLink.nextParticle);
                         if (recursive) {
@@ -82,14 +82,15 @@ public class Consist {
 
             // What direction we are applying force in
             double deltaV = velocityA - velocityB;
-            if (Math.abs(deltaV) < 0.1) {
+            if (Math.abs(deltaV) < 0.01) {
                 return;
             }
+            //System.out.printf("dv: %s (%s - %s)%n", deltaV, velocityA, velocityB);
 
             // This is what fudges the physics to treat a group of cars as a single rigid body
             // My testing so far has shown that it makes normal operations more smooth
             // but edge cases (like newtons cradle) don't work as well
-            boolean groupForces = true;
+            boolean groupForces = false;
 
             // Target
             List<Particle> groupB = new ArrayList<>();
@@ -129,7 +130,6 @@ public class Consist {
             double restitution = 0.3;
             double deltaVA = (restitution * massB * (velocityB - velocityA) + massA * velocityA + massB * velocityB) / (massA + massB) - velocityA;
             double deltaVB = (restitution * massA * (velocityA - velocityB) + massA * velocityA + massB * velocityB) / (massA + massB) - velocityB;
-            //System.out.printf("Collision%n: %s - %s", deltaVA, deltaVB);
 
             groupA.forEach(p -> p.velocity += deltaVA);
             groupB.forEach(p -> p.velocity += deltaVB);
@@ -144,6 +144,7 @@ public class Consist {
             findAffectedByForce(acceleration, affected, true);
             double totalMassKg = affected.stream().mapToDouble(p -> p.state.config.massKg).sum();
             double deltaV = acceleration / totalMassKg;
+            //ImmersiveRailroading.info("Accelerate %s by %s", affected.size(), deltaV);
             affected.forEach(p -> p.velocity += deltaV);
         }
 
@@ -173,16 +174,16 @@ public class Consist {
                 double couplerDelta = Speed.fromMetric(this.velocity - prevLink.prevParticle.velocity).minecraft();
                 prevLink.couplerOffset += couplerDelta;
 
-                double tolerance = 0.1 * state.config.gauge.scale();
+                double tolerance = 0.25 * state.config.gauge.scale();
 
                 // If the previous link is not within tolerances
-                if (Math.abs(prevLink.couplerOffset) - prevLink.maxCouplerDistance > tolerance && (prevLink.isPushing || prevLink.isPulling)) {
+                if (Math.abs(prevLink.couplerOffset) - prevLink.maxCouplerDistance > tolerance && (prevLink.isPushing(0) || prevLink.isPulling(0))) {
                     // We need to adjust the position AND Update the next coupler.  Since the iteration order
                     // is from back to front, any delta added to the next link should be applied when this is called on
                     // the next state object.
 
                     // How much we need to adjust our position to satisfy the link constraints
-                    double adjustment = Math.copySign((Math.abs(prevLink.couplerOffset) - prevLink.maxCouplerDistance)/2, -prevLink.couplerOffset);
+                    double adjustment = Math.copySign((Math.abs(prevLink.couplerOffset) - prevLink.maxCouplerDistance) / 2, -prevLink.couplerOffset);
                     velocityMPT += adjustment;
 
                     if (nextLink != null) {
@@ -198,10 +199,12 @@ public class Consist {
     public static class Linkage {
         private final Particle prevParticle;
         private final Particle nextParticle;
-        public boolean isPushing;
-        public boolean isPulling;
 
         private final double maxCouplerDistance;
+        private final boolean prevEngaged;
+        private final boolean nextEngaged;
+        private final double couplerDistance;
+        private final boolean isOverlapping;
 
         private double couplerOffset;
 
@@ -224,22 +227,31 @@ public class Consist {
             prevCoupler = prevCoupler.subtract(0, prevCoupler.y, 0);
             nextCoupler = nextCoupler.subtract(0, nextCoupler.y, 0);
 
-            boolean prevEngaged = prevCouplerFront ?
+            prevEngaged = prevCouplerFront ?
                     prev.state.config.couplerEngagedFront :
                     prev.state.config.couplerEngagedRear;
-            boolean nextEngaged = nextCouplerFront ?
+            nextEngaged = nextCouplerFront ?
                     next.state.config.couplerEngagedFront :
                     next.state.config.couplerEngagedRear;
 
             // TODO distance squared optimizations
             Vec3d couplerDelta = prevCoupler.subtract(nextCoupler);
-            double couplerDistance = couplerDelta.length();
-            boolean contacting = couplerDistance >= maxCouplerDistance;
-            boolean isOverlapping = prevPos.distanceTo(prevCoupler) > prevPos.distanceTo(nextCoupler) - (maxCouplerDistance/4);
+            couplerDistance = couplerDelta.length();
+            isOverlapping = prevPos.distanceTo(prevCoupler) > prevPos.distanceTo(nextCoupler) - (maxCouplerDistance / 4);
 
-            isPushing = contacting && isOverlapping;
-            isPulling = contacting && !isOverlapping && (prevEngaged && nextEngaged);
-            couplerOffset = isPushing ? -couplerDistance : couplerDistance;
+            couplerOffset = isOverlapping ? -couplerDistance : couplerDistance;
+        }
+
+        public boolean isPushing(double force) {
+            double dv = force + (prevParticle.velocity - nextParticle.velocity);
+            boolean contacting = couplerDistance + dv >= maxCouplerDistance;
+            return (contacting && isOverlapping) || maxCouplerDistance == 0;// && force >= prevParticle.velocity - nextParticle.velocity;
+        }
+
+        public boolean isPulling(double force) {
+            double dv = force - (prevParticle.velocity - nextParticle.velocity);
+            boolean contacting = couplerDistance - dv >= maxCouplerDistance;
+            return ((contacting && !isOverlapping) || maxCouplerDistance == 0) && (prevEngaged && nextEngaged);// && force >= prevParticle.velocity - nextParticle.velocity;
         }
     }
 
@@ -328,9 +340,9 @@ public class Consist {
 
             // Spread the brake pressure evenly.  TODO spread it from the suppliers (requires complete rethink of brake controls)
             float desiredBrakePressure = (float) consist.stream().mapToDouble(x -> x.state.config.desiredBrakePressure).max().orElse(0);
-            boolean needsBrakeEqualization = consist.stream().anyMatch(x -> x.state.config.hasPressureBrake && Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.001);
+            boolean needsBrakeEqualization = consist.stream().anyMatch(x -> x.state.config.hasPressureBrake && Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.01);
             if (needsBrakeEqualization) {
-                dirty = true;
+                //dirty = true;
                 double brakePressureDelta = 0.05 / consist.stream().filter(x -> x.state.config.hasPressureBrake).count();
                 consist.forEach(p -> {
                     if (p.state.config.hasPressureBrake) {
@@ -363,8 +375,8 @@ public class Consist {
         //Collections.reverse(particles);
 
         // Spread forces
-        particles.forEach(Particle::applyNextCollision);
         particles.forEach(Particle::applyAcceleration);
+        particles.forEach(Particle::applyNextCollision);
         particles.forEach(Particle::applyFriction);
 
         // Generate new states

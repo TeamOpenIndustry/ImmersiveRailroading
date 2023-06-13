@@ -149,7 +149,7 @@ public class SimulationState {
                         couplerEngagedRear == other.couplerEngagedRear &&
                         Math.abs(tractiveEffortFactors - other.tractiveEffortFactors) < 0.01 &&
                         Math.abs(massKg - other.massKg)/massKg < 0.01 &&
-                        Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.01 &&
+                        Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.1 &&
                         Math.abs(independentBrakePosition - other.independentBrakePosition) < 0.01;
             }
             return false;
