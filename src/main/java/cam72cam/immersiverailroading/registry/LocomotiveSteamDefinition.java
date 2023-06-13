@@ -32,6 +32,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     @Override
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/steam.caml");
+    }
+
+    @Override
     public void loadData(DataBlock data) throws Exception {
         super.loadData(data);
         DataBlock properties = data.getBlock("properties");

@@ -5,15 +5,12 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.util.CAML;
-import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.util.JSON;
-import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
@@ -221,7 +218,7 @@ public abstract class EntityRollingStockDefinition {
         this.defID = defID;
 
 
-        loadData(data);
+        loadData(transformData(data));
 
         this.model = createModel();
         this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.shouldRender(x)).collect(Collectors.toList());
@@ -284,11 +281,33 @@ public abstract class EntityRollingStockDefinition {
         return ConfigSound.scaleSoundToGauge && scalePitch;
     }
 
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/base.caml");
+    }
+
+    private DataBlock withImports(DataBlock data) throws IOException {
+        List<DataBlock.Value> imports = data.getValues("import");
+        if (imports != null) {
+            for (DataBlock.Value toImport : imports) {
+                DataBlock loaded = DataBlock.load(toImport.asIdentifier());
+                loaded = withImports(loaded);
+                // Graft data on TOP of loaded
+                data = new MergedBlocks(loaded, data);
+            }
+        }
+        return data;
+    }
+
+    private DataBlock transformData(DataBlock data) throws IOException {
+        DataBlock base = DataBlock.load(defaultDataLocation());
+        return new MergedBlocks(withImports(base), withImports(data));
+    }
+
     public void loadData(DataBlock data) throws Exception {
         name = data.getValue("name").asString();
-        modelerName = data.getValue("modeler").asString("N/A");
-        packName = data.getValue("pack").asString("N/A");
-        darken = data.getValue("darken_model").asFloat(0f);
+        modelerName = data.getValue("modeler").asString();
+        packName = data.getValue("pack").asString();
+        darken = data.getValue("darken_model").asFloat();
         internal_model_scale = 1;
         internal_inv_scale = 1;
         // TODO Gauge.from(Gauge.STANDARD).value() what happens when != Gauge.STANDARD
@@ -350,21 +369,17 @@ public abstract class EntityRollingStockDefinition {
         bogeyFront = pivot.getValue("front").asFloat() * (float) internal_model_scale;
         bogeyRear = pivot.getValue("rear").asFloat() * (float) internal_model_scale;
 
-        dampeningAmount = data.getValue("sound_dampening_percentage").asFloat(0.75f);
+        dampeningAmount = data.getValue("sound_dampening_percentage").asFloat();
         if (dampeningAmount < 0 || dampeningAmount > 1) {
             dampeningAmount = 0.75f;
         }
         scalePitch = data.getValue("scale_pitch").asBoolean(true);
 
-        couplerSlackFront = couplerSlackRear = 0.025f;
-
         DataBlock couplers = data.getBlock("couplers");
-        if (couplers != null) {
-            couplerOffsetFront = couplers.getValue("front_offset").asFloat(0f) * (float) internal_model_scale;
-            couplerOffsetRear = couplers.getValue("rear_offset").asFloat(0f) * (float) internal_model_scale;
-            couplerSlackFront = couplers.getValue("front_slack").asFloat(couplerSlackFront) * (float) internal_model_scale;
-            couplerSlackRear = couplers.getValue("rear_slack").asFloat(couplerSlackRear) * (float) internal_model_scale;
-        }
+        couplerOffsetFront = couplers.getValue("front_offset").asFloat() * (float) internal_model_scale;
+        couplerOffsetRear = couplers.getValue("rear_offset").asFloat() * (float) internal_model_scale;
+        couplerSlackFront = couplers.getValue("front_slack").asFloat() * (float) internal_model_scale;
+        couplerSlackRear = couplers.getValue("rear_slack").asFloat() * (float) internal_model_scale;
 
         DataBlock properties = data.getBlock("properties");
         weight = (int) Math.ceil(properties.getValue("weight_kg").asInteger() * internal_inv_scale);
@@ -376,7 +391,7 @@ public abstract class EntityRollingStockDefinition {
 
         brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
         try {
-            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString("CAST_IRON")));
+            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString()));
         } catch (Exception ex) {
             ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
         }

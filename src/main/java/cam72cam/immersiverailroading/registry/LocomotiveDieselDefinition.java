@@ -26,6 +26,11 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
     @Override
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/diesel.caml");
+    }
+
+    @Override
     public void loadData(DataBlock data) throws Exception {
         super.loadData(data);
 

@@ -14,7 +14,7 @@ tex_variants =              # Optional: List of texture variants for this stock
 # Passenger information
 passenger =                 # Required: Passenger compartment configuration
     slots = 0                   # Number of entities that can ride at the same time
-    should_sit = True           # Should the riders always be in the sitting position?
+    should_sit = False           # Should the riders always be in the sitting position?
     center_x = 0                # X Center of passenger compartment
     center_y = 0                # Y Center of passenger compartment
     length = 1                  # Y Size
@@ -31,10 +31,10 @@ scale_pitch = True                  # Optional: Scale any sounds emitted by this
 
 # Coupler Settings
 couplers =                  # Optional: modifications to coupler defaults
-    front_offset = null         # Distance in meters to offset the front coupler from the front of the model
-    front_slack = 0.025f        # Amount of slack present in the front coupler
-    rear_offset = null          # Distance in meters to offset the rear coupler from the rear of the model
-    rear_slack = 0.025f         # Amount of slack present in the rear coupler
+    front_offset = 0            # Distance in meters to offset the front coupler from the front of the model
+    front_slack = 0.025         # Amount of slack present in the front coupler
+    rear_offset = 0          # Distance in meters to offset the rear coupler from the rear of the model
+    rear_slack = 0.025          # Amount of slack present in the rear coupler
 
 # Misc Properties
 properties =                # Required:

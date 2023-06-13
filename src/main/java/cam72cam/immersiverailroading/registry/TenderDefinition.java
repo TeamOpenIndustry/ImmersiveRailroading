@@ -1,11 +1,13 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.FreightTankModel;
 import cam72cam.immersiverailroading.model.StockModel;
+import cam72cam.mod.resource.Identifier;
 
 import java.util.List;
 
@@ -16,6 +18,11 @@ public class TenderDefinition extends CarTankDefinition {
 
     public TenderDefinition(String defID, DataBlock data) throws Exception {
         super(Tender.class, defID, data);
+    }
+
+    @Override
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/tender.caml");
     }
 
     @Override

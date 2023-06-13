@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.model.FreightTankModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.resource.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,11 @@ public class CarTankDefinition extends FreightDefinition {
 
     CarTankDefinition(Class<? extends CarTank> type, String defID, DataBlock data) throws Exception {
         super(type, defID, data);
+    }
+
+    @Override
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/tank.caml");
     }
 
     @Override
