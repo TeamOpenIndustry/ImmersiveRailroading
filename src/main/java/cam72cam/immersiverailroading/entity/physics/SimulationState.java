@@ -120,7 +120,8 @@ public class SimulationState {
             couplerSlackRear = stock.getDefinition().getCouplerSlack(EntityCoupleableRollingStock.CouplerType.BACK, gauge);
 
             this.massKg = stock.getWeight();
-            double designMassKg = stock.getMaxWeight();
+            // When FuelRequired is false, most of the time the locos are empty.  Work around that here
+            double designMassKg = Config.ConfigBalance.FuelRequired ? stock.getMaxWeight() : massKg;
 
             if (stock instanceof Locomotive) {
                 Locomotive locomotive = (Locomotive) stock;

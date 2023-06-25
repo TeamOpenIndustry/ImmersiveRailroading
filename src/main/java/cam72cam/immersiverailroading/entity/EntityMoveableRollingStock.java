@@ -594,6 +594,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
      * Though, I'm going to limit it to 75% of the total possible adhesion
      */
     public double getBrakeSystemEfficiency() {
-        return Math.min(0.75, Math.pow(getDefinition().getBrakeShoeFriction(), 1/2.5));
+        return getDefinition().getBrakeShoeFriction() + 0.5;
     }
 }
