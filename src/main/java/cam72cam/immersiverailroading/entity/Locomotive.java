@@ -390,10 +390,10 @@ public abstract class Locomotive extends FreightTank {
 
 	/** Force applied between the wheels and the rails */
 	private double getAppliedTractiveEffort(Speed speed) {
+		double locoEfficiency = 0.7f; //TODO config
 		double outputHorsepower = Math.abs(Math.pow(getThrottle() * getReverser(), 3) * getAvailableHP());
-
-		// This is so wrong, it's not even funny
-		double tractiveEffortNewtons = 2650.0 * outputHorsepower / Math.max(1.4, Math.abs(speed.metric()));
+		
+		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(1.4, Math.abs(speed.metric()))));
 		return tractiveEffortNewtons;
 	}
 
