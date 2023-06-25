@@ -16,24 +16,6 @@ import java.util.stream.Collectors;
  * particles when they are interfering with each other via slacked linkages
  * It is not technically correct, but I believe it will produce the most reasonable simulation
  *
- * TODO: Make particles / linkages state agnostic for unit testing
- *
- *
- *
- * propagation through iteration / recursuion (maxdepth)
- *
- * accell = F newtons (kg*meter/time^2)
- * particle A (accell =
- *
- *
- *
- *
- *
- *
- *
- *
- *
- * Question: Do we want to store the deltaV in particle instead of immediately applying it to velocity?
  * */
 public class Consist {
     static boolean debug = false;
@@ -72,6 +54,10 @@ public class Consist {
             if (nextLink != null) {
                 nextLink.update();
             }
+            /*
+            if (Math.abs(velocity_M_S) > 0) {
+                System.out.printf("Pos: %s, Vel: %s%n", position_M, velocity_M_S);
+            }*/
         }
 
         public void computeVelocity(double dt_S) {
@@ -136,19 +122,21 @@ public class Consist {
                 // Proportional to smooth out differing velocities
                 particle.velocity_M_S = particle.velocity_M_S - (resistedVelocity_M_S * particle.velocity_M_S / totalVelocity_M_S);
             }
+
+            remainingFriction_KgM_S_S = (availableResistance_M_S - Math.abs(resistedVelocity_M_S)) * totalMass_Kg / dt_S;
         }
 
         public void computePosition(double dt) {
             // Apply velocity
             position_M = position_M + velocity_M_S * dt;
-
+            /*
             if (prevLink != null) {
                 // This is probably redundant if the processing order is stable
                 prevLink.correctDistance();
             }
             if (nextLink != null) {
                 nextLink.correctDistance();
-            }
+            }*/
         }
 
 
@@ -186,27 +174,65 @@ public class Consist {
                 return;
             }
 
+            // Assume non looping for now
+            /*
+             * We always care about the state of nextlink
+             *
+             * if nextlink is pushing, we care about other pushing
+             *      we collide that with this + who is pushing us
+             *
+             * if nextlink is pulling, we care about other pulling
+             *      we collide that with this + who is pulling us
+             *
+             */
 
-
-            double deltaV_M_S = 0;
-            if (nextLink != null && (nextLink.canPull || nextLink.canPush)) {
-                deltaV_M_S = this.velocity_M_S - nextLink.nextParticle.velocity_M_S;
-            }
-
-            if (Math.abs(deltaV_M_S) < 0.001) {
+            if (nextLink == null || !nextLink.canPull && !nextLink.canPush) {
                 return;
             }
 
             List<Particle> a = new ArrayList<>();
             List<Particle> b = new ArrayList<>();
 
-            interactingParticles(a, deltaV_M_S < 0);
-            interactingParticles(b, deltaV_M_S > 0);
+            double maxVD_M = 0.01;
 
-            if (deltaV_M_S < 0) {
+            // a <-slower-> this <-faster-> b
+            if (nextLink.canPull) {
                 a.add(this);
+                for (Linkage link = prevLink; link != null && link.canPull &&
+                        link.prevParticle.velocity_M_S <= link.nextParticle.velocity_M_S// &&
+                        ;//link.prevParticle.velocity_M_S >= link.nextParticle.velocity_M_S - maxVD_M;
+                     link = link.prevParticle.prevLink) {
+                    a.add(link.prevParticle);
+                }
+                for (Linkage link = nextLink; link != null && link.canPull &&
+                        link.prevParticle.velocity_M_S <= link.nextParticle.velocity_M_S// &&
+                        ;//link.prevParticle.velocity_M_S >= link.nextParticle.velocity_M_S - maxVD_M;
+                     link = link.nextParticle.nextLink) {
+                    b.add(link.nextParticle);
+                }
             } else {
-                b.add(this);
+                a.add(this);
+                // a >-faster-< this >-slower-< b
+                for (Linkage link = prevLink; link != null && link.canPush &&
+                        link.prevParticle.velocity_M_S >= link.nextParticle.velocity_M_S// &&
+                        ;//link.prevParticle.velocity_M_S <= link.nextParticle.velocity_M_S + maxVD_M;
+                     link = link.prevParticle.prevLink) {
+                    a.add(link.prevParticle);
+                }
+                for (Linkage link = nextLink; link != null && link.canPush &&
+                        link.prevParticle.velocity_M_S >= link.nextParticle.velocity_M_S// &&
+                        ;//link.prevParticle.velocity_M_S <= link.nextParticle.velocity_M_S + maxVD_M;
+                     link = link.nextParticle.nextLink) {
+                    b.add(link.nextParticle);
+                }
+            }
+
+            if (b.isEmpty() || a.isEmpty()) {
+                return;
+            }
+
+            if (Math.abs(a.get(0).velocity_M_S - b.get(0).velocity_M_S) < 0.001) {
+                return;
             }
 
             if (debug) {
@@ -227,12 +253,12 @@ public class Consist {
             for (Particle particle : a) {
                 a_j_KgM_S += particle.mass_Kg * particle.velocity_M_S;
                 a_mass_Kg += particle.mass_Kg;
-                a_velocity_M_S += particle.velocity_M_S;
+                a_velocity_M_S += particle.velocity_M_S / a.size();
             }
             for (Particle particle : b) {
                 b_j_KgM_S += particle.mass_Kg * particle.velocity_M_S;
                 b_mass_Kg += particle.mass_Kg;
-                b_velocity_M_S += particle.velocity_M_S;
+                b_velocity_M_S += particle.velocity_M_S / b.size();
             }
 
             // Calculate factors for momentum transfer
@@ -248,20 +274,37 @@ public class Consist {
             double cr = 0.25;
 
             // DeltaV is probably good enough here.  We could do a "fancier" momentum transfer here, or rely on small time steps and individual collisions to resolve.  Let's see how this works.
-            a_dv_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg - a_velocity_M_S;
-            b_dv_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg - b_velocity_M_S;
+            a_velocity_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg;
+            b_velocity_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg;
+            //a_dv_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg - a_velocity_M_S;
+            //b_dv_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg - b_velocity_M_S;
             for (Particle particle : a) {
-                particle.velocity_M_S += a_dv_M_S;
+                //particle.velocity_M_S += a_dv_M_S;
+                particle.velocity_M_S = a_velocity_M_S;
             }
             for (Particle particle : b) {
-                particle.velocity_M_S += b_dv_M_S;
+                //particle.velocity_M_S += b_dv_M_S;
+                particle.velocity_M_S = b_velocity_M_S;
             }
         }
 
         public void collide_old(Particle b) {
             Particle a = this;
 
-            if (Math.abs(a.velocity_M_S - b.velocity_M_S) < 0.001) {
+            if (a.velocity_M_S > b.velocity_M_S) {
+                if (!nextLink.canPush) {
+                    return;
+                }
+            } else {
+                if (!nextLink.canPull) {
+                    return;
+                }
+            }
+
+            double relativeDifference = a.velocity_M_S + b.velocity_M_S == 0 ? 0 : Math.abs((a.velocity_M_S - b.velocity_M_S)/(a.velocity_M_S + b.velocity_M_S));
+            if (relativeDifference < 0.001) {
+                // Smooth out negligible collisions
+                b.velocity_M_S = a.velocity_M_S;
                 return;
             }
 
@@ -326,7 +369,7 @@ public class Consist {
 
             double maxCouplerDistance = (prevCouplerFront ? prev.state.config.couplerSlackFront : prev.state.config.couplerSlackRear) +
                        (nextCouplerFront ? next.state.config.couplerSlackFront : next.state.config.couplerSlackRear);
-            //double maxCouplerDistance = 0;
+            //maxCouplerDistance = 0.25;
 
             boolean prevEngaged = prevCouplerFront ?
                     prev.state.config.couplerEngagedFront :
@@ -340,6 +383,7 @@ public class Consist {
             Vec3d prevCoupler = prevCouplerFront ? prevParticle.state.couplerPositionFront : prevParticle.state.couplerPositionRear;
             Vec3d nextCoupler = nextCouplerFront ? nextParticle.state.couplerPositionFront : nextParticle.state.couplerPositionRear;
 
+            // These two distanceTos could be replaced with definitions
             double prevLength = prevCoupler.distanceTo(prevPos);
             double nextLength = nextCoupler.distanceTo(nextPos);
             double couplerDistance = prevCoupler.distanceTo(nextCoupler);
@@ -348,7 +392,6 @@ public class Consist {
             couplerDistance = couplerDistance * (isOverlapping ? -1 : 1);
 
             double totalLength = prevLength + nextLength + couplerDistance;
-            debug = false;
 
             // Setup nextParticle position based on prevParticle
             nextParticle.initial_position_M = nextParticle.position_M = prevParticle.position_M + totalLength;
@@ -373,6 +416,9 @@ public class Consist {
          * This function should rarely make positions to the simulation
          */
         public void correctDistance() {
+            // Recompute here since slack is changing as we iterate
+            this.currentDistance_M = nextParticle.position_M - prevParticle.position_M;
+
             // Too Close
             if (currentDistance_M - minDistance_M < -0.001) {
                 // Recompute position
@@ -380,6 +426,9 @@ public class Consist {
                     System.out.printf("CORRECTION %s%n", currentDistance_M - minDistance_M);
                 }
                 nextParticle.position_M = prevParticle.position_M + (minDistance_M);
+                if (nextParticle.velocity_M_S < prevParticle.velocity_M_S)  {
+                    nextParticle.velocity_M_S = prevParticle.velocity_M_S;
+                }
             }
 
             // Too far and coupled
@@ -389,11 +438,15 @@ public class Consist {
                     System.out.printf("CORRECTION %s%n", currentDistance_M - maxDistance_M);
                 }
                 nextParticle.position_M = prevParticle.position_M + (maxDistance_M);
+                if (nextParticle.velocity_M_S > prevParticle.velocity_M_S) {
+                    nextParticle.velocity_M_S = prevParticle.velocity_M_S;
+                }
             }
         }
     }
 
     public static Map<UUID, SimulationState> iterate(Map<UUID, SimulationState> states, List<Vec3i> blocksAlreadyBroken) {
+        debug = false;
         // ordered
         List<Particle> particles = new ArrayList<>();
 
@@ -513,16 +566,30 @@ public class Consist {
         //Collections.reverse(particles);
 
         double ticksPerSecond = 20;
-        double stepsPerTick = 20;
+        double stepsPerTick = 40;
         double dt_S = (1 / (ticksPerSecond * stepsPerTick));
+
+        if (!particles.isEmpty()) {
+            if (debug) {
+                System.out.println("=============BOUNDARY==========");
+                // This shows that the movement between consist simulations is not exact.
+                // Some instability can be seen between ticks as the couplers get slack introduced
+            }
+        }
 
         // Spread forces
         for (int i = 0; i < stepsPerTick; i++) {
             particles.forEach(Particle::setup);
             particles.forEach(p -> p.computeVelocity(dt_S));
+            particles.forEach(p -> p.applyFriction(dt_S));
             particles.forEach(Particle::processCollisions);
             particles.forEach(p -> p.applyFriction(dt_S));
             particles.forEach(p -> p.computePosition(dt_S));
+            for (Particle particle : particles) {
+                if (particle.nextLink != null) {
+                    particle.nextLink.correctDistance();
+                }
+            }
         }
 
         // Generate new states
