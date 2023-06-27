@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -56,6 +57,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @TagField("BRAKE_PRESSURE")
     private float trainBrakePressure = 0;
 
+    @TagSync
+    @TagField("SLIDING")
+    private boolean sliding = false;
+
+    public long lastCollision = 0;
+
     private float sndRand;
 
     private ISound wheel_sound;
@@ -63,6 +70,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private ISound clackRear;
     private Vec3i clackFrontPos;
     private Vec3i clackRearPos;
+
+    private ISound slidingSound;
 
     private double swayMagnitude;
     private double swayImpulse;
@@ -250,6 +259,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             SimulationState state = getCurrentState();
             if (state != null) {
                 this.trainBrakePressure = state.brakePressure;
+                this.sliding = state.sliding;
+
+                if (state.collided > 0.1 && getTickCount() - lastCollision > 20) {
+                    lastCollision = getTickCount();
+                    new SoundPacket(getDefinition().collision_sound,
+                            this.getPosition(), this.getVelocity(),
+                            1, 1, (int) (200 * gauge.scale()), soundScale())
+                            .sendToObserving(this);
+                }
 
                 for (Vec3i bp : state.blocksToBreak) {
                     getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !getWorld().isSnow(bp));
@@ -272,6 +290,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 if (this.wheel_sound == null) {
                     wheel_sound = this.createSound(this.getDefinition().wheel_sound, true, 40);
                     this.sndRand = (float) Math.random() / 10;
+                }
+                if (this.slidingSound == null) {
+                    this.slidingSound = this.createSound(this.getDefinition().sliding_sound, true, 40);
                 }
                 if (this.clackFront == null) {
                     clackFront = this.createSound(this.getDefinition().clackFront, false, 30);
@@ -299,6 +320,20 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 } else {
                     if (wheel_sound.isPlaying()) {
                         wheel_sound.stop();
+                    }
+                }
+
+                if (sliding) {
+                    if (!slidingSound.isPlaying()) {
+                        slidingSound.play(getPosition());
+                    }
+                    slidingSound.setPitch((pitch + this.sndRand)/4);
+                    slidingSound.setVolume(Math.min(1, adjust*4));
+                    slidingSound.setPosition(getPosition());
+                    slidingSound.setVelocity(getVelocity());
+                } else {
+                    if (slidingSound.isPlaying()) {
+                        slidingSound.stop();
                     }
                 }
 

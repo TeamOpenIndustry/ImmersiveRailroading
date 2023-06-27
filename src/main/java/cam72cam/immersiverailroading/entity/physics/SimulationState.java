@@ -60,6 +60,8 @@ public class SimulationState {
     public Configuration config;
     public boolean dirty = true;
     public boolean canBeUnloaded = true;
+    public double collided;
+    public boolean sliding;
 
     public static class Configuration {
         public UUID id;
@@ -121,7 +123,7 @@ public class SimulationState {
 
             this.massKg = stock.getWeight();
             // When FuelRequired is false, most of the time the locos are empty.  Work around that here
-            double designMassKg = Config.ConfigBalance.FuelRequired ? stock.getMaxWeight() : massKg;
+            double designMassKg = !Config.ConfigBalance.FuelRequired && stock instanceof Locomotive ? massKg : stock.getMaxWeight();
 
             if (stock instanceof Locomotive) {
                 Locomotive locomotive = (Locomotive) stock;
@@ -381,10 +383,12 @@ public class SimulationState {
 
         double brakeAdhesionNewtons = config.designAdhesionNewtons * Math.min(1, Math.max(brakePressure, config.independentBrakePosition));
 
+        this.sliding = false;
         if (brakeAdhesionNewtons > config.maximumAdhesionNewtons && Math.abs(velocity) > 0.1) {
             // WWWWWHHHEEEEE!!! SLIDING!!!!
             double kineticFriction = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.STEEL);
             brakeAdhesionNewtons = config.massKg * kineticFriction;
+            this.sliding = true;
         }
 
         brakeAdhesionNewtons *= Config.ConfigBalance.brakeMultiplier;

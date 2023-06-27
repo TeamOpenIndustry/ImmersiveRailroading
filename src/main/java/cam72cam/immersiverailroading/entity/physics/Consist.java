@@ -82,7 +82,7 @@ public class Consist {
 
             double dv_M_S = netForce_KgM_S_S * dt_S / netMass_Kg;
             if (debug) {
-                System.out.printf("Accelerating %d particles by %.4f M/S with force of %.4f KgM/S/S from starting force of %.4f KgM/S/S and friction %.4f KgM/S/S%n", particles.size(), dv_M_S, netForce_KgM_S_S, force_KgM_S_S, totalFriction_KgM_S_S);
+                System.out.printf("Accelerating %d particles by %.7f M/S with force of %.7f KgM/S/S from starting force of %.7f KgM/S/S and friction %.7f KgM/S/S%n", particles.size(), dv_M_S, netForce_KgM_S_S, force_KgM_S_S, totalFriction_KgM_S_S);
             }
             for (Particle particle : particles) {
                 if (Math.abs(dv_M_S) > 0) {
@@ -115,12 +115,11 @@ public class Consist {
 
             double resistedVelocity_M_S = Math.copySign(Math.min(Math.abs(totalVelocity_M_S), availableResistance_M_S), totalVelocity_M_S);
 
-            if (debug && Math.abs(resistedVelocity_M_S) > 0.0001) {
-                System.out.printf("DeltaV of %d particles totals %.4f M/S (%.4f M/S avg) from a starting velocity of %.4f M/S and resistance of %.4f M/S%n", particles.size(), resistedVelocity_M_S, (resistedVelocity_M_S / particles.size()), totalVelocity_M_S, availableResistance_M_S);
+            if (debug && Math.abs(resistedVelocity_M_S) > 0.00001) {
+                System.out.printf("DeltaV of %d particles totals %.7f M/S (%.7f M/S avg) from a starting velocity of %.7f M/S and resistance of %.7f M/S%n", particles.size(), resistedVelocity_M_S, (resistedVelocity_M_S / particles.size()), totalVelocity_M_S, availableResistance_M_S);
             }
             for (Particle particle : particles) {
-                // Proportional to smooth out differing velocities
-                particle.velocity_M_S = particle.velocity_M_S - (resistedVelocity_M_S * particle.velocity_M_S / totalVelocity_M_S);
+                particle.velocity_M_S = particle.velocity_M_S - resistedVelocity_M_S;
             }
 
             remainingFriction_KgM_S_S = (availableResistance_M_S - Math.abs(resistedVelocity_M_S)) * totalMass_Kg / dt_S;
@@ -301,10 +300,9 @@ public class Consist {
                 }
             }
 
-            double relativeDifference = a.velocity_M_S + b.velocity_M_S == 0 ? 0 : Math.abs((a.velocity_M_S - b.velocity_M_S)/(a.velocity_M_S + b.velocity_M_S));
-            if (relativeDifference < 0.001) {
-                // Smooth out negligible collisions
-                b.velocity_M_S = a.velocity_M_S;
+            double relativeDifference = Math.abs(a.velocity_M_S) + Math.abs(b.velocity_M_S) < 0.01 ? 0 : Math.abs((a.velocity_M_S - b.velocity_M_S)/(a.velocity_M_S + b.velocity_M_S));
+            if (relativeDifference < 0.00001) {
+                // Negligible
                 return;
             }
 
@@ -325,11 +323,23 @@ public class Consist {
             double a_dj_KgM_S = a.mass_Kg * a_dv_M_S;
             double b_dj_KgM_s = b.mass_Kg * b_dv_M_S;
 
-            // Coefficient of restitution is how much of the dj is not absorbed by the impact
-            double cr = 0.25;
+            if (relativeDifference > 0.05) {
+                // Coefficient of restitution is how much of the dj is not absorbed by the impact
+                double cr = 0.25;
 
-            a.velocity_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg;
-            b.velocity_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg;
+                a.velocity_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg;
+                b.velocity_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg;
+                state.collided = Math.max(state.collided, relativeDifference);
+                if (debug) {
+                    System.out.printf("Collision between %s and %s%n", a.state.config.id, b.state.config.id);
+                }
+            } else {
+                // Smaller deltas should be treated as negligible w/ perfect restitution
+                a.velocity_M_S = b.velocity_M_S = total_j_KgM_S / total_m_Kg;
+                if (debug) {
+                    System.out.printf("Merge between %s and %s%n", a.state.config.id, b.state.config.id);
+                }
+            }
         }
 
 
@@ -370,6 +380,7 @@ public class Consist {
             double maxCouplerDistance = (prevCouplerFront ? prev.state.config.couplerSlackFront : prev.state.config.couplerSlackRear) +
                        (nextCouplerFront ? next.state.config.couplerSlackFront : next.state.config.couplerSlackRear);
             //maxCouplerDistance = 0.25;
+            //maxCouplerDistance = 0;
 
             boolean prevEngaged = prevCouplerFront ?
                     prev.state.config.couplerEngagedFront :
@@ -405,8 +416,8 @@ public class Consist {
         public void update() {
             // Next particle always has a larger position
             this.currentDistance_M = nextParticle.position_M - prevParticle.position_M;
-            this.canPush = currentDistance_M <= minDistance_M;
-            this.canPull = coupled && currentDistance_M >= maxDistance_M;
+            this.canPush = currentDistance_M <= minDistance_M || minDistance_M == maxDistance_M;
+            this.canPull = coupled && currentDistance_M >= maxDistance_M || minDistance_M == maxDistance_M;
             if (debug) {
                 //ImmersiveRailroading.info("min:%s curr:%s max:%s pull:%s push: %s", minDistance_M, currentDistance_M, maxDistance_M, canPull, canPush);
             }
@@ -426,9 +437,6 @@ public class Consist {
                     System.out.printf("CORRECTION %s%n", currentDistance_M - minDistance_M);
                 }
                 nextParticle.position_M = prevParticle.position_M + (minDistance_M);
-                if (nextParticle.velocity_M_S < prevParticle.velocity_M_S)  {
-                    nextParticle.velocity_M_S = prevParticle.velocity_M_S;
-                }
             }
 
             // Too far and coupled
@@ -438,9 +446,6 @@ public class Consist {
                     System.out.printf("CORRECTION %s%n", currentDistance_M - maxDistance_M);
                 }
                 nextParticle.position_M = prevParticle.position_M + (maxDistance_M);
-                if (nextParticle.velocity_M_S > prevParticle.velocity_M_S) {
-                    nextParticle.velocity_M_S = prevParticle.velocity_M_S;
-                }
             }
         }
     }
