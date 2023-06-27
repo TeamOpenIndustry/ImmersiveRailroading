@@ -67,9 +67,7 @@ public class Consist {
                 return;
             }
 
-            List<Particle> particles = new ArrayList<>();
-            particles.add(this);
-            this.interactingParticles(particles, netForce_KgM_S_S > 0);
+            List<Particle> particles = interactingParticles(netForce_KgM_S_S > 0);
 
             double totalFriction_KgM_S_S = 0;
             double netMass_Kg = 0;
@@ -99,9 +97,7 @@ public class Consist {
             if (remainingFriction_KgM_S_S == 0 || Math.abs(velocity_M_S) == 0) {
                 return;
             }
-            List<Particle> particles = new ArrayList<>();
-            particles.add(this);
-            this.interactingParticles(particles, velocity_M_S < 0);
+            List<Particle> particles = interactingParticles(velocity_M_S < 0);
 
             // TODO this might be clearer in terms of Momentum (technically equivalent)
             double totalMass_Kg = 0.0;
@@ -128,167 +124,35 @@ public class Consist {
         public void computePosition(double dt) {
             // Apply velocity
             position_M = position_M + velocity_M_S * dt;
-            /*
-            if (prevLink != null) {
-                // This is probably redundant if the processing order is stable
-                prevLink.correctDistance();
-            }
             if (nextLink != null) {
                 nextLink.correctDistance();
-            }*/
+            }
         }
 
 
-        public void interactingParticles(Collection<Particle> particles, boolean positive) {
-            if (prevLink != null) {
-                Particle prevParticle = prevLink.prevParticle;
-                if (!particles.contains(prevParticle)) {
-                    // Positive: We are moving away from the previous particle
-                    // Negative: We are moving toward the previous particle
-                    if (positive ? prevLink.canPull : prevLink.canPush) {
-                        particles.add(prevParticle);
-                        prevParticle.interactingParticles(particles, positive);
-                    }
-                }
+        public List<Particle> interactingParticles(boolean positive) {
+            List<Particle> particles = new ArrayList<>();
+            particles.add(this);
+            // Positive: We are moving away from the previous particle
+            // Negative: We are moving toward the previous particle
+            for (Linkage link = prevLink; link != null && (positive ? prevLink.canPull : prevLink.canPush); link = link.prevParticle.prevLink) {
+                particles.add(link.prevParticle);
             }
-            if (nextLink != null) {
-                Particle nextParticle = nextLink.nextParticle;
-                if (!particles.contains(nextParticle)) {
-                    // Positive: We are moving toward the next particle
-                    // Negative: We are moving away from the next particle
-                    if (positive ? nextLink.canPush : nextLink.canPull) {
-                        particles.add(nextParticle);
-                        nextParticle.interactingParticles(particles, positive);
-                    }
-                }
+            // Positive: We are moving toward the next particle
+            // Negative: We are moving away from the next particle
+            for (Linkage link = nextLink; link != null && (positive ? nextLink.canPush : nextLink.canPull); link = link.nextParticle.nextLink) {
+                particles.add(link.nextParticle);
             }
+            return particles;
         }
 
         public void processCollisions() {
-            // For new, use old "simple" collision code
-            if (1 == 1) {
-                if (nextLink != null && (nextLink.canPull || nextLink.canPush)) {
-                    this.collide_old(nextLink.nextParticle);
-                }
+            if (nextLink == null) {
                 return;
             }
 
-            // Assume non looping for now
-            /*
-             * We always care about the state of nextlink
-             *
-             * if nextlink is pushing, we care about other pushing
-             *      we collide that with this + who is pushing us
-             *
-             * if nextlink is pulling, we care about other pulling
-             *      we collide that with this + who is pulling us
-             *
-             */
-
-            if (nextLink == null || !nextLink.canPull && !nextLink.canPush) {
-                return;
-            }
-
-            List<Particle> a = new ArrayList<>();
-            List<Particle> b = new ArrayList<>();
-
-            double maxVD_M = 0.01;
-
-            // a <-slower-> this <-faster-> b
-            if (nextLink.canPull) {
-                a.add(this);
-                for (Linkage link = prevLink; link != null && link.canPull &&
-                        link.prevParticle.velocity_M_S <= link.nextParticle.velocity_M_S// &&
-                        ;//link.prevParticle.velocity_M_S >= link.nextParticle.velocity_M_S - maxVD_M;
-                     link = link.prevParticle.prevLink) {
-                    a.add(link.prevParticle);
-                }
-                for (Linkage link = nextLink; link != null && link.canPull &&
-                        link.prevParticle.velocity_M_S <= link.nextParticle.velocity_M_S// &&
-                        ;//link.prevParticle.velocity_M_S >= link.nextParticle.velocity_M_S - maxVD_M;
-                     link = link.nextParticle.nextLink) {
-                    b.add(link.nextParticle);
-                }
-            } else {
-                a.add(this);
-                // a >-faster-< this >-slower-< b
-                for (Linkage link = prevLink; link != null && link.canPush &&
-                        link.prevParticle.velocity_M_S >= link.nextParticle.velocity_M_S// &&
-                        ;//link.prevParticle.velocity_M_S <= link.nextParticle.velocity_M_S + maxVD_M;
-                     link = link.prevParticle.prevLink) {
-                    a.add(link.prevParticle);
-                }
-                for (Linkage link = nextLink; link != null && link.canPush &&
-                        link.prevParticle.velocity_M_S >= link.nextParticle.velocity_M_S// &&
-                        ;//link.prevParticle.velocity_M_S <= link.nextParticle.velocity_M_S + maxVD_M;
-                     link = link.nextParticle.nextLink) {
-                    b.add(link.nextParticle);
-                }
-            }
-
-            if (b.isEmpty() || a.isEmpty()) {
-                return;
-            }
-
-            if (Math.abs(a.get(0).velocity_M_S - b.get(0).velocity_M_S) < 0.001) {
-                return;
-            }
-
-            if (debug) {
-                System.out.printf("Collision between %s and %s%n", a.stream().map(p -> p.state.config.id.toString()).collect(Collectors.joining(",")), b.stream().map(p -> p.state.config.id.toString()).collect(Collectors.joining(",")));
-            }
-
-            double a_mass_Kg = 0;
-            double b_mass_Kg = 0;
-
-            double a_velocity_M_S = 0;
-            double b_velocity_M_S = 0;
-
-            // Calculate current momentum
-            double a_j_KgM_S = 0;
-            double b_j_KgM_S = 0;
-
-            double total_m_Kg = 0;
-            for (Particle particle : a) {
-                a_j_KgM_S += particle.mass_Kg * particle.velocity_M_S;
-                a_mass_Kg += particle.mass_Kg;
-                a_velocity_M_S += particle.velocity_M_S / a.size();
-            }
-            for (Particle particle : b) {
-                b_j_KgM_S += particle.mass_Kg * particle.velocity_M_S;
-                b_mass_Kg += particle.mass_Kg;
-                b_velocity_M_S += particle.velocity_M_S / b.size();
-            }
-
-            // Calculate factors for momentum transfer
-            total_m_Kg = a_mass_Kg + b_mass_Kg;
-            double total_j_KgM_S = a_j_KgM_S + b_j_KgM_S;
-
-            double a_dv_M_S = a_velocity_M_S - b_velocity_M_S;
-            double b_dv_M_S = b_velocity_M_S - a_velocity_M_S;
-            double a_dj_KgM_S = a_mass_Kg * a_dv_M_S;
-            double b_dj_KgM_s = b_mass_Kg * b_dv_M_S;
-
-            // Coefficient of restitution is how much of the dj is not absorbed by the impact
-            double cr = 0.25;
-
-            // DeltaV is probably good enough here.  We could do a "fancier" momentum transfer here, or rely on small time steps and individual collisions to resolve.  Let's see how this works.
-            a_velocity_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg;
-            b_velocity_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg;
-            //a_dv_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg - a_velocity_M_S;
-            //b_dv_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg - b_velocity_M_S;
-            for (Particle particle : a) {
-                //particle.velocity_M_S += a_dv_M_S;
-                particle.velocity_M_S = a_velocity_M_S;
-            }
-            for (Particle particle : b) {
-                //particle.velocity_M_S += b_dv_M_S;
-                particle.velocity_M_S = b_velocity_M_S;
-            }
-        }
-
-        public void collide_old(Particle b) {
             Particle a = this;
+            Particle b = nextLink.nextParticle;
 
             if (a.velocity_M_S > b.velocity_M_S) {
                 if (!nextLink.canPush) {
@@ -566,9 +430,7 @@ public class Consist {
             used.addAll(visited);
         }
 
-        // At this point we should have an ordered list
-        // Do we need to reverse it?
-        //Collections.reverse(particles);
+        // At this point we should have an ordered list, particle -> next -> next, etc...
 
         double ticksPerSecond = 20;
         double stepsPerTick = 40;
@@ -590,11 +452,6 @@ public class Consist {
             particles.forEach(Particle::processCollisions);
             particles.forEach(p -> p.applyFriction(dt_S));
             particles.forEach(p -> p.computePosition(dt_S));
-            for (Particle particle : particles) {
-                if (particle.nextLink != null) {
-                    particle.nextLink.correctDistance();
-                }
-            }
         }
 
         // Generate new states
