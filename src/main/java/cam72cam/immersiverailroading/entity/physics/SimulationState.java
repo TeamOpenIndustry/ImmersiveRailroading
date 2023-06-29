@@ -309,20 +309,20 @@ public class SimulationState {
             return;
         }
 
+        boolean isTurnTable = false;
         if (Math.abs(distance) < 0.0001) {
-            boolean isTurnTable;
 
             TileRailBase frontBase = trackFront instanceof TileRailBase ? (TileRailBase) trackFront : null;
             TileRailBase rearBase  = trackRear instanceof TileRailBase ? (TileRailBase) trackRear : null;
             isTurnTable = frontBase != null &&
                     (
-                            frontBase.getTicksExisted() < 100 ||
+                            //frontBase.getTicksExisted() < 100 ||
                                     frontBase.getParentTile() != null &&
                                             frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
                     );
             isTurnTable = isTurnTable || rearBase != null &&
                     (
-                            rearBase.getTicksExisted() < 100 ||
+                            //rearBase.getTicksExisted() < 100 ||
                                     rearBase.getParentTile() != null &&
                                             rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
                     );
@@ -369,6 +369,11 @@ public class SimulationState {
         if (isReversed) {
             yawFront += 180;
             yawRear += 180;
+        }
+
+        if (isTurnTable) {
+            yawFront = yaw;
+            yawRear = yaw;
         }
     }
 
