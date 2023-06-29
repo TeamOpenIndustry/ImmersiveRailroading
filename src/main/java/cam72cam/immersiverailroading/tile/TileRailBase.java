@@ -350,39 +350,51 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
-		float rotationYaw = VecUtil.toWrongYaw(motion);
-		double distanceMeters = motion.length();
+		double distanceMetersSq = motion.lengthSquared();
 
 
 		double maxDistance = 0.25;
-		if (distanceMeters > maxDistance) {
+		if (distanceMetersSq > maxDistance * maxDistance) {
 			return MovementTrack.iterativePathing(getWorld(), currentPosition, getTrackGauge(), motion, maxDistance * 0.9);
 		}
 
-		Collection<TileRail> tiles;
 		if (this.getReplaced() == null) {
 			// Simple common case, maybe this does not need to be optimized out of the for loop below?
 			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 			if (tile == null) {
 				return currentPosition;
 			}
-			tiles = Collections.singletonList(tile);
-		} else {
-			// Complex case with overlapping segments
-			Map<Vec3i, TileRail> tileMap = new HashMap<>();
-			for (TileRailBase current = this; current != null; current = current.getReplacedTile()) {
-				TileRail tile = current instanceof TileRail ? (TileRail) current : current.getParentTile();
-				TileRail parent = tile;
-				while (parent != null && !parent.getPos().equals(parent.getParent())) {
-					// Move to root of switch (if applicable)
-					parent = parent.getParentTile();
-				}
-				if (tile != null && parent != null) {
-					tileMap.putIfAbsent(parent.getPos(), tile);
-				}
+			//tiles = Collections.singletonList(tile);
+			// Optimized version of the below looping when no overlapping occurs
+
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
+
+			if (state == SwitchState.STRAIGHT) {
+				tile = tile.getParentTile();
 			}
-			tiles = tileMap.values();
+
+			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
+			if (potential != null) {
+				return potential;
+			}
+
+			return currentPosition;
 		}
+		// Complex case with overlapping segments
+		Map<Vec3i, TileRail> tileMap = new HashMap<>();
+		for (TileRailBase current = this; current != null; current = current.getReplacedTile()) {
+			TileRail tile = current instanceof TileRail ? (TileRail) current : current.getParentTile();
+			TileRail parent = tile;
+			while (parent != null && !parent.getPos().equals(parent.getParent())) {
+				// Move to root of switch (if applicable)
+				parent = parent.getParentTile();
+			}
+			if (tile != null && parent != null) {
+				tileMap.putIfAbsent(parent.getPos(), tile);
+			}
+		}
+
+		Collection<TileRail> tiles = tileMap.values();
 
 		Vec3d nextPos = currentPosition;
 		Vec3d predictedPos = currentPosition.add(motion);
@@ -402,6 +414,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				if (state == SwitchState.TURN) {
 					// This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
 					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
+					float rotationYaw = VecUtil.toWrongYaw(motion);
 					double diff = MathUtil.trueModulus(other - rotationYaw, 360);
 					diff = Math.min(360-diff, diff);
 					if (diff < 2.5) {
@@ -409,9 +422,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						nextPos = potential;
 					}
 				}
+				// TODO should this be an else?
 				// If we are not on a switch curve and closer to our target (or are on the first iteration)
-				if (!hasSwitchSet && potential.distanceToSquared(predictedPos) < nextPos.distanceToSquared(predictedPos) ||
-						currentPosition == nextPos) {
+				if (currentPosition == nextPos || !hasSwitchSet && potential.distanceToSquared(predictedPos) < nextPos.distanceToSquared(predictedPos)) {
 					nextPos = potential;
 				}
 			}
