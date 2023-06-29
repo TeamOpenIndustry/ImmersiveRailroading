@@ -21,10 +21,7 @@ import cam72cam.mod.util.DegreeFuncs;
 import cam72cam.mod.util.FastMath;
 import cam72cam.mod.world.World;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class SimulationState {
@@ -226,8 +223,8 @@ public class SimulationState {
         Vec3d bogeyFront = VecUtil.fromWrongYawPitch(config.offsetFront, yaw, pitch);
         Vec3d bogeyRear = VecUtil.fromWrongYawPitch(config.offsetRear, yaw, pitch);
 
-        Vec3d positionFront = position.add(bogeyFront);
-        Vec3d positionRear = position.add(bogeyRear);
+        Vec3d positionFront = couplerPositionFront = position.add(bogeyFront);
+        Vec3d positionRear = couplerPositionRear = position.add(bogeyRear);
 
         ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yaw, config.gauge.value());
         ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
@@ -238,8 +235,11 @@ public class SimulationState {
 
             couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront);
             couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear);
-        } else {
+        }
+        if (Objects.equals(couplerPositionFront, positionFront)) {
             couplerPositionFront = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
+        }
+        if (Objects.equals(couplerPositionRear, positionRear)) {
             couplerPositionRear = position.add(VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw));
         }
     }
