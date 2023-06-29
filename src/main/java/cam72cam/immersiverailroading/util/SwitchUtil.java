@@ -18,12 +18,13 @@ public class SwitchUtil {
 		if (rail == null) {
 			return SwitchState.NONE;
 		}
-		TileRail parent = rail.getParentTile();
-		if (parent == null) {
+
+		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM) {
 			return SwitchState.NONE;
 		}
-		
-		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM) {
+
+		TileRail parent = rail.getParentTile();
+		if (parent == null) {
 			return SwitchState.NONE;
 		}
 		if (parent.info.settings.type != TrackItems.SWITCH) {
