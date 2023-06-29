@@ -41,7 +41,7 @@ public class ConfigGraphics {
 	public static boolean OptifineEntityShaderOverrideAll = false;
 
 	@Comment("How far away stock needs to be to switch to a smaller LOD texture")
-	public static double StockLODDistance = 32;
+	public static double StockLODDistance = 64;
 
 	@Comment("0.0 is no sway, 1.0 is default sway")
 	public static double StockSwayMultiplier = 1;
