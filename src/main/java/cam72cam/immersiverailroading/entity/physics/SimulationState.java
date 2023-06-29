@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity.physics;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.PhysicalMaterials;
@@ -17,6 +18,7 @@ import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.DegreeFuncs;
+import cam72cam.mod.util.FastMath;
 import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
@@ -123,7 +125,7 @@ public class SimulationState {
 
             this.massKg = stock.getWeight();
             // When FuelRequired is false, most of the time the locos are empty.  Work around that here
-            double designMassKg = !Config.ConfigBalance.FuelRequired && stock instanceof Locomotive ? massKg : stock.getMaxWeight();
+            double designMassKg = !Config.ConfigBalance.FuelRequired && (stock instanceof Locomotive || stock instanceof Tender) ? massKg : stock.getMaxWeight();
 
             if (stock instanceof Locomotive) {
                 Locomotive locomotive = (Locomotive) stock;
@@ -359,7 +361,7 @@ public class SimulationState {
 
             Vec3d bogeyDelta = nextFront.subtract(nextRear);
             yaw = VecUtil.toWrongYaw(bogeyDelta);
-            pitch = (float) Math.toDegrees(Math.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
+            pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
             // TODO Rescale fixes issues with curves losing precision, but breaks when correcting stock positions
             position = position.add(deltaCenter/*.normalize().scale(distance)*/);
         }
