@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
@@ -42,6 +43,7 @@ public class Simulation {
             return;
         }
 
+
         int pass = (int) ChronoState.getState(world).getTickID();
 
         List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
@@ -76,7 +78,7 @@ public class Simulation {
                             stateMaps.get(i).put(entity.getUUID(), state);
                         }
                     }
-                    if (i < 20) {
+                    if (i < 40) {
                         stateMaps.get(i).get(entity.getUUID()).dirty = true;
                     }
                 }
@@ -86,6 +88,8 @@ public class Simulation {
         double maxCouplerDist = 4;
 
         for (int i = 0; i < stateMaps.size(); i++) {
+            long startMs = System.currentTimeMillis();
+
             Map<UUID, SimulationState> stateMap = stateMaps.get(i);
 
             List<SimulationState> states = new ArrayList<>(stateMap.values());
@@ -274,6 +278,11 @@ public class Simulation {
             // calculate new velocities
             if (i + 1 < stateMaps.size()) {
                 stateMaps.get(i+1).putAll(Consist.iterate(stateMap, blocksAlreadyBroken));
+            }
+
+            long totalMs = System.currentTimeMillis() - startMs;
+            if (totalMs > Config.ConfigDebug.physicsWarnThresholdMs) {
+                ImmersiveRailroading.warn("Calculating Immersive Railroading Physics took %sms (dirty: %s)", totalMs, anyStartedDirty);
             }
         }
 

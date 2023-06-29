@@ -238,6 +238,7 @@ public class Config {
 
 		@Comment("Default Augments to Computer Mode")
 		public static boolean defaultAugmentComputer = false;
+		public static long physicsWarnThresholdMs = 20;
     }
 
 	public static boolean isFuelRequired(Gauge gauge) {
