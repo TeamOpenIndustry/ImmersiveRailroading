@@ -351,13 +351,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		double distanceMetersSq = motion.lengthSquared();
-
-
 		double maxDistance = 0.25;
 		if (distanceMetersSq > maxDistance * maxDistance) {
-			return MovementTrack.iterativePathing(getWorld(), currentPosition, getTrackGauge(), motion, maxDistance * 0.9);
+			return MovementTrack.iterativePathing(getWorld(), currentPosition, this, getTrackGauge(), motion, maxDistance);
 		}
+		return getNextPositionShort(currentPosition, motion);
+	}
 
+	public Vec3d getNextPositionShort(Vec3d currentPosition, Vec3d motion) {
 		if (this.getReplaced() == null) {
 			// Simple common case, maybe this does not need to be optimized out of the for loop below?
 			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
