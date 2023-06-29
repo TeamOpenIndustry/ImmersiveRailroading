@@ -147,7 +147,7 @@ public abstract class ValveGear {
         public void effects(EntityMoveableRollingStock stock) {
             boolean drains_enabled = isEndStroke(stock) && stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled();
 
-            if (stock instanceof Locomotive && ((Locomotive)stock).getAvailableHP() <= 0) {
+            if (stock instanceof Locomotive && ((Locomotive)stock).getAppliedTractiveEffort(stock.getCurrentSpeed()) <= 0) {
                 return;
             }
 

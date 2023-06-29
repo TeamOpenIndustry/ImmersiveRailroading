@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.fluid.Fluid;
@@ -11,7 +12,7 @@ import cam72cam.mod.fluid.Fluid;
 public class HandCar extends Locomotive {
 
 	@Override
-    public int getAvailableHP() {
+	public double getAppliedTractiveEffort(Speed speed) {
 		int passengers = 0;
 		for (Entity passenger : this.getPassengers()) {
 			if (passenger.isPlayer()) {
@@ -25,7 +26,8 @@ public class HandCar extends Locomotive {
 				}
 			}
 		}
-		return this.getDefinition().getHorsePower(gauge) * passengers;
+		// Same function as Diesel for now
+		return this.getDefinition().getHorsePower(gauge) * (308 / speed.imperial()) * 4.4482 * passengers;
 	}
 
 	@Override

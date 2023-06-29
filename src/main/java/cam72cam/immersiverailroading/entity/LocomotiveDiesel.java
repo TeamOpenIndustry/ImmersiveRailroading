@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
@@ -161,9 +162,9 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-    public int getAvailableHP() {
+	public double getAppliedTractiveEffort(Speed speed) {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
-			return this.getDefinition().getHorsePower(gauge);
+			return this.getDefinition().getHorsePower(gauge) * (308 / speed.imperial()) * 4.4482;
 		}
 		return 0;
 	}

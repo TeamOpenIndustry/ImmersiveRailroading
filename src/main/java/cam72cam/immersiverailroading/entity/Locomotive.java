@@ -386,23 +386,15 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	public abstract int getAvailableHP();
-
 	/** Force applied between the wheels and the rails */
-	private double getAppliedTractiveEffort(Speed speed) {
-		double locoEfficiency = 0.7f; //TODO config
-		double outputHorsepower = Math.abs(Math.pow(getThrottle() * getReverser(), 3) * getAvailableHP());
-		
-		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(1.4, Math.abs(speed.metric()))));
-		return tractiveEffortNewtons;
-	}
+	public abstract double getAppliedTractiveEffort(Speed speed);
 
 	/** Maximum force that can be between the wheels and the rails before it slips */
 	private double getStaticTractiveEffort(Speed speed) {
-		return this.getDefinition().getStartingTractionNewtons(gauge) *
+		return (Config.ConfigBalance.FuelRequired ? this.getWeight() : this.getMaxWeight()) * 9.8 * STEEL.staticFriction(STEEL) * slipCoefficient(speed) / 4;/*this.getDefinition().getStartingTractionNewtons(gauge) *
 				slipCoefficient(speed) *
 				Config.ConfigBalance.tractionMultiplier *
-				1.5; // mmmmm fudge....
+				1.5; // mmmmm fudge....*/
 	}
 	
 	protected double simulateWheelSlip() {
@@ -592,7 +584,7 @@ public abstract class Locomotive extends FreightTank {
 		}
 		// Wheel balance messing with friction
 		if (speed.metric() != 0) {
-			double balance = 1d/(Math.abs(speed.metric())+100) / (1d/100);
+			double balance = 1d/(Math.abs(speed.metric())+300) / (1d/300);
 			slipMult *= balance;
 		}
 		return slipMult;
