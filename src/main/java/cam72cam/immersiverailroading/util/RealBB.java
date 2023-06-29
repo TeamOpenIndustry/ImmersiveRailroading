@@ -191,19 +191,17 @@ public class RealBB implements IBoundingBox {
 			otherRect.add(max.x, max.z);
 		}
 
-		Rectangle2D myRect = new Rectangle2D.Double(this.rear, -this.width / 2, 0, 0);
-		myRect.add(this.front, this.width / 2);
-
-		AffineTransform myTransform = new AffineTransform();
-		myTransform.translate(this.centerX, this.centerZ);
-		// This works since we are just translating.  Should probably just offset the rectangle directly
-		myRect = myTransform.createTransformedShape(myRect).getBounds2D();
+		Rectangle2D myRect = new Rectangle2D.Double(
+				this.rear + this.centerX,
+				-this.width/2 + this.centerZ,
+				this.front - this.rear,
+				this.width);
 
 		AffineTransform otherTransform = new AffineTransform();
 		otherTransform.rotate(Math.toRadians(180-yaw+90), this.centerX, this.centerZ);
 		Shape otherShape = otherTransform.createTransformedShape(otherRect);
 
-		if (!otherShape.intersects(myRect.getBounds2D())) {
+		if (!otherShape.intersects(myRect)) {
 			return Pair.of(false, min.y);
 		}
 		if (this.heightMap != null && useHeightmap) {
