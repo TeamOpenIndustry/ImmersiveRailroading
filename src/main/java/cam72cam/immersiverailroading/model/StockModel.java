@@ -248,7 +248,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         }
 
         // Refresh LOD every 0.5s
-        if (lod_tick + 10 < stock.getTickCount())  {
+        if (lod_tick + 10 < stock.getTickCount() || lod_tick > stock.getTickCount())  {
             lod_tick = stock.getTickCount();
 
             double playerDistanceSq = stock.getWorld().getEntities(stock.getClass()).stream()
