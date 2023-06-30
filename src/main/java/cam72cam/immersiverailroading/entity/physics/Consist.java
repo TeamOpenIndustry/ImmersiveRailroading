@@ -164,7 +164,7 @@ public class Consist {
                 }
             }
 
-            double relativeDifference = Math.abs(a.velocity_M_S) + Math.abs(b.velocity_M_S) < 0.01 ? 0 : Math.abs((a.velocity_M_S - b.velocity_M_S)/(a.velocity_M_S + b.velocity_M_S));
+            double relativeDifference = Math.abs(a.velocity_M_S + b.velocity_M_S) == 0 ? 0 : Math.abs((a.velocity_M_S - b.velocity_M_S)/(a.velocity_M_S + b.velocity_M_S));
             if (relativeDifference < 0.00001) {
                 // Negligible
                 return;
@@ -302,6 +302,9 @@ public class Consist {
                     System.out.printf("CORRECTION %s%n", currentDistance_M - minDistance_M);
                 }
                 nextParticle.position_M = prevParticle.position_M + (minDistance_M);
+                if (nextParticle.velocity_M_S < prevParticle.velocity_M_S) {
+                    nextParticle.velocity_M_S = prevParticle.velocity_M_S;
+                }
             }
 
             // Too far and coupled
@@ -311,6 +314,9 @@ public class Consist {
                     System.out.printf("CORRECTION %s%n", currentDistance_M - maxDistance_M);
                 }
                 nextParticle.position_M = prevParticle.position_M + (maxDistance_M);
+                if (nextParticle.velocity_M_S > prevParticle.velocity_M_S) {
+                    nextParticle.velocity_M_S = prevParticle.velocity_M_S;
+                }
             }
         }
     }
@@ -404,7 +410,7 @@ public class Consist {
             boolean needsBrakeEqualization = consist.stream().anyMatch(x -> x.state.config.hasPressureBrake && Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.01);
             if (needsBrakeEqualization) {
                 //dirty = true;
-                double brakePressureDelta = 0.1 / consist.stream().filter(x -> x.state.config.hasPressureBrake).count();
+                double brakePressureDelta = 0.6 / consist.stream().filter(x -> x.state.config.hasPressureBrake).count();
                 consist.forEach(p -> {
                     if (p.state.config.hasPressureBrake) {
                         if (Config.ImmersionConfig.instantBrakePressure) {
