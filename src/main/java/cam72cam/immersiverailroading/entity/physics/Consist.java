@@ -410,7 +410,7 @@ public class Consist {
             boolean needsBrakeEqualization = consist.stream().anyMatch(x -> x.state.config.hasPressureBrake && Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.01);
             if (needsBrakeEqualization) {
                 //dirty = true;
-                double brakePressureDelta = 0.6 / consist.stream().filter(x -> x.state.config.hasPressureBrake).count();
+                double brakePressureDelta = 0.1 / consist.stream().filter(x -> x.state.config.hasPressureBrake).count();
                 consist.forEach(p -> {
                     if (p.state.config.hasPressureBrake) {
                         if (Config.ImmersionConfig.instantBrakePressure) {
