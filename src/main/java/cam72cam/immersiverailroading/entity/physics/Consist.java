@@ -455,7 +455,7 @@ public class Consist {
         for (int i = 0; i < stepsPerTick; i++) {
             particles.forEach(Particle::setup);
             particles.forEach(p -> p.computeVelocity(dt_S));
-            //particles.forEach(p -> p.applyFriction(dt_S));
+            particles.forEach(p -> p.applyFriction(dt_S));
             particles.forEach(Particle::processCollisions);
             particles.forEach(p -> p.applyFriction(dt_S));
             particles.forEach(p -> p.computePosition(dt_S));
