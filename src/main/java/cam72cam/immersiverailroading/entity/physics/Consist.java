@@ -135,12 +135,12 @@ public class Consist {
             particles.add(this);
             // Positive: We are moving away from the previous particle
             // Negative: We are moving toward the previous particle
-            for (Linkage link = prevLink; link != null && (positive ? prevLink.canPull : prevLink.canPush); link = link.prevParticle.prevLink) {
+            for (Linkage link = prevLink; link != null && (positive ? link.canPull : link.canPush); link = link.prevParticle.prevLink) {
                 particles.add(link.prevParticle);
             }
             // Positive: We are moving toward the next particle
             // Negative: We are moving away from the next particle
-            for (Linkage link = nextLink; link != null && (positive ? nextLink.canPush : nextLink.canPull); link = link.nextParticle.nextLink) {
+            for (Linkage link = nextLink; link != null && (positive ? link.canPush : link.canPull); link = link.nextParticle.nextLink) {
                 particles.add(link.nextParticle);
             }
             return particles;
@@ -193,6 +193,7 @@ public class Consist {
 
                 a.velocity_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg;
                 b.velocity_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg;
+
                 state.collided = Math.max(state.collided, relativeDifference);
                 if (debug) {
                     System.out.printf("Collision between %s and %s%n", a.state.config.id, b.state.config.id);
@@ -448,7 +449,7 @@ public class Consist {
         for (int i = 0; i < stepsPerTick; i++) {
             particles.forEach(Particle::setup);
             particles.forEach(p -> p.computeVelocity(dt_S));
-            particles.forEach(p -> p.applyFriction(dt_S));
+            //particles.forEach(p -> p.applyFriction(dt_S));
             particles.forEach(Particle::processCollisions);
             particles.forEach(p -> p.applyFriction(dt_S));
             particles.forEach(p -> p.computePosition(dt_S));
