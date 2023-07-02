@@ -404,7 +404,7 @@ public abstract class Locomotive extends FreightTank {
 			return 0;
 		}
 
-		double adhesionFactor = getAppliedTractiveEffort(getCurrentSpeed()) /
+		double adhesionFactor = Math.abs(getAppliedTractiveEffort(getCurrentSpeed())) /
 								getStaticTractiveEffort(getCurrentSpeed());
 		if (adhesionFactor > 1) {
 			return Math.copySign(Math.min((adhesionFactor-1)/10, 1), getReverser());
@@ -417,29 +417,31 @@ public abstract class Locomotive extends FreightTank {
 			return 0;
 		}
 
-		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
-
 		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
-			tractiveEffortNewtons = 0;
+			return 0;
 		}
 
-		if (!cogging && tractiveEffortNewtons > 0) {
+		double appliedTractiveEffort = getAppliedTractiveEffort(speed);
+
+		if (!cogging && Math.abs(appliedTractiveEffort) > 0) {
 			double staticTractiveEffort = getStaticTractiveEffort(speed);
 
-			if (tractiveEffortNewtons > staticTractiveEffort) {
+			if (Math.abs(appliedTractiveEffort) > staticTractiveEffort) {
 				// This is a guess, but seems to be fairly accurate
 
 				// Reduce tractive effort to max static translated into kinetic
-				tractiveEffortNewtons = staticTractiveEffort /
+				double tractiveEffortNewtons = staticTractiveEffort /
 						STEEL.staticFriction(STEEL) *
 						STEEL.kineticFriction(STEEL);
 
 				// How badly tractive effort is overwhelming static effort
 				tractiveEffortNewtons *= staticTractiveEffort / tractiveEffortNewtons;
+
+				return Math.copySign(tractiveEffortNewtons, appliedTractiveEffort);
 			}
 		}
 
-		return Math.copySign(tractiveEffortNewtons, getReverser());
+		return appliedTractiveEffort;
 	}
 
 	@Override

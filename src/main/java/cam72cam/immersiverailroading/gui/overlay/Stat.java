@@ -28,7 +28,7 @@ public enum Stat {
                             return String.format("%.2f m/s", Math.abs(speed.metric()) / 3.6);
                         case kmh:
                         default:
-                            return String.format("%.2f km/h", speed.metric());
+                            return String.format("%.2f km/h", Math.abs(speed.metric()));
                     }
                 }
                 return "";

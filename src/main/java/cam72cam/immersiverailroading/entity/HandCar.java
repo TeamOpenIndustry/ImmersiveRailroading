@@ -26,8 +26,12 @@ public class HandCar extends Locomotive {
 				}
 			}
 		}
-		// Same function as Diesel for now
-		return this.getDefinition().getHorsePower(gauge) * (308 / speed.imperial()) * 4.4482 * passengers;
+		// Same as diesel for now
+		double maxPower_W = this.getDefinition().getHorsePower(gauge) * 745.7d * passengers;
+		double efficiency = 0.82; // Similar to a *lot* of imperial references
+		double speed_M_S = (speed.metric()/3.6);
+		double maxPowerAtSpeed = maxPower_W * efficiency / speed_M_S;
+		return maxPowerAtSpeed * getThrottle() * getReverser();
 	}
 
 	@Override

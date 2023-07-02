@@ -72,7 +72,7 @@ public class Simulation {
                         state.update(entity);
                         stateMaps.get(i).put(entity.getUUID(), state);
                         if (state.dirty) {
-                            ImmersiveRailroading.warn("DIRTY STATE");
+                            ImmersiveRailroading.debug("DIRTY STATE");
                             anyStartedDirty = true;
                             break;
                         }
