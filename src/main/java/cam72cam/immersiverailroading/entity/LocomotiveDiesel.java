@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -9,6 +10,7 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
@@ -160,12 +162,40 @@ public class LocomotiveDiesel extends Locomotive {
 
 	}
 
+	private int maxHorsePower = this.getDefinition().getHorsePower(gauge);
+	private int tractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge);
+	private double ratedTopSpeed = this.getDefinition().getMaxSpeed(gauge).metric();
+	
 	@Override
     public int getAvailableHP() {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
 			return this.getDefinition().getHorsePower(gauge);
 		}
 		return 0;
+	}
+	
+	private double motorEfficiency(Speed speed) {
+		double speedPercent = speed.metric() / ratedTopSpeed;
+		if (speed.metric() <= ratedTopSpeed) {
+			return (.3d * (Math.log(speedPercent + .05d) / Math.log(10))) +.6d;
+		}else {
+			return Math.pow(4.0d, 0 - ((2 * speedPercent) - 1.9d));
+		}
+	}
+	
+	private double torqueDropoff(double output) {
+		double torquePercent = (output / tractiveEffort) * .1d;
+		return .9d + torquePercent;
+	}
+	
+	@Override
+	public double getAppliedTractiveEffort(Speed speed) {
+		//speedMetersPerSecond = speed.metric() / 3.6d;
+		//powerWatts = (maxHorsePower * getThrottle()) * 745.7d
+		double powerCurve = (maxHorsePower * getThrottle() * 745.7d) / (speed.metric() / 3.6d);
+		double rpmEfficiency = powerCurve * motorEfficiency(speed);
+		double torqueEfficiency = rpmEfficiency * torqueDropoff(rpmEfficiency);
+		return getReverser() * Math.min(tractiveEffort, torqueEfficiency) * ConfigBalance.tractionMultiplier;
 	}
 
 	@Override

@@ -1,14 +1,21 @@
 package cam72cam.immersiverailroading.entity;
 
+import static cam72cam.immersiverailroading.library.PhysicalMaterials.STEEL;
+
+import java.util.OptionalDouble;
+import java.util.UUID;
+
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
-import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
-import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
@@ -18,11 +25,7 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
-
-import java.util.OptionalDouble;
-import java.util.UUID;
-
-import static cam72cam.immersiverailroading.library.PhysicalMaterials.*;
+import trackapi.lib.ITrack;
 
 public abstract class Locomotive extends FreightTank {
 	private static final float throttleDelta = 0.04f;
@@ -335,7 +338,6 @@ public abstract class Locomotive extends FreightTank {
 			if (bellKeyTimeout > 0) {
 				bellKeyTimeout--;
 			}
-			
 			if (deadMansSwitch && !this.getCurrentSpeed().isZero()) {
 				boolean hasDriver = this.getPassengers().stream().anyMatch(Entity::isPlayer);
 				if (!hasDriver) {
@@ -389,15 +391,10 @@ public abstract class Locomotive extends FreightTank {
 	public abstract int getAvailableHP();
 
 	/** Force applied between the wheels and the rails */
-	private double getAppliedTractiveEffort(Speed speed) {
-		double locoEfficiency = 0.7f; //TODO config
-		double outputHorsepower = Math.abs(Math.pow(getThrottle() * getReverser(), 3) * getAvailableHP());
-		
-		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(1.4, Math.abs(speed.metric()))));
-		return tractiveEffortNewtons;
-	}
+	public abstract double getAppliedTractiveEffort(Speed speed); 
 
 	/** Maximum force that can be between the wheels and the rails before it slips */
+	//TODO: redo
 	private double getStaticTractiveEffort(Speed speed) {
 		return this.getDefinition().getStartingTractionNewtons(gauge) *
 				slipCoefficient(speed) *
@@ -425,10 +422,6 @@ public abstract class Locomotive extends FreightTank {
 
 		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
 
-		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
-			tractiveEffortNewtons = 0;
-		}
-
 		if (!cogging && tractiveEffortNewtons > 0) {
 			double staticTractiveEffort = getStaticTractiveEffort(speed);
 
@@ -444,8 +437,9 @@ public abstract class Locomotive extends FreightTank {
 				tractiveEffortNewtons *= staticTractiveEffort / tractiveEffortNewtons;
 			}
 		}
-
-		return Math.copySign(tractiveEffortNewtons, getReverser());
+		
+		//for the sake of steam locos, sufficient back pressure can cause negative tractive effort, opposing the direction the reverser is set
+		return tractiveEffortNewtons;
 	}
 
 	@Override

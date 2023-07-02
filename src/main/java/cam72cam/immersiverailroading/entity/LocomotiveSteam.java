@@ -100,6 +100,58 @@ public class LocomotiveSteam extends Locomotive {
 		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(gauge), 3));
 	}
 	
+	//make properties local variables for simplicity
+	private int maxHorsePower = this.getDefinition().getHorsePower(gauge);
+	private int tractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge);
+	private double ratedTopSpeed = this.getDefinition().getMaxSpeed(gauge).metric();
+	private int mawp = this.getDefinition().getMaxPSI(gauge);
+	private int reverserDirection = getReverser() <= 0 ? -1 : 1;
+	
+	//maximum steam flow allowed in current regulator position in horse power
+	private float maxSteamFlow() { 
+		return (float)maxHorsePower * getThrottle() * 1.5f * (getBoilerPressure() / (float)mawp);
+	}
+	
+	//current tractive effort called for by cutoff
+	private float cutoffTractiveEffort() {
+		float tePerPSI = tractiveEffort / mawp;
+		float averagePreasure = (getBoilerPressure() * getReverser()) + ((((getBoilerPressure() * reverserDirection) + (getBoilerPressure() * getReverser())) / 2) * (1 - Math.abs(getReverser())));
+		return tePerPSI * averagePreasure;
+	}
+	
+	//current steam demand based on cutoff position in horse power
+	private double steamDemand() {
+		return Math.abs(cutoffTractiveEffort() * getCurrentSpeed().metric()) / 2684.52d; 
+		//2684.52 is combined conversion factor of km/h to m/s and Watts to hp
+	}
+	
+	//percent of rated max speed currently traveling at
+	private double speedPercent() {
+		return Math.abs(getCurrentSpeed().metric() / (double)ratedTopSpeed);
+	}
+	
+	//backpressure opposing motion due to high cutoff at high speed
+	private double backpressure() {
+		return Math.min(
+			2.0d * (double)tractiveEffort, 
+			Math.max(
+				0, 
+				((.55d * speedPercent()) * (Math.abs(getReverser()) * Math.pow(2.0d * Math.abs(getReverser()), 2.0d * speedPercent()))) - 0.21d) 
+			) * (getBoilerPressure() / mawp);
+	}
+	
+	private double workingTractiveEffort() {
+		if(steamDemand() < maxSteamFlow()) {
+			return cutoffTractiveEffort();
+		}else {
+			return cutoffTractiveEffort() * (maxSteamFlow() / steamDemand());
+		}
+	}
+	
+	@Override
+	public double getAppliedTractiveEffort(Speed speed) {
+		return (workingTractiveEffort() - ((backpressure() * (float)tractiveEffort) * reverserDirection)) * ConfigBalance.tractionMultiplier;
+	}
 	
 	@Override
 	public void onDissassemble() {
@@ -216,7 +268,7 @@ public class LocomotiveSteam extends Locomotive {
 		double energyKCalDeltaTick = 0;
 		
 		if (burningSlots != 0 && this.getLiquidAmount() > 0) {
-			energyKCalDeltaTick += burningSlots * coalEnergyKCalTick();
+			energyKCalDeltaTick += burningSlots * coalEnergyKCalTick() * 1.05;
 		}
 
 		// Assume the boiler is a cube...
@@ -269,14 +321,21 @@ public class LocomotiveSteam extends Locomotive {
 			pressureValve = false;
 		}
 		
-		float throttle = getThrottle() * Math.abs(getReverser());
+		double throttle;
+		if(steamDemand() < maxSteamFlow()) {
+			//steam use is steam demand
+			throttle = steamDemand() * 0.17811d * ConfigBalance.locoHeatTimeScale;
+		}else {
+			//steam use is max flow
+			throttle = maxSteamFlow() * 0.17811d * ConfigBalance.locoHeatTimeScale;
+		}
 		if (throttle != 0 && boilerPressure > 0) {
-			double burnableSlots = this.cargoItems.getSlotCount()-2;
+			/*double burnableSlots = this.cargoItems.getSlotCount()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
 			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
-			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss
+			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss*/
 			
-			float delta = (float) (throttle * maxPressureTick);
+			float delta = (float) (throttle  / (this.getTankCapacity().MilliBuckets() / 1000));
 			
 			boilerPressure = Math.max(0, boilerPressure - delta);
 			waterUsed += delta;
@@ -377,12 +436,14 @@ public class LocomotiveSteam extends Locomotive {
 
 	private double coalEnergyKCalTick() {
 		// Coal density = 800 KG/m3 (engineering toolbox)
-		double coalEnergyDensity = 30000; // KJ/KG (engineering toolbox)
+		/*double coalEnergyDensity = 30000; // KJ/KG (engineering toolbox)
 		double coalEnergyKJ = coalEnergyDensity / 9; // Assume each slot is burning 1/9th of a coal block
 		double coalEnergyBTU = coalEnergyKJ * 0.958; // 1 KJ = 0.958 BTU
 		double coalEnergyKCal = coalEnergyBTU / (3.968 * 1000); // 3.968 BTU = 1 KCal
 		double coalBurnTicks = 1600; // This is a bit of fudge
-		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;
+		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
+		//redefine based on max horsepower rating to limit max steam production and aproximate thermal efficiency
+		return (maxHorsePower / (getInventorySize() - 2)) * 0.17811d * ConfigBalance.locoHeatTimeScale;
 	}
 
 	private static class SlotTagMapper implements TagMapper<Map<Integer, Integer>> {
