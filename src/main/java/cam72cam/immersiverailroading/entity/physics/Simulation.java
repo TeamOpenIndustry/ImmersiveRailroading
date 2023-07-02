@@ -64,23 +64,22 @@ public class Simulation {
                 stateMaps.get(0).put(entity.getUUID(), new SimulationState(entity));
                 anyStartedDirty = true;
             } else {
-                current.update(entity);
-                if (current.dirty) {
-                    // Changed since last simulation
-                    stateMaps.get(0).put(entity.getUUID(), current);
-                    anyStartedDirty = true;
-                } else {
-                    // Copy from previous simulation
-                    int i = 0;
-                    for (SimulationState state : entity.states) {
-                        i = state.tickID - chrono.getServerTickID();
-                        if (i >= 0) {
-                            stateMaps.get(i).put(entity.getUUID(), state);
+                // Copy from previous simulation
+                int i = 0;
+                for (SimulationState state : entity.states) {
+                    i = state.tickID - chrono.getServerTickID();
+                    if (i >= 0) {
+                        state.update(entity);
+                        stateMaps.get(i).put(entity.getUUID(), state);
+                        if (state.dirty) {
+                            ImmersiveRailroading.warn("DIRTY STATE");
+                            anyStartedDirty = true;
+                            break;
                         }
                     }
-                    if (i < 40) {
-                        stateMaps.get(i).get(entity.getUUID()).dirty = true;
-                    }
+                }
+                if (i < 40) {
+                    stateMaps.get(i).get(entity.getUUID()).dirty = true;
                 }
             }
         }

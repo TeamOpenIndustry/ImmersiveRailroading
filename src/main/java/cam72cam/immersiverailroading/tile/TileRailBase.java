@@ -352,8 +352,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
 		double distanceMetersSq = motion.lengthSquared();
 		double maxDistance = 0.25;
-		if (distanceMetersSq > maxDistance * maxDistance) {
-			return MovementTrack.iterativePathing(getWorld(), currentPosition, this, getTrackGauge(), motion, maxDistance);
+		if (distanceMetersSq*0.9 > maxDistance * maxDistance) {
+			// 0.9 forces at least one iteration + scaling
+			//return MovementTrack.iterativePathing(getWorld(), currentPosition, this, getTrackGauge(), motion, maxDistance);
 		}
 		return getNextPositionShort(currentPosition, motion);
 	}

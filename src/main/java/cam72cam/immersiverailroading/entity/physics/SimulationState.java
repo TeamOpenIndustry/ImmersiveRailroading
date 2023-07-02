@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
@@ -61,6 +62,10 @@ public class SimulationState {
     public boolean canBeUnloaded = true;
     public double collided;
     public boolean sliding;
+    public boolean frontPushing;
+    public boolean frontPulling;
+    public boolean rearPushing;
+    public boolean rearPulling;
 
     public static class Configuration {
         public UUID id;
@@ -235,6 +240,8 @@ public class SimulationState {
 
             couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront);
             couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear);
+            //couplerPositionFront = couplerPositionFront.subtract(position).normalize().scale(Math.abs(config.couplerDistanceFront)).add(position);
+            //couplerPositionRear = couplerPositionRear.subtract(position).normalize().scale(Math.abs(config.couplerDistanceRear)).add(position);
         }
         if (Objects.equals(couplerPositionFront, positionFront)) {
             couplerPositionFront = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
@@ -273,6 +280,7 @@ public class SimulationState {
             next.velocity = 0;
         } else {
             next.calculateCouplerPositions();
+
             // We will actually break the blocks
             this.blocksToBreak = this.interferingBlocks;
             // We can now ignore those positions for the rest of the simulation
