@@ -327,7 +327,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     if (!slidingSound.isPlaying()) {
                         slidingSound.play(getPosition());
                     }
-                    slidingSound.setPitch((pitch + this.sndRand)/4);
+                    slidingSound.setPitch(1);
                     slidingSound.setVolume(Math.min(1, adjust*4));
                     slidingSound.setPosition(getPosition());
                     slidingSound.setVelocity(getVelocity());
@@ -400,8 +400,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         this.currentSpeed = currentPos.speed;
 
-        distanceTraveled += (float) this.currentSpeed.minecraft() * getTickSkew();
-        distanceTraveled = distanceTraveled % 32000;// Wrap around to prevent double float issues
+        if (!sliding) {
+            distanceTraveled += (float) this.currentSpeed.minecraft() * getTickSkew();
+            distanceTraveled = distanceTraveled % 32000;// Wrap around to prevent double float issues
+        }
 
         this.setPosition(currentPos.position);
         this.setVelocity(getPosition().subtract(prevPosX, prevPosY, prevPosZ));
@@ -630,5 +632,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
      */
     public double getBrakeSystemEfficiency() {
         return getDefinition().getBrakeShoeFriction() + 0.5;
+    }
+
+    public boolean isSliding() {
+        return sliding;
     }
 }

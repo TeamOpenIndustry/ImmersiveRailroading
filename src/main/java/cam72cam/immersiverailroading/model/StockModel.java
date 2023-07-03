@@ -270,7 +270,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         ) {
             double backup = stock.distanceTraveled;
 
-            stock.distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
+            if (!stock.isSliding()) {
+                stock.distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
+            }
             stock.distanceTraveled /= stock.gauge.scale();
 
 
