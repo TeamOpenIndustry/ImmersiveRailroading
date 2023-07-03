@@ -88,10 +88,12 @@ public class MovementTrack {
 		}
 
 		// prevPosition + motion scaled to remaining distance
-		double scale = (totalDistance - startPos.distanceTo(prevPosition)) / motion.length();
-		if (scale > 0.1 && scale < 1) {
-			currentPosition = prevPosition.add(motion.scale(scale));
-		}
+		//double scale = (totalDistance - startPos.distanceTo(prevPosition)) / motion.length();
+		//if (scale > 0.00001 && scale < 1.5) {
+		//	currentPosition = prevPosition.add(motion.scale(scale));
+		//}
+		currentPosition = startPos.add(currentPosition.subtract(startPos).normalize().scale(totalDistance));
+
 		return currentPosition;
 	}
 
