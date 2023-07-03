@@ -75,8 +75,12 @@ public class Consist {
                 totalFriction_KgM_S_S += particle.remainingFriction_KgM_S_S;
                 netMass_Kg += particle.mass_Kg;
             }
-            double resistedForce_KgM_S_S = Math.copySign(Math.min(Math.abs(netForce_KgM_S_S), totalFriction_KgM_S_S), netForce_KgM_S_S);
-            netForce_KgM_S_S = netForce_KgM_S_S - resistedForce_KgM_S_S;
+            double resistedForce_KgM_S_S = 0;
+            // Friction only applies to the resisted force if it's in the same direction
+            if (Math.copySign(1, netForce_KgM_S_S) == Math.copySign(1, velocity_M_S)) {
+                resistedForce_KgM_S_S = Math.copySign(Math.min(Math.abs(netForce_KgM_S_S), totalFriction_KgM_S_S), netForce_KgM_S_S);
+                netForce_KgM_S_S = netForce_KgM_S_S - resistedForce_KgM_S_S;
+            }
 
             double dv_M_S = netForce_KgM_S_S * dt_S / netMass_Kg;
             if (debug) {
@@ -195,7 +199,9 @@ public class Consist {
                 a.velocity_M_S = (b_dj_KgM_s * cr + total_j_KgM_S) / total_m_Kg;
                 b.velocity_M_S = (a_dj_KgM_S * cr + total_j_KgM_S) / total_m_Kg;
 
-                state.collided = Math.max(state.collided, relativeDifference);
+                if (Math.abs(a.velocity_M_S + b.velocity_M_S) > 0.1) {
+                    state.collided = Math.max(state.collided, relativeDifference);
+                }
             } else {
                 // Smaller deltas should be treated as negligible w/ perfect restitution
                 if (debug) {
@@ -467,6 +473,7 @@ public class Consist {
             boolean dirty = consist.stream().anyMatch(p -> p.state.dirty);
 
             // Spread the brake pressure evenly.  TODO spread it from the suppliers (requires complete rethink of brake controls)
+            // TODO don't spread brake pressure across shunting connections
             float desiredBrakePressure = (float) consist.stream().mapToDouble(x -> x.state.config.desiredBrakePressure).max().orElse(0);
             boolean needsBrakeEqualization = consist.stream().anyMatch(x -> x.state.config.hasPressureBrake && Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.01);
             if (needsBrakeEqualization) {
