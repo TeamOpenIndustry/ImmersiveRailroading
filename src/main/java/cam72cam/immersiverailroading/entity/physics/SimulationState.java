@@ -91,6 +91,7 @@ public class SimulationState {
 
         public double maximumAdhesionNewtons;
         public double designAdhesionNewtons;
+        public double rollingResistanceCoefficient;
 
         // We don't actually want to use this value, it's only for dirty checking
         private double tractiveEffortFactors;
@@ -146,6 +147,8 @@ public class SimulationState {
             this.designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
             this.independentBrakePosition = stock.getIndependentBrake();
             this.hasPressureBrake = stock.getDefinition().hasPressureBrake();
+
+            this.rollingResistanceCoefficient = stock.getDefinition().rollingResistanceCoefficient;
         }
 
         @Override
@@ -392,7 +395,7 @@ public class SimulationState {
 
     public double frictionNewtons() {
         // https://evilgeniustech.com/idiotsGuideToRailroadPhysics/OtherLocomotiveForces/#rolling-resistance
-        double rollingResistanceNewtons = 0.002 * (config.massKg * 9.8);
+        double rollingResistanceNewtons = config.rollingResistanceCoefficient * (config.massKg * 9.8);
         // TODO This is kinda directional?
         double blockResistanceNewtons = interferingResistance * 1000 * Config.ConfigDamage.blockHardness;
 

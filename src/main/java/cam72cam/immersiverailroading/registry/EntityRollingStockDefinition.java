@@ -96,6 +96,7 @@ public abstract class EntityRollingStockDefinition {
     private double swayMultiplier;
     private double tiltMultiplier;
     private float brakeCoefficient;
+    public double rollingResistanceCoefficient;
 
     public List<AnimationDefinition> animations;
 
@@ -383,6 +384,8 @@ public abstract class EntityRollingStockDefinition {
             ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
         }
         brakeCoefficient = properties.getValue("brake_friction_coefficient").asFloat(brakeCoefficient);
+        // https://en.wikipedia.org/wiki/Rolling_resistance#Rolling_resistance_coefficient_examples
+        rollingResistanceCoefficient = properties.getValue("rolling_resistance_coefficient").asDouble(0.002);
 
         swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
         tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
