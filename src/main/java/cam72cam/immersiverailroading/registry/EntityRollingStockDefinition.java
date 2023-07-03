@@ -54,6 +54,7 @@ public abstract class EntityRollingStockDefinition {
     public double internal_model_scale;
     public Identifier couple_sound;
     public Identifier sliding_sound;
+    public Identifier flange_sound;
     public Identifier collision_sound;
     double internal_inv_scale;
     private String name;
@@ -402,6 +403,7 @@ public abstract class EntityRollingStockDefinition {
         clackFront = clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
         couple_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/coupling.ogg");
         sliding_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/sliding.ogg");
+        flange_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/flange.ogg");
         collision_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/collision.ogg");
 
         DataBlock sounds = data.getBlock("sounds");
@@ -412,6 +414,7 @@ public abstract class EntityRollingStockDefinition {
             clackRear = sounds.getValue("clack_rear").asIdentifier(clackRear);
             couple_sound = sounds.getValue("couple").asIdentifier(couple_sound);
             sliding_sound = sounds.getValue("sliding").asIdentifier(sliding_sound);
+            flange_sound = sounds.getValue("flange").asIdentifier(flange_sound);
             collision_sound = sounds.getValue("collision").asIdentifier(collision_sound);
             DataBlock controls = sounds.getBlock("controls");
             if (controls != null) {

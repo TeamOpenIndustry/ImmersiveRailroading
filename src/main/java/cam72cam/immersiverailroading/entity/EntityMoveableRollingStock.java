@@ -26,6 +26,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.ISound;
+import cam72cam.mod.util.DegreeFuncs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     private Vec3i clackRearPos;
 
     private ISound slidingSound;
+    private ISound flangeSound;
 
     private double swayMagnitude;
     private double swayImpulse;
@@ -294,6 +296,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 if (this.slidingSound == null) {
                     this.slidingSound = this.createSound(this.getDefinition().sliding_sound, true, 40);
                 }
+                if (this.flangeSound == null) {
+                    this.flangeSound = this.createSound(this.getDefinition().flange_sound, true, 40);
+                }
                 if (this.clackFront == null) {
                     clackFront = this.createSound(this.getDefinition().clackFront, false, 30);
                 }
@@ -334,6 +339,23 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 } else {
                     if (slidingSound.isPlaying()) {
                         slidingSound.stop();
+                    }
+                }
+
+                double flangeFactor = Math.abs(DegreeFuncs.delta(frontYaw, rearYaw)/2)
+                        / (getDefinition().getBogeyFront(gauge) - getDefinition().getBogeyRear(gauge))
+                        * (Math.abs(getCurrentSpeed().metric()) / 50);
+                if (flangeFactor > 0.01) {
+                    if (!flangeSound.isPlaying()) {
+                        flangeSound.play(getPosition());
+                    }
+                    flangeSound.setPitch(0.6f + Math.abs((float)getCurrentSpeed().metric())/300 + sndRand);
+                    flangeSound.setVolume((float) flangeFactor/2 * (float)Math.sin((getTickCount()/40f * sndRand * 40))/2+0.25f);
+                    flangeSound.setPosition(getPosition());
+                    flangeSound.setVelocity(getVelocity());
+                } else {
+                    if (flangeSound.isPlaying()) {
+                        flangeSound.stop();
                     }
                 }
 
