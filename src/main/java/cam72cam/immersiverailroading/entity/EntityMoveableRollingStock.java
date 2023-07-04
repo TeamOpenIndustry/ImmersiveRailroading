@@ -12,10 +12,7 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.RealBB;
-import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
@@ -74,6 +71,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     private ISound slidingSound;
     private ISound flangeSound;
+    float lastFlangeVolume = 0;
 
     private double swayMagnitude;
     private double swayImpulse;
@@ -342,20 +340,32 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
 
-                double flangeFactor = Math.abs(DegreeFuncs.delta(frontYaw, rearYaw)/2)
-                        / (getDefinition().getBogeyFront(gauge) - getDefinition().getBogeyRear(gauge))
-                        * (Math.abs(getCurrentSpeed().metric()) / 50);
-                if (flangeFactor > 0.01) {
+                double yawDelta = MathUtil.deltaAngle(frontYaw, rearYaw);
+                double flangeMinYaw = getDefinition().flange_min_yaw;
+                if (yawDelta > flangeMinYaw && Math.abs(getCurrentSpeed().metric()) > 5) {
                     if (!flangeSound.isPlaying()) {
+                        lastFlangeVolume = 0.1f;
+                        flangeSound.setVolume(lastFlangeVolume);
                         flangeSound.play(getPosition());
                     }
-                    flangeSound.setPitch(0.6f + Math.abs((float)getCurrentSpeed().metric())/300 + sndRand);
-                    flangeSound.setVolume((float) flangeFactor/2 * (float)Math.sin((getTickCount()/40f * sndRand * 40))/2+0.25f);
+                    flangeSound.setPitch(0.9f + Math.abs((float)getCurrentSpeed().metric())/600 + sndRand);
+                    float oscillation = (float)Math.sin((getTickCount()/40f * sndRand * 40));
+                    double flangeFactor = (yawDelta - flangeMinYaw) / (90 - flangeMinYaw);
+                    float desiredVolume = (float)flangeFactor/2 * oscillation/4 + 0.25f;
+                    lastFlangeVolume = (lastFlangeVolume*9 + desiredVolume) / 10;
+                    flangeSound.setVolume(lastFlangeVolume);
                     flangeSound.setPosition(getPosition());
                     flangeSound.setVelocity(getVelocity());
                 } else {
                     if (flangeSound.isPlaying()) {
-                        flangeSound.stop();
+                        if (lastFlangeVolume > 0.1) {
+                            lastFlangeVolume = (lastFlangeVolume*9 + 0) / 10;
+                            flangeSound.setVolume(lastFlangeVolume);
+                            flangeSound.setPosition(getPosition());
+                            flangeSound.setVelocity(getVelocity());
+                        } else {
+                            flangeSound.stop();
+                        }
                     }
                 }
 
@@ -599,6 +609,15 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         }
         if (this.clackFront != null) {
             clackFront.stop();
+        }
+        if (this.clackRear != null) {
+            clackRear.stop();
+        }
+        if (this.slidingSound != null) {
+            slidingSound.stop();
+        }
+        if (this.flangeSound != null) {
+            flangeSound.stop();
         }
     }
 

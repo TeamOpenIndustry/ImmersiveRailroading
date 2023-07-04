@@ -56,6 +56,7 @@ public abstract class EntityRollingStockDefinition {
     public Identifier sliding_sound;
     public Identifier flange_sound;
     public Identifier collision_sound;
+    public double flange_min_yaw;
     double internal_inv_scale;
     private String name;
     private String modelerName;
@@ -404,6 +405,7 @@ public abstract class EntityRollingStockDefinition {
         couple_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/coupling.ogg");
         sliding_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/sliding.ogg");
         flange_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/flange.ogg");
+        flange_min_yaw = 15;
         collision_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/collision.ogg");
 
         DataBlock sounds = data.getBlock("sounds");
@@ -415,6 +417,7 @@ public abstract class EntityRollingStockDefinition {
             couple_sound = sounds.getValue("couple").asIdentifier(couple_sound);
             sliding_sound = sounds.getValue("sliding").asIdentifier(sliding_sound);
             flange_sound = sounds.getValue("flange").asIdentifier(flange_sound);
+            flange_min_yaw = sounds.getValue("flange_min_yaw").asDouble(flange_min_yaw);
             collision_sound = sounds.getValue("collision").asIdentifier(collision_sound);
             DataBlock controls = sounds.getBlock("controls");
             if (controls != null) {
