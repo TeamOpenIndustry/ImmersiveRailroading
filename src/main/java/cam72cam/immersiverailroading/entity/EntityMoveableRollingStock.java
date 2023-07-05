@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
@@ -339,7 +338,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
 
-                double yawDelta = DegreeFuncs.delta(frontYaw, rearYaw);
+                double yawDelta = Math.max(
+                        DegreeFuncs.delta(frontYaw, getRotationYaw())/getDefinition().getBogeyFront(gauge),
+                        DegreeFuncs.delta(rearYaw, getRotationYaw())/-getDefinition().getBogeyRear(gauge)
+                );
                 double flangeMinYaw = getDefinition().flange_min_yaw;
                 if (yawDelta > flangeMinYaw && Math.abs(getCurrentSpeed().metric()) > 5) {
                     if (!flangeSound.isPlaying()) {

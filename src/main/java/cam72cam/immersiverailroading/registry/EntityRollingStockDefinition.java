@@ -424,8 +424,6 @@ public abstract class EntityRollingStockDefinition {
                 controls.getBlockMap().forEach((key, block) -> controlSounds.put(key, new ControlSoundsDefinition(block)));
             }
         }
-        // Degrees per meter -> degrees per bogey delta
-        flange_min_yaw *= bogeyFront - bogeyRear;
 
         Identifier overlay = data.getValue("overlay").asIdentifier();
         this.overlay = overlay != null ? GuiBuilder.parse(overlay) : getDefaultOverlay(data);
