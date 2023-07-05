@@ -214,6 +214,7 @@ public abstract class Locomotive extends FreightTank {
 		return false;
 	}
 
+
 	protected float getReverserDelta() {
 		return throttleDelta;
 	}
@@ -593,7 +594,14 @@ public abstract class Locomotive extends FreightTank {
 		}
 		return slipMult;
 	}
-	
+
+	public abstract boolean providesElectricalPower();
+
+	@Override
+	public boolean hasElectricalPower() {
+		return super.hasElectricalPower() || providesElectricalPower();
+	}
+
 	public float ambientTemperature() {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;

@@ -319,8 +319,8 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
-	public boolean hasElectricalPower() {
-		return getBoilerPressure() > 0 || !ConfigBalance.FuelRequired || super.hasElectricalPower();
+	public boolean providesElectricalPower() {
+		return getBoilerPressure() > 0 || !ConfigBalance.FuelRequired;
 	}
 
 	@Override
