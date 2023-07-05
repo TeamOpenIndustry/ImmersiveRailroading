@@ -462,6 +462,9 @@ public class TrackGui implements IScreen {
 					break;
 			}
 		}
+		if (settings.type == TrackItems.CUSTOM) {
+			state.translate(-length / 2.0, 0, 0);
+		}
 		RailBuilderRender.renderRailBuilder(info, MinecraftClient.getPlayer().getWorld(), state);
 		state.translate(-0.5, 0, -0.5);
 		RailBaseRender.draw(info, MinecraftClient.getPlayer().getWorld(), state);

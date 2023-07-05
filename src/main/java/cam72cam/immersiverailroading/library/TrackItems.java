@@ -55,7 +55,6 @@ public enum TrackItems {
 		switch (this) {
 			case TURN:
 			case SWITCH:
-			case CUSTOM:
 				return true;
 			default:
 				return false;
