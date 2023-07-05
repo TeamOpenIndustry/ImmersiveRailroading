@@ -405,7 +405,7 @@ public abstract class EntityRollingStockDefinition {
         couple_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/coupling.ogg");
         sliding_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/sliding.ogg");
         flange_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/flange.ogg");
-        flange_min_yaw = 15;
+        flange_min_yaw = 1.5;
         collision_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/collision.ogg");
 
         DataBlock sounds = data.getBlock("sounds");
@@ -424,6 +424,8 @@ public abstract class EntityRollingStockDefinition {
                 controls.getBlockMap().forEach((key, block) -> controlSounds.put(key, new ControlSoundsDefinition(block)));
             }
         }
+        // Degrees per meter -> degrees per bogey delta
+        flange_min_yaw *= bogeyFront - bogeyRear;
 
         Identifier overlay = data.getValue("overlay").asIdentifier();
         this.overlay = overlay != null ? GuiBuilder.parse(overlay) : getDefaultOverlay(data);

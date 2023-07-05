@@ -27,7 +27,6 @@ import cam72cam.mod.util.DegreeFuncs;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
@@ -340,7 +339,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     }
                 }
 
-                double yawDelta = MathUtil.deltaAngle(frontYaw, rearYaw);
+                double yawDelta = DegreeFuncs.delta(frontYaw, rearYaw);
                 double flangeMinYaw = getDefinition().flange_min_yaw;
                 if (yawDelta > flangeMinYaw && Math.abs(getCurrentSpeed().metric()) > 5) {
                     if (!flangeSound.isPlaying()) {
@@ -352,14 +351,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     float oscillation = (float)Math.sin((getTickCount()/40f * sndRand * 40));
                     double flangeFactor = (yawDelta - flangeMinYaw) / (90 - flangeMinYaw);
                     float desiredVolume = (float)flangeFactor/2 * oscillation/4 + 0.25f;
-                    lastFlangeVolume = (lastFlangeVolume*9 + desiredVolume) / 10;
+                    lastFlangeVolume = (lastFlangeVolume*4 + desiredVolume) / 5;
                     flangeSound.setVolume(lastFlangeVolume);
                     flangeSound.setPosition(getPosition());
                     flangeSound.setVelocity(getVelocity());
                 } else {
                     if (flangeSound.isPlaying()) {
                         if (lastFlangeVolume > 0.1) {
-                            lastFlangeVolume = (lastFlangeVolume*9 + 0) / 10;
+                            lastFlangeVolume = (lastFlangeVolume*4 + 0) / 5;
                             flangeSound.setVolume(lastFlangeVolume);
                             flangeSound.setPosition(getPosition());
                             flangeSound.setVelocity(getVelocity());
