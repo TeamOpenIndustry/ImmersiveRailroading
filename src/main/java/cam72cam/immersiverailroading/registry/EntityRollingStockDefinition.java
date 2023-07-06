@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
@@ -520,6 +521,9 @@ public abstract class EntityRollingStockDefinition {
     }
 
     public double getCouplerSlack(CouplerType coupler, Gauge gauge) {
+        if (!Config.ImmersionConfig.slackEnabled) {
+            return 0;
+        }
         switch (coupler) {
             default:
             case FRONT:
