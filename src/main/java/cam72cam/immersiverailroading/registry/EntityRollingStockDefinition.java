@@ -406,7 +406,7 @@ public abstract class EntityRollingStockDefinition {
         couple_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/coupling.ogg");
         sliding_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/sliding.ogg");
         flange_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/flange.ogg");
-        flange_min_yaw = 1.5;
+        flange_min_yaw = 2.5;
         collision_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/collision.ogg");
 
         DataBlock sounds = data.getBlock("sounds");

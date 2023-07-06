@@ -342,8 +342,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                         DegreeFuncs.delta(frontYaw, getRotationYaw())/getDefinition().getBogeyFront(gauge),
                         DegreeFuncs.delta(rearYaw, getRotationYaw())/-getDefinition().getBogeyRear(gauge)
                 );
+                double startingFlangeSpeed = 5;
+                double kmh = Math.abs(getCurrentSpeed().metric());
                 double flangeMinYaw = getDefinition().flange_min_yaw;
-                if (yawDelta > flangeMinYaw && Math.abs(getCurrentSpeed().metric()) > 5) {
+                // https://en.wikipedia.org/wiki/Minimum_railway_curve_radius#Speed_and_cant implies squared speed
+                flangeMinYaw = flangeMinYaw / Math.sqrt(kmh) * Math.sqrt(startingFlangeSpeed);
+                if (yawDelta > flangeMinYaw && kmh > 5) {
                     if (!flangeSound.isPlaying()) {
                         lastFlangeVolume = 0.1f;
                         flangeSound.setVolume(lastFlangeVolume);
