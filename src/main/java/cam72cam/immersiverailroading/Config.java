@@ -86,6 +86,9 @@ public class Config {
 		@Comment("Old style brake control")
 		@Name("Instant Brake Pressure")
 		public static boolean instantBrakePressure = false;
+
+		@Comment("Enable coupler slack")
+		public static boolean slackEnabled = true;
     }
 
 	@Name("balance")
@@ -238,6 +241,7 @@ public class Config {
 
 		@Comment("Default Augments to Computer Mode")
 		public static boolean defaultAugmentComputer = false;
+		public static long physicsWarnThresholdMs = 20;
     }
 
 	public static boolean isFuelRequired(Gauge gauge) {

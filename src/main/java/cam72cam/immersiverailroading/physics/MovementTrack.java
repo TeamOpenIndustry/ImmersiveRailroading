@@ -50,15 +50,14 @@ public class MovementTrack {
 		return null;
 	}
 
-	public static Vec3d iterativePathing(World world, Vec3d currentPosition, double gauge, Vec3d motion, double maxDistance) {
+	public static Vec3d iterativePathing(World world, Vec3d currentPosition, ITrack te, double gauge, Vec3d motion, double maxDistance) {
 		Vec3d startPos = currentPosition;
 		Vec3d prevPosition = currentPosition;
 		double totalDistance = motion.length();
 		double maxDistanceSquared = maxDistance * maxDistance;
 		double motionLengthSquared = motion.lengthSquared();
 
-		Vec3i teBlockPosition = null;
-		ITrack te = null;
+		Vec3i teBlockPosition = new Vec3i(currentPosition);
 
 		for (double currentDistance = 0; currentDistance < totalDistance; currentDistance += maxDistance) {
 			Vec3i currentBlockPosition = new Vec3i(currentPosition);
@@ -78,7 +77,7 @@ public class MovementTrack {
 			}
 
 			prevPosition = currentPosition;
-			currentPosition = te.getNextPosition(currentPosition, motion);
+			currentPosition = te instanceof TileRailBase ? ((TileRailBase) te).getNextPositionShort(currentPosition, motion) : te.getNextPosition(currentPosition, motion);
 			motion = currentPosition.subtract(prevPosition);
 			motionLengthSquared = motion.lengthSquared();
 
@@ -89,10 +88,12 @@ public class MovementTrack {
 		}
 
 		// prevPosition + motion scaled to remaining distance
-		double scale = (totalDistance - startPos.distanceTo(prevPosition)) / motion.length();
-		if (scale > 0.1 && scale < 1) {
-			currentPosition = prevPosition.add(motion.scale(scale));
-		}
+		//double scale = (totalDistance - startPos.distanceTo(prevPosition)) / motion.length();
+		//if (scale > 0.00001 && scale < 1.5) {
+		//	currentPosition = prevPosition.add(motion.scale(scale));
+		//}
+		currentPosition = startPos.add(currentPosition.subtract(startPos).normalize().scale(totalDistance));
+
 		return currentPosition;
 	}
 

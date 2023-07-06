@@ -21,6 +21,7 @@ import util.Matrix4;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION extends EntityRollingStockDefinition> extends OBJModel {
@@ -229,6 +230,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         headlights.forEach(x -> x.removed(stock));
     }
 
+    private int lod_level = LOD_LARGE;
+    private int lod_tick = 0;
     public final void render(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
         List<ModelComponentType> available = stock.isBuilt() ? null : stock.getItemComponents()
                 .stream().flatMap(x -> x.render.stream())
@@ -244,19 +247,32 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             state = state.shader(ConfigGraphics.OptiFineEntityShader);
         }
 
-        Binder binder = binder().texture(stock.getTexture());
-        double playerDistance = stock.getPosition().distanceTo(MinecraftClient.getPlayer().getPosition());
-        if (playerDistance > ConfigGraphics.StockLODDistance * 2) {
-            binder.lod(LOD_SMALL);
-        } else if (playerDistance > ConfigGraphics.StockLODDistance) {
-            binder.lod(LOD_LARGE);
+        // Refresh LOD every 0.5s
+        if (lod_tick + 10 < stock.getTickCount() || lod_tick > stock.getTickCount())  {
+            lod_tick = stock.getTickCount();
+
+            double playerDistanceSq = stock.getWorld().getEntities(stock.getClass()).stream()
+                    .filter(x -> Objects.equals(x.getDefinitionID(), stock.getDefinitionID()) && Objects.equals(x.getTexture(), stock.getTexture()))
+                    .mapToDouble(x -> x.getPosition().distanceToSquared(MinecraftClient.getPlayer().getPosition())).min().orElse(0);
+
+            if (playerDistanceSq > ConfigGraphics.StockLODDistance * 2 * ConfigGraphics.StockLODDistance * 2) {
+                lod_level = LOD_SMALL;
+            } else if (playerDistanceSq > ConfigGraphics.StockLODDistance * ConfigGraphics.StockLODDistance) {
+                lod_level = LOD_LARGE;
+            } else {
+                lod_level = cam72cam.mod.Config.MaxTextureSize;
+            }
         }
+
+        Binder binder = binder().texture(stock.getTexture()).lod(lod_level);
         try (
                 OBJRender.Binding bound = binder.bind(state);
         ) {
             double backup = stock.distanceTraveled;
 
-            stock.distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
+            if (!stock.isSliding()) {
+                stock.distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
+            }
             stock.distanceTraveled /= stock.gauge.scale();
 
 

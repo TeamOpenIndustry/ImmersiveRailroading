@@ -22,6 +22,7 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     private boolean isCabCar;
     private boolean isLinkedBrakeThrottle;
     private boolean isCog;
+    private double factorOfAdhesion;
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, DataBlock data) throws Exception {
         super(type, defID, data);
@@ -43,9 +44,11 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
             traction = 0;
             maxSpeed = Speed.ZERO;
             muliUnitCapable = true;
+            factorOfAdhesion = 0;
         } else {
             power = (int) Math.ceil(properties.getValue("horsepower").asInteger() * internal_inv_scale);
             traction = (int) Math.ceil(properties.getValue("tractive_effort_lbf").asInteger() * internal_inv_scale);
+            factorOfAdhesion = properties.getValue("factor_of_adhesion").asDouble(4);
             maxSpeed = Speed.fromMetric(properties.getValue("max_speed_kmh").asDouble() * internal_inv_scale);
             muliUnitCapable = properties.getValue("multi_unit_capable").asBoolean(this.multiUnitDefault());
         }
@@ -115,5 +118,9 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     public boolean isCog() {
         return isCog;
+    }
+
+    public double factorOfAdhesion() {
+        return this.factorOfAdhesion;
     }
 }

@@ -132,8 +132,8 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-	public boolean hasElectricalPower() {
-		return this.isRunning() || super.hasElectricalPower();
+	public boolean providesElectricalPower() {
+		return this.isRunning();
 	}
 
 	@Override
@@ -167,9 +167,13 @@ public class LocomotiveDiesel extends Locomotive {
 	private double ratedTopSpeed = this.getDefinition().getMaxSpeed(gauge).metric();
 	
 	@Override
-    public int getAvailableHP() {
+	public double getAppliedTractiveEffort(Speed speed) {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
-			return this.getDefinition().getHorsePower(gauge);
+			double maxPower_W = this.getDefinition().getHorsePower(gauge) * 745.7d;
+			double efficiency = 0.82; // Similar to a *lot* of imperial references
+			double speed_M_S = (Math.abs(speed.metric())/3.6);
+			double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(0.001, speed_M_S);
+			return maxPowerAtSpeed * getThrottle() * getReverser();
 		}
 		return 0;
 	}
