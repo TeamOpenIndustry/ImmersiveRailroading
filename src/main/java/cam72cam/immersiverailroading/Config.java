@@ -89,6 +89,9 @@ public class Config {
 
 		@Comment("Enable coupler slack")
 		public static boolean slackEnabled = true;
+		
+		@Comment("Use simplified traction physics")
+		public static boolean arcadePhysics = true;
     }
 
 	@Name("balance")

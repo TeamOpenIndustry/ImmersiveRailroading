@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
+import cam72cam.immersiverailroading.Config.ImmersionConfig;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -88,80 +89,75 @@ public class LocomotiveSteam extends Locomotive {
 	public Map<Integer, Integer> getBurnMax() {
 		return burnMax;
 	}
-
+	
+	//make properties local variables for readability
+	private int maxPower_Hp = this.getDefinition().getHorsePower(gauge);
+	private int maxTractiveEffort_N = this.getDefinition().getStartingTractionNewtons(gauge);
+	private double ratedTopSpeed_Km_H = this.getDefinition().getMaxSpeed(gauge).metric();
+	private int mawp = this.getDefinition().getMaxPSI(gauge);	//maximum allowable working pressure, ie max boiler pressure
+	private int reverserDirection = getReverser() <= 0 ? -1 : 1;
+	private double cutoffTractiveEffort_N = 0;	//maximum tractive effort with current cutoff setting and boiler pressure in N, assuming full steam demand is met
+	private double steamDemand_Hp = 0;			//current steam demand in horse power, based on cutoff position and current speed
+	private double maxSteamFlow_Hp = 0;			//current maximum steam flow through the regulator in horse power, steam use cannot exceed this regardless of demand
+	
+	//used once per tick to calculate cutoffTractiveEffort_N
+	private float cutoffTractiveEffort() {
+		//tractive effort in N produced by each PSI applied to the cylinders
+		float tePerPSI = maxTractiveEffort_N / mawp;
+		/*
+		 * average pressure on the cylinders over the course of the stroke,
+		 * calculated by assuming current boiler pressure for length of valve travel(cutoff setting)
+		 * followed by finding pressure after expansion over the rest of the stroke and averaging it with the boiler pressure
+		 * this gives the average pressure over the remainder of the stroke
+		 * multiply these pressures by the portion of the stroke to which they are applicable and add to get final average pressure
+		 */
+		float averagePreasure = (getBoilerPressure() * getReverser()) + ((((getBoilerPressure() * reverserDirection) + (getBoilerPressure() * getReverser())) / 2) * (1 - Math.abs(getReverser())));
+		return tePerPSI * averagePreasure;
+	}
+	
+	//backpressure opposing motion due to high cutoff at high speed, produces a scalar as a proportion of maximum tractive effort
+	private double backpressure(double speedPercent) {
+		return Math.min(
+			2.0d, 	//limit maximum backpressure to max tractive effort in reverse
+			Math.max(
+				0, //formula spends a lot of time negative, so limit minimum to 0
+				//formula estimated and tweaked in desmos until it did about what I want
+				((.55d * speedPercent) * (Math.abs(getReverser()) * Math.pow(2.0d * Math.abs(getReverser()), 2.0d * speedPercent))) - 0.21d) 
+			) * (getBoilerPressure() / mawp);	//scale to current boiler pressure
+	}
+	
 	@Override
 	public double getAppliedTractiveEffort(Speed speed) {
 		if (getDefinition().isCabCar()) {
 			return 0;
 		}
+		if(ImmersionConfig.arcadePhysics) {//use arcade physics
+			double traction_N = this.getDefinition().getStartingTractionNewtons(gauge);
+			if (Config.isFuelRequired(gauge)) {
+				traction_N = traction_N / this.getDefinition().getMaxPSI(gauge) * this.getBoilerPressure();
+			}
 
-		double traction_N = this.getDefinition().getStartingTractionNewtons(gauge);
-		if (Config.isFuelRequired(gauge)) {
-			traction_N = traction_N / this.getDefinition().getMaxPSI(gauge) * this.getBoilerPressure();
+			// Cap the max "effective" reverser.  At high speeds having a fully open reverser just damages equipment
+			double reverser = getReverser();
+			double reverserCap = 0.5;
+			double maxReverser = 1 - Math.abs(getCurrentSpeed().metric()) / getDefinition().getMaxSpeed(gauge).metric() * reverserCap;
+
+			// This should probably be tuned...
+			double multiplier = Math.copySign(Math.abs(Math.pow(getThrottle() * Math.min(Math.abs(reverser), maxReverser), 3)), reverser);
+
+			return traction_N * multiplier;
+		} else {							//use realistic physics
+			double speedPercent = Math.abs(getCurrentSpeed().metric() / (double)ratedTopSpeed_Km_H);	//current speed as a percent of rated top speed
+			
+			double workingTractiveEffort;	//working tractive effort calculated with current steam flow, cutoff demand, and boiler pressure, before factoring loss due to backpressure
+			if(steamDemand_Hp < maxSteamFlow_Hp) {
+				workingTractiveEffort = cutoffTractiveEffort_N;
+			}else {
+				workingTractiveEffort = cutoffTractiveEffort_N * (maxSteamFlow_Hp / steamDemand_Hp);
+			}
+			
+			return (workingTractiveEffort - ((backpressure(speedPercent) * (double)maxTractiveEffort_N) * reverserDirection)) * ConfigBalance.tractionMultiplier;
 		}
-
-		// Cap the max "effective" reverser.  At high speeds having a fully open reverser just damages equipment
-		double reverser = getReverser();
-		double reverserCap = 0.5;
-		double maxReverser = 1 - Math.abs(getCurrentSpeed().metric()) / getDefinition().getMaxSpeed(gauge).metric() * reverserCap;
-
-		// This should probably be tuned...
-		double multiplier = Math.copySign(Math.abs(Math.pow(getThrottle() * Math.min(Math.abs(reverser), maxReverser), 3)), reverser);
-
-		return traction_N * multiplier;
-	}
-	
-	//make properties local variables for simplicity
-	private int maxHorsePower = this.getDefinition().getHorsePower(gauge);
-	private int tractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge);
-	private double ratedTopSpeed = this.getDefinition().getMaxSpeed(gauge).metric();
-	private int mawp = this.getDefinition().getMaxPSI(gauge);
-	private int reverserDirection = getReverser() <= 0 ? -1 : 1;
-	
-	//maximum steam flow allowed in current regulator position in horse power
-	private float maxSteamFlow() { 
-		return (float)maxHorsePower * getThrottle() * 1.5f * (getBoilerPressure() / (float)mawp);
-	}
-	
-	//current tractive effort called for by cutoff
-	private float cutoffTractiveEffort() {
-		float tePerPSI = tractiveEffort / mawp;
-		float averagePreasure = (getBoilerPressure() * getReverser()) + ((((getBoilerPressure() * reverserDirection) + (getBoilerPressure() * getReverser())) / 2) * (1 - Math.abs(getReverser())));
-		return tePerPSI * averagePreasure;
-	}
-	
-	//current steam demand based on cutoff position in horse power
-	private double steamDemand() {
-		return Math.abs(cutoffTractiveEffort() * getCurrentSpeed().metric()) / 2684.52d; 
-		//2684.52 is combined conversion factor of km/h to m/s and Watts to hp
-	}
-	
-	//percent of rated max speed currently traveling at
-	private double speedPercent() {
-		return Math.abs(getCurrentSpeed().metric() / (double)ratedTopSpeed);
-	}
-	
-	//backpressure opposing motion due to high cutoff at high speed
-	private double backpressure() {
-		return Math.min(
-			2.0d * (double)tractiveEffort, 
-			Math.max(
-				0, 
-				((.55d * speedPercent()) * (Math.abs(getReverser()) * Math.pow(2.0d * Math.abs(getReverser()), 2.0d * speedPercent()))) - 0.21d) 
-			) * (getBoilerPressure() / mawp);
-	}
-	
-	private double workingTractiveEffort() {
-		if(steamDemand() < maxSteamFlow()) {
-			return cutoffTractiveEffort();
-		}else {
-			return cutoffTractiveEffort() * (maxSteamFlow() / steamDemand());
-		}
-	}
-	
-	@Override
-	public double getAppliedTractiveEffort(Speed speed) {
-		return (workingTractiveEffort() - ((backpressure() * (float)tractiveEffort) * reverserDirection)) * ConfigBalance.tractionMultiplier;
 	}
 	
 	@Override
@@ -198,7 +194,13 @@ public class LocomotiveSteam extends Locomotive {
 			// Prevent explosions
 			return;
 		}
-
+		
+		//calculate values used multiple times once per tick
+		cutoffTractiveEffort_N = cutoffTractiveEffort();
+		steamDemand_Hp = Math.abs(cutoffTractiveEffort_N * getCurrentSpeed().metric()) / 2684.52d; 
+			//2684.52 is combined conversion factor of km/h to m/s and Watts to hp
+		maxSteamFlow_Hp = (double)maxPower_Hp * getThrottle() * 1.5d * (getBoilerPressure() / (double)mawp);
+		
 
 		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
 				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
@@ -333,12 +335,12 @@ public class LocomotiveSteam extends Locomotive {
 		}
 		
 		double throttle;
-		if(steamDemand() < maxSteamFlow()) {
+		if(steamDemand_Hp < maxSteamFlow_Hp) {
 			//steam use is steam demand
-			throttle = steamDemand() * 0.17811d * ConfigBalance.locoHeatTimeScale;
+			throttle = steamDemand_Hp * 0.17811d * ConfigBalance.locoHeatTimeScale;
 		}else {
 			//steam use is max flow
-			throttle = maxSteamFlow() * 0.17811d * ConfigBalance.locoHeatTimeScale;
+			throttle = maxSteamFlow_Hp * 0.17811d * ConfigBalance.locoHeatTimeScale;
 		}
 		if (throttle != 0 && boilerPressure > 0) {
 			/*double burnableSlots = this.cargoItems.getSlotCount()-2;
@@ -454,7 +456,7 @@ public class LocomotiveSteam extends Locomotive {
 		double coalBurnTicks = 1600; // This is a bit of fudge
 		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
 		//redefine based on max horsepower rating to limit max steam production and aproximate thermal efficiency
-		return (maxHorsePower / (getInventorySize() - 2)) * 0.17811d * ConfigBalance.locoHeatTimeScale;
+		return (maxPower_Hp / (getInventorySize() - 2)) * 0.17811d * ConfigBalance.locoHeatTimeScale;
 	}
 
 	private static class SlotTagMapper implements TagMapper<Map<Integer, Integer>> {

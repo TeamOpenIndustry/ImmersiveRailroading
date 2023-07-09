@@ -6,6 +6,7 @@ import java.util.OptionalDouble;
 import java.util.UUID;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ImmersionConfig;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
@@ -422,8 +423,8 @@ public abstract class Locomotive extends FreightTank {
 			return 0;
 		}
 
-
-		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
+		//cut tractive effort to 0 when above rated top speed if using arcade physics
+		if (ImmersionConfig.arcadePhysics && (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft())) {
 			return 0;
 		}
 

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
+import cam72cam.immersiverailroading.Config.ImmersionConfig;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -162,44 +163,51 @@ public class LocomotiveDiesel extends Locomotive {
 
 	}
 
-	private int maxHorsePower = this.getDefinition().getHorsePower(gauge);
-	private int tractiveEffort = this.getDefinition().getStartingTractionNewtons(gauge);
-	private double ratedTopSpeed = this.getDefinition().getMaxSpeed(gauge).metric();
+	private double maxPower_HP = this.getDefinition().getHorsePower(gauge);
+	private double maxPower_W = maxPower_HP * 745.7d;
+	private int tractiveEffort_N = this.getDefinition().getStartingTractionNewtons(gauge);
 	
-	@Override
-	public double getAppliedTractiveEffort(Speed speed) {
-		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
-			double maxPower_W = this.getDefinition().getHorsePower(gauge) * 745.7d;
-			double efficiency = 0.82; // Similar to a *lot* of imperial references
-			double speed_M_S = (Math.abs(speed.metric())/3.6);
-			double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(0.001, speed_M_S);
-			return maxPowerAtSpeed * getThrottle() * getReverser();
-		}
-		return 0;
-	}
-	
-	private double motorEfficiency(Speed speed) {
-		double speedPercent = speed.metric() / ratedTopSpeed;
-		if (speed.metric() <= ratedTopSpeed) {
+	//approximation of electric motor efficiency distribution, increases as RMP goes up, ramps from ~50% stopped to ~90% at max speed
+	//returns scalar between 0 and 1
+	private double motorEfficiency(double speed) {
+		double ratedTopSpeed = this.getDefinition().getMaxSpeed(gauge).metric();
+		
+		double speedPercent = speed / ratedTopSpeed;
+		if (speed <= ratedTopSpeed) {
+			//eyeballed formula the emulate typical efficiency diagrams
 			return (.3d * (Math.log(speedPercent + .05d) / Math.log(10))) +.6d;
-		}else {
+		} else {
+			//have torque drop off rapidly when exceeding rated top speed, somewhat realistic to real motor behavior
 			return Math.pow(4.0d, 0 - ((2 * speedPercent) - 1.9d));
 		}
 	}
 	
+	//approximation of electric motor efficiency distribution, decreases as torque goes down, drops from 100% at max torque to 90% at 0
+	//returns scalar between 0 and 1
 	private double torqueDropoff(double output) {
-		double torquePercent = (output / tractiveEffort) * .1d;
+		double torquePercent = (output / tractiveEffort_N) * .1d;
 		return .9d + torquePercent;
 	}
 	
 	@Override
 	public double getAppliedTractiveEffort(Speed speed) {
-		//speedMetersPerSecond = speed.metric() / 3.6d;
-		//powerWatts = (maxHorsePower * getThrottle()) * 745.7d
-		double powerCurve = (maxHorsePower * getThrottle() * 745.7d) / (speed.metric() / 3.6d);
-		double rpmEfficiency = powerCurve * motorEfficiency(speed);
-		double torqueEfficiency = rpmEfficiency * torqueDropoff(rpmEfficiency);
-		return getReverser() * Math.min(tractiveEffort, torqueEfficiency) * ConfigBalance.tractionMultiplier;
+		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
+			double speed_M_S = Math.abs(speed.metric() / 3.6d);
+			if (ImmersionConfig.arcadePhysics) {//use arcade physics
+				double efficiency = 0.82; // Similar to a *lot* of imperial references
+				double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(0.001, speed_M_S);
+				return maxPowerAtSpeed * getThrottle() * getReverser();
+			} else {							//use improved physics
+				//starting number for tractive effort, determines max possible force at given speed by the basic formula F=P/V
+				double powerCurve = (maxPower_W * getThrottle()) / (speed_M_S);					//force in Newtons
+				//first step of applying motor efficiency, RPM part only first
+				double rpmEfficiency = powerCurve * motorEfficiency(Math.abs(speed.metric()));	//force in Newtons
+				//second step of applying motor efficiency, lower torque means lower efficiency, be it from drop due to speed or throttle position
+				double torqueEfficiency = rpmEfficiency * torqueDropoff(rpmEfficiency);			//force in Newtons
+				return getReverser() * Math.min(tractiveEffort_N, torqueEfficiency) * ConfigBalance.tractionMultiplier;
+			}
+		}
+		return 0;
 	}
 
 	@Override
