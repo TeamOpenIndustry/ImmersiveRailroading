@@ -1,22 +1,14 @@
 package cam72cam.immersiverailroading.entity;
 
-import static cam72cam.immersiverailroading.library.PhysicalMaterials.STEEL;
-
-import java.util.OptionalDouble;
-import java.util.UUID;
-
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.Config.ImmersionConfig;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
-import cam72cam.immersiverailroading.library.ChatText;
-import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
@@ -26,7 +18,11 @@ import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
-import trackapi.lib.ITrack;
+
+import java.util.OptionalDouble;
+import java.util.UUID;
+
+import static cam72cam.immersiverailroading.library.PhysicalMaterials.*;
 
 public abstract class Locomotive extends FreightTank {
 	private static final float throttleDelta = 0.04f;
