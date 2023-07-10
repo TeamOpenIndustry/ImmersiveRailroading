@@ -462,8 +462,8 @@ public class LocomotiveSteam extends Locomotive {
 		double coalEnergyKCal = coalEnergyBTU / (3.968 * 1000); // 3.968 BTU = 1 KCal
 		double coalBurnTicks = 1600; // This is a bit of fudge
 		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
-		//redefine based on max horsepower rating to limit max steam production and aproximate thermal efficiency
-		return (maxPower_Hp / (getInventorySize() - 2)) * 0.17811d * ConfigBalance.locoHeatTimeScale;
+		//redefine based on max horsepower rating to limit max steam production and approximate thermal efficiency
+		return (maxPower_Hp / (getInventorySize() - 2)) * 0.17811d * (1/1500) * ConfigBalance.locoHeatTimeScale;
 	}
 
 	private static class SlotTagMapper implements TagMapper<Map<Integer, Integer>> {
