@@ -91,11 +91,12 @@ public class LocomotiveSteam extends Locomotive {
 	}
 	
 	//make properties local variables for readability
-	private int maxPower_Hp = this.getDefinition().getHorsePower(gauge);
-	private int maxTractiveEffort_N = this.getDefinition().getStartingTractionNewtons(gauge);
-	private double ratedTopSpeed_Km_H = this.getDefinition().getMaxSpeed(gauge).metric();
-	private int mawp = this.getDefinition().getMaxPSI(gauge);	//maximum allowable working pressure, ie max boiler pressure
-	private int reverserDirection = getReverser() <= 0 ? -1 : 1;
+	//initialized on first tick to avoid NPE
+	private int maxPower_Hp = 0;
+	private int maxTractiveEffort_N = 0;
+	private double ratedTopSpeed_Km_H = 0;
+	private int mawp = 0;	//maximum allowable working pressure, ie max boiler pressure
+	private int reverserDirection = 0;
 	private double cutoffTractiveEffort_N = 0;	//maximum tractive effort with current cutoff setting and boiler pressure in N, assuming full steam demand is met
 	private double steamDemand_Hp = 0;			//current steam demand in horse power, based on cutoff position and current speed
 	private double maxSteamFlow_Hp = 0;			//current maximum steam flow through the regulator in horse power, steam use cannot exceed this regardless of demand
@@ -191,11 +192,17 @@ public class LocomotiveSteam extends Locomotive {
 		}
 
 		if (this.getTickCount() < 2) {
+			//initialize constant values
+			maxPower_Hp = this.getDefinition().getHorsePower(gauge);
+			maxTractiveEffort_N = this.getDefinition().getStartingTractionNewtons(gauge);
+			ratedTopSpeed_Km_H = this.getDefinition().getMaxSpeed(gauge).metric();
+			mawp = this.getDefinition().getMaxPSI(gauge);
 			// Prevent explosions
 			return;
 		}
 		
 		//calculate values used multiple times once per tick
+		reverserDirection = getReverser() <= 0 ? -1 : 1;
 		cutoffTractiveEffort_N = cutoffTractiveEffort();
 		steamDemand_Hp = Math.abs(cutoffTractiveEffort_N * getCurrentSpeed().metric()) / 2684.52d; 
 			//2684.52 is combined conversion factor of km/h to m/s and Watts to hp

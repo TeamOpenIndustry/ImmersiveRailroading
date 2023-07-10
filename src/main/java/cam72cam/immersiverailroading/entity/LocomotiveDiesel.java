@@ -163,9 +163,10 @@ public class LocomotiveDiesel extends Locomotive {
 
 	}
 
-	private double maxPower_HP = this.getDefinition().getHorsePower(gauge);
-	private double maxPower_W = maxPower_HP * 745.7d;
-	private int tractiveEffort_N = this.getDefinition().getStartingTractionNewtons(gauge);
+	//initialized on first tick to avoid NPE
+	private double maxPower_HP = 0;
+	private double maxPower_W = 0;
+	private int tractiveEffort_N = 0;
 	
 	//approximation of electric motor efficiency distribution, increases as RMP goes up, ramps from ~50% stopped to ~90% at max speed
 	//returns scalar between 0 and 1
@@ -213,6 +214,13 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public void onTick() {
 		super.onTick();
+		
+		if(this.getTickCount() < 2) {
+			//initialize constant values
+			maxPower_HP = this.getDefinition().getHorsePower(gauge);
+			maxPower_W = maxPower_HP * 745.7d;
+			tractiveEffort_N = this.getDefinition().getStartingTractionNewtons(gauge);
+		}
 
 		if (turnOnOffDelay > 0) {
 			turnOnOffDelay -= 1;
