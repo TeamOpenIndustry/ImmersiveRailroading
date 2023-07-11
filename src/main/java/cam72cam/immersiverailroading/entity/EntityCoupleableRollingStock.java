@@ -221,7 +221,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			return;
 		}
 
-		if (target == null) {
+		if (target == null && isCouplerEngaged(coupler)) {
 			// Technically this fires the coupling sound twice (once for each entity)
 			new SoundPacket(getDefinition().couple_sound,
 					this.getCouplerPosition(coupler), this.getVelocity(),
