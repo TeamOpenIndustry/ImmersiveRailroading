@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
@@ -53,6 +54,10 @@ public abstract class EntityRollingStockDefinition {
     public Identifier clackRear;
     public double internal_model_scale;
     public Identifier couple_sound;
+    public Identifier sliding_sound;
+    public Identifier flange_sound;
+    public Identifier collision_sound;
+    public double flange_min_yaw;
     double internal_inv_scale;
     private String name;
     private String modelerName;
@@ -79,6 +84,7 @@ public abstract class EntityRollingStockDefinition {
     private int maxPassengers;
     private float interiorLightLevel;
     private boolean hasIndependentBrake;
+    private boolean hasPressureBrake;
     private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
@@ -93,6 +99,8 @@ public abstract class EntityRollingStockDefinition {
     private double swayMultiplier;
     private double tiltMultiplier;
     private float brakeCoefficient;
+    public double rollingResistanceCoefficient;
+    public double directFrictionCoefficient;
 
     public List<AnimationDefinition> animations;
 
@@ -342,8 +350,12 @@ public abstract class EntityRollingStockDefinition {
         maxPassengers = passenger.getValue("slots").asInteger();
         shouldSit = passenger.getValue("should_sit").asBoolean();
 
-        bogeyFront = data.getBlock("trucks").getValue("front").asFloat() * (float) internal_model_scale;
-        bogeyRear = data.getBlock("trucks").getValue("rear").asFloat() * (float) internal_model_scale;
+        DataBlock pivot = data.getBlock("trucks"); // Legacy
+        if (pivot == null) {
+            pivot = data.getBlock("pivot");
+        }
+        bogeyFront = pivot.getValue("front").asFloat() * (float) internal_model_scale;
+        bogeyRear = pivot.getValue("rear").asFloat() * (float) internal_model_scale;
 
         dampeningAmount = data.getValue("sound_dampening_percentage").asFloat(0.75f);
         if (dampeningAmount < 0 || dampeningAmount > 1) {
@@ -365,17 +377,9 @@ public abstract class EntityRollingStockDefinition {
         weight = (int) Math.ceil(properties.getValue("weight_kg").asInteger() * internal_inv_scale);
         valveGear = ValveGearConfig.get(properties, "valve_gear");
         hasIndependentBrake = properties.getValue("independent_brake").asBoolean(independentBrakeDefault());
+        hasPressureBrake = properties.getValue("pressure_brake").asBoolean(pressureBrakeDefault());
         // Locomotives default to linear brake control
         isLinearBrakeControl = properties.getValue("linear_brake_control").asBoolean(!(this instanceof LocomotiveDefinition));
-
-        DataBlock lights = data.getBlock("lights");
-        if (lights != null) {
-            lights.getBlockMap().forEach((key, block) -> this.lights.put(key, new LightDefinition(block)));
-        }
-        interiorLightLevel = properties.getValue("interior_light_level").asFloat(6 / 15f);
-        hasInternalLighting = properties.getValue("internalLighting").asBoolean(this instanceof CarPassengerDefinition || this instanceof LocomotiveDefinition);
-        swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
-        tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
 
         brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
         try {
@@ -384,10 +388,28 @@ public abstract class EntityRollingStockDefinition {
             ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
         }
         brakeCoefficient = properties.getValue("brake_friction_coefficient").asFloat(brakeCoefficient);
+        // https://en.wikipedia.org/wiki/Rolling_resistance#Rolling_resistance_coefficient_examples
+        rollingResistanceCoefficient = properties.getValue("rolling_resistance_coefficient").asDouble(0.002);
+        directFrictionCoefficient = properties.getValue("direct_friction_coefficient").asDouble(0);
+
+        swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
+        tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
+
+        interiorLightLevel = properties.getValue("interior_light_level").asFloat(6 / 15f);
+        hasInternalLighting = properties.getValue("internalLighting").asBoolean(this instanceof CarPassengerDefinition || this instanceof LocomotiveDefinition);
+
+        DataBlock lights = data.getBlock("lights");
+        if (lights != null) {
+            lights.getBlockMap().forEach((key, block) -> this.lights.put(key, new LightDefinition(block)));
+        }
 
         wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
         clackFront = clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
         couple_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/coupling.ogg");
+        sliding_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/sliding.ogg");
+        flange_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/flange.ogg");
+        flange_min_yaw = 2.5;
+        collision_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/collision.ogg");
 
         DataBlock sounds = data.getBlock("sounds");
         if (sounds != null) {
@@ -396,6 +418,10 @@ public abstract class EntityRollingStockDefinition {
             clackFront = sounds.getValue("clack_front").asIdentifier(clackFront);
             clackRear = sounds.getValue("clack_rear").asIdentifier(clackRear);
             couple_sound = sounds.getValue("couple").asIdentifier(couple_sound);
+            sliding_sound = sounds.getValue("sliding").asIdentifier(sliding_sound);
+            flange_sound = sounds.getValue("flange").asIdentifier(flange_sound);
+            flange_min_yaw = sounds.getValue("flange_min_yaw").asDouble(flange_min_yaw);
+            collision_sound = sounds.getValue("collision").asIdentifier(collision_sound);
             DataBlock controls = sounds.getBlock("controls");
             if (controls != null) {
                 controls.getBlockMap().forEach((key, block) -> controlSounds.put(key, new ControlSoundsDefinition(block)));
@@ -424,8 +450,11 @@ public abstract class EntityRollingStockDefinition {
             }
         }
 
-        List<DataBlock> aobjs = data.getBlocks("animations");
         this.animations = new ArrayList<>();
+        List<DataBlock> aobjs = data.getBlocks("animations");
+        if (aobjs == null) {
+            aobjs = data.getBlocks("animation");
+        }
         if (aobjs != null) {
             for (DataBlock entry : aobjs) {
                 animations.add(new AnimationDefinition(entry));
@@ -494,6 +523,9 @@ public abstract class EntityRollingStockDefinition {
     }
 
     public double getCouplerSlack(CouplerType coupler, Gauge gauge) {
+        if (!Config.ImmersionConfig.slackEnabled) {
+            return 0;
+        }
         switch (coupler) {
             default:
             case FRONT:
@@ -506,6 +538,10 @@ public abstract class EntityRollingStockDefinition {
 
     public boolean hasIndependentBrake() {
         return hasIndependentBrake;
+    }
+
+    public boolean hasPressureBrake() {
+        return hasPressureBrake;
     }
 
     private static class HeightMapData {
@@ -745,12 +781,16 @@ public abstract class EntityRollingStockDefinition {
         return false;
     }
 
+    protected boolean pressureBrakeDefault() {
+        return true;
+    }
+
     public boolean isLinearBrakeControl() {
         return isLinearBrakeControl;
     }
 
     protected GuiBuilder getDefaultOverlay(DataBlock data) throws IOException {
-        return hasIndependentBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.json")) : null;
+        return hasIndependentBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.caml")) : null;
     }
 
     public GuiBuilder getOverlay() {

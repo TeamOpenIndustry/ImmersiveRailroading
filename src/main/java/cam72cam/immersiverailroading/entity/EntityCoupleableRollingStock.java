@@ -173,11 +173,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		if (this.getTickCount() % 5 == 0) {
 			hasElectricalPower = false;
-			this.mapTrain(this, false, stock -> {
-				if (stock instanceof Locomotive && stock.hasElectricalPower()) {
-					hasElectricalPower = true;
-				}
-			});
+			this.mapTrain(this, false, stock ->
+					hasElectricalPower = hasElectricalPower ||
+							stock instanceof Locomotive && ((Locomotive) stock).providesElectricalPower()
+			);
 		}
 
 		hadElectricalPower = hasElectricalPower();
@@ -222,7 +221,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			return;
 		}
 
-		if (target == null) {
+		if (target == null && isCouplerEngaged(coupler)) {
 			// Technically this fires the coupling sound twice (once for each entity)
 			new SoundPacket(getDefinition().couple_sound,
 					this.getCouplerPosition(coupler), this.getVelocity(),
@@ -447,6 +446,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@Override
 	public boolean internalLightsEnabled() {
 		return getDefinition().hasInternalLighting() && hasElectricalPower() && (
+				gotElectricalPowerTick == -1 ||
+						getTickCount() - gotElectricalPowerTick > 15 ||
+						((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0
+		);
+	}
+
+	@Override
+	public boolean externalLightsEnabled() {
+		return hasElectricalPower() && (
 				gotElectricalPowerTick == -1 ||
 						getTickCount() - gotElectricalPowerTick > 15 ||
 						((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0

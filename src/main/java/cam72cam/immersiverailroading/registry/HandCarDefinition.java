@@ -15,11 +15,16 @@ public class HandCarDefinition extends LocomotiveDefinition {
 
     @Override
     protected GuiBuilder getDefaultOverlay(DataBlock data) throws IOException {
-        return GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/handcar.json"));
+        return GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/handcar.caml"));
     }
 
     @Override
     protected boolean multiUnitDefault() {
+        return false;
+    }
+
+    @Override
+    protected boolean pressureBrakeDefault() {
         return false;
     }
 }

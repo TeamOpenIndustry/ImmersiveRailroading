@@ -57,15 +57,15 @@ public enum Readouts {
             case INDEPENDENT_BRAKE:
                 return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getIndependentBrake() : 0;
             case BRAKE_PRESSURE:
-                return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getTotalBrake() : 0;
+                return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getBrakePressure() : 0;
             case COUPLER_FRONT:
                 return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.FRONT) ? 1 : 0 : 0;
             case COUPLER_REAR:
                 return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.BACK) ? 1 : 0 : 0;
             case COUPLED_FRONT:
-                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.FRONT) ? 1 : 0 : 0;
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.FRONT) && ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.FRONT) ? 1 : 0 : 0;
             case COUPLED_REAR:
-                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.BACK) ? 1 : 0 : 0;
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.BACK) && ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.BACK) ? 1 : 0 : 0;
             case BELL:
                 return stock instanceof Locomotive ? ((Locomotive) stock).getBell() > 0 ? 1 : 0 : 0;
             case WHISTLE:

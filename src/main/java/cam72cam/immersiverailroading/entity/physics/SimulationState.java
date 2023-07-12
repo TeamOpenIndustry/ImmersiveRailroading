@@ -1,10 +1,13 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
+import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.PhysicalMaterials;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
@@ -16,12 +19,10 @@ import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.DegreeFuncs;
+import cam72cam.mod.util.FastMath;
 import cam72cam.mod.world.World;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class SimulationState {
@@ -42,6 +43,8 @@ public class SimulationState {
     public UUID interactingFront;
     public UUID interactingRear;
 
+    public float brakePressure;
+
     public Vec3d recalculatedAt;
     // All positions in the stock bounds
     public List<Vec3i> collidingBlocks;
@@ -54,9 +57,17 @@ public class SimulationState {
     // Blocks that were actually broken and need to be removed
     public List<Vec3i> blocksToBreak;
 
+    public double directResistance;
+
     public Configuration config;
     public boolean dirty = true;
     public boolean canBeUnloaded = true;
+    public double collided;
+    public boolean sliding;
+    public boolean frontPushing;
+    public boolean frontPulling;
+    public boolean rearPushing;
+    public boolean rearPulling;
 
     public static class Configuration {
         public UUID id;
@@ -79,10 +90,20 @@ public class SimulationState {
         public double couplerSlackRear;
 
         public double massKg;
-        public double brakeAdhesionNewtons;
+
+        public double maximumAdhesionNewtons;
+        public double designAdhesionNewtons;
+        public double rollingResistanceCoefficient;
+        private final Function<List<Vec3i>, Double> directResistanceNewtons;
+
         // We don't actually want to use this value, it's only for dirty checking
         private double tractiveEffortFactors;
         private Function<Speed, Double> tractiveEffortNewtons;
+
+        public double desiredBrakePressure;
+        public double independentBrakePosition;
+
+        public boolean hasPressureBrake;
 
         public Configuration(EntityCoupleableRollingStock stock) {
             id = stock.getUUID();
@@ -109,18 +130,29 @@ public class SimulationState {
             couplerSlackRear = stock.getDefinition().getCouplerSlack(EntityCoupleableRollingStock.CouplerType.BACK, gauge);
 
             this.massKg = stock.getWeight();
+            // When FuelRequired is false, most of the time the locos are empty.  Work around that here
+            double designMassKg = !Config.ConfigBalance.FuelRequired && (stock instanceof Locomotive || stock instanceof Tender) ? massKg : stock.getMaxWeight();
 
             if (stock instanceof Locomotive) {
                 Locomotive locomotive = (Locomotive) stock;
                 tractiveEffortNewtons = locomotive::getTractiveEffortNewtons;
                 tractiveEffortFactors = locomotive.getThrottle() + (locomotive.getReverser() * 10);
+                desiredBrakePressure = locomotive.getTrainBrake();
             } else {
                 tractiveEffortNewtons = speed -> 0d;
                 tractiveEffortFactors = 0;
+                desiredBrakePressure = 0;
             }
 
-            double totalAdhesionNewtons = stock.getWeight() * stock.getBrakeShoeFriction();
-            brakeAdhesionNewtons = totalAdhesionNewtons * stock.getTotalBrake() * Config.ConfigBalance.brakeMultiplier;
+
+            double staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL);
+            this.maximumAdhesionNewtons = massKg * staticFriction;
+            this.designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
+            this.independentBrakePosition = stock.getIndependentBrake();
+            this.directResistanceNewtons = stock::getDirectFrictionNewtons;
+            this.hasPressureBrake = stock.getDefinition().hasPressureBrake();
+
+            this.rollingResistanceCoefficient = stock.getDefinition().rollingResistanceCoefficient;
         }
 
         @Override
@@ -130,7 +162,9 @@ public class SimulationState {
                 return couplerEngagedFront == other.couplerEngagedFront &&
                         couplerEngagedRear == other.couplerEngagedRear &&
                         Math.abs(tractiveEffortFactors - other.tractiveEffortFactors) < 0.01 &&
-                        Math.abs(brakeAdhesionNewtons - other.brakeAdhesionNewtons)/massKg < 0.01;
+                        Math.abs(massKg - other.massKg)/massKg < 0.01 &&
+                        Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.1 &&
+                        Math.abs(independentBrakePosition - other.independentBrakePosition) < 0.01;
             }
             return false;
         }
@@ -150,6 +184,8 @@ public class SimulationState {
 
         interactingFront = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.FRONT);
         interactingRear = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.BACK);
+
+        brakePressure = stock.getBrakePressure();
 
         config = new Configuration(stock);
 
@@ -176,6 +212,8 @@ public class SimulationState {
         this.interactingFront = prev.interactingFront;
         this.interactingRear = prev.interactingRear;
 
+        this.brakePressure = prev.brakePressure;
+
         this.config = prev.config;
 
         this.bounds = config.bounds.apply(this);
@@ -191,26 +229,33 @@ public class SimulationState {
         interferingBlocks = prev.interferingBlocks;
         interferingResistance = prev.interferingResistance;
         blocksToBreak = Collections.emptyList();
+        directResistance = prev.directResistance;
     }
 
     public void calculateCouplerPositions() {
         Vec3d bogeyFront = VecUtil.fromWrongYawPitch(config.offsetFront, yaw, pitch);
         Vec3d bogeyRear = VecUtil.fromWrongYawPitch(config.offsetRear, yaw, pitch);
-        Vec3d positionFront = position.add(bogeyFront);
-        Vec3d positionRear = position.add(bogeyRear);
 
-        Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw);
-        Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw);
+        Vec3d positionFront = couplerPositionFront = position.add(bogeyFront);
+        Vec3d positionRear = couplerPositionRear = position.add(bogeyRear);
 
         ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yaw, config.gauge.value());
         ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
 
         if (trackFront != null && trackRear != null) {
-            couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront.subtract(bogeyFront));
-            couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear.subtract(bogeyRear));
-        } else {
-            couplerPositionFront = position.add(couplerVecFront);
-            couplerPositionRear = position.add(couplerVecRear);
+            Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront - config.offsetFront, yawFront);
+            Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear - config.offsetRear, yawRear);
+
+            couplerPositionFront = trackFront.getNextPosition(positionFront, couplerVecFront);
+            couplerPositionRear = trackRear.getNextPosition(positionRear, couplerVecRear);
+            //couplerPositionFront = couplerPositionFront.subtract(position).normalize().scale(Math.abs(config.couplerDistanceFront)).add(position);
+            //couplerPositionRear = couplerPositionRear.subtract(position).normalize().scale(Math.abs(config.couplerDistanceRear)).add(position);
+        }
+        if (Objects.equals(couplerPositionFront, positionFront)) {
+            couplerPositionFront = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
+        }
+        if (Objects.equals(couplerPositionRear, positionRear)) {
+            couplerPositionRear = position.add(VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw));
         }
     }
 
@@ -243,6 +288,7 @@ public class SimulationState {
             next.velocity = 0;
         } else {
             next.calculateCouplerPositions();
+
             // We will actually break the blocks
             this.blocksToBreak = this.interferingBlocks;
             // We can now ignore those positions for the rest of the simulation
@@ -253,6 +299,7 @@ public class SimulationState {
             if (next.recalculatedAt.distanceToSquared(next.position) > minDist * minDist) {
                 next.calculateBlockCollisions(blocksAlreadyBroken);
                 next.recalculatedAt = next.position;
+                next.directResistance = config.directResistanceNewtons.apply(trackToUpdate);
             } else {
                 // We put off calculating collisions for now
                 next.interferingBlocks = Collections.emptyList();
@@ -273,26 +320,26 @@ public class SimulationState {
         Vec3d positionRear = VecUtil.fromWrongYawPitch(config.offsetRear, yaw, pitch).add(position);
 
         // Find tracks
-        ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yaw, config.gauge.value());
-        ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
+        ITrack trackFront = MovementTrack.findTrack(config.world, positionFront, yawFront, config.gauge.value());
+        ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yawRear, config.gauge.value());
         if (trackFront == null || trackRear == null) {
             return;
         }
 
+        boolean isTurnTable = false;
         if (Math.abs(distance) < 0.0001) {
-            boolean isTurnTable;
 
             TileRailBase frontBase = trackFront instanceof TileRailBase ? (TileRailBase) trackFront : null;
             TileRailBase rearBase  = trackRear instanceof TileRailBase ? (TileRailBase) trackRear : null;
             isTurnTable = frontBase != null &&
                     (
-                            frontBase.getTicksExisted() < 100 ||
+                            //frontBase.getTicksExisted() < 100 ||
                                     frontBase.getParentTile() != null &&
                                             frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
                     );
             isTurnTable = isTurnTable || rearBase != null &&
                     (
-                            rearBase.getTicksExisted() < 100 ||
+                            //rearBase.getTicksExisted() < 100 ||
                                     rearBase.getParentTile() != null &&
                                             rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
                     );
@@ -331,7 +378,7 @@ public class SimulationState {
 
             Vec3d bogeyDelta = nextFront.subtract(nextRear);
             yaw = VecUtil.toWrongYaw(bogeyDelta);
-            pitch = (float) Math.toDegrees(Math.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
+            pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
             // TODO Rescale fixes issues with curves losing precision, but breaks when correcting stock positions
             position = position.add(deltaCenter/*.normalize().scale(distance)*/);
         }
@@ -339,6 +386,11 @@ public class SimulationState {
         if (isReversed) {
             yawFront += 180;
             yawRear += 180;
+        }
+
+        if (isTurnTable) {
+            yawFront = yaw;
+            yawRear = yaw;
         }
     }
 
@@ -349,9 +401,22 @@ public class SimulationState {
 
     public double frictionNewtons() {
         // https://evilgeniustech.com/idiotsGuideToRailroadPhysics/OtherLocomotiveForces/#rolling-resistance
-        double rollingResistanceNewtons = 0.002 * (config.massKg * 9.8);
+        double rollingResistanceNewtons = config.rollingResistanceCoefficient * (config.massKg * 9.8);
         // TODO This is kinda directional?
         double blockResistanceNewtons = interferingResistance * 1000 * Config.ConfigDamage.blockHardness;
-        return rollingResistanceNewtons + blockResistanceNewtons + config.brakeAdhesionNewtons;
+
+        double brakeAdhesionNewtons = config.designAdhesionNewtons * Math.min(1, Math.max(brakePressure, config.independentBrakePosition));
+
+        this.sliding = false;
+        if (brakeAdhesionNewtons > config.maximumAdhesionNewtons && Math.abs(velocity) > 0.01) {
+            // WWWWWHHHEEEEE!!! SLIDING!!!!
+            double kineticFriction = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.STEEL);
+            brakeAdhesionNewtons = config.massKg * kineticFriction;
+            this.sliding = true;
+        }
+
+        brakeAdhesionNewtons *= Config.ConfigBalance.brakeMultiplier;
+
+        return rollingResistanceNewtons + blockResistanceNewtons + brakeAdhesionNewtons + directResistance;
     }
 }

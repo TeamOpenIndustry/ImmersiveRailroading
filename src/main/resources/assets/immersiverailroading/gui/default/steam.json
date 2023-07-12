@@ -60,6 +60,20 @@
           }
         },
         {
+          "comment": "brake pressure",
+          "x": 61,
+          "y": 74,
+          "image": "immersiverailroading:gui/indicator.png",
+          "readout": "BRAKE_PRESSURE",
+          "translate": {
+            "x": 0,
+            "y": -50
+          },
+          "color": {
+            "0.0": "0xDDa22020"
+          }
+        },
+        {
           "comment": "train brake",
           "x": 61,
           "y": 74,

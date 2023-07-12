@@ -1,0 +1,9 @@
+# Either a sound file or sound definition
+sound_name = "immersiverailroading:my/path/to/sound.ogg"
+sound_name =
+        start = "immersiverailroading:my/path/to/sound_start.ogg"   # Optional: Play when started
+        main = "immersiverailroading:my/path/to/sound_main.ogg"     # Optional: Play once start has completed.
+        stop = "immersiverailroading:my/path/to/sound_stop.ogg"     # Optional: Play once main has completed or sound has been stopped.
+        looping = True  # Optional: Should the main sound be looped?
+        distance = null # Optional: How far should the sound be heard in meters
+        volume = 1.0    # Optional: Base volume multiplier

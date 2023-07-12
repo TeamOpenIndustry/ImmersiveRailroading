@@ -35,7 +35,7 @@ import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.List;
+import java.util.*;
 
 import static cam72cam.immersiverailroading.entity.Locomotive.AUTOMATED_PLAYER;
 
@@ -76,6 +76,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@TagField("stockTag")
 	private String stockTag;
 	private EntityMoveableRollingStock overhead;
+	@TagField("pushPull")
+	private boolean pushPull = true;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -136,7 +138,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		this.markDirty();
 		return this.augmentFilterID != null;
 	}
-	public PlayerMessage nextAugmentRedstoneMode(boolean crouching) {
+
+	public PlayerMessage nextAugmentRedstoneMode(boolean isPiston) {
 		if (this.augment == null) {
 			return null;
 		}
@@ -148,7 +151,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				controlMode = LocoControlMode.values()[((controlMode.ordinal() + 1) % (LocoControlMode.values().length))];
 				return PlayerMessage.translate(controlMode.toString());
 			case COUPLER:
-				if (! crouching) {
+				if (isPiston) {
 					couplerMode = CouplerAugmentMode.values()[((couplerMode.ordinal() + 1) % (CouplerAugmentMode.values().length))];
 					return PlayerMessage.translate(couplerMode.toString());
 				}
@@ -157,8 +160,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			case ITEM_UNLOADER:
 			case FLUID_LOADER:
 			case FLUID_UNLOADER:
-				this.redstoneMode = RedstoneMode.values()[(redstoneMode.ordinal() + 1) % RedstoneMode.values().length];
-				return PlayerMessage.translate(redstoneMode.toString());
+				if (isPiston) {
+					this.pushPull = !this.pushPull;
+					return PlayerMessage.translate("immersiverailroading:augment.pushpull." + (this.pushPull ? "enabled" : "disabled"));
+				} else {
+					this.redstoneMode = RedstoneMode.values()[(redstoneMode.ordinal() + 1) % RedstoneMode.values().length];
+					return PlayerMessage.translate(redstoneMode.toString());
+				}
 			default:
 				return null;
 		}
@@ -269,6 +277,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return replaced;
 	}
 
+	public TileRailBase getReplacedTile() {
+		return replaced != null ? (TileRailBase) getWorld().reconstituteBlockEntity(replaced) : null;
+	}
+
 	/* TODO HACKS
 	@Override
 	public boolean shouldRefresh(net.minecraft.world.World world, net.minecraft.util.math.BlockPos pos, net.minecraft.block.state.IBlockState oldState, net.minecraft.block.state.IBlockState newState) {
@@ -338,38 +350,73 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
-		float rotationYaw = VecUtil.toWrongYaw(motion);
-		Vec3d nextPos = currentPosition;
-		Vec3d predictedPos = currentPosition.add(motion);
-		boolean hasSwitchSet = false;
-
-		TileRailBase self = this;
-		TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
-
-		if (tile == null) {
-			// Can happen due to track in progress of breaking
-			return currentPosition;
+		double distanceMetersSq = motion.lengthSquared();
+		double maxDistance = 0.25;
+		if (distanceMetersSq*0.9 > maxDistance * maxDistance) {
+			// 0.9 forces at least one iteration + scaling
+			return MovementTrack.iterativePathing(getWorld(), currentPosition, this, getTrackGauge(), motion, maxDistance);
 		}
+		return getNextPositionShort(currentPosition, motion);
+	}
 
-		double distanceMeters = motion.length();
-		if (distanceMeters > MovementTrack.maxDistance) {
-			return MovementTrack.nextPosition(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
-		}
+	public Vec3d getNextPositionShort(Vec3d currentPosition, Vec3d motion) {
+		if (this.getReplaced() == null) {
+			// Simple common case, maybe this does not need to be optimized out of the for loop below?
+			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
+			if (tile == null) {
+				return currentPosition;
+			}
+			//tiles = Collections.singletonList(tile);
+			// Optimized version of the below looping when no overlapping occurs
 
-		while(tile != null) {
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
 
 			if (state == SwitchState.STRAIGHT) {
 				tile = tile.getParentTile();
 			}
 
+			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
+			if (potential != null) {
+				return potential;
+			}
 
-			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, rotationYaw, distanceMeters);
+			return currentPosition;
+		}
+		// Complex case with overlapping segments
+		Map<Vec3i, TileRail> tileMap = new HashMap<>();
+		for (TileRailBase current = this; current != null; current = current.getReplacedTile()) {
+			TileRail tile = current instanceof TileRail ? (TileRail) current : current.getParentTile();
+			TileRail parent = tile;
+			while (parent != null && !parent.getPos().equals(parent.getParent())) {
+				// Move to root of switch (if applicable)
+				parent = parent.getParentTile();
+			}
+			if (tile != null && parent != null) {
+				tileMap.putIfAbsent(parent.getPos(), tile);
+			}
+		}
+
+		Collection<TileRail> tiles = tileMap.values();
+
+		Vec3d nextPos = currentPosition;
+		Vec3d predictedPos = currentPosition.add(motion);
+		boolean hasSwitchSet = false;
+
+		for (TileRail tile : tiles) {
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
+
+			if (state == SwitchState.STRAIGHT) {
+				tile = tile.getParentTile();
+			}
+
+			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
 			if (potential != null) {
 				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
 				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
 				if (state == SwitchState.TURN) {
+					// This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
 					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
+					float rotationYaw = VecUtil.toWrongYaw(motion);
 					double diff = MathUtil.trueModulus(other - rotationYaw, 360);
 					diff = Math.min(360-diff, diff);
 					if (diff < 2.5) {
@@ -377,33 +424,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						nextPos = potential;
 					}
 				}
+				// TODO should this be an else?
 				// If we are not on a switch curve and closer to our target (or are on the first iteration)
-				if (!hasSwitchSet && potential.distanceToSquared(predictedPos) < nextPos.distanceToSquared(predictedPos) ||
-						currentPosition == nextPos) {
+				if (currentPosition == nextPos || !hasSwitchSet && potential.distanceToSquared(predictedPos) < nextPos.distanceToSquared(predictedPos)) {
 					nextPos = potential;
-				}
-			}
-
-			if (self.getReplaced() == null) {
-				break;
-			}
-
-			if (self.getParentTile() == null) {
-				// Still loading
-				ImmersiveRailroading.warn("Unloaded parent at %s", self.getParent());
-				break;
-			}
-
-            tile = null;
-			Vec3i currentParent = self.getParentTile().getParent();
-			for (TagCompound data = self.getReplaced(); data != null; data = self.getReplaced()) {
-				self = (TileRailBase) getWorld().reconstituteBlockEntity(data);
-				if (self == null) {
-					break;
-				}
-				if (!currentParent.equals(self.getParent())) {
-					tile = self.getParentTile();
-					break;
 				}
 			}
 		}
@@ -560,7 +584,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		try {
 			switch (this.augment) {
             case ITEM_LOADER:
-			{
+			if (pushPull) {
 				Freight freight = this.getStockNearBy(Freight.class);
 				if (freight == null) {
 					break;
@@ -573,7 +597,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 			break;
-			case ITEM_UNLOADER: {
+			case ITEM_UNLOADER:
+			if (pushPull) {
 				Freight freight = this.getStockNearBy(Freight.class);
 				if (freight == null) {
 					break;
@@ -586,7 +611,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 			break;
-			case FLUID_LOADER: {
+			case FLUID_LOADER:
+			if (pushPull) {
 				FreightTank stock = this.getStockNearBy(FreightTank.class);
 				if (stock == null) {
 					break;
@@ -598,8 +624,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					}
 				}
 			}
-				break;
-			case FLUID_UNLOADER: {
+			break;
+			case FLUID_UNLOADER:
+			if (pushPull) {
 				FreightTank stock = this.getStockNearBy(FreightTank.class);
 				if (stock == null) {
 					break;
@@ -611,8 +638,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					}
 				}
 			}
-				
-				break;
+			break;
 			case WATER_TROUGH:
 				/*
 				if (this.augmentTank == null) {
@@ -891,8 +917,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 			return true;
 		}
-		if (player.hasPermission(Permissions.AUGMENT_TRACK) && (stack.is(Fuzzy.REDSTONE_TORCH) || stack.is(Fuzzy.REDSTONE_DUST))) {
-			PlayerMessage next = this.nextAugmentRedstoneMode(stack.is(Fuzzy.REDSTONE_DUST));
+		if (player.hasPermission(Permissions.AUGMENT_TRACK) && (stack.is(Fuzzy.REDSTONE_TORCH) || stack.is(Fuzzy.REDSTONE_DUST) || stack.is(Fuzzy.PISTON))) {
+			PlayerMessage next = this.nextAugmentRedstoneMode(stack.is(Fuzzy.PISTON));
 			if (next != null) {
 				if (this.getWorld().isServer) {
 					player.sendMessage(next);

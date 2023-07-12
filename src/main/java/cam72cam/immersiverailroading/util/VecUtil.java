@@ -30,9 +30,10 @@ public class VecUtil {
 		);
 	}
 	public static Vec3d rotatePitch(Vec3d pos, float rotationPitch) {
-		if (rotationPitch == 0) {
+		if (Math.abs(rotationPitch) < 0.01) {
 			return pos;
 		}
+		// TODO optimize me!
 		return new Matrix4().rotate(Math.toRadians(rotationPitch), 0, 0, 1).apply(pos);
 	}
 

@@ -1,0 +1,17 @@
+import: "immersiverailroading:rolling_stock/default/base.caml"
+
+works = null # Optional: Displayed as part of the item tooltip
+
+properties =
+    hasRadioEquipment = False # Optional: Most locomotives don't support remote control
+
+    cab_car = False             # Optional: Cab Cars don't have any motive power, but can be MU'd
+    # The following are ignored if cab_car = True
+    horsepower = null           # Required
+    tractive_effort_lbf = null  # Required
+    max_speed_kmh = null        # Required
+    multi_unit_capable = False  # Optional: Defaults to true for Diesel Electrics
+
+    isLinkedBrakeThrottle = False # Optional: Should the throttle / brake controls be connected?
+    toggle_bell = True            # Optional: Should the bell be toggled on/off or should it require you to hold a button to activate?
+    isCog = False                 # Optional: provides near infinite traction when on cog-enabled track

@@ -1,0 +1,15 @@
+import: "immersiverailroading:rolling_stock/default/locomotive.caml"
+
+properties =
+    multi_unit_capable = True  # Optional: Defaults to true for Diesel Electrics
+
+    # The following is ignored if cab_car is set to True
+    fuel_capacity_l = null # Required: How large should the fuel tank be?
+    fuel_efficiency_% = null # Required: How efficient does this locomotive consume fuel? Range 1-99
+    throttle_notches = 8 # Optional: Number of throttle notches in the cab
+    horn_sustained = False # Optional: Should the horn repeat
+
+sounds =
+    idle = "immersiverailroading:sounds/diesel/default/idle.ogg"  # Optional: See sound_definition.caml for details
+    horn = "immersiverailroading:sounds/diesel/default/horn.ogg"  # Optional: See sound_definition.caml for details
+    bell = "immersiverailroading:sounds/diesel/default/bell.ogg"  # Optional: See sound_definition.caml for details

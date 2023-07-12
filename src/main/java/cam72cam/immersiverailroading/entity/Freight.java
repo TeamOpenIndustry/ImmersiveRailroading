@@ -160,4 +160,9 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		fLoad = fLoad + super.getWeight();
 		return fLoad;
 	}
+
+	@Override
+	public double getMaxWeight() {
+		return super.getMaxWeight() + ConfigBalance.blockWeight * getInventorySize() * 64;
+	}
 }

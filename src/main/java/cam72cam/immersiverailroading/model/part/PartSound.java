@@ -111,8 +111,14 @@ public class PartSound {
                     }
                 case PLAYING:
                     // Keep looping until loop is stopped
-                    if (sounds.main != null && sounds.main.isPlaying()) {
-                        toUpdate = sounds.main;
+                    if (sounds.main != null) {
+                        if (canLoop && !sounds.main.isPlaying()) {
+                            // It can go out of attenuation distance and may need to be restarted
+                            sounds.main.play(stock.getPosition());
+                        }
+                        if (sounds.main.isPlaying()) {
+                            toUpdate = sounds.main;
+                        }
                         break;
                     }
                     // Loop Finished, wait for shutoff to play outro

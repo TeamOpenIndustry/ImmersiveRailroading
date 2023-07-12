@@ -84,7 +84,7 @@ public class CAML {
 
             String trimmed = val.trim();
             if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
-                val = val.substring(1, val.length() - 1);
+                trimmed = trimmed.substring(1, trimmed.length() - 1);
             }
 
             if (StringUtils.isWhitespace(val)) {
@@ -105,12 +105,12 @@ public class CAML {
                     if (primitives.containsKey(key) || primitiveSets.containsKey(key)) {
                         throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times %s", line, context));
                     }
-                    primitives.put(key, createValue(val));
+                    primitives.put(key, createValue(trimmed));
                 } else {
                     if (primitives.containsKey(key)) {
                         throw new ParseException(String.format("Invalid line: '%s' can not be specified multiple times %s", line, context));
                     }
-                    primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(createValue(val));
+                    primitiveSets.computeIfAbsent(key, k -> new ArrayList<>()).add(createValue(trimmed));
                 }
             }
         }
@@ -188,31 +188,34 @@ public class CAML {
     }
 
     private static DataBlock.Value createValue(String value) {
-            return new DataBlock.Value() {
-                @Override
-                public Boolean asBoolean() {
-                    return value == null ? null : Boolean.parseBoolean(value);
-                }
+        if (value == null || value.equalsIgnoreCase("null")) {
+            return DataBlock.Value.NULL;
+        }
+        return new DataBlock.Value() {
+            @Override
+            public Boolean asBoolean() {
+                                     return Boolean.parseBoolean(value);
+                                                                                               }
 
-                @Override
-                public Integer asInteger() {
-                    return value == null ? null : Integer.parseInt(value);
-                }
+            @Override
+            public Integer asInteger() {
+                                     return Integer.parseInt(value);
+                                                                                           }
 
-                @Override
-                public Float asFloat() {
-                    return value == null ? null : Float.parseFloat(value);
-                }
+            @Override
+            public Float asFloat() {
+                                 return Float.parseFloat(value);
+                                                                                       }
 
-                @Override
-                public Double asDouble() {
-                    return value == null ? null : Double.parseDouble(value);
-                }
+            @Override
+            public Double asDouble() {
+                                   return Double.parseDouble(value);
+                                                                                           }
 
-                @Override
-                public String asString() {
-                    return value;
-                }
-            };
+            @Override
+            public String asString() {
+                return value;
+            }
+        };
     }
 }
