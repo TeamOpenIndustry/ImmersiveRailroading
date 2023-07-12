@@ -127,7 +127,7 @@ public class LocomotiveSteam extends Locomotive {
 				//formula estimated and tweaked in desmos until it did about what I want
 				((1.8d * speedPercent) * (Math.abs(getReverser()) * Math.pow(2.0d, 2.0d * speedPercent))) - 0.21d) 
 			) * (currentPressure / mawp)	//scale to current boiler pressure
-			* Math.max(getThrottle() * 5, 1);	//no backpressure at 0 throttle, full back pressure by 20% throttle
+			* Math.min(getThrottle() * 5, 1);	//no backpressure at 0 throttle, full back pressure by 20% throttle
 	}
 	
 	@Override
@@ -183,7 +183,7 @@ public class LocomotiveSteam extends Locomotive {
 	protected double getStaticTractiveEffort(Speed speed) {
 		//we're calculating average tractive effort, real tractive effort when starting varies, this simulates wheel slip caused by that variation
 		double original = super.getStaticTractiveEffort(speed);
-		return ImmersionConfig.arcadePhysics ? original : original * Math.min(.85 + (speed.metric() * 0.05), 1);
+		return ImmersionConfig.arcadePhysics ? original : original * Math.min(.80 + (Math.abs(speed.metric()) * 0.05), 1);
 	}
 
 	@Override
@@ -369,7 +369,7 @@ public class LocomotiveSteam extends Locomotive {
 			float delta = (float) (throttle  / this.getTankCapacity().MilliBuckets());
 			
 			boilerPressure = Math.max(0, boilerPressure - delta);
-			waterUsed += delta * 1000/*fudge*/;
+			waterUsed += delta * 10/*fudge*/;
 		}
 		
 		if (waterUsed != 0) {
