@@ -124,7 +124,7 @@ public class LocomotiveSteam extends Locomotive {
 			Math.max(
 				0, //formula spends a lot of time negative, so limit minimum to 0
 				//formula estimated and tweaked in desmos until it did about what I want
-				((.55d * speedPercent) * (Math.abs(getReverser()) * Math.pow(2.0d, 2.0d * speedPercent))) - 0.21d) 
+				((1.8d * speedPercent) * (Math.abs(getReverser()) * Math.pow(2.0d, 2.0d * speedPercent))) - 0.21d) 
 			) * (currentPressure / mawp);	//scale to current boiler pressure
 	}
 	
@@ -176,6 +176,11 @@ public class LocomotiveSteam extends Locomotive {
 	@Override
 	public double getTractiveEffortNewtons(Speed speed) {
 		return (getDefinition().cab_forward ? -1 : 1) * super.getTractiveEffortNewtons(speed);
+	}
+	
+	@Override
+	protected double getStaticTractiveEffort(Speed speed) {
+		return super.getStaticTractiveEffort(speed) * Math.min(.85 + (speed.metric() / 2.0d), 1);
 	}
 
 	@Override
