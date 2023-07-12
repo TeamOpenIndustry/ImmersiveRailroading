@@ -124,7 +124,7 @@ public class LocomotiveSteam extends Locomotive {
 			Math.max(
 				0, //formula spends a lot of time negative, so limit minimum to 0
 				//formula estimated and tweaked in desmos until it did about what I want
-				((.55d * speedPercent) * (Math.abs(getReverser()) * Math.pow(2.0d * Math.abs(getReverser()), 2.0d * speedPercent))) - 0.21d) 
+				((.55d * speedPercent) * (Math.abs(getReverser()) * Math.pow(2.0d, 2.0d * speedPercent))) - 0.21d) 
 			) * (currentPressure / mawp);	//scale to current boiler pressure
 	}
 	
@@ -290,7 +290,7 @@ public class LocomotiveSteam extends Locomotive {
 		double energyKCalDeltaTick = 0;
 		
 		if (burningSlots != 0 && this.getLiquidAmount() > 0) {
-			energyKCalDeltaTick += burningSlots * coalEnergyKCalTick() * 1.05;
+			energyKCalDeltaTick += burningSlots * coalEnergyKCalTick();
 		}
 
 		// Assume the boiler is a cube...
@@ -346,10 +346,10 @@ public class LocomotiveSteam extends Locomotive {
 		double throttle;
 		if(steamDemand_Hp < maxSteamFlow_Hp) {
 			//steam use is steam demand
-			throttle = (steamDemand_Hp / 20) * 0.17811d *.01d/*fudge*/ * ConfigBalance.locoHeatTimeScale;	//Hp is per second, adjust to per tick
+			throttle = (steamDemand_Hp / 20) * 0.17811d *.1d/*fudge*/ * ConfigBalance.locoHeatTimeScale;	//Hp is per second, adjust to per tick
 		}else {
 			//steam use is max flow
-			throttle = (maxSteamFlow_Hp / 20) * 0.17811d *.01d/*fudge*/ * ConfigBalance.locoHeatTimeScale;
+			throttle = (maxSteamFlow_Hp / 20) * 0.17811d *.1d/*fudge*/ * ConfigBalance.locoHeatTimeScale;
 		}
 		if (throttle != 0 && boilerPressure > 0) {
 			/*double burnableSlots = this.cargoItems.getSlotCount()-2;
@@ -466,7 +466,7 @@ public class LocomotiveSteam extends Locomotive {
 		double coalBurnTicks = 1600; // This is a bit of fudge
 		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
 		//redefine based on max horsepower rating to limit max steam production and approximate thermal efficiency
-		return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * .01d/*fudge*/ * ConfigBalance.locoHeatTimeScale;
+		return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * .1d/*fudge*/ * ConfigBalance.locoHeatTimeScale;
 	}
 
 	private static class SlotTagMapper implements TagMapper<Map<Integer, Integer>> {
