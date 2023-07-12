@@ -400,7 +400,7 @@ public abstract class Locomotive extends FreightTank {
 				* slipCoefficient(speed)
 				* getDefinition().factorOfAdhesion()
 				* Config.ConfigBalance.tractionMultiplier;*/
-		return getDefinition().getStartingTractionNewtons(gauge) * (getDefinition().factorOfAdhesion() / 4);
+		return getDefinition().getStartingTractionNewtons(gauge) * (getDefinition().factorOfAdhesion() / 4) * slipCoefficient(speed);
 	}
 	
 	protected double simulateWheelSlip() {
