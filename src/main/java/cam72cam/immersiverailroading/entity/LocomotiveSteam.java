@@ -100,11 +100,12 @@ public class LocomotiveSteam extends Locomotive {
 	private double cutoffTractiveEffort_N = 0;	//maximum tractive effort with current cutoff setting and boiler pressure in N, assuming full steam demand is met
 	private double steamDemand_Hp = 0;			//current steam demand in horse power, based on cutoff position and current speed
 	private double maxSteamFlow_Hp = 0;			//current maximum steam flow through the regulator in horse power, steam use cannot exceed this regardless of demand
+	private double currentPressure = 0;			//current boiler pressure or mawp if fuel isn't required
 	
 	//used once per tick to calculate cutoffTractiveEffort_N
-	private float cutoffTractiveEffort() {
+	private double cutoffTractiveEffort() {
 		//tractive effort in N produced by each PSI applied to the cylinders
-		float tePerPSI = maxTractiveEffort_N / mawp;
+		double tePerPSI = (double)maxTractiveEffort_N / (double)mawp;
 		/*
 		 * average pressure on the cylinders over the course of the stroke,
 		 * calculated by assuming current boiler pressure for length of valve travel(cutoff setting)
@@ -112,7 +113,7 @@ public class LocomotiveSteam extends Locomotive {
 		 * this gives the average pressure over the remainder of the stroke
 		 * multiply these pressures by the portion of the stroke to which they are applicable and add to get final average pressure
 		 */
-		float averagePreasure = (getBoilerPressure() * getReverser()) + ((((getBoilerPressure() * reverserDirection) + (getBoilerPressure() * getReverser())) / 2) * (1 - Math.abs(getReverser())));
+		double averagePreasure = (currentPressure * getReverser()) + ((((currentPressure * reverserDirection) + (currentPressure * getReverser())) / 2) * (1 - Math.abs(getReverser())));
 		return tePerPSI * averagePreasure;
 	}
 	
@@ -124,7 +125,7 @@ public class LocomotiveSteam extends Locomotive {
 				0, //formula spends a lot of time negative, so limit minimum to 0
 				//formula estimated and tweaked in desmos until it did about what I want
 				((.55d * speedPercent) * (Math.abs(getReverser()) * Math.pow(2.0d * Math.abs(getReverser()), 2.0d * speedPercent))) - 0.21d) 
-			) * (getBoilerPressure() / mawp);	//scale to current boiler pressure
+			) * (currentPressure / mawp);	//scale to current boiler pressure
 	}
 	
 	@Override
@@ -202,11 +203,12 @@ public class LocomotiveSteam extends Locomotive {
 		}
 		
 		//calculate values used multiple times once per tick
+		currentPressure = ConfigBalance.FuelRequired ? getBoilerPressure() : mawp;
 		reverserDirection = getReverser() <= 0 ? -1 : 1;
 		cutoffTractiveEffort_N = cutoffTractiveEffort();
 		steamDemand_Hp = Math.abs(cutoffTractiveEffort_N * getCurrentSpeed().metric()) / 2684.52d; 
 			//2684.52 is combined conversion factor of km/h to m/s and Watts to hp
-		maxSteamFlow_Hp = (double)maxPower_Hp * getThrottle() * 1.5d * (getBoilerPressure() / (double)mawp);
+		maxSteamFlow_Hp = (double)maxPower_Hp * getThrottle() * 1.5d * (currentPressure / (double)mawp);
 		
 
 		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
@@ -309,10 +311,10 @@ public class LocomotiveSteam extends Locomotive {
 		if (energyKCalDeltaTick != 0) {
 			// Change temperature
 			// 1 KCal raises 1KG water at STP 1 degree
-			// 1 KG of water == 1 m^3 of water 
+			// 1 KG of water == 1l of water == 1MB == .001 m^3
 			// TODO what happens when we change liters per mb FluidQuantity.FromMillibuckets((int) waterLevelMB).Liters()
 			//  +1 prevents div by zero
-			boilerTemperature += energyKCalDeltaTick / ((waterLevelMB + 1) / 1000);
+			boilerTemperature += energyKCalDeltaTick / (waterLevelMB + 1);
 		}
 		
 		if (boilerTemperature > 100) {
@@ -344,10 +346,10 @@ public class LocomotiveSteam extends Locomotive {
 		double throttle;
 		if(steamDemand_Hp < maxSteamFlow_Hp) {
 			//steam use is steam demand
-			throttle = steamDemand_Hp * 0.17811d * ConfigBalance.locoHeatTimeScale;
+			throttle = (steamDemand_Hp / 20) * 0.17811d *.01d/*fudge*/ * ConfigBalance.locoHeatTimeScale;	//Hp is per second, adjust to per tick
 		}else {
 			//steam use is max flow
-			throttle = maxSteamFlow_Hp * 0.17811d * ConfigBalance.locoHeatTimeScale;
+			throttle = (maxSteamFlow_Hp / 20) * 0.17811d *.01d/*fudge*/ * ConfigBalance.locoHeatTimeScale;
 		}
 		if (throttle != 0 && boilerPressure > 0) {
 			/*double burnableSlots = this.cargoItems.getSlotCount()-2;
@@ -355,10 +357,10 @@ public class LocomotiveSteam extends Locomotive {
 			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
 			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss*/
 			
-			float delta = (float) (throttle  / (this.getTankCapacity().MilliBuckets() / 1000));
+			float delta = (float) (throttle  / this.getTankCapacity().MilliBuckets());
 			
 			boilerPressure = Math.max(0, boilerPressure - delta);
-			waterUsed += delta;
+			waterUsed += delta * 1000/*fudge*/;
 		}
 		
 		if (waterUsed != 0) {
@@ -373,10 +375,11 @@ public class LocomotiveSteam extends Locomotive {
 		setBoilerPressure(boilerPressure);
 		setBoilerTemperature(Math.max(boilerTemperature, ambientTemperature()));
 
-		if (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 1.1 || (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 0.5 && boilerTemperature > 150)) {
-			// 10% over max pressure OR
+		if (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 4.0d || (boilerPressure > this.getDefinition().getMaxPSI(gauge) * 0.5 && boilerTemperature > 150)) {
+			// 300% over max pressure OR
 			// Half max pressure and high boiler temperature
 			//EXPLODE
+			//boilers have a factor of safety of at least 4, and I'm dealing with some weirdness redoing pressure, so I'm changing this to 400% pressure for now
 
 			Vec3d pos = this.getPosition();
 			if (Config.ConfigDamage.explosionsEnabled) {
@@ -463,7 +466,7 @@ public class LocomotiveSteam extends Locomotive {
 		double coalBurnTicks = 1600; // This is a bit of fudge
 		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
 		//redefine based on max horsepower rating to limit max steam production and approximate thermal efficiency
-		return (maxPower_Hp / (getInventorySize() - 2)) * 0.17811d * (1/1500) * ConfigBalance.locoHeatTimeScale;
+		return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * .01d/*fudge*/ * ConfigBalance.locoHeatTimeScale;
 	}
 
 	private static class SlotTagMapper implements TagMapper<Map<Integer, Integer>> {
