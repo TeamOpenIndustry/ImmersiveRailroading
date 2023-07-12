@@ -475,7 +475,7 @@ public class LocomotiveSteam extends Locomotive {
 		double coalBurnTicks = 1600; // This is a bit of fudge
 		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
 		//redefine based on max horsepower rating to limit max steam production and approximate thermal efficiency
-		double draguht = Math.max(1, 0.1 +(getThrottle() * (getReverser() * 5) * (speedPercent * 5) * 5));
+		double draguht = Math.min(1, 0.1 +(getThrottle() * (getReverser() * 5) * (speedPercent * 5) * 5));
 		return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * draguht * ConfigBalance.locoHeatTimeScale;
 	}
 
