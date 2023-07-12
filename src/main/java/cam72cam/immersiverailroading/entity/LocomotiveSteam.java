@@ -114,8 +114,9 @@ public class LocomotiveSteam extends Locomotive {
 		 * this gives the average pressure over the remainder of the stroke
 		 * multiply these pressures by the portion of the stroke to which they are applicable and add to get final average pressure
 		 */
+		//TODO sqrt((p1^2 + p2^2) / 2) in next physics level
 		double averagePreasure = (currentPressure * getReverser()) + ((((currentPressure * reverserDirection) + (currentPressure * getReverser())) / 2) * (1 - Math.abs(getReverser())));
-		return tePerPSI * averagePreasure;
+		return getReverser() == 0 ? 0 : tePerPSI * averagePreasure;
 	}
 	
 	//backpressure opposing motion due to high cutoff at high speed, produces a scalar as a proportion of maximum tractive effort

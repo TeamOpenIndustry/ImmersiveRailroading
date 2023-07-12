@@ -394,12 +394,13 @@ public abstract class Locomotive extends FreightTank {
 	/** Maximum force that can be between the wheels and the rails before it slips */
 	//TODO: redo
 	protected double getStaticTractiveEffort(Speed speed) {
-		return (Config.ConfigBalance.FuelRequired ? this.getWeight() : this.getMaxWeight()) // KG
+		/*return (Config.ConfigBalance.FuelRequired ? this.getWeight() : this.getMaxWeight()) // KG
 				* 9.8 // M/S/S
 				* STEEL.staticFriction(STEEL) * .4	//steel on steel static friction on a railway is typically .2-.35 not .7
 				* slipCoefficient(speed)
 				* getDefinition().factorOfAdhesion()
-				* Config.ConfigBalance.tractionMultiplier;
+				* Config.ConfigBalance.tractionMultiplier;*/
+		return getDefinition().getStartingTractionNewtons(gauge) * (getDefinition().factorOfAdhesion() / 4);
 	}
 	
 	protected double simulateWheelSlip() {
