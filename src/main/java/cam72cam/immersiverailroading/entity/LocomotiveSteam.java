@@ -101,6 +101,7 @@ public class LocomotiveSteam extends Locomotive {
 	private double steamDemand_Hp = 0;			//current steam demand in horse power, based on cutoff position and current speed
 	private double maxSteamFlow_Hp = 0;			//current maximum steam flow through the regulator in horse power, steam use cannot exceed this regardless of demand
 	private double currentPressure = 0;			//current boiler pressure or mawp if fuel isn't required
+	private double speedPercent = 0;			//current speed as a percent of rated top speed
 	
 	//used once per tick to calculate cutoffTractiveEffort_N
 	private double cutoffTractiveEffort() {
@@ -125,7 +126,8 @@ public class LocomotiveSteam extends Locomotive {
 				0, //formula spends a lot of time negative, so limit minimum to 0
 				//formula estimated and tweaked in desmos until it did about what I want
 				((1.8d * speedPercent) * (Math.abs(getReverser()) * Math.pow(2.0d, 2.0d * speedPercent))) - 0.21d) 
-			) * (currentPressure / mawp);	//scale to current boiler pressure
+			) * (currentPressure / mawp)	//scale to current boiler pressure
+			* Math.max(getThrottle() * 5, 1);	//no backpressure at 0 throttle, full back pressure by 20% throttle
 	}
 	
 	@Override
@@ -149,7 +151,6 @@ public class LocomotiveSteam extends Locomotive {
 
 			return traction_N * multiplier;
 		} else {							//use realistic physics
-			double speedPercent = Math.abs(getCurrentSpeed().metric() / (double)ratedTopSpeed_Km_H);	//current speed as a percent of rated top speed
 			
 			double workingTractiveEffort;	//working tractive effort calculated with current steam flow, cutoff demand, and boiler pressure, before factoring loss due to backpressure
 			if(steamDemand_Hp < maxSteamFlow_Hp) {
@@ -180,7 +181,9 @@ public class LocomotiveSteam extends Locomotive {
 	
 	@Override
 	protected double getStaticTractiveEffort(Speed speed) {
-		return super.getStaticTractiveEffort(speed) * Math.min(.85 + (speed.metric() / 2.0d), 1);
+		//we're calculating average tractive effort, real tractive effort when starting varies, this simulates wheel slip caused by that variation
+		double original = super.getStaticTractiveEffort(speed);
+		return ImmersionConfig.arcadePhysics ? original : original * Math.min(.85 + (speed.metric() * 0.05), 1);
 	}
 
 	@Override
@@ -214,6 +217,7 @@ public class LocomotiveSteam extends Locomotive {
 		steamDemand_Hp = Math.abs(cutoffTractiveEffort_N * getCurrentSpeed().metric()) / 2684.52d; 
 			//2684.52 is combined conversion factor of km/h to m/s and Watts to hp
 		maxSteamFlow_Hp = (double)maxPower_Hp * getThrottle() * 1.5d * (currentPressure / (double)mawp);
+		speedPercent = Math.abs(getCurrentSpeed().metric() / (double)ratedTopSpeed_Km_H);
 		
 
 		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
@@ -351,10 +355,10 @@ public class LocomotiveSteam extends Locomotive {
 		double throttle;
 		if(steamDemand_Hp < maxSteamFlow_Hp) {
 			//steam use is steam demand
-			throttle = (steamDemand_Hp / 20) * 0.17811d *.1d/*fudge*/ * ConfigBalance.locoHeatTimeScale;	//Hp is per second, adjust to per tick
+			throttle = (steamDemand_Hp / 20) * 0.17811d /*fudge*/ * ConfigBalance.locoHeatTimeScale;	//Hp is per second, adjust to per tick
 		}else {
 			//steam use is max flow
-			throttle = (maxSteamFlow_Hp / 20) * 0.17811d *.1d/*fudge*/ * ConfigBalance.locoHeatTimeScale;
+			throttle = (maxSteamFlow_Hp / 20) * 0.17811d /*fudge*/ * ConfigBalance.locoHeatTimeScale;
 		}
 		if (throttle != 0 && boilerPressure > 0) {
 			/*double burnableSlots = this.cargoItems.getSlotCount()-2;
@@ -471,7 +475,8 @@ public class LocomotiveSteam extends Locomotive {
 		double coalBurnTicks = 1600; // This is a bit of fudge
 		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
 		//redefine based on max horsepower rating to limit max steam production and approximate thermal efficiency
-		return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * .1d/*fudge*/ * ConfigBalance.locoHeatTimeScale;
+		double draguht = Math.max(1, 0.1 +(getThrottle() * (getReverser() * 5) * (speedPercent * 5) * 5));
+		return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * draguht * ConfigBalance.locoHeatTimeScale;
 	}
 
 	private static class SlotTagMapper implements TagMapper<Map<Integer, Integer>> {
