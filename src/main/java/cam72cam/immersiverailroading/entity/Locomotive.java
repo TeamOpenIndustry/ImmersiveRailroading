@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ImmersionConfig;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
@@ -400,7 +401,10 @@ public abstract class Locomotive extends FreightTank {
 				* slipCoefficient(speed)
 				* getDefinition().factorOfAdhesion()
 				* Config.ConfigBalance.tractionMultiplier;*/
-		return getDefinition().getStartingTractionNewtons(gauge) * (getDefinition().factorOfAdhesion() / 4) * slipCoefficient(speed);
+		return getDefinition().getStartingTractionNewtons(gauge) 
+				* (getDefinition().factorOfAdhesion() / 4)
+				* slipCoefficient(speed)
+				* ConfigBalance.tractionMultiplier;
 	}
 	
 	protected double simulateWheelSlip() {

@@ -476,7 +476,7 @@ public class LocomotiveSteam extends Locomotive {
 		double coalBurnTicks = 1600; // This is a bit of fudge
 		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
 		//redefine based on max horsepower rating to limit max steam production and approximate thermal efficiency
-		double draguht = Math.abs(Math.min(1, 0.1 +(getThrottle() * (getReverser() * 1.5) * (speedPercent * 5) * 5)));
+		double draguht = Math.max(.1, Math.max(1, Math.abs(getReverser() * 1.5) + speedPercent) * Math.max(1, getThrottle() * 3) * Math.max(1, speedPercent * 2));
 		return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * draguht * ConfigBalance.locoHeatTimeScale;
 	}
 
@@ -500,7 +500,7 @@ public class LocomotiveSteam extends Locomotive {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
 		List<Control<?>> drains = getDefinition().getModel().getControls().stream().filter(x -> x.part.type == ModelComponentType.CYLINDER_DRAIN_CONTROL_X).collect(Collectors.toList());
 		if (drains.isEmpty()) {
-			double csm = Math.abs(getCurrentSpeed().metric()) / gauge.scale();
+			double csm = Math.abs(getCurrentSpeed().metric()) / gauge.scale(); //TODO ask cam if this should be multiply
 			return csm < 20;
 		}
 
