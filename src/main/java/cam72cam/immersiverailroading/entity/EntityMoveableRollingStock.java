@@ -248,12 +248,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
             }
 
-            if (this.getTickCount() % 10 == 0) {
-                // Wipe this now and again to force a refresh
-                // Could also be implemented as a wipe from the track rail base (might be more efficient?)
-                lastRetarderPos = null;
-            }
-
             SimulationState state = getCurrentState();
             if (state != null) {
                 this.trainBrakePressure = state.brakePressure;
@@ -572,30 +566,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.rearYaw = rearYaw;
     }
 
-    private Vec3i lastRetarderPos = null;
-    private int lastRetarderValue = 0;
-
-    public int getSpeedRetarderSlowdown(TickPos latest) {
-        if (new Vec3i(latest.position).equals(lastRetarderPos)) {
-            return lastRetarderValue;
-        }
-
-        int over = 0;
-        int max = 0;
-        for (Vec3i bp : getWorld().blocksInBounds(this.getCollision().offset(new Vec3d(0, gauge.scale(), 0)))) {
-            TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
-            if (te != null) {
-                if (te.getAugment() == Augment.SPEED_RETARDER) {
-                    max = Math.max(max, getWorld().getRedstone(bp));
-                    over += 1;
-                }
-            }
-        }
-        lastRetarderPos = new Vec3i(latest.position);
-        lastRetarderValue = over * max;
-        return lastRetarderValue;
-    }
-
     public float getTickSkew() {
         ChronoState state = ChronoState.getState(getWorld());
         return state != null ? (float) state.getTickSkew() : 1;
@@ -682,5 +652,22 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     public boolean isSliding() {
         return sliding;
+    }
+
+    public double getDirectFrictionNewtons(List<Vec3i> track) {
+        double newtons = getWeight() * 9.8;
+        double retardedNewtons = 0;
+        for (Vec3i bp : track) {
+            TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
+            if (te != null) {
+                if (te.getAugment() == Augment.SPEED_RETARDER) {
+                    double red = getWorld().getRedstone(bp);
+                    retardedNewtons += red / 15f / track.size() * newtons;
+                }
+            }
+        }
+        double independentNewtons = getDefinition().directFrictionCoefficient * getIndependentBrake() * newtons;
+        double pressureNewtons = getDefinition().directFrictionCoefficient * getBrakePressure() * newtons;
+        return retardedNewtons + independentNewtons + pressureNewtons;
     }
 }

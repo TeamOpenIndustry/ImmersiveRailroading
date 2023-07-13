@@ -128,8 +128,8 @@ public class Consist {
         public void computePosition(double dt) {
             // Apply velocity
             position_M = position_M + velocity_M_S * dt;
-            if (nextLink != null) {
-                nextLink.correctDistance();
+            if (prevLink != null) {
+                prevLink.correctDistance();
             }
         }
 
@@ -357,11 +357,11 @@ public class Consist {
             if (currentDistance_M - minDistance_M < -0.001) {
                 // Recompute position
                 if (debug) {
-                    ImmersiveRailroading.info("CORRECTION %s%n", currentDistance_M - minDistance_M);
+                    ImmersiveRailroading.info("CORRECTION %s %s%n", nextParticle.hashCode(), currentDistance_M - minDistance_M);
                 }
                 nextParticle.position_M = prevParticle.position_M + (minDistance_M);
                 if (nextParticle.velocity_M_S < prevParticle.velocity_M_S) {
-                    nextParticle.velocity_M_S = prevParticle.velocity_M_S;
+                    //nextParticle.velocity_M_S = prevParticle.velocity_M_S;
                 }
             }
 
@@ -369,11 +369,11 @@ public class Consist {
             if (currentDistance_M - maxDistance_M > 0.001 && coupled) {
                 // Recompute position
                 if (debug) {
-                    ImmersiveRailroading.info("CORRECTION %s%n", currentDistance_M - maxDistance_M);
+                    ImmersiveRailroading.info("CORRECTION %s %s%n", nextParticle.hashCode(), currentDistance_M - maxDistance_M);
                 }
                 nextParticle.position_M = prevParticle.position_M + (maxDistance_M);
                 if (nextParticle.velocity_M_S > prevParticle.velocity_M_S) {
-                    nextParticle.velocity_M_S = prevParticle.velocity_M_S;
+                    //nextParticle.velocity_M_S = prevParticle.velocity_M_S;
                 }
             }
         }
@@ -520,6 +520,29 @@ public class Consist {
         // Spread forces
         for (int i = 0; i < stepsPerTick; i++) {
             particles.forEach(Particle::setup);
+
+            if (debug) {
+                String s = "";
+                for (Particle particle : particles) {
+                    s += String.format("[%s = %.3f]", particle.hashCode(), particle.velocity_M_S);
+                    if (particle.nextLink != null) {
+                        if (particle.nextLink.canPush) {
+                            s += " >< ";
+                        } else if (particle.nextLink.canPull) {
+                            s += " <> ";
+                        } else {
+                            s += String.format(" %.2f ", particle.nextLink.currentDistance_M - particle.nextLink.minDistance_M);
+                        }
+                    } else {
+                        ImmersiveRailroading.info(s);
+                        s = "";
+                    }
+                }
+                if (!s.isEmpty()) {
+                    ImmersiveRailroading.info(s);
+                }
+            }
+
             particles.forEach(p -> p.computeVelocity(dt_S));
             particles.forEach(p -> p.applyFriction(dt_S));
             particles.forEach(Particle::processCollisions);

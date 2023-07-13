@@ -57,6 +57,8 @@ public class SimulationState {
     // Blocks that were actually broken and need to be removed
     public List<Vec3i> blocksToBreak;
 
+    public double directResistance;
+
     public Configuration config;
     public boolean dirty = true;
     public boolean canBeUnloaded = true;
@@ -92,6 +94,7 @@ public class SimulationState {
         public double maximumAdhesionNewtons;
         public double designAdhesionNewtons;
         public double rollingResistanceCoefficient;
+        private final Function<List<Vec3i>, Double> directResistanceNewtons;
 
         // We don't actually want to use this value, it's only for dirty checking
         private double tractiveEffortFactors;
@@ -146,6 +149,7 @@ public class SimulationState {
             this.maximumAdhesionNewtons = massKg * staticFriction;
             this.designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
             this.independentBrakePosition = stock.getIndependentBrake();
+            this.directResistanceNewtons = stock::getDirectFrictionNewtons;
             this.hasPressureBrake = stock.getDefinition().hasPressureBrake();
 
             this.rollingResistanceCoefficient = stock.getDefinition().rollingResistanceCoefficient;
@@ -225,6 +229,7 @@ public class SimulationState {
         interferingBlocks = prev.interferingBlocks;
         interferingResistance = prev.interferingResistance;
         blocksToBreak = Collections.emptyList();
+        directResistance = prev.directResistance;
     }
 
     public void calculateCouplerPositions() {
@@ -294,6 +299,7 @@ public class SimulationState {
             if (next.recalculatedAt.distanceToSquared(next.position) > minDist * minDist) {
                 next.calculateBlockCollisions(blocksAlreadyBroken);
                 next.recalculatedAt = next.position;
+                next.directResistance = config.directResistanceNewtons.apply(trackToUpdate);
             } else {
                 // We put off calculating collisions for now
                 next.interferingBlocks = Collections.emptyList();
@@ -411,6 +417,6 @@ public class SimulationState {
 
         brakeAdhesionNewtons *= Config.ConfigBalance.brakeMultiplier;
 
-        return rollingResistanceNewtons + blockResistanceNewtons + brakeAdhesionNewtons;
+        return rollingResistanceNewtons + blockResistanceNewtons + brakeAdhesionNewtons + directResistance;
     }
 }

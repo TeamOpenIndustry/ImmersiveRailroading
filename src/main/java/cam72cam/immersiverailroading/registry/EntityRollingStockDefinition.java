@@ -100,6 +100,7 @@ public abstract class EntityRollingStockDefinition {
     private double tiltMultiplier;
     private float brakeCoefficient;
     public double rollingResistanceCoefficient;
+    public double directFrictionCoefficient;
 
     public List<AnimationDefinition> animations;
 
@@ -389,6 +390,7 @@ public abstract class EntityRollingStockDefinition {
         brakeCoefficient = properties.getValue("brake_friction_coefficient").asFloat(brakeCoefficient);
         // https://en.wikipedia.org/wiki/Rolling_resistance#Rolling_resistance_coefficient_examples
         rollingResistanceCoefficient = properties.getValue("rolling_resistance_coefficient").asDouble(0.002);
+        directFrictionCoefficient = properties.getValue("direct_friction_coefficient").asDouble(0);
 
         swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
         tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
