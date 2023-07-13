@@ -220,7 +220,7 @@ public abstract class FreightTank extends Freight {
 	@Override
 	public double getWeight() {
 		double fLoad = super.getWeight();
-		if (this.getLiquidAmount() > 0) {
+		if (this.getLiquidAmount() > 0 && this.getLiquid() != null) {
 			fLoad += this.getLiquidAmount() * this.getLiquid().getDensity() / Fluid.BUCKET_VOLUME;
 		}
 		return fLoad;
