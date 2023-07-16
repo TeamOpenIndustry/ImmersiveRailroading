@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
@@ -352,6 +353,10 @@ public class Simulation {
             }
         }
 
+        boolean sendPackets = world.getTicks() % 20 == 0 || anyStartedDirty;
+        double syncDistanceSq = ImmersiveRailroading.ENTITY_SYNC_DISTANCE * ImmersiveRailroading.ENTITY_SYNC_DISTANCE;
+        List<Player> players = sendPackets ? world.getEntities(Player.class) : null;
+
         // Apply new states
         for (EntityCoupleableRollingStock stock : allStock) {
             stock.states = stateMaps.stream().map(m -> m.get(stock.getUUID())).filter(Objects::nonNull).collect(Collectors.toList());
@@ -359,7 +364,7 @@ public class Simulation {
                 state.dirty = false;
             }
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
-            if (world.getTicks() % 20 == 0 || anyStartedDirty) {
+            if (sendPackets && players.stream().anyMatch(player -> player.getPosition().distanceToSquared(stock.getPosition()) < syncDistanceSq)) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }
         }
