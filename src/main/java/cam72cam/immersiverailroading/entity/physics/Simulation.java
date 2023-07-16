@@ -53,16 +53,17 @@ public class Simulation {
             stateMaps.add(new HashMap<>());
         }
 
-        boolean anyStartedDirty = false;
 
         ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
+
+        List<UUID> dirty = new ArrayList<>(allStock.size());
 
         for (EntityCoupleableRollingStock entity : allStock) {
             SimulationState current = entity.getCurrentState();
             if (current == null) {
                 // Newly placed
                 stateMaps.get(0).put(entity.getUUID(), new SimulationState(entity));
-                anyStartedDirty = true;
+                dirty.add(entity.getUUID());
             } else {
                 // Copy from previous simulation
                 int i = 0;
@@ -72,9 +73,7 @@ public class Simulation {
                         state.update(entity);
                         stateMaps.get(i).put(entity.getUUID(), state);
                         if (state.dirty) {
-                            ImmersiveRailroading.debug("DIRTY STATE");
-                            anyStartedDirty = true;
-                            break;
+                            dirty.add(entity.getUUID());
                         }
                     }
                 }
@@ -83,6 +82,72 @@ public class Simulation {
                 }
             }
         }
+
+        // This finds the full list of dirty stock that needs to be recomputed.
+        // It is *highly* optimized to run in under 0.5ms per 100 pieces of stock.
+        // It could be tuned further, but I suspect this is good enough for now
+        for (int i = 0; i < allStock.size(); i++) {
+            int lastSize = dirty.size();
+
+            for (UUID uuid : stateMaps.get(0).keySet()) {
+                boolean isDirty = dirty.contains(uuid);
+
+                // This makes an assumption that stock only has a single value for a coupler in 40 ticks
+                // Worst case is the potential for a missed dirty flag which will interact with the Mismatch check
+                UUID front = null;
+                UUID rear = null;
+
+                for (Map<UUID, SimulationState> stateMap : stateMaps) {
+                    if (front != null && rear != null) {
+                        break;
+                    }
+
+                    SimulationState state = stateMap.get(uuid);
+                    if (state != null) {
+                        if (front == null && state.interactingFront != null) {
+                            front = state.interactingFront;
+                        }
+                        if (rear == null && state.interactingRear != null) {
+                            rear = state.interactingRear;
+                        }
+                    }
+                }
+
+                if (!isDirty) {
+                    if (front != null && dirty.contains(front)) {
+                        dirty.add(uuid);
+                        isDirty = true;
+                    }
+                }
+                if (!isDirty) {
+                    if (rear != null && dirty.contains(rear)) {
+                        dirty.add(uuid);
+                        isDirty = true;
+                    }
+                }
+
+                if (isDirty) {
+                    if (front != null && !dirty.contains(front)) {
+                        dirty.add(front);
+                    }
+                    if (rear != null && !dirty.contains(rear)) {
+                        dirty.add(rear);
+                    }
+                }
+            }
+            if (lastSize == dirty.size()) {
+                break;
+            }
+        }
+
+        for (UUID uuid : dirty) {
+            SimulationState state = stateMaps.get(0).get(uuid);
+            if (state != null) {
+                state.dirty = true;
+            }
+        }
+
+        boolean anyStartedDirty = !dirty.isEmpty();
 
         double maxCouplerDist = 4;
 
@@ -133,8 +198,10 @@ public class Simulation {
                         stock is starting from 0, while the one it has future coupled to in a previous pass (that's english right?)
                         does not know until this re-check that it has desync'd at this point and must generate new states
                         from here on out in this pass.
+
+                        This should be fixed with the smarter "dirty" logic above
                          */
-                        ImmersiveRailroading.debug("%s-%s: Mismatched coupler states: %s (%s) -> %s (%s, %s)",
+                        ImmersiveRailroading.warn("%s-%s: Mismatched coupler states: %s (%s) -> %s (%s, %s)",
                                 pass, state.tickID,
                                 myID, myCouplerLabel,
                                 otherID, other.interactingFront, other.interactingRear);
