@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
@@ -395,7 +394,8 @@ public class SimulationState {
     }
 
     public double forcesNewtons() {
-        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitch)) * Config.ConfigBalance.slopeMultiplier;
+        // Int cast here means that anything under 1degree of pitch is ignored (helps with chunk loading)
+        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians((int)pitch)) * Config.ConfigBalance.slopeMultiplier;
         return config.tractiveEffortNewtons(Speed.fromMinecraft(velocity)) + gradeForceNewtons;
     }
 
