@@ -63,10 +63,14 @@ public class ItemLargeWrench extends CustomItem {
 					}
 					return ClickResult.ACCEPTED;
 				}
-				TileRail parent = te.getParentTile();
 				if (world.isServer) {
-					if (parent != null && parent.info.settings.type == TrackItems.TURNTABLE) {
-						parent.setTablePosition(VecUtil.toWrongYaw(new Vec3d(parent.getPos()).add(0.5, 0, 0.5).subtract(hit.add(pos))) + parent.info.placementInfo.yaw);
+					while (te != null) {
+						TileRail parent = te.getParentTile();
+						if (parent != null && parent.info.settings.type == TrackItems.TURNTABLE) {
+							parent.setTablePosition(VecUtil.toWrongYaw(new Vec3d(parent.getPos()).add(0.5, 0, 0.5).subtract(hit.add(pos))) + parent.info.placementInfo.yaw);
+							break;
+						}
+						te = te.getReplacedTile();
 					}
 				}
 			}
