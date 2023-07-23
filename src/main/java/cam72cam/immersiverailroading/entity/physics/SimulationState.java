@@ -145,8 +145,8 @@ public class SimulationState {
 
 
             double staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL);
-            this.maximumAdhesionNewtons = massKg * staticFriction;
-            this.designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
+            this.maximumAdhesionNewtons = massKg * staticFriction * 9.8;
+            this.designAdhesionNewtons = designMassKg * staticFriction * 9.8 * stock.getBrakeSystemEfficiency();
             this.independentBrakePosition = stock.getIndependentBrake();
             this.directResistanceNewtons = stock::getDirectFrictionNewtons;
             this.hasPressureBrake = stock.getDefinition().hasPressureBrake();
