@@ -303,7 +303,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
                 float volume = 0.01f + adjust;
 
-                if (Math.abs(this.getCurrentSpeed().metric()) > 5 && MinecraftClient.getPlayer().getPosition().distanceTo(getPosition()) < 40) {
+                if (Math.abs(this.getCurrentSpeed().metric()) > 1 && MinecraftClient.getPlayer().getPosition().distanceTo(getPosition()) < 40) {
                     if (!wheel_sound.isPlaying()) {
                         wheel_sound.play(getPosition());
                     }
@@ -647,7 +647,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
      * Though, I'm going to limit it to 75% of the total possible adhesion
      */
     public double getBrakeSystemEfficiency() {
-        return getDefinition().getBrakeShoeFriction() + 0.5;
+        return getDefinition().getBrakeShoeFriction();
     }
 
     public boolean isSliding() {
