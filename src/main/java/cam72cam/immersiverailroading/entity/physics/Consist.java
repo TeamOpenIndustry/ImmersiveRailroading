@@ -472,30 +472,6 @@ public class Consist {
 
             boolean dirty = consist.stream().anyMatch(p -> p.state.dirty);
 
-            // Spread the brake pressure evenly.  TODO spread it from the suppliers (requires complete rethink of brake controls)
-            // TODO don't spread brake pressure across shunting connections
-            float desiredBrakePressure = (float) consist.stream().mapToDouble(x -> x.state.config.desiredBrakePressure).max().orElse(0);
-            boolean needsBrakeEqualization = consist.stream().anyMatch(x -> x.state.config.hasPressureBrake && Math.abs(x.state.brakePressure - desiredBrakePressure) > 0.01);
-            if (needsBrakeEqualization) {
-                //dirty = true;
-                double brakePressureDelta = 0.1 / consist.stream().filter(x -> x.state.config.hasPressureBrake).count();
-                consist.forEach(p -> {
-                    if (p.state.config.hasPressureBrake) {
-                        if (Config.ImmersionConfig.instantBrakePressure) {
-                            p.state.brakePressure = desiredBrakePressure;
-                        } else {
-                            if (p.state.brakePressure > desiredBrakePressure + brakePressureDelta) {
-                                p.state.brakePressure -= brakePressureDelta;
-                            } else if (p.state.brakePressure < desiredBrakePressure - brakePressureDelta) {
-                                p.state.brakePressure += brakePressureDelta;
-                            } else {
-                                p.state.brakePressure = desiredBrakePressure;
-                            }
-                        }
-                    }
-                });
-            }
-
             if (dirty) {
                 consist.forEach(p -> p.state.dirty = true);
                 particles.addAll(consist);
@@ -516,6 +492,46 @@ public class Consist {
                 particle.nextLink.setup();
             }
         }
+
+        List<SimulationState> linked = new ArrayList<>();
+        for (Particle source : particles) {
+            linked.add(source.state);
+
+            if (source.nextLink == null || !source.nextLink.coupled || !source.state.config.hasPressureBrake) {
+                // No further linked couplings
+                // Spread brake pressure
+
+                float desiredBrakePressure = (float) linked.stream()
+                        .filter(s -> s.config.desiredBrakePressure != null)
+                        .mapToDouble(s -> s.config.desiredBrakePressure)
+                        .max().orElse(0);
+
+                boolean needsBrakeEqualization = linked.stream().anyMatch(s -> s.config.hasPressureBrake && Math.abs(s.brakePressure - desiredBrakePressure) > 0.01);
+
+                if (needsBrakeEqualization) {
+                    double brakePressureDelta = 0.1 / linked.stream().filter(s -> s.config.hasPressureBrake).count();
+                    linked.forEach(p -> {
+                        if (p.config.hasPressureBrake) {
+                            if (Config.ImmersionConfig.instantBrakePressure) {
+                                p.brakePressure = desiredBrakePressure;
+                            } else {
+                                if (p.brakePressure > desiredBrakePressure + brakePressureDelta) {
+                                    p.brakePressure -= brakePressureDelta;
+                                } else if (p.brakePressure < desiredBrakePressure - brakePressureDelta) {
+                                    p.brakePressure += brakePressureDelta;
+                                } else {
+                                    p.brakePressure = desiredBrakePressure;
+                                }
+                            }
+                        }
+                    });
+                }
+
+                linked.clear();
+                continue;
+            }
+        }
+
 
         // Spread forces
         for (int i = 0; i < stepsPerTick; i++) {

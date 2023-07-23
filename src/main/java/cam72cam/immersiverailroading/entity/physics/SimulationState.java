@@ -99,7 +99,7 @@ public class SimulationState {
         private double tractiveEffortFactors;
         private Function<Speed, Double> tractiveEffortNewtons;
 
-        public double desiredBrakePressure;
+        public Double desiredBrakePressure;
         public double independentBrakePosition;
 
         public boolean hasPressureBrake;
@@ -136,11 +136,11 @@ public class SimulationState {
                 Locomotive locomotive = (Locomotive) stock;
                 tractiveEffortNewtons = locomotive::getTractiveEffortNewtons;
                 tractiveEffortFactors = locomotive.getThrottle() + (locomotive.getReverser() * 10);
-                desiredBrakePressure = locomotive.getTrainBrake();
+                desiredBrakePressure = (double)locomotive.getTrainBrake();
             } else {
                 tractiveEffortNewtons = speed -> 0d;
                 tractiveEffortFactors = 0;
-                desiredBrakePressure = 0;
+                desiredBrakePressure = null;
             }
 
 
@@ -162,7 +162,7 @@ public class SimulationState {
                         couplerEngagedRear == other.couplerEngagedRear &&
                         Math.abs(tractiveEffortFactors - other.tractiveEffortFactors) < 0.01 &&
                         Math.abs(massKg - other.massKg)/massKg < 0.01 &&
-                        Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.1 &&
+                        (desiredBrakePressure == null || Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.1) &&
                         Math.abs(independentBrakePosition - other.independentBrakePosition) < 0.01;
             }
             return false;
