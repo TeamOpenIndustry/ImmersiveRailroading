@@ -228,6 +228,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     protected void removed(ENTITY stock) {
         headlights.forEach(x -> x.removed(stock));
+        animations.forEach(c -> c.removed(stock));
     }
 
     private int lod_level = LOD_LARGE;

@@ -138,4 +138,8 @@ public class StockAnimation {
             sound.effects(stock, volume, pitch);
         }
     }
+
+    public <ENTITY extends EntityMoveableRollingStock> void removed(ENTITY stock) {
+        sound.removed(stock);
+    }
 }
