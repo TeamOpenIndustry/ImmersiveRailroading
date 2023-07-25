@@ -15,10 +15,12 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
     private DieselExhaust exhaust;
     private Horn horn;
     private final PartSound idle;
+    private final PartSound running;
 
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
         idle = def.isCabCar() ? null : new PartSound(def.idle, true, 80);
+        running = def.isCabCar() ? null : new PartSound(def.running, true, 80);
     }
 
     @Override
@@ -67,7 +69,29 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
                         ? stock.getDefinition().getHornSus() ? stock.getHornTime() / 10f : 1
                         : 0);
         if (idle != null) {
-            idle.effects(stock, stock.isRunning() ? Math.max(0.1f, stock.getSoundThrottle()) : 0, 0.7f + stock.getSoundThrottle() / 4);
+            if (stock.isRunning()) {
+                float volume = Math.max(0.1f, stock.getSoundThrottle());
+                float pitch = 0.7f + stock.getSoundThrottle() / 4;
+                if (running == null) {
+                    // Simple
+                    idle.effects(stock, volume, pitch);
+                } else {
+                    // Switching between two effects
+                    if (stock.getSoundThrottle() < 0.01) {
+                        // Idling
+                        idle.effects(stock, 1, 1);
+                        running.effects(stock, false);
+                    } else {
+                        idle.effects(stock, false);
+                        running.effects(stock, volume, pitch);
+                    }
+                }
+            } else {
+                idle.effects(stock, false);
+                if (running != null) {
+                    running.effects(stock, false);
+                }
+            }
         }
     }
 
@@ -77,6 +101,9 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
         horn.removed(stock);
         if (idle != null) {
             idle.removed(stock);
+        }
+        if (running != null) {
+            running.removed(stock);
         }
     }
 }
