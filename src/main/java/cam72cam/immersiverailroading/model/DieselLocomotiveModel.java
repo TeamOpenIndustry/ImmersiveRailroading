@@ -82,7 +82,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
                         idle.effects(stock, 1, 1);
                         running.effects(stock, false);
                     } else {
-                        idle.effects(stock, false);
+                        idle.effects(stock, 0.01f);
                         running.effects(stock, volume, pitch);
                     }
                 }
