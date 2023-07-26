@@ -408,7 +408,7 @@ public abstract class Locomotive extends FreightTank {
 		double adhesionFactor = Math.abs(getAppliedTractiveEffort(getCurrentSpeed())) /
 								getStaticTractiveEffort(getCurrentSpeed());
 		if (adhesionFactor > 1) {
-			return Math.copySign(Math.min((adhesionFactor-1)/10, 1), getReverser());
+			return Math.copySign((adhesionFactor-1)/10, getReverser());
 		}
 		return 0;
 	}

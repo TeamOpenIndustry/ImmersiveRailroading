@@ -157,6 +157,13 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	@Override
 	public double getWeight() {
 		double fLoad = ConfigBalance.blockWeight * itemCount;
+		/*
+		for (int i = 0; i < cargoItems.getSlotCount(); i++) {
+			ItemStack item = Fuzzy.WOOD_PLANK.example();
+			item.setCount(64);
+			cargoItems.set(i, item);
+		}*/
+
 		fLoad = fLoad + super.getWeight();
 		return fLoad;
 	}
