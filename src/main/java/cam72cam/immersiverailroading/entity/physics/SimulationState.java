@@ -394,8 +394,10 @@ public class SimulationState {
     }
 
     public double forcesNewtons() {
+        double pitchRound = Math.abs(pitch) < 0.25 ? 0 : pitch;
+
         // Int cast here means that anything under 1degree of pitch is ignored (helps with chunk loading)
-        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians((int)pitch)) * Config.ConfigBalance.slopeMultiplier;
+        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitchRound)) * Config.ConfigBalance.slopeMultiplier;
         return config.tractiveEffortNewtons(Speed.fromMinecraft(velocity)) + gradeForceNewtons;
     }
 
