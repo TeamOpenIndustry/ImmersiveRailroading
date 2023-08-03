@@ -43,7 +43,6 @@ public class SteamChimney {
             darken *= 0.75;
             for (ModelComponent smoke : emitter) {
                 Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(smoke.center.scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
-                particlePos = particlePos.subtract(fakeMotion);
 
                 double smokeMod = Math.min(1, Math.max(0.2, Math.abs(stock.getCurrentSpeed().minecraft())*2));
 
