@@ -422,4 +422,13 @@ public class LocomotiveSteam extends Locomotive {
 
 		return drains.stream().anyMatch(c -> getControlPosition(c) == 1);
 	}
+
+	public void setCylinderDrains(boolean enabled) {
+		// This could be optimized to once-per-tick, but I'm not sure that is necessary
+		List<Control<?>> drains = getDefinition().getModel().getControls().stream().filter(x -> x.part.type == ModelComponentType.CYLINDER_DRAIN_CONTROL_X).collect(Collectors.toList());
+
+		for (Control<?> drain : drains) {
+			setControlPosition(drain, enabled ? 1 : 0);
+		}
+	}
 }

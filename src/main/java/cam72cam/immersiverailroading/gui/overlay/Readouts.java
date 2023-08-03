@@ -27,6 +27,7 @@ public enum Readouts {
     REAR_BOGEY_ANGLE,
     FRONT_LOCOMOTIVE_ANGLE,
     REAR_LOCOMOTIVE_ANGLE,
+    CYLINDER_DRAIN,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -83,6 +84,8 @@ public enum Readouts {
             case REAR_LOCOMOTIVE_ANGLE:
                 StockModel<?, ?> rear = stock.getDefinition().getModel();
                 return rear instanceof LocomotiveModel ? yawToPercent(((LocomotiveModel<?, ?>)rear).getRearLocomotiveYaw((EntityMoveableRollingStock) stock), 90) : 0.5f;
+            case CYLINDER_DRAIN:
+                return stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled() ? 1 : 0;
         }
         return 0;
     }
@@ -145,6 +148,11 @@ public enum Readouts {
             case ENGINE:
                 if (stock instanceof LocomotiveDiesel) {
                     ((LocomotiveDiesel) stock).setTurnedOn(!((LocomotiveDiesel) stock).isTurnedOn());
+                }
+                break;
+            case CYLINDER_DRAIN:
+                if (stock instanceof LocomotiveSteam) {
+                    ((LocomotiveSteam)stock).setCylinderDrains(value > 0.9);
                 }
                 break;
         }
