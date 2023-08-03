@@ -140,6 +140,8 @@ public class StockAnimation {
     }
 
     public <ENTITY extends EntityMoveableRollingStock> void removed(ENTITY stock) {
-        sound.removed(stock);
+        if (sound != null) {
+            sound.removed(stock);
+        }
     }
 }
