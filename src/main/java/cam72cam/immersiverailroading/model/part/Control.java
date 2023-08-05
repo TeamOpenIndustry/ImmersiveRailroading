@@ -17,8 +17,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.sound.ISound;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -47,9 +45,6 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     private final Map<Axis, Float> translations = new HashMap<>();
     private final Map<Axis, Float> scales = new HashMap<>();
     private final Map<Axis, Float> scaleRot = new HashMap<>();
-    private final Map<UUID, Float> lastMoveSoundValue = new HashMap<>();
-    private final Map<UUID, Boolean> wasSoundPressed = new HashMap<>();
-    private final Map<UUID, List<ISound>> sounds = new HashMap<>();
 
     public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos) {
         return provider.parseAll(type, pos).stream().map(part1 -> new Control<T>(part1, state)).collect(Collectors.toList());
@@ -379,65 +374,16 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         lastClientLook = null;
     }
 
-    public ControlSoundsDefinition getSounds(T stock) {
-        return stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
-    }
-
-    private void createSound(T stock, Identifier sound, boolean repeats) {
-        if (sound == null) {
-            return;
-        }
-        ISound snd = stock.createSound(sound, repeats, 10);
-        snd.setVelocity(stock.getVelocity());
-        snd.setVolume(1);
-        snd.setPitch(1f);
-        snd.play(center(stock));
-        sounds.computeIfAbsent(stock.getUUID(), k -> new ArrayList<>()).add(snd);
-    }
-
     public void effects(T stock) {
-        ControlSoundsDefinition sounds = getSounds(stock);
+        ControlSoundsDefinition sounds = stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
         if (sounds != null) {
-            if (this.sounds.containsKey(stock.getUUID())) {
-                for (ISound snd : new ArrayList<>(this.sounds.get(stock.getUUID()))) {
-                    if (snd.isPlaying()) {
-                        snd.setVelocity(stock.getVelocity());
-                        snd.setPosition(center(stock));
-                    } else {
-                        this.sounds.get(stock.getUUID()).remove(snd);
-                    }
-                }
-            }
-
-            boolean isPressed = stock.getControlPressed(this);
-            Boolean wasPressed = wasSoundPressed.getOrDefault(stock.getUUID(), isPressed);
-            wasSoundPressed.put(stock.getUUID(), isPressed);
-
-            float value = stock.getControlPosition(this);
-            float lastValue = lastMoveSoundValue.computeIfAbsent(stock.getUUID(), k -> value);
-
-            if (!wasPressed && isPressed) {
-                // Start
-                createSound(stock, sounds.engage, false);
-                if (sounds.move != null && sounds.movePercent == null) {
-                    // Start move repeat
-                    createSound(stock, sounds.move, true);
-                }
-            } else if (wasPressed && !isPressed) {
-                // Release
-                if (this.sounds.containsKey(stock.getUUID())) {
-                    for (ISound snd : this.sounds.get(stock.getUUID())) {
-                        snd.stop();
-                    }
-                }
-                createSound(stock, sounds.disengage, false);
-            } else if (sounds.move != null && sounds.movePercent != null){
-                // Move
-                if (Math.abs(lastValue - value) > sounds.movePercent) {
-                    createSound(stock, sounds.move, false);
-                    lastMoveSoundValue.put(stock.getUUID(), value);
-                }
-            }
+            sounds.effects(stock, stock.getControlPressed(this), stock.getControlPosition(this), center(stock));
+        }
+    }
+    public void removed(T stock) {
+        ControlSoundsDefinition sounds = stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
+        if (sounds != null) {
+            sounds.removed(stock);
         }
     }
 }

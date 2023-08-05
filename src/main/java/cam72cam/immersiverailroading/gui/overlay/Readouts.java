@@ -13,6 +13,7 @@ public enum Readouts {
     THROTTLE,
     REVERSER,
     TRAIN_BRAKE,
+    TRAIN_BRAKE_LEVER,
     INDEPENDENT_BRAKE,
     BRAKE_PRESSURE,
     COUPLER_FRONT,
@@ -31,6 +32,10 @@ public enum Readouts {
     ;
 
     public float getValue(EntityRollingStock stock) {
+        return getValue(stock, 0);
+    }
+
+    public float getValue(EntityRollingStock stock, float lever) {
         switch (this) {
             case LIQUID:
                 return stock instanceof FreightTank ? ((FreightTank) stock).getPercentLiquidFull() / 100f : 0;
@@ -55,6 +60,8 @@ public enum Readouts {
                 return stock instanceof Locomotive ? (((Locomotive) stock).getReverser() + 1) / 2 : 0;
             case TRAIN_BRAKE:
                 return stock instanceof Locomotive ? ((Locomotive) stock).getTrainBrake() : 0;
+            case TRAIN_BRAKE_LEVER:
+                return stock.getDefinition().isLinearBrakeControl() ? TRAIN_BRAKE.getValue(stock) : lever;
             case INDEPENDENT_BRAKE:
                 return stock instanceof EntityMoveableRollingStock ? ((EntityMoveableRollingStock) stock).getIndependentBrake() : 0;
             case BRAKE_PRESSURE:
@@ -71,7 +78,7 @@ public enum Readouts {
                 return stock instanceof Locomotive ? ((Locomotive) stock).getBell() > 0 ? 1 : 0 : 0;
             case WHISTLE:
             case HORN:
-                return stock instanceof Locomotive ? ((Locomotive) stock).getHornTime() > 0 ? 1 : 0 : 0;
+                return stock instanceof Locomotive ? ((Locomotive) stock).hornPull : 0;
             case ENGINE:
                 return stock instanceof LocomotiveDiesel ? ((LocomotiveDiesel) stock).isTurnedOn() ? 1 : 0 : 0;
             case FRONT_BOGEY_ANGLE:
@@ -119,6 +126,16 @@ public enum Readouts {
                     ((Locomotive) stock).setTrainBrake(value);
                 }
                 break;
+            case TRAIN_BRAKE_LEVER:
+                if (stock.getDefinition().isLinearBrakeControl()) {
+                    TRAIN_BRAKE.setValue(stock, value);
+                } else {
+                    if (stock instanceof Locomotive) {
+                        // Logic duplicated in Locomotive#onTick
+                        ((Locomotive) stock).setTrainBrake(Math.max(0, Math.min(1, ((Locomotive) stock).getTrainBrake() + (value - 0.5f) / 80)));
+                    }
+                }
+                break;
             case INDEPENDENT_BRAKE:
                 if (stock instanceof EntityMoveableRollingStock) {
                     ((Locomotive) stock).setIndependentBrake(value);
@@ -136,13 +153,17 @@ public enum Readouts {
                 break;
             case BELL:
                 if (stock instanceof Locomotive) {
-                    ((Locomotive) stock).setBell(10);
+                    ((Locomotive) stock).setBell((int) (value * 10));
                 }
                 break;
             case WHISTLE:
             case HORN:
                 if (stock instanceof Locomotive) {
-                    ((Locomotive) stock).setHorn(40, Locomotive.AUTOMATED_PLAYER);
+                    if (value != 0) {
+                        ((Locomotive) stock).setHorn(10000, value);
+                    } else {
+                        ((Locomotive) stock).setHorn(10, value);
+                    }
                 }
                 break;
             case ENGINE:

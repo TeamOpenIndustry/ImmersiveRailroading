@@ -1,157 +1,154 @@
 element:
-    # left panel
-    x = 10
-    y = -95
-    image = "immersiverailroading:gui/overlay_steam.png"
+  import: "immersiverailroading:gui/default/common/settings.caml"
+
+element:
+  screen_x = RIGHT
+  screen_y = BOTTOM
+
+  import: "immersiverailroading:gui/default/common/opacity.caml"
+
+  element:
+    import: "immersiverailroading:gui/default/common/scale.caml"
+
     element:
-        # water level
-        x = 5
-        y = 75
-        image = "immersiverailroading:gui/fluid.png"
-        readout = "LIQUID"
-        translate =
-            x = 0
-            y = -50
-        scale =
-            y = 1
-        color =
-            0 = "0xAA0F0FFF"
+      y = -60
+      element:
+        import: "immersiverailroading:gui/default/steam/dial_right.caml"
+        import: "immersiverailroading:gui/default/steam/gauge_speed_face.caml"
+
     element:
-        # steam level
-        x = 25
-        y = 75
-        image = "immersiverailroading:gui/fluid.png"
-        readout = "BOILER_PRESSURE"
-        translate =
-            x = 0
-            y = -50
-        scale =
-            y = 1
-        color =
-            0 = "0x99DDDDDD"
+      y = -120
+      element:
+        import: "immersiverailroading:gui/default/steam/dial_right.caml"
+        import: "immersiverailroading:gui/default/steam/gauge_brake_face.caml"
+
+element:
+  screen_x = RIGHT
+  screen_y = TOP
+
+  import: "immersiverailroading:gui/default/common/opacity.caml"
+
+  element:
+    import: "immersiverailroading:gui/default/common/scale.caml"
+
     element:
-        # boiler temp
-        x = 45
-        y = 75
-        image = "immersiverailroading:gui/fluid.png"
-        readout = "TEMPERATURE"
-        translate =
-            x = 0
-            y = -40
-        scale =
-            y = 0.8
-        color =
-            0 = "0x99d1c715"
-            0.95 = "0x99d16c15"
-            1.05 = "0x99a21010"
+      x = -6
+      y = -30
+      image = "immersiverailroading:gui/default/steam/whistle_cord.png"
     element:
-        # brake pressure
-        x = 61
-        y = 74
-        image = "immersiverailroading:gui/indicator.png"
-        readout = "BRAKE_PRESSURE"
-        translate =
-            x = 0
-            y = -50
-        color =
-            0.0 = "0xDDa22020"
+      x = -6
+      y = 52
+      image = "immersiverailroading:gui/default/steam/whistle.png"
+      readout = "WHISTLE"
+      translate =
+        y = 12
+
+
+element:
+  screen_x = RIGHT
+  screen_y = BOTTOM
+
+  import: "immersiverailroading:gui/default/common/opacity.caml"
+
+  element:
+    import: "immersiverailroading:gui/default/common/scale.caml"
+
     element:
-        # train brake
-        x = 61
-        y = 74
-        image = "immersiverailroading:gui/indicator.png"
-        readout = "TRAIN_BRAKE"
-        translate =
-            x = 0
-            y = -50
-    element:
-        # ind brake
-        x = 67
-        y = 74
-        image = "immersiverailroading:gui/indicator.png"
-        readout = "INDEPENDENT_BRAKE"
-        translate =
-            x = 0
-            y = -50
-    element:
-        # throttle
-        x = 81
-        y = 74
-        image = "immersiverailroading:gui/indicator.png"
-        readout = "THROTTLE"
-        translate =
-            x = 0
-            y = -50
-    element:
-        # reverser
-        x = 87
-        y = 74
-        image = "immersiverailroading:gui/indicator.png"
+      x = -70
+      element:
+        x = -25
+        y = -70
+
+        image = "immersiverailroading:gui/default/steam/reverser_harp_lever.png"
         readout = "REVERSER"
-        translate =
-            x = 0
-            y = -50
+        sound =
+          engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+          move = "immersiverailroading:sounds/default/lever_move.ogg"
+          movePercent = 0.1
+          disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+        rotate =
+            x = 2
+            y = 70
+            degrees = 60
+            offset = -30
+      element:
+        x = -45
+        y = -36
+        image = "immersiverailroading:gui/default/steam/reverser_harp_stand.png"
+
     element:
-        # speed readout
-        text =
-            value = "stat.speed"
-            height = 6
-        x = 50
-        y = 8
+      y = -65
+      element:
+        x = -8
+        y = -4
+        image = "immersiverailroading:gui/default/steam/brake_stand.png"
+      element:
+        x = -22.5
+        y = -1.5
+        image = "immersiverailroading:gui/default/steam/brake_lever.png"
+        readout = "TRAIN_BRAKE_LEVER"
+        sound =
+          engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+          move = "immersiverailroading:sounds/default/pressure.ogg"
+          disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+        rotate =
+          x = 18.5
+          y = 1.5
+          degrees = -30
+
     element:
-        # top labels
-        y = 19
-        element:
-            x = 10
-            text =
-                value = "stat.liquid"
-                height = 4
-        element:
-            x = 30
-            text =
-                value = "stat.boiler_psi"
-                height = 4
-        element:
-            x = 50
-            text =
-                value = "stat.temperature"
-                height = 4
-        element:
-            x = 68
-            text =
-                value = "label.brake"
-                height = 4
-        element:
-            x = 89
-            text =
-                value = "label.throttle"
-                height = 4
+      y = -150
+      element:
+        x = -10
+        y = -5
+        image = "immersiverailroading:gui/default/steam/throttle_backing.png"
+      element:
+        x = -80
+        y = -4
+        image = "immersiverailroading:gui/default/steam/throttle.png"
+        readout = "THROTTLE"
+        sound =
+          engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+          disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+        rotate =
+          x = 75
+          y = 4
+          degrees = -30
+
+
+element:
+  #left panel
+  screen_x = LEFT
+  screen_y = MIDDLE
+
+  import: "immersiverailroading:gui/default/common/opacity.caml"
+
+  element:
+    import: "immersiverailroading:gui/default/common/scale.caml"
+
     element:
-        # bottom labels
-        y = 78
+      y = -50
+      x = -90
+      import: "immersiverailroading:gui/default/steam/gauge_water_left.caml"
+
+element:
+  screen_x = LEFT
+  screen_y = TOP
+
+  import: "immersiverailroading:gui/default/common/opacity.caml"
+
+  element:
+    import: "immersiverailroading:gui/default/common/scale.caml"
+
+    element:
+      element:
+        x = 0
         element:
-            x = 10
-            text =
-                value = "stat.max_liquid"
-                height = 4
+          import: "immersiverailroading:gui/default/steam/dial_up.caml"
+          import: "immersiverailroading:gui/default/steam/gauge_boiler_face.caml"
+
+      element:
+        x = 60
         element:
-            x = 30
-            text =
-                value = "stat.max_boiler_psi"
-                height = 4
-        element:
-            x = 50
-            y = 0
-            text =
-                value = "stat.max_temperature"
-                height = 4
-        element:
-            x = 68
-            text =
-                value = ""
-                height = 4
-        element:
-            x = 89
-            text =
-                value = "label.reverser"
-                height = 4
+          import: "immersiverailroading:gui/default/steam/dial_up.caml"
+          import: "immersiverailroading:gui/default/steam/gauge_temperature_face.caml"

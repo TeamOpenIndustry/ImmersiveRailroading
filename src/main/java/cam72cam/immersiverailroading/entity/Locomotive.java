@@ -48,10 +48,12 @@ public abstract class Locomotive extends FreightTank {
 	@TagField("HORN")
 	protected int hornTime = 0;
 
-	public static final UUID AUTOMATED_PLAYER = new UUID(0, 0);
 	@TagSync
 	@TagField(value = "HORN_PLAYER", mapper = StrictTagMapper.class)
 	protected UUID hornPlayer = null;
+	@TagSync
+	@TagField(value = "HORN_PULL")
+	public float hornPull;
 
 	@TagSync
 	@TagField("BELL")
@@ -325,6 +327,7 @@ public abstract class Locomotive extends FreightTank {
 		if (getWorld().isServer) {
 			sync.setInterval(5);
 			for (Control<?> control : getDefinition().getModel().getControls()) {
+				// Logic duplicated in Readouts#setValue
 				if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
 					setTrainBrake(Math.max(0, Math.min(1, getTrainBrake() + (getControlPosition(control) - 0.5f) / 8)));
 				}
@@ -348,6 +351,9 @@ public abstract class Locomotive extends FreightTank {
 				hornTime--;
 			} else if (hornPlayer != null) {
 				hornPlayer = null;
+			}
+			if (hornTime == 0) {
+				hornPull = 0;
 			}
 			OptionalDouble control = this.getDefinition().getModel().getControls().stream()
 					.filter(x -> x.part.type == ModelComponentType.BELL_CONTROL_X)
@@ -504,12 +510,22 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	public void setHorn(int val, UUID uuid) {
+		if (uuid == null) {
+			// Legacy API
+			hornPull = 1;
+		}
+
 		if (hornPlayer == null && uuid != null) {
 			hornPlayer = uuid;
 		}
 		if (hornPlayer == null || hornPlayer.equals(uuid)) {
 			hornTime = val;
 		}
+	}
+
+	public void setHorn(int time, float value) {
+		hornTime = time;
+		hornPull = value;
 	}
 
 	public int getHornTime() {
@@ -525,8 +541,16 @@ public abstract class Locomotive extends FreightTank {
 		return null;
 	}
 
-	public boolean isAutomatedHorn() {
-		return AUTOMATED_PLAYER.equals(hornPlayer);
+	public float getHornPull() {
+		if (getHornPlayer() != null) {
+			return (getHornPlayer().getRotationPitch() + 90) / 180;
+		}
+		double control = this.getDefinition().getModel().getControls().stream()
+				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
+				.mapToDouble(this::getControlPosition)
+				.max().orElse(0);
+
+		return Math.max((float)control, hornPull);
 	}
 
 	@Deprecated

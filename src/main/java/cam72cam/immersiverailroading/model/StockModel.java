@@ -228,6 +228,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     protected void removed(ENTITY stock) {
         headlights.forEach(x -> x.removed(stock));
+        controls.forEach(c -> c.removed(stock));
+        doors.forEach(c -> c.removed(stock));
+        gauges.forEach(c -> c.removed(stock));
         animations.forEach(c -> c.removed(stock));
     }
 

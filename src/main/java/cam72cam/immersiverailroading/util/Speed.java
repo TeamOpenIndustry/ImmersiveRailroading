@@ -31,6 +31,9 @@ public class Speed {
 	public double metric() {
 		return internalSpeed * speedRatio;
 	}
+	public double metersPerSecond() {
+		return internalSpeed * speedRatio / 3.6;
+	}
 
 	public double imperial() {
 		return metric() * 0.621371;

@@ -37,8 +37,6 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
 
-import static cam72cam.immersiverailroading.entity.Locomotive.AUTOMATED_PLAYER;
-
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	@TagField("parent")
 	private Vec3i parent;
@@ -668,7 +666,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							loco.setTrainBrake(power / 15f);
 							break;
 						case HORN:
-							loco.setHorn(40, AUTOMATED_PLAYER);
+							loco.setHorn(40, power/15f);
 							break;
 						case BELL:
 							loco.setBell(10 * power);

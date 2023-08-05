@@ -1,0 +1,15 @@
+element:
+  image = "immersiverailroading:gui/default/steam/water_glass_right.png"
+  x = -105 # base width from image
+
+  element:
+    x = 6
+    y = 87
+    image = "immersiverailroading:gui/default/steam/water_glass_fill.png"
+
+    readout = "LIQUID"
+    translate =
+        x = 0
+        y = -69
+    scale =
+        y = 1

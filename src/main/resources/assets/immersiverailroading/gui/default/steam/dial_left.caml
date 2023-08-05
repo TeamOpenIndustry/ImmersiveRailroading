@@ -1,0 +1,7 @@
+element:
+  x = 60 # 68
+  element:
+    image = "immersiverailroading:gui/default/steam/dial_steam.png"
+    rotate =
+      offset = 90
+x = 8

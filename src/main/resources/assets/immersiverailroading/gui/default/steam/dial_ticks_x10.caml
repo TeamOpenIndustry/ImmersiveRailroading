@@ -1,0 +1,60 @@
+# Ticks
+element:
+  x = 29.5 # 60/2 - rotate.x
+  y = 7    # 60/2 - rotate.y
+  color =
+      0.0 = "0xAA282828"
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = -100
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = -75
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = -50
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = -25
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = 0
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = 25
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = 50
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = 75
+  element:
+    image = "immersiverailroading:gui/default/steam/tickmark.png"
+    rotate =
+      x = 0.5
+      y = 23
+      offset = 100

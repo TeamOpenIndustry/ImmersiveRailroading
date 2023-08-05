@@ -1,9 +1,13 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.library.SpeedDisplayType;
+import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
 import cam72cam.mod.render.OptiFine;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static cam72cam.mod.config.ConfigFile.*;
 
@@ -48,4 +52,7 @@ public class ConfigGraphics {
 
 	@Comment("How likely a piece of stock is to sway (1 == always, 10 == infrequent)")
 	public static int StockSwayChance = 1;
+
+	@Comment("Settings used in the stock user interfaces")
+	public static Map<String, Float> settings = new HashMap<>();
 }
