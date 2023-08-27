@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
@@ -52,6 +53,12 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     public static final int LOD_SMALL = 512;
 
     private final List<StockAnimation> animations;
+
+    private final float sndRand;
+    private final PartSound wheel_sound;
+    private final PartSound slidingSound;
+    private final FlangeSound flangeSound;
+    private final SwaySimulator sway;
 
     public StockModel(DEFINITION def) throws Exception {
         super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds, i -> {
@@ -131,11 +138,16 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             rearTrackers = null;
         }
 
+        sndRand = (float) Math.random() / 10;
+        wheel_sound = new PartSound(new SoundDefinition(def.wheel_sound), true, 40);
+        slidingSound = new PartSound(new SoundDefinition(def.sliding_sound), true, 40);
+        flangeSound = new FlangeSound(def.flange_sound, true, 40);
+        sway = new SwaySimulator();
     }
 
     public ModelState addRoll(ModelState state) {
         return state.push(builder -> builder.add((ModelState.Animator) stock ->
-                new Matrix4().rotate(Math.toRadians(stock.getRollDegrees()), 1, 0, 0)));
+                new Matrix4().rotate(Math.toRadians(sway.getRollDegrees(stock)), 1, 0, 0)));
     }
 
     protected void initStates() {
@@ -220,6 +232,20 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         doors.forEach(c -> c.effects(stock));
         gauges.forEach(c -> c.effects(stock));
         animations.forEach(c -> c.effects(stock));
+
+
+        float adjust = (float) Math.abs(stock.getCurrentSpeed().metric()) / 300;
+        float pitch = adjust + 0.7f;
+        if (stock.getDefinition().shouldScalePitch()) {
+            // TODO this is probably wrong...
+            pitch = (float) (pitch/stock.gauge.scale());
+        }
+        float volume = 0.01f + adjust;
+
+        wheel_sound.effects(stock, Math.abs(stock.getCurrentSpeed().metric()) > 1 ? volume : 0, pitch + sndRand);
+        slidingSound.effects(stock, stock.sliding ? Math.min(1, adjust*4) : 0);
+        flangeSound.effects(stock);
+        sway.effects(stock);
     }
 
     public final void onClientRemoved(EntityMoveableRollingStock stock) {
@@ -229,6 +255,11 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected void removed(ENTITY stock) {
         headlights.forEach(x -> x.removed(stock));
         animations.forEach(c -> c.removed(stock));
+
+        wheel_sound.removed(stock);
+        slidingSound.removed(stock);
+        flangeSound.removed(stock);
+        sway.removed(stock);
     }
 
     private int lod_level = LOD_LARGE;
@@ -321,7 +352,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     }
 
     protected void postRender(ENTITY stock, RenderState state) {
-        state.rotate(stock.getRollDegrees(), 1, 0, 0);
+        state.rotate(sway.getRollDegrees(stock), 1, 0, 0);
         controls.forEach(c -> c.postRender(stock, state));
         doors.forEach(c -> c.postRender(stock, state));
         gauges.forEach(c -> c.postRender(stock, state));
