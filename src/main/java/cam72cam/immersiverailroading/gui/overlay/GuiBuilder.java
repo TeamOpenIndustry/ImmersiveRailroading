@@ -44,6 +44,7 @@ public class GuiBuilder {
     private final Readouts readout;
     private final String control;
     private final String setting;
+    private final String texture_variant;
     private final Float setting_default;
     private final boolean global;
     private final boolean invert;
@@ -134,6 +135,7 @@ public class GuiBuilder {
         this.control = data.getValue("control").asString();
         this.setting = data.getValue("setting").asString();
         this.setting_default = data.getValue("setting_default").asFloat();
+        this.texture_variant = data.getValue("texture_variant").asString();
         DataBlock soundBlock = data.getBlock("sound");
         this.sound = soundBlock != null ? new EntityRollingStockDefinition.ControlSoundsDefinition(soundBlock) : null;
         this.global = data.getValue("global").asBoolean(false);
@@ -240,6 +242,8 @@ public class GuiBuilder {
             }
 
             value = ConfigGraphics.settings.getOrDefault(setting, 0f);
+        } else if (texture_variant != null) {
+            value = texture_variant.equals(stock.getTexture()) ? 1 : 0;
         }
 
         if (invert) {
@@ -349,7 +353,7 @@ public class GuiBuilder {
         }
 
         if (image != null && interactable()) {
-            if (control == null && setting == null) {
+            if (control == null && setting == null && texture_variant == null) {
                 if (readout == null) {
                     return null;
                 }
@@ -441,7 +445,7 @@ public class GuiBuilder {
                     //TODO ConfigFile.write(ConfigGraphics.class);
                 } else {
                     if (readout != Readouts.TRAIN_BRAKE_LEVER) {
-                        new ControlChangePacket(stock, readout, control, global, val).sendToServer();
+                        new ControlChangePacket(stock, readout, control, global, texture_variant, val).sendToServer();
                     }
                 }
             }
@@ -475,7 +479,7 @@ public class GuiBuilder {
             ConfigGraphics.settings.put(setting, value);
             //TODO ConfigFile.write(ConfigGraphics.class);
         } else {
-            new ControlChangePacket(stock, readout, control, global, value).sendToServer();
+            new ControlChangePacket(stock, readout, control, global, texture_variant, value).sendToServer();
         }
 
         temporary_value = 0.5f;
@@ -520,7 +524,7 @@ public class GuiBuilder {
                 }
                 EntityRollingStock stock = (EntityRollingStock) riding;
                 float value = target.invert ? target.getValue(stock) : 1 - target.getValue(stock);
-                new ControlChangePacket(stock, target.readout, target.control, target.global, value).sendToServer();
+                new ControlChangePacket(stock, target.readout, target.control, target.global, target.texture_variant, value).sendToServer();
             }
         });
     }
@@ -537,15 +541,18 @@ public class GuiBuilder {
         @TagField
         private float value;
 
+        @TagField
+        private String texture_variant;
         public ControlChangePacket() {
             super(); // Reflection
         }
 
-        public ControlChangePacket(EntityRollingStock stock, Readouts readout, String controlGroup, boolean global, float value) {
+        public ControlChangePacket(EntityRollingStock stock, Readouts readout, String controlGroup, boolean global, String texture_variant, float value) {
             this.stockUUID = stock.getUUID();
             this.readout = readout;
             this.controlGroup = controlGroup;
             this.global = global;
+            this.texture_variant = texture_variant;
             this.value = value;
             // Update the UI, server will resync once the update actually happens
             update(stock);
@@ -593,6 +600,9 @@ public class GuiBuilder {
                 } else {
                     readout.setValue(stock, value);
                 }
+            }
+            if (texture_variant != null && value == 1) {
+                stock.setTexture(texture_variant);
             }
         }
     }
