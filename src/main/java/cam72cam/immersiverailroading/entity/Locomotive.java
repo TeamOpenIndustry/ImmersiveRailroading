@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ImmersionConfig;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
 import cam72cam.immersiverailroading.library.*;
@@ -23,6 +24,9 @@ import cam72cam.mod.world.World;
 
 import java.util.OptionalDouble;
 import java.util.UUID;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static cam72cam.immersiverailroading.library.PhysicalMaterials.*;
 
@@ -407,15 +411,22 @@ public abstract class Locomotive extends FreightTank {
 				* ConfigBalance.tractionMultiplier;
 	}
 	
+	private Logger log = LogManager.getLogger(ImmersiveRailroading.MODID);
+	
 	protected double simulateWheelSlip() {
 		if (cogging) {
 			return 0;
 		}
 
+		log.info("applied tractive effort " + Math.abs(getAppliedTractiveEffort(getCurrentSpeed())));
+		log.info("static trctive effort " + getStaticTractiveEffort(getCurrentSpeed()));
 		double adhesionFactor = Math.abs(getAppliedTractiveEffort(getCurrentSpeed())) /
 								getStaticTractiveEffort(getCurrentSpeed());
+		
+		log.info("adhesion factor " + adhesionFactor);
 		if (adhesionFactor > 1) {
-			return Math.copySign(Math.min((adhesionFactor-1)/10, 1), getReverser());
+			log.info("slip by " + Math.copySign(Math.min((adhesionFactor-1), 1), getReverser()));
+			return Math.copySign((adhesionFactor-1), getReverser());
 		}
 		return 0;
 	}

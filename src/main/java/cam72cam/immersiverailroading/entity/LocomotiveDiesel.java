@@ -205,7 +205,7 @@ public class LocomotiveDiesel extends Locomotive {
 				double rpmEfficiency = powerCurve * motorEfficiency(Math.abs(speed.metric()));	//force in Newtons
 				//second step of applying motor efficiency, lower torque means lower efficiency, be it from drop due to speed or throttle position
 				double torqueEfficiency = rpmEfficiency * torqueDropoff(rpmEfficiency);			//force in Newtons
-				return getReverser() * Math.min(tractiveEffort_N, torqueEfficiency) * ConfigBalance.tractionMultiplier;
+				return getReverser() * Math.min(tractiveEffort_N, torqueEfficiency);
 			}
 		}
 		return 0;

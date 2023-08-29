@@ -160,7 +160,7 @@ public class LocomotiveSteam extends Locomotive {
 				workingTractiveEffort = cutoffTractiveEffort_N * (maxSteamFlow_Hp / steamDemand_Hp);
 			}
 			
-			return (workingTractiveEffort - ((backpressure(speedPercent) * (double)maxTractiveEffort_N) * reverserDirection)) * ConfigBalance.tractionMultiplier;
+			return (workingTractiveEffort - ((backpressure(speedPercent) * (double)maxTractiveEffort_N) * reverserDirection));
 		}
 	}
 	
@@ -184,7 +184,7 @@ public class LocomotiveSteam extends Locomotive {
 	protected double getStaticTractiveEffort(Speed speed) {
 		//we're calculating average tractive effort, real tractive effort when starting varies, this simulates wheel slip caused by that variation
 		double original = super.getStaticTractiveEffort(speed);
-		return ImmersionConfig.arcadePhysics ? original : original * Math.min(.80d + (Math.abs(speed.metric()) * 0.08d), 1);
+		return ImmersionConfig.arcadePhysics ? original : original * Math.min(.70d + (speedPercent * 3), 1);
 	}
 
 	@Override
