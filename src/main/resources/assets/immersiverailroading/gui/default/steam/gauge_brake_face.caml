@@ -1,62 +1,20 @@
-element:
-  x = 30
-  y = 19
-  text =
-    value = "BRAKE"
-    height = 4
-  color =
-      0.0 = "0xFF000000"
+import:
+  source = immersiverailroading:gui/default/steam/gauge_common_face.caml
+  replace =
+    TITLE = BRAKE
+    MIN = 0
+    CURRENT = stat.brake_pressure stat.units_brake_pressure
+    MAX = stat.max_brake_pressure
+
+import:
+  source = immersiverailroading:gui/default/steam/gauge_dial.caml
+  replace =
+    READOUT = TRAIN_BRAKE
 
 element:
-  x = 30
-  y = 47
-  text =
-    value = stat.brake_pressure stat.units_brake_pressure
-    height = 4
-  color =
-      0.0 = "0xFF000000"
-
-element:
-  x = 14
-  y = 40
-  text =
-    value = "0"
-    height = 4
-  color =
-      0.0 = "0xFF000000"
-
-element:
-  x = 44
-  y = 40
-  text =
-    value = stat.max_brake_pressure
-    height = 4
-  color =
-      0.0 = "0xFF000000"
-
-
-element:
-  image = "immersiverailroading:gui/default/steam/steam_dial.png"
-  x = 27.5 # 60/2 - rotate.x
-  y = 16   # 60/2 - rotate.y
-  readout = TRAIN_BRAKE
-  rotate =
-    x = 2.5 # indicator width/2
-    y = 14  # indicator height/2
-    degrees = 250
-    offset = -125
-
-element:
-  image = "immersiverailroading:gui/default/steam/steam_dial.png"
-  x = 27.5 # 60/2 - rotate.x
-  y = 16   # 60/2 - rotate.y
-  readout = BRAKE_PRESSURE
   color =
     0 = "0xFFFF1010"
-  rotate =
-    x = 2.5 # indicator width/2
-    y = 14  # indicator height/2
-    degrees = 250
-    offset = -125
-
-import: "immersiverailroading:gui/default/steam/dial_ticks_x10.caml"
+  import:
+    source = immersiverailroading:gui/default/steam/gauge_dial.caml
+    replace =
+      READOUT = BRAKE_PRESSURE

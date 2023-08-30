@@ -90,10 +90,16 @@ public class GuiBuilder {
         // This is kinda weird as it appends the import to the current block instead of inserting it in the current
         // element list.  It's definitely a bit of a footgun.  The "correct" way to do this would be to make import part
         // of parsing in CAML, which is it's own sort of weirdness due to JSON interop.
-        List<DataBlock.Value> imports = data.getValues("import");
-        if (imports != null) {
-            for (DataBlock.Value imp : imports) {
+        List<DataBlock.Value> direct = data.getValues("import");
+        if (direct != null) {
+            for (DataBlock.Value imp : direct) {
                 data = new MergedBlocks(data, processImports(DataBlock.load(imp.asIdentifier())));
+            }
+        }
+        List<DataBlock> imports = data.getBlocks("import");
+        if (imports != null) {
+            for (DataBlock imp : imports) {
+                data = new MergedBlocks(data, processImports(DataBlock.load(imp.getValue("source").asIdentifier(), imp.getBlock("replace"))));
             }
         }
         return data;
