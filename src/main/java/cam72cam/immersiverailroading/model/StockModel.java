@@ -128,12 +128,14 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         rocking.include(remaining);
         this.allComponents = provider.components();
 
-        if (bogeyFront != null && Math.abs(def.getBogeyFront(Gauge.from(Gauge.STANDARD)) + bogeyFront.center().x) > 0.5) {
+        float frontOffset = -def.getBogeyFront(Gauge.from(Gauge.STANDARD));
+        if (bogeyFront != null && (frontOffset < bogeyFront.bogey.min.x || frontOffset > bogeyFront.bogey.max.x)) {
             frontTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyFront.center(), def.getBogeyFront(s.gauge)));
         } else {
             frontTrackers = null;
         }
-        if (bogeyRear != null && Math.abs(def.getBogeyRear(Gauge.from(Gauge.STANDARD)) + bogeyRear.center().x) > 0.5) {
+        float rearOffset = -def.getBogeyRear(Gauge.from(Gauge.STANDARD));
+        if (bogeyRear != null && (rearOffset < bogeyRear.bogey.min.x || rearOffset > bogeyRear.bogey.max.x)) {
             rearTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyRear.center(), def.getBogeyRear(s.gauge)));
         } else {
             rearTrackers = null;
