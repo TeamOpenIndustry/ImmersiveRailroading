@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Bogey {
-    private final ModelComponent bogey;
+    public final ModelComponent bogey;
     public final WheelSet wheels;
 
     public static Bogey get(ComponentProvider provider, ModelState state, boolean unified, ModelPosition pos) {
