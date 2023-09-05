@@ -518,21 +518,19 @@ public class GuiBuilder {
         return true;
     }
 
-    static {
-        ClientEvents.TICK.subscribe(() -> {
-            if (target != null && (target.readout == Readouts.TRAIN_BRAKE_LEVER)) {
-                if (!MinecraftClient.isReady()) {
-                    return ;
-                }
-                Entity riding = MinecraftClient.getPlayer().getRiding();
-                if (!(riding instanceof EntityRollingStock)) {
-                    return ;
-                }
-                EntityRollingStock stock = (EntityRollingStock) riding;
-                float value = target.invert ? target.getValue(stock) : 1 - target.getValue(stock);
-                new ControlChangePacket(stock, target.readout, target.control, target.global, target.texture_variant, value).sendToServer();
+    public static void onClientTick() {
+        if (target != null && (target.readout == Readouts.TRAIN_BRAKE_LEVER)) {
+            if (!MinecraftClient.isReady()) {
+                return ;
             }
-        });
+            Entity riding = MinecraftClient.getPlayer().getRiding();
+            if (!(riding instanceof EntityRollingStock)) {
+                return ;
+            }
+            EntityRollingStock stock = (EntityRollingStock) riding;
+            float value = target.invert ? target.getValue(stock) : 1 - target.getValue(stock);
+            new ControlChangePacket(stock, target.readout, target.control, target.global, target.texture_variant, value).sendToServer();
+        }
     }
 
     public static class ControlChangePacket extends Packet {

@@ -217,6 +217,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					return true;
 				});
 
+				ClientEvents.TICK.subscribe(GuiBuilder::onClientTick);
+
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
 
 				ClientPartDragging.register();
