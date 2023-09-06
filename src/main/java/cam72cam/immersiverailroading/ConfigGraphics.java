@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.library.PressureDisplayType;
 import cam72cam.immersiverailroading.library.SpeedDisplayType;
+import cam72cam.immersiverailroading.library.TemperatureDisplayType;
 import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
@@ -15,12 +17,6 @@ import static cam72cam.mod.config.ConfigFile.*;
 @Name("general")
 @File("immersiverailroading_graphics.cfg")
 public class ConfigGraphics {
-	@Comment( "Place to draw the Train GUI as a % from the left of the screen" )
-	public static int GUIPositionHorizontal = 2;
-
-	@Comment( "Place to draw the Train GUI as a % from the top of the screen" )
-	public static int GUIPositionVertical = 95;
-
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
 
@@ -29,6 +25,12 @@ public class ConfigGraphics {
 	
 	@Comment( "What unit to use for speedometer. (kmh, mph or ms)" )
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
+
+	@Comment("What units to display pressure in (psi, bar)")
+	public static PressureDisplayType pressureUnit = PressureDisplayType.psi;
+
+	@Comment("What units to display pressure in (psi, bar)")
+	public static TemperatureDisplayType temperatureUnit = TemperatureDisplayType.celcius;
 
 	@Comment( "How long to keep textures in memory after they have left the screen (higher numbers = smoother game play, lower numbers = less GPU memory used)")
     public static int textureCacheSeconds = 30;

@@ -26,6 +26,8 @@ public enum Stat {
     ;
 
     public String getValue(EntityRollingStock stock) {
+        Float temp = null;
+
         switch (this) {
             case SPEED:
                 if (stock instanceof EntityMoveableRollingStock) {
@@ -54,16 +56,7 @@ public enum Stat {
                 }
                 return "";
             case UNITS_SPEED:
-                switch (ConfigGraphics.speedUnit) {
-                    case kmh:
-                        return "km/h";
-                    case mph:
-                        return "mph";
-                    case ms:
-                        return "m/s";
-                }
-                return "";
-
+                return ConfigGraphics.speedUnit.toUnitString();
             case LIQUID:
                 return stock instanceof FreightTank ?
                         String.format("%.1f",
@@ -79,32 +72,32 @@ public enum Stat {
 
             case BOILER_PRESSURE:
                 return stock instanceof LocomotiveSteam ?
-                        String.format("%.1f", ((LocomotiveSteam) stock).getBoilerPressure()) : "";
+                        String.format("%.1f", ConfigGraphics.pressureUnit.convertFromPSI(((LocomotiveSteam) stock).getBoilerPressure())) : "";
             case MAX_BOILER_PRESSURE:
                 return stock instanceof LocomotiveSteam ?
-                        String.format("%.1f", (float)((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge))
+                        String.format("%.1f", ConfigGraphics.pressureUnit.convertFromPSI((float)((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge)))
                         : "";
             case UNITS_BOILER_PRESSURE:
-                return "PSI";
+                return ConfigGraphics.pressureUnit.toUnitString();
 
             case TEMPERATURE:
                 if (stock instanceof LocomotiveSteam) {
-                    return String.format("%.1f", ((LocomotiveSteam) stock).getBoilerTemperature());
+                    temp = ((LocomotiveSteam) stock).getBoilerTemperature();
                 }
                 if (stock instanceof LocomotiveDiesel) {
-                    return String.format("%.1f", ((LocomotiveDiesel) stock).getEngineTemperature());
+                    temp = ((LocomotiveDiesel) stock).getEngineTemperature();
                 }
-                return "";
+                return temp != null ? String.format("%.1f", ConfigGraphics.temperatureUnit.convertFromCelcius(temp)) : "";
             case MAX_TEMPERATURE:
                 if (stock instanceof LocomotiveSteam) {
-                    return String.format("%.1f", 100f);
+                    temp = 100f;
                 }
                 if (stock instanceof LocomotiveDiesel) {
-                    return String.format("%.1f", 150f);
+                    temp = 150f;
                 }
-                return "";
+                return temp != null ? String.format("%.1f", ConfigGraphics.temperatureUnit.convertFromCelcius(temp)) : "";
             case UNITS_TEMPERATURE:
-                return "C";
+                return ConfigGraphics.temperatureUnit.toUnitString();
             case BRAKE_PRESSURE:
                 if (stock instanceof EntityMoveableRollingStock) {
                     return String.format("%s", (int)(((EntityMoveableRollingStock) stock).getBrakePressure() * 100));
