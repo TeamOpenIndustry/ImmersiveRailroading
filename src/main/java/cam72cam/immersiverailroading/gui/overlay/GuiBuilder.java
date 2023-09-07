@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.util.MergedBlocks;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
@@ -448,7 +449,7 @@ public class GuiBuilder {
                 temporary_value = val;
                 if (setting != null) {
                     ConfigGraphics.settings.put(setting, val);
-                    //TODO ConfigFile.write(ConfigGraphics.class);
+                    ConfigFile.write(ConfigGraphics.class);
                 } else {
                     if (readout != Readouts.TRAIN_BRAKE_LEVER) {
                         new ControlChangePacket(stock, readout, control, global, texture_variant, val).sendToServer();
@@ -483,7 +484,7 @@ public class GuiBuilder {
 
         if (setting != null) {
             ConfigGraphics.settings.put(setting, value);
-            //TODO ConfigFile.write(ConfigGraphics.class);
+            ConfigFile.write(ConfigGraphics.class);
         } else {
             new ControlChangePacket(stock, readout, control, global, texture_variant, value).sendToServer();
         }
