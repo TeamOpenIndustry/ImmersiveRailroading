@@ -14,7 +14,7 @@ tex_variants =              # Optional: List of texture variants for this stock
 # Passenger information
 passenger =                 # Required: Passenger compartment configuration
     slots = 0                   # Number of entities that can ride at the same time
-    should_sit = False           # Should the riders always be in the sitting position?
+    should_sit = null           # Should the riders always be in the sitting position?  Defaults to gauge if null or unspecified
     center_x = 0                # X Center of passenger compartment
     center_y = 0                # Y Center of passenger compartment
     length = 1                  # Y Size
@@ -50,9 +50,11 @@ properties =                # Required:
 
     independent_brake = False           # Optional: Does this piece of stock have an independent brake?  Usually False except for Locomotives
     pressure_brake = True               # Optional: Does this piece of stock have a pressure brake?  Usually True except for Hand Cars
-    linear_brake_control = null         # Optional: Make brakes move in a linear fashion, TODO FIX/REMOVE THIS
+    linear_brake_control = True         # Optional: Make brakes move in a linear fashion, TODO FIX/REMOVE THIS
     brake_shoe_material = CAST_IRON     # Optional: How well the brakes should work/last (STEEL/CAST_IRON/WOOD)
     brake_friction_coefficient = null   # Optional: Override the generic brake shoe materials with a specific coefficient of friction
+    rolling_resistance_coefficient = 0.002
+    direct_friction_coefficient = 0
 
     swayMultiplier = 1  # Optional: How much the stock should sway when going over bumpy tracks / joints
     tiltMultiplier = 0  # Optional: How much the stock should tilt into curves
@@ -76,7 +78,11 @@ sounds = # Optional
     clack = "immersiverailroading:sounds/default/clack.ogg"             # Optional: Clack when crossing between rail joints
     clack_front = null                                                  # Optional: Clack for front wheels
     clack_rear = null                                                   # Optional: Clack for rear wheels
-    couple_sound = "immersiverailroading:sounds/default/coupling.ogg"   # Optional: Played when coupling occurs
+    couple = "immersiverailroading:sounds/default/coupling.ogg"         # Optional: Played when coupling occurs
+    sliding = "immersiverailroading:sounds/default/sliding.ogg"         # Optional: Played when sliding (locked brakes) occurs
+    flange = "immersiverailroading:sounds/default/flange.ogg"           # Optional: Played when flange rub occurs
+    flange_min_yaw = 2.5                                                # Optional: TODO explain this
+    collision = "immersiverailroading:sounds/default/collision.ogg"     # Optional: Played when a collision occurs
 
 #    controls =              # Optional: Map of model controls to sound properties
 #        MODEL_TYPE_ID =         # Example: model group k4_REVERSER_1_Cube would map to REVERSER_1

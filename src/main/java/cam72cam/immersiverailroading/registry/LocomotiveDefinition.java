@@ -114,11 +114,6 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         return isLinkedBrakeThrottle;
     }
 
-    @Override
-    protected boolean independentBrakeDefault() {
-        return true;
-    }
-
     public boolean isCabCar() {
         return isCabCar;
     }

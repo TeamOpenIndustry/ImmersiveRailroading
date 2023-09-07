@@ -1,0 +1,5 @@
+import: "immersiverailroading:rolling_stock/default/freight.caml"
+
+properties =
+    # Overrides
+    internalLighting = True       # Optional: Does this piece of stock have internal lighting?
