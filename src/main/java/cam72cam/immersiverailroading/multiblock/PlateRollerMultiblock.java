@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.IRFuzzy;

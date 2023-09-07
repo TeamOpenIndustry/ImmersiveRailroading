@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemCastRail;
 import cam72cam.immersiverailroading.items.ItemRail;
