@@ -30,15 +30,15 @@ public class Door<T extends EntityMoveableRollingStock> extends Control<T> {
     public final Types type;
 
     public static <T extends EntityMoveableRollingStock> List<Door<T>> get(ComponentProvider provider, ModelState state) {
-        return provider.parseAll(ModelComponentType.DOOR_X).stream().map(p -> new Door<T>(p, state)).collect(Collectors.toList());
+        return provider.parseAll(ModelComponentType.DOOR_X).stream().map(p -> new Door<T>(p, state, provider.internal_model_scale)).collect(Collectors.toList());
     }
 
     public static <T extends EntityMoveableRollingStock> List<Door<T>> get(ComponentProvider provider, ModelState state, ModelPosition pos) {
-        return provider.parseAll(ModelComponentType.DOOR_X, pos).stream().map(p -> new Door<T>(p, state)).collect(Collectors.toList());
+        return provider.parseAll(ModelComponentType.DOOR_X, pos).stream().map(p -> new Door<T>(p, state, provider.internal_model_scale)).collect(Collectors.toList());
     }
 
-    public Door(ModelComponent part, ModelState state) {
-        super(part, state);
+    public Door(ModelComponent part, ModelState state, double internal_model_scale) {
+        super(part, state, internal_model_scale);
         type = part.modelIDs.stream().anyMatch(g -> g.contains("EXTERNAL")) ? Types.EXTERNAL :
                 part.modelIDs.stream().anyMatch(g -> g.contains("CONNECTING")) ? Types.CONNECTING :
                 Types.INTERNAL;

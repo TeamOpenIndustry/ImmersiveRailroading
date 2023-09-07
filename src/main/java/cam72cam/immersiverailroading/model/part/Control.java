@@ -53,14 +53,14 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     private final Map<UUID, List<ISound>> sounds = new HashMap<>();
 
     public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos) {
-        return provider.parseAll(type, pos).stream().map(part1 -> new Control<T>(part1, state)).collect(Collectors.toList());
+        return provider.parseAll(type, pos).stream().map(part1 -> new Control<T>(part1, state, provider.internal_model_scale)).collect(Collectors.toList());
     }
 
     public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(part1 -> new Control<T>(part1, state)).collect(Collectors.toList());
+        return provider.parseAll(type).stream().map(part1 -> new Control<T>(part1, state, provider.internal_model_scale)).collect(Collectors.toList());
     }
 
-    public Control(ModelComponent part, ModelState state) {
+    public Control(ModelComponent part, ModelState state, double internal_model_scale) {
         super(part);
         this.controlGroup = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_CG_([^_]+)").matcher(group);
@@ -116,7 +116,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         for (String modelID : part.modelIDs) {
             Matcher matcher = pattern.matcher(modelID);
             while (matcher.find()) {
-                translations.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
+                translations.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)) * (float)internal_model_scale);
             }
         }
         pattern = Pattern.compile("SCALE_([^_]*)_([^_]+)");
