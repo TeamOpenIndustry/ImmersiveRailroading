@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -387,7 +388,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         if (sound == null) {
             return;
         }
-        ISound snd = stock.createSound(sound, repeats, 10);
+        ISound snd = stock.createSound(sound, repeats, 10, ConfigSound.SoundCategories::controls);
         snd.setVelocity(stock.getVelocity());
         snd.setVolume(1);
         snd.setPitch(1f);

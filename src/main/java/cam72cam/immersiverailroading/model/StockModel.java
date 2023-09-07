@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -139,8 +140,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         }
 
         sndRand = (float) Math.random() / 10;
-        wheel_sound = new PartSound(new SoundDefinition(def.wheel_sound), true, 40);
-        slidingSound = new PartSound(new SoundDefinition(def.sliding_sound), true, 40);
+        wheel_sound = new PartSound(new SoundDefinition(def.wheel_sound), true, 40, ConfigSound.SoundCategories.RollingStock::wheel);
+        slidingSound = new PartSound(new SoundDefinition(def.sliding_sound), true, 40, ConfigSound.SoundCategories.RollingStock::sliding);
         flangeSound = new FlangeSound(def.flange_sound, true, 40);
         sway = new SwaySimulator();
     }

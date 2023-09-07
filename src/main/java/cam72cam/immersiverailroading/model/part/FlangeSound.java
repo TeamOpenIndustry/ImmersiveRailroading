@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.ISound;
@@ -28,7 +29,7 @@ public class FlangeSound {
 
         Sound(EntityMoveableRollingStock stock) {
             lastFlangeVolume = 0;
-            sound = stock.createSound(def, canLoop, attenuationDistance);
+            sound = stock.createSound(def, canLoop, attenuationDistance, ConfigSound.SoundCategories.RollingStock::flange);
             this.stock = stock;
             this.sndRand = (float) Math.random() / 10;
         }

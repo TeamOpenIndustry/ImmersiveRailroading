@@ -241,7 +241,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     lastCollision = getTickCount();
                     new SoundPacket(getDefinition().collision_sound,
                             this.getPosition(), this.getVelocity(),
-                            (float) Math.min(1.0, state.collided), 1, (int) (100 * gauge.scale()), soundScale())
+                            (float) Math.min(1.0, state.collided), 1, (int) (100 * gauge.scale()), soundScale(), SoundPacket.PacketSoundCategory.COLLISION)
                             .sendToObserving(this);
                 }
 

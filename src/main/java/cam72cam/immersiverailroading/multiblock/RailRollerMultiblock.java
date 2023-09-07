@@ -139,7 +139,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (craftingTe.getRenderTicks() % 10 == 0 && craftingTe.getCraftProgress() != 0) {
-					Audio.playSound(world, craftingTe.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
+					Audio.playSound(world, craftingTe.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1 * ConfigSound.SoundCategories.Machines.category(), 0.2f);
 				}
 				return;
 			}

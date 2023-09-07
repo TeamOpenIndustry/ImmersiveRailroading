@@ -33,7 +33,7 @@ public class Whistle {
     public Whistle(ModelComponent whistle, ModelState state, Quilling quilling, EntityRollingStockDefinition.SoundDefinition fallback) {
         this.component = whistle;
         this.quilling = quilling;
-        this.whistle = new PartSound(fallback, true, 150);
+        this.whistle = new PartSound(fallback, true, 150, ConfigSound.SoundCategories.Locomotive.Steam::whistle);
         state.include(whistle);
     }
 
@@ -45,7 +45,7 @@ public class Whistle {
         private SoundEffects(EntityMoveableRollingStock stock) {
             chimes = new ArrayList<>();
             for (Quilling.Chime chime : quilling.chimes) {
-                chimes.add(stock.createSound(chime.sample, true, 150));
+                chimes.add(stock.createSound(chime.sample, true, 150, ConfigSound.SoundCategories.Locomotive.Steam::whistle));
             }
         }
 
@@ -149,16 +149,14 @@ public class Whistle {
         // Particles and Sound
 
         if (quilling != null) {
-            if (ConfigSound.soundEnabled) {
-                SoundEffects sound = sounds.get(stock.getUUID());
+            SoundEffects sound = sounds.get(stock.getUUID());
 
-                if (sound == null) {
-                    sound = new SoundEffects(stock);
-                    sounds.put(stock.getUUID(), sound);
-                }
-
-                sound.update(stock, hornTime, isAutomatedHorn, hornPlayer);
+            if (sound == null) {
+                sound = new SoundEffects(stock);
+                sounds.put(stock.getUUID(), sound);
             }
+
+            sound.update(stock, hornTime, isAutomatedHorn, hornPlayer);
         } else {
             whistle.effects(stock, hornTime > 0);
         }

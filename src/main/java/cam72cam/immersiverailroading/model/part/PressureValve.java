@@ -39,24 +39,22 @@ public class PressureValve {
     };
 
     public void effects(EntityMoveableRollingStock stock, boolean isBlowingOff) {
-        if (ConfigSound.soundEnabled && ConfigSound.soundPressureValve) {
-            ISound sound = sounds.get(stock.getUUID());
-            if (sound == null) {
-                sound = stock.createSound(sndFile, true, 40);
-                sound.setVolume(0.3f);
-                sounds.put(stock.getUUID(), sound);
+        ISound sound = sounds.get(stock.getUUID());
+        if (sound == null) {
+            sound = stock.createSound(sndFile, true, 40, ConfigSound.SoundCategories.Locomotive.Steam::pressureValve);
+            sound.setVolume(0.3f);
+            sounds.put(stock.getUUID(), sound);
+        }
+
+        if (isBlowingOff) {
+            if (!sound.isPlaying()) {
+                sound.play(stock.getPosition());
             }
 
-            if (isBlowingOff) {
-                if (!sound.isPlaying()) {
-                    sound.play(stock.getPosition());
-                }
-
-                sound.setPosition(stock.getPosition());
-                sound.setVelocity(stock.getVelocity());
-            } else {
-                sound.stop();
-            }
+            sound.setPosition(stock.getPosition());
+            sound.setVelocity(stock.getVelocity());
+        } else {
+            sound.stop();
         }
 
         if (ConfigGraphics.particlesEnabled && isBlowingOff) {

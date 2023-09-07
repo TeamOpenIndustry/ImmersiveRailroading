@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemPlate;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
@@ -133,7 +134,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (craftTe.getRenderTicks() % 10 == 0 && craftTe.getCraftProgress() != 0) {
-					Audio.playSound(world, craftTe.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
+					Audio.playSound(world, craftTe.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.MASTER, 1 * ConfigSound.SoundCategories.Machines.category(), 0.2f);
 				}
 				return;
 			}
