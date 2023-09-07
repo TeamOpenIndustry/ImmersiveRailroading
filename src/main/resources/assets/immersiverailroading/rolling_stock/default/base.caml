@@ -10,6 +10,7 @@ model_gauge_m = null        # Optional: Gauge in meters that the model is scaled
 recommended_gauge_m = null  # Optional: Gauge to show as the default for the piece of stock
 tex_variants =              # Optional: List of texture variants for this stock
     Default = ""                # Format: Name With Spaces = resource_folder_name
+show_current_load_only = False  # Controls how the CARGO_FILL_PERCENTAGE model groups are shown
 
 # Passenger information
 passenger =                 # Required: Passenger compartment configuration

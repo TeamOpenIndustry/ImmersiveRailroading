@@ -42,54 +42,15 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         } else {
             fuelCapacity = FluidQuantity.ZERO;
         }
-        notches = properties.getValue("throttle_notches").asInteger(8);
+        notches = properties.getValue("throttle_notches").asInteger();
 
-        hornSus = properties.getValue("horn_sustained").asBoolean(false);
-
-        idle = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg"));
-        running = null;
-        horn = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg"));
-        bell = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg"));
+        hornSus = properties.getValue("horn_sustained").asBoolean();
 
         DataBlock sounds = data.getBlock("sounds");
-        if(sounds != null) {
-            idle = SoundDefinition.getOrDefault(sounds, "idle", idle);
-            running = SoundDefinition.getOrDefault(sounds, "running", null);
-            horn = SoundDefinition.getOrDefault(sounds, "horn", horn);
-            bell = SoundDefinition.getOrDefault(sounds, "bell", bell);
-        }
-
-        if (controlSounds.isEmpty()) {
-            controlSounds.put("REVERSER_1", new ControlSoundsDefinition(
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_move.ogg"),
-                    0.45f,
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
-            ));
-            controlSounds.put("THROTTLE_1", new ControlSoundsDefinition(
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_move.ogg"),
-                    1/8f,
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
-            ));
-            controlSounds.put("TRAIN_BRAKE_1", new ControlSoundsDefinition(
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/pressure.ogg"),
-                    null,
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
-            ));
-            controlSounds.put("INDEPENDENT_BRAKE_1", new ControlSoundsDefinition(
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/pressure.ogg"),
-                    null,
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
-            ));
-        }
-    }
-
-    @Override
-    protected boolean multiUnitDefault() {
-        return true;
+        idle = SoundDefinition.getOrDefault(sounds, "idle");
+        running = SoundDefinition.getOrDefault(sounds, "running");
+        horn = SoundDefinition.getOrDefault(sounds, "horn");
+        bell = SoundDefinition.getOrDefault(sounds, "bell");
     }
 
     @Override

@@ -129,7 +129,7 @@ public abstract class EntityRollingStockDefinition {
             volume = obj.getValue("volume").asFloat(1.0f);
         }
 
-        public static SoundDefinition getOrDefault(DataBlock block, String key, SoundDefinition fallback) {
+        public static SoundDefinition getOrDefault(DataBlock block, String key) {
             DataBlock found = block.getBlock(key);
             if (found != null) {
                 return new SoundDefinition(found);
@@ -138,7 +138,7 @@ public abstract class EntityRollingStockDefinition {
             if (ident != null && ident.canLoad()) {
                 return new SoundDefinition(ident);
             }
-            return fallback;
+            return null;
         }
     }
 
@@ -172,7 +172,7 @@ public abstract class EntityRollingStockDefinition {
             offset = obj.getValue("offset").asFloat(0f);
             invert = obj.getValue("invert").asBoolean(false);
             frames_per_tick = obj.getValue("frames_per_tick").asFloat(1f);
-            sound = SoundDefinition.getOrDefault(obj, "sound", null);
+            sound = SoundDefinition.getOrDefault(obj, "sound");
         }
 
         public boolean valid() {

@@ -22,9 +22,4 @@ public class HandCarDefinition extends LocomotiveDefinition {
     protected Identifier defaultDataLocation() {
         return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/handcar.caml");
     }
-
-    @Override
-    protected boolean multiUnitDefault() {
-        return false;
-    }
 }
