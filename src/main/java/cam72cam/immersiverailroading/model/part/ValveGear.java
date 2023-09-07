@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
@@ -147,7 +148,7 @@ public abstract class ValveGear {
         public void effects(EntityMoveableRollingStock stock) {
             boolean drains_enabled = isEndStroke(stock) && stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled();
 
-            if (stock instanceof Locomotive && ((Locomotive)stock).getAvailableHP() <= 0) {
+            if (stock instanceof Locomotive && (((LocomotiveSteam)stock).getBoilerPressure() <= 0 && Config.ConfigBalance.FuelRequired)) {
                 return;
             }
 
@@ -159,7 +160,7 @@ public abstract class ValveGear {
                 Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos.getRight(), new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale(), stock.getDefinition().steamParticleTexture));
             }
 
-            if (ConfigSound.soundEnabled && stock instanceof LocomotiveSteam) {
+            if (stock instanceof LocomotiveSteam) {
                 if (particlePos == null) {
                     particlePos = particlePos(stock);
                 }
@@ -216,9 +217,9 @@ public abstract class ValveGear {
             chuffId = 0;
             chuffs = new ArrayList<>();
             for (int i = 0; i < 6; i++) {
-                chuffs.add(stock.createSound(stock.getDefinition().chuff, false, 40));
+                chuffs.add(stock.createSound(stock.getDefinition().chuff, false, 40, ConfigSound.SoundCategories.Locomotive.Steam::chuff));
             }
-            cylinder_drain = stock.createSound(stock.getDefinition().cylinder_drain, true, 40);
+            cylinder_drain = stock.createSound(stock.getDefinition().cylinder_drain, true, 40, ConfigSound.SoundCategories.Locomotive.Steam::cylinder_drain);
             this.stock = stock;
             this.pitchOffset = (float) (Math.random() / 50);
             this.pitchStroke = false;

@@ -32,6 +32,10 @@ public class Speed {
 		return internalSpeed * speedRatio;
 	}
 
+	public double imperial() {
+		return metric() * 0.621371;
+	}
+
 	public String metricString() {
 		return String.format("%.2f km/h", metric());
 	}

@@ -12,6 +12,7 @@ import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
+import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class MultiPreviewRender {

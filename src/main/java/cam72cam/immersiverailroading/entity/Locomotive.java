@@ -214,6 +214,7 @@ public abstract class Locomotive extends FreightTank {
 		return false;
 	}
 
+
 	protected float getReverserDelta() {
 		return throttleDelta;
 	}
@@ -386,23 +387,17 @@ public abstract class Locomotive extends FreightTank {
 		}
 	}
 
-	public abstract int getAvailableHP();
-
 	/** Force applied between the wheels and the rails */
-	private double getAppliedTractiveEffort(Speed speed) {
-		double locoEfficiency = 0.7f; //TODO config
-		double outputHorsepower = Math.abs(Math.pow(getThrottle() * getReverser(), 3) * getAvailableHP());
-		
-		double tractiveEffortNewtons = (2650.0 * ((locoEfficiency * outputHorsepower) / Math.max(1.4, Math.abs(speed.metric()))));
-		return tractiveEffortNewtons;
-	}
+	public abstract double getAppliedTractiveEffort(Speed speed);
 
 	/** Maximum force that can be between the wheels and the rails before it slips */
 	private double getStaticTractiveEffort(Speed speed) {
-		return this.getDefinition().getStartingTractionNewtons(gauge) *
-				slipCoefficient(speed) *
-				Config.ConfigBalance.tractionMultiplier *
-				1.5; // mmmmm fudge....
+		return (Config.ConfigBalance.FuelRequired ? this.getWeight() : this.getMaxWeight()) // KG
+				* 9.8 // M/S/S
+				* STEEL.staticFriction(STEEL)
+				* slipCoefficient(speed)
+				/ getDefinition().factorOfAdhesion()
+				* Config.ConfigBalance.tractionMultiplier;
 	}
 	
 	protected double simulateWheelSlip() {
@@ -410,10 +405,10 @@ public abstract class Locomotive extends FreightTank {
 			return 0;
 		}
 
-		double adhesionFactor = getAppliedTractiveEffort(getCurrentSpeed()) /
+		double adhesionFactor = Math.abs(getAppliedTractiveEffort(getCurrentSpeed())) /
 								getStaticTractiveEffort(getCurrentSpeed());
 		if (adhesionFactor > 1) {
-			return Math.copySign(Math.min((adhesionFactor-1)/10, 1), getReverser());
+			return Math.copySign((adhesionFactor-1)/10, getReverser());
 		}
 		return 0;
 	}
@@ -423,29 +418,31 @@ public abstract class Locomotive extends FreightTank {
 			return 0;
 		}
 
-		double tractiveEffortNewtons = getAppliedTractiveEffort(speed);
-
 		if (Math.abs(speed.minecraft()) > this.getDefinition().getMaxSpeed(gauge).minecraft()) {
-			tractiveEffortNewtons = 0;
+			return 0;
 		}
 
-		if (!cogging && tractiveEffortNewtons > 0) {
+		double appliedTractiveEffort = getAppliedTractiveEffort(speed);
+
+		if (!cogging && Math.abs(appliedTractiveEffort) > 0) {
 			double staticTractiveEffort = getStaticTractiveEffort(speed);
 
-			if (tractiveEffortNewtons > staticTractiveEffort) {
+			if (Math.abs(appliedTractiveEffort) > staticTractiveEffort) {
 				// This is a guess, but seems to be fairly accurate
 
 				// Reduce tractive effort to max static translated into kinetic
-				tractiveEffortNewtons = staticTractiveEffort /
+				double tractiveEffortNewtons = staticTractiveEffort /
 						STEEL.staticFriction(STEEL) *
 						STEEL.kineticFriction(STEEL);
 
 				// How badly tractive effort is overwhelming static effort
 				tractiveEffortNewtons *= staticTractiveEffort / tractiveEffortNewtons;
+
+				return Math.copySign(tractiveEffortNewtons, appliedTractiveEffort);
 			}
 		}
 
-		return Math.copySign(tractiveEffortNewtons, getReverser());
+		return appliedTractiveEffort;
 	}
 
 	@Override
@@ -592,12 +589,19 @@ public abstract class Locomotive extends FreightTank {
 		}
 		// Wheel balance messing with friction
 		if (speed.metric() != 0) {
-			double balance = 1d/(Math.abs(speed.metric())+100) / (1d/100);
+			double balance = 1d/(Math.abs(speed.metric())+300) / (1d/300);
 			slipMult *= balance;
 		}
 		return slipMult;
 	}
-	
+
+	public abstract boolean providesElectricalPower();
+
+	@Override
+	public boolean hasElectricalPower() {
+		return super.hasElectricalPower() || providesElectricalPower();
+	}
+
 	public float ambientTemperature() {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;

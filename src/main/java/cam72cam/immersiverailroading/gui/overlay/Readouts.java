@@ -27,6 +27,7 @@ public enum Readouts {
     REAR_BOGEY_ANGLE,
     FRONT_LOCOMOTIVE_ANGLE,
     REAR_LOCOMOTIVE_ANGLE,
+    CYLINDER_DRAIN,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -63,9 +64,9 @@ public enum Readouts {
             case COUPLER_REAR:
                 return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.BACK) ? 1 : 0 : 0;
             case COUPLED_FRONT:
-                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.FRONT) ? 1 : 0 : 0;
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.FRONT) && ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.FRONT) ? 1 : 0 : 0;
             case COUPLED_REAR:
-                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.BACK) ? 1 : 0 : 0;
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.BACK) && ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.BACK) ? 1 : 0 : 0;
             case BELL:
                 return stock instanceof Locomotive ? ((Locomotive) stock).getBell() > 0 ? 1 : 0 : 0;
             case WHISTLE:
@@ -83,6 +84,8 @@ public enum Readouts {
             case REAR_LOCOMOTIVE_ANGLE:
                 StockModel<?, ?> rear = stock.getDefinition().getModel();
                 return rear instanceof LocomotiveModel ? yawToPercent(((LocomotiveModel<?, ?>)rear).getRearLocomotiveYaw((EntityMoveableRollingStock) stock), 90) : 0.5f;
+            case CYLINDER_DRAIN:
+                return stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled() ? 1 : 0;
         }
         return 0;
     }
@@ -145,6 +148,11 @@ public enum Readouts {
             case ENGINE:
                 if (stock instanceof LocomotiveDiesel) {
                     ((LocomotiveDiesel) stock).setTurnedOn(!((LocomotiveDiesel) stock).isTurnedOn());
+                }
+                break;
+            case CYLINDER_DRAIN:
+                if (stock instanceof LocomotiveSteam) {
+                    ((LocomotiveSteam)stock).setCylinderDrains(value > 0.9);
                 }
                 break;
         }

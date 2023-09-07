@@ -63,6 +63,8 @@ class ExportAnimatrixData(Operator, ExportHelper):
                     res = obj.matrix_world
 
                     for arm in [m.object for m in obj.modifiers if m.type == "ARMATURE"]:
+                        if arm is None:
+                            continue
                         return arm.matrix_world @ arm.pose.bones[obj.vertex_groups[0].name].matrix
 
                     return res

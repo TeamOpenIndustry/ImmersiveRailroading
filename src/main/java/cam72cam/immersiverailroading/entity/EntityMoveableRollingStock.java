@@ -1,21 +1,19 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
-import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.ICollision;
@@ -24,11 +22,9 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.sound.ISound;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
@@ -56,16 +52,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     @TagField("BRAKE_PRESSURE")
     private float trainBrakePressure = 0;
 
-    private float sndRand;
+    @TagSync
+    @TagField("SLIDING")
+    public boolean sliding = false;
 
-    private ISound wheel_sound;
-    private ISound clackFront;
-    private ISound clackRear;
-    private Vec3i clackFrontPos;
-    private Vec3i clackRearPos;
-
-    private double swayMagnitude;
-    private double swayImpulse;
+    public long lastCollision = 0;
 
     @Override
     public void load(TagCompound data) {
@@ -241,15 +232,18 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 }
             }
 
-            if (this.getTickCount() % 10 == 0) {
-                // Wipe this now and again to force a refresh
-                // Could also be implemented as a wipe from the track rail base (might be more efficient?)
-                lastRetarderPos = null;
-            }
-
             SimulationState state = getCurrentState();
             if (state != null) {
                 this.trainBrakePressure = state.brakePressure;
+                this.sliding = state.sliding;
+
+                if (state.collided > 0.1 && getTickCount() - lastCollision > 20) {
+                    lastCollision = getTickCount();
+                    new SoundPacket(getDefinition().collision_sound,
+                            this.getPosition(), this.getVelocity(),
+                            (float) Math.min(1.0, state.collided), 1, (int) (100 * gauge.scale()), soundScale(), SoundPacket.PacketSoundCategory.COLLISION)
+                            .sendToObserving(this);
+                }
 
                 for (Vec3i bp : state.blocksToBreak) {
                     getWorld().breakBlock(bp, Config.ConfigDamage.dropSnowBalls || !getWorld().isSnow(bp));
@@ -266,84 +260,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         if (getWorld().isClient) {
             getDefinition().getModel().onClientTick(this);
-
-
-            if (ConfigSound.soundEnabled) {
-                if (this.wheel_sound == null) {
-                    wheel_sound = this.createSound(this.getDefinition().wheel_sound, true, 40);
-                    this.sndRand = (float) Math.random() / 10;
-                }
-                if (this.clackFront == null) {
-                    clackFront = this.createSound(this.getDefinition().clackFront, false, 30);
-                }
-                if (this.clackRear == null) {
-                    clackRear = this.createSound(this.getDefinition().clackRear, false, 30);
-                }
-                float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
-                float pitch = adjust + 0.7f;
-                if (getDefinition().shouldScalePitch()) {
-                    // TODO this is probably wrong...
-                    pitch = (float) (pitch/ gauge.scale());
-                }
-                float volume = 0.01f + adjust;
-
-                if (Math.abs(this.getCurrentSpeed().metric()) > 5 && MinecraftClient.getPlayer().getPosition().distanceTo(getPosition()) < 40) {
-                    if (!wheel_sound.isPlaying()) {
-                        wheel_sound.play(getPosition());
-                    }
-                    wheel_sound.setPitch(pitch + this.sndRand);
-                    wheel_sound.setVolume(volume);
-
-                    wheel_sound.setPosition(getPosition());
-                    wheel_sound.setVelocity(getVelocity());
-                } else {
-                    if (wheel_sound.isPlaying()) {
-                        wheel_sound.stop();
-                    }
-                }
-
-                volume = Math.min(1, volume * 2);
-                swayMagnitude -= 0.07;
-                double swayMin = getCurrentSpeed().metric() / 300 / 3;
-                swayMagnitude = Math.max(swayMagnitude, swayMin);
-
-                if (swayImpulse > 0) {
-                    swayMagnitude += 0.3;
-                    swayImpulse -= 0.7;
-                }
-                swayMagnitude = Math.min(swayMagnitude, 3);
-
-                Vec3i posFront = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyFront(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
-                if (BlockUtil.isIRRail(getWorld(), posFront)) {
-                    TileRailBase rb = getWorld().getBlockEntity(posFront, TileRailBase.class);
-                    rb = rb != null ? rb.getParentTile() : null;
-                    if (rb != null && !rb.getPos().equals(clackFrontPos) && rb.clacks()) {
-                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
-                            clackFront.setPitch(pitch);
-                            clackFront.setVolume(volume);
-                            clackFront.play(new Vec3d(posFront));
-                        }
-                        clackFrontPos = rb.getPos();
-                        if (getWorld().getTicks() % ConfigGraphics.StockSwayChance == 0) {
-                            swayImpulse += 7 * rb.getBumpiness();
-                            swayImpulse = Math.min(swayImpulse, 20);
-                        }
-                    }
-                }
-                Vec3i posRear = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyRear(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
-                if (BlockUtil.isIRRail(getWorld(), posRear)) {
-                    TileRailBase rb = getWorld().getBlockEntity(posRear, TileRailBase.class);
-                    rb = rb != null ? rb.getParentTile() : null;
-                    if (rb != null && !rb.getPos().equals(clackRearPos) && rb.clacks()) {
-                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
-                            clackRear.setPitch(pitch);
-                            clackRear.setVolume(volume);
-                            clackRear.play(new Vec3d(posRear));
-                        }
-                        clackRearPos = rb.getPos();
-                    }
-                }
-            }
         }
 
         // Apply position onTick
@@ -365,8 +281,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         this.currentSpeed = currentPos.speed;
 
-        distanceTraveled += (float) this.currentSpeed.minecraft() * getTickSkew();
-        distanceTraveled = distanceTraveled % 32000;// Wrap around to prevent double float issues
+        if (!sliding) {
+            distanceTraveled += (float) this.currentSpeed.minecraft() * getTickSkew();
+            distanceTraveled = distanceTraveled % 32000;// Wrap around to prevent double float issues
+        }
 
         this.setPosition(currentPos.position);
         this.setVelocity(getPosition().subtract(prevPosX, prevPosY, prevPosZ));
@@ -455,22 +373,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.boundingBox = null;
     }
 
-    public double getRollDegrees() {
-        if (Math.abs(getCurrentSpeed().metric() * gauge.scale()) < 4) {
-            // don't calculate it
-            return 0;
-        }
-
-        double sway = Math.cos(Math.toRadians(this.getTickCount() * 13)) *
-                swayMagnitude / 5 *
-                getDefinition().getSwayMultiplier() *
-                ConfigGraphics.StockSwayMultiplier;
-
-        double tilt = getDefinition().getTiltMultiplier() * (getPrevRotationYaw() - getRotationYaw()) * (getCurrentSpeed().minecraft() > 0 ? 1 : -1);
-
-        return sway + tilt;
-    }
-
     /*
      *
      * Client side render guessing
@@ -498,30 +400,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.rearYaw = rearYaw;
     }
 
-    private Vec3i lastRetarderPos = null;
-    private int lastRetarderValue = 0;
-
-    public int getSpeedRetarderSlowdown(TickPos latest) {
-        if (new Vec3i(latest.position).equals(lastRetarderPos)) {
-            return lastRetarderValue;
-        }
-
-        int over = 0;
-        int max = 0;
-        for (Vec3i bp : getWorld().blocksInBounds(this.getCollision().offset(new Vec3d(0, gauge.scale(), 0)))) {
-            TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
-            if (te != null) {
-                if (te.getAugment() == Augment.SPEED_RETARDER) {
-                    max = Math.max(max, getWorld().getRedstone(bp));
-                    over += 1;
-                }
-            }
-        }
-        lastRetarderPos = new Vec3i(latest.position);
-        lastRetarderValue = over * max;
-        return lastRetarderValue;
-    }
-
     public float getTickSkew() {
         ChronoState state = ChronoState.getState(getWorld());
         return state != null ? (float) state.getTickSkew() : 1;
@@ -533,13 +411,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         if (getWorld().isClient) {
             this.getDefinition().getModel().onClientRemoved(this);
-        }
-
-        if (this.wheel_sound != null) {
-            wheel_sound.stop();
-        }
-        if (this.clackFront != null) {
-            clackFront.stop();
         }
     }
 
@@ -594,6 +465,27 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
      * Though, I'm going to limit it to 75% of the total possible adhesion
      */
     public double getBrakeSystemEfficiency() {
-        return Math.min(0.75, Math.pow(getDefinition().getBrakeShoeFriction(), 1/2.5));
+        return getDefinition().getBrakeShoeFriction();
+    }
+
+    public boolean isSliding() {
+        return sliding;
+    }
+
+    public double getDirectFrictionNewtons(List<Vec3i> track) {
+        double newtons = getWeight() * 9.8;
+        double retardedNewtons = 0;
+        for (Vec3i bp : track) {
+            TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
+            if (te != null) {
+                if (te.getAugment() == Augment.SPEED_RETARDER) {
+                    double red = getWorld().getRedstone(bp);
+                    retardedNewtons += red / 15f / track.size() * newtons;
+                }
+            }
+        }
+        double independentNewtons = getDefinition().directFrictionCoefficient * getIndependentBrake() * newtons;
+        double pressureNewtons = getDefinition().directFrictionCoefficient * getBrakePressure() * newtons;
+        return retardedNewtons + independentNewtons + pressureNewtons;
     }
 }

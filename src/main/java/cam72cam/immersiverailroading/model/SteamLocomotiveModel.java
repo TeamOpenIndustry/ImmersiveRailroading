@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -23,7 +24,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
 
     public SteamLocomotiveModel(LocomotiveSteamDefinition def) throws Exception {
         super(def);
-        idleSounds = new PartSound(def.idle, true, 40);
+        idleSounds = new PartSound(def.idle, true, 40, ConfigSound.SoundCategories.Locomotive.Steam::idle);
     }
 
     @Override

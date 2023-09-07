@@ -90,14 +90,25 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
-	public int getAvailableHP() {
-		if (!Config.isFuelRequired(gauge)) {
-			return this.getDefinition().getHorsePower(gauge);
-		}
+	public double getAppliedTractiveEffort(Speed speed) {
 		if (getDefinition().isCabCar()) {
 			return 0;
 		}
-		return (int) (this.getDefinition().getHorsePower(gauge) * Math.pow(this.getBoilerPressure() / this.getDefinition().getMaxPSI(gauge), 3));
+
+		double traction_N = this.getDefinition().getStartingTractionNewtons(gauge);
+		if (Config.isFuelRequired(gauge)) {
+			traction_N = traction_N / this.getDefinition().getMaxPSI(gauge) * this.getBoilerPressure();
+		}
+
+		// Cap the max "effective" reverser.  At high speeds having a fully open reverser just damages equipment
+		double reverser = getReverser();
+		double reverserCap = 0.5;
+		double maxReverser = 1 - Math.abs(getCurrentSpeed().metric()) / getDefinition().getMaxSpeed(gauge).metric() * reverserCap;
+
+		// This should probably be tuned...
+		double multiplier = Math.copySign(Math.abs(Math.pow(getThrottle() * Math.min(Math.abs(reverser), maxReverser), 3)), reverser);
+
+		return traction_N * multiplier;
 	}
 	
 	
@@ -308,13 +319,13 @@ public class LocomotiveSteam extends Locomotive {
 	}
 
 	@Override
-	public boolean hasElectricalPower() {
-		return getAvailableHP() > 0 || super.hasElectricalPower();
+	public boolean providesElectricalPower() {
+		return getBoilerPressure() > 0 || !ConfigBalance.FuelRequired;
 	}
 
 	@Override
     public boolean internalLightsEnabled() {
-		return getAvailableHP() > 0 || super.internalLightsEnabled();
+		return getBoilerPressure() > 0 || !ConfigBalance.FuelRequired || super.internalLightsEnabled();
     }
 
     @Override
@@ -410,5 +421,14 @@ public class LocomotiveSteam extends Locomotive {
 		}
 
 		return drains.stream().anyMatch(c -> getControlPosition(c) == 1);
+	}
+
+	public void setCylinderDrains(boolean enabled) {
+		// This could be optimized to once-per-tick, but I'm not sure that is necessary
+		List<Control<?>> drains = getDefinition().getModel().getControls().stream().filter(x -> x.part.type == ModelComponentType.CYLINDER_DRAIN_CONTROL_X).collect(Collectors.toList());
+
+		for (Control<?> drain : drains) {
+			setControlPosition(drain, enabled ? 1 : 0);
+		}
 	}
 }

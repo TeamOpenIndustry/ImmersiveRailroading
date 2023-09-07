@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
@@ -130,8 +131,8 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-	public boolean hasElectricalPower() {
-		return this.isRunning() || super.hasElectricalPower();
+	public boolean providesElectricalPower() {
+		return this.isRunning();
 	}
 
 	@Override
@@ -161,9 +162,13 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 
 	@Override
-    public int getAvailableHP() {
+	public double getAppliedTractiveEffort(Speed speed) {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
-			return this.getDefinition().getHorsePower(gauge);
+			double maxPower_W = this.getDefinition().getHorsePower(gauge) * 745.7d;
+			double efficiency = 0.82; // Similar to a *lot* of imperial references
+			double speed_M_S = (Math.abs(speed.metric())/3.6);
+			double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(0.001, speed_M_S);
+			return maxPowerAtSpeed * getThrottle() * getReverser();
 		}
 		return 0;
 	}

@@ -61,7 +61,8 @@ public class ItemConductorWhistle extends CustomItem {
 					player.getPosition(), Vec3d.ZERO,
 					0.7f, (float) (Math.random() / 4 + 0.75), 
 					(int) (Config.ConfigBalance.villagerConductorDistance * 1.2f), 
-					1
+					1,
+					SoundPacket.PacketSoundCategory.WHISTLE
 			);
 			packet.sendToAllAround(world, player.getPosition(), Config.ConfigBalance.villagerConductorDistance * 1.2f);
 

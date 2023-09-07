@@ -25,8 +25,11 @@ public class SoundPacket extends Packet {
 	@TagField
 	private float scale;
 
+	@TagField
+	private PacketSoundCategory category;
+
 	public SoundPacket() { }
-	public SoundPacket(Identifier soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, float scale) {
+	public SoundPacket(Identifier soundfile, Vec3d pos, Vec3d motion, float volume, float pitch, int distance, float scale, PacketSoundCategory category) {
 		this.file = soundfile.toString();
 		this.pos = pos;
 		this.motion = motion;
@@ -34,14 +37,32 @@ public class SoundPacket extends Packet {
 		this.pitch = pitch;
 		this.distance = distance;
 		this.scale = scale;
+		this.category = category;
 	}
 
 	@Override
 	public void handle() {
-		ISound snd = Audio.newSound(new Identifier(file), SoundCategory.AMBIENT, false, (float) (distance * ConfigSound.soundDistanceScale), scale);
+		ISound snd = Audio.newSound(new Identifier(file), SoundCategory.MASTER, false, (float) (distance * ConfigSound.soundDistanceScale), scale);
 		snd.setVelocity(motion);
+		switch (category) {
+			case COUPLE:
+				volume *= ConfigSound.SoundCategories.RollingStock.couple();
+				break;
+			case COLLISION:
+				volume *= ConfigSound.SoundCategories.RollingStock.collision();
+				break;
+			case WHISTLE:
+				volume *= ConfigSound.SoundCategories.passenger_whistle();
+				break;
+		}
 		snd.setVolume(volume);
 		snd.setPitch(pitch);
 		snd.play(pos);
+	}
+
+	public enum PacketSoundCategory {
+		COUPLE,
+		COLLISION,
+		WHISTLE,
 	}
 }
