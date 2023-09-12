@@ -53,9 +53,10 @@ public class TrackFollower {
             pos = stock.getPosition();
             float offsetYaw = (front ? stock.getFrontYaw() : stock.getRearYaw());
             if (offset >= min && offset <= max) {
+                yawReadout = stock.getRotationYaw() - offsetYaw;
                 matrix.setIdentity();
                 matrix.translate(-offset, 0, 0);
-                matrix.rotate(Math.toRadians(stock.getRotationYaw() - offsetYaw), 0, 1, 0);
+                matrix.rotate(Math.toRadians(yawReadout), 0, 1, 0);
                 matrix.translate(offset, 0, 0);
             } else {
                 // Don't need to path to a point that's already on the track.  TODO This can also be used to improve accuracy of the offset rendering
@@ -80,6 +81,8 @@ public class TrackFollower {
                 } else {
                     pos = null; // Force recompute
                 }
+
+                yawReadout = toPointYaw + atPointYaw;
 
                 matrix.setIdentity();
                 matrix.rotate(Math.toRadians(toPointYaw), 0, 1, 0);
@@ -106,7 +109,7 @@ public class TrackFollower {
     }
 
     public float getYawReadout() {
-        return offset >= min && offset <= max ? stock.getRotationYaw() - (front ? stock.getFrontYaw() : stock.getRearYaw()) : toPointYaw + atPointYaw;
+        return yawReadout;
     }
 
     public static class TrackFollowers {
