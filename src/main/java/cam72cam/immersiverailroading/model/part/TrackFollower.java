@@ -24,10 +24,7 @@ public class TrackFollower {
     private final float offset;
     private final boolean front;
     private Vec3d pos;
-
-    private float toPointYaw;
-    private float toPointPitch;
-    private float atPointYaw;
+    private float yawReadout;
     private final Matrix4 matrix;
 
     public TrackFollower(EntityMoveableRollingStock stock, ModelComponent frame, WheelSet wheels, boolean front) {
@@ -62,9 +59,14 @@ public class TrackFollower {
                 matrix.translate(offset, 0, 0);
             } else {
                 // Don't need to path to a point that's already on the track.  TODO This can also be used to improve accuracy of the offset rendering
-                Vec3d offsetPos = pos.add(VecUtil.fromWrongYaw(offset, stock.getRotationYaw()));
+                Vec3d offsetPos = pos.add(VecUtil.fromWrongYawPitch(offset, stock.getRotationYaw(), stock.getRotationPitch()));
                 double toMinPoint = max - offset;
                 double betweenPoints = min - max;
+
+                float toPointYaw = 0;
+                float atPointYaw = 0;
+                float toPointPitch = 0;
+                float atPointPitch = 0;
 
                 Vec3d pointPos = nextPosition(stock.getWorld(), stock.gauge, offsetPos, stock.getRotationYaw(), offsetYaw, toMinPoint);
                 Vec3d pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, betweenPoints);
@@ -74,9 +76,9 @@ public class TrackFollower {
                     atPointYaw = VecUtil.toYaw(pointPos.subtract(pointPosNext)) + stock.getRotationYaw() + 180 - toPointYaw ;
 
                     toPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(delta, stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch();
+                    atPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(pointPos.subtract(pointPosNext), stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch() - toPointPitch;
                 } else {
-                    pos = null; // Mark for re-compute
-                    atPointYaw = 0;
+                    pos = null; // Force recompute
                 }
 
                 matrix.setIdentity();
@@ -84,7 +86,7 @@ public class TrackFollower {
                 matrix.rotate(Math.toRadians(toPointPitch), 0, 0, 1);
                 matrix.translate(-max / stock.gauge.scale(), 0, 0);
                 matrix.rotate(Math.toRadians(atPointYaw), 0, 1, 0);
-                // TODO pitch
+                matrix.rotate(Math.toRadians(atPointPitch), 0, 0, 1);
                 matrix.translate(max / stock.gauge.scale(), 0, 0);
             }
         }
