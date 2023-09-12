@@ -37,11 +37,12 @@ public class TrackDefinition {
         this.bumpiness = object.getValue("bumpiness").asFloat(clack ? 1f : 0f);
         this.cog = object.getValue("cog").asBoolean(false);
         this.model_gauge_m = object.getValue("model_gauge_m").asDouble(Gauges.STANDARD);
+        double spacing = object.getValue("model_spacing_m").asDouble( model_gauge_m / Gauges.STANDARD);
 
         this.models = new ArrayList<>();
         DataBlock models = object.getBlock("models");
         for (Map.Entry<String, DataBlock.Value> entry : models.getValueMap().entrySet()) {
-            this.models.add(new TrackModel(entry.getKey(), entry.getValue().asIdentifier(), model_gauge_m));
+            this.models.add(new TrackModel(entry.getKey(), entry.getValue().asIdentifier(), model_gauge_m, spacing));
         }
 
         DataBlock mats = object.getBlock("materials");
