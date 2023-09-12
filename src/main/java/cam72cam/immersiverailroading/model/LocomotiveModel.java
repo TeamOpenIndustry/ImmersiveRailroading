@@ -38,8 +38,8 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
 
     public LocomotiveModel(DEFINITION def) throws Exception {
         super(def);
-        frontTrackers = frameFront != null ? new TrackFollowers(s -> new TrackFollower(s, frameFront.center, def.getBogeyFront(s.gauge))) : null;
-        rearTrackers = frameRear != null ? new TrackFollowers(s -> new TrackFollower(s, frameRear.center, def.getBogeyRear(s.gauge))) : null;
+        frontTrackers = new TrackFollowers(s -> new TrackFollower(s, frameFront, drivingWheelsFront != null ? drivingWheelsFront.wheels : null, true));
+        rearTrackers = new TrackFollowers(s -> new TrackFollower(s, frameRear, drivingWheelsRear != null ? drivingWheelsRear.wheels : null, false));
     }
 
     @Override
@@ -167,18 +167,18 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     }
 
     private Matrix4 getFrontLocomotiveMatrix(EntityMoveableRollingStock s) {
-        return frontTrackers != null ? frontTrackers.get(s).getMatrix() : null;
+        return frontTrackers.get(s).getMatrix();
     }
 
     public float getFrontLocomotiveYaw(EntityMoveableRollingStock s) {
-        return frontTrackers != null ? frontTrackers.get(s).toPointYaw + frontTrackers.get(s).atPointYaw : 0;
+        return frontTrackers.get(s).getYawReadout();
     }
 
     private Matrix4 getRearLocomotiveMatrix(EntityMoveableRollingStock s) {
-        return rearTrackers != null ? rearTrackers.get(s).getMatrix() : null;
+        return rearTrackers.get(s).getMatrix();
     }
 
     public float getRearLocomotiveYaw(EntityMoveableRollingStock s) {
-        return rearTrackers != null ? rearTrackers.get(s).toPointYaw + rearTrackers.get(s).atPointYaw : 0;
+        return rearTrackers.get(s).getYawReadout();
     }
 }

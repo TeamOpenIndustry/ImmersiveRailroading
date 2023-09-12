@@ -128,18 +128,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         rocking.include(remaining);
         this.allComponents = provider.components();
 
-        float frontOffset = -def.getBogeyFront(Gauge.from(Gauge.STANDARD));
-        if (bogeyFront != null && (frontOffset < bogeyFront.bogey.min.x || frontOffset > bogeyFront.bogey.max.x)) {
-            frontTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyFront.center(), def.getBogeyFront(s.gauge)));
-        } else {
-            frontTrackers = null;
-        }
-        float rearOffset = -def.getBogeyRear(Gauge.from(Gauge.STANDARD));
-        if (bogeyRear != null && (rearOffset < bogeyRear.bogey.min.x || rearOffset > bogeyRear.bogey.max.x)) {
-            rearTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyRear.center(), def.getBogeyRear(s.gauge)));
-        } else {
-            rearTrackers = null;
-        }
+        frontTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyFront != null ? bogeyFront.bogey : null, bogeyFront != null ? bogeyFront.wheels : null, true));
+        rearTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyRear != null ? bogeyRear.bogey : null,  bogeyRear != null ? bogeyRear.wheels : null, false));
 
         sndRand = (float) Math.random() / 10;
         wheel_sound = new PartSound(new SoundDefinition(def.wheel_sound), true, 40, ConfigSound.SoundCategories.RollingStock::wheel);
@@ -323,35 +313,19 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     // TODO invert -> reinvert sway
     private Matrix4 getFrontBogeyMatrix(EntityMoveableRollingStock stock) {
-        if (frontTrackers != null) {
-            return frontTrackers.get(stock).getMatrix();
-        } else {
-            Matrix4 matrix = new Matrix4(); // TODO cache this?
-            matrix.translate(-def.getBogeyFront(Gauge.standard()), 0, 0);
-            matrix.rotate(Math.toRadians(stock.getRotationYaw() - stock.getFrontYaw()), 0, 1, 0);
-            matrix.translate(def.getBogeyFront(Gauge.standard()), 0, 0);
-            return matrix;
-        }
+        return frontTrackers.get(stock).getMatrix();
     }
 
     public float getFrontYaw(EntityMoveableRollingStock stock) {
-        return frontTrackers != null ? frontTrackers.get(stock).toPointYaw + frontTrackers.get(stock).atPointYaw : stock.getRotationYaw() - stock.getFrontYaw();
+        return frontTrackers.get(stock).getYawReadout();
     }
 
     private Matrix4 getRearBogeyMatrix(EntityMoveableRollingStock stock) {
-        if (rearTrackers != null) {
-            return rearTrackers.get(stock).getMatrix();
-        } else {
-            Matrix4 matrix = new Matrix4(); // TODO cache this?
-            matrix.translate(-def.getBogeyRear(Gauge.standard()), 0, 0);
-            matrix.rotate(Math.toRadians(stock.getRotationYaw() - stock.getRearYaw()), 0, 1, 0);
-            matrix.translate(def.getBogeyRear(Gauge.standard()), 0, 0);
-            return matrix;
-        }
+        return rearTrackers.get(stock).getMatrix();
     }
 
     public float getRearYaw(EntityMoveableRollingStock stock) {
-        return rearTrackers != null ? rearTrackers.get(stock).toPointYaw + rearTrackers.get(stock).atPointYaw : stock.getRotationYaw() - stock.getRearYaw();
+        return rearTrackers.get(stock).getYawReadout();
     }
 
     protected void postRender(ENTITY stock, RenderState state) {
