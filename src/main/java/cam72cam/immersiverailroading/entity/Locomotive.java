@@ -425,8 +425,8 @@ public abstract class Locomotive extends FreightTank {
 		
 		log.info("adhesion factor " + adhesionFactor);
 		if (adhesionFactor > 1) {
-			log.info("slip by " + Math.copySign(Math.min((adhesionFactor-1), 1), getReverser()));
-			return Math.copySign((adhesionFactor-1), getReverser());
+			log.info("slip by " + Math.copySign((adhesionFactor-1) * 5.0d, getReverser()));
+			return Math.copySign((adhesionFactor-1) * 5.0d, getReverser());
 		}
 		return 0;
 	}

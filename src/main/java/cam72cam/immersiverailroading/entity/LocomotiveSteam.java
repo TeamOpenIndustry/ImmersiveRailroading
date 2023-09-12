@@ -122,7 +122,7 @@ public class LocomotiveSteam extends Locomotive {
 	//backpressure opposing motion due to high cutoff at high speed, produces a scalar as a proportion of maximum tractive effort
 	private double backpressure(double speedPercent) {
 		return Math.min(
-			2.0d, 	//limit maximum backpressure to max tractive effort in reverse
+			1.0d, 	//limit maximum backpressure to max tractive effort in reverse
 			Math.max(
 				0, //formula spends a lot of time negative, so limit minimum to 0
 				//formula estimated and tweaked in desmos until it did about what I want
