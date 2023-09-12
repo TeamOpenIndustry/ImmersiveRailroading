@@ -24,15 +24,15 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     private final float rangeMax;
 
     public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelState state, ModelComponentType type, Readouts value) {
-        return provider.parseAll(type).stream().map(p -> new Readout<T>(p, value::getValue, state)).collect(Collectors.toList());
+        return provider.parseAll(type).stream().map(p -> new Readout<T>(p, value::getValue, state, provider.internal_model_scale)).collect(Collectors.toList());
     }
 
     public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos, Readouts value) {
-        return provider.parseAll(type, pos).stream().map(p -> new Readout<T>(p, value::getValue, state)).collect(Collectors.toList());
+        return provider.parseAll(type, pos).stream().map(p -> new Readout<T>(p, value::getValue, state, provider.internal_model_scale)).collect(Collectors.toList());
     }
 
-    public Readout(ModelComponent part, Function<T, Float> position, ModelState state) {
-        super(part, state);
+    public Readout(ModelComponent part, Function<T, Float> position, ModelState state, double internal_model_scale) {
+        super(part, state, internal_model_scale);
         this.position = position;
 
         float min = 0;

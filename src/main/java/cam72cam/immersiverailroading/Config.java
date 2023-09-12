@@ -1,9 +1,11 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.File;
 import cam72cam.mod.config.ConfigFile.Name;
+import cam72cam.mod.config.ConfigFile.Range;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 
@@ -53,12 +55,14 @@ public class Config {
 		public static boolean explosionEnvDamageEnabled = true;
 		
 		@Comment( "km/h to damage 1 heart on collision" )
+		@Range(min = 0, max = 100)
 		public static double entitySpeedDamage = 10;
 
 		@Comment("Trains should break block")
 		public static boolean TrainsBreakBlocks = true;
 
 		@Comment("How hard are blocks to break by rolling stock?")
+		@Range(min = 0, max = 500)
 		public static int blockHardness = 50;
 
 		@Comment("Break block around the border of the tracks in creative")
@@ -104,51 +108,65 @@ public class Config {
 		public static boolean FuelRequired = true;
 
 		@Comment("Slope Multiplier: Higher numbers increase slowdown, lower numbers decrease slowdown")
+		@Range(min = 0, max = 2)
 		public static double slopeMultiplier = 1.0;
 		
 		@Comment("Brake Multiplier: Higher numbers increase slowdown, lower numbers decrease slowdown")
+		@Range(min = 0, max = 10)
 		public static double brakeMultiplier = 1.0;
 		
 		@Comment("Traction Multiplier: Higher numbers decreases wheel slip, lower numders increase wheel slip")
+		@Range(min = 0, max = 10)
 		public static double tractionMultiplier = 1.0;
 		
 		@Comment( "How heavy is a single block in Kg" )
+		@Range(min = 0, max = 100)
 		public static int blockWeight = 10;
 
 		@Comment( "MilliBuckets per Liter" )
 		public static int MB_PER_LITER = 1;
 
 		@Comment("Cost to place down a tie")
+		@Range(min = 0, max = 10)
 		public static double TieCostMultiplier = 0.25;
 
 		@Comment("Cost to place down a rail")
+		@Range(min = 0, max = 10)
 		public static double RailCostMultiplier = 0.25;
 
 		@Comment("Cost to place down rail bed")
+		@Range(min = 0, max = 10)
 		public static double BedCostMultiplier = 0.25;
 
 		@Comment("If more than X% of the tracks are above non solid block, break the track")
+		@Range(min = 0, max = 1)
 		public static double trackFloatingPercent = 0.05;
 		
 		@Comment("Diesel Fuel Efficiency")
+		@Range(min = 1, max = 500)
 		public static int locoDieselFuelEfficiency = 100;
 		
 		@Comment("Steam Fuel Efficiency")
+		@Range(min = 1, max = 500)
 		public static int locoSteamFuelEfficiency = 100;
 
 		@Comment("How fast the steam locomotive should heat up.  1 is real internal (slow), 72 is scaled to minecraft time")
+		@Range(min = 0, max = 500)
 		public static int locoHeatTimeScale = 72;
 		
 		@Comment("How fast the diesel locomotive should heat up. 1 is real internal (slow), 72 is scaled to minecraft time")
+		@Range(min = 0, max = 500)
 		public static int dieselLocoHeatTimeScale = 72;
 
 		@Comment("How much water the locomotive should use")
+		@Range(min = 0, max = 100)
 		public static float locoWaterUsage = 10;
 
 		@Comment("How much you getContents payed per meter the villager traveled (default 1 emerald per km)")
 		public static double villagerPayoutPerMeter = 0.001;
 
 		@Comment("Distance the villagers will hear the conductor's whistle")
+		@Range(min = 0, max = 200)
 		public static double villagerConductorDistance = 50;
 		
 		@Comment("Villager payout items (ore dict)")
@@ -179,21 +197,26 @@ public class Config {
 		public static boolean RadioEquipmentRequired = true;
 		
 		@Comment("Range of radio-control, positive integer")
+		@Range(min = 0, max = 1000)
 		public static int RadioRange = 500;
 		
 		@Comment("IEnergy cost (RF) per radio transmission per metre")
+		@Range(min = 0, max = 1000)
 		public static int RadioCostPerMetre = 0;
 		
 		@Comment("Prevent stock from being built outside the recommended and model gauges")
 		public static boolean DesignGaugeLock = false;
 
 		@Comment("Angle Placement Segmentation")
+		@Range(min = 0, max = 64)
 		public static int AnglePlacementSegmentation = 4;
 
 		@Comment("Machine power factor (0 means no power required)")
+		@Range(min = 0, max = 10)
 		public static float machinePowerFactor = 1.0f;
 
 		@Comment("Angles per tick to rotate turntables (used server side)")
+		@Range(min = 0, max = 5)
 		public static double TurnTableSpeed = 0.4;
 	}
 
@@ -210,15 +233,18 @@ public class Config {
 	public static class ConfigDebug {
 
 		@Comment( "Range between couplers to try coupling" )
+		@Range(min = 0, max = 1)
 		public static double couplerRange = 0.3;
 
 		@Comment( "Deep Snow on tracks" )
 		public static boolean deepSnow = false;
 
 		@Comment( "How fast snow should accumulate, 0 = disabled, 20 = fast, 400 = slow" )
+		@Range(min = 0, max = 1000)
 		public static int snowAccumulateRate = 400;
 
 		@Comment( "How fast snow should melt, 0 = disabled, 20 = fast, 400 = slow" )
+		@Range(min = 0, max = 1000)
 		public static int snowMeltRate = 0;
 
 		@Comment("Keep rolling stock loaded even when it is not moving")
@@ -234,9 +260,11 @@ public class Config {
 		public static boolean debugInfiniteLiquids = false;
 
 		@Comment("Time between open computers poll ticks for augments")
+		@Range(min = 0, max = 10)
 		public static int ocPollDelayTicks = 1;
 		
 		@Comment("DEV ONLY: How much to artifically lag the server (per internal)")
+		@Range(min = 0, max = 100)
 		public static int lagServer = 0;
 
 		@Comment("Old Narrow track placement (single width instead of 3)")
@@ -244,6 +272,8 @@ public class Config {
 
 		@Comment("Default Augments to Computer Mode")
 		public static boolean defaultAugmentComputer = false;
+		@Comment("Warn if a physics tick takes more than the given time in ms")
+		@Range(min = 1, max = 100)
 		public static long physicsWarnThresholdMs = 20;
     }
 

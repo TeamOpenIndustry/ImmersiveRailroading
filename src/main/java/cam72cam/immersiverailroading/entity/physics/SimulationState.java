@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
@@ -100,7 +99,7 @@ public class SimulationState {
         private double tractiveEffortFactors;
         private Function<Speed, Double> tractiveEffortNewtons;
 
-        public double desiredBrakePressure;
+        public Double desiredBrakePressure;
         public double independentBrakePosition;
 
         public boolean hasPressureBrake;
@@ -137,17 +136,17 @@ public class SimulationState {
                 Locomotive locomotive = (Locomotive) stock;
                 tractiveEffortNewtons = locomotive::getTractiveEffortNewtons;
                 tractiveEffortFactors = locomotive.getThrottle() + (locomotive.getReverser() * 10);
-                desiredBrakePressure = locomotive.getTrainBrake();
+                desiredBrakePressure = (double)locomotive.getTrainBrake();
             } else {
                 tractiveEffortNewtons = speed -> 0d;
                 tractiveEffortFactors = 0;
-                desiredBrakePressure = 0;
+                desiredBrakePressure = null;
             }
 
 
             double staticFriction = PhysicalMaterials.STEEL.staticFriction(PhysicalMaterials.STEEL);
-            this.maximumAdhesionNewtons = massKg * staticFriction;
-            this.designAdhesionNewtons = designMassKg * staticFriction * stock.getBrakeSystemEfficiency();
+            this.maximumAdhesionNewtons = massKg * staticFriction * 9.8;
+            this.designAdhesionNewtons = designMassKg * staticFriction * 9.8 * stock.getBrakeSystemEfficiency();
             this.independentBrakePosition = stock.getIndependentBrake();
             this.directResistanceNewtons = stock::getDirectFrictionNewtons;
             this.hasPressureBrake = stock.getDefinition().hasPressureBrake();
@@ -163,7 +162,7 @@ public class SimulationState {
                         couplerEngagedRear == other.couplerEngagedRear &&
                         Math.abs(tractiveEffortFactors - other.tractiveEffortFactors) < 0.01 &&
                         Math.abs(massKg - other.massKg)/massKg < 0.01 &&
-                        Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.1 &&
+                        (desiredBrakePressure == null || Math.abs(desiredBrakePressure - other.desiredBrakePressure) < 0.1) &&
                         Math.abs(independentBrakePosition - other.independentBrakePosition) < 0.01;
             }
             return false;
@@ -395,7 +394,10 @@ public class SimulationState {
     }
 
     public double forcesNewtons() {
-        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitch)) * Config.ConfigBalance.slopeMultiplier;
+        double pitchRound = Math.abs(pitch) < 0.25 ? 0 : pitch;
+
+        // Int cast here means that anything under 1degree of pitch is ignored (helps with chunk loading)
+        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitchRound)) * Config.ConfigBalance.slopeMultiplier;
         return config.tractiveEffortNewtons(Speed.fromMinecraft(velocity)) + gradeForceNewtons;
     }
 

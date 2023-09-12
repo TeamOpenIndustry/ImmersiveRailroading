@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemCastRail;
 import cam72cam.immersiverailroading.items.ItemRail;
@@ -139,7 +140,7 @@ public class RailRollerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (craftingTe.getRenderTicks() % 10 == 0 && craftingTe.getCraftProgress() != 0) {
-					Audio.playSound(world, craftingTe.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
+					Audio.playSound(world, craftingTe.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1 * ConfigSound.SoundCategories.Machines.category(), 0.2f);
 				}
 				return;
 			}

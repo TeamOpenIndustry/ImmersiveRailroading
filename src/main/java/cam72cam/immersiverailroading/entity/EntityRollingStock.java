@@ -14,7 +14,6 @@ import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.entity.custom.*;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.*;
@@ -24,12 +23,12 @@ import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.SingleCache;
 import org.apache.commons.lang3.tuple.Pair;
-import trackapi.lib.Gauges;
 import util.Matrix4;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable {
 	@TagField("defID")
@@ -51,10 +50,11 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 			.scale(this.gauge.scale(), this.gauge.scale(), this.gauge.scale())
 	);
 
-	public void setup(String defID, Gauge gauge, String texture) {
-		this.defID = defID;
+	public void setup(EntityRollingStockDefinition def, Gauge gauge, String texture) {
+		this.defID = def.defID;
 		this.gauge = gauge;
 		this.texture = texture;
+		def.cgDefaults.forEach(this::setControlPosition);
 	}
 
 	public boolean isImmuneToFire() {
@@ -210,13 +210,49 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return this.getDefinition().shouldScalePitch() ? (float) Math.sqrt(Math.sqrt(gauge.scale())) : 1;
 	}
 
-	public ISound createSound(Identifier oggLocation, boolean repeats, double attenuationDistance) {
-		return Audio.newSound(
-				oggLocation, SoundCategory.AMBIENT,
+	public ISound createSound(Identifier oggLocation, boolean repeats, double attenuationDistance, Supplier<Float> category) {
+		ISound snd = Audio.newSound(
+				oggLocation, SoundCategory.MASTER,
 				repeats,
 				(float) (attenuationDistance * ConfigSound.soundDistanceScale * gauge.scale()),
 				soundScale()
 		);
+		return new ISound() {
+			@Override
+			public void play(Vec3d pos) {
+				snd.play(pos);
+			}
+
+			@Override
+			public void stop() {
+				snd.stop();
+			}
+
+			@Override
+			public void setPosition(Vec3d pos) {
+				snd.setPosition(pos);
+			}
+
+			@Override
+			public void setPitch(float f) {
+				snd.setPitch(f);
+			}
+
+			@Override
+			public void setVelocity(Vec3d vel) {
+				snd.setVelocity(vel);
+			}
+
+			@Override
+			public void setVolume(float f) {
+				snd.setVolume(f * category.get());
+			}
+
+			@Override
+			public boolean isPlaying() {
+				return snd.isPlaying();
+			}
+		};
 	}
 
 	public String getTexture() {

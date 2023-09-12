@@ -103,6 +103,7 @@ public abstract class EntityRollingStockDefinition {
     public double directFrictionCoefficient;
 
     public List<AnimationDefinition> animations;
+    public Map<String, Float> cgDefaults;
 
     public static class SoundDefinition {
         public final Identifier start;
@@ -282,7 +283,7 @@ public abstract class EntityRollingStockDefinition {
         stock.setRotationYaw(yaw);
         // Override prev
         stock.setRotationYaw(yaw);
-        stock.setup(defID, gauge, texture);
+        stock.setup(this, gauge, texture);
 
         return stock;
     }
@@ -459,6 +460,14 @@ public abstract class EntityRollingStockDefinition {
             for (DataBlock entry : aobjs) {
                 animations.add(new AnimationDefinition(entry));
             }
+        }
+
+        this.cgDefaults = new HashMap<>();
+        DataBlock controls = data.getBlock("controls");
+        if (controls != null) {
+            controls.getBlockMap().forEach((key, block) ->
+                    this.cgDefaults.put(key, block.getValue("default").asFloat(0))
+            );
         }
     }
 

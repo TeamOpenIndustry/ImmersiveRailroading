@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.util.DataBlock;
@@ -35,6 +36,7 @@ public class GuiBuilder {
 
     private final Readouts readout;
     private final String control;
+    private final boolean global;
     private final boolean invert;
     private final boolean hide;
     private final float tlx;
@@ -87,6 +89,7 @@ public class GuiBuilder {
         String readout = data.getValue("readout").asString();
         this.readout = readout != null ? Readouts.valueOf(readout.toUpperCase(Locale.ROOT)) : null;
         this.control = data.getValue("control").asString();
+        this.global = data.getValue("global").asBoolean(false);
         this.invert = data.getValue("invert").asBoolean(false);
         this.hide = data.getValue("hide").asBoolean(false);
 
@@ -358,7 +361,7 @@ public class GuiBuilder {
             }
 
             if (closestValue != value) {
-                new ControlChangePacket(stock, readout, control, closestValue).sendToServer();
+                new ControlChangePacket(stock, readout, control, global, closestValue).sendToServer();
             }
         } else {
             for (GuiBuilder element : elements) {
@@ -376,7 +379,7 @@ public class GuiBuilder {
             case RELEASE:
                 if (target != null) {
                     if (!target.hasMovement()) {
-                        new ControlChangePacket(stock, target.readout, target.control, target.invert ? target.getValue(stock) : 1 - target.getValue(stock)).sendToServer();
+                        new ControlChangePacket(stock, target.readout, target.control, target.global, target.invert ? target.getValue(stock) : 1 - target.getValue(stock)).sendToServer();
                     }
                     target = null;
                     return false;
@@ -400,16 +403,19 @@ public class GuiBuilder {
         @TagField
         private String controlGroup;
         @TagField
+        private boolean global;
+        @TagField
         private float value;
 
         public ControlChangePacket() {
             super(); // Reflection
         }
 
-        public ControlChangePacket(EntityRollingStock stock, Readouts readout, String controlGroup, float value) {
+        public ControlChangePacket(EntityRollingStock stock, Readouts readout, String controlGroup, boolean global, float value) {
             this.stockUUID = stock.getUUID();
             this.readout = readout;
             this.controlGroup = controlGroup;
+            this.global = global;
             this.value = value;
         }
 
@@ -433,12 +439,24 @@ public class GuiBuilder {
                             value = 0;
                             break;
                         default:
-                            stock.setControlPosition(controlGroup, value);
+                            if (global) {
+                                ((EntityCoupleableRollingStock)stock).mapTrain((EntityCoupleableRollingStock) stock, false, target -> {
+                                    target.setControlPosition(controlGroup, value);
+                                });
+                            } else {
+                                stock.setControlPosition(controlGroup, value);
+                            }
                             return;
                     }
                 }
                 if (readout != null) {
-                    readout.setValue(stock, value);
+                    if (global) {
+                        ((EntityCoupleableRollingStock)stock).mapTrain((EntityCoupleableRollingStock) stock, false, target -> {
+                            readout.setValue(target, value);
+                        });
+                    } else {
+                        readout.setValue(stock, value);
+                    }
                 }
             }
         }

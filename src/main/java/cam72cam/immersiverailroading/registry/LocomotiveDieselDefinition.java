@@ -15,6 +15,7 @@ import java.io.IOException;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     public SoundDefinition idle;
+    public SoundDefinition running;
     public SoundDefinition horn;
     private FluidQuantity fuelCapacity;
     private int fuelEfficiency;
@@ -41,12 +42,14 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         hornSus = properties.getValue("horn_sustained").asBoolean(false);
 
         idle = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/idle.ogg"));
+        running = null;
         horn = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/horn.ogg"));
         bell = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/diesel/default/bell.ogg"));
 
         DataBlock sounds = data.getBlock("sounds");
         if(sounds != null) {
             idle = SoundDefinition.getOrDefault(sounds, "idle", idle);
+            running = SoundDefinition.getOrDefault(sounds, "running", null);
             horn = SoundDefinition.getOrDefault(sounds, "horn", horn);
             bell = SoundDefinition.getOrDefault(sounds, "bell", bell);
         }
