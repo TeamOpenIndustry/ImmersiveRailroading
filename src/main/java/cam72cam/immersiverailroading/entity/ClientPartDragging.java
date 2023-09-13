@@ -12,6 +12,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Comparator;
@@ -19,9 +20,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class ClientPartDragging {
-    private EntityRollingStock stock = null;
-    private Control<?> component = null;
+    private EntityRollingStock interactingStock = null;
+    private Control<?> interactingControl = null;
     private Float lastValue = null;
+
+    private EntityRollingStock targetStock = null;
+    private Interactable<?> targetInteractable = null;
 
     public static void register() {
         ClientPartDragging dragger = new ClientPartDragging();
@@ -31,47 +35,16 @@ public class ClientPartDragging {
     }
 
     private boolean capture(Player.Hand hand) {
-
-        if (hand == Player.Hand.SECONDARY && MinecraftClient.isReady() && !MinecraftClient.getPlayer().isCrouching()) {
-            this.stock = null;
-            Player player = MinecraftClient.getPlayer();
-            Vec3d look = player.getLookVector();
-            Vec3d start = player.getPositionEyes();
-
-            MinecraftClient.getPlayer().getWorld().getEntities(EntityRollingStock.class).stream()
-                    .filter(stock ->
-                            stock.getPosition().distanceTo(player.getPositionEyes()) < stock.getDefinition().getLength(stock.gauge)
-                    )
-                    .flatMap(stock ->
-                            stock.getDefinition().getModel().getInteractable().stream().map(c -> Pair.of(stock, c))
-                    ).map(p -> {
-                        double padding = 0.2 * p.getLeft().gauge.scale();
-                        Double min = null;
-                        Vec3d center = p.getRight().center(p.getLeft());
-                        IBoundingBox bb = p.getRight().getBoundingBox(p.getLeft()).grow(new Vec3d(padding, padding, padding));
-                        for (double i = 0; i < 3; i += 0.1 * p.getLeft().gauge.scale()) {
-                            Vec3d cast = start.add(look.scale(i));
-                            if (bb.contains(cast)) {
-                                double dist = cast.distanceTo(center);
-                                min = min == null ? dist : Math.min(dist, min);
-                            }
-                        }
-                        return min != null ? Pair.of(min, p) : null;
-                    }).filter(Objects::nonNull)
-                    .min(Comparator.comparingDouble(Pair::getLeft))
-                    .map(Pair::getRight)
-                    .ifPresent(found -> {
-                        Interactable<?> interactable = found.getRight();
-                        if (interactable instanceof Control) {
-                            this.stock = found.getLeft();
-                            this.component = (Control<?>) interactable;
-                            new DragPacket(stock, component, true, 0, false).sendToServer();
-                        }
-                        if (interactable instanceof Seat) {
-                            new SeatPacket((EntityRidableRollingStock) found.getLeft(), (Seat)interactable).sendToServer();
-                        }
-                    });
-            return stock == null;
+        if (hand == Player.Hand.SECONDARY && MinecraftClient.isReady() && !MinecraftClient.getPlayer().isCrouching() && targetInteractable != null) {
+            if (targetInteractable instanceof Control) {
+                this.interactingStock = targetStock;
+                this.interactingControl = (Control<?>) targetInteractable;
+                new DragPacket(interactingStock, interactingControl, true, 0, false).sendToServer();
+            }
+            if (targetInteractable instanceof Seat) {
+                new SeatPacket((EntityRidableRollingStock) interactingStock, (Seat<?>)targetInteractable).sendToServer();
+            }
+            return false;
         }
         return true;
     }
@@ -139,30 +112,69 @@ public class ClientPartDragging {
     }
 
     private void tick() {
-        if (stock != null && MinecraftClient.isReady()) {
+        if (!MinecraftClient.isReady()) {
+            return;
+        }
+
+        if (interactingStock != null) {
+            interactingControl.lookedAt = interactingStock.getWorld().getTicks();
             if (Mouse.getDrag() == null) {
-                component.stopClientDragging();
-                new DragPacket(stock, component, false, 0, true).sendToServer();
-                stock = null;
-                component = null;
+                interactingControl.stopClientDragging();
+                new DragPacket(interactingStock, interactingControl, false, 0, true).sendToServer();
+                interactingStock = null;
+                interactingControl = null;
                 lastValue = null;
                 return;
             }
 
-            if (component.toggle) {
+            if (interactingControl.toggle) {
                 return;
             }
 
-            float newValue = component.clientMovementDelta(MinecraftClient.getPlayer(), stock) + stock.getControlPosition(component);
+            float newValue = interactingControl.clientMovementDelta(MinecraftClient.getPlayer(), interactingStock) + interactingStock.getControlPosition(interactingControl);
             if (lastValue != null && Math.abs(lastValue - newValue) < 0.001) {
                 return;
             }
 
             // Server will override this, but for now it allows the client to see the active changes.
-            stock.setControlPosition(component, newValue);
+            interactingStock.setControlPosition(interactingControl, newValue);
 
-            new DragPacket(stock, component, false, newValue, false).sendToServer();
+            new DragPacket(interactingStock, interactingControl, false, newValue, false).sendToServer();
             lastValue = newValue;
+        } else {
+            targetStock = null;
+            targetInteractable = null;
+
+            Player player = MinecraftClient.getPlayer();
+            Vec3d look = player.getLookVector();
+            Vec3d start = player.getPositionEyes();
+            World world = player.getWorld();
+
+            Double min = null;
+
+            for (EntityRollingStock stock : world.getEntities(EntityRollingStock.class)) {
+                if (stock.getPosition().distanceToSquared(player.getPosition()) > stock.getDefinition().getLength(stock.gauge) * stock.getDefinition().getLength(stock.gauge)) {
+                    continue;
+                }
+
+                double padding = 0.05 * stock.gauge.scale();
+                for (Interactable<?> interactable : stock.getDefinition().getModel().getInteractable()) {
+                    IBoundingBox bb = interactable.getBoundingBox(stock).grow(new Vec3d(padding, padding, padding));
+                    for (double i = 0.125; i < 3; i += 0.05 * stock.gauge.scale()) {
+                        Vec3d cast = start.add(look.scale(i));
+                        if (bb.contains(cast)) {
+                            interactable.lookedAt = MinecraftClient.getPlayer().getWorld().getTicks();
+                            // This is a weird check, but it seems to work
+                            double dist = i * interactable.center(stock).distanceTo(cast);
+                            if (min == null || min > dist) {
+                                min = dist;
+                                targetStock = stock;
+                                targetInteractable = interactable;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
