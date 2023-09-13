@@ -45,8 +45,8 @@ properties =                # Required:
 #   valve_gear = WALSCHAERTS     # Generic Example
 #   valve_gear =                 # Animatrix Example
 #       # More steps are recommended, but this should work
-#       0.0 = immersiverailroading:some/path/animation_0.0.anim # Reverse
-#       0.5 = immersiverailroading:some/path/animation_0.5.anim # Neutral
+#       -1.0 = immersiverailroading:some/path/animation_-1.0.anim # Reverse
+#       0.0 = immersiverailroading:some/path/animation_0.0.anim # Neutral
 #       1.0 = immersiverailroading:some/path/animation_1.0.anim # Forward
 
     independent_brake = False           # Optional: Does this piece of stock have an independent brake?  Usually False except for Locomotives
