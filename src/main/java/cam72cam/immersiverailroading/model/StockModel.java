@@ -329,6 +329,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     }
 
     protected void postRender(ENTITY stock, RenderState state) {
+        state.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
         state.rotate(sway.getRollDegrees(stock), 1, 0, 0);
         controls.forEach(c -> c.postRender(stock, state));
         doors.forEach(c -> c.postRender(stock, state));

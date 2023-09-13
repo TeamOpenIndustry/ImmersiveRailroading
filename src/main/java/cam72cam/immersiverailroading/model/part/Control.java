@@ -244,12 +244,8 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             }
         }
 
-        Matrix4 m = new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
-        Matrix4 gm = this.state.getGroupMatrix(stock, modelId);
-        if (gm != null) {
-            m = m.multiply(gm);
-        }
-        Vec3d pos = m.apply(center);
+        Matrix4 m = this.state.getGroupMatrix(stock, modelId);
+        Vec3d pos = m == null ? center : m.apply(center);
         String labelstate = "";
         float percent = getValue(stock) - offset;
         switch (part.type) {
