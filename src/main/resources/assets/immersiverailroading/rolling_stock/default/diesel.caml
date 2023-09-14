@@ -10,9 +10,10 @@ properties =
     horn_sustained = False # Optional: Should the horn repeat
 
 sounds =
-    idle = "immersiverailroading:sounds/diesel/default/idle.ogg"  # Optional: See sound_definition.caml for details
-    horn = "immersiverailroading:sounds/diesel/default/horn.ogg"  # Optional: See sound_definition.caml for details
-    bell = "immersiverailroading:sounds/diesel/default/bell.ogg"  # Optional: See sound_definition.caml for details
+    idle = "immersiverailroading:sounds/diesel/default/idle.ogg"    # Optional: See sound_definition.caml for details
+    running = "immersiverailroading:sounds/diesel/default/idle.ogg" # Optional: See sound_definition.caml for details
+    horn = "immersiverailroading:sounds/diesel/default/horn.ogg"    # Optional: See sound_definition.caml for details
+    bell = "immersiverailroading:sounds/diesel/default/bell.ogg"    # Optional: See sound_definition.caml for details
     controls =
             REVERSER_1 =
                     engage = "immersiverailroading:sounds/default/lever_engage.ogg"
