@@ -21,6 +21,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private int fuelEfficiency;
     private boolean hornSus;
     private int notches;
+    private float enginePitchRange;
 
     public LocomotiveDieselDefinition(String defID, DataBlock data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
@@ -49,6 +50,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         DataBlock sounds = data.getBlock("sounds");
         idle = SoundDefinition.getOrDefault(sounds, "idle");
         running = SoundDefinition.getOrDefault(sounds, "running");
+        enginePitchRange = sounds.getValue("engine_pitch_range").asFloat();
         horn = SoundDefinition.getOrDefault(sounds, "horn");
         bell = SoundDefinition.getOrDefault(sounds, "bell");
     }
@@ -90,5 +92,9 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public int getThrottleNotches() {
         return notches;
+    }
+
+    public float getEnginePitchRange() {
+        return enginePitchRange;
     }
 }

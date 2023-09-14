@@ -11,7 +11,8 @@ properties =
 
 sounds =
     idle = "immersiverailroading:sounds/diesel/default/idle.ogg"    # Optional: See sound_definition.caml for details
-    running = null # Optional: See sound_definition.caml for details
+    running = null                                                  # Optional: See sound_definition.caml for details
+    engine_pitch_range = 0.25                                       # Optional: Percent of the pitch range to map the throttle to.  Ex: 0.25 means start at 75% pitch and move to 100% as the engine throttles up
     horn = "immersiverailroading:sounds/diesel/default/horn.ogg"    # Optional: See sound_definition.caml for details
     bell = "immersiverailroading:sounds/diesel/default/bell.ogg"    # Optional: See sound_definition.caml for details
     controls =

@@ -77,7 +77,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
         if (idle != null) {
             if (stock.isRunning()) {
                 float volume = Math.max(0.1f, stock.getSoundThrottle());
-                float pitch = 0.7f + stock.getSoundThrottle() / 4;
+                float pitchRange = stock.getDefinition().getEnginePitchRange();
+                float pitch = (1-pitchRange) + stock.getSoundThrottle() * pitchRange;
                 if (running == null) {
                     // Simple
                     idle.effects(stock, volume, pitch);
