@@ -9,12 +9,17 @@ import:
 import:
   source = immersiverailroading:gui/default/steam/gauge_dial.caml
   replace =
-    READOUT = TRAIN_BRAKE
+    READOUT = INDEPENDENT_BRAKE
+    COLOR = "0xFF101070"
 
-element:
-  color =
-    0 = "0xFFFF1010"
-  import:
-    source = immersiverailroading:gui/default/steam/gauge_dial.caml
-    replace =
-      READOUT = BRAKE_PRESSURE
+import:
+  source = immersiverailroading:gui/default/steam/gauge_dial.caml
+  replace =
+    READOUT = BRAKE_PRESSURE
+    COLOR = "0xFFFF1010"
+
+import:
+  source = immersiverailroading:gui/default/steam/gauge_dial.caml
+  replace =
+    READOUT = TRAIN_BRAKE
+    COLOR = "0xFF101010"

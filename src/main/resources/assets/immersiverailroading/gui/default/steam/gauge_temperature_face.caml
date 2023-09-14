@@ -1,7 +1,7 @@
 import:
   source = immersiverailroading:gui/default/steam/gauge_common_face.caml
   replace =
-    TITLE = TEMPERATURE
+    TITLE = TEMP.
     MIN = 0
     CURRENT = stat.temperature stat.units_temperature
     MAX = stat.max_temperature
@@ -10,3 +10,4 @@ import:
   source = immersiverailroading:gui/default/steam/gauge_dial.caml
   replace =
     READOUT = TEMPERATURE
+    COLOR = "0xFF101010"

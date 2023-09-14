@@ -10,3 +10,4 @@ import:
   source = immersiverailroading:gui/default/steam/gauge_dial.caml
   replace =
     READOUT = SPEED
+    COLOR = "0xFF101010"
