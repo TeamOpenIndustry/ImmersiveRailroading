@@ -207,7 +207,11 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	*/
 
 	public float soundScale() {
-		return this.getDefinition().shouldScalePitch() ? (float) Math.sqrt(Math.sqrt(gauge.scale())) : 1;
+		if (this.getDefinition().shouldScalePitch()) {
+			double scale = gauge.scale() * getDefinition().internal_model_scale;
+			return (float) Math.sqrt(Math.sqrt(scale));
+		}
+		return 1;
 	}
 
 	public ISound createSound(Identifier oggLocation, boolean repeats, double attenuationDistance, Supplier<Float> category) {
