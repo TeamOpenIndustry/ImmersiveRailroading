@@ -9,7 +9,7 @@ import util.Matrix4;
 import java.util.function.Function;
 
 public class Wheel {
-    protected final ModelComponent wheel;
+    public final ModelComponent wheel;
 
     protected Wheel(ModelComponent wheel, ModelState state, Function<EntityMoveableRollingStock, Float> angle) {
         this.wheel = wheel;

@@ -225,7 +225,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			// Technically this fires the coupling sound twice (once for each entity)
 			new SoundPacket(getDefinition().couple_sound,
 					this.getCouplerPosition(coupler), this.getVelocity(),
-					1, 1, (int) (200 * gauge.scale()), soundScale())
+					1, 1, (int) (200 * gauge.scale()), soundScale(), SoundPacket.PacketSoundCategory.COUPLE)
 					.sendToObserving(this);
 		}
 

@@ -10,8 +10,9 @@ public class TrackModel extends OBJModel {
     private final String compare;
     private final double size;
     private final double height;
+    public final double spacing;
 
-    public TrackModel(String condition, Identifier resource, double model_gauge_m) throws Exception {
+    public TrackModel(String condition, Identifier resource, double model_gauge_m, double spacing) throws Exception {
         super(resource, 0, Gauges.STANDARD / model_gauge_m);
         this.compare = condition.substring(0, 1);
         this.size = Double.parseDouble(condition.substring(1));
@@ -22,6 +23,7 @@ public class TrackModel extends OBJModel {
             }
         }
         height = maxOfGroup(groups).y;
+        this.spacing = spacing * (Gauges.STANDARD / model_gauge_m);
     }
 
     public boolean canRender(double gauge) {

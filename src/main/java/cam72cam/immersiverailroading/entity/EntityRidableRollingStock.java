@@ -35,7 +35,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	private Map<String, UUID> seatedPassengers = new HashMap<>();
 
 	// Hack to remount players if they were seated
-	private Map<Player, Vec3d> remount = new HashMap<>();
+	private Map<UUID, Vec3d> remount = new HashMap<>();
 
 
 
@@ -198,9 +198,12 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		super.onTick();
 
 		if (getWorld().isServer) {
-			remount.forEach((player, pos) -> {
-				player.setPosition(pos);
-				player.startRiding(this);
+			remount.forEach((uuid, pos) -> {
+				Player player = getWorld().getEntity(uuid, Player.class);
+				if (player != null) {
+					player.setPosition(pos);
+					player.startRiding(this);
+				}
 			});
 			remount.clear();
 			for (Player source : getWorld().getEntities(Player.class)) {
@@ -217,7 +220,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if (!seats.isEmpty()) {
 			seats.forEach(seatedPassengers::remove);
 			if (getWorld().isServer && passenger.isPlayer()) {
-				remount.put(passenger.asPlayer(), passenger.getPosition());
+				remount.put(passenger.getUUID(), passenger.getPosition());
 			}
 		}
 

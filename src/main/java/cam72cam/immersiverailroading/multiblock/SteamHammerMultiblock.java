@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -108,7 +109,7 @@ public class SteamHammerMultiblock extends Multiblock {
 			
 			if (world.isClient) {
 				if (te.getRenderTicks() % 10 == 0 && te.getCraftProgress() != 0) {
-					Audio.playSound(world, te.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1, 0.2f);
+					Audio.playSound(world, te.getPos(), StandardSound.BLOCK_ANVIL_PLACE, SoundCategory.BLOCKS, 1 * ConfigSound.SoundCategories.Machines.category(), 0.2f);
 				}
 				return;
 			}

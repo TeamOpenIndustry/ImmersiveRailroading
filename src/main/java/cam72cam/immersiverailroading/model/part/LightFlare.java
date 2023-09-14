@@ -143,7 +143,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
             return;
         }
 
-        Vec3d flareOffset = new Vec3d(forward ? component.min.x - 0.01 : component.max.x + 0.01, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2).scale(stock.gauge.scale());
+        Vec3d flareOffset = new Vec3d(forward ? component.min.x - 0.02 : component.max.x + 0.02, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2);;
         if (location != null) {
             // TODO this does not actually work
             Matrix4 m = location.apply(stock);
@@ -169,9 +169,9 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
 
         if (intensity > 0.01) {
             RenderState matrix = state.clone();
-            matrix.translate(flareOffset.x - (intensity / 2 * stock.gauge.scale())*(forward ? 3 : -3), flareOffset.y, flareOffset.z);
+            matrix.translate(flareOffset.x - (intensity / 2)*(forward ? 3 : -3), flareOffset.y, flareOffset.z);
             matrix.rotate(90, 0, 1, 0);
-            double scale = Math.max((component.max.z - component.min.z) * 0.5, intensity * 2) * stock.gauge.scale();
+            double scale = Math.max((component.max.z - component.min.z) * 0.5, intensity * 2);
             matrix.scale(scale, scale, scale);
             if (!forward) {
                 matrix.rotate(180, 0, 1, 0);
@@ -190,13 +190,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         RenderState matrix = state.clone();
         matrix.translate(flareOffset.x, flareOffset.y, flareOffset.z);
         matrix.rotate(90, 0, 1, 0);
-        if (location != null) {
-            Matrix4 m = location.apply(stock);
-            if (m != null) {
-                matrix.model_view().multiply(m);
-            }
-        }
-        double scale = (component.max.z - component.min.z) / 1.5 * stock.gauge.scale();
+        double scale = (component.max.z - component.min.z) / 1.5;
         matrix.scale(scale, scale, scale);
         if (!forward) {
             matrix.rotate(180, 0, 1, 0);

@@ -1,18 +1,19 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
-import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.library.Augment;
+import cam72cam.immersiverailroading.library.KeyTypes;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.*;
-import cam72cam.mod.MinecraftClient;
+import cam72cam.immersiverailroading.util.RealBB;
+import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.ICollision;
@@ -21,8 +22,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.sound.ISound;
-import cam72cam.mod.util.DegreeFuncs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,24 +54,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     @TagSync
     @TagField("SLIDING")
-    private boolean sliding = false;
+    public boolean sliding = false;
 
     public long lastCollision = 0;
-
-    private float sndRand;
-
-    private ISound wheel_sound;
-    private ISound clackFront;
-    private ISound clackRear;
-    private Vec3i clackFrontPos;
-    private Vec3i clackRearPos;
-
-    private ISound slidingSound;
-    private ISound flangeSound;
-    float lastFlangeVolume = 0;
-
-    private double swayMagnitude;
-    private double swayImpulse;
 
     @Override
     public void load(TagCompound data) {
@@ -257,7 +241,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                     lastCollision = getTickCount();
                     new SoundPacket(getDefinition().collision_sound,
                             this.getPosition(), this.getVelocity(),
-                            (float) Math.min(1.0, state.collided), 1, (int) (100 * gauge.scale()), soundScale())
+                            (float) Math.min(1.0, state.collided), 1, (int) (100 * gauge.scale()), soundScale(), SoundPacket.PacketSoundCategory.COLLISION)
                             .sendToObserving(this);
                 }
 
@@ -276,140 +260,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         if (getWorld().isClient) {
             getDefinition().getModel().onClientTick(this);
-
-
-            if (ConfigSound.soundEnabled) {
-                if (this.wheel_sound == null) {
-                    wheel_sound = this.createSound(this.getDefinition().wheel_sound, true, 40);
-                    this.sndRand = (float) Math.random() / 10;
-                }
-                if (this.slidingSound == null) {
-                    this.slidingSound = this.createSound(this.getDefinition().sliding_sound, true, 40);
-                }
-                if (this.flangeSound == null) {
-                    this.flangeSound = this.createSound(this.getDefinition().flange_sound, true, 40);
-                }
-                if (this.clackFront == null) {
-                    clackFront = this.createSound(this.getDefinition().clackFront, false, 30);
-                }
-                if (this.clackRear == null) {
-                    clackRear = this.createSound(this.getDefinition().clackRear, false, 30);
-                }
-                float adjust = (float) Math.abs(this.getCurrentSpeed().metric()) / 300;
-                float pitch = adjust + 0.7f;
-                if (getDefinition().shouldScalePitch()) {
-                    // TODO this is probably wrong...
-                    pitch = (float) (pitch/ gauge.scale());
-                }
-                float volume = 0.01f + adjust;
-
-                if (Math.abs(this.getCurrentSpeed().metric()) > 1 && MinecraftClient.getPlayer().getPosition().distanceTo(getPosition()) < 40) {
-                    if (!wheel_sound.isPlaying()) {
-                        wheel_sound.play(getPosition());
-                    }
-                    wheel_sound.setPitch(pitch + this.sndRand);
-                    wheel_sound.setVolume(volume);
-
-                    wheel_sound.setPosition(getPosition());
-                    wheel_sound.setVelocity(getVelocity());
-                } else {
-                    if (wheel_sound.isPlaying()) {
-                        wheel_sound.stop();
-                    }
-                }
-
-                if (sliding) {
-                    if (!slidingSound.isPlaying()) {
-                        slidingSound.play(getPosition());
-                    }
-                    slidingSound.setPitch(1);
-                    slidingSound.setVolume(Math.min(1, adjust*4));
-                    slidingSound.setPosition(getPosition());
-                    slidingSound.setVelocity(getVelocity());
-                } else {
-                    if (slidingSound.isPlaying()) {
-                        slidingSound.stop();
-                    }
-                }
-
-                double yawDelta = Math.max(
-                        DegreeFuncs.delta(frontYaw, getRotationYaw())/getDefinition().getBogeyFront(gauge),
-                        DegreeFuncs.delta(rearYaw, getRotationYaw())/-getDefinition().getBogeyRear(gauge)
-                );
-                double startingFlangeSpeed = 5;
-                double kmh = Math.abs(getCurrentSpeed().metric());
-                double flangeMinYaw = getDefinition().flange_min_yaw;
-                // https://en.wikipedia.org/wiki/Minimum_railway_curve_radius#Speed_and_cant implies squared speed
-                flangeMinYaw = flangeMinYaw / Math.sqrt(kmh) * Math.sqrt(startingFlangeSpeed);
-                if (yawDelta > flangeMinYaw && kmh > 5) {
-                    if (!flangeSound.isPlaying()) {
-                        lastFlangeVolume = 0.1f;
-                        flangeSound.setVolume(lastFlangeVolume);
-                        flangeSound.play(getPosition());
-                    }
-                    flangeSound.setPitch(0.9f + Math.abs((float)getCurrentSpeed().metric())/600 + sndRand);
-                    float oscillation = (float)Math.sin((getTickCount()/40f * sndRand * 40));
-                    double flangeFactor = (yawDelta - flangeMinYaw) / (90 - flangeMinYaw);
-                    float desiredVolume = (float)flangeFactor/2 * oscillation/4 + 0.25f;
-                    lastFlangeVolume = (lastFlangeVolume*4 + desiredVolume) / 5;
-                    flangeSound.setVolume(lastFlangeVolume);
-                    flangeSound.setPosition(getPosition());
-                    flangeSound.setVelocity(getVelocity());
-                } else {
-                    if (flangeSound.isPlaying()) {
-                        if (lastFlangeVolume > 0.1) {
-                            lastFlangeVolume = (lastFlangeVolume*4 + 0) / 5;
-                            flangeSound.setVolume(lastFlangeVolume);
-                            flangeSound.setPosition(getPosition());
-                            flangeSound.setVelocity(getVelocity());
-                        } else {
-                            flangeSound.stop();
-                        }
-                    }
-                }
-
-                volume = Math.min(1, volume * 2);
-                swayMagnitude -= 0.07;
-                double swayMin = getCurrentSpeed().metric() / 300 / 3;
-                swayMagnitude = Math.max(swayMagnitude, swayMin);
-
-                if (swayImpulse > 0) {
-                    swayMagnitude += 0.3;
-                    swayImpulse -= 0.7;
-                }
-                swayMagnitude = Math.min(swayMagnitude, 3);
-
-                Vec3i posFront = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyFront(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
-                if (BlockUtil.isIRRail(getWorld(), posFront)) {
-                    TileRailBase rb = getWorld().getBlockEntity(posFront, TileRailBase.class);
-                    rb = rb != null ? rb.getParentTile() : null;
-                    if (rb != null && !rb.getPos().equals(clackFrontPos) && rb.clacks()) {
-                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
-                            clackFront.setPitch(pitch);
-                            clackFront.setVolume(volume);
-                            clackFront.play(new Vec3d(posFront));
-                        }
-                        clackFrontPos = rb.getPos();
-                        if (getWorld().getTicks() % ConfigGraphics.StockSwayChance == 0) {
-                            swayImpulse += 7 * rb.getBumpiness();
-                            swayImpulse = Math.min(swayImpulse, 20);
-                        }
-                    }
-                }
-                Vec3i posRear = new Vec3i(VecUtil.fromWrongYawPitch(getDefinition().getBogeyRear(gauge), getRotationYaw(), getRotationPitch()).add(getPosition()));
-                if (BlockUtil.isIRRail(getWorld(), posRear)) {
-                    TileRailBase rb = getWorld().getBlockEntity(posRear, TileRailBase.class);
-                    rb = rb != null ? rb.getParentTile() : null;
-                    if (rb != null && !rb.getPos().equals(clackRearPos) && rb.clacks()) {
-                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
-                            clackRear.setPitch(pitch);
-                            clackRear.setVolume(volume);
-                            clackRear.play(new Vec3d(posRear));
-                        }
-                        clackRearPos = rb.getPos();
-                    }
-                }
-            }
         }
 
         // Apply position onTick
@@ -523,22 +373,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.boundingBox = null;
     }
 
-    public double getRollDegrees() {
-        if (Math.abs(getCurrentSpeed().metric() * gauge.scale()) < 4) {
-            // don't calculate it
-            return 0;
-        }
-
-        double sway = Math.cos(Math.toRadians(this.getTickCount() * 13)) *
-                swayMagnitude / 5 *
-                getDefinition().getSwayMultiplier() *
-                ConfigGraphics.StockSwayMultiplier;
-
-        double tilt = getDefinition().getTiltMultiplier() * (getPrevRotationYaw() - getRotationYaw()) * (getCurrentSpeed().minecraft() > 0 ? 1 : -1);
-
-        return sway + tilt;
-    }
-
     /*
      *
      * Client side render guessing
@@ -577,22 +411,6 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
         if (getWorld().isClient) {
             this.getDefinition().getModel().onClientRemoved(this);
-        }
-
-        if (this.wheel_sound != null) {
-            wheel_sound.stop();
-        }
-        if (this.clackFront != null) {
-            clackFront.stop();
-        }
-        if (this.clackRear != null) {
-            clackRear.stop();
-        }
-        if (this.slidingSound != null) {
-            slidingSound.stop();
-        }
-        if (this.flangeSound != null) {
-            flangeSound.stop();
         }
     }
 

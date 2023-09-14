@@ -28,6 +28,7 @@ import util.Matrix4;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable {
 	@TagField("defID")
@@ -208,16 +209,56 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	*/
 
 	public float soundScale() {
-		return this.getDefinition().shouldScalePitch() ? (float) Math.sqrt(Math.sqrt(gauge.scale())) : 1;
+		if (this.getDefinition().shouldScalePitch()) {
+			double scale = gauge.scale() * getDefinition().internal_model_scale;
+			return (float) Math.sqrt(Math.sqrt(scale));
+		}
+		return 1;
 	}
 
-	public ISound createSound(Identifier oggLocation, boolean repeats, double attenuationDistance) {
-		return Audio.newSound(
-				oggLocation, SoundCategory.AMBIENT,
+	public ISound createSound(Identifier oggLocation, boolean repeats, double attenuationDistance, Supplier<Float> category) {
+		ISound snd = Audio.newSound(
+				oggLocation, SoundCategory.MASTER,
 				repeats,
 				(float) (attenuationDistance * ConfigSound.soundDistanceScale * gauge.scale()),
 				soundScale()
 		);
+		return new ISound() {
+			@Override
+			public void play(Vec3d pos) {
+				snd.play(pos);
+			}
+
+			@Override
+			public void stop() {
+				snd.stop();
+			}
+
+			@Override
+			public void setPosition(Vec3d pos) {
+				snd.setPosition(pos);
+			}
+
+			@Override
+			public void setPitch(float f) {
+				snd.setPitch(f);
+			}
+
+			@Override
+			public void setVelocity(Vec3d vel) {
+				snd.setVelocity(vel);
+			}
+
+			@Override
+			public void setVolume(float f) {
+				snd.setVolume(f * category.get());
+			}
+
+			@Override
+			public boolean isPlaying() {
+				return snd.isPlaying();
+			}
+		};
 	}
 
 	public String getTexture() {

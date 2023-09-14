@@ -14,4 +14,9 @@ properties =
 
     isLinkedBrakeThrottle = False # Optional: Should the throttle / brake controls be connected?
     toggle_bell = True            # Optional: Should the bell be toggled on/off or should it require you to hold a button to activate?
-    isCog = False                 # Optional: provides near infinite traction when on cog-enabled track
+    cog = False                   # Optional: provides near infinite traction when on cog-enabled track
+
+    # Overrides
+    internalLighting = True       # Optional: Does this piece of stock have internal lighting?
+    independent_brake = True      # Optional: Does this piece of stock have an independent brake?  Usually False except for Locomotives
+    linear_brake_control = False  # Optional: Make brakes move in a linear fashion, TODO FIX/REMOVE THIS

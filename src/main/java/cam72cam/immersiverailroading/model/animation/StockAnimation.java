@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.animation;
 
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.model.part.PartSound;
@@ -38,7 +39,7 @@ public class StockAnimation {
             default:
                 looping = true;
         }
-        this.sound = def.sound != null ? new PartSound(def.sound, true, 20) : null;
+        this.sound = def.sound != null ? new PartSound(def.sound, true, 20, ConfigSound.SoundCategories::animations) : null;
     }
 
     public float getValue(EntityRollingStock stock) {

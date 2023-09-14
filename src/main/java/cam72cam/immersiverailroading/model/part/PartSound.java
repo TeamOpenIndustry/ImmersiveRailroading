@@ -1,23 +1,25 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.sound.ISound;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PartSound {
     private final SoundDefinition def;
     private final boolean canLoop;
     private final float attenuationDistance;
+    private final Supplier<Float> category;
 
 
-    public PartSound(SoundDefinition def, boolean canLoop, float attenuationDistance) {
+    public PartSound(SoundDefinition def, boolean canLoop, float attenuationDistance, Supplier<Float> category) {
         this.def = def;
         this.canLoop = canLoop;
         this.attenuationDistance = attenuationDistance;
+        this.category = category;
     }
 
     private enum SoundState {
@@ -36,9 +38,9 @@ public class PartSound {
         public Sounds(EntityMoveableRollingStock stock) {
             state = SoundState.STOPPED;
             float distance = def.distance != null ? def.distance : attenuationDistance;
-            start = def.start != null ? stock.createSound(def.start, false, distance) : null;
-            main = def.main != null ? stock.createSound(def.main, canLoop && def.looping, distance) : null;
-            stop = def.stop != null ? stock.createSound(def.stop, false, distance) : null;
+            start = def.start != null ? stock.createSound(def.start, false, distance, category) : null;
+            main = def.main != null ? stock.createSound(def.main, canLoop && def.looping, distance, category) : null;
+            stop = def.stop != null ? stock.createSound(def.stop, false, distance, category) : null;
         }
 
         public void terminate() {
@@ -70,7 +72,7 @@ public class PartSound {
     }
 
     public void effects(EntityMoveableRollingStock stock, float volume, float pitch) {
-        if (!ConfigSound.soundEnabled || def == null) {
+        if (def == null) {
             return;
         }
 

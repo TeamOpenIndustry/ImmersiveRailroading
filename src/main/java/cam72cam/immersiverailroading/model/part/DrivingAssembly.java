@@ -9,7 +9,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 
 public class DrivingAssembly {
-    private final WheelSet wheels;
+    public final WheelSet wheels;
     private final ValveGear right;
     private final ValveGear inner_right;
     private final ValveGear center;

@@ -33,6 +33,7 @@ public class ConfigGraphics {
 	public static TemperatureDisplayType temperatureUnit = TemperatureDisplayType.celcius;
 
 	@Comment( "How long to keep textures in memory after they have left the screen (higher numbers = smoother game play, lower numbers = less GPU memory used)")
+	@Range(min = 0, max = 100)
     public static int textureCacheSeconds = 30;
 
 	@Comment( "Show text tooltips over interactable components" )
@@ -47,12 +48,15 @@ public class ConfigGraphics {
 	public static boolean OptifineEntityShaderOverrideAll = false;
 
 	@Comment("How far away stock needs to be to switch to a smaller LOD texture")
+	@Range(min = 0, max = 500)
 	public static double StockLODDistance = 64;
 
 	@Comment("0.0 is no sway, 1.0 is default sway")
+	@Range(min = 0, max = 1)
 	public static double StockSwayMultiplier = 1;
 
 	@Comment("How likely a piece of stock is to sway (1 == always, 10 == infrequent)")
+	@Range(min = 0, max = 10)
 	public static int StockSwayChance = 1;
 
 	@Comment("Settings used in the stock user interfaces")

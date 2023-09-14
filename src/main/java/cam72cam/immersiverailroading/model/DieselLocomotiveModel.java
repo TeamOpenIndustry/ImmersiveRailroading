@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -8,7 +9,10 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, LocomotiveDieselDefinition> {
     private List<ModelComponent> components;
@@ -17,10 +21,12 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
     private final PartSound idle;
     private final PartSound running;
 
+    private Map<UUID, Float> runningFade = new HashMap<>();
+
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
-        idle = def.isCabCar() ? null : new PartSound(def.idle, true, 80);
-        running = def.isCabCar() || def.running == null ? null : new PartSound(def.running, true, 80);
+        idle = def.isCabCar() ? null : new PartSound(def.idle, true, 80, ConfigSound.SoundCategories.Locomotive.Diesel::idle);
+        running = def.isCabCar() || def.running == null ? null : new PartSound(def.running, true, 80, ConfigSound.SoundCategories.Locomotive.Diesel::running);
     }
 
     @Override
@@ -71,25 +77,26 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
         if (idle != null) {
             if (stock.isRunning()) {
                 float volume = Math.max(0.1f, stock.getSoundThrottle());
-                float pitch = 0.7f + stock.getSoundThrottle() / 4;
+                float pitchRange = stock.getDefinition().getEnginePitchRange();
+                float pitch = (1-pitchRange) + stock.getSoundThrottle() * pitchRange;
                 if (running == null) {
                     // Simple
                     idle.effects(stock, volume, pitch);
                 } else {
-                    // Switching between two effects
-                    if (stock.getSoundThrottle() < 0.01) {
-                        // Idling
-                        idle.effects(stock, 1, 1);
-                        running.effects(stock, false);
-                    } else {
-                        idle.effects(stock, 0.01f);
-                        running.effects(stock, volume, pitch);
-                    }
+                    boolean isThrottledUp = stock.getSoundThrottle() > 0.01;
+                    float fade = runningFade.getOrDefault(stock.getUUID(), 0f);
+                    fade += 0.05f * (isThrottledUp ? 1 : -1);
+                    fade = Math.min(Math.max(fade, 0), 1);
+                    runningFade.put(stock.getUUID(), fade);
+
+                    idle.effects(stock, 1 - fade + 0.01f, 1);
+                    running.effects(stock, fade + 0.01f, pitch);
                 }
             } else {
                 idle.effects(stock, false);
                 if (running != null) {
                     running.effects(stock, false);
+                    runningFade.put(stock.getUUID(), 0f);
                 }
             }
         }

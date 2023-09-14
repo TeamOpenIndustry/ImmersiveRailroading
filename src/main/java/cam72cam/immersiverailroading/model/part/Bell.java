@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -16,7 +17,7 @@ public class Bell extends PartSound {
     }
 
     public Bell(ModelComponent component, EntityRollingStockDefinition.SoundDefinition soundFile) {
-        super(soundFile, true, 150);
+        super(soundFile, true, 150, ConfigSound.SoundCategories.Locomotive::bell);
         this.component = component;
     }
 }
