@@ -32,6 +32,11 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     @Override
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/steam.caml");
+    }
+
+    @Override
     public void loadData(DataBlock data) throws Exception {
         super.loadData(data);
         DataBlock properties = data.getBlock("properties");
@@ -52,64 +57,21 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         }
         cab_forward = properties.getValue("cab_forward").asBoolean(false);
 
-        //sets default sounds
-        whistle = null; //new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/whistle.ogg");
-        idle = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/idle.ogg"));
-        chuff = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/chuff.ogg");
-        pressure = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/pressure.ogg");
-        bell = new SoundDefinition(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/bell.ogg"));
-        cylinder_drain = new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/cylinder_drain.ogg");
-
         DataBlock sounds = data.getBlock("sounds");
-        //overrides original sounds with added sounds
-        if (sounds != null) {
-            whistle = SoundDefinition.getOrDefault(sounds, "whistle", whistle);
-            idle = SoundDefinition.getOrDefault(sounds, "idle", idle);
-            chuff = sounds.getValue("chuff").asIdentifier(chuff);
-            pressure = sounds.getValue("pressure").asIdentifier(pressure);
-            bell = SoundDefinition.getOrDefault(sounds, "bell", bell);
-            cylinder_drain = sounds.getValue("cylinder_drain").asIdentifier(cylinder_drain);
+        whistle = SoundDefinition.getOrDefault(sounds, "whistle");
+        idle = SoundDefinition.getOrDefault(sounds, "idle");
+        chuff = sounds.getValue("chuff").asIdentifier();
+        pressure = sounds.getValue("pressure").asIdentifier();
+        bell = SoundDefinition.getOrDefault(sounds, "bell");
+        cylinder_drain = sounds.getValue("cylinder_drain").asIdentifier();
 
-            List<DataBlock> quilling = sounds.getBlocks("quilling");
-            if (quilling != null) {
-                quill = new Quilling(quilling);
-            }
+        List<DataBlock> quilling = sounds.getBlocks("quilling");
+        if (quilling != null) {
+            quill = new Quilling(quilling);
         }
         if (whistle == null && (quill == null || !quill.canLoad())) {
             quill = new Quilling(new Identifier(ImmersiveRailroading.MODID, "sounds/steam/default/quill.ogg"));
         }
-
-        if (controlSounds.isEmpty()) {
-            controlSounds.put("REVERSER_1", new ControlSoundsDefinition(
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_move.ogg"),
-                    0.1f,
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
-            ));
-            controlSounds.put("THROTTLE_1", new ControlSoundsDefinition(
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
-                    null,
-                    null,
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
-            ));
-            controlSounds.put("TRAIN_BRAKE_1", new ControlSoundsDefinition(
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/pressure.ogg"),
-                    null,
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
-            ));
-            controlSounds.put("INDEPENDENT_BRAKE_1", new ControlSoundsDefinition(
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_engage.ogg"),
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/pressure.ogg"),
-                    null,
-                    new Identifier(ImmersiveRailroading.MODID, "sounds/default/lever_disengage.ogg")
-            ));
-        }
-    }
-
-    @Override
-    protected boolean multiUnitDefault() {
-        return false;
     }
 
     @Override

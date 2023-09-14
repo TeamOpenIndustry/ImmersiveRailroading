@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -7,6 +8,7 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.LocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.mod.resource.Identifier;
 
 import java.util.List;
 
@@ -26,6 +28,11 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     LocomotiveDefinition(Class<? extends EntityRollingStock> type, String defID, DataBlock data) throws Exception {
         super(type, defID, data);
+    }
+
+    @Override
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/locomotive.caml");
     }
 
     @Override
@@ -50,18 +57,16 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
             traction = (int) Math.ceil(properties.getValue("tractive_effort_lbf").asInteger() * internal_inv_scale);
             factorOfAdhesion = properties.getValue("factor_of_adhesion").asDouble(4);
             maxSpeed = Speed.fromMetric(properties.getValue("max_speed_kmh").asDouble() * internal_inv_scale);
-            muliUnitCapable = properties.getValue("multi_unit_capable").asBoolean(this.multiUnitDefault());
+            muliUnitCapable = properties.getValue("multi_unit_capable").asBoolean();
         }
-        isLinkedBrakeThrottle = properties.getValue("isLinkedBrakeThrottle").asBoolean(false);
-        toggleBell = properties.getValue("toggle_bell").asBoolean(true);
-        isCog = properties.getValue("cog").asBoolean(false);
+        isLinkedBrakeThrottle = properties.getValue("isLinkedBrakeThrottle").asBoolean();
+        toggleBell = properties.getValue("toggle_bell").asBoolean();
+        isCog = properties.getValue("cog").asBoolean();
     }
 
     protected boolean readCabCarFlag(DataBlock data) {
         return data.getBlock("properties").getValue("cab_car").asBoolean(false);
     }
-
-    protected abstract boolean multiUnitDefault();
 
     @Override
     protected StockModel<?, ?> createModel() throws Exception {
@@ -105,11 +110,6 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
 
     public boolean isLinkedBrakeThrottle() {
         return isLinkedBrakeThrottle;
-    }
-
-    @Override
-    protected boolean independentBrakeDefault() {
-        return true;
     }
 
     public boolean isCabCar() {

@@ -1,0 +1,5 @@
+import: "immersiverailroading:rolling_stock/default/locomotive.caml"
+
+properties =
+    # Overrides
+    pressure_brake = False               # Optional: Does this piece of stock have a pressure brake?  Usually True except for Hand Cars

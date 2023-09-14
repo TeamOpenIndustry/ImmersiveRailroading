@@ -1,7 +1,5 @@
 import: "immersiverailroading:rolling_stock/default/base.caml"
 
-show_current_load_only = False  # Controls how the CARGO_FILL_PERCENTAGE model groups are shown
-
 # Freight cars only:
 freight =
     slots = 0  # Required: Number of slots in this container

@@ -1,7 +1,9 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.mod.resource.Identifier;
 
 public class CarPassengerDefinition extends CarFreightDefinition {
 
@@ -10,8 +12,8 @@ public class CarPassengerDefinition extends CarFreightDefinition {
     }
 
     @Override
-    public void loadData(DataBlock data) throws Exception {
-        super.loadData(data);
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/passenger.caml");
     }
 
     @Override

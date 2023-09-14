@@ -6,25 +6,20 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.util.CAML;
-import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.util.JSON;
-import cam72cam.immersiverailroading.util.RealBB;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.VertexBuffer;
 import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.serialization.ResourceCache;
+import cam72cam.mod.serialization.*;
 import cam72cam.mod.serialization.ResourceCache.GenericByteBuffer;
-import cam72cam.mod.serialization.TagCompound;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.world.World;
 
@@ -32,6 +27,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,6 +40,7 @@ public abstract class EntityRollingStockDefinition {
 
     public final String defID;
     private final Class<? extends EntityRollingStock> type;
+
     public final List<String> itemGroups;
     public Map<String, String> textureNames;
     public float dampeningAmount;
@@ -132,7 +129,7 @@ public abstract class EntityRollingStockDefinition {
             volume = obj.getValue("volume").asFloat(1.0f);
         }
 
-        public static SoundDefinition getOrDefault(DataBlock block, String key, SoundDefinition fallback) {
+        public static SoundDefinition getOrDefault(DataBlock block, String key) {
             DataBlock found = block.getBlock(key);
             if (found != null) {
                 return new SoundDefinition(found);
@@ -141,7 +138,7 @@ public abstract class EntityRollingStockDefinition {
             if (ident != null && ident.canLoad()) {
                 return new SoundDefinition(ident);
             }
-            return fallback;
+            return null;
         }
     }
 
@@ -175,7 +172,7 @@ public abstract class EntityRollingStockDefinition {
             offset = obj.getValue("offset").asFloat(0f);
             invert = obj.getValue("invert").asBoolean(false);
             frames_per_tick = obj.getValue("frames_per_tick").asFloat(1f);
-            sound = SoundDefinition.getOrDefault(obj, "sound", null);
+            sound = SoundDefinition.getOrDefault(obj, "sound");
         }
 
         public boolean valid() {
@@ -229,7 +226,7 @@ public abstract class EntityRollingStockDefinition {
         this.defID = defID;
 
 
-        loadData(data);
+        loadData(transformData(data));
 
         this.model = createModel();
         this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.shouldRender(x)).collect(Collectors.toList());
@@ -292,11 +289,33 @@ public abstract class EntityRollingStockDefinition {
         return ConfigSound.scaleSoundToGauge && scalePitch;
     }
 
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/base.caml");
+    }
+
+    private DataBlock withImports(DataBlock data) throws IOException {
+        List<DataBlock.Value> imports = data.getValues("import");
+        if (imports != null) {
+            for (DataBlock.Value toImport : imports) {
+                DataBlock loaded = DataBlock.load(toImport.asIdentifier());
+                loaded = withImports(loaded);
+                // Graft data on TOP of loaded
+                data = new MergedBlocks(loaded, data);
+            }
+        }
+        return data;
+    }
+
+    private DataBlock transformData(DataBlock data) throws IOException {
+        DataBlock base = DataBlock.load(defaultDataLocation());
+        return new MergedBlocks(withImports(base), withImports(data));
+    }
+
     public void loadData(DataBlock data) throws Exception {
         name = data.getValue("name").asString();
-        modelerName = data.getValue("modeler").asString("N/A");
-        packName = data.getValue("pack").asString("N/A");
-        darken = data.getValue("darken_model").asFloat(0f);
+        modelerName = data.getValue("modeler").asString();
+        packName = data.getValue("pack").asString();
+        darken = data.getValue("darken_model").asFloat();
         internal_model_scale = 1;
         internal_inv_scale = 1;
         // TODO Gauge.from(Gauge.STANDARD).value() what happens when != Gauge.STANDARD
@@ -315,7 +334,7 @@ public abstract class EntityRollingStockDefinition {
         }
 
         textureNames = new LinkedHashMap<>();
-        textureNames.put("", "Default");
+        //textureNames.put("", "Default");
         DataBlock tex_variants = data.getBlock("tex_variants");
         if (tex_variants != null) {
             tex_variants.getValueMap().forEach((key, value) -> textureNames.put(value.asString(), key));
@@ -358,75 +377,61 @@ public abstract class EntityRollingStockDefinition {
         bogeyFront = pivot.getValue("front").asFloat() * (float) internal_model_scale;
         bogeyRear = pivot.getValue("rear").asFloat() * (float) internal_model_scale;
 
-        dampeningAmount = data.getValue("sound_dampening_percentage").asFloat(0.75f);
+        dampeningAmount = data.getValue("sound_dampening_percentage").asFloat();
         if (dampeningAmount < 0 || dampeningAmount > 1) {
             dampeningAmount = 0.75f;
         }
-        scalePitch = data.getValue("scale_pitch").asBoolean(true);
-
-        couplerSlackFront = couplerSlackRear = 0.025f;
+        scalePitch = data.getValue("scale_pitch").asBoolean();
 
         DataBlock couplers = data.getBlock("couplers");
-        if (couplers != null) {
-            couplerOffsetFront = couplers.getValue("front_offset").asFloat(0f) * (float) internal_model_scale;
-            couplerOffsetRear = couplers.getValue("rear_offset").asFloat(0f) * (float) internal_model_scale;
-            couplerSlackFront = couplers.getValue("front_slack").asFloat(couplerSlackFront) * (float) internal_model_scale;
-            couplerSlackRear = couplers.getValue("rear_slack").asFloat(couplerSlackRear) * (float) internal_model_scale;
-        }
+        couplerOffsetFront = couplers.getValue("front_offset").asFloat() * (float) internal_model_scale;
+        couplerOffsetRear = couplers.getValue("rear_offset").asFloat() * (float) internal_model_scale;
+        couplerSlackFront = couplers.getValue("front_slack").asFloat() * (float) internal_model_scale;
+        couplerSlackRear = couplers.getValue("rear_slack").asFloat() * (float) internal_model_scale;
 
         DataBlock properties = data.getBlock("properties");
         weight = (int) Math.ceil(properties.getValue("weight_kg").asInteger() * internal_inv_scale);
         valveGear = ValveGearConfig.get(properties, "valve_gear");
-        hasIndependentBrake = properties.getValue("independent_brake").asBoolean(independentBrakeDefault());
-        hasPressureBrake = properties.getValue("pressure_brake").asBoolean(pressureBrakeDefault());
+        hasIndependentBrake = properties.getValue("independent_brake").asBoolean();
+        hasPressureBrake = properties.getValue("pressure_brake").asBoolean();
         // Locomotives default to linear brake control
-        isLinearBrakeControl = properties.getValue("linear_brake_control").asBoolean(!(this instanceof LocomotiveDefinition));
+        isLinearBrakeControl = properties.getValue("linear_brake_control").asBoolean();
 
         brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.CAST_IRON);
         try {
-            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString("CAST_IRON")));
+            brakeCoefficient = PhysicalMaterials.STEEL.kineticFriction(PhysicalMaterials.valueOf(properties.getValue("brake_shoe_material").asString()));
         } catch (Exception ex) {
             ImmersiveRailroading.warn("Invalid brake_shoe_material, possible values are: %s", Arrays.toString(PhysicalMaterials.values()));
         }
         brakeCoefficient = properties.getValue("brake_friction_coefficient").asFloat(brakeCoefficient);
         // https://en.wikipedia.org/wiki/Rolling_resistance#Rolling_resistance_coefficient_examples
-        rollingResistanceCoefficient = properties.getValue("rolling_resistance_coefficient").asDouble(0.002);
-        directFrictionCoefficient = properties.getValue("direct_friction_coefficient").asDouble(0);
+        rollingResistanceCoefficient = properties.getValue("rolling_resistance_coefficient").asDouble();
+        directFrictionCoefficient = properties.getValue("direct_friction_coefficient").asDouble();
 
-        swayMultiplier = properties.getValue("swayMultiplier").asDouble(1);
-        tiltMultiplier = properties.getValue("tiltMultiplier").asDouble(0);
+        swayMultiplier = properties.getValue("swayMultiplier").asDouble();
+        tiltMultiplier = properties.getValue("tiltMultiplier").asDouble();
 
-        interiorLightLevel = properties.getValue("interior_light_level").asFloat(6 / 15f);
-        hasInternalLighting = properties.getValue("internalLighting").asBoolean(this instanceof CarPassengerDefinition || this instanceof LocomotiveDefinition);
+        interiorLightLevel = properties.getValue("interior_light_level").asFloat();
+        hasInternalLighting = properties.getValue("internalLighting").asBoolean();
 
         DataBlock lights = data.getBlock("lights");
         if (lights != null) {
             lights.getBlockMap().forEach((key, block) -> this.lights.put(key, new LightDefinition(block)));
         }
 
-        wheel_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/track_wheels.ogg");
-        clackFront = clackRear = new Identifier(ImmersiveRailroading.MODID, "sounds/default/clack.ogg");
-        couple_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/coupling.ogg");
-        sliding_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/sliding.ogg");
-        flange_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/flange.ogg");
-        flange_min_yaw = 2.5;
-        collision_sound = new Identifier(ImmersiveRailroading.MODID, "sounds/default/collision.ogg");
-
         DataBlock sounds = data.getBlock("sounds");
-        if (sounds != null) {
-            wheel_sound = sounds.getValue("wheels").asIdentifier(wheel_sound);
-            clackFront = clackRear = sounds.getValue("clack").asIdentifier(clackFront);
-            clackFront = sounds.getValue("clack_front").asIdentifier(clackFront);
-            clackRear = sounds.getValue("clack_rear").asIdentifier(clackRear);
-            couple_sound = sounds.getValue("couple").asIdentifier(couple_sound);
-            sliding_sound = sounds.getValue("sliding").asIdentifier(sliding_sound);
-            flange_sound = sounds.getValue("flange").asIdentifier(flange_sound);
-            flange_min_yaw = sounds.getValue("flange_min_yaw").asDouble(flange_min_yaw);
-            collision_sound = sounds.getValue("collision").asIdentifier(collision_sound);
-            DataBlock controls = sounds.getBlock("controls");
-            if (controls != null) {
-                controls.getBlockMap().forEach((key, block) -> controlSounds.put(key, new ControlSoundsDefinition(block)));
-            }
+        wheel_sound = sounds.getValue("wheels").asIdentifier();
+        clackFront = clackRear = sounds.getValue("clack").asIdentifier();
+        clackFront = sounds.getValue("clack_front").asIdentifier(clackFront);
+        clackRear = sounds.getValue("clack_rear").asIdentifier(clackRear);
+        couple_sound = sounds.getValue("couple").asIdentifier();
+        sliding_sound = sounds.getValue("sliding").asIdentifier();
+        flange_sound = sounds.getValue("flange").asIdentifier();
+        flange_min_yaw = sounds.getValue("flange_min_yaw").asDouble();
+        collision_sound = sounds.getValue("collision").asIdentifier();
+        DataBlock soundControls = sounds.getBlock("controls");
+        if (soundControls != null) {
+            soundControls.getBlockMap().forEach((key, block) -> controlSounds.put(key, new ControlSoundsDefinition(block)));
         }
 
         Identifier overlay = data.getValue("overlay").asIdentifier();
@@ -783,15 +788,6 @@ public abstract class EntityRollingStockDefinition {
 
     public float interiorLightLevel() {
         return interiorLightLevel;
-    }
-
-
-    protected boolean independentBrakeDefault() {
-        return false;
-    }
-
-    protected boolean pressureBrakeDefault() {
-        return true;
     }
 
     public boolean isLinearBrakeControl() {
