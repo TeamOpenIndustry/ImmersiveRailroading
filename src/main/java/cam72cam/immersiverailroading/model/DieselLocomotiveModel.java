@@ -89,8 +89,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
                     fade = Math.min(Math.max(fade, 0), 1);
                     runningFade.put(stock.getUUID(), fade);
 
-                    idle.effects(stock, 1 - fade, 1);
-                    running.effects(stock, fade, pitch);
+                    idle.effects(stock, 1 - fade + 0.01f, 1);
+                    running.effects(stock, fade + 0.01f, pitch);
                 }
             } else {
                 idle.effects(stock, false);
