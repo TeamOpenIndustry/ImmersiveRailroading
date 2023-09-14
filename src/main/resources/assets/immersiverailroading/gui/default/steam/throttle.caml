@@ -1,0 +1,16 @@
+element:
+  x = -10
+  y = -5
+  image = "immersiverailroading:gui/default/steam/throttle_backing.png"
+element:
+  x = -80
+  y = -4
+  image = "immersiverailroading:gui/default/steam/throttle.png"
+  readout = "THROTTLE"
+  sound =
+    engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+    disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+  rotate =
+    x = 75
+    y = 4
+    degrees = -30
