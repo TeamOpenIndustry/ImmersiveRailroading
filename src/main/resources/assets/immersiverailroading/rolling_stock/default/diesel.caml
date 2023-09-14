@@ -11,7 +11,7 @@ properties =
 
 sounds =
     idle = "immersiverailroading:sounds/diesel/default/idle.ogg"    # Optional: See sound_definition.caml for details
-    running = "immersiverailroading:sounds/diesel/default/idle.ogg" # Optional: See sound_definition.caml for details
+    running = null # Optional: See sound_definition.caml for details
     horn = "immersiverailroading:sounds/diesel/default/horn.ogg"    # Optional: See sound_definition.caml for details
     bell = "immersiverailroading:sounds/diesel/default/bell.ogg"    # Optional: See sound_definition.caml for details
     controls =
