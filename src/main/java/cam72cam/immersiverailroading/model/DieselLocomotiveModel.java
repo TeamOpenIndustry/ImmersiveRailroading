@@ -9,7 +9,10 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, LocomotiveDieselDefinition> {
     private List<ModelComponent> components;
@@ -17,6 +20,8 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
     private Horn horn;
     private final PartSound idle;
     private final PartSound running;
+
+    private Map<UUID, Float> runningFade = new HashMap<>();
 
     public DieselLocomotiveModel(LocomotiveDieselDefinition def) throws Exception {
         super(def);
@@ -77,20 +82,20 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
                     // Simple
                     idle.effects(stock, volume, pitch);
                 } else {
-                    // Switching between two effects
-                    if (stock.getSoundThrottle() < 0.01) {
-                        // Idling
-                        idle.effects(stock, 1, 1);
-                        running.effects(stock, false);
-                    } else {
-                        idle.effects(stock, 0.01f);
-                        running.effects(stock, volume, pitch);
-                    }
+                    boolean isThrottledUp = stock.getSoundThrottle() > 0.01;
+                    float fade = runningFade.getOrDefault(stock.getUUID(), 0f);
+                    fade += 0.05f * (isThrottledUp ? 1 : -1);
+                    fade = Math.min(Math.max(fade, 0), 1);
+                    runningFade.put(stock.getUUID(), fade);
+
+                    idle.effects(stock, 1 - fade, 1);
+                    running.effects(stock, fade, pitch);
                 }
             } else {
                 idle.effects(stock, false);
                 if (running != null) {
                     running.effects(stock, false);
+                    runningFade.put(stock.getUUID(), 0f);
                 }
             }
         }
