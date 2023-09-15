@@ -419,6 +419,10 @@ public class GuiBuilder {
         if (target == this) {
             // 0 0 imageHeight imageWidth
 
+            if (toggle) {
+                return;
+            }
+
             float closestValue = value;
             double closestDelta = 999999;
 
@@ -476,6 +480,9 @@ public class GuiBuilder {
 
         if (toggle) {
             value = 1 - value;
+            if (invert) {
+                value = 1 - value;
+            }
         }
 
         if (readout == Readouts.HORN || readout == Readouts.WHISTLE) {
