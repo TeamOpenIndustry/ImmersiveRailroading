@@ -74,7 +74,14 @@ public class GuiBuilder {
         ;
 
         public static Horizontal from(String pos_x) {
-            return pos_x == null ? LEFT : valueOf(pos_x.toUpperCase(Locale.ROOT));
+            if (pos_x == null) {
+                return LEFT;
+            }
+            pos_x = pos_x.toUpperCase(Locale.ROOT);
+            if (pos_x.equals("CENTER")) {
+                return MIDDLE;
+            }
+            return valueOf(pos_x);
         }
     }
     private enum Vertical {
@@ -83,7 +90,15 @@ public class GuiBuilder {
         BOTTOM,
         ;
         public static Vertical from(String pos_y) {
-            return pos_y == null ? TOP : valueOf(pos_y.toUpperCase(Locale.ROOT));
+            if (pos_y == null) {
+                return TOP;
+            }
+            pos_y = pos_y.toUpperCase(Locale.ROOT);
+            if (pos_y.equals("CENTER")) {
+                return MIDDLE;
+            }
+
+            return valueOf(pos_y);
         }
     }
 
