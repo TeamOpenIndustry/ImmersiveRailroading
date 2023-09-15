@@ -519,6 +519,10 @@ public class GuiBuilder {
     public boolean click(ClientEvents.MouseGuiEvent event, EntityRollingStock stock) {
         switch (event.action) {
             case CLICK:
+                if (target != null) {
+                    // Weird hack for when mouse goes out of the window
+                    target.onMouseRelease(stock);
+                }
                 target = find(stock, new Matrix4(), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, event.y);
                 if (target != null) {
                     target.onMouseClick(stock);

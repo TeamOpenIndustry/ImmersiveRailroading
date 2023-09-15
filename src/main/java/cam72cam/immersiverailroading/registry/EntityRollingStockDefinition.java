@@ -246,13 +246,11 @@ public abstract class EntityRollingStockDefinition {
                     if (snd.isPlaying()) {
                         snd.setVelocity(stock.getVelocity());
                         snd.setPosition(pos);
-                    } else {
-                        this.sounds.get(stock.getUUID()).remove(snd);
                     }
                 }
             }
 
-            Boolean wasPressed = wasSoundPressed.getOrDefault(stock.getUUID(), isPressed);
+            Boolean wasPressed = wasSoundPressed.getOrDefault(stock.getUUID(), false);
             wasSoundPressed.put(stock.getUUID(), isPressed);
 
             float lastValue = lastMoveSoundValue.computeIfAbsent(stock.getUUID(), k -> value);
@@ -267,7 +265,7 @@ public abstract class EntityRollingStockDefinition {
             } else if (wasPressed && !isPressed) {
                 // Release
                 if (this.sounds.containsKey(stock.getUUID())) {
-                    for (ISound snd : this.sounds.get(stock.getUUID())) {
+                    for (ISound snd : this.sounds.remove(stock.getUUID())) {
                         snd.stop();
                     }
                 }
