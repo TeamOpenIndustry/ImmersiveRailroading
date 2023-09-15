@@ -418,7 +418,8 @@ public class SimulationState {
         }
 
         brakeAdhesionNewtons *= Config.ConfigBalance.brakeMultiplier;
-
+        /*TODO add combined drag coefficient for advance physics, combines bearing, air, drivetrain, and all other speed scaled frictions and applies them based on speed
+         * add JSON enumerators to give rough approximate values for various setups as well as the option to define it directly*/
         return rollingResistanceNewtons + blockResistanceNewtons + brakeAdhesionNewtons + directResistance;
     }
 }

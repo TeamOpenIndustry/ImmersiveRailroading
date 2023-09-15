@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ImmersionConfig;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
@@ -25,6 +26,9 @@ import cam72cam.mod.serialization.TagMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LocomotiveSteam extends Locomotive {
 	// PSI
@@ -103,20 +107,29 @@ public class LocomotiveSteam extends Locomotive {
 	private double currentPressure = 0;			//current boiler pressure or mawp if fuel isn't required
 	private double speedPercent = 0;			//current speed as a percent of rated top speed
 	
+	private Logger log = LogManager.getLogger(ImmersiveRailroading.MODID);
+	
 	//used once per tick to calculate cutoffTractiveEffort_N
 	private double cutoffTractiveEffort() {
 		//tractive effort in N produced by each PSI applied to the cylinders
 		double tePerPSI = (double)maxTractiveEffort_N / (double)mawp;
+		double reverserMagnitude = Math.abs(getReverser());
 		/*
 		 * average pressure on the cylinders over the course of the stroke,
 		 * calculated by assuming current boiler pressure for length of valve travel(cutoff setting)
-		 * followed by finding pressure after expansion over the rest of the stroke and averaging it with the boiler pressure
-		 * this gives the average pressure over the remainder of the stroke
+		 * followed by using logarithmic mean to find the average pressure for the rest of the stroke
 		 * multiply these pressures by the portion of the stroke to which they are applicable and add to get final average pressure
 		 */
-		//TODO sqrt((p1^2 + p2^2) / 2) in next physics level
-		double averagePreasure = (currentPressure * getReverser()) + ((((currentPressure * reverserDirection) + (currentPressure * getReverser())) / 2) * (1 - Math.abs(getReverser())));
-		return getReverser() == 0 ? 0 : tePerPSI * averagePreasure;
+		double valveOpen = (currentPressure * getReverser());
+		double valveClosed = reverserMagnitude < 1 ? (((currentPressure * Math.log(1 / reverserMagnitude)) / ((1 / reverserMagnitude) - 1)) * (1 - reverserMagnitude) * reverserDirection ) : 0;
+		double averagePreasure = valveOpen + valveClosed;
+		double output = getReverser() == 0 ? 0 : tePerPSI * averagePreasure;
+		/*	TODO reevaluate limit after drag is implemented, try to tune typical drag to land top speed at about 10% cutoff
+		 * finally to simulate the limits of typical valve gear in terms of how far you can reduce cutoff before steam stops being admitted to the cylinders
+		 * heavily restrict power output below 12% cutoff
+		   for now fudge it as the cutoff percent*/
+		output = reverserMagnitude < .12d ? output * reverserMagnitude : output;
+		return output;
 	}
 	
 	//backpressure opposing motion due to high cutoff at high speed, produces a scalar as a proportion of maximum tractive effort
@@ -152,15 +165,22 @@ public class LocomotiveSteam extends Locomotive {
 
 			return traction_N * multiplier;
 		} else {							//use realistic physics
-			
 			double workingTractiveEffort;	//working tractive effort calculated with current steam flow, cutoff demand, and boiler pressure, before factoring loss due to backpressure
-			if(steamDemand_Hp < maxSteamFlow_Hp) {
+			//approximate minimum starting steam flow demand to 1/4 max HP to avoid having 0 steam demand when stationary which causes instant wheel slip, this does not affect steam use
+			double adjustedSteamDemand_Hp = (maxPower_Hp * .25d) + (steamDemand_Hp * .75d);
+			double backPressureScalar = backpressure(speedPercent);
+			if(adjustedSteamDemand_Hp < maxSteamFlow_Hp) {
 				workingTractiveEffort = cutoffTractiveEffort_N;
 			}else {
-				workingTractiveEffort = cutoffTractiveEffort_N * (maxSteamFlow_Hp / steamDemand_Hp);
+				workingTractiveEffort = cutoffTractiveEffort_N * (maxSteamFlow_Hp / adjustedSteamDemand_Hp);
 			}
-			
-			return (workingTractiveEffort - ((backpressure(speedPercent) * (double)maxTractiveEffort_N) * reverserDirection));
+			//if using backpressure braking(ie reverser opposing direction of motion) ignore workingTractiveEffort and go off backpressure only
+			if (Math.copySign(getCurrentSpeed().metric(), reverserDirection) != getCurrentSpeed().metric()) {
+				backPressureScalar = 0;
+			}
+			//reduce effective pressure on the cylinder heads when cylinder cocks are open, this does not reduce steam use
+			double cylinderCocksPressureDrop = cylinderDrainsEnabled() ? .5d : 1d;
+			return workingTractiveEffort - (backPressureScalar * cutoffTractiveEffort_N) * cylinderCocksPressureDrop;
 		}
 	}
 	
@@ -177,19 +197,21 @@ public class LocomotiveSteam extends Locomotive {
 
 	@Override
 	public double getTractiveEffortNewtons(Speed speed) {
-		return (getDefinition().cab_forward ? -1 : 1) * super.getTractiveEffortNewtons(speed);
+		double slowSpeedPeak = Math.max(1.0d, 1.0d + (0.15d - speedPercent));
+		return (getDefinition().cab_forward ? -1 : 1) * super.getTractiveEffortNewtons(speed, slowSpeedPeak);
 	}
 	
-	@Override
+	/*@Override
 	protected double getStaticTractiveEffort(Speed speed) {
 		//we're calculating average tractive effort, real tractive effort when starting varies, this simulates wheel slip caused by that variation
 		double original = super.getStaticTractiveEffort(speed);
-		return ImmersionConfig.arcadePhysics ? original : original * Math.min(.70d + (speedPercent * 3), 1);
-	}
+		return ImmersionConfig.arcadePhysics ? original : original * Math.min(.70d + (speedPercent * 2), 1);
+	}*/
 
 	@Override
 	protected double simulateWheelSlip() {
-		return (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip();
+		double slowSpeedPeak = Math.max(1.0d, 1.0d + (0.15d - speedPercent));
+		return (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip(slowSpeedPeak);
 	}
 
 
@@ -197,10 +219,7 @@ public class LocomotiveSteam extends Locomotive {
 	public void onTick() {
 		super.onTick();
 
-		if (getWorld().isClient) {
-			return;
-		}
-
+		//values need to be calculated for client too for models to render correctly
 		if (this.getTickCount() < 2) {
 			//initialize constant values
 			maxPower_Hp = this.getDefinition().getHorsePower(gauge);
@@ -217,9 +236,12 @@ public class LocomotiveSteam extends Locomotive {
 		cutoffTractiveEffort_N = cutoffTractiveEffort();
 		steamDemand_Hp = Math.abs(cutoffTractiveEffort_N * getCurrentSpeed().metric()) / 2684.52d; 
 			//2684.52 is combined conversion factor of km/h to m/s and Watts to hp
-		maxSteamFlow_Hp = (double)maxPower_Hp * getThrottle() * 1.5d * (currentPressure / (double)mawp);
 		speedPercent = Math.abs(getCurrentSpeed().metric() / (double)ratedTopSpeed_Km_H);
+		maxSteamFlow_Hp = ((double)maxPower_Hp * getThrottle() + speedPercent) * (currentPressure / (double)mawp);
 		
+		if (getWorld().isClient) {
+			return;
+		}
 
 		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
 				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
@@ -266,6 +288,9 @@ public class LocomotiveSteam extends Locomotive {
 			coupler = coupler.opposite();
 			stock = tender;
 		}
+		
+		//TODO add arcade boiler physics
+		//TODO rework realistic physics fuelRequired false implementation
 		
 		float boilerTemperature = getBoilerTemperature();
 		float boilerPressure = getBoilerPressure();
@@ -467,6 +492,7 @@ public class LocomotiveSteam extends Locomotive {
 		return pressureValve;
 	}
 
+	//TODO add arcade version of coal energy
 	private double coalEnergyKCalTick() {
 		// Coal density = 800 KG/m3 (engineering toolbox)
 		/*double coalEnergyDensity = 30000; // KJ/KG (engineering toolbox)
@@ -496,6 +522,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 	}
 
+	//TODO add keybind control
 	public boolean cylinderDrainsEnabled() {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
 		List<Control<?>> drains = getDefinition().getModel().getControls().stream().filter(x -> x.part.type == ModelComponentType.CYLINDER_DRAIN_CONTROL_X).collect(Collectors.toList());

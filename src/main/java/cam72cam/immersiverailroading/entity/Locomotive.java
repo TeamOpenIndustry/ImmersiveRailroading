@@ -69,6 +69,8 @@ public abstract class Locomotive extends FreightTank {
 	@TagSync
 	@TagField("cogging")
 	private boolean cogging = false;
+	
+	private boolean slipping = false;
 
 	/*
 	 * 
@@ -397,14 +399,8 @@ public abstract class Locomotive extends FreightTank {
 	public abstract double getAppliedTractiveEffort(Speed speed); 
 
 	/** Maximum force that can be between the wheels and the rails before it slips */
-	//TODO: redo
 	protected double getStaticTractiveEffort(Speed speed) {
-		/*return (Config.ConfigBalance.FuelRequired ? this.getWeight() : this.getMaxWeight()) // KG
-				* 9.8 // M/S/S
-				* STEEL.staticFriction(STEEL) * .4	//steel on steel static friction on a railway is typically .2-.35 not .7
-				* slipCoefficient(speed)
-				* getDefinition().factorOfAdhesion()
-				* Config.ConfigBalance.tractionMultiplier;*/
+		/**/
 		return getDefinition().getStartingTractionNewtons(gauge) 
 				* (getDefinition().factorOfAdhesion() / 4)
 				* slipCoefficient(speed)
@@ -413,25 +409,44 @@ public abstract class Locomotive extends FreightTank {
 	
 	private Logger log = LogManager.getLogger(ImmersiveRailroading.MODID);
 	
-	protected double simulateWheelSlip() {
+	//TODO account for resistance from brakes
+	//TODO add arcade physics version
+	protected double simulateWheelSlip(double slowSpeedPeakModifier) {
 		if (cogging) {
 			return 0;
 		}
 
-		log.info("applied tractive effort " + Math.abs(getAppliedTractiveEffort(getCurrentSpeed())));
-		log.info("static trctive effort " + getStaticTractiveEffort(getCurrentSpeed()));
-		double adhesionFactor = Math.abs(getAppliedTractiveEffort(getCurrentSpeed())) /
-								getStaticTractiveEffort(getCurrentSpeed());
+		double appliedTractiveEffort = getAppliedTractiveEffort(getCurrentSpeed()) * slowSpeedPeakModifier;
 		
-		log.info("adhesion factor " + adhesionFactor);
-		if (adhesionFactor > 1) {
-			log.info("slip by " + Math.copySign((adhesionFactor-1) * 5.0d, getReverser()));
-			return Math.copySign((adhesionFactor-1) * 5.0d, getReverser());
+		if (slipping) {
+			double slipFrictionCoefficientDelta = STEEL.kineticFriction(STEEL) / STEEL.staticFriction(STEEL);
+			double adhesionFactor = Math.abs(appliedTractiveEffort) / (getStaticTractiveEffort(getCurrentSpeed()) * slipFrictionCoefficientDelta);
+			
+			if (adhesionFactor > 1) {
+				return Math.copySign((adhesionFactor-1), getReverser());
+			} else {
+				slipping = false;
+				return 0;
+			}
+		} else {
+			//log.info("produced tractive effort " + getAppliedTractiveEffort(getCurrentSpeed()));
+			//log.info("static tractive effort " + getStaticTractiveEffort(getCurrentSpeed()));
+			double adhesionFactor = Math.abs(appliedTractiveEffort) / getStaticTractiveEffort(getCurrentSpeed());
+			//log.info("adhesion factor " + adhesionFactor);
+			if (adhesionFactor > 1) {
+				//log.info("slip by " + Math.copySign((adhesionFactor-1) * 5.0d, getReverser()));
+				slipping = true;
+				return Math.copySign((adhesionFactor-1), getReverser());
+			}
 		}
 		return 0;
 	}
 	
-	public double getTractiveEffortNewtons(Speed speed) {	
+	protected double simulateWheelSlip() {
+		return simulateWheelSlip(1);
+	}
+	
+	public double getTractiveEffortNewtons(Speed speed, double slowSpeedPeakModifier) {
 		if (!this.isBuilt()) {
 			return 0;
 		}
@@ -442,26 +457,25 @@ public abstract class Locomotive extends FreightTank {
 		}
 
 		double appliedTractiveEffort = getAppliedTractiveEffort(speed);
-
-		if (!cogging && Math.abs(appliedTractiveEffort) > 0) {
-			double staticTractiveEffort = getStaticTractiveEffort(speed);
-
-			if (Math.abs(appliedTractiveEffort) > staticTractiveEffort) {
-				// This is a guess, but seems to be fairly accurate
-
-				// Reduce tractive effort to max static translated into kinetic
-				double tractiveEffortNewtons = staticTractiveEffort /
-						STEEL.staticFriction(STEEL) *
-						STEEL.kineticFriction(STEEL);
-
-				// How badly tractive effort is overwhelming static effort
-				tractiveEffortNewtons *= staticTractiveEffort / tractiveEffortNewtons;
-
-				return Math.copySign(tractiveEffortNewtons, appliedTractiveEffort);
+		double staticTractiveEffort = getStaticTractiveEffort(speed);
+		double slipFrictionCoefficientDelta = STEEL.kineticFriction(STEEL) / STEEL.staticFriction(STEEL);
+		
+		if (slipping) {
+			if(appliedTractiveEffort * slowSpeedPeakModifier < (staticTractiveEffort * slipFrictionCoefficientDelta)) {
+				slipping = false;
+				return appliedTractiveEffort;
 			}
+			return appliedTractiveEffort * slipFrictionCoefficientDelta;
+		} else if (!cogging && Math.abs(appliedTractiveEffort) * slowSpeedPeakModifier > staticTractiveEffort) {
+			slipping = true;
+			return appliedTractiveEffort * slipFrictionCoefficientDelta;
 		}
-
+		log.info("applied tractive effort " + appliedTractiveEffort);
 		return appliedTractiveEffort;
+	}
+	
+	public double getTractiveEffortNewtons(Speed speed) {
+		return getTractiveEffortNewtons(speed, 1);
 	}
 
 	@Override
