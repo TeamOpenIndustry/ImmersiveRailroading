@@ -340,7 +340,7 @@ public class Consist {
             double epsilon = 0.000001;
             this.currentDistance_M = nextParticle.position_M - prevParticle.position_M;
             this.canPush = currentDistance_M - minDistance_M <= epsilon || minDistance_M == maxDistance_M;
-            this.canPull = coupled && currentDistance_M - maxDistance_M >= -epsilon || minDistance_M == maxDistance_M;
+            this.canPull = coupled && (currentDistance_M - maxDistance_M >= -epsilon || minDistance_M == maxDistance_M);
             if (debug) {
                 //ImmersiveRailroading.info("min:%s curr:%s max:%s pull:%s push: %s", minDistance_M, currentDistance_M, maxDistance_M, canPull, canPush);
             }
