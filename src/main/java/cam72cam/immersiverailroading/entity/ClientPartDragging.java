@@ -42,7 +42,7 @@ public class ClientPartDragging {
                 new DragPacket(interactingStock, interactingControl, true, 0, false).sendToServer();
             }
             if (targetInteractable instanceof Seat) {
-                new SeatPacket((EntityRidableRollingStock) interactingStock, (Seat<?>)targetInteractable).sendToServer();
+                new SeatPacket((EntityRidableRollingStock) targetStock, (Seat<?>)targetInteractable).sendToServer();
             }
             return false;
         }
