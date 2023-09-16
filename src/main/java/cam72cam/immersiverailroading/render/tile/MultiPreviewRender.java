@@ -12,7 +12,6 @@ import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
-import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class MultiPreviewRender {
@@ -30,7 +29,6 @@ public class MultiPreviewRender {
                 Vec3d placementPosition = info.placementInfo.placementPosition.add(builder.pos);
 
                 if (GlobalRender.getCameraPos(partialTicks).distanceTo(placementPosition) < GlobalRender.getRenderDistance() + 50) {
-                    placementPosition = placementPosition.subtract(GlobalRender.getCameraPos(partialTicks));
                     RenderState placementState = state.clone().translate(placementPosition);
                     RailRenderUtil.render(info, preview.getWorld(), builder.pos, true, placementState);
                 }
