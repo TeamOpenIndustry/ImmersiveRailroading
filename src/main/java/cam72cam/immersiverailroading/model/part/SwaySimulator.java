@@ -30,8 +30,8 @@ public class SwaySimulator {
 
         Effect(EntityMoveableRollingStock stock) {
             this.stock = stock;
-            clackFront = stock.createSound(stock.getDefinition().clackFront, false, 30, ConfigSound.SoundCategories.RollingStock::clack);
-            clackRear = stock.createSound(stock.getDefinition().clackRear, false, 30, ConfigSound.SoundCategories.RollingStock::clack);
+            clackFront = stock.getWorld().isServer ? null : stock.createSound(stock.getDefinition().clackFront, false, 30, ConfigSound.SoundCategories.RollingStock::clack);
+            clackRear = stock.getWorld().isServer ? null : stock.createSound(stock.getDefinition().clackRear, false, 30, ConfigSound.SoundCategories.RollingStock::clack);
             swayImpulse = 0;
             swayMagnitude = 0;
         }
@@ -53,7 +53,7 @@ public class SwaySimulator {
                 TileRailBase rb = stock.getWorld().getBlockEntity(posFront, TileRailBase.class);
                 rb = rb != null ? rb.getParentTile() : null;
                 if (rb != null && !rb.getPos().equals(clackFrontPos) && rb.clacks()) {
-                    if (volume > 0) {
+                    if (volume > 0 && clackFront != null) {
                         if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
                             clackFront.setPitch(pitch);
                             clackFront.setVolume(volume);
@@ -72,7 +72,7 @@ public class SwaySimulator {
                 TileRailBase rb = stock.getWorld().getBlockEntity(posRear, TileRailBase.class);
                 rb = rb != null ? rb.getParentTile() : null;
                 if (rb != null && !rb.getPos().equals(clackRearPos) && rb.clacks()) {
-                    if (volume > 0) {
+                    if (volume > 0 && clackRear != null) {
                         if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
                             clackRear.setPitch(pitch);
                             clackRear.setVolume(volume);
