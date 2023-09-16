@@ -174,7 +174,7 @@ public class LocomotiveSteam extends Locomotive {
 			}else {
 				workingTractiveEffort = cutoffTractiveEffort_N * (maxSteamFlow_Hp / adjustedSteamDemand_Hp);
 			}
-			//if using backpressure braking(ie reverser opposing direction of motion) ignore workingTractiveEffort and go off backpressure only
+			//if using backpressure braking(ie reverser opposing direction of motion) ignore backpressure to avoid weird behavior
 			if (Math.copySign(getCurrentSpeed().metric(), reverserDirection) != getCurrentSpeed().metric()) {
 				backPressureScalar = 0;
 			}
@@ -289,7 +289,6 @@ public class LocomotiveSteam extends Locomotive {
 			stock = tender;
 		}
 		
-		//TODO add arcade boiler physics
 		//TODO rework realistic physics fuelRequired false implementation
 		
 		float boilerTemperature = getBoilerTemperature();
@@ -352,6 +351,8 @@ public class LocomotiveSteam extends Locomotive {
 			boilerTemperature += energyKCalDeltaTick / (waterLevelMB + 1);
 		}
 		
+		//TODO Ideal Gas Law the boiler for improved physics
+		
 		if (boilerTemperature > 100) {
 			// Assume linear relationship between temperature and pressure
 			float heatTransfer = boilerTemperature - 100;
@@ -378,32 +379,42 @@ public class LocomotiveSteam extends Locomotive {
 			pressureValve = false;
 		}
 		
-		double throttle;
-		if(steamDemand_Hp < maxSteamFlow_Hp) {
-			//steam use is steam demand
-			throttle = (steamDemand_Hp / 20) * 0.17811d /*fudge*/ * ConfigBalance.locoHeatTimeScale;	//Hp is per second, adjust to per tick
-		}else {
-			//steam use is max flow
-			throttle = (maxSteamFlow_Hp / 20) * 0.17811d /*fudge*/ * ConfigBalance.locoHeatTimeScale;
-		}
-		if (throttle != 0 && boilerPressure > 0) {
-			/*double burnableSlots = this.cargoItems.getSlotCount()-2;
-			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
-			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
-			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss*/
+		if(ImmersionConfig.arcadePhysics) {
+			float throttle = getThrottle() * Math.abs(getReverser());
+			if (throttle != 0 && boilerPressure > 0) {
+				double burnableSlots = this.cargoItems.getSlotCount()-2;
+				double maxKCalTick = burnableSlots * coalEnergyKCalTick();
+				double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
+				maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss
+				
+				float delta = (float) (throttle * maxPressureTick);
+				
+				boilerPressure = Math.max(0, boilerPressure - delta);
+				waterUsed += delta;
+			}
+		} else {
+			double throttle;
+			if(steamDemand_Hp < maxSteamFlow_Hp) {
+				//steam use is steam demand
+				throttle = (steamDemand_Hp / 20) * 0.17811d /*fudge*/ * ConfigBalance.locoHeatTimeScale;	//Hp is per second, adjust to per tick
+			}else {
+				//steam use is max flow
+				throttle = (maxSteamFlow_Hp / 20) * 0.17811d /*fudge*/ * ConfigBalance.locoHeatTimeScale;
+			}
+			if (throttle != 0 && boilerPressure > 0) {
+				float delta = (float) (throttle  / this.getTankCapacity().MilliBuckets());
+				
+				boilerPressure = Math.max(0, boilerPressure - delta);
+				waterUsed += delta * 10/*fudge*/;
+			}
 			
-			float delta = (float) (throttle  / this.getTankCapacity().MilliBuckets());
-			
-			boilerPressure = Math.max(0, boilerPressure - delta);
-			waterUsed += delta * 10/*fudge*/;
-		}
-		
-		if (waterUsed != 0) {
-			waterUsed *= Config.ConfigBalance.locoWaterUsage;
-			waterUsed += drainRemainder;
-			if (waterUsed > 0 && theTank.getContents() != null) {
-				theTank.drain(new FluidStack(theTank.getContents().getFluid(), (int) Math.floor(waterUsed)), false);
-				drainRemainder = waterUsed % 1;
+			if (waterUsed != 0) {
+				waterUsed *= Config.ConfigBalance.locoWaterUsage;
+				waterUsed += drainRemainder;
+				if (waterUsed > 0 && theTank.getContents() != null) {
+					theTank.drain(new FluidStack(theTank.getContents().getFluid(), (int) Math.floor(waterUsed)), false);
+					drainRemainder = waterUsed % 1;
+				}
 			}
 		}
 		
@@ -492,18 +503,20 @@ public class LocomotiveSteam extends Locomotive {
 		return pressureValve;
 	}
 
-	//TODO add arcade version of coal energy
 	private double coalEnergyKCalTick() {
-		// Coal density = 800 KG/m3 (engineering toolbox)
-		/*double coalEnergyDensity = 30000; // KJ/KG (engineering toolbox)
-		double coalEnergyKJ = coalEnergyDensity / 9; // Assume each slot is burning 1/9th of a coal block
-		double coalEnergyBTU = coalEnergyKJ * 0.958; // 1 KJ = 0.958 BTU
-		double coalEnergyKCal = coalEnergyBTU / (3.968 * 1000); // 3.968 BTU = 1 KCal
-		double coalBurnTicks = 1600; // This is a bit of fudge
-		return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;*/
-		//redefine based on max horsepower rating to limit max steam production and approximate thermal efficiency
-		double draguht = Math.max(.1, Math.min(1, Math.abs(getReverser() * 1.5) + (speedPercent * 1.5)) * Math.min(1, getThrottle() * 3) * Math.min(1, speedPercent * 2));
-		return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * draguht * ConfigBalance.locoHeatTimeScale;
+		if(ImmersionConfig.arcadePhysics) {
+			double coalDensity = 800; //KG/m3 (engineering toolbox)
+			double coalEnergyDensity = 30000; // KJ/KG (engineering toolbox)
+			double coalEnergySlot = (coalEnergyDensity * coalDensity) / 9; // Assume each slot is burning 1/9th of a coal block
+			double coalEnergyBTU = coalEnergySlot * 0.958; // 1 KJ = 0.958 BTU
+			double coalEnergyKCal = coalEnergyBTU / (3.968 * 1000); // 3.968 BTU = 1 KCal
+			double coalBurnTicks = 1600; // This is a bit of fudge
+			return coalEnergyKCal / coalBurnTicks * ConfigBalance.locoHeatTimeScale;
+		} else {
+			//redefine based on max horsepower rating to limit max steam production and approximate thermal efficiency
+			double draguht = Math.max(.1, Math.min(1, Math.max( Math.abs(getReverser() * 1.5) + (speedPercent * 8), 1) * Math.min(1, getThrottle() * 3) * Math.min(1, speedPercent * 2)));
+			return ((maxPower_Hp / (getInventorySize() - 2)) / 20) * 0.17811d * draguht * ConfigBalance.locoHeatTimeScale;
+		}
 	}
 
 	private static class SlotTagMapper implements TagMapper<Map<Integer, Integer>> {

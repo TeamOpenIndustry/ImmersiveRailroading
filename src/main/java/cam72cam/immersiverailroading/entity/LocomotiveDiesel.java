@@ -215,9 +215,8 @@ public class LocomotiveDiesel extends Locomotive {
 	protected double getStaticTractiveEffort(Speed speed) {
 		return (Config.ConfigBalance.FuelRequired ? this.getWeight() : this.getMaxWeight()) // KG
 				* 9.8 // M/S/S
-				* 0.25d//steel on steel static friction on a railway is typically .2-.35, most railroads chose .25 for their approximation
+				* (0.25d / (1 / getDefinition().factorOfAdhesion()))//steel on steel static friction on a railway is typically .2-.35, most railroads chose .25 for their approximation
 				* slipCoefficient(speed)
-				* getDefinition().factorOfAdhesion()
 				* Config.ConfigBalance.tractionMultiplier;
 	}
 	
