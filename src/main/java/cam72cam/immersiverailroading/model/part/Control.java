@@ -20,6 +20,7 @@ import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.ISound;
+import cam72cam.mod.text.TextColor;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -217,39 +218,13 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             return;
         }
 
-        Player player = MinecraftClient.getPlayer();
-
-        boolean overrideRange = stock.getControlPressed(this);
-        if (!overrideRange) {
-            if (transform(center, stock).distanceTo(player.getPositionEyes().add(stock.getVelocity())) > 4) {
-                return;
-            }
-
-            IBoundingBox bb = IBoundingBox.from(
-                    transform(part.min, stock),
-                    transform(part.max, stock)
-            ).grow(new Vec3d(0.05, 0.05, 0.05));
-            // The added velocity is due to a bug where the player may tick before or after the stock.
-            // Ideally we'd be able to fix this in UMC and have all UMC entities tick after the main entities
-            // or at least expose a "tick order" function as crappy as that would be...
-
-            boolean inRange = false;
-            Vec3d delta = bb.max().subtract(bb.min());
-            double step = Math.max(0.01, Math.min(delta.x, Math.min(delta.y, delta.z)) / 2);
-            for (double i = 0; i < 2; i += step) {
-                inRange = inRange || bb.contains(player.getPositionEyes().add(player.getLookVector().scale(i)).add(stock.getVelocity()));
-            }
-            if (!inRange) {
-                return;
-            }
+        boolean isPressed = stock.getControlPressed(this);
+        if (!isPressed && lookedAt != stock.getWorld().getTicks()) {
+            return;
         }
 
-        Matrix4 m = new Matrix4().scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
-        Matrix4 gm = this.state.getGroupMatrix(stock, modelId);
-        if (gm != null) {
-            m = m.multiply(gm);
-        }
-        Vec3d pos = m.apply(center);
+        Matrix4 m = this.state.getGroupMatrix(stock, modelId);
+        Vec3d pos = m == null ? center : m.apply(center);
         String labelstate = "";
         float percent = getValue(stock) - offset;
         switch (part.type) {
@@ -286,7 +261,11 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                     labelstate = String.format(" (%d%%)", (int)(percent * 100));
                 }
         }
-        GlobalRender.drawText((label != null ? label : formatLabel(part.type)) + labelstate, state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
+        String str = (label != null ? label : formatLabel(part.type)) + labelstate;
+        if (isPressed) {
+            str = TextColor.BOLD.wrap(str);
+        }
+        GlobalRender.drawText(str, state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
     public float getValue(EntityMoveableRollingStock stock) {

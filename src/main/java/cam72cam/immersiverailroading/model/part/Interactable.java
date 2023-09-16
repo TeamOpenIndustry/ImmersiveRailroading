@@ -8,6 +8,7 @@ import cam72cam.mod.math.Vec3d;
 
 public class Interactable<T extends EntityMoveableRollingStock> {
     public final ModelComponent part;
+    public long lookedAt;
 
     public Interactable(ModelComponent part) {
         this.part = part;

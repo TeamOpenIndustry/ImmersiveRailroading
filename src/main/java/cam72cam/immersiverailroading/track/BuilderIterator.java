@@ -166,7 +166,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
 
 		double scale = info.settings.gauge.scale();
-		List<PosStep> points = getPath(scale);
+		List<PosStep> points = getPath(scale * info.getTrackModel().spacing);
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
 		int switchSize = 0;

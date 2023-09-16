@@ -1,9 +1,11 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.mod.resource.Identifier;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,18 +25,18 @@ public class CarFreightDefinition extends FreightDefinition {
     }
 
     @Override
+    protected Identifier defaultDataLocation() {
+        return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/freight.caml");
+    }
+
+    @Override
     public void loadData(DataBlock data) throws Exception {
         super.loadData(data);
         DataBlock freight = data.getBlock("freight");
-        if (freight != null) {
-            this.numSlots = (int) Math.ceil(freight.getValue("slots").asInteger() * internal_inv_scale);
-            this.width = (int) Math.ceil(freight.getValue("width").asInteger() * internal_inv_scale);
-            this.validCargo = freight.getValues("cargo").stream().map(DataBlock.Value::asString).collect(Collectors.toList());
-        } else {
-            this.numSlots = 0;
-            this.width = 0;
-            this.validCargo = null;
-        }
+        this.numSlots = (int) Math.ceil(freight.getValue("slots").asInteger() * internal_inv_scale);
+        this.width = (int) Math.ceil(freight.getValue("width").asInteger() * internal_inv_scale);
+        List<DataBlock.Value> cargo = freight.getValues("cargo");
+        this.validCargo = cargo == null ? null : cargo.stream().map(DataBlock.Value::asString).collect(Collectors.toList());
     }
 
     @Override
