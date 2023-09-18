@@ -87,4 +87,8 @@ public class Permissions {
             "Machine interactions",
             ConfigPermissions.Defaults.MACHINIST
     );
+
+    public static void register() {
+        // loads static classes and ctrs
+    }
 }
