@@ -102,11 +102,11 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ConfigFile.sync(ConfigSound.class);
 				ConfigFile.sync(ConfigPermissions.class);
 
-				Permissions.register();
-
 				DefinitionManager.initDefinitions();
 				break;
 			case FINALIZE:
+				Permissions.register();
+
 				MultiblockRegistry.register(SteamHammerMultiblock.NAME, new SteamHammerMultiblock());
 				MultiblockRegistry.register(PlateRollerMultiblock.NAME, new PlateRollerMultiblock());
 				MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
