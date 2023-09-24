@@ -188,7 +188,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			if (switchStraight ) {
 				double switchOffset = 1 - (i / (double)switchSize);
 				if (switchOffset > 0) {
-					double dist = 0.2 * switchOffset * scale;
+					double dist = 0.2 * switchOffset * scale * info.getTrackModel().spacing;
 					Vec3d offset = VecUtil.fromYaw(dist, cur.yaw + 90 + info.placementInfo.direction.toYaw());
 					double offsetAngle = Math.toDegrees(0.2/switchSize); // This line took a whole page of scribbled math
 					if (direction == TrackDirection.RIGHT)  {
