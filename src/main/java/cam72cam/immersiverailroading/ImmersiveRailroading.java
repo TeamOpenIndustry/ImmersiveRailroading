@@ -91,7 +91,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				IRBlocks.register();
 				IRItems.register();
 				GuiTypes.register();
-				Permissions.register();
 
 				Command.register(new IRCommand());
 
@@ -102,6 +101,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ConfigFile.sync(ConfigGraphics.class);
 				ConfigFile.sync(ConfigSound.class);
 				ConfigFile.sync(ConfigPermissions.class);
+
+				Permissions.register();
 
 				DefinitionManager.initDefinitions();
 				break;
