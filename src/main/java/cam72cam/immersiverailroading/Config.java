@@ -272,6 +272,10 @@ public class Config {
 		@Comment("Warn if a physics tick takes more than the given time in ms")
 		@Range(min = 1, max = 100)
 		public static long physicsWarnThresholdMs = 20;
+
+		@Comment("Warn if a physics total iteration takes more than the given time in ms")
+		@Range(min = 1, max = 100)
+		public static long physicsWarnTotalThresholdMs = 40;
     }
 
 	public static boolean isFuelRequired(Gauge gauge) {

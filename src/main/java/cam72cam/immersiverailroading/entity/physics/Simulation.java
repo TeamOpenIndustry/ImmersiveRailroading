@@ -44,6 +44,7 @@ public class Simulation {
             return;
         }
 
+        long startMs = System.currentTimeMillis();
 
         int pass = (int) ChronoState.getState(world).getTickID();
 
@@ -95,8 +96,10 @@ public class Simulation {
 
         double maxCouplerDist = 4;
 
+        long startStatesMs = System.currentTimeMillis();
+
         for (int i = 0; i < stateMaps.size(); i++) {
-            long startMs = System.currentTimeMillis();
+            long startIterationMs = System.currentTimeMillis();
 
             Map<UUID, SimulationState> stateMap = stateMaps.get(i);
 
@@ -189,6 +192,7 @@ public class Simulation {
 
             // check for potential couplings and collisions
             for (int sai = 0; sai < states.size()-1; sai++) {
+
                 SimulationState stateA = states.get(sai);
                 if (stateA.interactingFront != null && stateA.interactingRear != null) {
                     // There's stock in front and behind, can't really hit any other stock here
@@ -290,10 +294,14 @@ public class Simulation {
                 stateMaps.get(i+1).putAll(Consist.iterate(stateMap, blocksAlreadyBroken));
             }
 
-            long totalMs = System.currentTimeMillis() - startMs;
-            if (totalMs > Config.ConfigDebug.physicsWarnThresholdMs) {
-                ImmersiveRailroading.warn("Calculating Immersive Railroading Physics took %sms (dirty: %s)", totalMs, anyStartedDirty);
+            long iterationMs = System.currentTimeMillis() - startIterationMs;
+            if (iterationMs > Config.ConfigDebug.physicsWarnThresholdMs) {
+                ImmersiveRailroading.warn("Calculating Immersive Railroading Physics Iteration took %sms (dirty: %s)", iterationMs, anyStartedDirty);
             }
+        }
+        long totalMs = System.currentTimeMillis() - startMs;
+        if (totalMs > Config.ConfigDebug.physicsWarnTotalThresholdMs) {
+            ImmersiveRailroading.warn("Calculating Immersive Railroading Physics took %sms : %sms (dirty: %s)", totalMs, System.currentTimeMillis() - startStatesMs, anyStartedDirty);
         }
 
         boolean sendPackets = world.getTicks() % 20 == 0 || anyStartedDirty;
