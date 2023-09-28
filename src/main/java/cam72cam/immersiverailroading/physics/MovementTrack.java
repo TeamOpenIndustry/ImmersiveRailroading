@@ -140,33 +140,45 @@ public class MovementTrack {
 			 * and the current pos and move distance along that.  How would that work for slopes at the ends? just fine?
 			 */
 			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25);
-			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.getPos());
-			Vec3d relative = currentPosition.subtract(center);
-			PosStep close = positions.get(0);
-			for (PosStep pos : positions) {
-				if (close.distanceToSquared(relative) > pos.distanceToSquared(relative)) {
-					close = pos;
+			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.getPos()).add(0, heightOffset, 0);
+			Vec3d target = currentPosition.add(delta);
+			Vec3d relative = target.subtract(center);
+
+			/* Simple ordered binary search
+			l    c      r
+			l    c  r
+			    lc  r
+			    lcr
+			    lr
+			 */
+			int left = 0;
+			double leftDistance = positions.get(left).distanceToSquared(relative);
+			int right = positions.size() - 1;
+			double rightDistance = positions.get(right).distanceToSquared(relative);
+			while (right - left > 1) {
+				int midIdx = left + (right - left) / 2;
+
+				if (leftDistance > rightDistance) {
+					left = midIdx;//(int) Math.floor(midIdx);
+					leftDistance = positions.get(left).distanceToSquared(relative);
+				} else {
+					right = midIdx;//(int) Math.ceil(midIdx);
+					rightDistance = positions.get(right).distanceToSquared(relative);
 				}
 			}
-			
-			Vec3d estimatedPosition = currentPosition.add(delta);
-			
-			Vec3d closePos = center.add(close).add(0, heightOffset, 0);
-			double distToClose = closePos.distanceTo(estimatedPosition);
 
-			Vec3d curveDelta = new Vec3d(distToClose, 0, 0);
-			curveDelta = VecUtil.rotatePitch(curveDelta, -close.pitch);
-			curveDelta = VecUtil.rotateYaw(curveDelta, close.yaw);
-
-			Vec3d forward = closePos.add(curveDelta);
-			Vec3d backward = closePos.subtract(curveDelta);
-
-
-
-			if (forward.distanceToSquared(estimatedPosition) < backward.distanceToSquared(estimatedPosition)) {
-				return forward;
+			PosStep leftPos = positions.get(left);
+			PosStep rightPos = positions.get(right);
+			Vec3d between = rightPos.subtract(leftPos);
+			Vec3d offset = between.scale(Math.sqrt(leftDistance) / between.length());
+			// Weird edge case where we need to move in the opposite direction since we are given a position past the end of pathing
+			Vec3d point = center.add(leftPos);
+			Vec3d result = point.add(offset);
+			Vec3d resultOpposite = point.subtract(offset);
+			if (result.distanceToSquared(target) < resultOpposite.distanceToSquared(target)) {
+				return result;
 			} else {
-				return backward;
+				return resultOpposite;
 			}
 		}
 		return currentPosition.add(delta);
