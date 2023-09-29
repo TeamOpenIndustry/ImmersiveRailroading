@@ -96,7 +96,7 @@ public class CargoItems {
                     if (comp.key.contains("IRSIZE")) {
                         if (stack.is(IRItems.ITEM_ROLLING_STOCK)) {
                             ItemRollingStock.Data data = new ItemRollingStock.Data(stack);
-                            Vec3d pos = new Vec3d(comp.center.x, comp.min.y, comp.center.z).scale(stock.gauge.scale());
+                            Vec3d pos = new Vec3d(comp.center.x, comp.min.y, comp.center.z);//.scale(stock.gauge.scale());
                             model.addCustom((s, pt) -> {
                                 s.translate(pos);
                                 s.scale(data.gauge.scale(), data.gauge.scale(), data.gauge.scale());
@@ -109,7 +109,7 @@ public class CargoItems {
                         }
                         if (stack.is(IRItems.ITEM_ROLLING_STOCK_COMPONENT)) {
                             ItemRollingStockComponent.Data data = new ItemRollingStockComponent.Data(stack);
-                            Vec3d pos = new Vec3d(comp.center.x, comp.min.y, comp.center.z).scale(stock.gauge.scale());
+                            Vec3d pos = new Vec3d(comp.center.x, comp.min.y, comp.center.z);//.scale(stock.gauge.scale());
                             List<String> groups = new ArrayList<>();
 
                             for (ModelComponentType r : data.componentType.render) {
@@ -145,7 +145,7 @@ public class CargoItems {
                     }
 
                     Matrix4 matrix = new Matrix4()
-                            .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())
+                            //.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())
                             .translate(comp.min.x, comp.min.y, comp.min.z)
                             .scale(scaleX, scaleY, scaleZ)
                             .translate(0.5, 0.5, 0.5)
