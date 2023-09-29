@@ -12,8 +12,8 @@ import cam72cam.mod.resource.Identifier;
 import java.util.List;
 
 public class TenderDefinition extends CarTankDefinition {
-    private int numSlots;
-    private int width;
+    private double numSlots;
+    private double width;
     private boolean showCurrentLoadOnly;
 
     public TenderDefinition(String defID, DataBlock data) throws Exception {
@@ -30,8 +30,8 @@ public class TenderDefinition extends CarTankDefinition {
         super.loadData(data);
 
         DataBlock tender = data.getBlock("tender");
-        this.numSlots = (int) Math.ceil(tender.getValue("slots").asInteger() * internal_inv_scale);
-        this.width = (int) Math.ceil(tender.getValue("width").asInteger() * internal_inv_scale);
+        this.numSlots = tender.getValue("slots").asInteger() * internal_inv_scale;
+        this.width = tender.getValue("width").asInteger() * internal_inv_scale;
         this.showCurrentLoadOnly = tender.getValue("show_current_load_only").asBoolean(false);
     }
 

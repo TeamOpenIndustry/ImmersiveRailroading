@@ -17,7 +17,7 @@ import java.util.List;
 public class CarTankDefinition extends FreightDefinition {
 
     private List<Fluid> fluidFilter; // null == no filter
-    private FluidQuantity capacity;
+    private double capacity_l;
 
     public CarTankDefinition(String defID, DataBlock data) throws Exception {
         this(CarTank.class, defID, data);
@@ -36,7 +36,7 @@ public class CarTankDefinition extends FreightDefinition {
     public void loadData(DataBlock data) throws Exception {
         super.loadData(data);
         DataBlock tank = data.getBlock("tank");
-        capacity = FluidQuantity.FromLiters((int) Math.ceil(tank.getValue("capacity_l").asInteger() * internal_inv_scale));
+        capacity_l = tank.getValue("capacity_l").asInteger() * internal_inv_scale;
         List<DataBlock.Value> whitelist = tank.getValues("whitelist");
         if (whitelist != null) {
             fluidFilter = new ArrayList<>();
@@ -59,7 +59,7 @@ public class CarTankDefinition extends FreightDefinition {
     }
 
     public FluidQuantity getTankCapaity(Gauge gauge) {
-        return this.capacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1)).roundBuckets();
+        return FluidQuantity.FromLiters((int) Math.ceil(capacity_l * gauge.scale())).min(FluidQuantity.FromBuckets(1)).roundBuckets();
     }
 
     public List<Fluid> getFluidFilter() {

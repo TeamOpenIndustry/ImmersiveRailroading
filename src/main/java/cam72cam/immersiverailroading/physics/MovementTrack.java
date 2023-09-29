@@ -156,13 +156,13 @@ public class MovementTrack {
 			int right = positions.size() - 1;
 			double rightDistance = positions.get(right).distanceToSquared(relative);
 			while (right - left > 1) {
-				int midIdx = left + (right - left) / 2;
+				double midIdx = left + (right - left) / 2f;
 
 				if (leftDistance > rightDistance) {
-					left = midIdx;//(int) Math.floor(midIdx);
+					left = (int) Math.floor(midIdx);
 					leftDistance = positions.get(left).distanceToSquared(relative);
 				} else {
-					right = midIdx;//(int) Math.ceil(midIdx);
+					right = (int) Math.ceil(midIdx);
 					rightDistance = positions.get(right).distanceToSquared(relative);
 				}
 			}

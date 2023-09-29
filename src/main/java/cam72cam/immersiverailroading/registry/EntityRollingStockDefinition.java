@@ -81,7 +81,7 @@ public abstract class EntityRollingStockDefinition {
     private double widthBounds;
     private double passengerCompartmentLength;
     private double passengerCompartmentWidth;
-    private int weight;
+    private double weight;
     private int maxPassengers;
     private float interiorLightLevel;
     private boolean hasIndependentBrake;
@@ -458,7 +458,7 @@ public abstract class EntityRollingStockDefinition {
         couplerSlackRear = couplers.getValue("rear_slack").asFloat() * (float) internal_model_scale;
 
         DataBlock properties = data.getBlock("properties");
-        weight = (int) Math.ceil(properties.getValue("weight_kg").asInteger() * internal_inv_scale);
+        weight = properties.getValue("weight_kg").asInteger() * internal_inv_scale;
         valveGear = ValveGearConfig.get(properties, "valve_gear");
         hasIndependentBrake = properties.getValue("independent_brake").asBoolean();
         hasPressureBrake = properties.getValue("pressure_brake").asBoolean();

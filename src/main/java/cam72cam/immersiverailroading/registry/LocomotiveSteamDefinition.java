@@ -20,10 +20,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     public Identifier chuff;
     public Identifier pressure;
     public Identifier cylinder_drain;
-    private FluidQuantity tankCapacity;
-    private int maxPSI;
-    private int numSlots;
-    private int width;
+    private double tankCapacity_l;
+    private double maxPSI;
+    private double numSlots;
+    private double width;
     public boolean tender_auto_feed;
     public boolean cab_forward;
 
@@ -41,7 +41,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         super.loadData(data);
         DataBlock properties = data.getBlock("properties");
         if (isCabCar()) {
-            tankCapacity = FluidQuantity.ZERO;
+            tankCapacity_l = 0;
             maxPSI = 0;
             numSlots = 0;
             width = 0;
@@ -49,10 +49,10 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
         } else {
             DataBlock firebox = data.getBlock("firebox");
 
-            tankCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.getValue("water_capacity_l").asInteger() * internal_inv_scale));
-            maxPSI = (int) Math.ceil(properties.getValue("max_psi").asInteger() * internal_inv_scale);
-            numSlots = (int) Math.ceil(firebox.getValue("slots").asInteger() * internal_inv_scale);
-            width = (int) Math.ceil(firebox.getValue("width").asInteger() * internal_inv_scale);
+            tankCapacity_l = properties.getValue("water_capacity_l").asInteger() * internal_inv_scale;
+            maxPSI = Math.ceil(properties.getValue("max_psi").asInteger() * internal_inv_scale);
+            numSlots = Math.ceil(firebox.getValue("slots").asInteger() * internal_inv_scale);
+            width = Math.ceil(firebox.getValue("width").asInteger() * internal_inv_scale);
             tender_auto_feed = properties.getValue("tender_auto_feed").asBoolean(true);
         }
         cab_forward = properties.getValue("cab_forward").asBoolean(false);
@@ -92,7 +92,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     }
 
     public FluidQuantity getTankCapacity(Gauge gauge) {
-        return this.tankCapacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1)).roundBuckets();
+        return FluidQuantity.FromLiters((int) Math.ceil(this.tankCapacity_l * gauge.scale())).min(FluidQuantity.FromBuckets(1)).roundBuckets();
     }
 
     public int getMaxPSI(Gauge gauge) {

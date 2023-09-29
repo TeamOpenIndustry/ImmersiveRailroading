@@ -17,7 +17,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     public SoundDefinition idle;
     public SoundDefinition running;
     public SoundDefinition horn;
-    private FluidQuantity fuelCapacity;
+    private double fuelCapacity_l;
     private int fuelEfficiency;
     private boolean hornSus;
     private int notches;
@@ -38,10 +38,10 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
         DataBlock properties = data.getBlock("properties");
         if (!isCabCar()) {
-            fuelCapacity = FluidQuantity.FromLiters((int) Math.ceil(properties.getValue("fuel_capacity_l").asInteger() * internal_inv_scale * 10));
+            fuelCapacity_l = properties.getValue("fuel_capacity_l").asInteger() * internal_inv_scale * 10;
             fuelEfficiency = properties.getValue("fuel_efficiency_%").asInteger();
         } else {
-            fuelCapacity = FluidQuantity.ZERO;
+            fuelCapacity_l = 0;
         }
         notches = properties.getValue("throttle_notches").asInteger();
 
@@ -78,7 +78,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
     public FluidQuantity getFuelCapacity(Gauge gauge) {
-        return this.fuelCapacity.scale(gauge.scale()).min(FluidQuantity.FromBuckets(1)).roundBuckets();
+        return FluidQuantity.FromLiters((int) Math.ceil(this.fuelCapacity_l * gauge.scale())).min(FluidQuantity.FromBuckets(1)).roundBuckets();
     }
 
     public int getFuelEfficiency() {
