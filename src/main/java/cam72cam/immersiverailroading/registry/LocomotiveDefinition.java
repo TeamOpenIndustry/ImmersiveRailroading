@@ -16,8 +16,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     public boolean toggleBell;
     public SoundDefinition bell;
     private String works;
-    private int power;
-    private int traction;
+    private double power;
+    private double traction;
     private Speed maxSpeed;
     private boolean hasRadioEquipment;
     public boolean muliUnitCapable;
@@ -53,8 +53,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
             muliUnitCapable = true;
             factorOfAdhesion = 0;
         } else {
-            power = (int) Math.ceil(properties.getValue("horsepower").asInteger() * internal_inv_scale);
-            traction = (int) Math.ceil(properties.getValue("tractive_effort_lbf").asInteger() * internal_inv_scale);
+            power = properties.getValue("horsepower").asInteger() * internal_inv_scale;
+            traction = properties.getValue("tractive_effort_lbf").asInteger() * internal_inv_scale;
             factorOfAdhesion = properties.getValue("factor_of_adhesion").asDouble(4);
             maxSpeed = Speed.fromMetric(properties.getValue("max_speed_kmh").asDouble() * internal_inv_scale);
             muliUnitCapable = properties.getValue("multi_unit_capable").asBoolean();

@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class CarFreightDefinition extends FreightDefinition {
 
-    private int numSlots;
-    private int width;
+    private double numSlots;
+    private double width;
     private List<String> validCargo;
 
     public CarFreightDefinition(Class<? extends CarFreight> cls, String defID, DataBlock data) throws Exception {
@@ -33,8 +33,8 @@ public class CarFreightDefinition extends FreightDefinition {
     public void loadData(DataBlock data) throws Exception {
         super.loadData(data);
         DataBlock freight = data.getBlock("freight");
-        this.numSlots = (int) Math.ceil(freight.getValue("slots").asInteger() * internal_inv_scale);
-        this.width = (int) Math.ceil(freight.getValue("width").asInteger() * internal_inv_scale);
+        this.numSlots = freight.getValue("slots").asInteger() * internal_inv_scale;
+        this.width = freight.getValue("width").asInteger() * internal_inv_scale;
         List<DataBlock.Value> cargo = freight.getValues("cargo");
         this.validCargo = cargo == null ? null : cargo.stream().map(DataBlock.Value::asString).collect(Collectors.toList());
     }
