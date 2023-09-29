@@ -145,9 +145,21 @@ public class MovementTrack {
 			Vec3d target = currentPosition.add(delta);
 			Vec3d relative = target.subtract(center);
 
-			if (positions.size() < 2) {
-				ImmersiveRailroading.error("Invalid track path %s: %s", positions.size(), rail.info.uniqueID);
+			if (positions.isEmpty()) {
+				ImmersiveRailroading.error("Invalid track path %s", rail.info.uniqueID);
 				return currentPosition; // keep in same place for debugging
+			}
+			if (positions.size() == 1) {
+				// track with length == 1
+				PosStep pos = positions.get(0);
+				Vec3d offset = VecUtil.fromYaw(delta.length(), pos.yaw);
+				Vec3d result = currentPosition.add(offset);
+				Vec3d resultOpposite = currentPosition.subtract(offset);
+				if (result.distanceToSquared(target) < resultOpposite.distanceToSquared(target)) {
+					return result;
+				} else {
+					return resultOpposite;
+				}
 			}
 
 			/* Simple ordered binary search
