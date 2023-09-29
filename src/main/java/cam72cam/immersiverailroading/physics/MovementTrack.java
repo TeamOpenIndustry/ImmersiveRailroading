@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -166,9 +167,26 @@ public class MovementTrack {
 					rightDistance = positions.get(right).distanceToSquared(relative);
 				}
 			}
+			if (right == left) {
+				ImmersiveRailroading.warn("Correcting track pathing tree...");
+				// Hack for edge case
+				if (right == positions.size() -1) {
+					left -= 1;
+				} else {
+					right += 1;
+				}
+			}
 
 			PosStep leftPos = positions.get(left);
 			PosStep rightPos = positions.get(right);
+
+			if (leftDistance < 0.000001) {
+				return center.add(leftPos);
+			}
+			if (rightDistance < 0.000001) {
+				return center.add(rightPos);
+			}
+
 			Vec3d between = rightPos.subtract(leftPos);
 			Vec3d offset = between.scale(Math.sqrt(leftDistance) / between.length());
 			// Weird edge case where we need to move in the opposite direction since we are given a position past the end of pathing
