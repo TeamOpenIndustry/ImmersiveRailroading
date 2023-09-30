@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.physics;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -139,10 +140,27 @@ public class MovementTrack {
 			 * trying to move.  Instead we should probably calculate the vector between the closest pos
 			 * and the current pos and move distance along that.  How would that work for slopes at the ends? just fine?
 			 */
-			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25);
+			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25 * rail.info.settings.gauge.scale());
 			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.getPos()).add(0, heightOffset, 0);
 			Vec3d target = currentPosition.add(delta);
 			Vec3d relative = target.subtract(center);
+
+			if (positions.isEmpty()) {
+				ImmersiveRailroading.error("Invalid track path %s", rail.info.uniqueID);
+				return currentPosition; // keep in same place for debugging
+			}
+			if (positions.size() == 1) {
+				// track with length == 1
+				PosStep pos = positions.get(0);
+				Vec3d offset = VecUtil.fromYaw(delta.length(), pos.yaw);
+				Vec3d result = currentPosition.add(offset);
+				Vec3d resultOpposite = currentPosition.subtract(offset);
+				if (result.distanceToSquared(target) < resultOpposite.distanceToSquared(target)) {
+					return result;
+				} else {
+					return resultOpposite;
+				}
+			}
 
 			/* Simple ordered binary search
 			l    c      r
@@ -166,9 +184,26 @@ public class MovementTrack {
 					rightDistance = positions.get(right).distanceToSquared(relative);
 				}
 			}
+			if (right == left) {
+				ImmersiveRailroading.warn("Correcting track pathing tree...");
+				// Hack for edge case
+				if (right == positions.size() -1) {
+					left -= 1;
+				} else {
+					right += 1;
+				}
+			}
 
 			PosStep leftPos = positions.get(left);
 			PosStep rightPos = positions.get(right);
+
+			if (leftDistance < 0.000001) {
+				return center.add(leftPos);
+			}
+			if (rightDistance < 0.000001) {
+				return center.add(rightPos);
+			}
+
 			Vec3d between = rightPos.subtract(leftPos);
 			Vec3d offset = between.scale(Math.sqrt(leftDistance) / between.length());
 			// Weird edge case where we need to move in the opposite direction since we are given a position past the end of pathing
