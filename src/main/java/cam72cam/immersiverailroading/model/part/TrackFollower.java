@@ -16,8 +16,8 @@ import java.util.function.Function;
 
 public class TrackFollower {
     private final EntityMoveableRollingStock stock;
-    private final float min;
     private final float max;
+    private final float min;
 
 
 
@@ -34,16 +34,16 @@ public class TrackFollower {
         this.matrix = new Matrix4();
 
         if (wheels != null && wheels.wheels.size() > 1) {
-            this.min = -(float) (wheels.wheels.stream().mapToDouble(w -> w.wheel.center.x).min().getAsDouble() * stock.gauge.scale());
-            this.max = -(float) (wheels.wheels.stream().mapToDouble(w -> w.wheel.center.x).max().getAsDouble() * stock.gauge.scale());
+            this.max = -(float) (wheels.wheels.stream().mapToDouble(w -> w.wheel.center.x).min().getAsDouble() * stock.gauge.scale());
+            this.min = -(float) (wheels.wheels.stream().mapToDouble(w -> w.wheel.center.x).max().getAsDouble() * stock.gauge.scale());
         } else if (wheels != null && wheels.wheels.size() == 1) {
-            this.min = -(float) (wheels.wheels.get(0).wheel.min.x * stock.gauge.scale());
-            this.max = -(float) (wheels.wheels.get(0).wheel.max.x * stock.gauge.scale());
+            this.max = -(float) (wheels.wheels.get(0).wheel.min.x * stock.gauge.scale());
+            this.min = -(float) (wheels.wheels.get(0).wheel.max.x * stock.gauge.scale());
         } else if (frame != null) {
-            this.min = -(float) (frame.min.x * stock.gauge.scale());
-            this.max = -(float) (frame.max.x * stock.gauge.scale());
+            this.max = -(float) (frame.min.x * stock.gauge.scale());
+            this.min = -(float) (frame.max.x * stock.gauge.scale());
         } else {
-            this.min = this.max = offset;
+            this.max = this.min = offset;
         }
     }
 
@@ -61,8 +61,8 @@ public class TrackFollower {
             } else {
                 // Don't need to path to a point that's already on the track.  TODO This can also be used to improve accuracy of the offset rendering
                 Vec3d offsetPos = pos.add(VecUtil.fromWrongYawPitch(offset, stock.getRotationYaw(), stock.getRotationPitch()));
-                double toMinPoint = max - offset;
-                double betweenPoints = min - max;
+                double toMinPoint = min - offset;
+                double betweenPoints = max - min;
 
                 float toPointYaw = 0;
                 float atPointYaw = 0;
@@ -71,7 +71,7 @@ public class TrackFollower {
 
                 Vec3d pointPos = nextPosition(stock.getWorld(), stock.gauge, offsetPos, stock.getRotationYaw(), offsetYaw, toMinPoint);
                 Vec3d pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, betweenPoints);
-                Vec3d delta = stock.getPosition().subtract(pointPos).scale(min); // Scale copies sign
+                Vec3d delta = stock.getPosition().subtract(pointPos).scale(max); // Scale copies sign
                 if (pointPos.distanceTo(pointPosNext) > 0.1 * stock.gauge.scale()) {
                     toPointYaw = VecUtil.toYaw(delta) + stock.getRotationYaw() + 180;
                     atPointYaw = VecUtil.toYaw(pointPos.subtract(pointPosNext)) + stock.getRotationYaw() + 180 - toPointYaw ;
@@ -87,10 +87,10 @@ public class TrackFollower {
                 matrix.setIdentity();
                 matrix.rotate(Math.toRadians(toPointYaw), 0, 1, 0);
                 matrix.rotate(Math.toRadians(toPointPitch), 0, 0, 1);
-                matrix.translate(-max / stock.gauge.scale(), 0, 0);
+                matrix.translate(-min / stock.gauge.scale(), 0, 0);
                 matrix.rotate(Math.toRadians(atPointYaw), 0, 1, 0);
                 matrix.rotate(Math.toRadians(atPointPitch), 0, 0, 1);
-                matrix.translate(max / stock.gauge.scale(), 0, 0);
+                matrix.translate(min / stock.gauge.scale(), 0, 0);
             }
         }
         return matrix;
