@@ -67,26 +67,61 @@ public class CargoItems {
 
 
             for (ModelComponent comp : components) {
-                double itemsX = comp.length();
-                double itemsY = comp.height();
-                double itemsZ = comp.width();
+                double xSize = comp.length();
+                double ySize = comp.height();
+                double zSize = comp.width();
 
-                double modelVolume = itemsX * itemsY * itemsZ;
-                int cargoVolume = (int) Math.ceil(stock.cargoItems.getSlotCount() * modelVolume/totalVolume);
+                double modelVolume = xSize * ySize * zSize;
+                int cargoSlots = (int) Math.ceil(stock.cargoItems.getSlotCount() * modelVolume/totalVolume);
 
-                double volumeRatio = Math.pow(cargoVolume / modelVolume, 0.3333);
-                itemsY = Math.ceil(itemsY * volumeRatio);
+                // Goal: We want the biggest cubes to fill in the space
+                // Define fitment: How close each of the dimensions are to their reference given a specific scale
+                // These numbers are small enough that we can test each permutation.
 
-                modelVolume = itemsX * itemsY * itemsZ;
-                volumeRatio = Math.pow(cargoVolume / modelVolume, 0.3333);
-                itemsZ = Math.ceil(itemsZ * volumeRatio);
+                // The "ideal" storage ratio
+                double ratio = Math.pow(cargoSlots / modelVolume, 0.33333);
+                double xItemsIdeal = ratio * xSize;
+                double yItemsIdeal = ratio * ySize;
+                double zItemsIdeal = ratio * zSize;
 
-                modelVolume = itemsX * itemsY * itemsZ;
-                volumeRatio = cargoVolume / modelVolume;
-                itemsX = Math.ceil(itemsX * volumeRatio);
+                double bestFit = Double.MAX_VALUE;
+                int xItems = (int)Math.round(xItemsIdeal);
+                int yItems = (int)Math.round(yItemsIdeal);
+                int zItems = (int)Math.round(zItemsIdeal);
+
+                for (int x = 1; x < cargoSlots; x++) {
+                    for (int y = 1; y < cargoSlots; y++) {
+                        for (int z = 1; z < cargoSlots; z++) {
+                            int currentSlots = x * y * z;
+                            if (currentSlots < cargoSlots) {
+                                continue;
+                            }
+                            double fitSize = Math.abs(1 - x / xItemsIdeal) + Math.abs(1 - y / yItemsIdeal) + Math.abs(1 - z / zItemsIdeal);
+                            double fitRatio = Math.max(xSize / x, Math.max(ySize / y, zSize / z));
+                            int fitItems = Math.abs(1 - currentSlots / cargoSlots);
+                            double fit = fitSize + fitItems + fitRatio;
+                            if (fit < bestFit) {
+                                bestFit = fit;
+                                xItems = x;
+                                yItems = y;
+                                zItems = z;
+                            }
+                        }
+                    }
+                }
+
+                double xScale = xSize / xItems;
+                double yScale = ySize / yItems;
+                double zScale = zSize / zItems;
+                if (!comp.key.contains("STRETCHED")) {
+                    xScale = yScale = zScale = Math.min(xScale, Math.min(yScale, zScale));
+                }
+
+                // Center X, Z
+                Vec3d offset = comp.min.add((xSize - xItems * xScale)/2,0,(zSize - zItems * zScale)/2);
 
                 int renderSlot = 0;
-                for (int i = slotOffset; i < Math.min(slotOffset+ cargoVolume, stock.cargoItems.getSlotCount()); i++) {
+                for (int i = slotOffset; i < Math.min(slotOffset+ cargoSlots, stock.cargoItems.getSlotCount()); i++) {
                     ItemStack stack = stock.cargoItems.get(i);
                     if (stack.isEmpty()) {
                         continue;
@@ -133,21 +168,18 @@ public class CargoItems {
                             continue;
                         }
                     }
-                    int x = renderSlot % (int) itemsX;
-                    int z = (renderSlot / (int) itemsX) % (int) itemsZ;
-                    int y = (renderSlot / (int) itemsX / (int) itemsZ) % (int) itemsY;
+                    int z = renderSlot % zItems;
+                    int x = (renderSlot / zItems) % xItems;
+                    int y = (renderSlot / zItems / xItems) % yItems;
 
-                    double scaleX = comp.length() / itemsX;
-                    double scaleY = comp.height() / itemsY;
-                    double scaleZ = comp.width() / itemsZ;
-                    if (!comp.key.contains("STRETCHED")) {
-                        scaleX = scaleY = scaleZ = Math.min(comp.length() / itemsX, Math.min(comp.height() / itemsY, comp.width() / itemsZ));
-                    }
+                    // Fill from center Z and X
+                    z = zItems/2 + ((z % 2 == 0) ? z/2 : -(z+1)/2);
+                    x = xItems/2 + ((x % 2 == 0) ? x/2 : -(x+1)/2);
 
                     Matrix4 matrix = new Matrix4()
                             //.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale())
-                            .translate(comp.min.x, comp.min.y, comp.min.z)
-                            .scale(scaleX, scaleY, scaleZ)
+                            .translate(offset.x, offset.y, offset.z)
+                            .scale(xScale, yScale, zScale)
                             .translate(0.5, 0.5, 0.5)
                             .translate(x, y, z);
 
@@ -160,7 +192,7 @@ public class CargoItems {
                     model.addItem(stack, matrix);
                     renderSlot++;
                 }
-                slotOffset += cargoVolume;
+                slotOffset += cargoSlots;
             }
             cache.put(stock.getUUID(), model);
         }
