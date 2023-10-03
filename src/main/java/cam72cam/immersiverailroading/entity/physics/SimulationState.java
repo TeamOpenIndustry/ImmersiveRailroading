@@ -348,14 +348,6 @@ public class SimulationState {
             }
         }
 
-        // Fix bogeys pointing in opposite directions
-        if (DegreeFuncs.delta(yawFront, yaw) > 90) {
-            yawFront = yaw;
-        }
-        if (DegreeFuncs.delta(yawRear, yaw) > 90) {
-            yawRear = yaw;
-        }
-
         boolean isReversed = distance < 0;
         if (isReversed) {
             distance = -distance;
@@ -388,6 +380,12 @@ public class SimulationState {
         }
 
         if (isTurnTable) {
+            yawFront = yaw;
+            yawRear = yaw;
+        }
+
+        // Fix bogeys pointing in opposite directions
+        if (DegreeFuncs.delta(yawFront, yaw) > 90 || DegreeFuncs.delta(yawFront, yawRear) > 90) {
             yawFront = yaw;
             yawRear = yaw;
         }
