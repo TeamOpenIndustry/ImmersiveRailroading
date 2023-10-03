@@ -229,17 +229,23 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 					.sendToObserving(this);
 		}
 
+		EntityCoupleableRollingStock coupled = id != null ? findByUUID(id) : null;
+
 		switch (coupler) {
 			case FRONT:
 				coupledFront = id;
 				if (coupledFront == null) {
 					lastKnownFront = null;
+				} else if (coupled != null){
+					lastKnownFront = new Vec3i(coupled.getPosition());
 				}
 				break;
 			case BACK:
 				coupledBack = id;
 				if (coupledBack == null) {
 					lastKnownRear = null;
+				} else if (coupled != null){
+					lastKnownFront = new Vec3i(coupled.getPosition());
 				}
 				break;
 		}

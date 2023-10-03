@@ -67,6 +67,7 @@ public class SimulationState {
     public boolean frontPulling;
     public boolean rearPushing;
     public boolean rearPulling;
+    public List<UUID> consist;
 
     public static class Configuration {
         public UUID id;
@@ -199,6 +200,8 @@ public class SimulationState {
 
         calculateBlockCollisions(Collections.emptyList());
         blocksToBreak = Collections.emptyList();
+
+        consist = Collections.singletonList(config.id);
     }
 
     private SimulationState(SimulationState prev) {
@@ -229,6 +232,8 @@ public class SimulationState {
         interferingResistance = prev.interferingResistance;
         blocksToBreak = Collections.emptyList();
         directResistance = prev.directResistance;
+
+        consist = prev.consist;
     }
 
     public void calculateCouplerPositions() {
