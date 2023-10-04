@@ -67,6 +67,7 @@ public class SimulationState {
     public boolean frontPulling;
     public boolean rearPushing;
     public boolean rearPulling;
+    public List<UUID> consist;
 
     public static class Configuration {
         public UUID id;
@@ -199,6 +200,8 @@ public class SimulationState {
 
         calculateBlockCollisions(Collections.emptyList());
         blocksToBreak = Collections.emptyList();
+
+        consist = Collections.singletonList(config.id);
     }
 
     private SimulationState(SimulationState prev) {
@@ -229,6 +232,8 @@ public class SimulationState {
         interferingResistance = prev.interferingResistance;
         blocksToBreak = Collections.emptyList();
         directResistance = prev.directResistance;
+
+        consist = prev.consist;
     }
 
     public void calculateCouplerPositions() {
@@ -348,14 +353,6 @@ public class SimulationState {
             }
         }
 
-        // Fix bogeys pointing in opposite directions
-        if (DegreeFuncs.delta(yawFront, yaw) > 90) {
-            yawFront = yaw;
-        }
-        if (DegreeFuncs.delta(yawRear, yaw) > 90) {
-            yawRear = yaw;
-        }
-
         boolean isReversed = distance < 0;
         if (isReversed) {
             distance = -distance;
@@ -388,6 +385,12 @@ public class SimulationState {
         }
 
         if (isTurnTable) {
+            yawFront = yaw;
+            yawRear = yaw;
+        }
+
+        // Fix bogeys pointing in opposite directions
+        if (DegreeFuncs.delta(yawFront, yaw) > 90 || DegreeFuncs.delta(yawFront, yawRear) > 90) {
             yawFront = yaw;
             yawRear = yaw;
         }

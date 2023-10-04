@@ -74,70 +74,13 @@ public class Simulation {
                         state.update(entity);
                         stateMaps.get(i).put(entity.getUUID(), state);
                         if (state.dirty) {
-                            dirty.add(entity.getUUID());
+                            dirty.addAll(state.consist);
                         }
                     }
                 }
                 if (i < 40) {
-                    stateMaps.get(i).get(entity.getUUID()).dirty = true;
+                    dirty.addAll(stateMaps.get(i).get(entity.getUUID()).consist);
                 }
-            }
-        }
-
-        // This finds the full list of dirty stock that needs to be recomputed.
-        // It is *highly* optimized to run in under 0.5ms per 100 pieces of stock.
-        // It could be tuned further, but I suspect this is good enough for now
-        for (int i = 0; i < allStock.size(); i++) {
-            int lastSize = dirty.size();
-
-            for (UUID uuid : stateMaps.get(0).keySet()) {
-                boolean isDirty = dirty.contains(uuid);
-
-                // This makes an assumption that stock only has a single value for a coupler in 40 ticks
-                // Worst case is the potential for a missed dirty flag which will interact with the Mismatch check
-                UUID front = null;
-                UUID rear = null;
-
-                for (Map<UUID, SimulationState> stateMap : stateMaps) {
-                    if (front != null && rear != null) {
-                        break;
-                    }
-
-                    SimulationState state = stateMap.get(uuid);
-                    if (state != null) {
-                        if (front == null && state.interactingFront != null) {
-                            front = state.interactingFront;
-                        }
-                        if (rear == null && state.interactingRear != null) {
-                            rear = state.interactingRear;
-                        }
-                    }
-                }
-
-                if (!isDirty) {
-                    if (front != null && dirty.contains(front)) {
-                        dirty.add(uuid);
-                        isDirty = true;
-                    }
-                }
-                if (!isDirty) {
-                    if (rear != null && dirty.contains(rear)) {
-                        dirty.add(uuid);
-                        isDirty = true;
-                    }
-                }
-
-                if (isDirty) {
-                    if (front != null && !dirty.contains(front)) {
-                        dirty.add(front);
-                    }
-                    if (rear != null && !dirty.contains(rear)) {
-                        dirty.add(rear);
-                    }
-                }
-            }
-            if (lastSize == dirty.size()) {
-                break;
             }
         }
 

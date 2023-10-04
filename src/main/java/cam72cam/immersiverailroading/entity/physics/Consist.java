@@ -469,6 +469,8 @@ public class Consist {
             // Propagate dirty flag
             boolean canBeUnloaded = consist.stream().allMatch(p -> p.state.velocity == 0 && state.forcesNewtons() < state.frictionNewtons());
             consist.forEach(p -> p.state.canBeUnloaded = canBeUnloaded);
+            List<UUID> ids = consist.stream().map(x -> x.state.config.id).collect(Collectors.toList());
+            consist.forEach(p -> p.state.consist = ids);
 
             boolean dirty = consist.stream().anyMatch(p -> p.state.dirty);
 
