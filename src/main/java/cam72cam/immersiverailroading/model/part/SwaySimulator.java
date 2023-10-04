@@ -111,8 +111,13 @@ public class SwaySimulator {
         }
 
         public void removed() {
-            clackFront.stop();
-            clackRear.stop();
+            // These should never be null, but for some reason they are
+            if (clackFront != null) {
+                clackFront.stop();
+            }
+            if (clackRear != null) {
+                clackRear.stop();
+            }
         }
     }
 
