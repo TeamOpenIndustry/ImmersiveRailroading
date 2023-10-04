@@ -72,3 +72,28 @@ element:
 
       translate =
         x = 200
+
+  element:
+    x = 25
+    y = 90
+
+    element:
+      text =
+        value = "Original GUI"
+        height = 6
+      setting = "legacy_gui"
+      toggle = true
+      color =
+        0.0 = "0xFFFFFFFF"
+        1.0 = "0xFF999999"
+    element:
+      x = 50
+      setting = "legacy_gui"
+      text =
+        value = "Advanced GUI"
+        height = 6
+      toggle = true
+      invert = true
+      color =
+        0.0 = "0xFFFFFFFF"
+        1.0 = "0xFF999999"

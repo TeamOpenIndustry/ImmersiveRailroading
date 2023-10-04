@@ -1,0 +1,63 @@
+element:
+  screen_x = RIGHT
+  screen_y = BOTTOM
+  import: "immersiverailroading:gui/default/common/scale.caml"
+
+  element:
+    y = -60
+    element:
+      import: "immersiverailroading:gui/default/steam/dial_right.caml"
+      import: "immersiverailroading:gui/default/steam/gauge_speed_face.caml"
+
+  element:
+    y = -120
+    element:
+      import: "immersiverailroading:gui/default/steam/dial_right.caml"
+      import: "immersiverailroading:gui/default/steam/gauge_brake_face.caml"
+
+  element:
+    x = -70
+    import: "immersiverailroading:gui/default/steam/reverser.caml"
+
+  element:
+    y = -65
+    import: "immersiverailroading:gui/default/steam/brake_lever.caml"
+
+  element:
+    y = -150
+    import: "immersiverailroading:gui/default/steam/throttle.caml"
+
+element:
+  screen_x = RIGHT
+  screen_y = TOP
+  import: "immersiverailroading:gui/default/common/scale.caml"
+
+  element:
+    import: "immersiverailroading:gui/default/steam/whistle.caml"
+
+element:
+  screen_x = LEFT
+  screen_y = MIDDLE
+  import: "immersiverailroading:gui/default/common/scale.caml"
+
+  element:
+    y = -50
+    x = -90
+    import: "immersiverailroading:gui/default/steam/gauge_water_left.caml"
+
+element:
+  screen_x = LEFT
+  screen_y = TOP
+  import: "immersiverailroading:gui/default/common/scale.caml"
+
+  element:
+    x = 0
+    element:
+      import: "immersiverailroading:gui/default/steam/dial_up.caml"
+      import: "immersiverailroading:gui/default/steam/gauge_boiler_face.caml"
+
+  element:
+    x = 60
+    element:
+      import: "immersiverailroading:gui/default/steam/dial_up.caml"
+      import: "immersiverailroading:gui/default/steam/gauge_temperature_face.caml"

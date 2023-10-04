@@ -36,8 +36,8 @@ public class GuiBuilder {
     private final Vertical screen_y;
 
     private final Identifier image;
-    private final int imageWidth;
-    private final int imageHeight;
+    private final int width;
+    private final int height;
 
     private final String text;
     private final float textHeight;
@@ -130,17 +130,6 @@ public class GuiBuilder {
         this.screen_x = Horizontal.from(data.getValue("screen_x").asString());
         this.screen_y = Vertical.from(data.getValue("screen_y").asString());
 
-        // Image stuff
-        this.image = data.getValue("image").asIdentifier(null);
-        if (image != null) {
-            BufferedImage tmp = ImageIO.read(this.image.getResourceStream());
-            imageWidth = tmp.getWidth();
-            imageHeight = tmp.getHeight();
-        } else {
-            imageWidth = 0;
-            imageHeight = 0;
-        }
-
         // Text stuff
         DataBlock txt = data.getBlock("text");
         if (txt != null) {
@@ -149,6 +138,20 @@ public class GuiBuilder {
         } else {
             text = null;
             textHeight = 0;
+        }
+
+        // Image stuff
+        this.image = data.getValue("image").asIdentifier(null);
+        if (image != null) {
+            BufferedImage tmp = ImageIO.read(this.image.getResourceStream());
+            width = tmp.getWidth();
+            height = tmp.getHeight();
+        } else if (text != null) {
+            width = (int) (textHeight/4 * text.length()); // Guesstimate
+            height = (int) textHeight;
+        } else {
+            width = 0;
+            height = 0;
         }
 
         // Controls
@@ -329,9 +332,9 @@ public class GuiBuilder {
         if (image != null) {
             DirectDraw draw = new DirectDraw();
             draw.vertex(0, 0, 0).uv(0, 0);
-            draw.vertex(0, imageHeight, 0).uv(0, 1);
-            draw.vertex(imageWidth, imageHeight, 0).uv(1, 1);
-            draw.vertex(imageWidth, 0, 0).uv(1, 0);
+            draw.vertex(0, height, 0).uv(0, 1);
+            draw.vertex(width, height, 0).uv(1, 1);
+            draw.vertex(width, 0, 0).uv(1, 0);
             draw.draw(state.clone()
                     .texture(Texture.wrap(image))
                     .alpha_test(false)
@@ -374,7 +377,7 @@ public class GuiBuilder {
             }
         }
 
-        if (image != null && interactable()) {
+        if (interactable() && (image != null || text != null)) {
             if (control == null && setting == null && texture_variant == null) {
                 if (readout == null) {
                     return null;
@@ -397,10 +400,10 @@ public class GuiBuilder {
                 }
             }
             int border = 2;
-            Vec3d cornerA = matrix.apply(new Vec3d(-border, -border, 0));
-            Vec3d cornerB = matrix.apply(new Vec3d(-border, imageHeight + border, 0));
-            Vec3d cornerC = matrix.apply(new Vec3d(imageWidth + border, -border, 0));
-            Vec3d cornerD = matrix.apply(new Vec3d(imageWidth + border, imageHeight + border, 0));
+            Vec3d cornerA = matrix.apply(new Vec3d((image == null ? -width : 0)-border, -border, 0));
+            Vec3d cornerB = matrix.apply(new Vec3d((image == null ? -width : 0)-border, height + border, 0));
+            Vec3d cornerC = matrix.apply(new Vec3d(width + border, -border, 0));
+            Vec3d cornerD = matrix.apply(new Vec3d(width + border, height + border, 0));
 
             Polygon poly = new Polygon(
                     new int[]{(int) cornerA.x, (int) cornerB.x, (int) cornerC.x, (int) cornerD.x},
@@ -455,7 +458,7 @@ public class GuiBuilder {
                     temp.scale(scalex != null ? scalex * checkValue : 1, scaley != null ? scaley * checkValue : 1, 1);
                 }
 
-                Vec3d checkMiddle = temp.apply(new Vec3d(imageWidth/2f, imageHeight/2f, 0));
+                Vec3d checkMiddle = temp.apply(new Vec3d(width /2f, height /2f, 0));
                 double delta = checkMiddle.distanceTo(new Vec3d(x, y, 0));
                 if (delta < closestDelta) {
                     closestDelta = delta;

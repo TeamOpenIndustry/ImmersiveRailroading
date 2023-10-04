@@ -1,0 +1,142 @@
+element:
+  screen_x = RIGHT
+  screen_y = BOTTOM
+  import: "immersiverailroading:gui/default/common/scale.caml"
+
+  element:
+    image = "immersiverailroading:gui/default/diesel/diesel_base.png"
+    x = -120
+    y = -190
+
+    element:
+      x = 55
+      element:
+        y = 2.5
+        image = "immersiverailroading:gui/default/diesel/dial.png"
+        import: "immersiverailroading:gui/default/diesel/gauge_speed_face.caml"
+
+      element:
+        y = 65
+        image = "immersiverailroading:gui/default/diesel/dial.png"
+        import: "immersiverailroading:gui/default/diesel/gauge_brake_face.caml"
+
+      element:
+        y = 127.5
+        image = "immersiverailroading:gui/default/diesel/dial.png"
+        import: "immersiverailroading:gui/default/diesel/gauge_temperature_face.caml"
+
+
+    element:
+      element:
+        x = 5
+        y = 80
+        image = "immersiverailroading:gui/default/diesel/horn.png"
+
+        readout = HORN
+
+        rotate =
+          x = 0
+          y = 10
+          degrees = 10
+
+      element:
+        x = 5
+        y = 95
+        image = "immersiverailroading:gui/default/diesel/button.png"
+
+        readout = ENGINE
+        toggle = true
+        color =
+          0.0 = 0xFF006000
+          1.0 = 0xFF008000
+
+      element:
+        x = 35
+        y = 95
+        image = "immersiverailroading:gui/default/diesel/button.png"
+
+        readout = BELL
+        toggle = true
+        color =
+          0.0 = 0xFFAAAA00
+          1.0 = 0xFFCCCC00
+
+      element:
+        x = 5
+        y = 115
+        image = "immersiverailroading:gui/default/diesel/throttle_base.png"
+
+        element:
+          x = 11.5
+          y = 13
+          image = "immersiverailroading:gui/default/diesel/throttle_lever.png"
+          readout = "THROTTLE"
+          rotate =
+            x = 1.5
+            y = -13
+            degrees = -90
+            offset = 45
+          sound =
+            engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+            disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+
+      element:
+        x = 34
+        y = 115
+        image = "immersiverailroading:gui/default/diesel/reverser_base.png"
+
+        element:
+          x = 9
+          y = 10
+          image = "immersiverailroading:gui/default/diesel/reverser_lever.png"
+          readout = "REVERSER"
+          rotate =
+            x = 1
+            y = -10
+            degrees = -90
+            offset = 45
+          sound =
+            engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+            disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+
+      element:
+        x = 12
+        y = 145
+        image = "immersiverailroading:gui/default/diesel/brake_stand.png"
+
+        element:
+          x = 10
+          y = 2.5
+          image = "immersiverailroading:gui/default/diesel/brake_lever.png"
+          readout = "TRAIN_BRAKE_LEVER"
+          rotate =
+            x = -5
+            y = 2.5
+            degrees = 30
+            offset = -15
+          color =
+            0.0 = 0xFF806600
+          sound =
+            engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+            move = "immersiverailroading:sounds/default/pressure.ogg"
+            disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+
+      element:
+        x = 12
+        y = 165
+        image = "immersiverailroading:gui/default/diesel/brake_stand.png"
+        element:
+          x = 10
+          y = 2.5
+          image = "immersiverailroading:gui/default/diesel/brake_lever.png"
+          readout = "INDEPENDENT_BRAKE"
+          rotate =
+            x = -5
+            y = 2.5
+            degrees = -15
+            offset = 0
+          color =
+            0.0 = 0xFF800000
+          sound =
+            engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+            disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
