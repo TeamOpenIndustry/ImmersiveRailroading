@@ -523,9 +523,13 @@ public class Consist {
                 for (Particle particle : consist) {
                     nextStateMap.put(particle.state.config.id, particle.state.next());
                 }
+                Simulation.restStates += consist.size();
             } else {
                 if (dirty || missingNextStates) {
                     particles.addAll(consist);
+                    Simulation.calculatedStates += consist.size();
+                } else {
+                    Simulation.keptStates += consist.size();
                 }
             }
 

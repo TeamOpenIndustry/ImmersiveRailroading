@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 public class Simulation {
 
     public static boolean forceQuickUpdates = false;
+    public static int calculatedStates;
+    public static int restStates;
+    public static int keptStates;
 
     public static void simulate(World world) {
         // 100KM/h ~= 28m/s which means non-loaded stationary stock may be phased through at that speed
@@ -45,6 +48,9 @@ public class Simulation {
         }
 
         long startMs = System.currentTimeMillis();
+        calculatedStates = 0;
+        restStates = 0;
+        keptStates = 0;
 
         int pass = (int) ChronoState.getState(world).getTickID();
 
@@ -293,12 +299,12 @@ public class Simulation {
 
             long iterationMs = System.currentTimeMillis() - startIterationMs;
             if (iterationMs > Config.ConfigDebug.physicsWarnThresholdMs) {
-                ImmersiveRailroading.warn("Calculating Immersive Railroading Physics Iteration took %sms (dirty: %s)", iterationMs, anyStartedDirty);
+                ImmersiveRailroading.warn("Calculating Immersive Railroading Physics Iteration took %sms (dirty: %s, %s, %s, %s)", iterationMs, anyStartedDirty, calculatedStates, restStates, keptStates);
             }
         }
         long totalMs = System.currentTimeMillis() - startMs;
         if (totalMs > Config.ConfigDebug.physicsWarnTotalThresholdMs) {
-            ImmersiveRailroading.warn("Calculating Immersive Railroading Physics took %sms : %sms (dirty: %s)", totalMs, System.currentTimeMillis() - startStatesMs, anyStartedDirty);
+            ImmersiveRailroading.warn("Calculating Immersive Railroading Physics took %sms : %sms (dirty: %s, %s, %s, %s)", totalMs, System.currentTimeMillis() - startStatesMs, anyStartedDirty, calculatedStates, restStates, keptStates);
         }
 
         boolean sendPackets = world.getTicks() % 20 == 0 || anyStartedDirty;
