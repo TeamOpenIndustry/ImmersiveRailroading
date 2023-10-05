@@ -379,7 +379,7 @@ public class Consist {
         }
     }
 
-    public static Map<UUID, SimulationState> iterate(Map<UUID, SimulationState> states, List<Vec3i> blocksAlreadyBroken) {
+    public static void iterate(Map<UUID, SimulationState> states, Map<UUID, SimulationState> nextStateMap, List<Vec3i> blocksAlreadyBroken) {
         debug = false;
         // ordered
         List<Particle> particles = new ArrayList<>();
@@ -466,18 +466,76 @@ public class Consist {
                 prevParticle = currParticle;
             }
 
-            // Propagate dirty flag
-            boolean canBeUnloaded = consist.stream().allMatch(p -> p.state.velocity == 0 && state.forcesNewtons() < state.frictionNewtons());
-            consist.forEach(p -> p.state.canBeUnloaded = canBeUnloaded);
-            List<UUID> ids = consist.stream().map(x -> x.state.config.id).collect(Collectors.toList());
-            consist.forEach(p -> p.state.consist = ids);
+            // Propogate brake pressure
 
+            List<SimulationState> linked = new ArrayList<>();
+            for (Particle source : consist) {
+                linked.add(source.state);
+
+                if (source.nextLink == null || !source.nextLink.coupled || !source.state.config.hasPressureBrake) {
+                    // No further linked couplings
+                    // Spread brake pressure
+
+                    float desiredBrakePressure = (float) linked.stream()
+                            .filter(s -> s.config.desiredBrakePressure != null)
+                            .mapToDouble(s -> s.config.desiredBrakePressure)
+                            .max().orElse(0);
+
+                    boolean needsBrakeEqualization = linked.stream().anyMatch(s -> s.config.hasPressureBrake && Math.abs(s.brakePressure - desiredBrakePressure) > 0.01);
+
+                    if (needsBrakeEqualization) {
+                        double brakePressureDelta = 0.1 / linked.stream().filter(s -> s.config.hasPressureBrake).count();
+                        linked.forEach(p -> {
+                            if (p.config.hasPressureBrake) {
+                                if (Config.ImmersionConfig.instantBrakePressure) {
+                                    p.brakePressure = desiredBrakePressure;
+                                } else {
+                                    if (p.brakePressure > desiredBrakePressure + brakePressureDelta) {
+                                        p.brakePressure -= brakePressureDelta;
+                                    } else if (p.brakePressure < desiredBrakePressure - brakePressureDelta) {
+                                        p.brakePressure += brakePressureDelta;
+                                    } else {
+                                        p.brakePressure = desiredBrakePressure;
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    linked.clear();
+                }
+            }
+
+
+
+
+            // Propagate dirty flag
             boolean dirty = consist.stream().anyMatch(p -> p.state.dirty);
+            boolean atRest = consist.stream().allMatch(p -> p.state.atRest());
+            boolean missingNextStates = consist.stream().anyMatch(p -> !nextStateMap.containsKey(p.state.config.id));
 
             if (dirty) {
                 consist.forEach(p -> p.state.dirty = true);
-                particles.addAll(consist);
             }
+
+            if (atRest) {
+                // Copy existing states
+                for (Particle particle : consist) {
+                    nextStateMap.put(particle.state.config.id, particle.state.next());
+                }
+            } else {
+                if (dirty || missingNextStates) {
+                    particles.addAll(consist);
+                }
+            }
+
+            // Propagate atRest
+            consist.forEach(p -> p.state.atRest = atRest);
+
+
+            // Store loaded ids
+            List<UUID> ids = consist.stream().map(x -> x.state.config.id).collect(Collectors.toList());
+            consist.forEach(p -> p.state.consist = ids);
 
             // Make sure we can't accidentally hook into any of the processed states from this consist
             used.addAll(visited);
@@ -495,44 +553,6 @@ public class Consist {
             }
         }
 
-        List<SimulationState> linked = new ArrayList<>();
-        for (Particle source : particles) {
-            linked.add(source.state);
-
-            if (source.nextLink == null || !source.nextLink.coupled || !source.state.config.hasPressureBrake) {
-                // No further linked couplings
-                // Spread brake pressure
-
-                float desiredBrakePressure = (float) linked.stream()
-                        .filter(s -> s.config.desiredBrakePressure != null)
-                        .mapToDouble(s -> s.config.desiredBrakePressure)
-                        .max().orElse(0);
-
-                boolean needsBrakeEqualization = linked.stream().anyMatch(s -> s.config.hasPressureBrake && Math.abs(s.brakePressure - desiredBrakePressure) > 0.01);
-
-                if (needsBrakeEqualization) {
-                    double brakePressureDelta = 0.1 / linked.stream().filter(s -> s.config.hasPressureBrake).count();
-                    linked.forEach(p -> {
-                        if (p.config.hasPressureBrake) {
-                            if (Config.ImmersionConfig.instantBrakePressure) {
-                                p.brakePressure = desiredBrakePressure;
-                            } else {
-                                if (p.brakePressure > desiredBrakePressure + brakePressureDelta) {
-                                    p.brakePressure -= brakePressureDelta;
-                                } else if (p.brakePressure < desiredBrakePressure - brakePressureDelta) {
-                                    p.brakePressure += brakePressureDelta;
-                                } else {
-                                    p.brakePressure = desiredBrakePressure;
-                                }
-                            }
-                        }
-                    });
-                }
-
-                linked.clear();
-                continue;
-            }
-        }
 
 
         // Spread forces
@@ -570,7 +590,9 @@ public class Consist {
 
         // Generate new states
         try {
-            return particles.stream().map(particle -> particle.applyToState(blocksAlreadyBroken)).collect(Collectors.toMap(s -> s.config.id, s -> s));
+            for (Particle particle : particles) {
+                nextStateMap.put(particle.state.config.id, particle.applyToState(blocksAlreadyBroken));
+            }
         } catch (Exception ex) {
             for (SimulationState state : states.values()) {
                 ImmersiveRailroading.debug("State: %s (%s, %s)", state.config.id, state.interactingFront, state.interactingRear);

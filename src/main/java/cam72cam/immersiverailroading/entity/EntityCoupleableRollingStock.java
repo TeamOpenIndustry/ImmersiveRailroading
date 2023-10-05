@@ -181,7 +181,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		hadElectricalPower = hasElectricalPower();
 
-		if (this.getCurrentState() != null && !this.getCurrentState().canBeUnloaded || ConfigDebug.keepStockLoaded) {
+		if (this.getCurrentState() != null && !this.getCurrentState().atRest || ConfigDebug.keepStockLoaded) {
 			keepLoaded();
 		}
 

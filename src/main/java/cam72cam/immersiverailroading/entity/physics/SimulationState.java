@@ -60,7 +60,7 @@ public class SimulationState {
 
     public Configuration config;
     public boolean dirty = true;
-    public boolean canBeUnloaded = true;
+    public boolean atRest = true;
     public double collided;
     public boolean sliding;
     public boolean frontPushing;
@@ -218,7 +218,7 @@ public class SimulationState {
 
         this.config = prev.config;
 
-        this.bounds = config.bounds.apply(this);
+        this.bounds = prev.bounds;
 
         this.yawFront = prev.yawFront;
         this.yawRear = prev.yawRear;
@@ -285,6 +285,12 @@ public class SimulationState {
         }
     }
 
+    public SimulationState next() {
+        SimulationState next = new SimulationState(this);
+        next.dirty = false;
+        return next;
+    }
+
     public SimulationState next(double distance, List<Vec3i> blocksAlreadyBroken) {
         SimulationState next = new SimulationState(this);
         next.moveAlongTrack(distance);
@@ -292,6 +298,7 @@ public class SimulationState {
             next.velocity = 0;
         } else {
             next.calculateCouplerPositions();
+            next.bounds = next.config.bounds.apply(next);
 
             // We will actually break the blocks
             this.blocksToBreak = this.interferingBlocks;
@@ -397,11 +404,13 @@ public class SimulationState {
     }
 
     public double forcesNewtons() {
-        double pitchRound = Math.abs(pitch) < 0.25 ? 0 : pitch;
-
         // Int cast here means that anything under 1degree of pitch is ignored (helps with chunk loading)
-        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitchRound)) * Config.ConfigBalance.slopeMultiplier;
+        double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitch)) * Config.ConfigBalance.slopeMultiplier;
         return config.tractiveEffortNewtons(Speed.fromMinecraft(velocity)) + gradeForceNewtons;
+    }
+
+    public boolean atRest() {
+        return velocity == 0 && forcesNewtons() < frictionNewtons();
     }
 
     public double frictionNewtons() {

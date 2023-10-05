@@ -58,52 +58,51 @@ public class Simulation {
 
         ServerChronoState chrono = (ServerChronoState) ChronoState.getState(world);
 
-        List<UUID> dirty = new ArrayList<>(allStock.size());
-
         for (EntityCoupleableRollingStock entity : allStock) {
             SimulationState current = entity.getCurrentState();
             if (current == null) {
                 // Newly placed
                 stateMaps.get(0).put(entity.getUUID(), new SimulationState(entity));
-                dirty.add(entity.getUUID());
             } else {
                 // Copy from previous simulation
-                int i = 0;
                 for (SimulationState state : entity.states) {
-                    i = state.tickID - chrono.getServerTickID();
+                    int i = state.tickID - chrono.getServerTickID();
                     if (i >= 0) {
                         state.update(entity);
                         stateMaps.get(i).put(entity.getUUID(), state);
-                        if (state.dirty) {
-                            dirty.addAll(state.consist);
-                        }
                     }
                 }
-                if (i < 40) {
-                    dirty.addAll(stateMaps.get(i).get(entity.getUUID()).consist);
-                }
             }
         }
 
-        for (UUID uuid : dirty) {
-            SimulationState state = stateMaps.get(0).get(uuid);
-            if (state != null) {
-                state.dirty = true;
-            }
-        }
-
-        boolean anyStartedDirty = !dirty.isEmpty();
+        boolean anyStartedDirty = stateMaps.get(0).values().stream().anyMatch(x -> x.dirty);
 
         double maxCouplerDist = 4;
 
         long startStatesMs = System.currentTimeMillis();
 
-        for (int i = 0; i < stateMaps.size(); i++) {
+        for (int i = 0; i < stateMaps.size()-1; i++) {
             long startIterationMs = System.currentTimeMillis();
 
             Map<UUID, SimulationState> stateMap = stateMaps.get(i);
+            Map<UUID, SimulationState> nextStateMap = stateMaps.get(i+1);
 
             List<SimulationState> states = new ArrayList<>(stateMap.values());
+
+            // Propagate dirty (even across links that will be since that can change between iterations)
+            Set<UUID> dirty = new HashSet<>();
+            for (SimulationState state : nextStateMap.values()) {
+                if (state.dirty) {
+                    dirty.addAll(state.consist);
+                }
+            }
+            for (UUID uuid : dirty) {
+                SimulationState state = stateMap.get(uuid);
+                if (state != null) {
+                    state.dirty = true;
+                }
+            }
+
 
             // Decouple / fix coupler positions
             for (SimulationState state : states) {
@@ -290,9 +289,7 @@ public class Simulation {
             }
 
             // calculate new velocities
-            if (i + 1 < stateMaps.size()) {
-                stateMaps.get(i+1).putAll(Consist.iterate(stateMap, blocksAlreadyBroken));
-            }
+            Consist.iterate(stateMap, nextStateMap, blocksAlreadyBroken);
 
             long iterationMs = System.currentTimeMillis() - startIterationMs;
             if (iterationMs > Config.ConfigDebug.physicsWarnThresholdMs) {
