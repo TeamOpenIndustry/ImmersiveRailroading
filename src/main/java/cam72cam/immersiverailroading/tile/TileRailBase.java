@@ -359,6 +359,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return getNextPositionShort(currentPosition, motion);
 	}
 
+	private Collection<TileRail> tiles = null;
 	public Vec3d getNextPositionShort(Vec3d currentPosition, Vec3d motion) {
 		if (this.getReplaced() == null) {
 			// Simple common case, maybe this does not need to be optimized out of the for loop below?
@@ -383,20 +384,22 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return currentPosition;
 		}
 		// Complex case with overlapping segments
-		Map<Vec3i, TileRail> tileMap = new HashMap<>();
-		for (TileRailBase current = this; current != null; current = current.getReplacedTile()) {
-			TileRail tile = current instanceof TileRail ? (TileRail) current : current.getParentTile();
-			TileRail parent = tile;
-			while (parent != null && !parent.getPos().equals(parent.getParent())) {
-				// Move to root of switch (if applicable)
-				parent = parent.getParentTile();
+		if (tiles == null) {
+			Map<Vec3i, TileRail> tileMap = new HashMap<>();
+			for (TileRailBase current = this; current != null; current = current.getReplacedTile()) {
+				TileRail tile = current instanceof TileRail ? (TileRail) current : current.getParentTile();
+				TileRail parent = tile;
+				while (parent != null && !parent.getPos().equals(parent.getParent())) {
+					// Move to root of switch (if applicable)
+					parent = parent.getParentTile();
+				}
+				if (tile != null && parent != null) {
+					tileMap.putIfAbsent(parent.getPos(), tile);
+				}
 			}
-			if (tile != null && parent != null) {
-				tileMap.putIfAbsent(parent.getPos(), tile);
-			}
+			tiles = tileMap.values();
 		}
 
-		Collection<TileRail> tiles = tileMap.values();
 
 		Vec3d nextPos = currentPosition;
 		Vec3d predictedPos = currentPosition.add(motion);
