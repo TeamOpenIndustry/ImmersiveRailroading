@@ -114,8 +114,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 					player.sendMessage(ChatText.COUPLER_DISENGAGED.getMessage(coupler));
 				}
 			} else {
-				if (this.isCoupled(coupler) && this.isCouplerEngaged(coupler)) {
-					EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
+				EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
+				if (this.isCoupled(coupler) && this.isCouplerEngaged(coupler) && coupled != null) {
 					player.sendMessage(ChatText.COUPLER_STATUS_COUPLED.getMessage(
 							coupler,
 							coupled.getDefinition().name(),
