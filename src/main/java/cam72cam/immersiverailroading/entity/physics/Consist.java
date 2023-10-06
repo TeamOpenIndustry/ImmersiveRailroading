@@ -468,6 +468,13 @@ public class Consist {
 
             // Propogate brake pressure
 
+
+            for (Particle particle : consist) {
+                if (particle.nextLink != null) {
+                    particle.nextLink.setup();
+                }
+            }
+
             List<SimulationState> linked = new ArrayList<>();
             for (Particle source : consist) {
                 linked.add(source.state);
@@ -550,12 +557,6 @@ public class Consist {
         double ticksPerSecond = 20;
         double stepsPerTick = 40;
         double dt_S = (1 / (ticksPerSecond * stepsPerTick));
-
-        for (Particle particle : particles) {
-            if (particle.nextLink != null) {
-                particle.nextLink.setup();
-            }
-        }
 
 
 
