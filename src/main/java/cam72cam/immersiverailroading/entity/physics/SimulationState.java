@@ -410,7 +410,7 @@ public class SimulationState {
     }
 
     public boolean atRest() {
-        return velocity == 0 && forcesNewtons() < frictionNewtons();
+        return velocity == 0 && Math.abs(forcesNewtons()) < frictionNewtons();
     }
 
     public double frictionNewtons() {
