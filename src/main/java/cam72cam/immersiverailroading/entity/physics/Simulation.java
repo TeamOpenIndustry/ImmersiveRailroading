@@ -57,7 +57,7 @@ public class Simulation {
         List<Map<UUID, SimulationState>> stateMaps = new ArrayList<>();
         List<Vec3i> blocksAlreadyBroken = new ArrayList<>();
 
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < Config.ConfigDebug.physicsFutureTicks; i++) {
             stateMaps.add(new HashMap<>());
         }
 
@@ -110,6 +110,7 @@ public class Simulation {
             }
 
 
+
             // Decouple / fix coupler positions
             for (SimulationState state : states) {
                 for (boolean isMyCouplerFront : new boolean[]{true, false}) {
@@ -120,6 +121,11 @@ public class Simulation {
 
                     if (otherID == null) {
                         // No existing coupler, nothing to check
+                        continue;
+                    }
+
+                    if (state.atRest) {
+                        // Technically this is fired twice for each piece of coupled stock which isn't great
                         continue;
                     }
 
@@ -197,14 +203,17 @@ public class Simulation {
 
             // check for potential couplings and collisions
             for (int sai = 0; sai < states.size()-1; sai++) {
-
                 SimulationState stateA = states.get(sai);
                 if (stateA.interactingFront != null && stateA.interactingRear != null) {
                     // There's stock in front and behind, can't really hit any other stock here
                     continue;
                 }
+
                 for (int sbi = sai+1; sbi < states.size(); sbi++) {
                     SimulationState stateB = states.get(sbi);
+                    if (stateA.atRest && stateB.atRest) {
+                        continue;
+                    }
                     if (stateB.interactingFront != null && stateB.interactingRear != null) {
                         // There's stock in front and behind, can't really hit any other stock here
                         continue;
@@ -307,7 +316,7 @@ public class Simulation {
             ImmersiveRailroading.warn("Calculating Immersive Railroading Physics took %sms : %sms (dirty: %s, %s, %s, %s)", totalMs, System.currentTimeMillis() - startStatesMs, anyStartedDirty, calculatedStates, restStates, keptStates);
         }
 
-        boolean sendPackets = world.getTicks() % 20 == 0 || anyStartedDirty;
+        boolean sendPackets = world.getTicks() % (Config.ConfigDebug.physicsFutureTicks / 2) == 0 || anyStartedDirty;
         double syncDistanceSq = ImmersiveRailroading.ENTITY_SYNC_DISTANCE * ImmersiveRailroading.ENTITY_SYNC_DISTANCE;
         List<Player> players = sendPackets ? world.getEntities(Player.class) : null;
 
