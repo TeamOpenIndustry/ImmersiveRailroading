@@ -525,7 +525,7 @@ public class Consist {
                 consist.forEach(p -> p.state.dirty = true);
             }
 
-            if (atRest) {
+            if (atRest && !dirty) {
                 // Copy existing states
                 for (Particle particle : consist) {
                     nextStateMap.put(particle.state.config.id, particle.state.next());
