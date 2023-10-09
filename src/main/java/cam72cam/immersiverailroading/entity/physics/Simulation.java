@@ -155,12 +155,16 @@ public class Simulation {
                 }
                 SimulationState other = stateMap.get(otherID);
                 if (other == null) {
+                    Vec3i otherPos = loaded.stream()
+                            .filter(x -> x.getUUID().equals(myID)).findFirst()
+                            .map(x -> isMyCouplerFront ? x.lastKnownFront : x.lastKnownRear).orElse(null);
 
-                    // Don't need to load
-                    if (state.atRest && !state.dirty) {
+                    if (otherPos != null && !world.isBlockLoaded(otherPos)) {
+                        // Other location is not loaded, we must not need to do this check.
                         continue;
                     }
 
+                    // This should really only be hit when removing a piece of stock
                     ImmersiveRailroading.debug("%s-%s: Stock not found %s (%s) -> %s!",
                             startTickID, state.tickID, myID, myCouplerLabel, otherID);
                     if (isMyCouplerFront) {

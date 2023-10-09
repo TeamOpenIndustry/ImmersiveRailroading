@@ -85,6 +85,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagField(value = "consist", mapper = Consist.TagMapper.class)
 	public Consist consist = new Consist(Collections.emptyList(), Collections.emptyList());
 
+    @TagField("lastKnownFront")
+    public Vec3i lastKnownFront = null;
+	@TagField("lastKnownRear")
+	public Vec3i lastKnownRear = null;
+
 	@TagSync
 	@TagField("hasElectricalPower")
 	private boolean hasElectricalPower;
@@ -192,6 +197,23 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			setCoupledUUID(CouplerType.FRONT, state.interactingFront);
 			setCoupledUUID(CouplerType.BACK, state.interactingRear);
 			consist = state.consist;
+
+			if (getCoupledUUID(CouplerType.FRONT) != null) {
+				EntityCoupleableRollingStock front = getCoupled(CouplerType.FRONT);
+				if (front != null) {
+					lastKnownFront = front.getBlockPosition();
+				}
+			} else {
+				lastKnownFront = null;
+			}
+			if (getCoupledUUID(CouplerType.BACK) != null) {
+				EntityCoupleableRollingStock rear = getCoupled(CouplerType.BACK);
+				if (rear != null) {
+					lastKnownRear = rear.getBlockPosition();
+				}
+			} else {
+				lastKnownRear = null;
+			}
 		}
 	}
 
