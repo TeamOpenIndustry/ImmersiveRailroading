@@ -32,6 +32,8 @@ public class Simulation {
 
 
     public Simulation(World world) {
+        calculatedStates = keptStates = restStates = 0;
+        long startTimeMs = System.currentTimeMillis();
         this.world = world;
         this.startTickID = ((ServerChronoState)ChronoState.getState(world)).getServerTickID();
 
@@ -61,9 +63,16 @@ public class Simulation {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }
         }
+
+        long totalTimeMs = System.currentTimeMillis() - startTimeMs;
+        if (totalTimeMs > Config.ConfigDebug.physicsWarnTotalThresholdMs) {
+            ImmersiveRailroading.warn("Calculating Immersive Railroading Physics took %sms (%s, %s, %s)", totalTimeMs, calculatedStates, restStates, keptStates);
+        }
     }
 
     public void simulateTick(int iteration) {
+        long startTimeMs = System.currentTimeMillis();
+
         int tickID = startTickID + iteration;
 
         Map<UUID, SimulationState> stateMap = stateMaps.get(iteration);
@@ -337,6 +346,11 @@ public class Simulation {
 
         // calculate new velocities
         Consist.iterate(stateMap, nextStateMap, blocksAlreadyBroken);
+
+        long totalTimeMs = System.currentTimeMillis() - startTimeMs;
+        if (totalTimeMs > Config.ConfigDebug.physicsWarnThresholdMs) {
+            ImmersiveRailroading.warn("Calculating Immersive Railroading Physics Iteration took %sms (%s, %s, %s)", totalTimeMs, calculatedStates, restStates, keptStates);
+        }
     }
 
 
