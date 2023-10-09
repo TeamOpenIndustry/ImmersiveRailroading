@@ -5,6 +5,10 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.SerializationException;
+import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -543,10 +547,14 @@ public class Consist {
             // Propagate atRest
             consist.forEach(p -> p.state.atRest = atRest);
 
-
-            // Store loaded ids
-            List<UUID> ids = consist.stream().map(x -> x.state.config.id).collect(Collectors.toList());
-            consist.forEach(p -> p.state.consist = ids);
+            // Store consist info
+            if (dirty) {
+                Consist c = new Consist(
+                        consist.stream().map(x -> x.state.config.id).collect(Collectors.toList()),
+                        consist.stream().map(x -> new Vec3i(x.state.position)).collect(Collectors.toList())
+                );
+                consist.forEach(p -> p.state.consist = c);
+            }
 
             // Make sure we can't accidentally hook into any of the processed states from this consist
             used.addAll(visited);
@@ -607,6 +615,47 @@ public class Consist {
             }
 
             throw ex;
+        }
+    }
+
+
+    // For dirty propagation
+    public List<UUID> ids;
+    // For chunk loading
+    public List<Vec3i> positions;
+
+    public Consist(List<UUID> consistIDs, List<Vec3i> consistPositions) {
+        this.ids = consistIDs;
+        this.positions = consistPositions;
+    }
+
+    public static class TagMapper implements cam72cam.mod.serialization.TagMapper<Consist> {
+        @Override
+        public TagAccessor<Consist> apply(Class<Consist> type, String fieldName, TagField tag) throws SerializationException {
+            return new TagAccessor<Consist>(
+                    (d, o) -> {
+                        System.out.println("WRITE CONSIST");
+                        if (o != null) {
+                            d.set(fieldName, new TagCompound()
+                                    .setList("ids", o.ids, u -> new TagCompound().setUUID("id", u))
+                                    .setList("pos", o.positions, p -> new TagCompound().setVec3i("p", p))
+                            );
+                        }
+                    },
+                    // TODO we could fallback to lastKnownFront/Rear
+                    d -> {
+                        System.out.println("READ CONSIST");
+                        return d.hasKey(fieldName) ? new Consist(
+                                d.get(fieldName).getList("ids", t -> t.getUUID("id")),
+                                d.get(fieldName).getList("pos", t -> t.getVec3i("p"))
+                        ) : new Consist(Collections.emptyList(), Collections.emptyList());
+                    }
+            ) {
+                @Override
+                public boolean applyIfMissing() {
+                    return true;
+                }
+            };
         }
     }
 }

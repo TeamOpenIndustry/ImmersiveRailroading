@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.entity.physics.Consist;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -69,8 +70,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagSync
 	@TagField(value = "CoupledFront", mapper = StrictTagMapper.class)
 	private UUID coupledFront = null;
-	@TagField("lastKnownFront")
-	private Vec3i lastKnownFront = null;
 	@TagSync
 	@TagField("frontCouplerEngaged")
 	private boolean frontCouplerEngaged = true;
@@ -78,11 +77,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagSync
 	@TagField(value = "CoupledBack", mapper = StrictTagMapper.class)
 	private UUID coupledBack = null;
-	@TagField("lastKnownRear")
-	private Vec3i lastKnownRear= null;
 	@TagSync
 	@TagField("backCouplerEngaged")
 	private boolean backCouplerEngaged = true;
+
+
+	@TagField(value = "consist", mapper = Consist.TagMapper.class)
+	public Consist consist = new Consist(Collections.emptyList(), Collections.emptyList());
 
 	@TagSync
 	@TagField("hasElectricalPower")
@@ -115,6 +116,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 				}
 			} else {
 				EntityCoupleableRollingStock coupled = this.getCoupled(coupler);
+				System.out.println(this.getCoupledUUID(coupler));
 				if (this.isCoupled(coupler) && this.isCouplerEngaged(coupler) && coupled != null) {
 					player.sendMessage(ChatText.COUPLER_STATUS_COUPLED.getMessage(
 							coupler,
@@ -189,19 +191,16 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (state != null) {
 			setCoupledUUID(CouplerType.FRONT, state.interactingFront);
 			setCoupledUUID(CouplerType.BACK, state.interactingRear);
+			consist = state.consist;
 		}
 	}
 
 	public void keepLoaded() {
 		World world = getWorld();
 		world.keepLoaded(getBlockPosition());
-		world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
-		world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
-		if (this.lastKnownFront != null) {
-			world.keepLoaded(this.lastKnownFront);
-		}
-		if (this.lastKnownRear != null) {
-			world.keepLoaded(this.lastKnownRear);
+		if (getCurrentState() != null && !getCurrentState().atRest) {
+			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.FRONT)));
+			world.keepLoaded(new Vec3i(this.guessCouplerPosition(CouplerType.BACK)));
 		}
 	}
 
@@ -220,7 +219,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (Objects.equals(target, id)) {
 			return;
 		}
-
 		if (target == null && isCouplerEngaged(coupler)) {
 			// Technically this fires the coupling sound twice (once for each entity)
 			new SoundPacket(getDefinition().couple_sound,
@@ -229,24 +227,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 					.sendToObserving(this);
 		}
 
-		EntityCoupleableRollingStock coupled = id != null ? findByUUID(id) : null;
-
 		switch (coupler) {
 			case FRONT:
 				coupledFront = id;
-				if (coupledFront == null) {
-					lastKnownFront = null;
-				} else if (coupled != null){
-					lastKnownFront = new Vec3i(coupled.getPosition());
-				}
 				break;
 			case BACK:
 				coupledBack = id;
-				if (coupledBack == null) {
-					lastKnownRear = null;
-				} else if (coupled != null){
-					lastKnownFront = new Vec3i(coupled.getPosition());
-				}
 				break;
 		}
 	}

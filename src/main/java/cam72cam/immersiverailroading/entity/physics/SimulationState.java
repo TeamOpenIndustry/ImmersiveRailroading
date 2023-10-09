@@ -67,7 +67,7 @@ public class SimulationState {
     public boolean frontPulling;
     public boolean rearPushing;
     public boolean rearPulling;
-    public List<UUID> consist;
+    public Consist consist;
 
     public static class Configuration {
         public UUID id;
@@ -201,7 +201,7 @@ public class SimulationState {
         calculateBlockCollisions(Collections.emptyList());
         blocksToBreak = Collections.emptyList();
 
-        consist = Collections.singletonList(config.id);
+        consist = stock.consist;
     }
 
     private SimulationState(SimulationState prev) {
