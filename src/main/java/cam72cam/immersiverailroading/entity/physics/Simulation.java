@@ -82,9 +82,10 @@ public class Simulation {
         for (int tryLoad = 0; tryLoad < 10; tryLoad++) {
             // If this is too slow, we could hang onto the list of stock that is at rest.
             // We should only need to do this when stock is no longer at rest or changes dirty flag
+            int lastCount = loaded == null ? 0 : loaded.size();
             loaded = world.getEntities(EntityCoupleableRollingStock.class);
+            boolean newChunksLoaded = lastCount != loaded.size();
 
-            boolean newChunksLoaded = false;
             for (EntityCoupleableRollingStock stock : loaded) {
 
                 if (!stateMap.containsKey(stock.getUUID())) {

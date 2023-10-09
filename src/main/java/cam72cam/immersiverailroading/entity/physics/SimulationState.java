@@ -202,6 +202,11 @@ public class SimulationState {
         blocksToBreak = Collections.emptyList();
 
         consist = stock.consist;
+
+        if (stock.getTickCount() <= 5) {
+            // Just loaded, not dirty yet
+            dirty = false;
+        }
     }
 
     private SimulationState(SimulationState prev) {
@@ -404,7 +409,6 @@ public class SimulationState {
     }
 
     public double forcesNewtons() {
-        // Int cast here means that anything under 1degree of pitch is ignored (helps with chunk loading)
         double gradeForceNewtons = config.massKg * -9.8 * Math.sin(Math.toRadians(pitch)) * Config.ConfigBalance.slopeMultiplier;
         return config.tractiveEffortNewtons(Speed.fromMinecraft(velocity)) + gradeForceNewtons;
     }
@@ -416,6 +420,9 @@ public class SimulationState {
     public double frictionNewtons() {
         // https://evilgeniustech.com/idiotsGuideToRailroadPhysics/OtherLocomotiveForces/#rolling-resistance
         double rollingResistanceNewtons = config.rollingResistanceCoefficient * (config.massKg * 9.8);
+        // https://www.arema.org/files/pubs/pgre/PGChapter2.pdf
+        // ~15 lb/ton -> 0.01 weight ratio -> 0.001 uS with gravity
+        double startingFriction = velocity == 0 ? 0.001 * config.massKg * 9.8 : 0;
         // TODO This is kinda directional?
         double blockResistanceNewtons = interferingResistance * 1000 * Config.ConfigDamage.blockHardness;
 
@@ -431,6 +438,6 @@ public class SimulationState {
 
         brakeAdhesionNewtons *= Config.ConfigBalance.brakeMultiplier;
 
-        return rollingResistanceNewtons + blockResistanceNewtons + brakeAdhesionNewtons + directResistance;
+        return rollingResistanceNewtons + blockResistanceNewtons + brakeAdhesionNewtons + directResistance + startingFriction;
     }
 }

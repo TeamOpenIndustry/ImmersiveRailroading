@@ -5,10 +5,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -631,7 +629,7 @@ public class Consist {
 
     public static class TagMapper implements cam72cam.mod.serialization.TagMapper<Consist> {
         @Override
-        public TagAccessor<Consist> apply(Class<Consist> type, String fieldName, TagField tag) throws SerializationException {
+        public TagAccessor<Consist> apply(Class<Consist> type, String fieldName, TagField tag) {
             return new TagAccessor<Consist>(
                     (d, o) -> {
                         if (o != null) {
