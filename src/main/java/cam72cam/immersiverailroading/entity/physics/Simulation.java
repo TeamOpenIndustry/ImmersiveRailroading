@@ -243,7 +243,7 @@ public class Simulation {
 
             for (int sbi = sai+1; sbi < states.size(); sbi++) {
                 SimulationState stateB = states.get(sbi);
-                if (stateA.atRest && stateB.atRest) {
+                if (stateA.atRest && stateB.atRest && !stateA.dirty && !stateB.dirty) {
                     continue;
                 }
                 if (stateB.interactingFront != null && stateB.interactingRear != null) {
