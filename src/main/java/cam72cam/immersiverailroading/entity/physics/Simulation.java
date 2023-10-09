@@ -88,18 +88,19 @@ public class Simulation {
             for (EntityCoupleableRollingStock stock : loaded) {
 
                 if (!stateMap.containsKey(stock.getUUID())) {
-                    if (stock.states.isEmpty()) {
+                    for (SimulationState state : stock.states) {
+                        int stateIteration = state.tickID - tickID;
+                        if (stateIteration >= 0) {
+                            state.update(stock);
+                            stateMaps.get(stateIteration).put(stock.getUUID(), state);
+                        }
+                    }
+
+                    if (!stateMap.containsKey(stock.getUUID())) {
+                        // This should only ever happen right after stock is placed.
                         SimulationState state = new SimulationState(stock);
                         state.tickID = tickID;
                         stateMap.put(stock.getUUID(), state);
-                    } else {
-                        for (SimulationState state : stock.states) {
-                            int stateIteration = state.tickID - tickID;
-                            if (stateIteration >= 0) {
-                                state.update(stock);
-                                stateMaps.get(stateIteration).put(stock.getUUID(), state);
-                            }
-                        }
                     }
                 }
 
