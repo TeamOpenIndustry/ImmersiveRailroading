@@ -634,7 +634,6 @@ public class Consist {
         public TagAccessor<Consist> apply(Class<Consist> type, String fieldName, TagField tag) throws SerializationException {
             return new TagAccessor<Consist>(
                     (d, o) -> {
-                        System.out.println("WRITE CONSIST");
                         if (o != null) {
                             d.set(fieldName, new TagCompound()
                                     .setList("ids", o.ids, u -> new TagCompound().setUUID("id", u))
@@ -643,13 +642,10 @@ public class Consist {
                         }
                     },
                     // TODO we could fallback to lastKnownFront/Rear
-                    d -> {
-                        System.out.println("READ CONSIST");
-                        return d.hasKey(fieldName) ? new Consist(
-                                d.get(fieldName).getList("ids", t -> t.getUUID("id")),
-                                d.get(fieldName).getList("pos", t -> t.getVec3i("p"))
-                        ) : new Consist(Collections.emptyList(), Collections.emptyList());
-                    }
+                    d -> d.hasKey(fieldName) ? new Consist(
+                            d.get(fieldName).getList("ids", t -> t.getUUID("id")),
+                            d.get(fieldName).getList("pos", t -> t.getVec3i("p"))
+                    ) : new Consist(Collections.emptyList(), Collections.emptyList())
             ) {
                 @Override
                 public boolean applyIfMissing() {
