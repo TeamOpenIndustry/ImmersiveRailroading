@@ -203,10 +203,8 @@ public class SimulationState {
 
         consist = stock.consist;
 
-        if (stock.getTickCount() <= 5) {
-            // Just loaded, not dirty yet
-            dirty = false;
-        }
+        // If we just placed it, need to adjust it.  Otherwise, it already existed and is just loading in
+        dirty = stock.newlyPlaced;
     }
 
     private SimulationState(SimulationState prev) {

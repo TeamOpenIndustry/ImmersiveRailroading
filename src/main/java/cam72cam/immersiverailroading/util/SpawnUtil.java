@@ -78,6 +78,8 @@ public class SpawnUtil {
 						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.subtract(rear)));
 					}
 				}
+
+				moveable.newlyPlaced = true;
 			}
 
 			if (stock instanceof EntityBuildableRollingStock) {
