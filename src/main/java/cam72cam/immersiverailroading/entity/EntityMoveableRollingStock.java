@@ -58,6 +58,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     public long lastCollision = 0;
 
+    public boolean newlyPlaced = false;
+
     @Override
     public void load(TagCompound data) {
         super.load(data);
