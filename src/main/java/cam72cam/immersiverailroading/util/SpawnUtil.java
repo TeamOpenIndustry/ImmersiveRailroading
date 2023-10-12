@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
@@ -46,23 +47,39 @@ public class SpawnUtil {
 		if (worldIn.isServer) {
 			EntityRollingStock stock = def.spawn(worldIn, new Vec3d(pos).add(0.5, 0.1, 0.5), yaw, gauge, data.texture);
 
-			if (stock instanceof EntityCoupleableRollingStock) {
-				EntityCoupleableRollingStock ecrs = (EntityCoupleableRollingStock) stock;
-				outer:
-				for (int i = 0; i <= 90; i+= 5) {
-					for (int j = -1; j <= 1; j += 2) {
-						ecrs.setRotationYaw(yaw + i * j);
-						SimulationState state = new SimulationState(ecrs).next(offset, new ArrayList<>());
-						if (state.position.distanceTo(ecrs.getPosition()) > offset/2) {
-							ecrs.setPosition(state.position);
-							ecrs.setRotationYaw(state.yaw);
-							ecrs.setRotationPitch(state.pitch);
-							ecrs.setFrontYaw(state.yawFront);
-							ecrs.setRearYaw(state.yawRear);
-							break outer;
-						}
+			Vec3d center = stock.getPosition();
+			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(-0.1, yaw));
+			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(0.1, yaw));
+			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(offset, yaw));
+			stock.setPosition(center);
+
+			if (stock instanceof EntityMoveableRollingStock) {
+				EntityMoveableRollingStock moveable = (EntityMoveableRollingStock)stock;
+				ITrack centerte = ITrack.get(worldIn, center, true);
+				if (centerte != null) {
+					float frontDistance = moveable.getDefinition().getBogeyFront(gauge);
+					float rearDistance = moveable.getDefinition().getBogeyRear(gauge);
+					Vec3d front = centerte.getNextPosition(center, VecUtil.fromWrongYaw(frontDistance, yaw));
+					Vec3d rear = centerte.getNextPosition(center, VecUtil.fromWrongYaw(rearDistance, yaw));
+
+					moveable.setRotationYaw(VecUtil.toWrongYaw(front.subtract(rear)));
+					moveable.setRotationPitch(VecUtil.toPitch(front.subtract(rear)) - 90);
+					moveable.setPosition(rear.add(front.subtract(rear).scale(frontDistance / (frontDistance - rearDistance))));
+
+					ITrack frontte = ITrack.get(worldIn, front, true);
+					if (frontte != null) {
+						Vec3d frontNext = frontte.getNextPosition(front, VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));
+						moveable.setFrontYaw(VecUtil.toWrongYaw(frontNext.subtract(front)));
+					}
+
+					ITrack rearte = ITrack.get(worldIn, rear, true);
+					if (rearte != null) {
+						Vec3d rearNext = rearte.getNextPosition(rear, VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));
+						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.subtract(rear)));
 					}
 				}
+
+				moveable.newlyPlaced = true;
 			}
 
 			if (stock instanceof EntityBuildableRollingStock) {

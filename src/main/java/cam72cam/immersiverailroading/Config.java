@@ -271,7 +271,15 @@ public class Config {
 		public static boolean defaultAugmentComputer = false;
 		@Comment("Warn if a physics tick takes more than the given time in ms")
 		@Range(min = 1, max = 100)
-		public static long physicsWarnThresholdMs = 20;
+		public static int physicsWarnThresholdMs = 20;
+
+		@Comment("Warn if a physics total iteration takes more than the given time in ms")
+		@Range(min = 1, max = 100)
+		public static int physicsWarnTotalThresholdMs = 40;
+
+		@Comment("Number of physics steps to cache for future movement / send in packets.  DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING")
+		@Range(min = 10, max = 60)
+		public static int physicsFutureTicks = 10;
     }
 
 	public static boolean isFuelRequired(Gauge gauge) {
