@@ -490,4 +490,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         double pressureNewtons = getDefinition().directFrictionCoefficient * getBrakePressure() * newtons;
         return retardedNewtons + independentNewtons + pressureNewtons;
     }
+
+    public double getBrakeAdhesionEfficiency() {
+        return 1;
+    }
 }
