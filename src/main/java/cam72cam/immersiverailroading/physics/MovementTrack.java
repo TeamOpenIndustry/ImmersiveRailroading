@@ -162,25 +162,25 @@ public class MovementTrack {
 				}
 			}
 
-			/* Simple ordered binary search
+			/* Simple ordered binary search ***
 			l    c      r
 			l    c  r
 			    lc  r
 			    lcr
 			    lr
+
+			 *** Updated to step by 1/3rds since this is not a purely linear search.
 			 */
 			int left = 0;
 			double leftDistance = positions.get(left).distanceToSquared(relative);
 			int right = positions.size() - 1;
 			double rightDistance = positions.get(right).distanceToSquared(relative);
 			while (right - left > 1) {
-				double midIdx = left + (right - left) / 2f;
-
 				if (leftDistance > rightDistance) {
-					left = (int) Math.floor(midIdx);
+					left = (int) Math.ceil(left + (right - left) / 3f);
 					leftDistance = positions.get(left).distanceToSquared(relative);
 				} else {
-					right = (int) Math.ceil(midIdx);
+					right = (int) Math.floor(right + (left - right) / 3f);
 					rightDistance = positions.get(right).distanceToSquared(relative);
 				}
 			}
