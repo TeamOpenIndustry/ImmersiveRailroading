@@ -35,10 +35,8 @@ public class FlangeSound {
         }
 
         void effects() {
-            double yawDelta = Math.max(
-                    DegreeFuncs.delta(stock.getFrontYaw(), stock.getRotationYaw())/stock.getDefinition().getBogeyFront(stock.gauge),
-                    DegreeFuncs.delta(stock.getRearYaw(), stock.getRotationYaw())/-stock.getDefinition().getBogeyRear(stock.gauge)
-            );
+            double yawDelta = DegreeFuncs.delta(stock.getFrontYaw(), stock.getRearYaw()) /
+                    Math.abs(stock.getDefinition().getBogeyFront(stock.gauge) - stock.getDefinition().getBogeyRear(stock.gauge));
             double startingFlangeSpeed = 5;
             double kmh = Math.abs(stock.getCurrentSpeed().metric());
             double flangeMinYaw = stock.getDefinition().flange_min_yaw;

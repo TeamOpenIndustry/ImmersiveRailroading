@@ -459,6 +459,13 @@ public abstract class Locomotive extends FreightTank {
 		return super.getBrakeSystemEfficiency();
 	}
 
+	@Override
+	public double getBrakeAdhesionEfficiency() {
+		if (cogging) {
+			return 10;
+		}
+		return super.getBrakeAdhesionEfficiency();
+	}
 	/*
 	 * 
 	 * Misc Helper functions
