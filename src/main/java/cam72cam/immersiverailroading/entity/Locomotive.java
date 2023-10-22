@@ -66,6 +66,8 @@ public abstract class Locomotive extends FreightTank {
 	@TagField("cogging")
 	private boolean cogging = false;
 
+	private boolean slipping = false;
+
 	/*
 	 * 
 	 * Stock Definitions
@@ -400,7 +402,7 @@ public abstract class Locomotive extends FreightTank {
 	private double getStaticTractiveEffort(Speed speed) {
 		return (Config.ConfigBalance.FuelRequired ? this.getWeight() : this.getMaxWeight()) // KG
 				* 9.8 // M/S/S
-				* STEEL.staticFriction(STEEL)
+				* (slipping ? STEEL.kineticFriction(STEEL) : STEEL.staticFriction(STEEL))
 				* slipCoefficient(speed)
 				/ getDefinition().factorOfAdhesion()
 				* Config.ConfigBalance.tractionMultiplier;
@@ -413,8 +415,9 @@ public abstract class Locomotive extends FreightTank {
 
 		double adhesionFactor = Math.abs(getAppliedTractiveEffort(getCurrentSpeed())) /
 								getStaticTractiveEffort(getCurrentSpeed());
-		if (adhesionFactor > 1) {
-			return Math.copySign((adhesionFactor-1)/10, getReverser());
+		slipping = adhesionFactor > 1;
+		if (slipping) {
+			return Math.copySign((adhesionFactor-1)/5, getReverser());
 		}
 		return 0;
 	}
