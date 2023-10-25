@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.render.tile;
 
 import cam72cam.immersiverailroading.render.ExpireableMap;
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
@@ -30,7 +30,7 @@ public class MultiPreviewRender {
 
                 if (GlobalRender.getCameraPos(partialTicks).distanceTo(placementPosition) < GlobalRender.getRenderDistance() + 50) {
                     RenderState placementState = state.clone().translate(placementPosition);
-                    RailRenderUtil.render(info, preview.getWorld(), builder.pos, true, placementState);
+                    RailRender.render(info, preview.getWorld(), builder.pos, true, placementState);
                 }
             }
         }

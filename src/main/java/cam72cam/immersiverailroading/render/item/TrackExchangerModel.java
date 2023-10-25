@@ -3,8 +3,7 @@ package cam72cam.immersiverailroading.render.item;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
-import cam72cam.immersiverailroading.render.rail.RailBaseRender;
-import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
+import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -68,13 +67,13 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 		state.rotate(90, 1, 0, 0);
 
 		state.translate(-15.15, 0.75, -8.75);
-		RailBaseRender.draw(info, world, state);
-		RailBuilderRender.renderRailBuilder(info, world, state);
+		RailRender.get(info).renderRailBase(state);
+		RailRender.get(info).renderRailModel(state);
 
 		if (lookInfo != null) {
 			state.translate(-22.05, 0, 0);
-			RailBaseRender.draw(lookInfo, world, state);
-			RailBuilderRender.renderRailBuilder(lookInfo, world, state);
+			RailRender.get(lookInfo).renderRailBase(state);
+			RailRender.get(lookInfo).renderRailModel(state);
 		}
 	}
 

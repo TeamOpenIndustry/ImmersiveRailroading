@@ -23,7 +23,7 @@ public class RailBuilderRender {
         }
     };
 
-    public static void renderRailBuilder(RailInfo info, World world, RenderState state) {
+    public static void renderRailBuilder(RailInfo info, List<VecYawPitch> renderData, RenderState state) {
         TrackModel model = DefinitionManager.getTrack(info.settings.track, info.settings.gauge.value());
         if (model == null) {
             return;
@@ -33,7 +33,7 @@ public class RailBuilderRender {
         if (cached == null) {
             OBJRender.Builder builder = model.binder().builder();
 
-            for (VecYawPitch piece : info.getBuilder(world).getRenderData()) {
+            for (VecYawPitch piece : renderData) {
                 Matrix4 m = new Matrix4();
                 //m.rotate(Math.toRadians(info.placementInfo.yaw), 0, 1, 0);
                 m.translate(piece.x, piece.y, piece.z);

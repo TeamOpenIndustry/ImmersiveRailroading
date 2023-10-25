@@ -2,9 +2,7 @@ package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
-import cam72cam.immersiverailroading.render.rail.RailBaseRender;
-import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
-import cam72cam.immersiverailroading.render.rail.RailRenderUtil;
+import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.render.*;
@@ -50,9 +48,9 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 		state.translate(0.5, 0, 0.5);
 
-		RailBuilderRender.renderRailBuilder(info, world, state);
+		RailRender.get(info).renderRailModel(state);
 		state.translate(-0.5, 0, -0.5);
-		RailBaseRender.draw(info, world, state);
+		RailRender.get(info).renderRailBase(state);
 	}
 
 	private static ExpireableMap<String, RailInfo> infoCache = new ExpireableMap<>();
@@ -84,6 +82,6 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		Vec3d offPos = info.placementInfo.placementPosition.add(pos).subtract(cameraPos);
 		state.translate(offPos.x, offPos.y, offPos.z);
 
-		RailRenderUtil.render(info, world, pos, true, state);
+		RailRender.render(info, world, pos, true, state);
 	}
 }

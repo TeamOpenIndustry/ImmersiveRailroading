@@ -28,7 +28,7 @@ public class RailPreviewRender {
             Vec3d placementPosition = info.placementInfo.placementPosition;
             state.translate(placementPosition.x, placementPosition.y, placementPosition.z);
             if (!te.isMulti()) {
-                RailRenderUtil.render(info, te.getWorld(), te.isAboveRails() ? te.getPos().down() : te.getPos(), true, state);
+                RailRender.render(info, te.getWorld(), te.isAboveRails() ? te.getPos().down() : te.getPos(), true, state);
             }
             MinecraftClient.endProfiler();
 		});
