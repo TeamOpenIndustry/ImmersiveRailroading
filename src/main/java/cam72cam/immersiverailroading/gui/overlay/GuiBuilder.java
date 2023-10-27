@@ -489,6 +489,30 @@ public class GuiBuilder {
         }
     }
 
+    public boolean onMouseScroll(int scroll, EntityRollingStock stock, int maxx, int maxy, int x, int y) {
+        GuiBuilder target = find(stock, new Matrix4(), maxx, maxy, x, y);
+        if (target != null && !target.toggle) {
+            target.onMouseClick(stock);
+
+            float value = target.getValue(stock);
+
+            // Same as ClientPartDragging
+            value += (-scroll / 120f) / 50 * ConfigGraphics.ScrollSpeed;
+
+            if (target.setting != null) {
+                ConfigGraphics.settings.put(target.setting, value);
+                ConfigFile.write(ConfigGraphics.class);
+            } else {
+                if (target.readout != Readouts.TRAIN_BRAKE_LEVER) {
+                    new ControlChangePacket(stock, target.readout, target.control, target.global, target.texture_variant, value).sendToServer();
+                }
+            }
+
+            return false;
+        }
+        return true;
+    }
+
     public void onMouseRelease(EntityRollingStock stock) {
         float value = getValue(stock);
 
@@ -517,6 +541,7 @@ public class GuiBuilder {
         temporary_value = 0.5f;
     }
 
+
     private static GuiBuilder target = null;
 
     public boolean click(ClientEvents.MouseGuiEvent event, EntityRollingStock stock) {
@@ -544,6 +569,8 @@ public class GuiBuilder {
                     return false;
                 }
                 break;
+            case SCROLL:
+                return this.onMouseScroll(event.scroll, stock, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, event.y);
         }
         return true;
     }

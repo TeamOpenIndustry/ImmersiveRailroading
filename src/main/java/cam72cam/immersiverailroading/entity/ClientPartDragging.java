@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.entity;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.model.part.Interactable;
 import cam72cam.immersiverailroading.model.part.Seat;
@@ -31,7 +32,23 @@ public class ClientPartDragging {
         ClientPartDragging dragger = new ClientPartDragging();
         Mouse.registerDragHandler(dragger::capture);
         ClientEvents.TICK.subscribe(dragger::tick);
+        ClientEvents.SCROLL.subscribe(dragger::scroll);
         Packet.register(DragPacket::new, PacketDirection.ClientToServer);
+    }
+
+    private boolean scroll(int scroll) {
+        if (MinecraftClient.isReady() && targetInteractable != null) {
+            if (targetInteractable instanceof Control) {
+                float value = targetStock.getControlPosition((Control<?>) targetInteractable);
+                // Same as GuiBuilder
+                value += (-scroll / 120f) / 50 * ConfigGraphics.ScrollSpeed;
+                targetStock.setControlPosition((Control<?>) targetInteractable, value);
+                targetStock.onDragRelease((Control<?>) targetInteractable);
+                new DragPacket(targetStock, (Control<?>) targetInteractable, true, value, true).sendToServer();
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean capture(Player.Hand hand) {
@@ -78,6 +95,13 @@ public class ClientPartDragging {
             if (!stock.playerCanDrag(getPlayer(), control)) {
                 return;
             }
+            if (start && released) {
+                stock.onDragStart(control);
+                stock.onDrag(control, newValue);
+                stock.onDragRelease(control);
+                return;
+            }
+
             if (start) {
                 stock.onDragStart(control);
             } else if (released) {

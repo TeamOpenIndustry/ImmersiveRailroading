@@ -216,7 +216,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         }
 
         boolean isPressed = stock.getControlPressed(this);
-        if (!isPressed && lookedAt != stock.getWorld().getTicks()) {
+        if (!isPressed && Math.abs(lookedAt - stock.getWorld().getTicks()) > 2) {
             return;
         }
 
