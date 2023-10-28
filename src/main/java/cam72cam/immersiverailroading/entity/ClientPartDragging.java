@@ -36,12 +36,12 @@ public class ClientPartDragging {
         Packet.register(DragPacket::new, PacketDirection.ClientToServer);
     }
 
-    private boolean scroll(int scroll) {
+    private boolean scroll(double scroll) {
         if (MinecraftClient.isReady() && targetInteractable != null) {
             if (targetInteractable instanceof Control) {
                 float value = targetStock.getControlPosition((Control<?>) targetInteractable);
                 // Same as GuiBuilder
-                value += (-scroll / 120f) / 50 * ConfigGraphics.ScrollSpeed;
+                value += scroll / -50 * ConfigGraphics.ScrollSpeed;
                 targetStock.setControlPosition((Control<?>) targetInteractable, value);
                 targetStock.onDragRelease((Control<?>) targetInteractable);
                 new DragPacket(targetStock, (Control<?>) targetInteractable, true, value, true).sendToServer();

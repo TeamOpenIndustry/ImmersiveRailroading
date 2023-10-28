@@ -489,7 +489,7 @@ public class GuiBuilder {
         }
     }
 
-    public boolean onMouseScroll(int scroll, EntityRollingStock stock, int maxx, int maxy, int x, int y) {
+    public boolean onMouseScroll(double scroll, EntityRollingStock stock, int maxx, int maxy, int x, int y) {
         GuiBuilder target = find(stock, new Matrix4(), maxx, maxy, x, y);
         if (target != null && !target.toggle) {
             target.onMouseClick(stock);
@@ -497,7 +497,7 @@ public class GuiBuilder {
             float value = target.getValue(stock);
 
             // Same as ClientPartDragging
-            value += (-scroll / 120f) / 50 * ConfigGraphics.ScrollSpeed;
+            value += scroll / -50 * ConfigGraphics.ScrollSpeed;
 
             if (target.setting != null) {
                 ConfigGraphics.settings.put(target.setting, value);
