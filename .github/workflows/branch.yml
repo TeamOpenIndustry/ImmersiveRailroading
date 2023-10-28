@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        branch: [1.12.2-forge]
+        branch: [1.12.2-forge, 1.16.5-forge]
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
