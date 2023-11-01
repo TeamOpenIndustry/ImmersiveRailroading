@@ -61,4 +61,8 @@ public class ConfigGraphics {
 
 	@Comment("Settings used in the stock user interfaces")
 	public static Map<String, Float> settings = new HashMap<>();
+
+	@Comment("Mouse Scroll Speed (negative values invert it)")
+	@Range(min = -10, max = 10)
+	public static float ScrollSpeed = 1;
 }
