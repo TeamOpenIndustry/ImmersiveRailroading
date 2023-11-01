@@ -7,7 +7,8 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.opengl.DirectDraw;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.render.opengl.Texture;
-import cam72cam.mod.world.World;
+
+import java.util.List;
 
 public class RailBaseOverlayRender {
 	private static final ExpireableMap<String, DirectDraw> cache = new ExpireableMap<String, DirectDraw>() {
@@ -21,11 +22,11 @@ public class RailBaseOverlayRender {
 		}
 	};
 
-	private static DirectDraw doDraw(RailInfo info, World world, Vec3i pos) {
+	private static DirectDraw doDraw(RailInfo info, List<TrackBase> tracks, Vec3i pos) {
 		DirectDraw draw = new DirectDraw();
 		Vec3i placePos = new Vec3i(info.placementInfo.placementPosition).add(pos);
 
-		for (TrackBase base : info.getBuilder(world, placePos).getTracksForRender()) {
+		for (TrackBase base : tracks) {
 			boolean canPlace = base.canPlaceTrack();
 			if (!canPlace) {
 				Vec3i tpos = base.getPos();
@@ -72,11 +73,11 @@ public class RailBaseOverlayRender {
 		return draw;
 	}
 
-	public static void draw(RailInfo info, World world, Vec3i pos, RenderState state) {
+	public static void draw(RailInfo info, List<TrackBase> tracks, Vec3i pos, RenderState state) {
 		String key = info.uniqueID + pos.add(new Vec3i(info.placementInfo.placementPosition));
 		DirectDraw draw = cache.get(key);
 		if (draw == null) {
-			draw = doDraw(info, world, pos);
+			draw = doDraw(info, tracks, pos);
 			cache.put(key, draw);
 		}
 		state.texture(Texture.NO_TEXTURE);

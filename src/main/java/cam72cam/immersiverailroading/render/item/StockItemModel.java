@@ -76,7 +76,7 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 				binder.texture(data.texture);
 			}
 
-			try (OBJRender.Binding vbo = binder.bind(state)) {
+			try (OBJRender.Binding vbo = binder.bind(state, true)) {
 				vbo.draw(def.itemGroups);
 			}
 			def.getModel().free();
