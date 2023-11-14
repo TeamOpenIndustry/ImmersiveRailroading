@@ -7,8 +7,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
-import cam72cam.immersiverailroading.render.rail.RailBaseRender;
-import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
+import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.TrackBase;
@@ -358,9 +357,9 @@ public class TrackGui implements IScreen {
 			state.rotate(90, 1, 0, 0);
 			state.scale(-scale, scale, scale);
 			state.translate(0, 0, 1);
-			RailBuilderRender.renderRailBuilder(info, MinecraftClient.getPlayer().getWorld(), state);
+			RailRender.get(info).renderRailModel(state);
 			state.translate(-0.5, 0, -0.5);
-			RailBaseRender.draw(info, MinecraftClient.getPlayer().getWorld(), state);
+			RailRender.get(info).renderRailBase(state);
 			return;
 		}
 
@@ -404,9 +403,9 @@ public class TrackGui implements IScreen {
 			state.rotate(frame/2.0, 0, 1, 0);
 			state.translate(0, 0, -1);
 
-			RailBuilderRender.renderRailBuilder(info, MinecraftClient.getPlayer().getWorld(), state);
+			RailRender.get(info).renderRailModel(state);
 			state.translate(-0.5, 0, -0.5);
-			RailBaseRender.draw(info, MinecraftClient.getPlayer().getWorld(), state);
+			RailRender.get(info).renderRailBase(state);
 
 			if (!info.settings.railBedFill.isEmpty()) {
 				StandardModel model = new StandardModel();
@@ -465,9 +464,9 @@ public class TrackGui implements IScreen {
 		if (settings.type == TrackItems.CUSTOM) {
 			state.translate(-length / 2.0, 0, 0);
 		}
-		RailBuilderRender.renderRailBuilder(info, MinecraftClient.getPlayer().getWorld(), state);
+		RailRender.get(info).renderRailModel(state);
 		state.translate(-0.5, 0, -0.5);
-		RailBaseRender.draw(info, MinecraftClient.getPlayer().getWorld(), state);
+		RailRender.get(info).renderRailBase(state);
 		if (!info.settings.railBedFill.isEmpty()) {
 			StandardModel model = new StandardModel();
 			for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {

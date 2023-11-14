@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.*;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.entity.Player;
@@ -160,14 +161,14 @@ public class RailInfo {
 	}
 
 
-	public Map<Vec3i, BuilderBase> builders = new HashMap<>();
+	public ExpireableMap<Vec3i, BuilderBase> builders = new ExpireableMap<>();
 	public BuilderBase getBuilder(World world, Vec3i pos) {
-		// TODO HOLY MEMORY LEAK BATMAN!
-		if (builders.containsKey(pos)) {
-			return builders.get(pos);
+		BuilderBase builder = builders.get(pos);
+		if (builder == null) {
+			builder = constructBuilder(world, pos);
+			builders.put(pos, builder);
 		}
-		builders.put(pos, constructBuilder(world, pos));
-		return builders.get(pos);
+		return builder;
 	}
 	private BuilderBase constructBuilder(World world, Vec3i pos) {
 		switch (settings.type) {
