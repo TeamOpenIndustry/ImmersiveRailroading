@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *          comment = "Any character that follows a # is ignored, unless it is a contained in a quoted string"
  *          whitespace = Any combination of spaces and tabs
  *          key =
- *              # An identifier made up of any non-whitespace character followed by a '=' or ':'
+ *              # An identifier made up of any non-assignment character followed by an assignment ('=' or ':')
  *              set: When a key is followed by ':' there can be multiple keys with that name which are grouped in a collection
  *              single = When a key is followed by '=' there can only be a single key with that name.
  *          string = Any sequence of characters that is optionally wrapped in "quotation marks"
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * */
 public class CAML {
-    private static final Pattern base = Pattern.compile("(\\s*)(\\S+)\\s*([=:])\\s?(\"[^\"]*\"|[^#]*)(#.*)?");
+    private static final Pattern base = Pattern.compile("(\\s*)([^=^:]+)\\s*([=:])\\s?(\"[^\"]*\"|[^#]*)(#.*)?");
     public static DataBlock parse(InputStream stream) throws IOException {
         List<String> lines = IOUtils.readLines(stream, StandardCharsets.UTF_8).stream()
                 .filter(s -> !StringUtils.isWhitespace(s.replaceFirst("#.*", "")))
@@ -85,6 +85,11 @@ public class CAML {
             String trimmed = val.trim();
             if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
                 trimmed = trimmed.substring(1, trimmed.length() - 1);
+            }
+
+            key = key.trim();
+            if (key.startsWith("\"") && key.endsWith("\"")) {
+                key = key.substring(1, key.length() - 1);
             }
 
             if (StringUtils.isWhitespace(val)) {
