@@ -213,6 +213,7 @@ public abstract class EntityRollingStockDefinition {
         private final Map<UUID, List<ISound>> sounds = new HashMap<>();
         private final Map<UUID, Float> lastMoveSoundValue = new HashMap<>();
         private final Map<UUID, Boolean> wasSoundPressed = new HashMap<>();
+        private static final List<ISound> toStop = new ArrayList<>();
 
         public ControlSoundsDefinition(Identifier engage, Identifier move, Float movePercent, Identifier disengage) {
             this.engage = engage;
@@ -226,6 +227,16 @@ public abstract class EntityRollingStockDefinition {
             move = data.getValue("move").asIdentifier();
             movePercent = data.getValue("movePercent").asFloat();
             disengage = data.getValue("disengage").asIdentifier();
+        }
+
+        public static void cleanupStoppedSounds() {
+            if (toStop.isEmpty()) {
+                return;
+            }
+            for (ISound sound : toStop) {
+                sound.stop();
+            }
+            toStop.clear();
         }
 
         private void createSound(EntityRollingStock stock, Identifier sound, Vec3d pos, boolean repeats) {
@@ -265,9 +276,8 @@ public abstract class EntityRollingStockDefinition {
             } else if (wasPressed && !isPressed) {
                 // Release
                 if (this.sounds.containsKey(stock.getUUID())) {
-                    for (ISound snd : this.sounds.remove(stock.getUUID())) {
-                        snd.stop();
-                    }
+                    // Start and Stop may have happend between ticks, we want to wait till the next tick to stop the sound
+                    toStop.addAll(this.sounds.remove(stock.getUUID()));
                 }
                 createSound(stock, disengage, pos, false);
             } else if (move != null && movePercent != null){
