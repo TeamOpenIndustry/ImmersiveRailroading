@@ -1,17 +1,166 @@
 element:
   import: "immersiverailroading:gui/default/common/settings.caml"
 
-
 element:
   import: "immersiverailroading:gui/default/common/opacity.caml"
-
   element:
-    setting = "legacy_gui"
-    translucent = true
-    invert = true
-    import: "immersiverailroading:gui/default/steam_v0.caml"
-
-  element:
-    setting = "legacy_gui"
-    translucent = true
-    import: "immersiverailroading:gui/default/steam_v1.caml"
+    screen_x = LEFT
+    screen_y = BOTTOM
+    import: "immersiverailroading:gui/default/common/scale.caml"
+    element:
+      # left panel
+      x = 10
+      y = -95
+      image = "immersiverailroading:gui/overlay_steam.png"
+      element:
+          # water level
+          x = 5
+          y = 75
+          image = "immersiverailroading:gui/fluid.png"
+          readout = "LIQUID"
+          translate =
+              x = 0
+              y = -50
+          scale =
+              y = 1
+          color =
+              0 = "0xAA0F0FFF"
+      element:
+          # steam level
+          x = 25
+          y = 75
+          image = "immersiverailroading:gui/fluid.png"
+          readout = "BOILER_PRESSURE"
+          translate =
+              x = 0
+              y = -50
+          scale =
+              y = 1
+          color =
+              0 = "0x99DDDDDD"
+      element:
+          # boiler temp
+          x = 45
+          y = 75
+          image = "immersiverailroading:gui/fluid.png"
+          readout = "TEMPERATURE"
+          translate =
+              x = 0
+              y = -40
+          scale =
+              y = 0.8
+          color =
+              0 = "0x99d1c715"
+              0.95 = "0x99d16c15"
+              1.05 = "0x99a21010"
+      element:
+          # brake pressure
+          x = 61
+          y = 74
+          image = "immersiverailroading:gui/indicator.png"
+          readout = "BRAKE_PRESSURE"
+          translate =
+              x = 0
+              y = -50
+          color =
+              0.0 = "0xDDa22020"
+      element:
+          # train brake
+          x = 61
+          y = 74
+          image = "immersiverailroading:gui/indicator.png"
+          readout = "TRAIN_BRAKE"
+          translate =
+              x = 0
+              y = -50
+      element:
+          # ind brake
+          x = 67
+          y = 74
+          image = "immersiverailroading:gui/indicator.png"
+          readout = "INDEPENDENT_BRAKE"
+          translate =
+              x = 0
+              y = -50
+      element:
+          # throttle
+          x = 81
+          y = 74
+          image = "immersiverailroading:gui/indicator.png"
+          readout = "THROTTLE"
+          translate =
+              x = 0
+              y = -50
+      element:
+          # reverser
+          x = 87
+          y = 74
+          image = "immersiverailroading:gui/indicator.png"
+          readout = "REVERSER"
+          translate =
+              x = 0
+              y = -50
+      element:
+          # speed readout
+          text =
+              value = "stat.speed stat.units_speed"
+              height = 6
+          x = 50
+          y = 8
+      element:
+          # top labels
+          y = 19
+          element:
+              x = 10
+              text =
+                  value = "stat.liquidstat.units_liquid"
+                  height = 4
+          element:
+              x = 30
+              text =
+                  value = "stat.boiler_pressurestat.units_boiler_pressure"
+                  height = 4
+          element:
+              x = 50
+              text =
+                  value = "stat.temperaturestat.units_temperature"
+                  height = 4
+          element:
+              x = 68
+              text =
+                  value = "label.brake"
+                  height = 4
+          element:
+              x = 89
+              text =
+                  value = "label.throttle"
+                  height = 4
+      element:
+          # bottom labels
+          y = 78
+          element:
+              x = 10
+              text =
+                  value = "stat.max_liquidstat.units_liquid"
+                  height = 4
+          element:
+              x = 30
+              text =
+                  value = "stat.max_boiler_pressurestat.units_boiler_pressure"
+                  height = 4
+          element:
+              x = 50
+              y = 0
+              text =
+                  value = "stat.max_temperaturestat.units_temperature"
+                  height = 4
+          element:
+              x = 68
+              text =
+                  value = ""
+                  height = 4
+          element:
+              x = 89
+              text =
+                  value = "label.reverser"
+                  height = 4

@@ -3,11 +3,13 @@ element:
   screen_y = TOP
   x = 4
   y = 4
-  image = "immersiverailroading:gui/default/common/gear.png"
-  toggle = true
+  element:
+    element:
+      image = "immersiverailroading:gui/default/common/dial_control_1.png"
+      toggle = true
 
-  setting = "IR_SETTINGS_PANEL"
-  setting_default = 1
+      setting = "IR_SETTINGS_PANEL"
+      setting_default = 1
 
 element:
   screen_x = MIDDLE
@@ -73,27 +75,27 @@ element:
       translate =
         x = 200
 
-  element:
-    x = 25
-    y = 90
-
-    element:
-      text =
-        value = "Original GUI"
-        height = 6
-      setting = "legacy_gui"
-      toggle = true
-      color =
-        0.0 = "0xFFFFFFFF"
-        1.0 = "0xFF999999"
-    element:
-      x = 50
-      setting = "legacy_gui"
-      text =
-        value = "Advanced GUI"
-        height = 6
-      toggle = true
-      invert = true
-      color =
-        0.0 = "0xFFFFFFFF"
-        1.0 = "0xFF999999"
+#  element:
+#    x = 25
+#    y = 90
+#
+#    element:
+#      text =
+#        value = "Original GUI"
+#        height = 6
+#      setting = "legacy_gui"
+#      toggle = true
+#      color =
+#        0.0 = "0xFFFFFFFF"
+#        1.0 = "0xFF999999"
+#    element:
+#      x = 50
+#      setting = "legacy_gui"
+#      text =
+#        value = "Advanced GUI"
+#        height = 6
+#      toggle = true
+#      invert = true
+#      color =
+#        0.0 = "0xFFFFFFFF"
+#        1.0 = "0xFF999999"
