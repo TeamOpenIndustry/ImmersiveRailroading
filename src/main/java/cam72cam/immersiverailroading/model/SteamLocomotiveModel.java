@@ -92,7 +92,7 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
         }
         pressureValve.effects(stock, stock.isOverpressure() && Config.isFuelRequired(stock.gauge));
         idleSounds.effects(stock, stock.getBoilerTemperature() > stock.ambientTemperature() + 5 ? 0.1f : 0);
-        whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.isAutomatedHorn(), stock.getHornPlayer());
+        whistle.effects(stock, stock.getBoilerPressure() > 0 || !Config.isFuelRequired(stock.gauge) ? stock.getHornTime() : 0, stock.getHornPull());
     }
 
     @Override

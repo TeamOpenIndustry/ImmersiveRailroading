@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.Augment;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.render.rail.RailBuilderRender;
+import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -44,7 +44,7 @@ public class RailBaseModel {
 					}
 				}
 
-                RailBuilderRender.renderRailBuilder(info, te.getWorld(), state.translate(info.placementInfo.placementPosition));
+				RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition));
 			});
 		}
 

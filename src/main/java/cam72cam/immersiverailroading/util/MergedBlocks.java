@@ -21,8 +21,9 @@ public class MergedBlocks implements DataBlock {
         override.getValuesMap().forEach((key, values) -> {
             if (primitiveSets.containsKey(key)) {
                 // Merge into new list
-                values = new ArrayList<>(values);
-                values.addAll(primitiveSets.get(key));
+                List<Value> tmp = new ArrayList<>(primitiveSets.get(key));
+                tmp.addAll(values);
+                values = tmp;
             }
             primitiveSets.put(key, values);
         });
@@ -34,8 +35,9 @@ public class MergedBlocks implements DataBlock {
         });
         override.getBlocksMap().forEach((key, blocks) -> {
             if (blockSets.containsKey(key)) {
-                blocks = new ArrayList<>(blocks);
-                blocks.addAll(blockSets.get(key));
+                List<DataBlock> tmp = new ArrayList<>(blockSets.get(key));
+                tmp.addAll(blocks);
+                blocks = tmp;
             }
             blockSets.put(key, blocks);
         });

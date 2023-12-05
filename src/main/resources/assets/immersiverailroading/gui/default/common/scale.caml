@@ -1,0 +1,5 @@
+setting = "GUI_SCALE"
+setting_default = 0.25
+scale =
+  x = 4
+  y = 4

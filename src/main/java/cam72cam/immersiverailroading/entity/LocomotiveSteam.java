@@ -103,7 +103,7 @@ public class LocomotiveSteam extends Locomotive {
 
 		// Cap the max "effective" reverser.  At high speeds having a fully open reverser just damages equipment
 		double reverser = getReverser();
-		double reverserCap = 0.5;
+		double reverserCap = 0.25;
 		double maxReverser = 1 - Math.abs(getCurrentSpeed().metric()) / getDefinition().getMaxSpeed(gauge).metric() * reverserCap;
 
 		// This should probably be tuned...

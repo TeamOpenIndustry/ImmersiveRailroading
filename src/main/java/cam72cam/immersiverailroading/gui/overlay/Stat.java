@@ -9,65 +9,106 @@ import java.util.Locale;
 
 public enum Stat {
     SPEED,
+    MAX_SPEED,
+    UNITS_SPEED,
     LIQUID,
     MAX_LIQUID,
-    BOILER_PSI,
-    MAX_BOILER_PSI,
+    UNITS_LIQUID,
+    BOILER_PRESSURE,
+    MAX_BOILER_PRESSURE,
+    UNITS_BOILER_PRESSURE,
     TEMPERATURE,
     MAX_TEMPERATURE,
+    UNITS_TEMPERATURE,
+    BRAKE_PRESSURE,
+    MAX_BRAKE_PRESSURE,
+    UNITS_BRAKE_PRESSURE,
     ;
+
     public String getValue(EntityRollingStock stock) {
+        Float temp = null;
+
         switch (this) {
             case SPEED:
                 if (stock instanceof EntityMoveableRollingStock) {
                     Speed speed = ((EntityMoveableRollingStock) stock).getCurrentSpeed();
                     switch (ConfigGraphics.speedUnit) {
                         case mph:
-                            return String.format("%.2f mph", Math.abs(speed.imperial()));
+                            return String.format("%.2f", Math.abs(speed.imperial()));
                         case ms:
-                            return String.format("%.2f m/s", Math.abs(speed.metric()) / 3.6);
+                            return String.format("%.2f", Math.abs(speed.metersPerSecond()));
                         case kmh:
-                        default:
-                            return String.format("%.2f km/h", Math.abs(speed.metric()));
+                            return String.format("%.2f", Math.abs(speed.metric()));
                     }
                 }
                 return "";
+            case MAX_SPEED:
+                if (stock instanceof Locomotive) {
+                    Speed speed = ((Locomotive)stock).getDefinition().getMaxSpeed(stock.gauge);
+                    switch (ConfigGraphics.speedUnit) {
+                        case mph:
+                            return String.format("%.0f", Math.abs(speed.imperial()));
+                        case ms:
+                            return String.format("%.0f", Math.abs(speed.metersPerSecond()));
+                        case kmh:
+                            return String.format("%.0f", Math.abs(speed.metric()));
+                    }
+                }
+                return "";
+            case UNITS_SPEED:
+                return ConfigGraphics.speedUnit.toUnitString();
             case LIQUID:
                 return stock instanceof FreightTank ?
-                        String.format("%.1fB",
+                        String.format("%.1f",
                                 ((FreightTank) stock).getLiquidAmount() / (float)Fluid.BUCKET_VOLUME)
                         : "";
             case MAX_LIQUID:
                 return stock instanceof FreightTank ?
-                        String.format("%.1fB",
+                        String.format("%.1f",
                                 ((FreightTank)stock).getTankCapacity().MilliBuckets() / (float)Fluid.BUCKET_VOLUME)
                         : "";
-            case BOILER_PSI:
+            case UNITS_LIQUID:
+                return "B";
+
+            case BOILER_PRESSURE:
                 return stock instanceof LocomotiveSteam ?
-                        String.format("%.1fPSI", ((LocomotiveSteam) stock).getBoilerPressure()) : "";
-            case MAX_BOILER_PSI:
+                        String.format("%.1f", ConfigGraphics.pressureUnit.convertFromPSI(((LocomotiveSteam) stock).getBoilerPressure())) : "";
+            case MAX_BOILER_PRESSURE:
                 return stock instanceof LocomotiveSteam ?
-                        String.format("%.1fPSI", (float)((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge))
+                        String.format("%.1f", ConfigGraphics.pressureUnit.convertFromPSI((float)((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge)))
                         : "";
+            case UNITS_BOILER_PRESSURE:
+                return ConfigGraphics.pressureUnit.toUnitString();
+
             case TEMPERATURE:
                 if (stock instanceof LocomotiveSteam) {
-                    return String.format("%.1fC", ((LocomotiveSteam) stock).getBoilerTemperature());
+                    temp = ((LocomotiveSteam) stock).getBoilerTemperature();
                 }
                 if (stock instanceof LocomotiveDiesel) {
-                    return String.format("%.1fC", ((LocomotiveDiesel) stock).getEngineTemperature());
+                    temp = ((LocomotiveDiesel) stock).getEngineTemperature();
                 }
-                return "";
+                return temp != null ? String.format("%.1f", ConfigGraphics.temperatureUnit.convertFromCelcius(temp)) : "";
             case MAX_TEMPERATURE:
                 if (stock instanceof LocomotiveSteam) {
-                    return String.format("%.1fC", 100f);
+                    temp = 100f;
                 }
                 if (stock instanceof LocomotiveDiesel) {
-                    return String.format("%.1fC", 150f);
+                    temp = 150f;
+                }
+                return temp != null ? String.format("%.1f", ConfigGraphics.temperatureUnit.convertFromCelcius(temp)) : "";
+            case UNITS_TEMPERATURE:
+                return ConfigGraphics.temperatureUnit.toUnitString();
+            case BRAKE_PRESSURE:
+                if (stock instanceof EntityMoveableRollingStock) {
+                    return String.format("%s", (int)(((EntityMoveableRollingStock) stock).getBrakePressure() * 100));
                 }
                 return "";
-            default:
-                return "";
+            case MAX_BRAKE_PRESSURE:
+                return "100";
+            case UNITS_BRAKE_PRESSURE:
+                return "%";
         }
+        return "";
     }
     @Override
     public String toString() {

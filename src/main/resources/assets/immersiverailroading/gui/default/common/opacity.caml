@@ -1,0 +1,3 @@
+setting = "GUI_OPACITY"
+setting_default = 1
+translucent = true

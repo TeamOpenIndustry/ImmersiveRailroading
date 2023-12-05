@@ -12,13 +12,11 @@ import cam72cam.immersiverailroading.registry.Quilling;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.entity.Entity;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalDouble;
 import java.util.UUID;
 
 public class Whistle {
@@ -49,7 +47,7 @@ public class Whistle {
             }
         }
 
-        public void update(EntityMoveableRollingStock stock, int hornTime, boolean isAutomatedHorn, Entity hornPlayer) {
+        public void update(EntityMoveableRollingStock stock, int hornTime, float hornPull) {
             if (hornTime < 1) {
                 pullString = 0;
                 soundDampener = 0;
@@ -68,20 +66,7 @@ public class Whistle {
                     if (soundDampener < 1) {
                         soundDampener += 0.1;
                     }
-                    if (hornPlayer != null) {
-                        float newString = (hornPlayer.getRotationPitch() + 90) / 180;
-                        delta = newString - pullString;
-                    } else {
-                        OptionalDouble control = stock.getDefinition().getModel().getControls().stream()
-                                .filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
-                                .mapToDouble(stock::getControlPosition)
-                                .max();
-                        if (control.isPresent() && !isAutomatedHorn) {
-                            delta = (float) control.getAsDouble() - pullString;
-                        } else {
-                            delta = (float) quilling.maxPull - pullString;
-                        }
-                    }
+                    delta = hornPull - pullString;
                 } else {
                     if (soundDampener > 0) {
                         soundDampener -= 0.07;
@@ -145,7 +130,7 @@ public class Whistle {
         }
     };
 
-    public void effects(EntityMoveableRollingStock stock, int hornTime, boolean isAutomatedHorn, Entity hornPlayer) {
+    public void effects(EntityMoveableRollingStock stock, int hornTime, float hornPull) {
         // Particles and Sound
 
         if (quilling != null) {
@@ -156,7 +141,7 @@ public class Whistle {
                 sounds.put(stock.getUUID(), sound);
             }
 
-            sound.update(stock, hornTime, isAutomatedHorn, hornPlayer);
+            sound.update(stock, hornTime, hornPull);
         } else {
             whistle.effects(stock, hornTime > 0);
         }

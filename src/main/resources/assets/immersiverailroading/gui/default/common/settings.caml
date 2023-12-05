@@ -1,0 +1,101 @@
+element:
+  screen_x = LEFT
+  screen_y = TOP
+  x = 4
+  y = 4
+  element:
+    element:
+      image = "immersiverailroading:gui/default/common/dial_control_1.png"
+      toggle = true
+
+      setting = "IR_SETTINGS_PANEL"
+      setting_default = 1
+
+element:
+  screen_x = MIDDLE
+  screen_y = MIDDLE
+  setting = "IR_SETTINGS_PANEL"
+  x = -125
+  y = -50
+  invert = true
+  hide = true
+
+  image = "immersiverailroading:gui/default/common/settings_panel.png"
+
+  element:
+    x = 125
+    y = 10
+    text =
+      value = "Immersive Railroading Interface Settings"
+      height = 8
+
+  element:
+    x = 17
+    y = 40
+    text =
+      value = "Scale:"
+      height = 6
+
+  element:
+    x = 35
+    y = 40
+    image = "immersiverailroading:gui/default/common/settings_slider.png"
+
+    element:
+      x = 0
+      y = -8
+      image = "immersiverailroading:gui/default/common/settings_bar.png"
+
+      setting = "GUI_SCALE"
+      setting_default = 0.25
+
+      translate =
+        x = 200
+
+  element:
+    x = 17
+    y = 70
+    text =
+      value = "Opacity:"
+      height = 6
+
+  element:
+    x = 35
+    y = 70
+    image = "immersiverailroading:gui/default/common/settings_slider.png"
+
+    element:
+      x = 0
+      y = -8
+      image = "immersiverailroading:gui/default/common/settings_bar.png"
+
+      setting = "GUI_OPACITY"
+      setting_default = 1
+
+      translate =
+        x = 200
+
+#  element:
+#    x = 25
+#    y = 90
+#
+#    element:
+#      text =
+#        value = "Original GUI"
+#        height = 6
+#      setting = "legacy_gui"
+#      toggle = true
+#      color =
+#        0.0 = "0xFFFFFFFF"
+#        1.0 = "0xFF999999"
+#    element:
+#      x = 50
+#      setting = "legacy_gui"
+#      text =
+#        value = "Advanced GUI"
+#        height = 6
+#      toggle = true
+#      invert = true
+#      color =
+#        0.0 = "0xFFFFFFFF"
+#        1.0 = "0xFF999999"

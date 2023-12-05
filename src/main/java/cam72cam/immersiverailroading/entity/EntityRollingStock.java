@@ -138,7 +138,9 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 
 	public void setTexture(String variant) {
-		this.texture = variant;
+		if (getDefinition().textureNames.containsKey(variant)) {
+			this.texture = variant;
+		}
 	}
 
 	@Override

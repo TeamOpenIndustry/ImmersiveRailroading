@@ -1,9 +1,15 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.library.PressureDisplayType;
 import cam72cam.immersiverailroading.library.SpeedDisplayType;
+import cam72cam.immersiverailroading.library.TemperatureDisplayType;
+import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
 import cam72cam.mod.render.OptiFine;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static cam72cam.mod.config.ConfigFile.*;
 
@@ -11,12 +17,6 @@ import static cam72cam.mod.config.ConfigFile.*;
 @Name("general")
 @File("immersiverailroading_graphics.cfg")
 public class ConfigGraphics {
-	@Comment( "Place to draw the Train GUI as a % from the left of the screen" )
-	public static int GUIPositionHorizontal = 2;
-
-	@Comment( "Place to draw the Train GUI as a % from the top of the screen" )
-	public static int GUIPositionVertical = 95;
-
 	@Comment("Enable Particles")
 	public static boolean particlesEnabled = true;
 
@@ -25,6 +25,12 @@ public class ConfigGraphics {
 	
 	@Comment( "What unit to use for speedometer. (kmh, mph or ms)" )
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
+
+	@Comment("What units to display pressure in (psi, bar)")
+	public static PressureDisplayType pressureUnit = PressureDisplayType.psi;
+
+	@Comment("What units to display pressure in (psi, bar)")
+	public static TemperatureDisplayType temperatureUnit = TemperatureDisplayType.celcius;
 
 	@Comment( "How long to keep textures in memory after they have left the screen (higher numbers = smoother game play, lower numbers = less GPU memory used)")
 	@Range(min = 0, max = 100)
@@ -52,4 +58,11 @@ public class ConfigGraphics {
 	@Comment("How likely a piece of stock is to sway (1 == always, 10 == infrequent)")
 	@Range(min = 0, max = 10)
 	public static int StockSwayChance = 1;
+
+	@Comment("Settings used in the stock user interfaces")
+	public static Map<String, Float> settings = new HashMap<>();
+
+	@Comment("Mouse Scroll Speed (negative values invert it)")
+	@Range(min = -10, max = 10)
+	public static float ScrollSpeed = 1;
 }

@@ -1,43 +1,52 @@
 element:
-    # left panel
-    x = 10
-    y = -95
-    image = "immersiverailroading:gui/overlay_handcar.png"
+  import: "immersiverailroading:gui/default/common/settings.caml"
+
+element:
+    import: "immersiverailroading:gui/default/common/opacity.caml"
     element:
-        # ind brake
-        x = 14
-        y = 74
-        image = "immersiverailroading:gui/indicator.png"
-        readout = "INDEPENDENT_BRAKE"
-        translate =
-            x = 0
-            y = -50
-    element:
-        # reverser
-        x = 35
-        y = 74
-        image = "immersiverailroading:gui/indicator.png"
-        readout = "REVERSER"
-        translate =
-            x = 0
-            y = -50
-    element:
-        # speed readout
-        text =
-            value = "stat.speed"
-            height = 6
-        x = 30
-        y = 8
-    element:
-        # top labels
-        y = 19
+        import: "immersiverailroading:gui/default/common/scale.caml"
+        screen_x = LEFT
+        screen_y = BOTTOM
         element:
-            x = 20
-            text =
-                value = "label.brake"
-                height = 4
-        element:
-            x = 38
-            text =
-                value = "label.throttle"
-                height = 4
+            # left panel
+            x = 10
+            y = -95
+            image = "immersiverailroading:gui/overlay_handcar.png"
+            element:
+                # ind brake
+                x = 14
+                y = 74
+                image = "immersiverailroading:gui/indicator.png"
+                readout = "INDEPENDENT_BRAKE"
+                translate =
+                    x = 0
+                    y = -50
+            element:
+                # reverser
+                x = 35
+                y = 74
+                image = "immersiverailroading:gui/indicator.png"
+                readout = "REVERSER"
+                translate =
+                    x = 0
+                    y = -50
+            element:
+                # speed readout
+                text =
+                    value = "stat.speed stat.units_speed"
+                    height = 6
+                x = 30
+                y = 8
+            element:
+                # top labels
+                y = 19
+                element:
+                    x = 20
+                    text =
+                        value = "label.brake"
+                        height = 4
+                element:
+                    x = 38
+                    text =
+                        value = "label.throttle"
+                        height = 4
