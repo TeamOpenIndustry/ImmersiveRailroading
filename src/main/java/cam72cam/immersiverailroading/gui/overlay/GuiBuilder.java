@@ -508,8 +508,19 @@ public class GuiBuilder {
         }
     }
 
+    private static GuiBuilder scrollTarget = null;
+    private static int lastScrolled = 0;
     public boolean onMouseScroll(double scroll, EntityRollingStock stock, int maxx, int maxy, int x, int y) {
+        if (!MinecraftClient.isReady()) {
+            return true;
+        }
+        int ticks = MinecraftClient.getPlayer().getTickCount();
+
         GuiBuilder target = find(stock, new Matrix4(), maxx, maxy, x, y);
+        if (target == null && lastScrolled + 10 > ticks) {
+            target = scrollTarget;
+        }
+
         if (target != null && !target.toggle) {
             target.onMouseClick(stock);
 
@@ -526,6 +537,9 @@ public class GuiBuilder {
                     new ControlChangePacket(stock, target.readout, target.control, target.global, target.texture_variant, value).sendToServer();
                 }
             }
+
+            scrollTarget = target;
+            lastScrolled = ticks;
 
             return false;
         }
