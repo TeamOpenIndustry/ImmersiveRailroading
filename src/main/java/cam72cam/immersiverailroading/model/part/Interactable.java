@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 
+// TODO rename to Widget?
 public class Interactable<T extends EntityMoveableRollingStock> {
     public final ModelComponent part;
     public long lookedAt;
@@ -16,6 +17,10 @@ public class Interactable<T extends EntityMoveableRollingStock> {
 
     public Vec3d center(EntityRollingStock stock) {
         return stock.getModelMatrix().apply(part.center);
+    }
+
+    public boolean disabled() {
+        return false;
     }
 
     public IBoundingBox getBoundingBox(EntityRollingStock stock) {

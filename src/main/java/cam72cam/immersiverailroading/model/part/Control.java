@@ -43,6 +43,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     private final Vec3d center;
     protected final ModelState state;
     private final String modelId;
+    private final boolean noInteract;
     private Vec3d rotationPoint = null;
     private float rotationDegrees = 0;
     private final Map<Axis, Float> rotations = new HashMap<>();
@@ -73,6 +74,10 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
         this.invert = part.modelIDs.stream().anyMatch(g -> g.contains("_INVERT_") || g.startsWith("INVERT_") || g.endsWith("_INVERT"));
         this.hide = part.modelIDs.stream().anyMatch(g -> g.contains("_HIDE_") || g.startsWith("HIDE_") || g.endsWith("_HIDE"));
+        this.noInteract = part.modelIDs.stream().anyMatch(g ->
+                g.contains("_NOINTERACT_") || g.startsWith("NOINTERACT_") || g.endsWith("_NOINTERACT") ||
+                g.contains("_NOTOUCH_") || g.startsWith("NOTOUCH_") || g.endsWith("_NOTOUCH")
+        );
         this.offset = part.modelIDs.stream().map(group -> {
             Matcher matcher = Pattern.compile("_OFFSET_([^_]+)").matcher(group);
             return matcher.find() ? Float.parseFloat(matcher.group(1)) : null;
@@ -196,6 +201,11 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         this.state = state;
         this.state.include(part);
         this.modelId = part.modelIDs.stream().findFirst().get();
+    }
+
+    @Override
+    public boolean disabled() {
+        return noInteract;
     }
 
     private static String formatLabel(ModelComponentType label) {

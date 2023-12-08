@@ -14,10 +14,7 @@ import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Comparator;
-import java.util.Objects;
 import java.util.UUID;
 
 public class ClientPartDragging {
@@ -183,6 +180,9 @@ public class ClientPartDragging {
 
                 double padding = 0.05 * stock.gauge.scale();
                 for (Interactable<?> interactable : stock.getDefinition().getModel().getInteractable()) {
+                    if (interactable.disabled()) {
+                        continue;
+                    }
                     IBoundingBox bb = interactable.getBoundingBox(stock).grow(new Vec3d(padding, padding, padding));
                     for (double i = 0.125; i < 3; i += 0.05 * stock.gauge.scale()) {
                         Vec3d cast = start.add(look.scale(i));
