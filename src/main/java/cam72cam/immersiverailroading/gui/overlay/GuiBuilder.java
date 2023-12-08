@@ -51,6 +51,7 @@ public class GuiBuilder {
     private final boolean invert;
     private final boolean translucent;
     private final boolean toggle;
+    private final ClampMode clamp;
     private final float tlx;
     private final float tly;
     private final float rotx;
@@ -99,6 +100,16 @@ public class GuiBuilder {
             }
 
             return valueOf(pos_y);
+        }
+    }
+
+    private enum ClampMode {
+        NONE, FLOOR, CEIL;
+        public static ClampMode from(String value) {
+            if (value != null) {
+                return valueOf(value.toUpperCase(Locale.ROOT));
+            }
+            return NONE;
         }
     }
 
@@ -167,6 +178,7 @@ public class GuiBuilder {
         this.invert = data.getValue("invert").asBoolean(false);
         this.translucent = data.getValue("translucent").asBoolean(data.getValue("hide").asBoolean(false));
         this.toggle = data.getValue("toggle").asBoolean(false);
+        this.clamp = ClampMode.from(data.getValue("clamp").asString());
 
         DataBlock tl = data.getBlock("translate");
         if (tl != null) {
@@ -269,6 +281,13 @@ public class GuiBuilder {
             value = ConfigGraphics.settings.getOrDefault(setting, 0f);
         } else if (texture_variant != null) {
             value = texture_variant.equals(stock.getTexture()) ? 1 : 0;
+        }
+
+        switch (clamp) {
+            case FLOOR:
+                value = value < 0.95 ? 0 : 1;
+            case CEIL:
+                value = value < 0.05 ? 0 : 1;
         }
 
         if (invert) {
