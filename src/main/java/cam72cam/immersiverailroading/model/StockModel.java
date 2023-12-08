@@ -85,10 +85,14 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             if (!stock.internalLightsEnabled()) {
                 return base;
             }
+            Boolean interiorHack = null;
+            if (!hasInterior) {
+                interiorHack = MinecraftClient.getPlayer().getRiding() != stock;
+            }
             float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
             float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
             boolean brighter = blockLight < interiorLight;
-            return base.merge(new ModelState.LightState(brighter ? interiorLight : null, brighter ? skyLight : null, true, null));
+            return base.merge(new ModelState.LightState(brighter ? interiorLight : null, brighter ? skyLight : null, true, interiorHack));
         };
 
         animations = new ArrayList<>();
