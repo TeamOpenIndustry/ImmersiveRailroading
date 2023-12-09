@@ -247,6 +247,8 @@ public class Consist {
             future.frontPulling = frontLink != null && frontLink.canPull;
             future.rearPushing = rearLink != null && rearLink.canPush;
             future.rearPulling = rearLink != null && rearLink.canPull;
+            future.slackFrontPercent = frontLink != null ? (float) frontLink.slackPercent() : 0;
+            future.slackRearPercent = rearLink != null ? (float) rearLink.slackPercent() : 0;
 
             return future;
         }
@@ -378,6 +380,10 @@ public class Consist {
                     //nextParticle.velocity_M_S = prevParticle.velocity_M_S;
                 }
             }
+        }
+
+        public double slackPercent() {
+            return (maxDistance_M - minDistance_M) > 0 ? (currentDistance_M - minDistance_M) / (maxDistance_M - minDistance_M) : 0;
         }
     }
 

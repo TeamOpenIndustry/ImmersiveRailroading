@@ -68,6 +68,8 @@ public class SimulationState {
     public boolean rearPushing;
     public boolean rearPulling;
     public Consist consist;
+    public float slackFrontPercent;
+    public float slackRearPercent;
 
     public static class Configuration {
         public UUID id;
@@ -235,6 +237,9 @@ public class SimulationState {
         interferingResistance = prev.interferingResistance;
         blocksToBreak = Collections.emptyList();
         directResistance = prev.directResistance;
+
+        slackFrontPercent = prev.slackFrontPercent;
+        slackRearPercent = prev.slackRearPercent;
 
         consist = prev.consist;
     }

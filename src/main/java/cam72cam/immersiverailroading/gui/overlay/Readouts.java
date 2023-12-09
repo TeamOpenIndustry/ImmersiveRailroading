@@ -20,6 +20,8 @@ public enum Readouts {
     COUPLER_REAR,
     COUPLED_FRONT,
     COUPLED_REAR,
+    COUPLER_SLACK_FRONT,
+    COUPLER_SLACK_REAR,
     BELL,
     WHISTLE,
     HORN,
@@ -73,6 +75,10 @@ public enum Readouts {
                 return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.FRONT) && ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.FRONT) ? 1 : 0 : 0;
             case COUPLED_REAR:
                 return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).isCoupled(CouplerType.BACK) && ((EntityCoupleableRollingStock) stock).isCouplerEngaged(CouplerType.BACK) ? 1 : 0 : 0;
+            case COUPLER_SLACK_FRONT:
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).slackFrontPercent : 0;
+            case COUPLER_SLACK_REAR:
+                return stock instanceof EntityCoupleableRollingStock ? ((EntityCoupleableRollingStock) stock).slackRearPercent : 0;
             case BELL:
                 return stock instanceof Locomotive ? ((Locomotive) stock).getBell() > 0 ? 1 : 0 : 0;
             case WHISTLE:

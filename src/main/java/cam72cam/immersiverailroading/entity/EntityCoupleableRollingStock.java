@@ -90,6 +90,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagField("lastKnownRear")
 	public Vec3i lastKnownRear = null;
 
+	@TagField("slackFront")
+	@TagSync
+	public float slackFrontPercent;
+	@TagField("slackRear")
+	@TagSync
+	public float slackRearPercent;
+
 	@TagSync
 	@TagField("hasElectricalPower")
 	private boolean hasElectricalPower;
@@ -191,6 +198,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			keepLoaded();
 		}
 
+		slackFrontPercent = 0;
+		slackRearPercent = 0;
+
 		SimulationState state = getCurrentState();
 		if (state != null) {
 			setCoupledUUID(CouplerType.FRONT, state.interactingFront);
@@ -213,6 +223,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			} else {
 				lastKnownRear = null;
 			}
+
+			this.slackFrontPercent = state.slackFrontPercent;
+			this.slackRearPercent = state.slackRearPercent;
 		}
 	}
 
