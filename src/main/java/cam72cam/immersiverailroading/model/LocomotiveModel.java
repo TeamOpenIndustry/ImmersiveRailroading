@@ -19,7 +19,6 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     private List<ModelComponent> components;
     private Bell bell;
 
-    protected DrivingAssembly drivingWheels;
     private ModelComponent frameFront;
     private ModelComponent frameRear;
     protected DrivingAssembly drivingWheelsFront;
@@ -127,12 +126,6 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
 
         cargoFillRear = CargoFill.get(provider, rearLocomotiveRocking, showCurrentLoadOnly, ModelPosition.REAR);
         drivingWheelsRear = DrivingAssembly.get(type, provider, rearLocomotive, ModelPosition.REAR, 45);
-
-        drivingWheels = DrivingAssembly.get(type, provider, base, 0,
-                frame != null ? frame.wheels : null,
-                bogeyFront != null ? bogeyFront.wheels : null,
-                bogeyRear != null ? bogeyRear.wheels : null
-        );
 
         components = provider.parse(
                 new ModelComponentType[]{ModelComponentType.CAB}

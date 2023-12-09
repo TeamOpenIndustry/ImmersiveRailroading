@@ -38,6 +38,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected Frame frame;
     protected Bogey bogeyFront;
     protected Bogey bogeyRear;
+    protected DrivingAssembly drivingWheels;
     private ModelComponent shell;
     private ModelComponent remaining;
     protected final List<Door<ENTITY>> doors;
@@ -210,6 +211,13 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     protected void parseComponents(ComponentProvider provider, DEFINITION def) {
         this.frame = new Frame(provider, base, rocking, def.defID, def.getValveGear());
+
+        drivingWheels = DrivingAssembly.get(def.getValveGear(), provider, base, 0,
+                frame != null ? frame.wheels : null,
+                bogeyFront != null ? bogeyFront.wheels : null,
+                bogeyRear != null ? bogeyRear.wheels : null
+        );
+
         this.shell = provider.parse(ModelComponentType.SHELL);
         rocking.include(shell);
     }
