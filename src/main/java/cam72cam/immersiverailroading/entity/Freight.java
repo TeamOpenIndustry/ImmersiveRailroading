@@ -63,6 +63,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 				if (!stack.isEmpty()) {
 					getWorld().dropItem(stack.copy(), getPosition());
 					stack.setCount(0);
+					cargoItems.set(i, stack);
 				}
 			}
 		}
