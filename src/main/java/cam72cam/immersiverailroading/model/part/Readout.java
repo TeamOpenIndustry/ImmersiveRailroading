@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.util.DataBlock;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,15 +25,15 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     private final float rangeMax;
 
     public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelState state, ModelComponentType type, Readouts value) {
-        return provider.parseAll(type).stream().map(p -> new Readout<T>(p, value::getValue, state, provider.internal_model_scale)).collect(Collectors.toList());
+        return provider.parseAll(type).stream().map(p -> new Readout<T>(p, value::getValue, state, provider.internal_model_scale, provider.widgetConfig)).collect(Collectors.toList());
     }
 
     public static <T extends EntityMoveableRollingStock> List<Readout<T>> getReadouts(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos, Readouts value) {
-        return provider.parseAll(type, pos).stream().map(p -> new Readout<T>(p, value::getValue, state, provider.internal_model_scale)).collect(Collectors.toList());
+        return provider.parseAll(type, pos).stream().map(p -> new Readout<T>(p, value::getValue, state, provider.internal_model_scale, provider.widgetConfig)).collect(Collectors.toList());
     }
 
-    public Readout(ModelComponent part, Function<T, Float> position, ModelState state, double internal_model_scale) {
-        super(part, state, internal_model_scale);
+    public Readout(ModelComponent part, Function<T, Float> position, ModelState state, double internal_model_scale, Map<String, DataBlock> widgetConfig) {
+        super(part, state, internal_model_scale, widgetConfig);
         this.position = position;
 
         float min = 0;

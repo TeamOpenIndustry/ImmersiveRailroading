@@ -117,7 +117,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         };
         this.base = ModelState.construct(settings -> settings.add(animators).add(interiorLit));
 
-        ComponentProvider provider = new ComponentProvider(this, def.internal_model_scale);
+        ComponentProvider provider = new ComponentProvider(this, def.internal_model_scale, def.widgetConfig);
         initStates();
         parseControllable(provider, def);
 

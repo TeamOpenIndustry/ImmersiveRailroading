@@ -105,6 +105,7 @@ public abstract class EntityRollingStockDefinition {
 
     public List<AnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
+    public Map<String, DataBlock> widgetConfig;
 
     public static class SoundDefinition {
         public final Identifier start;
@@ -551,6 +552,11 @@ public abstract class EntityRollingStockDefinition {
             controls.getBlockMap().forEach((key, block) ->
                     this.cgDefaults.put(key, block.getValue("default").asFloat(0))
             );
+        }
+        this.widgetConfig = Collections.emptyMap();
+        DataBlock widgets = data.getBlock("widgets");
+        if (widgets != null) {
+            widgetConfig = widgets.getBlockMap();
         }
     }
 

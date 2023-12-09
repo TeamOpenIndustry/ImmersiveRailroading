@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -10,6 +9,7 @@ import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.ControlSoundsDefinition;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
@@ -18,8 +18,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.TextColor;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
@@ -27,6 +25,7 @@ import org.apache.commons.lang3.text.WordUtils;
 import util.Matrix4;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,36 +51,15 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     private final Map<Axis, Float> scaleRot = new HashMap<>();
 
     public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos) {
-        return provider.parseAll(type, pos).stream().map(part1 -> new Control<T>(part1, state, provider.internal_model_scale)).collect(Collectors.toList());
+        return provider.parseAll(type, pos).stream().map(part1 -> new Control<T>(part1, state, provider.internal_model_scale, provider.widgetConfig)).collect(Collectors.toList());
     }
 
     public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type) {
-        return provider.parseAll(type).stream().map(part1 -> new Control<T>(part1, state, provider.internal_model_scale)).collect(Collectors.toList());
+        return provider.parseAll(type).stream().map(part1 -> new Control<T>(part1, state, provider.internal_model_scale, provider.widgetConfig)).collect(Collectors.toList());
     }
 
-    public Control(ModelComponent part, ModelState state, double internal_model_scale) {
+    public Control(ModelComponent part, ModelState state, double internal_model_scale, Map<String, DataBlock> widgetConfig) {
         super(part);
-        this.controlGroup = part.modelIDs.stream().map(group -> {
-            Matcher matcher = Pattern.compile("_CG_([^_]+)").matcher(group);
-            return matcher.find() ? matcher.group(1) : null;
-        }).filter(Objects::nonNull).findFirst().orElse(part.key);
-        this.label = part.modelIDs.stream().map(group -> {
-            Matcher matcher = Pattern.compile("_LABEL_([^_]+)").matcher(group);
-            return matcher.find() ? matcher.group(1).replaceAll("\\^", " ") : null;
-        }).filter(Objects::nonNull).findFirst().orElse(null);
-        this.toggle = part.modelIDs.stream().anyMatch(g -> g.contains("_TOGGLE_") || g.startsWith("TOGGLE_") || g.endsWith("_TOGGLE"));
-        this.press = part.modelIDs.stream().anyMatch(g -> g.contains("_PRESS_") || g.startsWith("PRESS_") || g.endsWith("_PRESS"));
-        this.global = part.modelIDs.stream().anyMatch(g -> g.contains("_GLOBAL_") || g.startsWith("GLOBAL_") || g.endsWith("_GLOBAL"));
-        this.invert = part.modelIDs.stream().anyMatch(g -> g.contains("_INVERT_") || g.startsWith("INVERT_") || g.endsWith("_INVERT"));
-        this.hide = part.modelIDs.stream().anyMatch(g -> g.contains("_HIDE_") || g.startsWith("HIDE_") || g.endsWith("_HIDE"));
-        this.noInteract = part.modelIDs.stream().anyMatch(g ->
-                g.contains("_NOINTERACT_") || g.startsWith("NOINTERACT_") || g.endsWith("_NOINTERACT") ||
-                g.contains("_NOTOUCH_") || g.startsWith("NOTOUCH_") || g.endsWith("_NOTOUCH")
-        );
-        this.offset = part.modelIDs.stream().map(group -> {
-            Matcher matcher = Pattern.compile("_OFFSET_([^_]+)").matcher(group);
-            return matcher.find() ? Float.parseFloat(matcher.group(1)) : null;
-        }).filter(Objects::nonNull).findFirst().orElse(0f);
 
         // This is terrible
         String rotpat = part.pos != null && !part.type.regex.contains("#POS#") ?
@@ -89,47 +67,113 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                 part.pos != null ?
                         part.type.regex.replaceAll("#POS#", part.pos.toString()).replaceAll("#ID#", part.id + "_ROT") :
                         part.type.regex.replaceAll("#ID#", part.id + "_ROT");
-        OBJGroup rot = part.groups().stream()
-                .filter(g -> Pattern.matches(rotpat, g.name))
-                .findFirst().orElse(null);
-        if (rot != null && rot.normal != null) {
-            this.rotationPoint = rot.max.add(rot.min).scale(0.5);
-            String[] split = rot.name.split("_");
-            int idx = ArrayUtils.indexOf(split, "ROT");
-            if (idx != ArrayUtils.INDEX_NOT_FOUND) {
-                String degrees = split[idx + 1];
-                try {
-                    rotationDegrees = Float.parseFloat(degrees);
-                } catch (NumberFormatException e) {
-                    ModCore.error("Unable to parse rotation point '%s': %s", rot.name, e);
+        // This is worse...
+        String name = rotpat.replace("_ROT", "").replaceAll("\\.\\*", "");
+
+        DataBlock config = widgetConfig.containsKey(name) ? widgetConfig.get(name) : new DataBlock() {
+            @Override
+            public Map<String, Value> getValueMap() { return Collections.emptyMap(); }
+            @Override
+            public Map<String, List<Value>> getValuesMap() { return Collections.emptyMap(); }
+            @Override
+            public Map<String, DataBlock> getBlockMap() { return Collections.emptyMap(); }
+            @Override
+            public Map<String, List<DataBlock>> getBlocksMap() { return Collections.emptyMap(); }
+        };
+
+        this.controlGroup = config.getValue("CG").asString(part.modelIDs.stream().map(group -> {
+            Matcher matcher = Pattern.compile("_CG_([^_]+)").matcher(group);
+            return matcher.find() ? matcher.group(1) : null;
+        }).filter(Objects::nonNull).findFirst().orElse(part.key));
+        this.label = config.getValue("LABEL").asString(part.modelIDs.stream().map(group -> {
+            Matcher matcher = Pattern.compile("_LABEL_([^_]+)").matcher(group);
+            return matcher.find() ? matcher.group(1).replaceAll("\\^", " ") : null;
+        }).filter(Objects::nonNull).findFirst().orElse(null));
+
+        Predicate<String> hasKey = s -> config.getValue(s).asBoolean(part.modelIDs.stream().anyMatch(g -> g.contains("_" + s + "_") || g.startsWith(s + "_") || g.endsWith("_" + s)));
+        this.toggle = hasKey.test("TOGGLE");
+        this.press = hasKey.test("PRESS");
+        this.global = hasKey.test("GLOBAL");
+        this.invert = hasKey.test("INVERT");
+        this.hide = hasKey.test("HIDE");
+        this.noInteract = hasKey.test("NOTOUCH") || hasKey.test("NOINTERACT");
+
+        this.offset = config.getValue("OFFSET").asFloat(part.modelIDs.stream().map(group -> {
+            Matcher matcher = Pattern.compile("_OFFSET_([^_]+)").matcher(group);
+            return matcher.find() ? Float.parseFloat(matcher.group(1)) : null;
+        }).filter(Objects::nonNull).findFirst().orElse(0f));
+
+        DataBlock rotBlock = config.getBlock("ROT");
+        if (rotBlock != null) {
+            this.rotationDegrees = rotBlock.getValue("DEGREES").asFloat();
+            DataBlock point = rotBlock.getBlock("POINT");
+            this.rotationPoint = new Vec3d(
+                    point.getValue("X").asDouble(),
+                    point.getValue("Y").asDouble(),
+                    point.getValue("Z").asDouble()
+            );
+            DataBlock axis = rotBlock.getBlock("AXIS");
+            this.rotations.put(Axis.X, axis.getValue("X").asFloat());
+            this.rotations.put(Axis.Y, axis.getValue("Y").asFloat());
+            this.rotations.put(Axis.Z, axis.getValue("Z").asFloat());
+            this.center = part.center;
+        } else {
+            OBJGroup rot = part.groups().stream()
+                    .filter(g -> Pattern.matches(rotpat, g.name))
+                    .findFirst().orElse(null);
+            if (rot != null && rot.normal != null) {
+                this.rotationPoint = rot.max.add(rot.min).scale(0.5);
+                String[] split = rot.name.split("_");
+                int idx = ArrayUtils.indexOf(split, "ROT");
+                if (idx != ArrayUtils.INDEX_NOT_FOUND) {
+                    String degrees = split[idx + 1];
+                    try {
+                        rotationDegrees = Float.parseFloat(degrees);
+                    } catch (NumberFormatException e) {
+                        ModCore.error("Unable to parse rotation point '%s': %s", rot.name, e);
+                    }
+                }
+
+                rotations.put(Axis.X, (float) rot.normal.x);
+                rotations.put(Axis.Y, (float) rot.normal.y);
+                rotations.put(Axis.Z, (float) rot.normal.z);
+
+                List<Vec3d> nonRotGroups = part.groups().stream().filter(g -> !g.name.contains("_ROT")).map(g -> g.max.add(g.min).scale(0.5)).collect(Collectors.toList());
+                this.center = nonRotGroups.isEmpty() ? part.center : nonRotGroups.stream().reduce(Vec3d.ZERO, Vec3d::add).scale(1.0 / nonRotGroups.size());
+            } else {
+                this.center = part.center;
+            }
+        }
+
+        DataBlock tl = config.getBlock("TL");
+        if (tl != null) {
+            tl.getValueMap().forEach((k, v) -> translations.put(Axis.valueOf(k), v.asFloat()));
+        } else {
+            Pattern pattern = Pattern.compile("TL_([^_]*)_([^_])");
+            for (String modelID : part.modelIDs) {
+                Matcher matcher = pattern.matcher(modelID);
+                while (matcher.find()) {
+                    translations.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)) * (float) internal_model_scale);
                 }
             }
-
-            rotations.put(Axis.X, (float) rot.normal.x);
-            rotations.put(Axis.Y, (float) rot.normal.y);
-            rotations.put(Axis.Z, (float) rot.normal.z);
-
-            List<Vec3d> nonRotGroups = part.groups().stream().filter(g -> !g.name.contains("_ROT")).map(g -> g.max.add(g.min).scale(0.5)).collect(Collectors.toList());
-            this.center = nonRotGroups.isEmpty() ? part.center : nonRotGroups.stream().reduce(Vec3d.ZERO, Vec3d::add).scale(1.0/nonRotGroups.size());
-        } else {
-            this.center = part.center;
         }
-
-        Pattern pattern = Pattern.compile("TL_([^_]*)_([^_])");
-        for (String modelID : part.modelIDs) {
-            Matcher matcher = pattern.matcher(modelID);
-            while (matcher.find()) {
-                translations.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)) * (float)internal_model_scale);
+        DataBlock scale = config.getBlock("SCALE");
+        if (scale != null) {
+            scale.getValueMap().forEach((k, v) -> scales.put(Axis.valueOf(k), v.asFloat()));
+            DataBlock r = scale.getBlock("R");
+            if (r != null) {
+                r.getValueMap().forEach((k, v) -> scaleRot.put(Axis.valueOf(k), v.asFloat()));
             }
-        }
-        pattern = Pattern.compile("SCALE_([^_]*)_([^_]+)");
-        for (String modelID : part.modelIDs) {
-            Matcher matcher = pattern.matcher(modelID);
-            while (matcher.find()) {
-                if (matcher.group(2).startsWith("R")) {
-                    scaleRot.put(Axis.valueOf(matcher.group(2).substring(1)), Float.parseFloat(matcher.group(1)));
-                } else {
-                    scales.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
+        } else {
+            Pattern pattern = Pattern.compile("SCALE_([^_]*)_([^_]+)");
+            for (String modelID : part.modelIDs) {
+                Matcher matcher = pattern.matcher(modelID);
+                while (matcher.find()) {
+                    if (matcher.group(2).startsWith("R")) {
+                        scaleRot.put(Axis.valueOf(matcher.group(2).substring(1)), Float.parseFloat(matcher.group(1)));
+                    } else {
+                        scales.put(Axis.valueOf(matcher.group(2)), Float.parseFloat(matcher.group(1)));
+                    }
                 }
             }
         }
