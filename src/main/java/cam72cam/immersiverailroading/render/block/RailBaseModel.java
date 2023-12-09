@@ -42,6 +42,7 @@ public class RailBaseModel {
                 	if (held.is(IRItems.ITEM_TRACK_BLUEPRINT) || held.is(IRItems.ITEM_GOLDEN_SPIKE)) {
 						info = info.with(b -> b.itemHeld = true);
 					}
+
 				}
 
 				RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition));

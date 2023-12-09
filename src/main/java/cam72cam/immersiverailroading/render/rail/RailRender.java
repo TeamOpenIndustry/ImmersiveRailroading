@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.rail;
 
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.TrackBase;
@@ -41,18 +42,24 @@ public class RailRender {
 	private void startLoad() {
 		if (!isLoading) {
 			isLoading = true;
-			pool.submit(() -> {
-				// This may have some thread safety problems client side...
-				// Might need to add synchronization inside the builders
-				BuilderBase builder = info.getBuilder(MinecraftClient.getPlayer().getWorld());
-				renderData = builder.getRenderData();
-				tracks = builder.getTracksForRender();
-				isLoaded = true;
-				isLoading = false;
-			});
+			pool.submit(this::load);
 		}
 	}
+
+	public void load() {
+		// This may have some thread safety problems client side...
+		// Might need to add synchronization inside the builders
+		BuilderBase builder = info.getBuilder(MinecraftClient.getPlayer().getWorld());
+		renderData = builder.getRenderData();
+		tracks = builder.getTracksForRender();
+		isLoaded = true;
+		isLoading = false;
+	}
 	public void renderRailModel(RenderState state) {
+		if (info.settings.type == TrackItems.TURNTABLE) {
+			load();
+		}
+
 		if (!isLoaded) {
 			startLoad();
 		} else {
