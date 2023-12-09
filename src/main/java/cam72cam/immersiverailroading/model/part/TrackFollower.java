@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.util.DegreeFuncs;
 import cam72cam.mod.world.World;
 import util.Matrix4;
 
@@ -83,6 +84,17 @@ public class TrackFollower {
                 }
 
                 yawReadout = toPointYaw + atPointYaw;
+
+                float min = this.min;
+                // TODO This implies the code above is broken, but works around some of the weirder edge cases.
+                if (DegreeFuncs.delta(0, toPointYaw) > 90) {
+                    min = -min;
+                    toPointYaw = toPointYaw - 180;
+                }
+                if (DegreeFuncs.delta(0, atPointYaw) > 90) {
+                    atPointYaw -= 180;
+                    min = -min;
+                }
 
                 matrix.setIdentity();
                 matrix.rotate(Math.toRadians(toPointYaw), 0, 1, 0);
