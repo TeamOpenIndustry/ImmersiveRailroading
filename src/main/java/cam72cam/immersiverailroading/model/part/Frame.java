@@ -9,20 +9,15 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 
 public class Frame {
-    private final ModelComponent frame;
     public final WheelSet wheels;
-    private final ValveGear valveGearRight;
-    private final ValveGear valveGearLeft;
 
-    public Frame(ComponentProvider provider, ModelState state, ModelState rocking, String blame, ValveGearConfig type) {
+    public Frame(ComponentProvider provider, ModelState state, ModelState rocking, String blame) {
         this.wheels = WheelSet.get(provider, state, ModelComponentType.FRAME_WHEEL_X, 0);
-        this.frame = provider.parse(ModelComponentType.FRAME);
+        ModelComponent frame = provider.parse(ModelComponentType.FRAME);
         if (frame == null) {
             ImmersiveRailroading.warn("Invalid model: Missing FRAME for %s!  (this will fail in future versions of IR)", blame);
         } else {
             rocking.include(frame);
         }
-        valveGearRight = wheels != null ? ValveGear.get(wheels, type, provider, state, ModelPosition.RIGHT, -90) : null;
-        valveGearLeft = wheels != null ? ValveGear.get(wheels, type, provider, state, ModelPosition.LEFT, 0) : null;
     }
 }

@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
-import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.animation.StockAnimation;
@@ -210,7 +209,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     }
 
     protected void parseComponents(ComponentProvider provider, DEFINITION def) {
-        this.frame = new Frame(provider, base, rocking, def.defID, def.getValveGear());
+        this.frame = new Frame(provider, base, rocking, def.defID);
 
         drivingWheels = DrivingAssembly.get(def.getValveGear(), provider, base, 0,
                 frame != null ? frame.wheels : null,
