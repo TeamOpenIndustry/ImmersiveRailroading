@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.model.part.Interactable;
 import cam72cam.immersiverailroading.model.part.Seat;
@@ -38,7 +39,12 @@ public class ClientPartDragging {
             if (targetInteractable instanceof Control) {
                 float value = targetStock.getControlPosition((Control<?>) targetInteractable);
                 // Same as GuiBuilder
-                value += scroll / -50 * ConfigGraphics.ScrollSpeed;
+                if (targetStock instanceof LocomotiveDiesel && targetInteractable.part.type == ModelComponentType.REVERSER_X) {
+                    value += scroll > 0 ? 0.5 : -0.5;
+                } else {
+                    value += scroll / -50 * ConfigGraphics.ScrollSpeed;
+                }
+
                 targetStock.setControlPosition((Control<?>) targetInteractable, value);
                 targetStock.onDragRelease((Control<?>) targetInteractable);
                 new DragPacket(targetStock, (Control<?>) targetInteractable, true, value, true).sendToServer();

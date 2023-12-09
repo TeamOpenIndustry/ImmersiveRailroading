@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.gui.overlay;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.DataBlock;
@@ -527,7 +528,11 @@ public class GuiBuilder {
             float value = target.getValue(stock);
 
             // Same as ClientPartDragging
-            value += scroll / -50 * ConfigGraphics.ScrollSpeed;
+            if (stock instanceof LocomotiveDiesel && target.readout == Readouts.REVERSER) {
+                value += scroll > 0 ? 0.5 : -0.5;
+            } else {
+                value += scroll / -50 * ConfigGraphics.ScrollSpeed;
+            }
 
             if (target.setting != null) {
                 ConfigGraphics.settings.put(target.setting, value);
