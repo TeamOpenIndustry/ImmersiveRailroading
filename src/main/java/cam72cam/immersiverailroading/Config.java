@@ -205,7 +205,7 @@ public class Config {
 		public static boolean DesignGaugeLock = false;
 
 		@Comment("Angle Placement Segmentation")
-		@Range(min = 0, max = 64)
+		@Range(min = 1, max = 90)
 		public static int AnglePlacementSegmentation = 4;
 
 		@Comment("Machine power factor (0 means no power required)")
