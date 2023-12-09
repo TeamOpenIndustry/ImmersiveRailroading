@@ -518,7 +518,7 @@ public class GuiBuilder {
         int ticks = MinecraftClient.getPlayer().getTickCount();
 
         GuiBuilder target = find(stock, new Matrix4(), maxx, maxy, x, y);
-        if (target == null && lastScrolled + 10 > ticks) {
+        if (target == null && lastScrolled + 20 > ticks) {
             target = scrollTarget;
         }
 
