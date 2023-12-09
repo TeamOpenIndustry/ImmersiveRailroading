@@ -143,7 +143,7 @@ public enum Readouts {
                 break;
             case INDEPENDENT_BRAKE:
                 if (stock instanceof EntityMoveableRollingStock) {
-                    ((Locomotive) stock).setIndependentBrake(value);
+                    ((EntityMoveableRollingStock) stock).setIndependentBrake(value);
                 }
                 break;
             case COUPLER_FRONT:
