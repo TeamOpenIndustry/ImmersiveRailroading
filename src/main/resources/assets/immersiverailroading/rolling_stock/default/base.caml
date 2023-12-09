@@ -126,3 +126,8 @@ particles = # Optional: Configure general particle emitter settings
 #    invert = False          # Invert the animation driver
 #    frames_per_tick = 1.0   # How many frames to play per tick (can be greater or less than 1)
 #    sound = null # Optional: See sound_definition.caml for details
+
+# Control defaults
+# controls:
+#   CG_NAME =
+#     default = 0.0
