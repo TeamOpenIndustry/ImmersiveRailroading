@@ -183,7 +183,7 @@ public abstract class ValveGear {
             float delta = 0.03f;
             if (stock instanceof LocomotiveSteam) {
                 LocomotiveSteam loco = (LocomotiveSteam) stock;
-                if (Math.abs(loco.getThrottle() * loco.getReverser()) == 0) {
+                if (Math.abs(loco.getThrottle() * loco.getReverser()) <= 0.01) {
                     return false;
                 }
 
