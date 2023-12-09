@@ -333,7 +333,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 	
 				double speedDamage = Math.abs(this.getCurrentSpeed().metric()) / Config.ConfigDamage.entitySpeedDamage;
 				if (speedDamage > 1) {
-				    boolean isDark = Math.max(getWorld().getSkyLightLevel(entity.getBlockPosition()), getWorld().getBlockLightLevel(entity.getBlockPosition())) < 8.0F;
+
+				    boolean isBlockDark = getWorld().getBlockLightLevel(entity.getBlockPosition()) < 0.5;
+				    boolean isNightime = getWorld().getTime() > 13000 && getWorld().getTime() < 23000;
+				    boolean isDark = isBlockDark && isNightime;
 				    entity.directDamage(isDark ? DAMAGE_SOURCE_HIT_IN_DARKNESS : DAMAGE_SOURCE_HIT, speedDamage);
 				}
 			}
