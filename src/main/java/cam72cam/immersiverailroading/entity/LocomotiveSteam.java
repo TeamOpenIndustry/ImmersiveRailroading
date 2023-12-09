@@ -95,8 +95,11 @@ public class LocomotiveSteam extends Locomotive {
 			return 0;
 		}
 
-		//double traction_N = this.getDefinition().getStartingTractionNewtons(gauge);
-		double traction_N = this.getDefinition().getHorsePower(gauge) * 375 / Math.max(Math.abs(speed.imperial()), 1.0);
+		// This is terrible, but allows wheel slip for both legacy and updated hp vs te
+		double traction_N = Math.max(
+				this.getDefinition().getStartingTractionNewtons(gauge),
+				this.getDefinition().getHorsePower(gauge) * 375 / Math.max(Math.abs(speed.imperial()), 1.0)
+		);
 		if (Config.isFuelRequired(gauge)) {
 			traction_N = traction_N / this.getDefinition().getMaxPSI(gauge) * this.getBoilerPressure();
 		}
