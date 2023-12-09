@@ -446,7 +446,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (augmentFilterID != null && !augmentFilterID.equals(overhead.getDefinitionID())) {
 			return null;
 		}
-		if (stockTag != null && stockTag.equals(overhead.tag)) {
+		if (stockTag != null && !stockTag.equals(overhead.tag)) {
 			return null;
 		}
 
