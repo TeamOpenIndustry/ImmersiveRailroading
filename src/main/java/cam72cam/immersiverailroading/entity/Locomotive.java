@@ -402,7 +402,7 @@ public abstract class Locomotive extends FreightTank {
 	private double getStaticTractiveEffort(Speed speed) {
 		return (Config.ConfigBalance.FuelRequired ? this.getWeight() : this.getMaxWeight()) // KG
 				* 9.8 // M/S/S
-				* (slipping ? STEEL.kineticFriction(STEEL) : STEEL.staticFriction(STEEL))
+				* (slipping ? STEEL.kineticFriction(STEEL)/2 : STEEL.staticFriction(STEEL))
 				* slipCoefficient(speed)
 				/ getDefinition().factorOfAdhesion()
 				* Config.ConfigBalance.tractionMultiplier;
