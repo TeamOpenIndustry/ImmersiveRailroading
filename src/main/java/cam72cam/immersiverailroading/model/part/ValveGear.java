@@ -136,7 +136,7 @@ public abstract class ValveGear {
         }
 
         private Pair<Matrix4, Vec3d> particlePos(EntityMoveableRollingStock stock) {
-            Matrix4 m = state.getMatrix(stock);
+            Matrix4 m = state.getMatrix(stock, 0);
             if (m == null) {
                 // Just in case...
                 m = new Matrix4();

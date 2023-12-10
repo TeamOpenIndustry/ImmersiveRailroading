@@ -142,8 +142,8 @@ public class PaintBrushPicker implements IScreen {
         stock.distanceTraveled += frame * 0.02;
         stock.gauge = Gauge.standard();
 
-        model.render(stock, state, 0);
-        model.postRender(stock, state, 0);
+        model.renderEntity(stock, state, 0);
+        model.postRenderEntity(stock, state, 0);
 
         stock.setTexture(prevTex);
         stock.distanceTraveled = prevDist;

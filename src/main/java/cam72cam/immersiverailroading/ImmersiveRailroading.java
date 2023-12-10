@@ -150,7 +150,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					public void render(EntityMoveableRollingStock entity, RenderState state, float partialTicks) {
 						StockModel<?, ?> renderer = entity.getDefinition().getModel();
 						if (renderer != null) {
-							renderer.render(entity, state, partialTicks);
+							renderer.renderEntity(entity, state, partialTicks);
 						}
 					}
 
@@ -158,7 +158,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					public void postRender(EntityMoveableRollingStock entity, RenderState state, float partialTicks) {
 						StockModel<?, ?> renderer = entity.getDefinition().getModel();
 						if (renderer != null) {
-							renderer.postRender(entity, state, partialTicks);
+							renderer.postRenderEntity(entity, state, partialTicks);
 						}
 					}
 				};

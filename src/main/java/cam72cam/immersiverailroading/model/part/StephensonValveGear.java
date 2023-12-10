@@ -47,7 +47,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
         state.include(cylinder);
 
-        state.push(builder -> builder.add((ModelState.Animator) stock -> {
+        state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) -> {
             Matrix4 matrix = new Matrix4();
 
             Vec3d connRodMovment = connRodMovement(stock);
@@ -76,7 +76,7 @@ public class StephensonValveGear extends ConnectingRodValveGear {
             return matrix;
         })).include(drivingRod);
 
-        state.push(builder -> builder.add((ModelState.Animator) stock -> {
+        state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) -> {
             Matrix4 matrix = new Matrix4();
 
             Vec3d connRodMovment = connRodMovement(stock);

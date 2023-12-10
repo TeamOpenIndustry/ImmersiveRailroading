@@ -22,8 +22,8 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
     }
 
     @Override
-    protected void postRender(ENTITY stock, RenderState state) {
-        super.postRender(stock, state);
+    protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
+        super.postRender(stock, state, partialTicks);
 
         if (cargoItems != null) {
             cargoItems.postRender(stock, state);

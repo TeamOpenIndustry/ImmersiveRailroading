@@ -8,9 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -46,12 +44,12 @@ public class ModelState {
         return created;
     }
 
-    public Matrix4 getMatrix(EntityMoveableRollingStock stock) {
-        return animator != null ? animator.getMatrix(stock) : null;
+    public Matrix4 getMatrix(EntityMoveableRollingStock stock, float partialTicks) {
+        return animator != null ? animator.getMatrix(stock, partialTicks) : null;
     }
-    public Matrix4 getGroupMatrix(EntityMoveableRollingStock stock, String group) {
-        Matrix4 groupMatrix = groupAnimator != null ? groupAnimator.getMatrix(stock, group) : null;
-        Matrix4 baseMatrix = getMatrix(stock);
+    public Matrix4 getGroupMatrix(EntityMoveableRollingStock stock, String group, float partialTicks) {
+        Matrix4 groupMatrix = groupAnimator != null ? groupAnimator.getMatrix(stock, group, partialTicks) : null;
+        Matrix4 baseMatrix = getMatrix(stock, partialTicks);
         if (groupMatrix == null) {
             return baseMatrix;
         }
@@ -73,11 +71,11 @@ public class ModelState {
 
     @FunctionalInterface
     public interface Animator {
-        Matrix4 getMatrix(EntityMoveableRollingStock stock);
+        Matrix4 getMatrix(EntityMoveableRollingStock stock, float partialTicks);
         default Animator merge(Animator other) {
-            return (EntityMoveableRollingStock stock) -> {
-                Matrix4 ourMatrix = this.getMatrix(stock);
-                Matrix4 newMatrix = other.getMatrix(stock);
+            return (EntityMoveableRollingStock stock, float partialTicks) -> {
+                Matrix4 ourMatrix = this.getMatrix(stock, partialTicks);
+                Matrix4 newMatrix = other.getMatrix(stock, partialTicks);
                 if (ourMatrix == null) {
                     return newMatrix;
                 }
@@ -90,11 +88,11 @@ public class ModelState {
     }
     @FunctionalInterface
     public interface GroupAnimator {
-        Matrix4 getMatrix(EntityMoveableRollingStock stock, String group);
+        Matrix4 getMatrix(EntityMoveableRollingStock stock, String group, float partialTicks);
         default GroupAnimator merge(GroupAnimator other) {
-            return (stock, g) -> {
-                Matrix4 ourMatrix = this.getMatrix(stock, g);
-                Matrix4 newMatrix = other.getMatrix(stock, g);
+            return (stock, g, partialTicks) -> {
+                Matrix4 ourMatrix = this.getMatrix(stock, g, partialTicks);
+                Matrix4 newMatrix = other.getMatrix(stock, g, partialTicks);
                 if (ourMatrix == null) {
                     return newMatrix;
                 }
@@ -228,7 +226,7 @@ public class ModelState {
     }
 
     // TODO check performance impact of streams
-    public void render(OBJRender.Binding vbo, EntityMoveableRollingStock stock, List<ModelComponentType> available) {
+    public void render(OBJRender.Binding vbo, EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
         // Get all groups that we can render from components that are available
         List<String> groups = new ArrayList<>();
         for (ModelComponent component : components) {
@@ -248,12 +246,12 @@ public class ModelState {
             }).collect(Collectors.toList());
         }
 
-        Matrix4 matrix = animator != null ? animator.getMatrix(stock) : null;
+        Matrix4 matrix = animator != null ? animator.getMatrix(stock, partialTicks) : null;
 
         Map<String, Matrix4> animatedGroups = new HashMap<>();
         if (groupAnimator != null) {
             for (String group : groups) {
-                Matrix4 m = groupAnimator.getMatrix(stock, group);
+                Matrix4 m = groupAnimator.getMatrix(stock, group, partialTicks);
                 if (m != null) {
                     animatedGroups.put(group, m);
                 }
@@ -332,7 +330,7 @@ public class ModelState {
         });
 
         for (ModelState child : children) {
-            child.render(vbo, stock, available);
+            child.render(vbo, stock, available, partialTicks);
         }
     }
 }

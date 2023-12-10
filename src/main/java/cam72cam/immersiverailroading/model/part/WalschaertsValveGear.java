@@ -91,7 +91,7 @@ public class WalschaertsValveGear extends StephensonValveGear {
         state.include(todo);
 
         // This is pretty terrible
-        state = state.push(builder -> builder.add((ModelState.GroupAnimator) (stock, group) -> {
+        state = state.push(builder -> builder.add((ModelState.GroupAnimator) (stock, group, partialTicks) -> {
 
             float wheelAngle = super.angle(stock.distanceTraveled);
             float reverser = stock instanceof Locomotive ? ((Locomotive) stock).getReverser() : 0;

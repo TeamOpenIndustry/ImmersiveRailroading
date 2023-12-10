@@ -94,13 +94,13 @@ public class SwaySimulator {
             swayMagnitude = Math.min(swayMagnitude, 3);
         }
 
-        public double getRollDegrees() {
+        public double getRollDegrees(float partialTicks) {
             if (Math.abs(stock.getCurrentSpeed().metric() * stock.gauge.scale()) < 4) {
                 // don't calculate it
                 return 0;
             }
 
-            double sway = Math.cos(Math.toRadians(stock.getTickCount() * 13)) *
+            double sway = Math.cos(Math.toRadians((stock.getTickCount() + partialTicks) * 13)) *
                     swayMagnitude / 5 *
                     stock.getDefinition().getSwayMultiplier() *
                     ConfigGraphics.StockSwayMultiplier;
@@ -123,8 +123,8 @@ public class SwaySimulator {
 
     private final Map<UUID, Effect> effects = new HashMap<>();
 
-    public double getRollDegrees(EntityMoveableRollingStock stock) {
-        return effects.computeIfAbsent(stock.getUUID(), uuid -> new Effect(stock)).getRollDegrees();
+    public double getRollDegrees(EntityMoveableRollingStock stock, float partialTicks) {
+        return effects.computeIfAbsent(stock.getUUID(), uuid -> new Effect(stock)).getRollDegrees(partialTicks);
     }
 
     public void effects(EntityMoveableRollingStock stock) {

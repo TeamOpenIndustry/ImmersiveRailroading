@@ -10,16 +10,14 @@ import cam72cam.immersiverailroading.render.ExpireableMap;
 import util.Matrix4;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class StockAnimation {
     private final AnimationDefinition def;
     private final Animatrix animatrix;
 
-    private final ExpireableMap<UUID, Integer> tickStart;
-    private final ExpireableMap<UUID, Integer> tickStop;
+    private final ExpireableMap<UUID, Float> tickStart;
+    private final ExpireableMap<UUID, Float> tickStop;
     private final boolean looping;
     private final PartSound sound;
 
@@ -52,13 +50,15 @@ public class StockAnimation {
         return value;
     }
 
-    public float getPercent(EntityRollingStock stock) {
+    public float getPercent(EntityRollingStock stock, float partialTicks) {
         float value = getValue(stock);
 
         float total_ticks_per_loop = animatrix.frameCount() / def.frames_per_tick;
         if (def.mode == AnimationMode.LOOP_SPEED) {
             total_ticks_per_loop /= value;
         }
+
+        float tickCount = stock.getTickCount() + partialTicks;
 
         switch (def.mode) {
             case VALUE:
@@ -71,10 +71,10 @@ public class StockAnimation {
                 if (value >= 0.95) {
                     // FORWARD
                     if (tickStart.get(key) == null) {
-                        if (stock.getTickCount() < 2) {
-                            tickStart.put(key, (int) -total_ticks_per_loop - stock.getTickCount() - 1);
+                        if (tickCount < 2) {
+                            tickStart.put(key, -total_ticks_per_loop - tickCount - 1);
                         } else {
-                            tickStart.put(key, stock.getTickCount());
+                            tickStart.put(key, tickCount);
                         }
                         tickStop.remove(key);
                     }
@@ -82,14 +82,14 @@ public class StockAnimation {
                         return 1;
                     }
                     // 0 -> 1+
-                    tickDelta = stock.getTickCount() - tickStart.get(key);
+                    tickDelta = tickCount - tickStart.get(key);
                 } else {
                     // REVERSE
                     if (tickStop.get(key) == null) {
-                        if (stock.getTickCount() < 2) {
-                            tickStop.put(key, (int) -total_ticks_per_loop - stock.getTickCount() - 1);
+                        if (tickCount < 2) {
+                            tickStop.put(key, -total_ticks_per_loop - tickCount - 1);
                         } else {
-                            tickStop.put(key, stock.getTickCount());
+                            tickStop.put(key, tickCount);
                         }
                         tickStart.remove(key);
                     }
@@ -97,7 +97,7 @@ public class StockAnimation {
                         return 0;
                     }
                     // 0 -> 1+
-                    tickDelta = stock.getTickCount() - tickStop.get(key);
+                    tickDelta = tickCount - tickStop.get(key);
                     if (def.mode == AnimationMode.PLAY_BOTH) {
                         // 1 -> 0-
                         tickDelta = total_ticks_per_loop - tickDelta;
@@ -117,11 +117,11 @@ public class StockAnimation {
                 break;
         }
 
-        return (stock.getTickCount() % total_ticks_per_loop) / total_ticks_per_loop;
+        return (tickCount % total_ticks_per_loop) / total_ticks_per_loop;
     }
 
-    public Matrix4 getMatrix(EntityRollingStock stock, String group) {
-        return animatrix.groups().contains(group) ? animatrix.getMatrix(group, getPercent(stock), looping) : null;
+    public Matrix4 getMatrix(EntityRollingStock stock, String group, float partialTicks) {
+        return animatrix.groups().contains(group) ? animatrix.getMatrix(group, getPercent(stock, partialTicks), looping) : null;
     }
 
     public <ENTITY extends EntityMoveableRollingStock> void effects(ENTITY stock) {
@@ -135,7 +135,7 @@ public class StockAnimation {
                 case PLAY_FORWARD:
                 case PLAY_REVERSE:
                 case PLAY_BOTH:
-                    volume = getPercent(stock) > 0 && getPercent(stock) < 1 ? 1 : 0;
+                    volume = getPercent(stock, 0) > 0 && getPercent(stock, 0) < 1 ? 1 : 0;
                     break;
                 case LOOP:
                     volume = getValue(stock) > 0.95 ? 1 : 0;

@@ -117,7 +117,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
                 )
         );
         mystate.include(component);
-        location = mystate::getMatrix;
+        location = stock -> mystate.getMatrix(stock, 0);
     }
 
     private boolean isLightOff(EntityRollingStock stock) {

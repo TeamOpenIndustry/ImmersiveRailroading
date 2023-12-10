@@ -186,7 +186,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
 
         if (!(rotationPoint == null && translations.isEmpty() && scales.isEmpty())) {
             state = state.push(builder -> {
-                builder.add((ModelState.GroupAnimator) (stock, group) -> {
+                builder.add((ModelState.GroupAnimator) (stock, group, partialTicks) -> {
                     float valuePercent = getValue(stock);
 
                     Matrix4 m = new Matrix4();
@@ -256,7 +256,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         return WordUtils.capitalizeFully(label.name().replace("_X", "").replaceAll("_CONTROL", "").replaceAll("_", " ").toLowerCase(Locale.ROOT));
     }
 
-    public void postRender(T stock, RenderState state) {
+    public void postRender(T stock, RenderState state, float partialTicks) {
         if (!ConfigGraphics.interactiveComponentsOverlay) {
             return;
         }
@@ -274,7 +274,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             return;
         }
 
-        Matrix4 m = this.state.getGroupMatrix(stock, modelId);
+        Matrix4 m = this.state.getGroupMatrix(stock, modelId, partialTicks);
         Vec3d pos = m == null ? center : m.apply(center);
         String labelstate = "";
         float percent = getValue(stock) - offset;
@@ -325,7 +325,8 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     }
 
     public Vec3d transform(Vec3d point, T stock) {
-        Matrix4 m = state.getGroupMatrix(stock, modelId);
+        float partialTicks = 0;
+        Matrix4 m = state.getGroupMatrix(stock, modelId, partialTicks);
         if (m == null) {
             m = stock.getModelMatrix();
         } else {

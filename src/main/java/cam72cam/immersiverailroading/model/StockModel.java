@@ -103,10 +103,10 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
                 animations.add(new StockAnimation(animDef, def.internal_model_scale));
             }
         }
-        ModelState.GroupAnimator animators = (stock, group) -> {
+        ModelState.GroupAnimator animators = (stock, group, partialTicks) -> {
             Matrix4 m = null;
             for (StockAnimation animation : animations) {
-                Matrix4 found = animation.getMatrix(stock , group);
+                Matrix4 found = animation.getMatrix(stock , group, partialTicks);
                 if (found != null) {
                     if (m == null) {
                         m = found;
@@ -145,15 +145,15 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     }
 
     public ModelState addRoll(ModelState state) {
-        return state.push(builder -> builder.add((ModelState.Animator) stock ->
-                new Matrix4().rotate(Math.toRadians(sway.getRollDegrees(stock)), 1, 0, 0)));
+        return state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) ->
+                new Matrix4().rotate(Math.toRadians(sway.getRollDegrees(stock, partialTicks)), 1, 0, 0)));
     }
 
     protected void initStates() {
         this.rocking = addRoll(this.base);
-        this.front = this.base.push(settings -> settings.add(this::getFrontBogeyMatrix));
+        this.front = this.base.push(settings -> settings.add((EntityMoveableRollingStock stock, float partialTicks) -> getFrontBogeyMatrix(stock)));
         this.frontRocking = addRoll(this.front);
-        this.rear = this.base.push(settings -> settings.add(this::getRearBogeyMatrix));
+        this.rear = this.base.push(settings -> settings.add((EntityMoveableRollingStock stock, float partialTicks) -> getRearBogeyMatrix(stock)));
         this.rearRocking = addRoll(this.rear);
     }
 
@@ -273,7 +273,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     private int lod_level = LOD_LARGE;
     private int lod_tick = 0;
-    public final void render(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
+    public final void renderEntity(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
         List<ModelComponentType> available = stock.isBuilt() ? null : stock.getItemComponents()
                 .stream().flatMap(x -> x.render.stream())
                 .collect(Collectors.toList());
@@ -317,14 +317,14 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             stock.distanceTraveled /= stock.gauge.scale();
 
 
-            base.render(bound, stock, available);
+            base.render(bound, stock, available, partialTicks);
 
             stock.distanceTraveled = backup;
         }
     }
 
-    public void postRender(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
-        postRender((ENTITY) stock, state);
+    public void postRenderEntity(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
+        postRender((ENTITY) stock, state, partialTicks);
     }
 
     // TODO invert -> reinvert sway
@@ -344,12 +344,12 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         return rearTrackers.get(stock).getYawReadout();
     }
 
-    protected void postRender(ENTITY stock, RenderState state) {
+    protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
         state.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
-        state.rotate(sway.getRollDegrees(stock), 1, 0, 0);
-        controls.forEach(c -> c.postRender(stock, state));
-        doors.forEach(c -> c.postRender(stock, state));
-        gauges.forEach(c -> c.postRender(stock, state));
+        state.rotate(sway.getRollDegrees(stock, partialTicks), 1, 0, 0);
+        controls.forEach(c -> c.postRender(stock, state, partialTicks));
+        doors.forEach(c -> c.postRender(stock, state, partialTicks));
+        gauges.forEach(c -> c.postRender(stock, state, partialTicks));
         headlights.forEach(x -> x.postRender(stock, state));
     }
 

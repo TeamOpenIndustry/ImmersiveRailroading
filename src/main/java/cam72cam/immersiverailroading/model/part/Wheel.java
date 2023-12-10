@@ -15,7 +15,7 @@ public class Wheel {
         this.wheel = wheel;
         Vec3d wheelPos = wheel.center;
 
-        state.push(settings -> settings.add((ModelState.Animator) stock ->
+        state.push(settings -> settings.add((ModelState.Animator) (stock, partialTicks) ->
                 new Matrix4()
                         .translate(wheelPos.x, wheelPos.y, wheelPos.z)
                         .rotate(Math.toRadians(angle != null ?
