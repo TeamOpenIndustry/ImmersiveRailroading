@@ -215,6 +215,13 @@ public class Config {
 		@Comment("Angles per tick to rotate turntables (used server side)")
 		@Range(min = 0, max = 5)
 		public static double TurnTableSpeed = 0.4;
+
+		@Comment("Diesel locomotive capacity multiplier, set to 10 for old functionality")
+		@Range(min = 1, max = 10)
+		public static int DieselLocomotiveTankMultiplier = 1;
+
+		@Comment("Round to nearest bucket")
+		public static boolean RoundStockTankToNearestBucket = true;
 	}
 
 	@Name("performance")

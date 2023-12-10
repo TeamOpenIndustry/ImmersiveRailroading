@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.util.DataBlock;
@@ -78,7 +79,8 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     }
 
     public FluidQuantity getFuelCapacity(Gauge gauge) {
-        return FluidQuantity.FromLiters((int) Math.ceil(this.fuelCapacity_l * gauge.scale())).min(FluidQuantity.FromBuckets(1)).roundBuckets();
+        FluidQuantity cap = FluidQuantity.FromLiters((int) Math.ceil(this.fuelCapacity_l * gauge.scale()) * Config.ConfigBalance.DieselLocomotiveTankMultiplier).min(FluidQuantity.FromBuckets(1));
+        return Config.ConfigBalance.RoundStockTankToNearestBucket ? cap.roundBuckets() : cap;
     }
 
     public int getFuelEfficiency() {

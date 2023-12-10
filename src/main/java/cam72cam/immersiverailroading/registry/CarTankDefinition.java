@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.util.DataBlock;
@@ -59,7 +60,8 @@ public class CarTankDefinition extends FreightDefinition {
     }
 
     public FluidQuantity getTankCapaity(Gauge gauge) {
-        return FluidQuantity.FromLiters((int) Math.ceil(capacity_l * gauge.scale())).min(FluidQuantity.FromBuckets(1)).roundBuckets();
+        FluidQuantity cap = FluidQuantity.FromLiters((int) Math.ceil(this.capacity_l * gauge.scale())).min(FluidQuantity.FromBuckets(1));
+        return Config.ConfigBalance.RoundStockTankToNearestBucket ? cap.roundBuckets() : cap;
     }
 
     public List<Fluid> getFluidFilter() {
