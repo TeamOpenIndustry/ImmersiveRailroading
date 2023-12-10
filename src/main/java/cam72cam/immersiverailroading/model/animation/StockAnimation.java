@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.model.part.PartSound;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition.AnimationMode;
+import cam72cam.immersiverailroading.render.ExpireableMap;
 import util.Matrix4;
 
 import java.io.IOException;
@@ -17,16 +18,16 @@ public class StockAnimation {
     private final AnimationDefinition def;
     private final Animatrix animatrix;
 
-    private final Map<UUID, Integer> tickStart;
-    private final Map<UUID, Integer> tickStop;
+    private final ExpireableMap<UUID, Integer> tickStart;
+    private final ExpireableMap<UUID, Integer> tickStop;
     private final boolean looping;
     private final PartSound sound;
 
     public StockAnimation(AnimationDefinition def, double internal_model_scale) throws IOException {
         this.def = def;
         this.animatrix = new Animatrix(def.animatrix.getResourceStream(), internal_model_scale);
-        tickStart = new HashMap<>();
-        tickStop = new HashMap<>();
+        tickStart = new ExpireableMap<>();
+        tickStop = new ExpireableMap<>();
         switch (def.mode) {
             case VALUE:
             case PLAY_FORWARD:
@@ -69,7 +70,7 @@ public class StockAnimation {
                 float tickDelta;
                 if (value >= 0.95) {
                     // FORWARD
-                    if (!tickStart.containsKey(key)) {
+                    if (tickStart.get(key) == null) {
                         if (stock.getTickCount() < 2) {
                             tickStart.put(key, (int) -total_ticks_per_loop - stock.getTickCount() - 1);
                         } else {
@@ -84,7 +85,7 @@ public class StockAnimation {
                     tickDelta = stock.getTickCount() - tickStart.get(key);
                 } else {
                     // REVERSE
-                    if (!tickStop.containsKey(key)) {
+                    if (tickStop.get(key) == null) {
                         if (stock.getTickCount() < 2) {
                             tickStop.put(key, (int) -total_ticks_per_loop - stock.getTickCount() - 1);
                         } else {
