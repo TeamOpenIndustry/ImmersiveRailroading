@@ -70,7 +70,11 @@ public class StockAnimation {
                 if (value >= 0.95) {
                     // FORWARD
                     if (!tickStart.containsKey(key)) {
-                        tickStart.put(key, stock.getTickCount());
+                        if (stock.getTickCount() < 2) {
+                            tickStart.put(key, (int) -total_ticks_per_loop - stock.getTickCount() - 1);
+                        } else {
+                            tickStart.put(key, stock.getTickCount());
+                        }
                         tickStop.remove(key);
                     }
                     if (def.mode == AnimationMode.PLAY_REVERSE) {
@@ -81,7 +85,11 @@ public class StockAnimation {
                 } else {
                     // REVERSE
                     if (!tickStop.containsKey(key)) {
-                        tickStop.put(key, stock.getTickCount());
+                        if (stock.getTickCount() < 2) {
+                            tickStop.put(key, (int) -total_ticks_per_loop - stock.getTickCount() - 1);
+                        } else {
+                            tickStop.put(key, stock.getTickCount());
+                        }
                         tickStart.remove(key);
                     }
                     if (def.mode == AnimationMode.PLAY_FORWARD) {
