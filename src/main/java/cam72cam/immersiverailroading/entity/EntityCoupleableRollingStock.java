@@ -455,10 +455,6 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		return getWorld().getEntity(uuid, EntityCoupleableRollingStock.class);
 	}
 
-	public boolean hasElectricalPower() {
-		return this.hasElectricalPower;
-	}
-
     @Override
     public void setControlPosition(Control<?> component, float val) {
         super.setControlPosition(component, val);
@@ -470,17 +466,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
     }
 
 	@Override
-	public boolean internalLightsEnabled() {
-		return getDefinition().hasInternalLighting() && hasElectricalPower() && (
-				gotElectricalPowerTick == -1 ||
-						getTickCount() - gotElectricalPowerTick > 15 ||
-						((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0
-		);
-	}
-
-	@Override
-	public boolean externalLightsEnabled() {
-		return hasElectricalPower() && (
+	public boolean hasElectricalPower() {
+		return this.hasElectricalPower && (
 				gotElectricalPowerTick == -1 ||
 						getTickCount() - gotElectricalPowerTick > 15 ||
 						((getTickCount() - gotElectricalPowerTick)/(int)((Math.random()+2) * 4)) % 2 == 0

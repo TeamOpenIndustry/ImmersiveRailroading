@@ -2,7 +2,9 @@ package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
@@ -82,11 +84,11 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
         float interiorLight = def.interiorLightLevel();
         ModelState.Lighter interiorLit = stock -> {
-            if (!stock.internalLightsEnabled()) {
+            if (!stock.hasElectricalPower()) {
                 return base;
             }
             Boolean interiorHack = null;
-            if (!hasInterior) {
+            if (!hasInterior && (stock instanceof Locomotive  || stock instanceof CarPassenger)) {
                 interiorHack = MinecraftClient.getPlayer().getRiding() != stock;
             }
             float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());

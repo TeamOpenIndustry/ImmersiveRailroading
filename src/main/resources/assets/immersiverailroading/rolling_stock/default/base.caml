@@ -61,7 +61,6 @@ properties =                # Required:
     tiltMultiplier = 0  # Optional: How much the stock should tilt into curves
 
     interior_light_level = 0.4  # Optional: How bright the interior should be by default
-    internalLighting = False    # Optional: Does this piece of stock have internal lighting?
 
 # Exterior Light Properties
 #lights =                    # Optional: Map for lights in the model

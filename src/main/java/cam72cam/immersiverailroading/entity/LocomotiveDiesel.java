@@ -135,11 +135,6 @@ public class LocomotiveDiesel extends Locomotive {
 		return this.isRunning();
 	}
 
-	@Override
-    public boolean internalLightsEnabled() {
-		return this.isRunning() || super.internalLightsEnabled();
-    }
-
     @Override
 	protected float getReverserDelta() {
 		return 0.51f;

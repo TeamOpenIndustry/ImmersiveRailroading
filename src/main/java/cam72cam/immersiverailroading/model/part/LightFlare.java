@@ -121,7 +121,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
     }
 
     private boolean isLightOff(EntityRollingStock stock) {
-        return !stock.externalLightsEnabled() || (controlGroup != null && stock.getControlPosition(controlGroup) == (invert ? 1 : 0));
+        return !stock.hasElectricalPower() || (controlGroup != null && stock.getControlPosition(controlGroup) == (invert ? 1 : 0));
     }
     private boolean isBlinkOff(EntityRollingStock stock) {
         return isLightOff(stock) || blinkIntervalTicks > 0 && (stock.getTickCount() + blinkOffsetTicks) % (blinkIntervalTicks*2) > blinkIntervalTicks;

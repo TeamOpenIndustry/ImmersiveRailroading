@@ -265,14 +265,12 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return texture;
 	}
 
-    public boolean internalLightsEnabled() {
-		return false;
-    }
-    public boolean externalLightsEnabled() {
-		return internalLightsEnabled();
-	}
 	public Matrix4 getModelMatrix() {
 		return this.modelMatrix.get(getPosition()).copy();
+	}
+
+	public boolean hasElectricalPower() {
+		return false;
 	}
 
 	@TagSync
@@ -344,6 +342,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	public boolean playerCanDrag(Player player, Control<?> control) {
 		return control.part.type != ModelComponentType.INDEPENDENT_BRAKE_X || player.hasPermission(Permissions.BRAKE_CONTROL);
 	}
+
 
 	private static class ControlPositionMapper implements TagMapper<Map<String, Pair<Boolean, Float>>> {
 		@Override

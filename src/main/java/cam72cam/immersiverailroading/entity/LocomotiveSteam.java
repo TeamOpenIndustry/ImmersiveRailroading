@@ -327,11 +327,6 @@ public class LocomotiveSteam extends Locomotive {
 		return getBoilerPressure() > 0 || !ConfigBalance.FuelRequired;
 	}
 
-	@Override
-    public boolean internalLightsEnabled() {
-		return getBoilerPressure() > 0 || !ConfigBalance.FuelRequired || super.internalLightsEnabled();
-    }
-
     @Override
 	public void onDrag(Control<?> component, double newValue) {
 		super.onDrag(component, newValue);

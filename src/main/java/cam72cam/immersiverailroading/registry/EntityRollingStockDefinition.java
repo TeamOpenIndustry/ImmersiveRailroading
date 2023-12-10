@@ -96,7 +96,6 @@ public abstract class EntityRollingStockDefinition {
     private boolean isLinearBrakeControl;
     private GuiBuilder overlay;
     private List<String> extraTooltipInfo;
-    private boolean hasInternalLighting;
     private double swayMultiplier;
     private double tiltMultiplier;
     private float brakeCoefficient;
@@ -491,7 +490,6 @@ public abstract class EntityRollingStockDefinition {
         tiltMultiplier = properties.getValue("tiltMultiplier").asDouble();
 
         interiorLightLevel = properties.getValue("interior_light_level").asFloat();
-        hasInternalLighting = properties.getValue("internalLighting").asBoolean();
 
         DataBlock lights = data.getBlock("lights");
         if (lights != null) {
@@ -888,10 +886,6 @@ public abstract class EntityRollingStockDefinition {
 
     public List<String> getExtraTooltipInfo() {
         return extraTooltipInfo;
-    }
-
-    public boolean hasInternalLighting() {
-        return hasInternalLighting;
     }
 
     public double getSwayMultiplier() {
