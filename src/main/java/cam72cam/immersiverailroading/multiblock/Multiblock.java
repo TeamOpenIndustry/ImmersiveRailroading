@@ -62,7 +62,14 @@ public abstract class Multiblock {
 			for (int y = 0; y < components[z].length; y++) {
 				FuzzyProvider[] ycomp = zcomp[y];
 				for (int x = 0; x < ycomp.length; x++) {
-					if (components[z][y][x] != null) {
+					FuzzyProvider comp = components[z][y][x];
+					// Sometimes fuzzies are empty due to other mods breaking stuff
+					// Try to work around that here
+					if (comp != null && comp.get().example().isEmpty()) {
+						ImmersiveRailroading.warn("Multiblock %s is missing support for %s", name, comp.get().toString());
+						comp = components[z][y][x] = null;
+					}
+					if (comp != null) {
 						componentPositions.add(new Vec3i(x, y, z));
                     }
 				}
