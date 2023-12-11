@@ -21,7 +21,7 @@ import java.util.OptionalDouble;
 
 public class LocomotiveDiesel extends Locomotive {
 
-	private float soundThrottle;
+	private float relativeRPM;
 	private float internalBurn = 0;
 	private int turnOnOffDelay = 0;
 
@@ -163,7 +163,7 @@ public class LocomotiveDiesel extends Locomotive {
 			double efficiency = 0.82; // Similar to a *lot* of imperial references
 			double speed_M_S = (Math.abs(speed.metric())/3.6);
 			double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(0.001, speed_M_S);
-			return maxPowerAtSpeed * getThrottle() * getReverser();
+			return maxPowerAtSpeed * relativeRPM * getReverser();
 		}
 		return 0;
 	}
@@ -176,13 +176,13 @@ public class LocomotiveDiesel extends Locomotive {
 			turnOnOffDelay -= 1;
 		}
 
+		float absThrottle = Math.abs(this.getThrottle());
+		if (this.relativeRPM > absThrottle) {
+			this.relativeRPM -= Math.min(0.01f, this.relativeRPM - absThrottle);
+		} else if (this.relativeRPM < absThrottle) {
+			this.relativeRPM += Math.min(0.01f, absThrottle - this.relativeRPM);
+		}
 		if (getWorld().isClient) {
-			float absThrottle = Math.abs(this.getThrottle());
-			if (this.soundThrottle > absThrottle) {
-				this.soundThrottle -= Math.min(0.01f, this.soundThrottle - absThrottle);
-			} else if (this.soundThrottle < absThrottle) {
-				this.soundThrottle += Math.min(0.01f, absThrottle - this.soundThrottle);
-			}
 			return;
 		}
 
@@ -261,8 +261,8 @@ public class LocomotiveDiesel extends Locomotive {
 		setTurnedOn(false);
 	}
 
-	public float getSoundThrottle() {
-		return soundThrottle;
+	public float getRelativeRPM() {
+		return relativeRPM;
 	}
 
 	@Override
