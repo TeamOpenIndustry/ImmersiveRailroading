@@ -55,7 +55,7 @@ public class Config {
 		public static boolean explosionEnvDamageEnabled = true;
 		
 		@Comment( "km/h to damage 1 heart on collision" )
-		@Range(min = 0, max = 100)
+		@Range(min = 1, max = 100)
 		public static double entitySpeedDamage = 10;
 
 		@Comment("Trains should break block")
