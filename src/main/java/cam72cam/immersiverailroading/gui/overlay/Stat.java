@@ -23,6 +23,9 @@ public enum Stat {
     BRAKE_PRESSURE,
     MAX_BRAKE_PRESSURE,
     UNITS_BRAKE_PRESSURE,
+    CARGO_FILL,
+    MAX_CARGO_FILL,
+    UNITS_CARGO_FILL,
     ;
 
     public String getValue(EntityRollingStock stock) {
@@ -106,6 +109,15 @@ public enum Stat {
             case MAX_BRAKE_PRESSURE:
                 return "100";
             case UNITS_BRAKE_PRESSURE:
+                return "%";
+            case CARGO_FILL:
+                if (stock instanceof Freight) {
+                    return String.format("%s", ((Freight) stock).getPercentCargoFull());
+                }
+                return "";
+            case MAX_CARGO_FILL:
+                return "100";
+            case UNITS_CARGO_FILL:
                 return "%";
         }
         return "";

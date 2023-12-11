@@ -31,6 +31,7 @@ public enum Readouts {
     FRONT_LOCOMOTIVE_ANGLE,
     REAR_LOCOMOTIVE_ANGLE,
     CYLINDER_DRAIN,
+    CARGO_FILL
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -98,6 +99,8 @@ public enum Readouts {
                 return rear instanceof LocomotiveModel ? yawToPercent(((LocomotiveModel<?, ?>)rear).getRearLocomotiveYaw((EntityMoveableRollingStock) stock), 90) : 0.5f;
             case CYLINDER_DRAIN:
                 return stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled() ? 1 : 0;
+            case CARGO_FILL:
+                return stock instanceof Freight ? ((Freight) stock).getPercentCargoFull() / 100f : 0;
         }
         return 0;
     }
