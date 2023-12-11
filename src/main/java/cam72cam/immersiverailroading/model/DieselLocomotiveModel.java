@@ -76,14 +76,14 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
                         : 0);
         if (idle != null) {
             if (stock.isRunning()) {
-                float volume = Math.max(0.1f, stock.getSoundThrottle());
+                float volume = Math.max(0.1f, stock.getRelativeRPM());
                 float pitchRange = stock.getDefinition().getEnginePitchRange();
-                float pitch = (1-pitchRange) + stock.getSoundThrottle() * pitchRange;
+                float pitch = (1-pitchRange) + stock.getRelativeRPM() * pitchRange;
                 if (running == null) {
                     // Simple
                     idle.effects(stock, volume, pitch);
                 } else {
-                    boolean isThrottledUp = stock.getSoundThrottle() > 0.01;
+                    boolean isThrottledUp = stock.getRelativeRPM() > 0.01;
                     float fade = runningFade.getOrDefault(stock.getUUID(), 0f);
                     fade += 0.05f * (isThrottledUp ? 1 : -1);
                     fade = Math.min(Math.max(fade, 0), 1);
