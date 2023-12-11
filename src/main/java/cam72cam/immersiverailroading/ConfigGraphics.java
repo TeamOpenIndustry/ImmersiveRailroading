@@ -65,4 +65,7 @@ public class ConfigGraphics {
 	@Comment("Mouse Scroll Speed (negative values invert it)")
 	@Range(min = -10, max = 10)
 	public static float ScrollSpeed = 1;
+
+	@Comment("Try to fake interior lighting for locomotives/passenger cars that are being ridden")
+	public static boolean FakeInteriorLighting = true;
 }

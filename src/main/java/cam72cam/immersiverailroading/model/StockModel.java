@@ -88,7 +88,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
                 return base;
             }
             boolean hasInteriorOverride = hasInterior;
-            if (!hasInteriorOverride) {
+            if (!hasInteriorOverride && ConfigGraphics.FakeInteriorLighting) {
                 // No interior found in this stock, should we use a fallback?
 
                 if (stock instanceof Locomotive  || stock instanceof CarPassenger) {
