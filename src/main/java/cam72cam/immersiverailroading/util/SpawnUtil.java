@@ -63,7 +63,7 @@ public class SpawnUtil {
 					Vec3d rear = centerte.getNextPosition(center, VecUtil.fromWrongYaw(rearDistance, yaw));
 
 					moveable.setRotationYaw(VecUtil.toWrongYaw(front.subtract(rear)));
-					moveable.setRotationPitch(VecUtil.toPitch(front.subtract(rear)) - 90);
+					moveable.setRotationPitch(-VecUtil.toPitch(front.subtract(rear)) - 90);
 					moveable.setPosition(rear.add(front.subtract(rear).scale(frontDistance / (frontDistance - rearDistance))));
 
 					ITrack frontte = ITrack.get(worldIn, front, true);
