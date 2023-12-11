@@ -87,14 +87,22 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             if (!stock.hasElectricalPower()) {
                 return base;
             }
-            Boolean interiorHack = null;
-            if (!hasInterior && (stock instanceof Locomotive  || stock instanceof CarPassenger)) {
-                interiorHack = MinecraftClient.getPlayer().getRiding() != stock;
+            boolean hasInteriorOverride = hasInterior;
+            if (!hasInteriorOverride) {
+                // No interior found in this stock, should we use a fallback?
+
+                if (stock instanceof Locomotive  || stock instanceof CarPassenger) {
+                    // Locomotives and cars should pretend to have an interior when not ridden
+                    hasInteriorOverride = MinecraftClient.getPlayer().getRiding() != stock;
+                } else {
+                    // All other stock should pretend to have an interior to prevent the fallback
+                    hasInteriorOverride = true;
+                }
             }
             float blockLight = stock.getWorld().getBlockLightLevel(stock.getBlockPosition());
             float skyLight = stock.getWorld().getSkyLightLevel(stock.getBlockPosition());
             boolean brighter = blockLight < interiorLight;
-            return base.merge(new ModelState.LightState(brighter ? interiorLight : null, brighter ? skyLight : null, true, interiorHack));
+            return base.merge(new ModelState.LightState(brighter ? interiorLight : null, brighter ? skyLight : null, true, hasInteriorOverride));
         };
 
         animations = new ArrayList<>();
