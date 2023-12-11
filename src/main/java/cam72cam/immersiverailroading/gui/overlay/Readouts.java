@@ -43,8 +43,11 @@ public enum Readouts {
             case LIQUID:
                 return stock instanceof FreightTank ? ((FreightTank) stock).getPercentLiquidFull() / 100f : 0;
             case SPEED:
-                return (float)Math.abs(((EntityMoveableRollingStock)stock).getCurrentSpeed().metric() /
-                    (stock instanceof Locomotive ? ((Locomotive) stock).getDefinition().getMaxSpeed(stock.gauge).metric() : 200));
+                double maxSpeed = (stock instanceof Locomotive ? ((Locomotive) stock).getDefinition().getMaxSpeed(stock.gauge).metric() : 0);
+                if (maxSpeed == 0) {
+                    maxSpeed = 200;
+                }
+                return (float)Math.abs(((EntityMoveableRollingStock)stock).getCurrentSpeed().metric() / maxSpeed);
             case TEMPERATURE:
                 if (stock instanceof LocomotiveSteam) {
                     return ((LocomotiveSteam) stock).getBoilerTemperature() / 100f;

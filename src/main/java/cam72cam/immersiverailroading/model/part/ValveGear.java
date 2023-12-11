@@ -233,6 +233,9 @@ public abstract class ValveGear {
 
                     double speed = Math.abs(stock.getCurrentSpeed().minecraft());
                     double maxSpeed = Math.abs(stock.getDefinition().getMaxSpeed(stock.gauge).minecraft());
+                    if (maxSpeed == 0) {
+                        maxSpeed = 200;
+                    }
                     float volume = (float) Math.max(1-speed/maxSpeed, 0.3) * Math.abs(stock.getThrottle() * stock.getReverser());
                     volume = (float) Math.sqrt(volume);
                     double fraction = 3;
