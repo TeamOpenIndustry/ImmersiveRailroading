@@ -56,7 +56,7 @@ public class ConfigGraphics {
 	public static double StockSwayMultiplier = 1;
 
 	@Comment("How likely a piece of stock is to sway (1 == always, 10 == infrequent)")
-	@Range(min = 0, max = 10)
+	@Range(min = 1, max = 10)
 	public static int StockSwayChance = 1;
 
 	@Comment("Settings used in the stock user interfaces")
