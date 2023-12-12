@@ -31,7 +31,8 @@ public enum Readouts {
     FRONT_LOCOMOTIVE_ANGLE,
     REAR_LOCOMOTIVE_ANGLE,
     CYLINDER_DRAIN,
-    CARGO_FILL
+    CARGO_FILL,
+    ENGINE_RPM,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -104,6 +105,8 @@ public enum Readouts {
                 return stock instanceof LocomotiveSteam && ((LocomotiveSteam) stock).cylinderDrainsEnabled() ? 1 : 0;
             case CARGO_FILL:
                 return stock instanceof Freight ? ((Freight) stock).getPercentCargoFull() / 100f : 0;
+            case ENGINE_RPM:
+                return stock instanceof LocomotiveDiesel ? ((LocomotiveDiesel) stock).getRelativeRPM() : 0;
         }
         return 0;
     }
