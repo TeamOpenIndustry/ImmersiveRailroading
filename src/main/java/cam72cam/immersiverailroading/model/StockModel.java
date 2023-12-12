@@ -88,10 +88,10 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
                 return base;
             }
             boolean hasInteriorOverride = hasInterior;
-            if (!hasInteriorOverride && ConfigGraphics.FakeInteriorLighting) {
+            if (!hasInteriorOverride) {
                 // No interior found in this stock, should we use a fallback?
 
-                if (stock instanceof Locomotive  || stock instanceof CarPassenger) {
+                if ((stock instanceof Locomotive  || stock instanceof CarPassenger) && ConfigGraphics.FakeInteriorLighting) {
                     // Locomotives and cars should pretend to have an interior when not ridden
                     hasInteriorOverride = MinecraftClient.getPlayer().getRiding() != stock;
                 } else {
