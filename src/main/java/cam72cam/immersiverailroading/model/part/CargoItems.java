@@ -134,6 +134,7 @@ public class CargoItems {
                             Vec3d pos = new Vec3d(comp.center.x, comp.min.y, comp.center.z);//.scale(stock.gauge.scale());
                             model.addCustom((s, pt) -> {
                                 s.translate(pos);
+                                s.scale(1 / stock.gauge.scale(), 1 / stock.gauge.scale(), 1 / stock.gauge.scale());
                                 s.scale(data.gauge.scale(), data.gauge.scale(), data.gauge.scale());
                                 try (OBJRender.Binding binder = data.def.getModel().binder().texture(data.texture).bind(s)) {
                                     binder.draw(data.def.itemGroups);
@@ -158,6 +159,7 @@ public class CargoItems {
                             }
                             model.addCustom((s, pt) -> {
                                 s.translate(pos);
+                                s.scale(1 / stock.gauge.scale(), 1 / stock.gauge.scale(), 1 / stock.gauge.scale());
                                 s.scale(data.gauge.scale(), data.gauge.scale(), data.gauge.scale());
                                 s.translate(0, -componentOffset, 0);
                                 try (OBJRender.Binding binder = data.def.getModel().binder().texture(data.texture).bind(s)) {
