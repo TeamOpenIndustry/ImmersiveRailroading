@@ -15,7 +15,7 @@ import java.util.UUID;
 public class StockAnimation {
     private final AnimationDefinition def;
     private final Animatrix animatrix;
-
+    private final ExpireableMap<UUID, Boolean> active;
     private final ExpireableMap<UUID, Float> tickStart;
     private final ExpireableMap<UUID, Float> tickStop;
     private final boolean looping;
@@ -26,6 +26,7 @@ public class StockAnimation {
         this.animatrix = new Animatrix(def.animatrix.getResourceStream(), internal_model_scale);
         tickStart = new ExpireableMap<>();
         tickStop = new ExpireableMap<>();
+        active = new ExpireableMap<>();
         switch (def.mode) {
             case VALUE:
             case PLAY_FORWARD:
@@ -71,8 +72,9 @@ public class StockAnimation {
                 if (value >= 0.95) {
                     // FORWARD
                     if (tickStart.get(key) == null) {
-                        if (tickCount < 2) {
-                            tickStart.put(key, -total_ticks_per_loop - tickCount - 1);
+                        if (active.get(key) == null) {
+                            active.put(key, true);
+                            tickStart.put(key, tickCount - total_ticks_per_loop - 1);
                         } else {
                             tickStart.put(key, tickCount);
                         }
@@ -86,8 +88,9 @@ public class StockAnimation {
                 } else {
                     // REVERSE
                     if (tickStop.get(key) == null) {
-                        if (tickCount < 2) {
-                            tickStop.put(key, -total_ticks_per_loop - tickCount - 1);
+                        if (active.get(key) == null) {
+                            active.put(key, true);
+                            tickStop.put(key, tickCount - total_ticks_per_loop - 1);
                         } else {
                             tickStop.put(key, tickCount);
                         }
