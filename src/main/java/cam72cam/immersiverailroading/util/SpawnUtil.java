@@ -18,6 +18,7 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.mod.entity.Player;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.mod.util.DegreeFuncs;
 import cam72cam.mod.world.World;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
@@ -63,9 +64,11 @@ public class SpawnUtil {
 					Vec3d rear = centerte.getNextPosition(center, VecUtil.fromWrongYaw(rearDistance, yaw));
 
 					moveable.setRotationYaw(VecUtil.toWrongYaw(front.subtract(rear)));
-					float pitch = (-VecUtil.toPitch(front.subtract(rear)) - 90) % 180;
+					float pitch = (-VecUtil.toPitch(front.subtract(rear)) - 90);
+					if (DegreeFuncs.delta(pitch, 0) > 90) {
+						pitch = 180 - pitch;
+					}
 					moveable.setRotationPitch(pitch);
-					System.out.println(pitch);
 
 					moveable.setPosition(rear.add(front.subtract(rear).scale(frontDistance / (frontDistance - rearDistance))));
 
