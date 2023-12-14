@@ -115,8 +115,9 @@ public class SimulationState {
             width = stock.getDefinition().getWidth(gauge);
             length = stock.getDefinition().getLength(gauge);
             height = stock.getDefinition().getHeight(gauge);
+            double pitchOffset = (Math.abs(Math.sin(Math.toRadians(stock.getRotationPitch())) * length));
             bounds = s -> stock.getDefinition().getBounds(s.yaw, gauge)
-                    .offset(s.position.add(0, -(s.position.y % 1) - (Math.abs(Math.sin(Math.toRadians(stock.getRotationPitch())) * length)), 0))
+                    .offset(s.position.add(0, -(s.position.y % 1) - pitchOffset, 0))
                     .contract(new Vec3d(0, 0, 0.5 * gauge.scale()));
                     //.contract(new Vec3d(0, 0.5 * this.gauge.scale(), 0))
                     //.offset(new Vec3d(0, 0.5 * this.gauge.scale(), 0));
@@ -286,8 +287,10 @@ public class SimulationState {
                 trackToUpdate.add(bp);
             } else {
                 if (Config.ConfigDamage.TrainsBreakBlocks && !BlockUtil.isIRRail(config.world, bp.up())) {
-                    interferingBlocks.add(bp);
-                    interferingResistance += config.world.getBlockHardness(bp);
+                    if (bp.y >= position.y - (position.y % 1)) { // Prevent it from breaking blocks under the pitched train (bb expanded)
+                        interferingBlocks.add(bp);
+                        interferingResistance += config.world.getBlockHardness(bp);
+                    }
                 }
             }
         }
