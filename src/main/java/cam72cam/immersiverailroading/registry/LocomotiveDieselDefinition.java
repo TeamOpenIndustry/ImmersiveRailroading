@@ -23,6 +23,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     private boolean hornSus;
     private int notches;
     private float enginePitchRange;
+    public boolean hasDynamicTractionControl;
 
     public LocomotiveDieselDefinition(String defID, DataBlock data) throws Exception {
         super(LocomotiveDiesel.class, defID, data);
@@ -41,6 +42,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         if (!isCabCar()) {
             fuelCapacity_l = properties.getValue("fuel_capacity_l").asInteger() * internal_inv_scale * 10;
             fuelEfficiency = properties.getValue("fuel_efficiency_%").asInteger();
+            hasDynamicTractionControl = properties.getValue("dynamic_traction_control").asBoolean();
         } else {
             fuelCapacity_l = 0;
         }

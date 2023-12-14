@@ -7,6 +7,7 @@ properties =
     fuel_capacity_l = null # Required: How large should the fuel tank be?
     fuel_efficiency_% = null # Required: How efficient does this locomotive consume fuel? Range 1-99
     throttle_notches = 8 # Optional: Number of throttle notches in the cab
+    dynamic_traction_control = false # If the onboard computer can try to prevent wheel slip
     horn_sustained = False # Optional: Should the horn repeat
 
 sounds =

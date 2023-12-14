@@ -163,7 +163,15 @@ public class LocomotiveDiesel extends Locomotive {
 			double efficiency = 0.82; // Similar to a *lot* of imperial references
 			double speed_M_S = (Math.abs(speed.metric())/3.6);
 			double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(0.001, speed_M_S);
-			return maxPowerAtSpeed * relativeRPM * getReverser();
+			double applied = maxPowerAtSpeed * relativeRPM * getReverser();
+			if (getDefinition().hasDynamicTractionControl) {
+				double max = getStaticTractiveEffort(speed);
+				if (Math.abs(applied) > max) {
+					return Math.copySign(max, applied);
+				}
+
+			}
+			return applied;
 		}
 		return 0;
 	}
