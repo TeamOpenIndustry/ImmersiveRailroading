@@ -225,7 +225,8 @@ public class LocomotiveDiesel extends Locomotive {
 			}
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
-			
+			burnTime *= 10; // This is a workaround for the 10x tank size bug that existed for a long time and was tuned to
+
 			while (internalBurn < 0 && this.getLiquidAmount() > 0) {
 				internalBurn += burnTime;
 				theTank.drain(new FluidStack(theTank.getContents().getFluid(), 1), false);
