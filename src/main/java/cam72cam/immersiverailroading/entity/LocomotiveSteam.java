@@ -132,7 +132,25 @@ public class LocomotiveSteam extends Locomotive {
 		return (getDefinition().cab_forward ? -1 : 1) * super.getTractiveEffortNewtons(speed);
 	}
 
-	@Override
+    @Override
+    public double slipCoefficient(Speed speed) {
+		double slipMult = super.slipCoefficient(speed);
+		// Wheel balance messing with friction
+		if (speed.metric() != 0) {
+			double balance = 1d/(Math.abs(speed.metric())+300) / (1d/300);
+			slipMult *= balance;
+		}
+
+		// TODO better approximation
+		// assume wheel diameter == 5m
+		double ratio = 0.35;
+		double hammer = ratio + (slipping ? 0 : Math.abs(Math.sin(Math.toRadians(360 * distanceTraveled / (5f * gauge.scale()/ 2))) * (1-ratio)));
+		slipMult *= hammer;
+
+		return slipMult;
+    }
+
+    @Override
 	protected double simulateWheelSlip() {
 		return (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip();
 	}

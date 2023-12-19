@@ -66,7 +66,7 @@ public abstract class Locomotive extends FreightTank {
 	@TagField("cogging")
 	private boolean cogging = false;
 
-	private boolean slipping = false;
+	protected boolean slipping = false;
 
 	/*
 	 * 
@@ -404,7 +404,7 @@ public abstract class Locomotive extends FreightTank {
 				* 9.8 // M/S/S
 				* (slipping ? STEEL.kineticFriction(STEEL)/2 : STEEL.staticFriction(STEEL))
 				* slipCoefficient(speed)
-				/ getDefinition().factorOfAdhesion()
+				* (4/getDefinition().factorOfAdhesion()) // Physics are tuned to an adhesion factor of 4
 				* Config.ConfigBalance.tractionMultiplier;
 	}
 	
@@ -611,20 +611,15 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	public double slipCoefficient(Speed speed) {
-		double slipMult = 1.0;
+		double slipMult = 0.5; //TODO Assumes dirty rails.  Set this back to 1.0 and adjust physics coefficients
 		World world = getWorld();
 		if (world.isPrecipitating() && world.canSeeSky(getBlockPosition())) {
 			if (world.isRaining(getBlockPosition())) {
-				slipMult = 0.6;
+				slipMult *= 0.6;
 			}
 			if (world.isSnowing(getBlockPosition())) {
-				slipMult = 0.4;
+				slipMult *= 0.4;
 			}
-		}
-		// Wheel balance messing with friction
-		if (speed.metric() != 0) {
-			double balance = 1d/(Math.abs(speed.metric())+300) / (1d/300);
-			slipMult *= balance;
 		}
 		return slipMult;
 	}

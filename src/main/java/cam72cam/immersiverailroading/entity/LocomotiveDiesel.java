@@ -167,7 +167,7 @@ public class LocomotiveDiesel extends Locomotive {
 			if (getDefinition().hasDynamicTractionControl) {
 				double max = getStaticTractiveEffort(speed);
 				if (Math.abs(applied) > max) {
-					return Math.copySign(max, applied);
+					return Math.copySign(max, applied) * 0.95;
 				}
 
 			}
