@@ -346,5 +346,7 @@ in [src/main/java/cam72cam/immersiverailroading/library/Permissions.java](https:
 
 ## Known Issues
 
-* Translations
 * Moving around stock while riding may desync server side / be somewhat buggy
+* Sometimes offline mode will cause issues, UMC issue that will be patched later
+* Custom animation widgets occasionally desync
+* Locked switches occasionally desync
