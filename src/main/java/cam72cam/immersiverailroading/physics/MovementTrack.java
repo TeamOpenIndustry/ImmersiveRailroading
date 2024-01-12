@@ -140,7 +140,7 @@ public class MovementTrack {
 			 * trying to move.  Instead we should probably calculate the vector between the closest pos
 			 * and the current pos and move distance along that.  How would that work for slopes at the ends? just fine?
 			 */
-			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25 * rail.info.settings.gauge.scale());
+			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(rail.info.settings.gauge.scale());
 			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.getPos()).add(0, heightOffset, 0);
 			Vec3d target = currentPosition.add(delta);
 			Vec3d relative = target.subtract(center);
