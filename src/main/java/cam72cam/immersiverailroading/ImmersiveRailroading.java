@@ -72,6 +72,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRegistry.register(ImmersiveRailroading.instance, HandCar::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveDiesel::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveSteam::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
+                EntityRegistry.register(ImmersiveRailroading.instance, LocomotiveElectric::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, Tender::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 
 				Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
@@ -164,6 +165,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				};
 				EntityRenderer.register(LocomotiveSteam.class, stockRender);
 				EntityRenderer.register(LocomotiveDiesel.class, stockRender);
+                EntityRenderer.register(LocomotiveElectric.class, stockRender);
 				EntityRenderer.register(CarPassenger.class, stockRender);
 				EntityRenderer.register(CarFreight.class, stockRender);
 				EntityRenderer.register(CarTank.class, stockRender);
