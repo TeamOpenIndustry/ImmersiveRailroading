@@ -22,6 +22,7 @@ public class GuiTypes {
     public static final EntityGUI<Tender> TENDER = GuiRegistry.registerEntityContainer(Tender.class, TenderContainer::new);
     public static final EntityGUI<LocomotiveSteam> STEAM_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveSteam.class, SteamLocomotiveContainer::new);
     public static final EntityGUI<LocomotiveDiesel> DIESEL_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveDiesel.class, TankContainer::new);
+    public static final EntityGUI<LocomotiveElectric> ELECTRIC_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveElectric.class, null);
 
     public static final GUI RAIL = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "RAIL"), TrackGui::new);
     public static final BlockGUI RAIL_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, TrackGui::new);

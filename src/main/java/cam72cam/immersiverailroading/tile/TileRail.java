@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.LocomotiveElectric;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
@@ -86,9 +87,14 @@ public class TileRail extends TileRailBase {
 		this.tableIndex = dest;
 	}
 
-	@Override
+
+    public LocomotiveElectric getStock(){
+        return this.getStockNearBy(LocomotiveElectric.class);
+    }
+
+    @Override
 	public void update() {
-		super.update();
+        super.update();
 
 		if (getWorld().isServer && info != null && info.settings.type == TrackItems.TURNTABLE) {
 			int slotsPerCircle = Config.ConfigBalance.AnglePlacementSegmentation * 4;

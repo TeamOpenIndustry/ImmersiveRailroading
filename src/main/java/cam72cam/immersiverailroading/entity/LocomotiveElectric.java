@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Permissions;
@@ -24,7 +25,6 @@ import java.util.OptionalDouble;
 
 public class LocomotiveElectric extends Locomotive {
     private float relativeRPM;
-    private float internalBurn = 0.0F;
     private int turnOnOffDelay = 0;
     @TagSync
     @TagField("TURNED_ON")
@@ -32,6 +32,7 @@ public class LocomotiveElectric extends Locomotive {
     @TagSync
     @TagField("IS_POWERED")
     private boolean isPowered;
+    private int powerCooldown;
     private int throttleCooldown;
     private int reverserCooldown;
 
@@ -60,6 +61,10 @@ public class LocomotiveElectric extends Locomotive {
         this.setControlPositions(ModelComponentType.ENGINE_START_X, this.turnedOn ? 1.0F : 0.0F);
     }
 
+    public void setPowerCooldown(int powerCooldown) {
+        this.powerCooldown = powerCooldown;
+    }
+
     public boolean isTurnedOn() {
         return this.turnedOn;
     }
@@ -78,7 +83,7 @@ public class LocomotiveElectric extends Locomotive {
 
     public boolean openGui(Player player) {
         if (!this.getDefinition().isCabCar() && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
-//            GuiTypes.DIESEL_LOCOMOTIVE.open(player, this);
+            GuiTypes.ELECTRIC_LOCOMOTIVE.open(player, this);
             return true;
         } else {
             return false;
@@ -225,6 +230,13 @@ public class LocomotiveElectric extends Locomotive {
 //            }
 //
 //            this.setEngineTemperature(engineTemperature);
+            this.powerCooldown--;
+            if(this.powerCooldown < 0){
+                this.powerCooldown = 0;
+                isPowered = false;
+            }else if(!isPowered){
+                isPowered = true;
+            }
         }
     }
 
