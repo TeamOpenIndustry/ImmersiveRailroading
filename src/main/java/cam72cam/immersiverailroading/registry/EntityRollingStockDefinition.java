@@ -64,6 +64,7 @@ public abstract class EntityRollingStockDefinition {
     private String modelerName;
     private String packName;
     private ValveGearConfig valveGear;
+    public boolean isLeftFirst;
     public float darken;
     public Identifier modelLoc;
     protected StockModel<?, ?> model;
@@ -470,6 +471,9 @@ public abstract class EntityRollingStockDefinition {
         DataBlock properties = data.getBlock("properties");
         weight = properties.getValue("weight_kg").asInteger() * internal_inv_scale;
         valveGear = ValveGearConfig.get(properties, "valve_gear");
+        if(valveGear !=  null){
+            isLeftFirst = properties.getValue("left_first").asBoolean(true);
+        }
         hasIndependentBrake = properties.getValue("independent_brake").asBoolean();
         hasPressureBrake = properties.getValue("pressure_brake").asBoolean();
         // Locomotives default to linear brake control

@@ -221,7 +221,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected void parseComponents(ComponentProvider provider, DEFINITION def) {
         this.frame = new Frame(provider, base, rocking, def.defID);
 
-        drivingWheels = DrivingAssembly.get(def.getValveGear(), provider, base, 0,
+        drivingWheels = DrivingAssembly.get(def.getValveGear(), provider, base, 0, def.isLeftFirst,
                 frame != null ? frame.wheels : null,
                 bogeyFront != null ? bogeyFront.wheels : null,
                 bogeyRear != null ? bogeyRear.wheels : null
