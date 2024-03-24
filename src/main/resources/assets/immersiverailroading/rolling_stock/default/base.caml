@@ -48,6 +48,7 @@ properties =                # Required:
 #       -1.0 = immersiverailroading:some/path/animation_-1.0.anim # Reverse
 #       0.0 = immersiverailroading:some/path/animation_0.0.anim # Neutral
 #       1.0 = immersiverailroading:some/path/animation_1.0.anim # Forward
+#   left_first = true            # Optional: Should this valve gear be at left-first crank pin position? Default is true
 
     independent_brake = False           # Optional: Does this piece of stock have an independent brake?  Usually False except for Locomotives
     pressure_brake = True               # Optional: Does this piece of stock have a pressure brake?  Usually True except for Hand Cars
