@@ -472,7 +472,7 @@ public abstract class EntityRollingStockDefinition {
         weight = properties.getValue("weight_kg").asInteger() * internal_inv_scale;
         valveGear = ValveGearConfig.get(properties, "valve_gear");
         if(valveGear !=  null){
-            isLeftFirst = properties.getValue("left_first").asBoolean(true);
+            isLeftFirst = properties.getValue("left_first").asBoolean();
         }
         hasIndependentBrake = properties.getValue("independent_brake").asBoolean();
         hasPressureBrake = properties.getValue("pressure_brake").asBoolean();
