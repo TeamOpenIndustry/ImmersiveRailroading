@@ -42,9 +42,9 @@ public class DrivingAssembly {
         int angleDirection = isLeftFirst ? 1 : -1;
 
         ValveGear left = ValveGear.get(wheels, type, provider, state, ModelPosition.LEFT.and(pos), 0);
-        ValveGear inner_left = ValveGear.get(wheels, type, provider, state, ModelPosition.INNER_LEFT.and(pos), angleDirection * (180));
-        ValveGear center = ValveGear.get(wheels, type, provider, state, ModelPosition.CENTER.and(pos), angleDirection * (-120));
-        ValveGear inner_right = ValveGear.get(wheels, type, provider, state, ModelPosition.INNER_RIGHT.and(pos), angleDirection * (90));
+        ValveGear inner_left = ValveGear.get(wheels, type, provider, state, ModelPosition.INNER_LEFT.and(pos), angleDirection * 180);
+        ValveGear center = ValveGear.get(wheels, type, provider, state, ModelPosition.CENTER.and(pos), angleDirection * -120);
+        ValveGear inner_right = ValveGear.get(wheels, type, provider, state, ModelPosition.INNER_RIGHT.and(pos), angleDirection * 90);
         ValveGear right = ValveGear.get(wheels, type, provider, state, ModelPosition.RIGHT.and(pos), angleDirection * (center == null ? -90 : -240));
 
         ModelComponent steamChest = pos == null ?
