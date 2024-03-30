@@ -15,9 +15,8 @@ public class LocomotiveElectricDefinition extends LocomotiveDefinition {
     public EntityRollingStockDefinition.SoundDefinition idle;
     public EntityRollingStockDefinition.SoundDefinition running;
     public EntityRollingStockDefinition.SoundDefinition horn;
-    //    private double fuelCapacity_l;
-//    private int fuelEfficiency;
-    private int powerRequired;
+    private int energyCapacity;
+    private int energyConsumeRatio;
     private boolean hornSus;
     private int notches;
     private float enginePitchRange;
@@ -31,22 +30,16 @@ public class LocomotiveElectricDefinition extends LocomotiveDefinition {
         return new Identifier("immersiverailroading", "rolling_stock/default/diesel.caml");
     }
 
-    public int getPowerRequired() {
-        return powerRequired;
-    }
-
-    public void setPowerRequired(int powerRequired) {
-        this.powerRequired = powerRequired;
-    }
-
     public void loadData(DataBlock data) throws Exception {
         super.loadData(data);
         DataBlock properties = data.getBlock("properties");
         if (!this.isCabCar()) {
-            this.powerRequired = properties.getValue("power").asInteger(2000);
+            this.energyCapacity = properties.getValue("energy_capacity_rf").asInteger();
+            this.energyConsumeRatio = properties.getValue("energy_consume_ratio_rf/t").asInteger();
             this.hasDynamicTractionControl = properties.getValue("dynamic_traction_control").asBoolean();
         } else {
-            this.powerRequired = 0;
+            this.energyCapacity = 0;
+            this.energyConsumeRatio = 0;
         }
 
         this.notches = properties.getValue("throttle_notches").asInteger();
@@ -64,7 +57,7 @@ public class LocomotiveElectricDefinition extends LocomotiveDefinition {
     }
 
     protected GuiBuilder getDefaultOverlay(DataBlock data) throws IOException {
-        return GuiBuilder.parse(new Identifier("immersiverailroading", "gui/default/cab_car.caml"));
+        return GuiBuilder.parse(new Identifier("immersiverailroading", "gui/default/electric.caml"));
     }
 
     public StockModel<?, ?> getModel() {
@@ -85,5 +78,13 @@ public class LocomotiveElectricDefinition extends LocomotiveDefinition {
 
     public float getEnginePitchRange() {
         return this.enginePitchRange;
+    }
+
+    public int getEnergyCapacity() {
+        return energyCapacity;
+    }
+
+    public int getEnergyConsumeRatio() {
+        return energyConsumeRatio;
     }
 }

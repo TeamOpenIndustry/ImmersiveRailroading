@@ -748,6 +748,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 				break;
+            case SUPPLIER: {
+                EntityRollingStock stock = this.getStockNearBy(EntityRollingStock.class);
+                if (stock instanceof LocomotiveElectric) {
+                    LocomotiveElectric stock1 = (LocomotiveElectric) stock;
+                    stock1.onCharge(200);
+                }
+            }
+                break;
 			default:
 				break;
 			}

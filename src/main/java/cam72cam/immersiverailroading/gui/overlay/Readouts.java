@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.model.StockModel;
 
 public enum Readouts {
     LIQUID,
+    ENERGY,
     SPEED,
     TEMPERATURE,
     BOILER_PRESSURE,
@@ -43,6 +44,8 @@ public enum Readouts {
         switch (this) {
             case LIQUID:
                 return stock instanceof FreightTank ? ((FreightTank) stock).getPercentLiquidFull() / 100f : 0;
+            case ENERGY:
+                return stock instanceof LocomotiveElectric ? ((LocomotiveElectric) stock).getPercentEnergyFull() : 0;
             case SPEED:
                 double maxSpeed = (stock instanceof Locomotive ? ((Locomotive) stock).getDefinition().getMaxSpeed(stock.gauge).metric() : 0);
                 if (maxSpeed == 0) {

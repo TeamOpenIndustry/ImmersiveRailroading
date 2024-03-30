@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.registry.LocomotiveElectricDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.mod.energy.Energy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.Fluid;
@@ -32,11 +33,14 @@ public class LocomotiveElectric extends Locomotive {
     @TagSync
     @TagField("IS_POWERED")
     private boolean isPowered;
-    private int powerCooldown;
+    @TagSync
+    @TagField("POWER")
+    private Energy energy;
     private int throttleCooldown;
     private int reverserCooldown;
 
     public LocomotiveElectric() {
+
     }
 
     public boolean isPowered() {
@@ -45,13 +49,10 @@ public class LocomotiveElectric extends Locomotive {
 
     @Override
     public ClickResult onClick(Player player, Player.Hand hand) {
-        player.sendMessage(PlayerMessage.direct(String.valueOf(this.isPowered())));
+        player.sendMessage(PlayerMessage.direct(String.valueOf(this.getEnergy().getCurrent())));
         return super.onClick(player, hand);
     }
 
-    public void setPowered(boolean powered) {
-        isPowered = powered;
-    }
     public int getInventoryWidth() {
         return this.getDefinition().isCabCar() ? 0 : 2;
     }
@@ -59,10 +60,6 @@ public class LocomotiveElectric extends Locomotive {
     public void setTurnedOn(boolean value) {
         this.turnedOn = value;
         this.setControlPositions(ModelComponentType.ENGINE_START_X, this.turnedOn ? 1.0F : 0.0F);
-    }
-
-    public void setPowerCooldown(int powerCooldown) {
-        this.powerCooldown = powerCooldown;
     }
 
     public boolean isTurnedOn() {
@@ -78,7 +75,7 @@ public class LocomotiveElectric extends Locomotive {
     }
 
     public LocomotiveElectricDefinition getDefinition() {
-        return (LocomotiveElectricDefinition)super.getDefinition(LocomotiveElectricDefinition.class);
+        return (LocomotiveElectricDefinition) super.getDefinition(LocomotiveElectricDefinition.class);
     }
 
     public boolean openGui(Player player) {
@@ -135,23 +132,23 @@ public class LocomotiveElectric extends Locomotive {
     public void setThrottle(float newThrottle) {
         int notches = this.getDefinition().getThrottleNotches();
         if (newThrottle > this.getThrottle()) {
-            super.setThrottle((float)(Math.ceil((double)(newThrottle * (float)notches)) / (double)notches));
+            super.setThrottle((float) (Math.ceil((double) (newThrottle * (float) notches)) / (double) notches));
         } else {
-            super.setThrottle((float)(Math.floor((double)(newThrottle * (float)notches)) / (double)notches));
+            super.setThrottle((float) (Math.floor((double) (newThrottle * (float) notches)) / (double) notches));
         }
     }
 
     public void setReverser(float newReverser) {
-        super.setReverser((float)Math.round(newReverser));
+        super.setReverser((float) Math.round(newReverser));
     }
 
     public double getAppliedTractiveEffort(Speed speed) {
         if (this.isRunning() && !Config.isFuelRequired(this.gauge)) {
-            double maxPower_W = (double)this.getDefinition().getHorsePower(this.gauge) * 745.7;
+            double maxPower_W = (double) this.getDefinition().getHorsePower(this.gauge) * 745.7;
             double efficiency = 0.82;
             double speed_M_S = Math.abs(speed.metric()) / 3.6;
             double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(0.001, speed_M_S);
-            double applied = maxPowerAtSpeed * (double)this.relativeRPM * (double)this.getReverser();
+            double applied = maxPowerAtSpeed * (double) this.relativeRPM * (double) this.getReverser();
             if (this.getDefinition().hasDynamicTractionControl) {
                 double max = this.getStaticTractiveEffort(speed);
                 if (Math.abs(applied) > max) {
@@ -230,12 +227,18 @@ public class LocomotiveElectric extends Locomotive {
 //            }
 //
 //            this.setEngineTemperature(engineTemperature);
-            this.powerCooldown--;
-            if(this.powerCooldown < 0){
-                this.powerCooldown = 0;
-                isPowered = false;
-            }else if(!isPowered){
-                isPowered = true;
+            if(energy == null){
+                this.energy = new Energy(0, this.getDefinition().getEnergyCapacity());
+            }else if(energy.getMax() != getDefinition().getEnergyCapacity()) {
+                this.energy = new Energy(energy.getCurrent(), this.getDefinition().getEnergyCapacity());
+            }
+            if (isRunning()) {
+                this.energy.extract(this.getDefinition().getEnergyConsumeRatio(), false);
+                if (this.energy.getCurrent() == 0) {
+                    isPowered = false;
+                } else if (!isPowered) {
+                    isPowered = true;
+                }
             }
         }
     }
@@ -249,6 +252,14 @@ public class LocomotiveElectric extends Locomotive {
     @Override
     public List<Fluid> getFluidFilter() {
         return null;
+    }
+
+    public void onCharge(int ratio) {
+        this.energy.receive(ratio, false);
+    }
+
+    public Energy getEnergy() {
+        return this.energy;
     }
 
     public void onDissassemble() {
@@ -276,5 +287,9 @@ public class LocomotiveElectric extends Locomotive {
             this.setControlPositions(ModelComponentType.REVERSER_X, this.getReverser() / -2.0F + 0.5F);
         }
 
+    }
+
+    public float getPercentEnergyFull(){
+        return ((float) this.energy.getCurrent() / this.getEnergy().getMax());
     }
 }

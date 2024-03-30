@@ -10,6 +10,7 @@ public enum Augment {
 	ITEM_UNLOADER,
 	FLUID_LOADER,
 	FLUID_UNLOADER,
+    SUPPLIER,
 	DETECTOR,
 	COUPLER,
 	ACTUATOR,
@@ -37,6 +38,8 @@ public enum Augment {
 			return Color.ORANGE;
 		case ACTUATOR:
 			return Color.SILVER;
+        case SUPPLIER:
+            return Color.PURPLE;
 		}
 		return Color.WHITE;
 	}
