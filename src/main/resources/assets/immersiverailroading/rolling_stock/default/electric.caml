@@ -1,0 +1,37 @@
+import: "immersiverailroading:rolling_stock/default/locomotive.caml"
+
+properties =
+    multi_unit_capable = True  # Optional: Defaults to true for Diesel Electrics
+
+    # The following is ignored if cab_car is set to True
+    energy_capacity_rf = 200000
+    energy_consume_ratio_rf/t = 200
+    throttle_notches = 8 # Optional: Number of throttle notches in the cab
+    dynamic_traction_control = false # If the onboard computer can try to prevent wheel slip
+    horn_sustained = False # Optional: Should the horn repeat
+
+sounds =
+    idle = "immersiverailroading:sounds/diesel/default/idle.ogg"    # Optional: See sound_definition.caml for details
+    running = null                                                  # Optional: See sound_definition.caml for details
+    engine_pitch_range = 0.25                                       # Optional: Percent of the pitch range to map the throttle to.  Ex: 0.25 means start at 75% pitch and move to 100% as the engine throttles up
+    horn = "immersiverailroading:sounds/diesel/default/horn.ogg"    # Optional: See sound_definition.caml for details
+    bell = "immersiverailroading:sounds/diesel/default/bell.ogg"    # Optional: See sound_definition.caml for details
+    controls =
+            REVERSER_1 =
+                    engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+                    move = "immersiverailroading:sounds/default/lever_move.ogg"
+                    movePercent = 0.45
+                    disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+            THROTTLE_1 =
+                    engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+                    move = "immersiverailroading:sounds/default/lever_move.ogg"
+                    movePercent = 0.125 # 1/notches
+                    disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+            TRAIN_BRAKE_1 =
+                    engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+                    move = "immersiverailroading:sounds/default/pressure.ogg"
+                    disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"
+            INDEPENDENT_BRAKE_1 =
+                    engage = "immersiverailroading:sounds/default/lever_engage.ogg"
+                    move = "immersiverailroading:sounds/default/pressure.ogg"
+                    disengage = "immersiverailroading:sounds/default/lever_disengage.ogg"

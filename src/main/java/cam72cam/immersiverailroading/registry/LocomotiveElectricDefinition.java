@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.LocomotiveElectric;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.ValveGearConfig;
@@ -27,7 +28,7 @@ public class LocomotiveElectricDefinition extends LocomotiveDefinition {
     }
 
     protected Identifier defaultDataLocation() {
-        return new Identifier("immersiverailroading", "rolling_stock/default/diesel.caml");
+        return new Identifier("immersiverailroading", "rolling_stock/default/electric.caml");
     }
 
     public void loadData(DataBlock data) throws Exception {
@@ -57,7 +58,9 @@ public class LocomotiveElectricDefinition extends LocomotiveDefinition {
     }
 
     protected GuiBuilder getDefaultOverlay(DataBlock data) throws IOException {
-        return GuiBuilder.parse(new Identifier("immersiverailroading", "gui/default/electric.caml"));
+        return readCabCarFlag(data) ?
+                GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/cab_car.caml")) :
+                GuiBuilder.parse(new Identifier("immersiverailroading", "gui/default/electric.caml"));
     }
 
     public StockModel<?, ?> getModel() {

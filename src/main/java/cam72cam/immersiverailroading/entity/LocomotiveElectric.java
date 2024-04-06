@@ -47,12 +47,6 @@ public class LocomotiveElectric extends Locomotive {
         return isPowered;
     }
 
-    @Override
-    public ClickResult onClick(Player player, Player.Hand hand) {
-        player.sendMessage(PlayerMessage.direct(String.valueOf(this.getEnergy().getCurrent())));
-        return super.onClick(player, hand);
-    }
-
     public int getInventoryWidth() {
         return this.getDefinition().isCabCar() ? 0 : 2;
     }
@@ -175,6 +169,14 @@ public class LocomotiveElectric extends Locomotive {
             this.relativeRPM += Math.min(0.01F, absThrottle - this.relativeRPM);
         }
 
+        if (throttleCooldown > 0) {
+            throttleCooldown--;
+        }
+
+        if (reverserCooldown > 0) {
+            reverserCooldown--;
+        }
+
         if (!this.getWorld().isClient) {
             OptionalDouble control = this.getDefinition().getModel().getControls().stream().filter((x) -> {
                 return x.part.type == ModelComponentType.HORN_CONTROL_X;
@@ -183,50 +185,6 @@ public class LocomotiveElectric extends Locomotive {
                 this.setHorn(10, this.hornPlayer);
             }
 
-//            float engineTemperature = this.getEngineTemperature();
-//            float heatUpSpeed = 0.0029167F * (float) Config.ConfigBalance.dieselLocoHeatTimeScale / 1.7F;
-//            float ambientDelta = engineTemperature - this.ambientTemperature();
-//            float coolDownSpeed = heatUpSpeed * Math.copySign((float)Math.pow((double)(ambientDelta / 130.0F), 2.0), ambientDelta);
-//            if (this.throttleCooldown > 0) {
-//                --this.throttleCooldown;
-//            }
-//
-//            if (this.reverserCooldown > 0) {
-//                --this.reverserCooldown;
-//            }
-//
-//            engineTemperature -= coolDownSpeed;
-//            if (this.getLiquidAmount() > 0 && this.isRunning()) {
-//                float consumption = Math.abs(this.getThrottle()) + 0.05F;
-//                float burnTime = (float) BurnUtil.getBurnTime(this.getLiquid());
-//                if (burnTime == 0.0F) {
-//                    burnTime = 200.0F;
-//                }
-//
-//                burnTime *= (float)this.getDefinition().getFuelEfficiency() / 100.0F;
-//                burnTime *= (float) Config.ConfigBalance.locoDieselFuelEfficiency / 100.0F;
-//                burnTime *= 10.0F;
-//
-//                while(this.internalBurn < 0.0F && this.getLiquidAmount() > 0) {
-//                    this.internalBurn += burnTime;
-//                    this.theTank.drain(new FluidStack(this.theTank.getContents().getFluid(), 1), false);
-//                }
-//
-//                consumption *= 100.0F;
-//                consumption = (float)((double)consumption * this.gauge.scale());
-//                this.internalBurn -= consumption;
-//                engineTemperature += heatUpSpeed * (Math.abs(this.getThrottle()) + 0.2F);
-//                if (engineTemperature > 150.0F) {
-//                    engineTemperature = 150.0F;
-//                    this.setEngineOverheated(true);
-//                }
-//            }
-//
-//            if (engineTemperature < 100.0F && this.isEngineOverheated()) {
-//                this.setEngineOverheated(false);
-//            }
-//
-//            this.setEngineTemperature(engineTemperature);
             if(energy == null){
                 this.energy = new Energy(0, this.getDefinition().getEnergyCapacity());
             }else if(energy.getMax() != getDefinition().getEnergyCapacity()) {
@@ -264,8 +222,6 @@ public class LocomotiveElectric extends Locomotive {
 
     public void onDissassemble() {
         super.onDissassemble();
-//        this.setEngineTemperature(this.ambientTemperature());
-//        this.setEngineOverheated(false);
         this.setTurnedOn(false);
     }
 
