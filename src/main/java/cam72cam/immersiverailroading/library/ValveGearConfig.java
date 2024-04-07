@@ -15,6 +15,7 @@ public class ValveGearConfig {
 		CONNECTING,
 		STEPHENSON,
 		WALSCHAERTS,
+        WALSCHAERTS_INVERT,
 		HIDDEN,
 		// TODO
 		SHAY,
