@@ -43,15 +43,14 @@ public abstract class ValveGear {
         if (config == null) {
             return null;
         }
+        int invert = config.invert ? -1 : 1;
         switch (config.type) {
             case WALSCHAERTS:
-                return WalschaertsValveGear.get(wheels, provider, state, pos, angleOffset);
-            case WALSCHAERTS_INVERT:
-                return WalschaertsValveGear.get(wheels, provider, state, pos, angleOffset * -1);
+                return WalschaertsValveGear.get(wheels, provider, state, pos, angleOffset * invert);
             case STEPHENSON:
-                return StephensonValveGear.get(wheels, provider, state, pos, angleOffset);
+                return StephensonValveGear.get(wheels, provider, state, pos, angleOffset * invert);
             case CONNECTING:
-                return ConnectingRodValveGear.get(wheels, provider, state, pos, angleOffset);
+                return ConnectingRodValveGear.get(wheels, provider, state, pos, angleOffset * invert);
             case CUSTOM:
                 return CustomValveGear.get(config, wheels, provider, state, pos);
             case SHAY:

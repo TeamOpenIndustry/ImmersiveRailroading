@@ -10,12 +10,12 @@ import java.util.Map;
 public class ValveGearConfig {
 	public final ValveGearType type;
 	public final Map<Float, Identifier> custom;
+    public boolean invert = false;
 
 	public enum ValveGearType {
 		CONNECTING,
 		STEPHENSON,
 		WALSCHAERTS,
-        WALSCHAERTS_INVERT,
 		HIDDEN,
 		// TODO
 		SHAY,
@@ -55,7 +55,12 @@ public class ValveGearConfig {
 		}
 		String name = def.getValue(key).asString();
 		if (name != null) {
-			return new ValveGearConfig(ValveGearType.from(name.toUpperCase(Locale.ROOT)), null);
+            name = name.toUpperCase(Locale.ROOT);
+			ValveGearConfig valveGearConfig = name.endsWith("_INVERT") ?
+                    new ValveGearConfig(ValveGearType.from(name.substring(0, name.length() - 7)), null) :
+                    new ValveGearConfig(ValveGearType.from(name), null);
+            valveGearConfig.invert = name.endsWith("_INVERT");
+            return valveGearConfig;
 		}
 
 		return null;
