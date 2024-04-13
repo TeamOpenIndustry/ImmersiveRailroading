@@ -116,7 +116,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         frontLocomotiveRocking.include(shellFront);
 
         cargoFillFront = CargoFill.get(provider, frontLocomotiveRocking, showCurrentLoadOnly, ModelPosition.FRONT);
-        drivingWheelsFront = DrivingAssembly.get(type, provider, frontLocomotive, ModelPosition.FRONT, 0);
+        drivingWheelsFront = DrivingAssembly.get(type, provider, frontLocomotive, ModelPosition.FRONT, 0,  def.isLeftFirst);
 
 
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
@@ -125,7 +125,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         rearLocomotiveRocking.include(shellRear);
 
         cargoFillRear = CargoFill.get(provider, rearLocomotiveRocking, showCurrentLoadOnly, ModelPosition.REAR);
-        drivingWheelsRear = DrivingAssembly.get(type, provider, rearLocomotive, ModelPosition.REAR, 45);
+        drivingWheelsRear = DrivingAssembly.get(type, provider, rearLocomotive, ModelPosition.REAR, 45,  def.isLeftFirst);
 
         components = provider.parse(
                 new ModelComponentType[]{ModelComponentType.CAB}

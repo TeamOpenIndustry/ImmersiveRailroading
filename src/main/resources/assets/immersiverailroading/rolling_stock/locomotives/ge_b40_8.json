@@ -1,12 +1,12 @@
 {
-	"era": "diesel",
+	"era": "electric",
 	"name": "GE B40-8",
 	"works": "General Electric",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/ge_b40_8/ge_b40_8.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"fuel_efficiency_%": 65,
-		"fuel_capacity_l": 3150,
+        "energy_capacity_rf": 200000,
+        "energy_consume_ratio_rf/t": 200,
 		"horsepower": 4000,
 		"tractive_effort_lbf": 68500,
 		"max_speed_kmh": 120,
