@@ -76,6 +76,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private EntityMoveableRollingStock overhead;
 	@TagField("pushPull")
 	private boolean pushPull = true;
+    @TagField("graphID")
+    private UUID graphID;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -748,14 +750,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 				break;
-            case SUPPLIER: {
-                EntityRollingStock stock = this.getStockNearBy(EntityRollingStock.class);
-                if (stock instanceof LocomotiveElectric) {
-                    LocomotiveElectric stock1 = (LocomotiveElectric) stock;
-                    stock1.onCharge(200);
-                }
-            }
-                break;
 			default:
 				break;
 			}
@@ -1075,5 +1069,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
     public void stockOverhead(EntityMoveableRollingStock stock) {
 		this.overhead = stock;
+    }
+
+    public void setGraphID(UUID graphID) {
+        this.graphID = graphID;
+    }
+
+    public UUID getGraphID(){
+        return this.graphID;
     }
 }
