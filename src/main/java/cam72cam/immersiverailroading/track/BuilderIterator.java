@@ -75,7 +75,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				int posZ = (int)Math.floor(gagPos.z+nextUp.z+placeOff.z);
 				double height = 0;
 				if (info.settings.isGradeCrossing) {
-					height = (1 - Math.abs((int)q)/horiz)/3 - 0.05;
+					height = 0.306 - Math.abs(Math.round(q))/(3 * horiz);
 					height *= info.settings.gauge.scale();
 					height = Math.min(height, clamp);
 				}
