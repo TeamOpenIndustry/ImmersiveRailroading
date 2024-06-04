@@ -115,7 +115,11 @@ public class Config {
 		@Comment("Traction Multiplier: Higher numbers decreases wheel slip, lower numders increase wheel slip")
 		@Range(min = 0, max = 10)
 		public static double tractionMultiplier = 1.0;
-		
+
+		@Comment("Steam Traction At Pressure: Most locomotives traction is calculated at 85%.  Modelers should override this in config (eventually)")
+		@Range(min = 0.1, max = 10)
+		public static double steamTractionAtPressure = 0.85;
+
 		@Comment( "How heavy is a single block in Kg" )
 		@Range(min = 0, max = 100)
 		public static int blockWeight = 10;

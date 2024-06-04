@@ -66,6 +66,8 @@ public abstract class Locomotive extends FreightTank {
 	@TagField("cogging")
 	private boolean cogging = false;
 
+	@TagSync
+	@TagField("slipping")
 	protected boolean slipping = false;
 
 	/*
@@ -611,7 +613,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	public double slipCoefficient(Speed speed) {
-		double slipMult = 0.5; //TODO Assumes dirty rails.  Set this back to 1.0 and adjust physics coefficients
+		double slipMult = 1.0;
 		World world = getWorld();
 		if (world.isPrecipitating() && world.canSeeSky(getBlockPosition())) {
 			if (world.isRaining(getBlockPosition())) {
