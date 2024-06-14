@@ -10,7 +10,10 @@ import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.item.*;
+import cam72cam.mod.item.ClickResult;
+import cam72cam.mod.item.Fuzzy;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
@@ -36,10 +39,10 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 
 	/*
-	 * 
+	 *
 	 * EntityRollingStock Overrides
 	 */
-	
+
 	@Override
 	public void onAssemble() {
 		super.onAssemble();
@@ -51,7 +54,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 		initContainerFilter();
 	}
-	
+
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
@@ -123,33 +126,53 @@ public abstract class Freight extends EntityCoupleableRollingStock {
     @Override
     public void onTick() {
         super.onTick();
-        FreightModel<?,?> model = (FreightModel<?,?>) this.getDefinition().getModel();
-        if(this.getCurrentSpeed().metric() <= 10.8){//3m/s
+        FreightModel<?, ?> model = (FreightModel<?, ?>) this.getDefinition().getModel();
+        //inputs
+        if (this.getCurrentSpeed().metric() <= 10.8) {//3m/s
             List<ItemStack> stacks = model.getCargoNearbyItems(this);
 
-            if(stacks.isEmpty())
-                return;
+            if (!stacks.isEmpty()) {
+                //transfer to this.cargoItems
+                for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
+                    ItemStack stack = stacks.get(fromSlot);
+                    int origCount = stack.getCount();
 
-            //transfer to this.cargoItems
-            for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
-                ItemStack stack = stacks.get(fromSlot);
-                int origCount = stack.getCount();
-
-                if (stack.isEmpty()) {
-                    continue;
-                }
-
-                for (int toSlot = 0; toSlot < this.cargoItems.getSlotCount(); toSlot++) {
-                    stack.setCount(this.cargoItems.insert(toSlot, stack, false).getCount());
                     if (stack.isEmpty()) {
-                        break;
+                        continue;
+                    }
+
+                    for (int toSlot = 0; toSlot < this.cargoItems.getSlotCount(); toSlot++) {
+                        stack.setCount(this.cargoItems.insert(toSlot, stack, false).getCount());
+                        if (stack.isEmpty()) {
+                            break;
+                        }
+                    }
+
+                    if (origCount != stack.getCount()) {
+                        stacks.set(fromSlot, stack);
                     }
                 }
-
-                if (origCount != stack.getCount()) {
-                    stacks.set(fromSlot, stack);
-                }
             }
+        }
+        //outputs
+        if (!(model.getUnloadingPoints() == null)) {
+            final int count = cargoItems.getSlotCount();
+            model.getUnloadingPoints().forEach(point -> {
+                int slotIndex = 0;
+                while (cargoItems.get(slotIndex).getCount() == 0){
+                    slotIndex++;
+                    if(slotIndex >= count) {
+                        return;
+                    }
+                }
+                System.out.println(point.getOpenFactor(this));
+                System.out.println(slotIndex);
+                if (point.getOpenFactor(this) != 0) {
+                    Vec3d offset = point.getPos().z > 0 ? new Vec3d(0,0,0.75) : new Vec3d(0,0,-0.75);
+                    getWorld().dropItem(cargoItems.extract(slotIndex,(int)Math.floor(point.getOpenFactor(this) * 3),false),
+                            this.getModelMatrix().apply(point.getPos().add(offset)));//20~100 per sec
+                }
+            });
         }
     }
 
@@ -178,13 +201,13 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		itemCount = itemInsideCount;
 		percentFull = this.getInventorySize() > 0 ? stacksWithStuff * 100 / this.getInventorySize() : 100;
 	}
-	
+
 	public int getPercentCargoFull() {
 		return percentFull;
 	}
 
 	protected void initContainerFilter() {
-		
+
 	}
 
 	@Override

@@ -5,15 +5,18 @@ import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.part.CargoFill;
 import cam72cam.immersiverailroading.model.part.CargoItems;
+import cam72cam.immersiverailroading.model.part.CargoUnload;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.opengl.RenderState;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefinition> extends StockModel<ENTITY, DEFINITION> {
     private CargoFill cargoFill;
     private CargoItems cargoItems;
+    private List<CargoUnload> cargoUnload;
 
     public FreightModel(DEFINITION def) throws Exception {
         super(def);
@@ -23,6 +26,7 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
         super.parseComponents(provider, def);
         this.cargoFill = CargoFill.get(provider, rocking, def.shouldShowCurrentLoadOnly(), null);
         this.cargoItems = CargoItems.get(provider);
+        this.cargoUnload = CargoUnload.get(provider);
     }
 
     public LinkedList<ItemStack> getCargoNearbyItems(EntityRollingStock stock) {
@@ -34,6 +38,10 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
             list.addAll(cargoFill.getDroppedItem(stock.getWorld(), stock));
         }
         return list;
+    }
+
+    public List<CargoUnload> getUnloadingPoints() {
+        return cargoUnload;
     }
 
     @Override
