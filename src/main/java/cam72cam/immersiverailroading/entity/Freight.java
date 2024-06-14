@@ -123,16 +123,35 @@ public abstract class Freight extends EntityCoupleableRollingStock {
     @Override
     public void onTick() {
         super.onTick();
-//        FreightModel model = (FreightModel) this.getDefinition().getModel();
-//        if(model.getCargoItems() != null){
-//            System.out.println(this.getDefinition().name());
-//            List<ItemStack> stacks = model.getCargoItems().getDroppedItem(getWorld(), this);
-//            IInventory inventory = new ItemStackHandler(stacks.size());
-//            for (int i = 0; i < stacks.size(); i++) {
-//                inventory.set(i,stacks.get(i));
-//            }
-//            this.cargoItems.transferAllFrom(inventory);
-//        }
+        FreightModel model = (FreightModel) this.getDefinition().getModel();
+        if(model.getCargoItems() != null && this.getCurrentSpeed().metric() <= 5){
+            List<ItemStack> stacks = model.getCargoItems().getDroppedItem(getWorld(), this);
+            stacks.addAll(model.getCargoFill().getDroppedItem(getWorld(), this));
+
+            if(stacks.isEmpty())
+                return;
+
+            //transfer to this.cargoItems
+            for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
+                ItemStack stack = stacks.get(fromSlot);
+                int origCount = stack.getCount();
+
+                if (stack.isEmpty()) {
+                    continue;
+                }
+
+                for (int toSlot = 0; toSlot < this.cargoItems.getSlotCount(); toSlot++) {
+                    stack.setCount(this.cargoItems.insert(toSlot, stack, false).getCount());
+                    if (stack.isEmpty()) {
+                        break;
+                    }
+                }
+
+                if (origCount != stack.getCount()) {
+                    stacks.set(fromSlot, stack);
+                }
+            }
+        }
     }
 
     protected boolean openGui(Player player) {

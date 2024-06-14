@@ -25,6 +25,10 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
         return cargoItems;
     }
 
+    public CargoFill getCargoFill(){
+        return cargoFill;
+    }
+
     @Override
     protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
         super.postRender(stock, state, partialTicks);
