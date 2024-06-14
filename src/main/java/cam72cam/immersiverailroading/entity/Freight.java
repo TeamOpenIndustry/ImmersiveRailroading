@@ -4,14 +4,13 @@ import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.model.FreightModel;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.*;
 import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
@@ -121,7 +120,22 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		return ClickResult.PASS;
 	}
 
-	protected boolean openGui(Player player) {
+    @Override
+    public void onTick() {
+        super.onTick();
+//        FreightModel model = (FreightModel) this.getDefinition().getModel();
+//        if(model.getCargoItems() != null){
+//            System.out.println(this.getDefinition().name());
+//            List<ItemStack> stacks = model.getCargoItems().getDroppedItem(getWorld(), this);
+//            IInventory inventory = new ItemStackHandler(stacks.size());
+//            for (int i = 0; i < stacks.size(); i++) {
+//                inventory.set(i,stacks.get(i));
+//            }
+//            this.cargoItems.transferAllFrom(inventory);
+//        }
+    }
+
+    protected boolean openGui(Player player) {
 		if (getInventorySize() == 0) {
 			return false;
 		}

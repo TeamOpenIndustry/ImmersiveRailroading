@@ -21,6 +21,10 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
         this.cargoItems = CargoItems.get(provider);
     }
 
+    public CargoItems getCargoItems(){
+        return cargoItems;
+    }
+
     @Override
     protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
         super.postRender(stock, state, partialTicks);
