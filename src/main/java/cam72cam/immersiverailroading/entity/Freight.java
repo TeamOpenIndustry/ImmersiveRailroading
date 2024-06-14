@@ -123,10 +123,9 @@ public abstract class Freight extends EntityCoupleableRollingStock {
     @Override
     public void onTick() {
         super.onTick();
-        FreightModel model = (FreightModel) this.getDefinition().getModel();
-        if(model.getCargoItems() != null && this.getCurrentSpeed().metric() <= 5){
-            List<ItemStack> stacks = model.getCargoItems().getDroppedItem(getWorld(), this);
-            stacks.addAll(model.getCargoFill().getDroppedItem(getWorld(), this));
+        FreightModel<?,?> model = (FreightModel<?,?>) this.getDefinition().getModel();
+        if(this.getCurrentSpeed().metric() <= 10.8){//3m/s
+            List<ItemStack> stacks = model.getCargoNearbyItems(this);
 
             if(stacks.isEmpty())
                 return;

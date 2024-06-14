@@ -1,11 +1,15 @@
 package cam72cam.immersiverailroading.model;
 
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.part.CargoFill;
-import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.model.part.CargoItems;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.opengl.RenderState;
+
+import java.util.LinkedList;
 
 public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefinition> extends StockModel<ENTITY, DEFINITION> {
     private CargoFill cargoFill;
@@ -21,12 +25,15 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
         this.cargoItems = CargoItems.get(provider);
     }
 
-    public CargoItems getCargoItems(){
-        return cargoItems;
-    }
-
-    public CargoFill getCargoFill(){
-        return cargoFill;
+    public LinkedList<ItemStack> getCargoNearbyItems(EntityRollingStock stock) {
+        LinkedList<ItemStack> list = new LinkedList<>();
+        if(cargoItems != null){
+            list.addAll(cargoItems.getDroppedItem(stock.getWorld(), stock));
+        }
+        if(cargoFill != null){
+            list.addAll(cargoFill.getDroppedItem(stock.getWorld(), stock));
+        }
+        return list;
     }
 
     @Override
