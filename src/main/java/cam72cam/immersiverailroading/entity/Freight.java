@@ -125,36 +125,38 @@ public abstract class Freight extends EntityCoupleableRollingStock {
     public void onTick() {
         super.onTick();
         FreightModel<?, ?> model = (FreightModel<?, ?>) this.getDefinition().getModel();
-        //inputs
-        if (this.getCurrentSpeed().metric() <= 10.8) {//3m/s
-            List<ItemStack> stacks = model.getCargoNearbyItems(this);
+        if(getWorld().isServer){
+            //inputs
+            if (this.getCurrentSpeed().metric() <= 10.8) {//3m/s
+                List<ItemStack> stacks = model.getCargoNearbyItems(this);
 
-            if (!stacks.isEmpty()) {
-                //transfer to this.cargoItems
-                for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
-                    ItemStack stack = stacks.get(fromSlot);
-                    int origCount = stack.getCount();
+                if (!stacks.isEmpty()) {
+                    //transfer to this.cargoItems
+                    for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
+                        ItemStack stack = stacks.get(fromSlot);
+                        int origCount = stack.getCount();
 
-                    if (stack.isEmpty()) {
-                        continue;
-                    }
-
-                    for (int toSlot = 0; toSlot < this.cargoItems.getSlotCount(); toSlot++) {
-                        stack.setCount(this.cargoItems.insert(toSlot, stack, false).getCount());
                         if (stack.isEmpty()) {
-                            break;
+                            continue;
                         }
-                    }
 
-                    if (origCount != stack.getCount()) {
-                        stacks.set(fromSlot, stack);
+                        for (int toSlot = 0; toSlot < this.cargoItems.getSlotCount(); toSlot++) {
+                            stack.setCount(this.cargoItems.insert(toSlot, stack, false).getCount());
+                            if (stack.isEmpty()) {
+                                break;
+                            }
+                        }
+
+                        if (origCount != stack.getCount()) {
+                            stacks.set(fromSlot, stack);
+                        }
                     }
                 }
             }
-        }
-        //outputs
-        if (!(model.getUnloadingPoints() == null)) {
-            model.getUnloadingPoints().forEach(point -> point.tryToUnload(this));
+            //outputs
+            if (!(model.getUnloadingPoints() == null)) {
+                model.getUnloadingPoints().forEach(point -> point.tryToUnload(this));
+            }
         }
     }
 
