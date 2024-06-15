@@ -29,8 +29,8 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
         this.cargoUnload = CargoUnload.get(provider);
     }
 
-    public LinkedList<ItemStack> getCargoNearbyItems(EntityRollingStock stock) {
-        LinkedList<ItemStack> list = new LinkedList<>();
+    public List<ItemStack> getCargoNearbyItems(EntityRollingStock stock) {
+        List<ItemStack> list = new LinkedList<>();
         if(cargoItems != null){
             list.addAll(cargoItems.getDroppedItem(stock.getWorld(), stock));
         }

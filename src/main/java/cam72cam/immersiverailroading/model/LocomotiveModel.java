@@ -1,16 +1,18 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
-import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
-import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.mod.item.ItemStack;
 import util.Matrix4;
 
 import java.util.List;
@@ -157,6 +159,18 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         }
 
         bell.removed(stock);
+    }
+
+    @Override
+    public List<ItemStack> getCargoNearbyItems(EntityRollingStock stock) {
+        List<ItemStack> stacks = super.getCargoNearbyItems(stock);
+        if(cargoFillFront != null){
+            stacks.addAll(cargoFillRear.getDroppedItem(stock.getWorld(), stock));
+        }
+        if(cargoFillRear != null){
+            stacks.addAll(cargoFillRear.getDroppedItem(stock.getWorld(), stock));
+        }
+        return stacks;
     }
 
     private Matrix4 getFrontLocomotiveMatrix(EntityMoveableRollingStock s) {
