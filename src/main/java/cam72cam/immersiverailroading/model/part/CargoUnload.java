@@ -32,10 +32,6 @@ public class CargoUnload {
         return pos;
     }
 
-    public double getOpenFactor(EntityRollingStock stock){
-        return stock.getControlPosition(this.controlGroup);
-    }
-
     public void tryToUnload(Freight freight){
         int slotIndex = 0;
         int count = freight.cargoItems.getSlotCount();
@@ -45,9 +41,12 @@ public class CargoUnload {
                 return;
             }
         }
-        if (this.getOpenFactor(freight) != 0) {
+        double openFactor = freight.getControlPosition(this.controlGroup);
+        if (openFactor != 0) {
+            //For some stocks if we directly drop the items it will enter a cycle of being loaded and unloaded, so we'd better add an offset here
+            //TODO Can we give it an initial velocity?
             Vec3d offset = this.getPos().z > 0 ? new Vec3d(0,0,1) : new Vec3d(0,0,-1);
-            freight.getWorld().dropItem(freight.cargoItems.extract(slotIndex,(int)Math.floor(this.getOpenFactor(freight) * 3),false),//20~60 per sec
+            freight.getWorld().dropItem(freight.cargoItems.extract(slotIndex,(int)Math.floor(openFactor * 3),false),//20~60 per sec
                     freight.getModelMatrix().apply(this.getPos().add(offset)));
         }
     }
