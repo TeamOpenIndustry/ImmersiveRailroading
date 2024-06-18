@@ -2,10 +2,10 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.util.CAML;
-import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
+import cam72cam.immersiverailroading.util.CAML;
+import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.util.JSON;
 import cam72cam.mod.gui.Progress;
 import cam72cam.mod.resource.Identifier;
@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 public class DefinitionManager {
     private static Map<String, EntityRollingStockDefinition> definitions;
     private static Map<String, TrackDefinition> tracks;
+    public static Map<String, MultiblockDefinition> multiblocks;
     private static final Map<String, StockLoader> stockLoaders;
 
     static {
@@ -104,6 +105,13 @@ public class DefinitionManager {
             }
         }
 
+        if (multiblocks != null) {
+            for (MultiblockDefinition def : multiblocks.values()) {
+                if (def.model != null) {
+                    def.model.free();
+                }
+            }
+        }
 
         try {
             initGauges();
@@ -156,6 +164,11 @@ public class DefinitionManager {
             initTracks();
         } catch (Exception e) {
             throw new RuntimeException("Unable to load tracks, do you have a broken pack?", e);
+        }
+        try {
+            initMultiblocks();
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load multiblocks, do you have a broken pack?", e);
         }
     }
 
@@ -342,6 +355,60 @@ public class DefinitionManager {
                 }
             }
 
+            Progress.pop(bar);
+        }
+    }
+
+    private static void initMultiblocks() throws IOException {
+        multiblocks = new LinkedHashMap<>();
+
+        ImmersiveRailroading.info("Loading Multiblocks.");
+
+        List<DataBlock> blocks = new ArrayList<>();
+
+        Identifier mb_json = new Identifier(ImmersiveRailroading.MODID, "multiblocks/multiblock.json");
+        List<InputStream> inputs = mb_json.getResourceStreamAll();
+        for (InputStream input : inputs) {
+            blocks.add(JSON.parse(input));
+        }
+
+        Identifier mb_caml = new Identifier(ImmersiveRailroading.MODID, "multiblocks/multiblock.caml");
+        inputs = mb_caml.getResourceStreamAll();
+        for (InputStream input : inputs) {
+            blocks.add(CAML.parse(input));
+        }
+
+
+        for (DataBlock multiblock : blocks) {
+            List<String> types = multiblock.getValues("register").stream().map(DataBlock.Value::asString).collect(Collectors.toList());
+            Progress.Bar bar = Progress.push("Loading Multiblocks", types.size());
+
+            for (String def : types) {
+                bar.step(def);
+                ImmersiveRailroading.debug("Loading Multiblock %s", def);
+
+                Identifier identifier = new Identifier(ImmersiveRailroading.MODID, "multiblocks/"+def+".json");
+
+                if (!identifier.canLoad()) {
+                    identifier = new Identifier(identifier.getDomain(), identifier.getPath().replace(".json", ".caml"));
+                }
+
+                if (!identifier.canLoad()) {
+                    ImmersiveRailroading.error("Unable to load multiblocks '%s': file not found", identifier.toString());
+                    continue;
+                }
+
+                DataBlock block = DataBlock.load(identifier);
+
+                if (multiblock.getValue("pack").asString() != null && block.getValue("pack").asString() != null) {
+                    block.getValueMap().put("pack", multiblock.getValue("pack"));
+                }
+                try {
+                    multiblocks.put(def, new MultiblockDefinition(def, block));
+                } catch (Exception e) {
+                    ImmersiveRailroading.catching(e);
+                }
+            }
             Progress.pop(bar);
         }
     }

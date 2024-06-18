@@ -18,6 +18,7 @@ public class TileMultiblockRender {
 		renderers.put(RailRollerMultiblock.NAME, new RailRollerRender());
 		renderers.put(BoilerRollerMultiblock.NAME, new BoilerRollerRender());
 		renderers.put(CastingMultiblock.NAME, new CastingRender());
+        renderers.put("CUSTOM", new CustomRender());
 	}
 
 	public static StandardModel render(TileMultiblock te) {

@@ -10,6 +10,7 @@ public class MultiblockRegistry {
 	}
 	
 	public static void register(String name, Multiblock mb) {
+        System.out.println(name);
 		entries.put(name, mb);
 	}
 	
