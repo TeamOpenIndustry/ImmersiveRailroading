@@ -1,37 +1,41 @@
 {
-  "name": "demo",
-  "type": "TRANSPORTER",
+    "name": "demo",
+    "type": "TRANSPORTER",
 
-  "length": 3,
-  "height": 2,
-  "width": 1,
-  "structure": {
-    "0,0,0": "L_ENG",
-    "1,0,0": "H_ENG",
-    "2,0,0": "L_ENG",
-    "1,1,0": "L_ENG"
-  },
-  "model": "immersiverailroading:models/multiblocks/steam_hammer.obj",
+    "length": 3,
+    "height": 2,
+    "width": 1,
+    "structure": {
+        "0,0,0": "L_ENG",
+        "1,0,0": "H_ENG",
+        "2,0,0": "L_ENG",
+        "0,1,0": "L_ENG"
+    },
+    "model": "immersiverailroading:multiblocks/un.obj",
 
-  "input":{
-    "power_input":["0,0,0"],
-    "item_input_point":["0,0,0"],
-    "allow_throw":true,
-    "filter":["water"]
-  },
+    "input":{
+        "power_input":["0,0,0"],
+        "item_input_point":["0,0,0"],
+        "allow_throw":true,
+        "filter":["water"],
+        "height": 6,
+        "width": 10
+    },
 
-  "output":{
-    "item_output_point":["0,0,0"],
-    "should_throw":true,
-    "offset": "east",
-    "output_ratio_items_per_sec": 20
-  },
+    "output":{
+        "item_output_point":"2,0,0",
+        "redstone_control":true,
+        "redstone_control_point":"0,0,0",
+        "should_throw":true,
+        "offset": "pY",
+        "output_ratio_items_per_sec": 20
+    },
 
-  "properities":{
-    "power_limit_rf": 100000,
-    "inventory_slot_count": 20,
-    "inventory_slot_width": 5,
-    "enable_manual_interact": false,
-    "gui": "immersiverailroading:gui/mb.caml"
-  }
+    "properities":{
+        "power_limit_rf": 100000,
+        "inventory_slot_count": 20,
+        "inventory_slot_width": 5,
+        "enable_manual_interact": false,
+        "gui": "immersiverailroading:gui/mb.caml"
+    }
 }

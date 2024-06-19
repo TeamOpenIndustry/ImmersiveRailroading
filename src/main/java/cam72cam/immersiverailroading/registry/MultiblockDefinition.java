@@ -1,9 +1,10 @@
 package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.model.MultiblockModel;
+import cam72cam.immersiverailroading.render.multiblock.CustomRender;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.Facing;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,24 +15,28 @@ public class MultiblockDefinition {
     public final String name;
     public final String type;
 
-    public final Integer length;
-    public final Integer height;
-    public final Integer width;
+    public final int length;
+    public final int height;
+    public final int width;
     public final HashMap<Vec3i, String> structure;
-    public final MultiblockModel model;
+    public final MultiblockModel model;//-x is left, +y is front, origin in blender is origin in game
 
     public final List<Vec3i> itemInputPoints;
     public final List<Vec3i> energyInputPoints;
-    public final Boolean allowThrowInput;
+    public final boolean allowThrowInput;
+    public final int inventoryHeight;
+    public final int inventoryWidth;
 
     public final Vec3i outputPoint;
-    public final Integer outputRatio;
-    public final Boolean allowThrowOutput;
-    public final Facing throwOutputOffset;
+    public final int outputRatio;
+    public final boolean allowThrowOutput;
+    public final Vec3d throwOutputOffset;
+    public final boolean useRedstoneControl;
+    public final Vec3i redstoneControlPoint;
 
     MultiblockDefinition(String multiblockID, DataBlock object) throws Exception {
         this.mbID = multiblockID;
-        this.name = object.getValue("name").asString();
+        this.name = object.getValue("name").asString().toUpperCase();
         this.type = object.getValue("type").asString();
 
         this.length = object.getValue("length").asInteger();
@@ -39,10 +44,10 @@ public class MultiblockDefinition {
         this.width = object.getValue("width").asInteger();
         this.structure = new HashMap<>();
         DataBlock blocks = object.getBlock("structure");
-        for (int x = 0; x < length; x++) {
+        for (int z = 0; z < length; z++) {
             for (int y = 0; y < height; y++) {
-                for (int z = 0; z < width; z++) {
-                    String vec = String.format("%s,%s,%s", x, y, z);
+                for (int x = 0; x < width; x++) {
+                    String vec = String.format("%s,%s,%s", z, y, x);
                     if (blocks.getValue(vec).asString() != null) {
                         structure.put(new Vec3i(x, y, z), blocks.getValue(vec).asString());
                     }
@@ -51,6 +56,7 @@ public class MultiblockDefinition {
         }
 
         this.model = new MultiblockModel(object.getValue("model").asIdentifier(), 0);
+        CustomRender.addDef(this);
 
         DataBlock input = object.getBlock("input");
         this.itemInputPoints = new LinkedList<>();
@@ -64,17 +70,45 @@ public class MultiblockDefinition {
             energy.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::parseString).forEach(energyInputPoints::add);
         }
         this.allowThrowInput = input.getValue("allow_throw").asBoolean();
+        if(this.type.equals("TRANSPORTER")){
+            this.inventoryHeight = input.getValue("height").asInteger();
+            this.inventoryWidth = input.getValue("width").asInteger();
+        }else{
+            this.inventoryHeight = 0;
+            this.inventoryWidth = 0;
+        }
 
         DataBlock output = object.getBlock("output");
-        this.outputPoint = parseString(output.getValue("item_output").asString());
+        this.outputPoint = parseString(output.getValue("item_output_point").asString());
         this.outputRatio = output.getValue("output_ratio_items_per_sec").asInteger();
         if(outputPoint != null){
             this.allowThrowOutput = output.getValue("should_throw").asBoolean();
             String str = output.getValue("offset").asString();
-            this.throwOutputOffset = str == null ? Facing.UP : Facing.valueOf(str.toUpperCase());
-        }else{
+            switch (str){
+                case "pX":
+                    this.throwOutputOffset = new Vec3d(0.5,0,0);
+                    break;
+                case "pY":
+                    this.throwOutputOffset = new Vec3d(0,0,0.5);
+                    break;
+                case "nX":
+                    this.throwOutputOffset = new Vec3d(-0.5,0,0);
+                    break;
+                case "nY":
+                    this.throwOutputOffset = new Vec3d(0,0,-0.5);
+                    break;
+                default:
+                    this.throwOutputOffset = Vec3d.ZERO;
+            }
+        } else {
             this.allowThrowOutput = false;
-            this.throwOutputOffset = Facing.UP;
+            this.throwOutputOffset = Vec3d.ZERO;
+        }
+        this.useRedstoneControl = output.getValue("redstone_control").asBoolean();
+        if(this.useRedstoneControl){
+            this.redstoneControlPoint = parseString(output.getValue("redstone_control_point").asString());
+        }else{
+            this.redstoneControlPoint  = Vec3i.ZERO;
         }
 
 //        DataBlock properties = object.getBlock("properties");

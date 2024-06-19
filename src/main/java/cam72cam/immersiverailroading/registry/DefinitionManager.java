@@ -384,7 +384,7 @@ public class DefinitionManager {
             Progress.Bar bar = Progress.push("Loading Multiblocks", types.size());
 
             for (String def : types) {
-                bar.step(def);
+                bar.step(def.toUpperCase());
                 ImmersiveRailroading.debug("Loading Multiblock %s", def);
 
                 Identifier identifier = new Identifier(ImmersiveRailroading.MODID, "multiblocks/"+def+".json");
@@ -404,7 +404,8 @@ public class DefinitionManager {
                     block.getValueMap().put("pack", multiblock.getValue("pack"));
                 }
                 try {
-                    multiblocks.put(def, new MultiblockDefinition(def, block));
+                    MultiblockDefinition definition = new MultiblockDefinition(def, block);
+                    multiblocks.put(definition.name, definition);
                 } catch (Exception e) {
                     ImmersiveRailroading.catching(e);
                 }

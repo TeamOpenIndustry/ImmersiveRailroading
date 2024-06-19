@@ -1,12 +1,45 @@
 {
-	"locomotives": [
-	],
-	"tender": [
-	],
-	"hand_car": [
-	],
-	"passenger": [
-	],
+  "locomotives": [
+    "a1_peppercorn",
+    "big_boy",
+    "k4_pacific",
+    "e6_atlantic",
+    "a5_switcher",
+    "class_38",
+    "rodgers_460",
+    "skookum",
+    "br01",
+    "cooke_mogul",
+    "k36",
+    "firefly",
+    "iron_duke",
+    "ge_40_ton_boxcab",
+    "ge_b40_8",
+    "ge_b40_8w",
+    "ge_c44_9cw",
+    "emd_sd40-2",
+    "emd_sw1500",
+    "alco_rs1"
+  ],
+  "tender": [
+    "a1_peppercorn_tender",
+    "big_boy_tender",
+    "k4_tender",
+    "e6_tender",
+    "a5_tender",
+    "class_38_tender",
+    "rodgers_460_tender",
+    "skookum_tender",
+    "br01_tender"
+  ],
+  "hand_car": [
+    "hand_car_1"
+  ],
+  "passenger": [
+    "br_coach_mk1",
+    "b70baggage",
+    "p70coach1"
+  ],
 	"freight": [
 	],
 	"tank": [
