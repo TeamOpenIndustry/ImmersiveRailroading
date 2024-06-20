@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.ItemStackHandler;
 import cam72cam.mod.math.Rotation;
@@ -14,8 +15,7 @@ import cam72cam.mod.world.World;
 import java.util.List;
 
 public class CustomMultiblock extends Multiblock {
-    /* Define multiblock through json Done
-     *TODO:
+    /*TODO:
      * use Animatrix to Produce animation(I/O for factory)
      * new readouts
      * rewrite manual
@@ -36,12 +36,18 @@ public class CustomMultiblock extends Multiblock {
     }
 
     private static FuzzyProvider parseFuzzy(String def) {
-        def = def.toUpperCase();
-        if (def.equals("L_ENG"))
-            return L_ENG();
-        else if (def.equals("H_ENG"))
-            return H_ENG();
-        return STEEL();
+        if(Fuzzy.get(def).isEmpty()){
+            switch (def){
+                case "light_engineering_block":
+                    return L_ENG();
+                case "heavy_engineering_block":
+                    return H_ENG();
+                case "steel":
+                default:
+                    return STEEL();
+            }
+        }
+        return ()->Fuzzy.get(def);
     }
 
     @Override
@@ -56,6 +62,7 @@ public class CustomMultiblock extends Multiblock {
 
     public class CustomMultiblockInstance extends MultiblockInstance {//TODO sync the inventories
         public final MultiblockDefinition def;
+        private long ticks = 0;
 
         public CustomMultiblockInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
             super(world, origin, rot);
@@ -83,6 +90,7 @@ public class CustomMultiblock extends Multiblock {
 
         @Override
         public void tick(Vec3i offset) {
+            ticks++;
             if (def.itemInputPoints.contains(offset)) {
                 if (def.allowThrowInput) {
                     Vec3d vec3d = new Vec3d(getPos(offset));
@@ -123,9 +131,14 @@ public class CustomMultiblock extends Multiblock {
                             return;
                         }
                     }
-                    world.dropItem(getTile(Vec3i.ZERO).getContainer().extract(slotIndex, 1, false),
+                    world.dropItem(getTile(Vec3i.ZERO).getContainer().extract(slotIndex, def.outputRatioBase, false),
                             new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
                                     .rotateYaw((float) getTile(Vec3i.ZERO).getRotation())));
+                    if(ticks % 20 <= def.outputRatioMod) {
+                        world.dropItem(getTile(Vec3i.ZERO).getContainer().extract(slotIndex, 1, false),
+                                new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
+                                        .rotateYaw((float) getTile(Vec3i.ZERO).getRotation())));
+                    }
                 }
             }
         }

@@ -28,7 +28,8 @@ public class MultiblockDefinition {
     public final int inventoryWidth;
 
     public final Vec3i outputPoint;
-    public final int outputRatio;
+    public final int outputRatioBase;
+    public final int outputRatioMod;
     public final boolean allowThrowOutput;
     public final Vec3d throwOutputOffset;
     public final boolean useRedstoneControl;
@@ -80,7 +81,8 @@ public class MultiblockDefinition {
 
         DataBlock output = object.getBlock("output");
         this.outputPoint = parseString(output.getValue("item_output_point").asString());
-        this.outputRatio = output.getValue("output_ratio_items_per_sec").asInteger();
+        this.outputRatioBase = output.getValue("output_ratio_items_per_sec").asInteger() / 20;
+        this.outputRatioMod = output.getValue("output_ratio_items_per_sec").asInteger() % 20;
         if(outputPoint != null){
             this.allowThrowOutput = output.getValue("should_throw").asBoolean();
             String str = output.getValue("offset").asString();
