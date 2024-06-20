@@ -44,10 +44,10 @@ public class MultiblockDefinition {
         this.width = object.getValue("width").asInteger();
         this.structure = new HashMap<>();
         DataBlock blocks = object.getBlock("structure");
-        for (int z = 0; z < length; z++) {
+        for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    String vec = String.format("%s,%s,%s", z, y, x);
+                for (int z = 0; z < length; z++) {
+                    String vec = String.format("%s,%s,%s", x, y, z);
                     if (blocks.getValue(vec).asString() != null) {
                         structure.put(new Vec3i(x, y, z), blocks.getValue(vec).asString());
                     }
@@ -85,17 +85,23 @@ public class MultiblockDefinition {
             this.allowThrowOutput = output.getValue("should_throw").asBoolean();
             String str = output.getValue("offset").asString();
             switch (str){
-                case "pX":
-                    this.throwOutputOffset = new Vec3d(0.5,0,0);
+                case "+X":
+                    this.throwOutputOffset = new Vec3d(0,0,0.75);
                     break;
-                case "pY":
-                    this.throwOutputOffset = new Vec3d(0,0,0.5);
+                case "+Y":
+                    this.throwOutputOffset = new Vec3d(0.75,0,0);
                     break;
-                case "nX":
-                    this.throwOutputOffset = new Vec3d(-0.5,0,0);
+                case "+Z":
+                    this.throwOutputOffset = new Vec3d(0,0.75,0);
                     break;
-                case "nY":
-                    this.throwOutputOffset = new Vec3d(0,0,-0.5);
+                case "-X":
+                    this.throwOutputOffset = new Vec3d(0,0,-0.75);
+                    break;
+                case "-Y":
+                    this.throwOutputOffset = new Vec3d(-0.75,0,0);
+                    break;
+                case "-Z":
+                    this.throwOutputOffset = new Vec3d(0,-0.75,0);
                     break;
                 default:
                     this.throwOutputOffset = Vec3d.ZERO;

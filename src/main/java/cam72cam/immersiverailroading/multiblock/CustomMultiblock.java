@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.multiblock;
 
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
-import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
@@ -57,7 +56,6 @@ public class CustomMultiblock extends Multiblock {
 
     public class CustomMultiblockInstance extends MultiblockInstance {//TODO sync the inventories
         public final MultiblockDefinition def;
-        private boolean allowOutput = false;
 
         public CustomMultiblockInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
             super(world, origin, rot);
@@ -67,7 +65,7 @@ public class CustomMultiblock extends Multiblock {
         @Override
         public boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset) {
             if (world.isServer) {
-                Vec3i pos = getPos(offset);
+                Vec3i pos = getPos(Vec3i.ZERO);
                 GuiTypes.CUSTOM_MULTIBLOCK_TRANS.open(player, pos);
             }
             return true;
@@ -80,7 +78,7 @@ public class CustomMultiblock extends Multiblock {
 
         @Override
         public boolean isRender(Vec3i offset) {
-            return offset.x == 0 && offset.y == 0 && offset.z == 0;
+            return offset.equals(Vec3i.ZERO);
         }
 
         @Override
@@ -93,7 +91,6 @@ public class CustomMultiblock extends Multiblock {
                     ItemStackHandler handler = this.getTile(new Vec3i(0, 0, 0))//TODO perhaps we should open the "center" property?
                             .getContainer();
                     if (!stacks.isEmpty()) {
-                        //transfer to this.cargoItems
                         for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
                             ItemStack stack = stacks.get(fromSlot);
                             int origCount = stack.getCount();
@@ -117,21 +114,19 @@ public class CustomMultiblock extends Multiblock {
                 }
             }
 
-            if (def.useRedstoneControl && def.redstoneControlPoint.equals(offset)) {
-                this.allowOutput = world.getRedstone(getPos(offset)) >= 1;
-            }
-
-            if (allowOutput && def.outputPoint.equals(offset) && def.allowThrowOutput) {
-                int slotIndex = 0;
-                int count = getTile(Vec3i.ZERO).getContainer().getSlotCount();
-                while (getTile(Vec3i.ZERO).getContainer().get(slotIndex).getCount() == 0) {
-                    slotIndex++;
-                    if (slotIndex >= count) {
-                        return;
+            if(def.outputPoint.equals(offset)) {
+                if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowOutput) {
+                    int slotIndex = getTile(Vec3i.ZERO).getContainer().getSlotCount() - 1;
+                    while (getTile(Vec3i.ZERO).getContainer().get(slotIndex).getCount() == 0) {
+                        slotIndex--;
+                        if (slotIndex == -1) {
+                            return;
+                        }
                     }
+                    world.dropItem(getTile(Vec3i.ZERO).getContainer().extract(slotIndex, 1, false),
+                            new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
+                                    .rotateYaw((float) getTile(Vec3i.ZERO).getRotation())));
                 }
-                world.dropItem(getTile(Vec3i.ZERO).getContainer().extract(slotIndex, 1, false),
-                        new Vec3d(getPos(offset)).add(def.throwOutputOffset));
             }
         }
 
