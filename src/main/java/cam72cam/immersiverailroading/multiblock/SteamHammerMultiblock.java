@@ -88,7 +88,12 @@ public class SteamHammerMultiblock extends Multiblock {
 			return isCenter(offset) ? 2 : 0;
 		}
 
-		@Override
+        @Override
+        public int getTankCapability(Vec3i offset) {
+            return 0;
+        }
+
+        @Override
 		public void tick(Vec3i offset) {
 			if (!isCenter(offset)) {
 				return;
@@ -153,12 +158,22 @@ public class SteamHammerMultiblock extends Multiblock {
 			return slot == 0 && new ItemRollingStockComponent.Data(stack).rawCast;
 		}
 
-		@Override
-		public boolean isOutputSlot(Vec3i offset, int slot) {
-			return slot == 1;
-		}
+        @Override
+        public boolean canReceiveFluid(Vec3i offset) {
+            return false;
+        }
 
-		@Override
+        @Override
+        public boolean isItemOutputSlot(Vec3i offset, int slot) {
+            return slot == 1;
+        }
+
+        @Override
+        public boolean isFluidOutputSlot(Vec3i offset) {
+            return false;
+        }
+
+        @Override
 		public int getSlotLimit(Vec3i offset, int slot) {
 			return isCenter(offset) ? 1 : 0;
 		}

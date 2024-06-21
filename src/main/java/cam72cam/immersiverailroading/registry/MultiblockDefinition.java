@@ -1,19 +1,23 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.library.MultiblockTypes;
 import cam72cam.immersiverailroading.model.MultiblockModel;
 import cam72cam.immersiverailroading.render.multiblock.CustomRender;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.resource.Identifier;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import static cam72cam.immersiverailroading.library.MultiblockTypes.TRANSPORTER;
+
 public class MultiblockDefinition {
     public final String mbID;
     public final String name;
-    public final String type;
+    public final MultiblockTypes type;
 
     public final int length;
     public final int height;
@@ -22,10 +26,15 @@ public class MultiblockDefinition {
     public final MultiblockModel model;//-x is left, +y is front, origin in blender is origin in game
 
     public final List<Vec3i> itemInputPoints;
-    public final List<Vec3i> energyInputPoints;
+    public final List<Vec3i> fluidInputPoints;
     public final boolean allowThrowInput;
+    //For TRANSPORTERS
     public final int inventoryHeight;
     public final int inventoryWidth;
+    public final int tankCapability;
+    //For CRAFTERS
+    public final List<Vec3i> energyInputPoints;
+    public /*final*/ Identifier gui;
 
     public final Vec3i outputPoint;
     public final int outputRatioBase;
@@ -38,7 +47,7 @@ public class MultiblockDefinition {
     MultiblockDefinition(String multiblockID, DataBlock object) throws Exception {
         this.mbID = multiblockID;
         this.name = object.getValue("name").asString().toUpperCase();
-        this.type = object.getValue("type").asString();
+        this.type = MultiblockTypes.valueOf(object.getValue("type").asString());
 
         this.length = object.getValue("length").asInteger();
         this.height = object.getValue("height").asInteger();
@@ -65,18 +74,25 @@ public class MultiblockDefinition {
         if (items != null) {
             items.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::parseString).forEach(itemInputPoints::add);
         }
+        this.fluidInputPoints = new LinkedList<>();
+        List<DataBlock.Value> fluids = input.getValues("fluid_input_point");
+        if (fluids != null) {
+            fluids.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::parseString).forEach(fluidInputPoints::add);
+        }
         this.energyInputPoints = new LinkedList<>();
         List<DataBlock.Value> energy = input.getValues("energy_input_point");
         if (energy != null) {
             energy.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::parseString).forEach(energyInputPoints::add);
         }
         this.allowThrowInput = input.getValue("allow_throw").asBoolean();
-        if(this.type.equals("TRANSPORTER")){
-            this.inventoryHeight = input.getValue("height").asInteger();
-            this.inventoryWidth = input.getValue("width").asInteger();
+        if(this.type == TRANSPORTER){
+            this.inventoryHeight = input.getValue("inventory_height").asInteger();
+            this.inventoryWidth = input.getValue("inventory_width").asInteger(10);//TODO use caml
+            this.tankCapability = input.getValue("tank_capability_mb").asInteger();
         }else{
             this.inventoryHeight = 0;
             this.inventoryWidth = 0;
+            this.tankCapability = 0;
         }
 
         DataBlock output = object.getBlock("output");
@@ -116,7 +132,7 @@ public class MultiblockDefinition {
         if(this.useRedstoneControl){
             this.redstoneControlPoint = parseString(output.getValue("redstone_control_point").asString());
         }else{
-            this.redstoneControlPoint  = Vec3i.ZERO;
+            this.redstoneControlPoint = null;
         }
 
 //        DataBlock properties = object.getBlock("properties");

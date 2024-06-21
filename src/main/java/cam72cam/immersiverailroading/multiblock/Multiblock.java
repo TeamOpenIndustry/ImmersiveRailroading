@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.multiblock;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import cam72cam.immersiverailroading.IRBlocks;
@@ -108,7 +107,7 @@ public abstract class Multiblock {
 	
 	public abstract Vec3i placementPos();
 	public void place(World world, Player player, Vec3i pos, Rotation rot) {
-		Map<String, Integer> missing = new HashMap<String, Integer>();
+		Map<String, Integer> missing = new HashMap<>();
 		Vec3i origin = pos.subtract(this.placementPos().rotate(rot));
 		for (Vec3i offset : this.componentPositions) {
 			Fuzzy component = lookup(offset);
@@ -228,10 +227,13 @@ public abstract class Multiblock {
 		}
 		public abstract boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset);
 		public abstract int getInvSize(Vec3i offset);
+        public abstract int getTankCapability(Vec3i offset);
 		public abstract boolean isRender(Vec3i offset);
 		public abstract void tick(Vec3i offset);
 		public abstract boolean canInsertItem(Vec3i offset, int slot, ItemStack stack);
-		public abstract boolean isOutputSlot(Vec3i offset, int slot);
+        public abstract boolean canReceiveFluid(Vec3i offset);
+		public abstract boolean isItemOutputSlot(Vec3i offset, int slot);
+        public abstract boolean isFluidOutputSlot(Vec3i offset);
 		public abstract int getSlotLimit(Vec3i offset, int slot);
 		public abstract boolean canRecievePower(Vec3i offset);
 		public void onBreak() {
@@ -249,6 +251,10 @@ public abstract class Multiblock {
 		/*
 		 * Helpers
 		 */
+        public Vec3i getOrigin(){
+            return this.origin;
+        }
+
 		protected Vec3i getPos(Vec3i offset) {
 			return origin.add(offset.rotate(rot));
 		}

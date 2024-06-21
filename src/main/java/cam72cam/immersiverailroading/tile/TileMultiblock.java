@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.multiblock.CustomMultiblock;
 import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
@@ -11,15 +12,17 @@ import cam72cam.mod.energy.Energy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.fluid.FluidTank;
+import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.IInventory;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.ItemStackHandler;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.world.BlockInfo;
 
 public class TileMultiblock extends BlockEntityTickable {
@@ -46,6 +49,8 @@ public class TileMultiblock extends BlockEntityTickable {
 	private ItemStackHandler container = new ItemStackHandler(0);
 	@TagField("energyStorage")
     private Energy energy = new Energy(0, 1000);
+    @TagField("tank")
+    private FluidTank tank = new FluidTank(null, 0);
 
 	public boolean isLoaded() {
 			//TODO FIX ME bad init
@@ -67,6 +72,7 @@ public class TileMultiblock extends BlockEntityTickable {
 	public void load(TagCompound nbt) {
 		container.onChanged(slot -> this.markDirty());
 		container.setSlotLimit(slot -> getMultiblock().getSlotLimit(offset, slot));
+        tank.onChanged(() -> this.markDirty());
 		energy.onChanged(this::markDirty);
 	}
 
@@ -112,6 +118,17 @@ public class TileMultiblock extends BlockEntityTickable {
 		}
 		return this.container;
 	}
+
+    public FluidTank getFluidContainer() {
+        if (tank.getCapacity() != getMultiblock().getTankCapability(offset)) {
+            tank.setCapacity(getMultiblock().getTankCapability(offset));
+        }
+
+        if(!this.offset.equals(Vec3i.ZERO)){
+            this.tank = getWorld().getBlockEntity(getMultiblock().getOrigin(), TileMultiblock.class).tank;
+        }
+        return this.tank;
+    }
 
 	/*
 	 * BlockType Functions to pass on to the multiblock
@@ -206,50 +223,37 @@ public class TileMultiblock extends BlockEntityTickable {
 			return null;
 		}
 
+        if(!this.offset.equals(Vec3i.ZERO)){
+            this.container = getWorld().getBlockEntity(getMultiblock().getOrigin(), TileMultiblock.class).container;
+        }
+
 		if (container.getSlotCount() != getMultiblock().getInvSize(offset)) {
 			container.setSize(getMultiblock().getInvSize(offset));
 		}
 
-		return new IInventory() {
-			@Override
-			public int getSlotCount() {
-				return container.getSlotCount();
-			}
-
-			@Override
-			public ItemStack get(int slot) {
-				return container.get(slot);
-			}
-
-			@Override
-			public void set(int slot, ItemStack stack) {
-				container.set(slot, stack);
-			}
-
-			@Override
-			public ItemStack insert(int slot, ItemStack stack, boolean simulate) {
-				if (getMultiblock().canInsertItem(offset, slot, stack)) {
-					return container.insert(slot, stack, simulate);
-				}
-				return stack;
-			}
-
-			@Override
-			public ItemStack extract(int slot, int amount, boolean simulate) {
-				if (getMultiblock().isOutputSlot(offset, slot)) {
-					return container.extract(slot, amount, simulate);
-				}
-				return ItemStack.EMPTY;
-			}
-
-			@Override
-			public int getLimit(int slot) {
-				return container.getLimit(slot);
-			}
-		};
+        CustomMultiblock.CustomMultiblockInstance instance = (CustomMultiblock.CustomMultiblockInstance)getMultiblock();
+		return instance.canInsertItem(offset,0,null) ? this.container : null;
 	}
 
-	@Override
+    @Override
+    public ITank getTank(Facing side) {
+        if (this.getMultiblock() == null || this.getMultiblock().getTankCapability(offset) == 0) {
+            return null;
+        }
+
+        if(!this.offset.equals(Vec3i.ZERO)){
+            this.tank = getWorld().getBlockEntity(getMultiblock().getOrigin(), TileMultiblock.class).tank;
+        }
+
+        if (tank.getCapacity() != getMultiblock().getTankCapability(offset)) {
+            tank.setCapacity(getMultiblock().getTankCapability(offset));
+        }
+
+        CustomMultiblock.CustomMultiblockInstance instance = (CustomMultiblock.CustomMultiblockInstance)getMultiblock();
+        return instance.canReceiveFluid(offset) ? this.tank : null;
+    }
+
+    @Override
 	public IEnergy getEnergy(Facing facing) {
 		return this.isLoaded() && this.getMultiblock().canRecievePower(offset) ? energy : null;
 	}

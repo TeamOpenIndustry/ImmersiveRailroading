@@ -16,8 +16,9 @@ import java.util.List;
 
 public class CustomMultiblock extends Multiblock {
     /*TODO:
-     * use Animatrix to Produce animation(I/O for factory)
-     * new readouts
+     * use Animatrix to Produce animation(I/O for factory)(NOT NOW)
+     * REWRITE CURRENT ANIMATION TO FIT MB(NOT NOW)
+     * new readouts(NOT NOW)
      * rewrite manual
      */
     private final MultiblockDefinition def;
@@ -60,7 +61,7 @@ public class CustomMultiblock extends Multiblock {
         return new CustomMultiblockInstance(world, origin, rot, this.def);
     }
 
-    public class CustomMultiblockInstance extends MultiblockInstance {//TODO sync the inventories
+    public class CustomMultiblockInstance extends MultiblockInstance {
         public final MultiblockDefinition def;
         private long ticks = 0;
 
@@ -84,60 +85,71 @@ public class CustomMultiblock extends Multiblock {
         }
 
         @Override
+        public int getTankCapability(Vec3i offset) {
+            return this.def.tankCapability;
+        }
+
+        @Override
         public boolean isRender(Vec3i offset) {
             return offset.equals(Vec3i.ZERO);
         }
 
         @Override
         public void tick(Vec3i offset) {
-            ticks++;
-            if (def.itemInputPoints.contains(offset)) {
-                if (def.allowThrowInput) {
-                    Vec3d vec3d = new Vec3d(getPos(offset));
-                    List<ItemStack> stacks = world.getDroppedItems(IBoundingBox.from(
-                            vec3d.subtract(0.5, 0.5, 0.5), vec3d.add(1.5, 1.5, 1.5)));
-                    ItemStackHandler handler = this.getTile(new Vec3i(0, 0, 0))//TODO perhaps we should open the "center" property?
-                            .getContainer();
-                    if (!stacks.isEmpty()) {
-                        for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
-                            ItemStack stack = stacks.get(fromSlot);
-                            int origCount = stack.getCount();
+            this.ticks += 1;
+            if(this.getInvSize(Vec3i.ZERO) != 0){
+                if (def.itemInputPoints.contains(offset)) {
+                    //Handle item(thrown) input
+                    if (def.allowThrowInput) {
+                        Vec3d vec3d = new Vec3d(getPos(offset));
+                        List<ItemStack> stacks = world.getDroppedItems(IBoundingBox.from(
+                                vec3d.subtract(0.5, 0.5, 0.5), vec3d.add(1.5, 1.5, 1.5)));
+                        ItemStackHandler handler = this.getTile(Vec3i.ZERO)//TODO perhaps we should use the "center" property?
+                                .getContainer();
+                        if (!stacks.isEmpty()) {
+                            for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
+                                ItemStack stack = stacks.get(fromSlot);
+                                int origCount = stack.getCount();
 
-                            if (stack.isEmpty()) {
-                                continue;
-                            }
-
-                            for (int toSlot = 0; toSlot < handler.getSlotCount(); toSlot++) {
-                                stack.setCount(handler.insert(toSlot, stack, false).getCount());
                                 if (stack.isEmpty()) {
-                                    break;
+                                    continue;
                                 }
-                            }
 
-                            if (origCount != stack.getCount()) {
-                                stacks.set(fromSlot, stack);
+                                for (int toSlot = 0; toSlot < handler.getSlotCount(); toSlot++) {
+                                    stack.setCount(handler.insert(toSlot, stack, false).getCount());
+                                    if (stack.isEmpty()) {
+                                        break;
+                                    }
+                                }
+
+                                if (origCount != stack.getCount()) {
+                                    stacks.set(fromSlot, stack);
+                                }
                             }
                         }
                     }
                 }
-            }
-
-            if(def.outputPoint.equals(offset)) {
-                if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowOutput) {
-                    int slotIndex = getTile(Vec3i.ZERO).getContainer().getSlotCount() - 1;
-                    while (getTile(Vec3i.ZERO).getContainer().get(slotIndex).getCount() == 0) {
-                        slotIndex--;
-                        if (slotIndex == -1) {
-                            return;
+                //Handle item output
+                if (def.outputPoint.equals(offset)) {
+                    if (def.redstoneControlPoint == null)
+                        return;
+                    if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowOutput) {
+                        ItemStackHandler handler = getTile(Vec3i.ZERO).getContainer();
+                        int slotIndex = handler.getSlotCount() - 1;
+                        while (handler.get(slotIndex).getCount() == 0) {
+                            slotIndex--;
+                            if (slotIndex == -1) {
+                                return;
+                            }
                         }
-                    }
-                    world.dropItem(getTile(Vec3i.ZERO).getContainer().extract(slotIndex, def.outputRatioBase, false),
-                            new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
-                                    .rotateYaw((float) getTile(Vec3i.ZERO).getRotation())));
-                    if(ticks % 20 <= def.outputRatioMod) {
-                        world.dropItem(getTile(Vec3i.ZERO).getContainer().extract(slotIndex, 1, false),
+                        world.dropItem(handler.extract(slotIndex, def.outputRatioBase, false),
                                 new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
                                         .rotateYaw((float) getTile(Vec3i.ZERO).getRotation())));
+                        if (ticks % 20 <= def.outputRatioMod) {
+                            world.dropItem(handler.extract(slotIndex, 1, false),
+                                    new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
+                                            .rotateYaw(this.getRotation())));
+                        }
                     }
                 }
             }
@@ -149,8 +161,18 @@ public class CustomMultiblock extends Multiblock {
         }
 
         @Override
-        public boolean isOutputSlot(Vec3i offset, int slot) {
+        public boolean canReceiveFluid(Vec3i offset) {
+            return def.fluidInputPoints.stream().anyMatch(offset::equals);
+        }
+
+        @Override
+        public boolean isItemOutputSlot(Vec3i offset, int slot) {
             return def.outputPoint.equals(offset);
+        }
+
+        @Override
+        public boolean isFluidOutputSlot(Vec3i offset) {
+            return false;
         }
 
         @Override
@@ -161,6 +183,11 @@ public class CustomMultiblock extends Multiblock {
         @Override
         public boolean canRecievePower(Vec3i offset) {
             return def.energyInputPoints.stream().anyMatch(offset::equals);
+        }
+
+        //Helpers
+        public float getRotation(){
+            return (float) getTile(Vec3i.ZERO).getRotation();
         }
     }
 }

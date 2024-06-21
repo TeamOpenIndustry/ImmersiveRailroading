@@ -30,7 +30,7 @@ public class GuiTypes {
     public static final BlockGUI STEAM_HAMMER = GuiRegistry.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
     public static final BlockGUI CASTING = GuiRegistry.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);
     public static final BlockGUI PLATE_ROLLER = CASTING;
-    public static final BlockGUI CUSTOM_MULTIBLOCK_TRANS = GuiRegistry.registerBlockContainer(TileMultiblock.class, CustomMBTransporterGUI::new);
+    public static final BlockGUI CUSTOM_MULTIBLOCK_TRANS = GuiRegistry.registerBlockContainer(TileMultiblock.class, CustomMBContainer::new);
     private static IScreen createMultiblockScreen(TileMultiblock mb) {
         if (!mb.isLoaded()) {
             return null;
