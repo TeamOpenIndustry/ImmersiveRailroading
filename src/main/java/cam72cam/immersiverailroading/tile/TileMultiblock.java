@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.Permissions;
-import cam72cam.immersiverailroading.multiblock.CustomMultiblock;
+import cam72cam.immersiverailroading.multiblock.CustomTransporterMultiblock;
 import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
 import cam72cam.immersiverailroading.net.MultiblockSelectCraftPacket;
@@ -73,6 +73,7 @@ public class TileMultiblock extends BlockEntityTickable {
 		container.onChanged(slot -> this.markDirty());
 		container.setSlotLimit(slot -> getMultiblock().getSlotLimit(offset, slot));
         tank.onChanged(() -> this.markDirty());
+        tank.onChanged(()-> System.out.println(tank.getContents().getAmount()));
 		energy.onChanged(this::markDirty);
 	}
 
@@ -99,6 +100,10 @@ public class TileMultiblock extends BlockEntityTickable {
 	
 	public MultiblockInstance getMultiblock() {
 		if (this.mb == null && this.isLoaded()) {
+            if(MultiblockRegistry.get(name) == null) {
+                this.breakBlock();
+                return null;
+            }
 			this.mb = MultiblockRegistry.get(name).instance(getWorld(), getOrigin(), rotation);
 		}
 		return this.mb;
@@ -127,6 +132,7 @@ public class TileMultiblock extends BlockEntityTickable {
         if(!this.offset.equals(Vec3i.ZERO)){
             this.tank = getWorld().getBlockEntity(getMultiblock().getOrigin(), TileMultiblock.class).tank;
         }
+
         return this.tank;
     }
 
@@ -231,7 +237,7 @@ public class TileMultiblock extends BlockEntityTickable {
 			container.setSize(getMultiblock().getInvSize(offset));
 		}
 
-        CustomMultiblock.CustomMultiblockInstance instance = (CustomMultiblock.CustomMultiblockInstance)getMultiblock();
+        CustomTransporterMultiblock.TransporterMbInstance instance = (CustomTransporterMultiblock.TransporterMbInstance)getMultiblock();
 		return instance.canInsertItem(offset,0,null) ? this.container : null;
 	}
 
@@ -249,7 +255,8 @@ public class TileMultiblock extends BlockEntityTickable {
             tank.setCapacity(getMultiblock().getTankCapability(offset));
         }
 
-        CustomMultiblock.CustomMultiblockInstance instance = (CustomMultiblock.CustomMultiblockInstance)getMultiblock();
+        CustomTransporterMultiblock.TransporterMbInstance instance = (CustomTransporterMultiblock.TransporterMbInstance)getMultiblock();
+        System.out.println(tank.getContents().getAmount());
         return instance.canReceiveFluid(offset) ? this.tank : null;
     }
 

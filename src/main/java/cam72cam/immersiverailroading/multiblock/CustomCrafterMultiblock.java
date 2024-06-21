@@ -14,16 +14,10 @@ import cam72cam.mod.world.World;
 
 import java.util.List;
 
-public class CustomMultiblock extends Multiblock {
-    /*TODO:
-     * use Animatrix to Produce animation(I/O for factory)(NOT NOW)
-     * REWRITE CURRENT ANIMATION TO FIT MB(NOT NOW)
-     * new readouts(NOT NOW)
-     * rewrite manual
-     */
+public class CustomCrafterMultiblock extends Multiblock {
     private final MultiblockDefinition def;
 
-    public CustomMultiblock(MultiblockDefinition def) {
+    public CustomCrafterMultiblock(MultiblockDefinition def) {
         super(def.name.toUpperCase(), parseStructure(def));
         this.def = def;
     }
@@ -58,14 +52,14 @@ public class CustomMultiblock extends Multiblock {
 
     @Override
     protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
-        return new CustomMultiblockInstance(world, origin, rot, this.def);
+        return new CrafterMbInstance(world, origin, rot, this.def);
     }
 
-    public class CustomMultiblockInstance extends MultiblockInstance {
+    public class CrafterMbInstance extends MultiblockInstance {
         public final MultiblockDefinition def;
         private long ticks = 0;
 
-        public CustomMultiblockInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
+        public CrafterMbInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
             super(world, origin, rot);
             this.def = def;
         }
@@ -74,14 +68,16 @@ public class CustomMultiblock extends Multiblock {
         public boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset) {
             if (world.isServer) {
                 Vec3i pos = getPos(Vec3i.ZERO);
-                GuiTypes.CUSTOM_MULTIBLOCK_TRANS.open(player, pos);
+                GuiTypes.CUSTOM_MULTIBLOCK.open(player, pos);
             }
             return true;
         }
 
         @Override
         public int getInvSize(Vec3i offset) {
-            return this.def.inventoryWidth * this.def.inventoryHeight;
+            if(this.def.gui.getBlocks("slot") == null)
+                return 0;
+            return this.def.gui.getBlocks("slot").size();
         }
 
         @Override

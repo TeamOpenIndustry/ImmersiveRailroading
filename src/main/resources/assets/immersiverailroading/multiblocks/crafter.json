@@ -1,6 +1,6 @@
 {
-    "name": "demo1",
-    "type": "TRANSPORTER",
+    "name": "de",
+    "type": "CRAFTER",
 
     "width": 5,
     "height": 3,
@@ -27,9 +27,7 @@
         "item_input_point":["2,0,0"],
         "fluid_input_point":["2,0,0"],
         "allow_throw":true,
-        "inventory_height": 0,
-        "inventory_width": 10,
-        "tank_capability_mb": 20000
+        "power_limit_rf": 100000
     },
 
     "output":{
@@ -42,10 +40,7 @@
     },
 
     "properties":{
-        "power_limit_rf": 100000,
-        "inventory_slot_count": 20,
-        "inventory_slot_width": 5,
         "enable_manual_interact": false,
-        "gui": "immersiverailroading:gui/mb.caml"
+        "gui": "immersiverailroading:gui/multiblock/craft.caml"
     }
 }

@@ -1,0 +1,10 @@
+slot:
+#    screen_x = MIDDLE
+#    screen_y = MIDDLE
+    x = 40
+    y = 20
+slot:
+#    screen_x = MIDDLE
+#    screen_y = MIDDLE
+    x = 30
+    y = 30

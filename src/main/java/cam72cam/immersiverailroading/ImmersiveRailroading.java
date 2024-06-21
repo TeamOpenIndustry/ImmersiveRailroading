@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
+import cam72cam.immersiverailroading.gui.overlay.MbGuiBuilder;
 import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.KeyTypes;
@@ -85,6 +86,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(ClientPartDragging.DragPacket::new, PacketDirection.ClientToServer);
 				Packet.register(ClientPartDragging.SeatPacket::new, PacketDirection.ClientToServer);
 				Packet.register(GuiBuilder.ControlChangePacket::new, PacketDirection.ClientToServer);
+                Packet.register(MbGuiBuilder.ControlChangePacket::new, PacketDirection.ClientToServer);
 				Packet.register(ItemPaintBrush.PaintBrushPacket::new, PacketDirection.ClientToServer);
 
 				ServerChronoState.register();
@@ -114,9 +116,16 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
 				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
                 for (String s : DefinitionManager.multiblocks.keySet()) {
-                    MultiblockRegistry.register(DefinitionManager.multiblocks.get(s).name,
-                            new CustomMultiblock(DefinitionManager.multiblocks.get(s)));
-                    System.out.println(s);
+                    switch (DefinitionManager.multiblocks.get(s).type) {
+                        case TRANSPORTER:
+                            MultiblockRegistry.register(DefinitionManager.multiblocks.get(s).name,
+                                new CustomTransporterMultiblock(DefinitionManager.multiblocks.get(s)));
+                            break;
+                        case CRAFTER:
+                            MultiblockRegistry.register(DefinitionManager.multiblocks.get(s).name,
+                                    new CustomCrafterMultiblock(DefinitionManager.multiblocks.get(s)));
+                            break;
+                    }
                 }
                 TileMultiblockRender.registerOthers();
 				IRFuzzy.applyFallbacks();

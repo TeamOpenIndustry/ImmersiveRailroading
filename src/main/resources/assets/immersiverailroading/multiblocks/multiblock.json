@@ -1,4 +1,7 @@
 {
     "pack": "null",
-    "register": ["gas"]
+    "register": [
+        "transporter",
+        "crafter"
+    ]
 }

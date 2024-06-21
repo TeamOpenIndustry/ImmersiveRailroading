@@ -1,0 +1,48 @@
+{
+    "name": "demo1",
+    "type": "TRANSPORTER",
+
+    "width": 5,
+    "height": 4,
+    "length": 4,
+    "structure": {
+        "0,0,0": "light_engineering_block",
+        "1,0,0": "light_engineering_block",
+        "2,0,0": "light_engineering_block",
+        "3,0,0": "light_engineering_block",
+        "4,0,0": "light_engineering_block",
+        "0,1,0": "light_engineering_block",
+        "1,1,0": "light_engineering_block",
+        "2,1,0": "light_engineering_block",
+        "3,1,0": "light_engineering_block",
+        "4,1,0": "light_engineering_block",
+        "2,2,0": "light_engineering_block",
+        "2,2,1": "light_engineering_block",
+        "2,3,2": "light_engineering_block",
+        "2,2,3": "light_engineering_block"
+    },
+    "model": "immersiverailroading:multiblocks/un1.obj",
+
+    "input":{
+        "item_input_point":["2,0,0"],
+        "fluid_input_point":["2,0,0"],
+        "allow_throw":true,
+        "inventory_height": 0,
+        "inventory_width": 10,
+        "tank_capability_mb": 20000
+    },
+
+    "output":{
+        "item_output_point":"2,2,3",
+        "redstone_control":true,
+        "redstone_control_point":"0,0,0",
+        "should_throw": true,
+        "offset": "-Z",
+        "output_ratio_items_per_sec": 20
+    },
+
+    "properties":{
+        "power_limit_rf": 100000,
+        "enable_manual_interact": false
+    }
+}

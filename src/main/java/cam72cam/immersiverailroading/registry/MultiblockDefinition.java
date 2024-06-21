@@ -3,15 +3,16 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.library.MultiblockTypes;
 import cam72cam.immersiverailroading.model.MultiblockModel;
 import cam72cam.immersiverailroading.render.multiblock.CustomRender;
+import cam72cam.immersiverailroading.util.CAML;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.resource.Identifier;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import static cam72cam.immersiverailroading.library.MultiblockTypes.CRAFTER;
 import static cam72cam.immersiverailroading.library.MultiblockTypes.TRANSPORTER;
 
 public class MultiblockDefinition {
@@ -32,9 +33,10 @@ public class MultiblockDefinition {
     public final int inventoryHeight;
     public final int inventoryWidth;
     public final int tankCapability;
-    //For CRAFTERS
+    //For CRAFTER
     public final List<Vec3i> energyInputPoints;
-    public /*final*/ Identifier gui;
+    public final int powerMaximumValue;
+    public final DataBlock gui;
 
     public final Vec3i outputPoint;
     public final int outputRatioBase;
@@ -89,10 +91,17 @@ public class MultiblockDefinition {
             this.inventoryHeight = input.getValue("inventory_height").asInteger();
             this.inventoryWidth = input.getValue("inventory_width").asInteger(10);//TODO use caml
             this.tankCapability = input.getValue("tank_capability_mb").asInteger();
-        }else{
+            this.powerMaximumValue = 0;
+        }else if(this.type == CRAFTER){
+            this.powerMaximumValue = input.getValue("power_limit_rf").asInteger();
             this.inventoryHeight = 0;
             this.inventoryWidth = 0;
             this.tankCapability = 0;
+        }else{//DETECTOR
+            this.inventoryHeight = 0;
+            this.inventoryWidth = 0;
+            this.tankCapability = 0;
+            this.powerMaximumValue = 0;
         }
 
         DataBlock output = object.getBlock("output");
@@ -135,7 +144,12 @@ public class MultiblockDefinition {
             this.redstoneControlPoint = null;
         }
 
-//        DataBlock properties = object.getBlock("properties");
+        DataBlock properties = object.getBlock("properties");
+        if(this.type == CRAFTER){
+            this.gui = CAML.parse(properties.getValue("gui").asIdentifier().getResourceStream());
+        }else{
+            this.gui = null;
+        }
     }
 
     private static Vec3i parseString(String origin){
