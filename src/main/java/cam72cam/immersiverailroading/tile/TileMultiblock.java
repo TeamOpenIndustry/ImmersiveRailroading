@@ -12,6 +12,9 @@ import cam72cam.mod.energy.Energy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.entity.sync.TagSync;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.fluid.FluidTank;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.IInventory;
@@ -62,8 +65,14 @@ public class TileMultiblock extends BlockEntityTickable {
 		this.rotation = rot;
 		this.offset = offset;
 		this.replaced = replaced;
-		
-		container.setSize(this.getMultiblock().getInvSize(offset));
+
+        if(!this.offset.equals(Vec3i.ZERO)){
+            this.container = getWorld().getBlockEntity(getMultiblock().getOrigin(), TileMultiblock.class).container;
+            this.tank = getWorld().getBlockEntity(getMultiblock().getOrigin(), TileMultiblock.class).tank;
+        }
+
+        //Call this to refresh status
+		load(null);
 		
 		markDirty();
 	}
@@ -73,7 +82,6 @@ public class TileMultiblock extends BlockEntityTickable {
 		container.onChanged(slot -> this.markDirty());
 		container.setSlotLimit(slot -> getMultiblock().getSlotLimit(offset, slot));
         tank.onChanged(() -> this.markDirty());
-        tank.onChanged(()-> System.out.println(tank.getContents().getAmount()));
 		energy.onChanged(this::markDirty);
 	}
 
@@ -256,7 +264,6 @@ public class TileMultiblock extends BlockEntityTickable {
         }
 
         CustomTransporterMultiblock.TransporterMbInstance instance = (CustomTransporterMultiblock.TransporterMbInstance)getMultiblock();
-        System.out.println(tank.getContents().getAmount());
         return instance.canReceiveFluid(offset) ? this.tank : null;
     }
 

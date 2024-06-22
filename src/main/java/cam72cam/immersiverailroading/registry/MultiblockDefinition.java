@@ -12,8 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import static cam72cam.immersiverailroading.library.MultiblockTypes.CRAFTER;
-import static cam72cam.immersiverailroading.library.MultiblockTypes.TRANSPORTER;
+import static cam72cam.immersiverailroading.library.MultiblockTypes.*;
 
 public class MultiblockDefinition {
     public final String mbID;

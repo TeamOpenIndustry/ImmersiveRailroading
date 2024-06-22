@@ -59,9 +59,6 @@ public class CustomMultiblockGui implements IContainer {
                         slotY = currY;
                 }
 
-                /*TODO
-                *   Bug: A new created tank only can be rendered after at least 1 world reloading
-                */
                 container.drawTankBlock(0, tankY, getSlotsX(), 4,
                         tile.getFluidContainer().getContents().getFluid(),
                         tile.getFluidContainer().getContents().getAmount() / (float) def.tankCapability);
