@@ -6,8 +6,12 @@ import cam72cam.immersiverailroading.multiblock.CustomTransporterMultiblock;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.container.IContainer;
 import cam72cam.mod.gui.container.IContainerBuilder;
+import cam72cam.mod.gui.screen.IScreenBuilder;
+import cam72cam.mod.gui.screen.ScreenBuilder;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.Vec2f;
 
 import java.util.ArrayList;
@@ -40,10 +44,20 @@ public class CustomMultiblockGui implements IContainer {
             int currY = 0;
             for (int i = 0; i < slots.size(); i++) {
                 Vec2f vec2f = slots.get(i);
-                container.drawSlot(tile.getContainer(), i, (int) vec2f.x, (int) vec2f.y);
+                container.drawSlot(tile.getContainer(), i, (int) vec2f.x - 9, (int) vec2f.y);
                 currY = Math.max(currY, (int) vec2f.y);
             }
-            container.drawPlayerInventory(currY + 7, 0);
+            if(def.gui.getBlock("player_inventory").getValue("render").asBoolean()) {
+                currY = container.drawPlayerInventoryConnector(0, currY + 21, getSlotsX());
+                container.drawPlayerInventory(currY, getSlotsX());
+            }
+            //A hack to render background for containers
+            MbGuiHandler.playerGUi.keySet().stream().forEach(uuid -> {
+                Player player = tile.getWorld().getEntity(uuid, Player.class);
+                if(player.getPosition().distanceToSquared(new Vec3d(tile.getPos())) <= 20){
+                    MbGuiHandler.playerGUi.put(uuid, 2);
+                }
+            });
 
         } else if (this.def.type == MultiblockTypes.TRANSPORTER) {
             int currY = 0;

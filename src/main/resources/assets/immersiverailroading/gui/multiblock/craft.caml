@@ -1,10 +1,12 @@
 slot:
-#    screen_x = MIDDLE
-#    screen_y = MIDDLE
-    x = 40
-    y = 20
+    x = 0
+    y = 60
 slot:
-#    screen_x = MIDDLE
-#    screen_y = MIDDLE
-    x = 30
-    y = 30
+    x = -36
+    y = 0
+slot:
+    x = 36
+    y = 0
+player_inventory =
+    render = true
+    y = 0

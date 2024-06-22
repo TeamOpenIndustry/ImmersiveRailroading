@@ -2,6 +2,8 @@ package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
+import cam72cam.immersiverailroading.gui.container.CustomMultiblockBack;
+import cam72cam.immersiverailroading.gui.container.MbGuiHandler;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.gui.overlay.MbGuiBuilder;
 import cam72cam.immersiverailroading.items.ItemPaintBrush;
@@ -32,14 +34,19 @@ import cam72cam.mod.ModEvent;
 import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.EntityRegistry;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.event.ClientEvents;
+import cam72cam.mod.event.CommonEvents;
+import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.input.Keyboard.KeyCode;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.render.*;
+import cam72cam.mod.render.opengl.DirectDraw;
 import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.text.Command;
@@ -222,6 +229,20 @@ public class ImmersiveRailroading extends ModCore.Mod {
 						stock.getDefinition().getOverlay().render(state, stock);
 					}
 				});
+
+                MbGuiHandler.init();
+                GlobalRender.registerOverlay((state, pt) -> {
+                    Integer i = MbGuiHandler.playerGUi.get(MinecraftClient.getPlayer().getUUID());
+                    if(i != null && i != 0){
+                        System.out.println("render");
+                        DirectDraw buffer = new DirectDraw();
+                        buffer.vertex(-100, -100, 0).uv(0, 0);
+                        buffer.vertex(-100, 1, 0).uv(0, 1);
+                        buffer.vertex(1, 1, 0).uv(1, 1);
+                        buffer.vertex(1, -100, 0).uv(1, 0);
+                        buffer.draw(state.clone().texture(Texture.wrap(EntityRollingStockDefinition.LightDefinition.default_light_tex)));
+                    }
+                });
 
 				ClientEvents.MOUSE_GUI.subscribe(evt -> {
 					if (!MinecraftClient.isReady()) {

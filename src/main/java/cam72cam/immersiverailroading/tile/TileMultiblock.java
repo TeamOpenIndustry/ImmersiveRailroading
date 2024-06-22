@@ -81,7 +81,7 @@ public class TileMultiblock extends BlockEntityTickable {
 	public void load(TagCompound nbt) {
 		container.onChanged(slot -> this.markDirty());
 		container.setSlotLimit(slot -> getMultiblock().getSlotLimit(offset, slot));
-        tank.onChanged(() -> this.markDirty());
+        tank.onChanged(this::markDirty);
 		energy.onChanged(this::markDirty);
 	}
 
