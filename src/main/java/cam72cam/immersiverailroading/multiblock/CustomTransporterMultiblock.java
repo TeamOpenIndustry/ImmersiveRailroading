@@ -26,6 +26,9 @@ public class CustomTransporterMultiblock extends Multiblock {
     public CustomTransporterMultiblock(MultiblockDefinition def) {
         super(def.name.toUpperCase(), parseStructure(def));
         this.def = def;
+        //The center block should be built first...
+        componentPositions.remove(def.center);
+        componentPositions.add(0,def.center);
     }
 
     private static FuzzyProvider[][][] parseStructure(MultiblockDefinition def) {
@@ -53,7 +56,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
     @Override
     public Vec3i placementPos() {
-        return Vec3i.ZERO;
+        return def.center;
     }
 
     @Override
@@ -73,15 +76,16 @@ public class CustomTransporterMultiblock extends Multiblock {
         @Override
         public boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset) {
             if (world.isServer) {
-                Vec3i pos = getPos(Vec3i.ZERO);
-                GuiTypes.CUSTOM_MULTIBLOCK.open(player, pos);
+                Vec3i pos = getPos(def.center);
+                GuiTypes.CUSTOM_MULTIBLOCK_TRANSPORT.open(player, pos);
             }
             return true;
         }
 
         @Override
         public int getInvSize(Vec3i offset) {
-            return this.def.inventoryWidth * this.def.inventoryHeight;
+            return this.def.inventoryWidth * this.def.inventoryHeight +
+                    this.getTankCapability(offset) == 0 ? 0 : 2;
         }
 
         @Override
@@ -97,14 +101,14 @@ public class CustomTransporterMultiblock extends Multiblock {
         @Override
         public void tick(Vec3i offset) {
             this.ticks += 1;
-            if(this.getInvSize(Vec3i.ZERO) != 0){
+            if(this.getInvSize(def.center) != 0){
                 if (def.itemInputPoints.contains(offset)) {
                     //Handle item(thrown) input
                     if (def.allowThrowInput) {
                         Vec3d vec3d = new Vec3d(getPos(offset));
                         List<ItemStack> stacks = world.getDroppedItems(IBoundingBox.from(
                                 vec3d.subtract(0.5, 0.5, 0.5), vec3d.add(1.5, 1.5, 1.5)));
-                        ItemStackHandler handler = this.getTile(Vec3i.ZERO)//TODO perhaps we should use the "center" property?
+                        ItemStackHandler handler = this.getTile(def.center)
                                 .getContainer();
                         if (!stacks.isEmpty()) {
                             for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
@@ -134,7 +138,7 @@ public class CustomTransporterMultiblock extends Multiblock {
                     if (def.redstoneControlPoint == null)
                         return;
                     if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowOutput) {
-                        ItemStackHandler handler = getTile(Vec3i.ZERO).getContainer();
+                        ItemStackHandler handler = getTile(def.center).getContainer();
                         int slotIndex = handler.getSlotCount() - 1;
                         while (handler.get(slotIndex).getCount() == 0) {
                             slotIndex--;
@@ -144,7 +148,7 @@ public class CustomTransporterMultiblock extends Multiblock {
                         }
                         world.dropItem(handler.extract(slotIndex, def.outputRatioBase, false),
                                 new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
-                                        .rotateYaw((float) getTile(Vec3i.ZERO).getRotation())));
+                                        .rotateYaw((float) getTile(def.center).getRotation())));
                         if (ticks % 20 <= def.outputRatioMod) {
                             world.dropItem(handler.extract(slotIndex, 1, false),
                                     new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
@@ -187,7 +191,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
         //Helpers
         public float getRotation(){
-            return (float) getTile(Vec3i.ZERO).getRotation();
+            return (float) getTile(def.center).getRotation();
         }
     }
 }

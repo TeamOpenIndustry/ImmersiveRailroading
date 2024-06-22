@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.library.MultiblockTypes;
 import cam72cam.immersiverailroading.model.MultiblockModel;
-import cam72cam.immersiverailroading.render.multiblock.CustomRender;
+import cam72cam.immersiverailroading.render.multiblock.CustomMultiblockRender;
 import cam72cam.immersiverailroading.util.CAML;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.math.Vec3d;
@@ -23,6 +23,7 @@ public class MultiblockDefinition {
     public final int height;
     public final int width;
     public final HashMap<Vec3i, String> structure;
+    public final Vec3i center;
     public final MultiblockModel model;//-x is left, +y is front, origin in blender is origin in game
 
     public final List<Vec3i> itemInputPoints;
@@ -33,6 +34,7 @@ public class MultiblockDefinition {
     public final int inventoryWidth;
     public final int tankCapability;
     //For CRAFTER
+    //Unstable, DON'T USE!
     public final List<Vec3i> energyInputPoints;
     public final int powerMaximumValue;
     public final DataBlock gui;
@@ -65,9 +67,12 @@ public class MultiblockDefinition {
                 }
             }
         }
-
+        this.center = parseString(object.getValue("center").asString());
+        if(!structure.containsKey(center)){
+            throw new IllegalArgumentException("You must include the center block in the structure!");
+        }
         this.model = new MultiblockModel(object.getValue("model").asIdentifier(), 0);
-        CustomRender.addDef(this);
+        CustomMultiblockRender.addDef(this);
 
         DataBlock input = object.getBlock("input");
         this.itemInputPoints = new LinkedList<>();
@@ -88,7 +93,7 @@ public class MultiblockDefinition {
         this.allowThrowInput = input.getValue("allow_throw").asBoolean();
         if(this.type == TRANSPORTER){
             this.inventoryHeight = input.getValue("inventory_height").asInteger();
-            this.inventoryWidth = input.getValue("inventory_width").asInteger(10);//TODO use caml
+            this.inventoryWidth = input.getValue("inventory_width").asInteger();
             this.tankCapability = input.getValue("tank_capability_mb").asInteger();
             this.powerMaximumValue = 0;
         }else if(this.type == CRAFTER){

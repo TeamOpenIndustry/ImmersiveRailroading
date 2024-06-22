@@ -58,7 +58,7 @@ public abstract class Multiblock {
 		componentPositions = new ArrayList<>();
 		for (int z = 0; z < components.length; z++) {
 			FuzzyProvider[][] zcomp = components[z];
-			for (int y = 0; y < components[z].length; y++) {
+			for (int y = 0; y < zcomp.length; y++) {
 				FuzzyProvider[] ycomp = zcomp[y];
 				for (int x = 0; x < ycomp.length; x++) {
 					FuzzyProvider comp = components[z][y][x];

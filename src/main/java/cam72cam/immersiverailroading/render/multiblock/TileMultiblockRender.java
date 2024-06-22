@@ -23,7 +23,7 @@ public class TileMultiblockRender {
 
     public static void registerOthers(){
         for (String s : DefinitionManager.multiblocks.keySet()) {
-            renderers.put(s, new CustomRender());
+            renderers.put(s, new CustomMultiblockRender());
         }
     }
 

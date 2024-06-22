@@ -4,15 +4,14 @@ import cam72cam.immersiverailroading.model.MultiblockModel;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.resource.Identifier;
 
 import java.util.*;
 
-public class CustomRender implements IMultiblockRender {
-    private static final Map<String, MultiblockModel> refer;
+public class CustomMultiblockRender implements IMultiblockRender {
+    private static final Map<String, MultiblockDefinition> refer;
     private static final Vec3d north = new Vec3d(1,0,1);
     private static final Vec3d west = new Vec3d(1,0,0);
     private static final Vec3d east = new Vec3d(0,0,1);
@@ -22,13 +21,17 @@ public class CustomRender implements IMultiblockRender {
     }
 
     public static void addDef(MultiblockDefinition def){
-        refer.put(def.name, def.model);
+        refer.put(def.name, def);
     }
 
     @Override
     public void render(TileMultiblock te, RenderState state, float partialTicks) {
-        MultiblockModel model = refer.get(te.getName());
+        MultiblockModel model = refer.get(te.getName()).model;
         if(model != null){
+            //translate back
+            Vec3i t = refer.get(te.getName()).center;
+            state.translate(new Vec3d(t.z, t.y, t.x).scale(-1));
+            state.translate(0,0, 2);
             int temp = (int) (te.getRotation() - 90);
             state.rotate(temp, 0, 1, 0);
             switch (temp){

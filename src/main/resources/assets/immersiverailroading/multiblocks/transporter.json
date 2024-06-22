@@ -21,6 +21,7 @@
         "2,3,2": "light_engineering_block",
         "2,2,3": "light_engineering_block"
     },
+    "center": "2,0,0",
     "model": "immersiverailroading:multiblocks/un1.obj",
 
     "input":{

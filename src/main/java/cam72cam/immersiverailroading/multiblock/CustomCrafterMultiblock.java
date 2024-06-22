@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import cam72cam.immersiverailroading.gui.container.MbGuiHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.mod.entity.Player;
@@ -15,6 +14,7 @@ import cam72cam.mod.world.World;
 
 import java.util.List;
 
+@Deprecated
 public class CustomCrafterMultiblock extends Multiblock {
     private final MultiblockDefinition def;
 
@@ -69,8 +69,7 @@ public class CustomCrafterMultiblock extends Multiblock {
         public boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset) {
             if (world.isServer) {
                 Vec3i pos = getPos(Vec3i.ZERO);
-                MbGuiHandler.playerGUi.put(player.getUUID(), 2);
-                GuiTypes.CUSTOM_MULTIBLOCK.open(player, pos);
+                GuiTypes.CUSTOM_MULTIBLOCK_CRAFT.open(player, pos);
             }
             return true;
         }
