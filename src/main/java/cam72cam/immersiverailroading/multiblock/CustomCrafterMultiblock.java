@@ -127,10 +127,10 @@ public class CustomCrafterMultiblock extends Multiblock {
                     }
                 }
                 //Handle item output
-                if (def.outputPoint.equals(offset)) {
+                if (def.itemInputPoints.equals(offset)) {
                     if (def.redstoneControlPoint == null)
                         return;
-                    if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowOutput) {
+                    if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowItems) {
                         ItemStackHandler handler = getTile(Vec3i.ZERO).getContainer();
                         int slotIndex = handler.getSlotCount() - 1;
                         while (handler.get(slotIndex).getCount() == 0) {
@@ -139,12 +139,12 @@ public class CustomCrafterMultiblock extends Multiblock {
                                 return;
                             }
                         }
-                        world.dropItem(handler.extract(slotIndex, def.outputRatioBase, false),
-                                new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
+                        world.dropItem(handler.extract(slotIndex, def.itemOutputRatioBase, false),
+                                new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwPosition
                                         .rotateYaw((float) getTile(Vec3i.ZERO).getRotation())));
-                        if (ticks % 20 <= def.outputRatioMod) {
+                        if (ticks % 20 <= def.itemOutputRatioMod) {
                             world.dropItem(handler.extract(slotIndex, 1, false),
-                                    new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwOutputOffset
+                                    new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwPosition
                                             .rotateYaw(this.getRotation())));
                         }
                     }
@@ -164,7 +164,7 @@ public class CustomCrafterMultiblock extends Multiblock {
 
         @Override
         public boolean isItemOutputSlot(Vec3i offset, int slot) {
-            return def.outputPoint.equals(offset);
+            return def.itemOutputPoint.equals(offset);
         }
 
         @Override

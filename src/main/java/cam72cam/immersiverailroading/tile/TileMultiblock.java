@@ -39,6 +39,8 @@ public class TileMultiblock extends BlockEntityTickable {
     private String name;
     @TagField("craftMode")
     private CraftingMachineMode craftMode = CraftingMachineMode.STOPPED;
+    @TagField("isCustom")
+    protected boolean isCustom;
     private long ticks;
     private MultiblockInstance mb;
 
@@ -67,9 +69,10 @@ public class TileMultiblock extends BlockEntityTickable {
         this.offset = offset;
         this.replaced = replaced;
 
+        this.isCustom = this.getMultiblock() instanceof CustomTransporterMultiblock.TransporterMbInstance;
+
         //We want to use one tile to handle all inventory/tank, so here's a complex way of wrapping it...
-        if (this.getMultiblock() instanceof CustomTransporterMultiblock.TransporterMbInstance &&
-                !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance) this.getMultiblock()).def.center)) {
+        if (isCustom && !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance)this.getMultiblock()).def.center)) {
             //relative center
             Vec3i center = ((CustomTransporterMultiblock.TransporterMbInstance) this.getMultiblock()).def.center;
             //absolute center
@@ -99,6 +102,8 @@ public class TileMultiblock extends BlockEntityTickable {
     @Override
     public void update() {
         this.ticks += 1;
+
+        this.isCustom = this.getMultiblock() instanceof CustomTransporterMultiblock.TransporterMbInstance;
 
         if (tank.getCapacity() != 0) {
             ItemStack input = bucketContainer.get(0);
@@ -191,8 +196,8 @@ public class TileMultiblock extends BlockEntityTickable {
             tank.setCapacity(getMultiblock().getTankCapability(offset));
         }
 
-        if (this.getMultiblock() instanceof CustomTransporterMultiblock.TransporterMbInstance &&
-                !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance) this.getMultiblock()).def.center)) {
+        //We want to use one tile to handle all inventory/tank, so here's a complex way of wrapping it...
+        if (isCustom && !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance)this.getMultiblock()).def.center)) {
             //relative center
             Vec3i center = ((CustomTransporterMultiblock.TransporterMbInstance) this.getMultiblock()).def.center;
             //absolute center
@@ -241,6 +246,10 @@ public class TileMultiblock extends BlockEntityTickable {
 
     public double getRotation() {
         return 180 - Facing.EAST.rotate(rotation).getAngle();
+    }
+
+    public Rotation geFacing() {
+        return rotation;
     }
 
     /*
@@ -298,8 +307,8 @@ public class TileMultiblock extends BlockEntityTickable {
             return null;
         }
 
-        if (this.getMultiblock() instanceof CustomTransporterMultiblock.TransporterMbInstance &&
-                !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance) this.getMultiblock()).def.center)) {
+        //We want to use one tile to handle all inventory/tank, so here's a complex way of wrapping it...
+        if (isCustom && !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance)this.getMultiblock()).def.center)) {
             //relative center
             Vec3i center = ((CustomTransporterMultiblock.TransporterMbInstance) this.getMultiblock()).def.center;
             //absolute center
@@ -312,8 +321,7 @@ public class TileMultiblock extends BlockEntityTickable {
             container.setSize(getMultiblock().getInvSize(offset));
         }
 
-        MultiblockInstance instance = getMultiblock();
-        return instance.canInsertItem(offset, 0, null) ? this.container : null;
+        return getMultiblock().canInsertItem(offset, 0, null) ? this.container : null;
     }
 
     @Override
@@ -322,8 +330,8 @@ public class TileMultiblock extends BlockEntityTickable {
             return null;
         }
 
-        if (this.getMultiblock() instanceof CustomTransporterMultiblock.TransporterMbInstance &&
-                !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance) this.getMultiblock()).def.center)) {
+        //We want to use one tile to handle all inventory/tank, so here's a complex way of wrapping it...
+        if (isCustom && !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance)this.getMultiblock()).def.center)) {
             //relative center
             Vec3i center = ((CustomTransporterMultiblock.TransporterMbInstance) this.getMultiblock()).def.center;
             //absolute center
@@ -337,8 +345,7 @@ public class TileMultiblock extends BlockEntityTickable {
             tank.setCapacity(getMultiblock().getTankCapability(offset));
         }
 
-        MultiblockInstance instance = getMultiblock();
-        return instance.canReceiveFluid(offset) ? this.tank : null;
+        return getMultiblock().canReceiveFluid(offset) ? this.tank : null;
     }
 
     @Override

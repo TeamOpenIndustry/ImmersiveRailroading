@@ -39,11 +39,13 @@ public class MultiblockDefinition {
     public final int powerMaximumValue;
     public final DataBlock gui;
 
-    public final Vec3i outputPoint;
-    public final int outputRatioBase;
-    public final int outputRatioMod;
-    public final boolean allowThrowOutput;
-    public final Vec3d throwOutputOffset;
+    public final Vec3i itemOutputPoint;
+    public final int itemOutputRatioBase;
+    public final int itemOutputRatioMod;
+    public final Vec3i fluidOutputPoint;
+    public final boolean allowThrowItems;
+    public final Vec3d throwPosition;
+    public /*final*/ Vec3d initialVelocity;
     public final boolean useRedstoneControl;
     public final Vec3i redstoneControlPoint;
 
@@ -109,37 +111,38 @@ public class MultiblockDefinition {
         }
 
         DataBlock output = object.getBlock("output");
-        this.outputPoint = parseString(output.getValue("item_output_point").asString());
-        this.outputRatioBase = output.getValue("output_ratio_items_per_sec").asInteger() / 20;
-        this.outputRatioMod = output.getValue("output_ratio_items_per_sec").asInteger() % 20;
-        if(outputPoint != null){
-            this.allowThrowOutput = output.getValue("should_throw").asBoolean();
+        this.itemOutputPoint = parseString(output.getValue("item_output_point").asString());
+        this.itemOutputRatioBase = output.getValue("output_ratio_items_per_sec").asInteger() / 20;
+        this.itemOutputRatioMod = output.getValue("output_ratio_items_per_sec").asInteger() % 20;
+        this.fluidOutputPoint = parseString(output.getValue("fluid_output_point").asString());
+        if(itemOutputPoint != null){
+            this.allowThrowItems = output.getValue("should_throw").asBoolean();
             String str = output.getValue("offset").asString();
             switch (str){
                 case "+X":
-                    this.throwOutputOffset = new Vec3d(0,0,0.75);
+                    this.throwPosition = new Vec3d(0,0,0.75);
                     break;
                 case "+Y":
-                    this.throwOutputOffset = new Vec3d(0.75,0,0);
+                    this.throwPosition = new Vec3d(0.75,0,0);
                     break;
                 case "+Z":
-                    this.throwOutputOffset = new Vec3d(0,0.75,0);
+                    this.throwPosition = new Vec3d(0,0.75,0);
                     break;
                 case "-X":
-                    this.throwOutputOffset = new Vec3d(0,0,-0.75);
+                    this.throwPosition = new Vec3d(0,0,-0.75);
                     break;
                 case "-Y":
-                    this.throwOutputOffset = new Vec3d(-0.75,0,0);
+                    this.throwPosition = new Vec3d(-0.75,0,0);
                     break;
                 case "-Z":
-                    this.throwOutputOffset = new Vec3d(0,-0.75,0);
+                    this.throwPosition = new Vec3d(0,-0.75,0);
                     break;
                 default:
-                    this.throwOutputOffset = Vec3d.ZERO;
+                    this.throwPosition = Vec3d.ZERO;
             }
         } else {
-            this.allowThrowOutput = false;
-            this.throwOutputOffset = Vec3d.ZERO;
+            this.allowThrowItems = false;
+            this.throwPosition = Vec3d.ZERO;
         }
         this.useRedstoneControl = output.getValue("redstone_control").asBoolean();
         if(this.useRedstoneControl){

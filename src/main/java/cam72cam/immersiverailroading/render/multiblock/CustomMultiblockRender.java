@@ -29,9 +29,9 @@ public class CustomMultiblockRender implements IMultiblockRender {
         MultiblockModel model = refer.get(te.getName()).model;
         if(model != null){
             //translate back
-            Vec3i t = refer.get(te.getName()).center;
-            state.translate(new Vec3d(t.z, t.y, t.x).scale(-1));
-            state.translate(0,0, 2);
+            Vec3i t = refer.get(te.getName()).center.rotate(te.geFacing());
+            state.translate(-t.x, -t.y, -t.z);
+//            state.translate(0,0, t.);
             int temp = (int) (te.getRotation() - 90);
             state.rotate(temp, 0, 1, 0);
             switch (temp){

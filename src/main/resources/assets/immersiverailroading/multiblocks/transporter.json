@@ -35,15 +35,11 @@
 
     "output":{
         "item_output_point":"2,2,3",
+        "fluid_output_point": "2,2,3",
         "redstone_control":true,
         "redstone_control_point":"0,0,0",
         "should_throw": true,
         "offset": "-Z",
         "output_ratio_items_per_sec": 20
-    },
-
-    "properties":{
-        "power_limit_rf": 100000,
-        "enable_manual_interact": false
     }
 }
