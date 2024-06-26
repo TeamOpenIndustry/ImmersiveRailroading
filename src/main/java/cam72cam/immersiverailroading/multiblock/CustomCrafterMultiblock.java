@@ -69,7 +69,7 @@ public class CustomCrafterMultiblock extends Multiblock {
         public boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset) {
             if (world.isServer) {
                 Vec3i pos = getPos(Vec3i.ZERO);
-                GuiTypes.CUSTOM_MULTIBLOCK_CRAFT.open(player, pos);
+                GuiTypes.CUSTOM_TRANSPORT_MB_GUI.open(player, pos);
             }
             return true;
         }

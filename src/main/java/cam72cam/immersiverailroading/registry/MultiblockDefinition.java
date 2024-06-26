@@ -34,7 +34,6 @@ public class MultiblockDefinition {
     public final int inventoryWidth;
     public final int tankCapability;
     //For CRAFTER
-    //Unstable, DON'T USE!
     public final List<Vec3i> energyInputPoints;
     public final int powerMaximumValue;
     public final DataBlock gui;
@@ -45,7 +44,7 @@ public class MultiblockDefinition {
     public final Vec3i fluidOutputPoint;
     public final boolean allowThrowItems;
     public final Vec3d throwPosition;
-    public /*final*/ Vec3d initialVelocity;
+    public final Vec3d initialVelocity;
     public final boolean useRedstoneControl;
     public final Vec3i redstoneControlPoint;
 
@@ -69,7 +68,7 @@ public class MultiblockDefinition {
                 }
             }
         }
-        this.center = parseString(object.getValue("center").asString());
+        this.center = toVec3i(object.getValue("center").asString());
         if(!structure.containsKey(center)){
             throw new IllegalArgumentException("You must include the center block in the structure!");
         }
@@ -80,17 +79,17 @@ public class MultiblockDefinition {
         this.itemInputPoints = new LinkedList<>();
         List<DataBlock.Value> items = input.getValues("item_input_point");
         if (items != null) {
-            items.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::parseString).forEach(itemInputPoints::add);
+            items.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(itemInputPoints::add);
         }
         this.fluidInputPoints = new LinkedList<>();
         List<DataBlock.Value> fluids = input.getValues("fluid_input_point");
         if (fluids != null) {
-            fluids.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::parseString).forEach(fluidInputPoints::add);
+            fluids.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(fluidInputPoints::add);
         }
         this.energyInputPoints = new LinkedList<>();
         List<DataBlock.Value> energy = input.getValues("energy_input_point");
         if (energy != null) {
-            energy.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::parseString).forEach(energyInputPoints::add);
+            energy.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(energyInputPoints::add);
         }
         this.allowThrowInput = input.getValue("allow_throw").asBoolean();
         if(this.type == TRANSPORTER){
@@ -111,10 +110,11 @@ public class MultiblockDefinition {
         }
 
         DataBlock output = object.getBlock("output");
-        this.itemOutputPoint = parseString(output.getValue("item_output_point").asString());
+        this.itemOutputPoint = toVec3i(output.getValue("item_output_point").asString());
         this.itemOutputRatioBase = output.getValue("output_ratio_items_per_sec").asInteger() / 20;
         this.itemOutputRatioMod = output.getValue("output_ratio_items_per_sec").asInteger() % 20;
-        this.fluidOutputPoint = parseString(output.getValue("fluid_output_point").asString());
+        this.fluidOutputPoint = toVec3i(output.getValue("fluid_output_point").asString());
+        //Waiting for removal
         if(itemOutputPoint != null){
             this.allowThrowItems = output.getValue("should_throw").asBoolean();
             String str = output.getValue("offset").asString();
@@ -144,9 +144,10 @@ public class MultiblockDefinition {
             this.allowThrowItems = false;
             this.throwPosition = Vec3d.ZERO;
         }
+        this.initialVelocity = toVec3d(output.getValue("initial_velocity").asString());
         this.useRedstoneControl = output.getValue("redstone_control").asBoolean();
         if(this.useRedstoneControl){
-            this.redstoneControlPoint = parseString(output.getValue("redstone_control_point").asString());
+            this.redstoneControlPoint = toVec3i(output.getValue("redstone_control_point").asString());
         }else{
             this.redstoneControlPoint = null;
         }
@@ -159,7 +160,7 @@ public class MultiblockDefinition {
         }
     }
 
-    private static Vec3i parseString(String origin){
+    private static Vec3i toVec3i(String origin){
         if(origin == null)
             return null;
         String[] split = origin.split(",");
@@ -167,5 +168,15 @@ public class MultiblockDefinition {
             throw new IllegalArgumentException("Contains invalid vector: %s");
         }
         return new Vec3i(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
+    }
+
+    private static Vec3d toVec3d(String origin){
+        if(origin == null)
+            return null;
+        String[] split = origin.split(",");
+        if(split.length != 3){
+            throw new IllegalArgumentException("Contains invalid vector: %s");
+        }
+        return new Vec3d(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
     }
 }

@@ -36,26 +36,18 @@ public class CustomMultiblockContainer implements IContainer {
                     tile.getFluidContainer().getContents().getAmount() / (float) def.tankCapability);
 
             container.drawSlotOverlay(Fuzzy.BUCKET.example(), 1, slotY);
-            container.drawSlot(tile.getBucketContainer(), 0, 1, slotY);
-            container.drawSlot(tile.getBucketContainer(), 1,  1 + getSlotsX() * 16, slotY);
-
             String quantityStr = String.format("%s/%s", tile.getFluidContainer().getContents().getAmount(), def.tankCapability);
             container.drawCenteredString(quantityStr, 0, slotY);
-
-            if (tile.getContainer().getSlotCount() != 0) {
-                currY = container.drawSlotBlock(tile.getContainer(), 2, getSlotsX(), 0, currY);
-                currY = container.drawPlayerInventoryConnector(0, currY, getSlotsX());
-            } else {
-                currY = container.drawPlayerInventoryConnector(0, currY, getSlotsX());
-            }
         } else {
             currY = container.drawTopBar(0, currY, getSlotsX());
-            if (tile.getContainer().getSlotCount() != 0) {
-                currY = container.drawSlotBlock(tile.getContainer(), 0, getSlotsX(), 0, currY);
-                currY = container.drawPlayerInventoryConnector(0, currY, getSlotsX());
-            } else {
-                currY = container.drawPlayerInventoryConnector(0, currY, getSlotsX());
-            }
+        }
+        if (tile.getContainer().getSlotCount() != 0) {
+            System.out.println(tile.getContainer().getSlotCount());
+            System.out.println(tile.getMultiblock().getInvSize(null));
+            currY = container.drawSlotBlock(tile.getContainer(), 0, getSlotsX(), 0, currY);
+            currY = container.drawPlayerInventoryConnector(0, currY, getSlotsX());
+        } else {
+            currY = container.drawPlayerInventoryConnector(0, currY, getSlotsX());
         }
         currY = container.drawPlayerInventory(currY, getSlotsX());
     }

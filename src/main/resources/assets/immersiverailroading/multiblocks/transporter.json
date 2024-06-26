@@ -28,7 +28,7 @@
         "item_input_point":["2,0,0"],
         "fluid_input_point":["2,0,0"],
         "allow_throw":true,
-        "inventory_height": 0,
+        "inventory_height": 3,
         "inventory_width": 10,
         "tank_capability_mb": 20000
     },

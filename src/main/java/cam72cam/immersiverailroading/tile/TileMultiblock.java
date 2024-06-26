@@ -1,8 +1,6 @@
 package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
-import cam72cam.immersiverailroading.inventory.SlotFilter;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.multiblock.CustomTransporterMultiblock;
@@ -49,12 +47,10 @@ public class TileMultiblock extends BlockEntityTickable {
     private int craftProgress = 0;
     @TagField("craftItem")
     private ItemStack craftItem = ItemStack.EMPTY;
-    @TagField("container")
+    @TagField("defaultContainer")
     private ItemStackHandler container = new ItemStackHandler(0);
     @TagField("energyStorage")
     private Energy energy = new Energy(0, 1000);
-    @TagField("bucketContainer")
-    private FilteredStackHandler bucketContainer = new FilteredStackHandler(2);
     @TagField("tank")
     private FluidTank tank = new FluidTank(null, 0);
 
@@ -80,7 +76,6 @@ public class TileMultiblock extends BlockEntityTickable {
             //"center" tile
             TileMultiblock targetProxy = getWorld().getBlockEntity(pos, TileMultiblock.class);
             this.container = targetProxy.container;
-            this.bucketContainer = targetProxy.bucketContainer;
             this.tank = targetProxy.tank;
         }
         //Call this to refresh status
@@ -93,8 +88,6 @@ public class TileMultiblock extends BlockEntityTickable {
     public void load(TagCompound nbt) {
         container.onChanged(slot -> this.markDirty());
         container.setSlotLimit(slot -> getMultiblock().getSlotLimit(offset, slot));
-        bucketContainer.filter.put(0, SlotFilter.FLUID_CONTAINER);
-        bucketContainer.filter.put(1, SlotFilter.FLUID_CONTAINER);
         tank.onChanged(this::markDirty);
         energy.onChanged(this::markDirty);
     }
@@ -104,44 +97,6 @@ public class TileMultiblock extends BlockEntityTickable {
         this.ticks += 1;
 
         this.isCustom = this.getMultiblock() instanceof CustomTransporterMultiblock.TransporterMbInstance;
-
-        if (tank.getCapacity() != 0) {
-            ItemStack input = bucketContainer.get(0);
-
-            final ItemStack[] inputCopy = {input.copy()};
-            inputCopy[0].setCount(1);
-            ITank inputTank = ITank.getTank(inputCopy[0], (ItemStack stack) -> inputCopy[0] = stack);
-
-            if (input.getCount() > 0) {
-
-                for (Boolean doFill : new Boolean[]{false, true}) {
-                    boolean success;
-                    if (doFill) {
-                        success = tank.drain(inputTank, tank.getCapacity(), true) > 0;
-                    } else {
-                        success = tank.fill(inputTank, tank.getCapacity(), true) > 0;
-                    }
-
-                    if (success) {
-                        ItemStack out = inputCopy[0].copy();
-                        if (this.bucketContainer.insert(1, out, true).getCount() == 0) {
-                            if (doFill) {
-                                tank.drain(inputTank, tank.getCapacity(), false);
-                            } else {
-                                tank.fill(inputTank, tank.getCapacity(), false);
-                            }
-                                // Decrease input
-                            bucketContainer.extract(0, 1, false);
-
-                                // Increase output
-                                this.bucketContainer.insert(1, out, false);
-                                break;
-                        }
-                    }
-                }
-
-            }
-        }
 
         if (offset != null && getMultiblock() != null) {
             this.getMultiblock().tick(offset);
@@ -187,10 +142,6 @@ public class TileMultiblock extends BlockEntityTickable {
         return this.container;
     }
 
-    public ItemStackHandler getBucketContainer() {
-        return this.bucketContainer;
-    }
-
     public FluidTank getFluidContainer() {
         if (tank.getCapacity() != getMultiblock().getTankCapability(offset)) {
             tank.setCapacity(getMultiblock().getTankCapability(offset));
@@ -203,7 +154,6 @@ public class TileMultiblock extends BlockEntityTickable {
             //absolute center
             Vec3i pos = getMultiblock().getOrigin().add(center.rotate(rotation));
             TileMultiblock targetProxy = getWorld().getBlockEntity(pos, TileMultiblock.class);
-            this.bucketContainer = targetProxy.bucketContainer;
             this.tank = targetProxy.tank;
         }
 
@@ -337,7 +287,6 @@ public class TileMultiblock extends BlockEntityTickable {
             //absolute center
             Vec3i pos = getMultiblock().getOrigin().add(center.rotate(rotation));
             TileMultiblock targetProxy = getWorld().getBlockEntity(pos, TileMultiblock.class);
-            this.bucketContainer = targetProxy.bucketContainer;
             this.tank = targetProxy.tank;
         }
 

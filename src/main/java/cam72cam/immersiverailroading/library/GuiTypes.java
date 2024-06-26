@@ -31,7 +31,7 @@ public class GuiTypes {
     public static final BlockGUI CASTING = GuiRegistry.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);
     public static final BlockGUI PLATE_ROLLER = CASTING;
     public static final BlockGUI CUSTOM_MULTIBLOCK_TRANSPORT = GuiRegistry.registerBlockContainer(TileMultiblock.class, CustomMultiblockContainer::new);
-    public static final BlockGUI CUSTOM_MULTIBLOCK_CRAFT = GuiRegistry.registerBlock(TileMultiblock.class, CustomMultiblockScreen::new);
+    public static final BlockGUI CUSTOM_TRANSPORT_MB_GUI = GuiRegistry.registerBlock(TileMultiblock.class, CustomTransportMultiblockScreen::new);
     private static IScreen createMultiblockScreen(TileMultiblock mb) {
         if (!mb.isLoaded()) {
             return null;
