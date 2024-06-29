@@ -34,12 +34,13 @@
     },
 
     "output":{
-        "item_output_point":"2,2,3",
-        "fluid_output_point": "2,2,3",
+        "item_output_point":"4,4,5",
+        "fluid_output_point":"2,3,3",
         "redstone_control":true,
         "redstone_control_point":"0,0,0",
+        "auto_fill": true,
         "should_throw": true,
-        "offset": "-Z",
-        "output_ratio_items_per_sec": 20
+        "initial_velocity": "6,2,6",
+        "output_ratio_items_per_sec": 5
     }
 }

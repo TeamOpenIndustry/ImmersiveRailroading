@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.multiblock;
 
-import cam72cam.immersiverailroading.entity.CarTank;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -16,9 +15,9 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+
+import static cam72cam.immersiverailroading.render.multiblock.CustomMultiblockRender.*;
 
 public class CustomTransporterMultiblock extends Multiblock {
     /*TODO:
@@ -29,16 +28,17 @@ public class CustomTransporterMultiblock extends Multiblock {
      */
     private final MultiblockDefinition def;
     private static final List<Vec3i> fluidOutputPositions;
-    private static final CarTank nullTank = new CarTank();
     public static final HashMap<Vec3i, MultiblockPackage> packages;
 
     static {
         fluidOutputPositions = new ArrayList<>();
         packages = new HashMap<>();
-        for (int x = -4; x <= 4; x++) {//Store the possible relative poses for fluid output in order to avoid more search
-            for (int z = -4; z <= 4; z++) {
-                if (x * x + z * z <= 16) {//Radius == 4
-                    fluidOutputPositions.add(new Vec3i(x, 0, z));
+        for (int x = -6; x <= 6; x++) {//Store the possible relative poses for fluid output in order to avoid more calculation
+            for (int y = 0; y > -8; y--) {
+                for (int z = -6; z <= 6; z++) {
+                    if (x * x + z * z <= 36) {//Radius == 6
+                        fluidOutputPositions.add(new Vec3i(x, y, z));
+                    }
                 }
             }
         }
@@ -82,7 +82,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
     @Override
     protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
-        packages.put(origin.add(def.center.rotate(rot)), new MultiblockPackage());
+        packages.put(origin.add(def.center.rotate(rot)), new MultiblockPackage(this.def));
         return new TransporterMbInstance(world, origin, rot, this.def);
     }
 
@@ -94,6 +94,7 @@ public class CustomTransporterMultiblock extends Multiblock {
         public TransporterMbInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
             super(world, origin, rot);
             this.def = def;
+            packages.get(getPos(def.center)).refreshSelf(this);
         }
 
         @Override
@@ -156,11 +157,15 @@ public class CustomTransporterMultiblock extends Multiblock {
                         }
                     }
                 }
+
                 //Handle item output
-                if (def.itemOutputPoint.equals(offset)) {
-                    if (def.redstoneControlPoint == null)
-                        return;
-                    if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowItems) {
+                if (def.center.equals(offset)) {
+                    if (def.redstoneControlPoint == null) {
+                        if (def.useRedstoneControl)
+                            return;
+
+                    }
+                    if (def.redstoneControlPoint == null || world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowItems) {
                         ItemStackHandler handler = getTile(def.center).getContainer();
                         int slotIndex = handler.getSlotCount() - 1;
                         while (handler.get(slotIndex).getCount() == 0) {
@@ -169,48 +174,32 @@ public class CustomTransporterMultiblock extends Multiblock {
                                 return;
                             }
                         }
-//                        world.dropItem(handler.extract(slotIndex, def.itemOutputRatioBase, false), new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwPosition.rotateYaw(this.getRotation())), def.initialVelocity.rotateYaw(this.getRotation()));
+                        Vec3d vec3d = new Vec3d(def.itemOutputPoint.internal());
+                        switch ((int) (this.getRotation() + 90)) {
+                            case 180:
+                                vec3d = vec3d.add(-1, 0, -1);
+                                break;
+                            case 90:
+                                vec3d = vec3d.add(east);
+                                break;
+                            case -90:
+                                vec3d = vec3d.add(west);
+                        }
                         world.dropItem(handler.extract(slotIndex, def.itemOutputRatioBase, false),
-                                new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwPosition
-                                        .rotateYaw(this.getRotation())));
-                        if (ticks % 20 <= def.itemOutputRatioMod) {
+                                vec3d.rotateYaw(this.getRotation() + 90).add(origin),
+                                def.initialVelocity.rotateYaw(this.getRotation() + 90).scale(0.05));
+                        if (ticks % 20 <= 0) {
                             world.dropItem(handler.extract(slotIndex, 1, false),
-                                    new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwPosition
-                                            .rotateYaw(this.getRotation())));
+                                    vec3d.rotateYaw(this.getRotation() + 90).add(origin),
+                                    def.initialVelocity.rotateYaw(this.getRotation() + 90).scale(0.05));
                         }
                     }
                 }
             }
 
             //Handle fluid output
-            if (def.fluidOutputPoint != null && def.fluidOutputPoint.equals(offset) && world.isServer && ticks % 10 == 0) {
-                MultiblockPackage pack = packages.get(getPos(def.center));
-                final HashMap<String, FreightTank> refreshStockMap = new HashMap<>();
-                final HashMap<String, String> refreshGuiMap = new HashMap<>();
-                for (Vec3i position : fluidOutputPositions) {
-                    position = position.add(getPos(offset));
-                    for (int i = 0; i < 8; i++) {
-                        //What if we add an event that is fired when the track map is updated...
-                        TileRailBase tile = world.getBlockEntity(position.subtract(0, i, 0), TileRailBase.class);
-                        if (tile != null) {
-                            EntityRollingStock tank = tile.getStockOverhead();
-                            if (tank instanceof FreightTank && ((FreightTank) tank).getCurrentSpeed().metric() <= 1) {
-                                refreshStockMap.put(tank.getDefinition().name() + "_" + tank.getUUID().toString().substring(0,6),
-                                        (FreightTank) tank);
-                                refreshGuiMap.put(tank.getDefinition().name() + "_" + tank.getUUID().toString().substring(0,6),
-                                        tank.getDefinition().name() + "_" + tank.getUUID().toString().substring(0,6));
-                            }
-                        }
-                    }
-                }
-                pack.stockMap = refreshStockMap;
-                pack.guiMap = refreshGuiMap;
-                if(pack.target != null && pack.target != nullTank){
-                    getTile(def.center).getFluidContainer().fill(pack.target.theTank, 300, false);
-                }
-                if(!pack.stockMap.containsValue(pack.target)){
-                    pack.target = nullTank;
-                }
+            if (def.fluidOutputPoint != null && def.center.equals(offset) && world.isServer && ticks % 10 == 0) {
+                packages.get(getPos(def.center)).refreshSelf(this);
             }
         }
 
@@ -226,7 +215,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
         @Override
         public boolean isItemOutputSlot(Vec3i offset, int slot) {
-            return def.itemOutputPoint.equals(offset);
+            return def.itemOutputPoint.equals(new Vec3d(offset));
         }
 
         @Override
@@ -250,13 +239,84 @@ public class CustomTransporterMultiblock extends Multiblock {
         }
     }
 
-    public class MultiblockPackage{
+    public static class MultiblockPackage {
         public HashMap<String, FreightTank> stockMap = new HashMap<>();
-        public HashMap<String, String > guiMap = new HashMap<>();
+        public HashMap<String, String> guiMap = new HashMap<>();
+        public List<Vec3i> trackList = new LinkedList<>();
         public FreightTank target;
+        public int status = 0;//0 is N/A, 1 is true, 2 is false
+        public boolean autoFill = false;
+
+        public MultiblockPackage(MultiblockDefinition def) {
+            if(def.autoFillTanks.equals("true")){
+                status = 1;
+                autoFill = true;
+            }else if(def.autoFillTanks.equals("false")){
+                status = 2;
+            }
+        }
 
         public void setTarget(String name) {
-            this.target = stockMap.getOrDefault(name, nullTank);
+            this.target = stockMap.getOrDefault(name, null);
+        }
+
+        public boolean setAutoFill(boolean drain) {
+            if(status == 0) {
+                this.autoFill = drain;
+                return true;
+            }
+            return false;
+        }
+
+        public void refreshSelf(TransporterMbInstance instance) {
+            final HashMap<String, FreightTank> refreshStockMap = new HashMap<>();
+            final HashMap<String, String> refreshGuiMap = new HashMap<>();
+            final List<Vec3i> refreshTrackList = new LinkedList<>();
+            final Vec3i absPos = instance.getPos(instance.def.fluidOutputPoint);
+            final Rotation rot1 = instance.rot == Rotation.COUNTERCLOCKWISE_90
+                    ? Rotation.CLOCKWISE_90
+                    : instance.rot == Rotation.CLOCKWISE_90
+                    ? Rotation.COUNTERCLOCKWISE_90
+                    : instance.rot;//Rotate it back
+
+            //What if we add an event that is fired when the track map is updated...
+            for (Vec3i position : fluidOutputPositions) {
+                position = position.add(absPos);
+                TileRailBase tile = instance.world.getBlockEntity(position, TileRailBase.class);
+                if (tile != null) {
+                    refreshTrackList.add(position.subtract(instance.getPos(Vec3i.ZERO)).rotate(rot1));
+                    EntityRollingStock tank = tile.getStockOverhead();
+                    if (tank instanceof FreightTank && ((FreightTank) tank).getCurrentSpeed().metric() <= 1) {
+                        refreshStockMap.put(tank.getDefinition().name() + "_" + tank.getUUID().toString().substring(0, 6),
+                                (FreightTank) tank);
+                        refreshGuiMap.put(tank.getDefinition().name() + "_" + tank.getUUID().toString().substring(0, 6),
+                                tank.getDefinition().name() + "_" + tank.getUUID().toString().substring(0, 6));
+                    }
+                }
+            }
+
+            this.stockMap = refreshStockMap;
+            this.guiMap = refreshGuiMap;
+            this.trackList = refreshTrackList;
+
+            if (instance.def.autoFillTanks == null) {//Controlled by gui
+                if (autoFill) {
+                    this.stockMap.values().forEach(stock ->
+                            instance.getTile(instance.def.center).getFluidContainer().fill(stock.theTank, 300, false));
+                } else if (this.target != null) {
+                    instance.getTile(instance.def.center).getFluidContainer().fill(this.target.theTank, 300, false);
+                }
+            } else {//Controlled by json
+                if (instance.def.autoFillTanks.equals("true")) {
+                    this.stockMap.values().forEach(stock ->
+                            instance.getTile(instance.def.center).getFluidContainer().fill(stock.theTank, 300, false));
+                } else if (instance.def.autoFillTanks.equals("false")) {
+                    instance.getTile(instance.def.center).getFluidContainer().fill(this.target.theTank, 300, false);
+                }
+            }
+            if (!this.stockMap.containsValue(this.target)) {
+                this.target = null;
+            }
         }
     }
 }

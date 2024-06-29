@@ -127,7 +127,7 @@ public class CustomCrafterMultiblock extends Multiblock {
                     }
                 }
                 //Handle item output
-                if (def.itemInputPoints.equals(offset)) {
+                if (def.center.equals(offset)) {
                     if (def.redstoneControlPoint == null)
                         return;
                     if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowItems) {
@@ -140,12 +140,10 @@ public class CustomCrafterMultiblock extends Multiblock {
                             }
                         }
                         world.dropItem(handler.extract(slotIndex, def.itemOutputRatioBase, false),
-                                new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwPosition
-                                        .rotateYaw((float) getTile(Vec3i.ZERO).getRotation())));
+                                def.itemOutputPoint.rotateYaw(this.getRotation()));
                         if (ticks % 20 <= def.itemOutputRatioMod) {
                             world.dropItem(handler.extract(slotIndex, 1, false),
-                                    new Vec3d(getPos(offset)).add(new Vec3d(0.5, 0.5, 0.5)).add(def.throwPosition
-                                            .rotateYaw(this.getRotation())));
+                                    def.itemOutputPoint.rotateYaw(this.getRotation()));
                         }
                     }
                 }

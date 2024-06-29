@@ -38,12 +38,12 @@ public class MultiblockDefinition {
     public final int powerMaximumValue;
     public final DataBlock gui;
 
-    public final Vec3i itemOutputPoint;
+    public final Vec3d itemOutputPoint;
     public final int itemOutputRatioBase;
     public final int itemOutputRatioMod;
     public final Vec3i fluidOutputPoint;
     public final boolean allowThrowItems;
-    public final Vec3d throwPosition;
+    public final String autoFillTanks;
     public final Vec3d initialVelocity;
     public final boolean useRedstoneControl;
     public final Vec3i redstoneControlPoint;
@@ -69,11 +69,9 @@ public class MultiblockDefinition {
             }
         }
         this.center = toVec3i(object.getValue("center").asString());
-        if(!structure.containsKey(center)){
+        if (!structure.containsKey(center)) {
             throw new IllegalArgumentException("You must include the center block in the structure!");
         }
-        this.model = new MultiblockModel(object.getValue("model").asIdentifier(), 0);
-        CustomMultiblockRender.addDef(this);
 
         DataBlock input = object.getBlock("input");
         this.itemInputPoints = new LinkedList<>();
@@ -92,17 +90,17 @@ public class MultiblockDefinition {
             energy.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(energyInputPoints::add);
         }
         this.allowThrowInput = input.getValue("allow_throw").asBoolean();
-        if(this.type == TRANSPORTER){
+        if (this.type == TRANSPORTER) {
             this.inventoryHeight = input.getValue("inventory_height").asInteger();
             this.inventoryWidth = input.getValue("inventory_width").asInteger();
             this.tankCapability = input.getValue("tank_capability_mb").asInteger();
             this.powerMaximumValue = 0;
-        }else if(this.type == CRAFTER){
-            this.powerMaximumValue = input.getValue("power_limit_rf").asInteger();
+        } else if (this.type == CRAFTER) {
             this.inventoryHeight = 0;
             this.inventoryWidth = 0;
             this.tankCapability = 0;
-        }else{//DETECTOR
+            this.powerMaximumValue = input.getValue("power_limit_rf").asInteger();
+        } else {//DETECTOR
             this.inventoryHeight = 0;
             this.inventoryWidth = 0;
             this.tankCapability = 0;
@@ -110,71 +108,60 @@ public class MultiblockDefinition {
         }
 
         DataBlock output = object.getBlock("output");
-        this.itemOutputPoint = toVec3i(output.getValue("item_output_point").asString());
+        this.itemOutputPoint = toVec3d(output.getValue("item_output_point").asString());
         this.itemOutputRatioBase = output.getValue("output_ratio_items_per_sec").asInteger() / 20;
         this.itemOutputRatioMod = output.getValue("output_ratio_items_per_sec").asInteger() % 20;
         this.fluidOutputPoint = toVec3i(output.getValue("fluid_output_point").asString());
-        //Waiting for removal
-        if(itemOutputPoint != null){
+        if (itemOutputPoint != null) {
             this.allowThrowItems = output.getValue("should_throw").asBoolean();
-            String str = output.getValue("offset").asString();
-            switch (str){
-                case "+X":
-                    this.throwPosition = new Vec3d(0,0,0.75);
-                    break;
-                case "+Y":
-                    this.throwPosition = new Vec3d(0.75,0,0);
-                    break;
-                case "+Z":
-                    this.throwPosition = new Vec3d(0,0.75,0);
-                    break;
-                case "-X":
-                    this.throwPosition = new Vec3d(0,0,-0.75);
-                    break;
-                case "-Y":
-                    this.throwPosition = new Vec3d(-0.75,0,0);
-                    break;
-                case "-Z":
-                    this.throwPosition = new Vec3d(0,-0.75,0);
-                    break;
-                default:
-                    this.throwPosition = Vec3d.ZERO;
+            this.initialVelocity = toVec3d(output.getValue("initial_velocity").asString());
+
+            this.useRedstoneControl = output.getValue("redstone_control").asBoolean();
+            if (this.useRedstoneControl) {
+                this.redstoneControlPoint = toVec3i(output.getValue("redstone_control_point").asString());
+            } else {
+                this.redstoneControlPoint = null;
             }
         } else {
             this.allowThrowItems = false;
-            this.throwPosition = Vec3d.ZERO;
-        }
-        this.initialVelocity = toVec3d(output.getValue("initial_velocity").asString());
-        this.useRedstoneControl = output.getValue("redstone_control").asBoolean();
-        if(this.useRedstoneControl){
-            this.redstoneControlPoint = toVec3i(output.getValue("redstone_control_point").asString());
-        }else{
+            this.initialVelocity = Vec3d.ZERO;
+            this.useRedstoneControl = false;
             this.redstoneControlPoint = null;
         }
 
+        if (this.fluidOutputPoint != null && output.getValue("auto_fill") != null) {
+            this.autoFillTanks = output.getValue("auto_fill").asBoolean().toString();
+        } else {
+            this.autoFillTanks = null;
+        }
+
         DataBlock properties = object.getBlock("properties");
-        if(this.type == CRAFTER){
+        if (this.type == CRAFTER) {
             this.gui = CAML.parse(properties.getValue("gui").asIdentifier().getResourceStream());
-        }else{
+        } else {
             this.gui = null;
         }
+
+        //Put these at the bottom as them use the properties above
+        this.model = new MultiblockModel(object.getValue("model").asIdentifier(), 0, this);
+        CustomMultiblockRender.addDef(this);
     }
 
-    private static Vec3i toVec3i(String origin){
-        if(origin == null)
+    private static Vec3i toVec3i(String origin) {
+        if (origin == null)
             return null;
         String[] split = origin.split(",");
-        if(split.length != 3){
+        if (split.length != 3) {
             throw new IllegalArgumentException("Contains invalid vector: %s");
         }
         return new Vec3i(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
     }
 
-    private static Vec3d toVec3d(String origin){
-        if(origin == null)
+    private static Vec3d toVec3d(String origin) {
+        if (origin == null)
             return null;
         String[] split = origin.split(",");
-        if(split.length != 3){
+        if (split.length != 3) {
             throw new IllegalArgumentException("Contains invalid vector: %s");
         }
         return new Vec3d(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
