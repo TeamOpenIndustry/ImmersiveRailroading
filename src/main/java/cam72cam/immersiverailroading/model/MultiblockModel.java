@@ -44,7 +44,7 @@ public class MultiblockModel extends OBJModel {
             });
         }
 
-        for (Vec3i input : def.fluidInputPoints) {
+        for (Vec3i input : def.fluidHandlePoints) {
             frames.addCustom((s, t1) -> {
                 RenderState state1 = s.lighting(true).lightmap(1,1).translate(-input.x, input.y, -input.z);
                 try (VBO.Binding vbo = fluid_input.binder().bind(state1)) {

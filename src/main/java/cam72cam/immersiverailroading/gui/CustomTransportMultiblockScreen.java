@@ -24,7 +24,6 @@ public class CustomTransportMultiblockScreen implements IScreen {
     private ListSelector<String> tankSelector;
 
     private String name;
-    private String tankType;
     private final Map<String, Pair<ItemStack, Integer>> map = new HashMap<>();
 
     public CustomTransportMultiblockScreen(TileMultiblock tile) {
@@ -41,48 +40,98 @@ public class CustomTransportMultiblockScreen implements IScreen {
     @Override
     public void init(IScreenBuilder screen) {
         CustomTransporterMultiblock.MultiblockPackage pack = CustomTransporterMultiblock.packages.get(tile.getPos());
+
         tankSelector = new ListSelector<String>(screen, (int) (GUIHelpers.getScreenWidth() / 2d - GUIHelpers.getScreenWidth() / 2.3d + 130),
                 180, 20, "null", pack.guiMap) {
             @Override
             public void onClick(String option) {
-                pack.setTarget(option);
-            }
-        };
-        Button selectButton = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4,
-                120, 20, "Select output target") {
-            @Override
-            public void onClick(Player.Hand hand) {
-                tankSelector.setVisible(!tankSelector.isVisible());
-            }
-        };
-        Button autoFillTanks = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4 + 20,
-                120, 20, "Enable auto drain") {
-            @Override
-            public void onClick(Player.Hand hand) {
-                if(this.getText().equals("Enable auto fill")){
-                    if(pack.setAutoFill(true)) {
-                        selectButton.setEnabled(false);
-                        tankSelector.setVisible(false);
-                        this.setText("Disable auto fill");
-                    }
-                }else{
-                    if (pack.setAutoFill(false)) {
-                        selectButton.setEnabled(true);
-                        this.setText("Enable auto fill");
-                    }
-                }
+                pack.setTargetTank(option);
             }
         };
 
-        if(pack.status == 1){
-            autoFillTanks.setText("Auto fill enabled");
-            autoFillTanks.setEnabled(false);
-            selectButton.setEnabled(false);
-        }else if(pack.status == 2){
-            autoFillTanks.setText("Auto fill disabled");
-            autoFillTanks.setEnabled(false);
-        }else if(pack.autoFill){
-            autoFillTanks.onClick(null);
+        if (def.isFluidToStocks) {
+            //Outputs
+            Button outputSelectButton = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4,
+                    120, 20, "Select fill target") {
+                @Override
+                public void onClick(Player.Hand hand) {
+                    tankSelector.setVisible(!tankSelector.isVisible());
+                }
+            };
+            Button autoFillTanks = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4 + 20,
+                    120, 20, "Enable auto fill") {
+                @Override
+                public void onClick(Player.Hand hand) {
+                    if (this.getText().equals("Enable auto fill")) {
+                        if (pack.setAutoInteract(true)) {
+                            outputSelectButton.setEnabled(false);
+                            tankSelector.setVisible(false);
+                            this.setText("Disable auto fill");
+                        }
+                    } else {
+                        if (pack.setAutoInteract(false)) {
+                            outputSelectButton.setEnabled(true);
+                            this.setText("Enable auto fill");
+                        }
+                    }
+                }
+            };
+
+            if (pack.fluidStatus == 1) {//Enable locked
+                autoFillTanks.setText("Auto fill enabled");
+                autoFillTanks.setEnabled(false);
+                outputSelectButton.setEnabled(false);
+            } else if (pack.fluidStatus == 2) {//Disable locked
+                autoFillTanks.setText("Auto fill disabled");
+                autoFillTanks.setEnabled(false);
+            } else if (pack.autoInteract) {//Isn't locked and need refresh
+                autoFillTanks.onClick(null);
+            }
+
+            screen.addButton(outputSelectButton);
+            screen.addButton(autoFillTanks);
+
+        } else {//Inputs
+
+            Button inputSelectButton = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4,
+                    120, 20, "Select drain source") {
+                @Override
+                public void onClick(Player.Hand hand) {
+                    tankSelector.setVisible(!tankSelector.isVisible());
+                }
+            };
+            Button autoDrainTanks = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4 + 20,
+                    120, 20, "Enable auto drain") {
+                @Override
+                public void onClick(Player.Hand hand) {
+                    if (this.getText().equals("Enable auto drain")) {
+                        if (pack.setAutoInteract(true)) {
+                            inputSelectButton.setEnabled(false);
+                            tankSelector.setVisible(false);
+                            this.setText("Disable auto drain");
+                        }
+                    } else {
+                        if (pack.setAutoInteract(false)) {
+                            inputSelectButton.setEnabled(true);
+                            this.setText("Enable auto drain");
+                        }
+                    }
+                }
+            };
+
+            if (pack.fluidStatus == 1) {//Enable locked
+                autoDrainTanks.setText("Auto drain enabled");
+                autoDrainTanks.setEnabled(false);
+                inputSelectButton.setEnabled(false);
+            } else if (pack.fluidStatus == 2) {//Disable locked
+                autoDrainTanks.setText("Auto drain disabled");
+                autoDrainTanks.setEnabled(false);
+            } else if (pack.autoInteract) {//Isn't locked and need refresh
+                inputSelectButton.onClick(null);
+            }
+
+            screen.addButton(inputSelectButton);
+            screen.addButton(autoDrainTanks);
         }
 
         Button delete = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4 + 40,
@@ -93,12 +142,11 @@ public class CustomTransportMultiblockScreen implements IScreen {
                         tile.getFluidContainer().getCapacity()), false);
             }
         };
-        screen.addButton(selectButton);
-        screen.addButton(autoFillTanks);
+
         screen.addButton(delete);
+
+        //Strings initialization
         name = ("Name: " + def.name + "#" + (String.valueOf(tile.hashCode()).substring(0, 4)));
-        String fluidType = tile.getFluidContainer().getContents().getFluid().ident;
-        tankType = ("Fluid: " + (fluidType.equals("empty") ? "null" : fluidType));
     }
 
     @Override
@@ -121,14 +169,15 @@ public class CustomTransportMultiblockScreen implements IScreen {
                 GUIHelpers.getScreenHeight() / 4d, 0.5);
         GUIHelpers.drawCenteredString(name, 0, 0, 0xFFFFFF, mat2);
         mat2.translate(0, 20, 0);
-        GUIHelpers.drawCenteredString(tankType, 0, 0, 0xFFFFFF, mat2);
+        String fluidType = tile.getFluidContainer().getContents().getFluid().ident.toLowerCase();
+        GUIHelpers.drawCenteredString("Fluid: " + (fluidType.equals("empty") ? "null" : fluidType),
+                0, 0, 0xFFFFFF, mat2);
         mat2.translate(0, 20, 0);
         GUIHelpers.drawCenteredString("Tank: " + tile.getFluidContainer().getContents().getAmount() + "/" + def.tankCapability,
                 0, 0, 0xFFFFFF, mat2);
 
         matrix4.translate(GUIHelpers.getScreenWidth() / 16d + 150, GUIHelpers.getScreenHeight() / 16d, 0.5);
         Matrix4 matrix41 = matrix4.copy();
-        //That's weird
         if (tankSelector != null && !tankSelector.isVisible()) {
             map.clear();
             for (int i = 0; i < tile.getContainer().getSlotCount(); i++) {

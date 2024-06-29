@@ -3,16 +3,11 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.library.MultiblockTypes;
 import cam72cam.immersiverailroading.model.MultiblockModel;
 import cam72cam.immersiverailroading.render.multiblock.CustomMultiblockRender;
-import cam72cam.immersiverailroading.util.CAML;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-
-import static cam72cam.immersiverailroading.library.MultiblockTypes.*;
+import java.util.*;
 
 public class MultiblockDefinition {
     public final String mbID;
@@ -26,44 +21,63 @@ public class MultiblockDefinition {
     public final Vec3i center;
     public final MultiblockModel model;//-x is left, +y is front, origin in blender is origin in game
 
+    //items
     public final List<Vec3i> itemInputPoints;
-    public final List<Vec3i> fluidInputPoints;
-    public final boolean allowThrowInput;
-    //For TRANSPORTERS
+    public final Vec3d itemOutputPoint;
     public final int inventoryHeight;
     public final int inventoryWidth;
-    public final int tankCapability;
-    //For CRAFTER
-    public final List<Vec3i> energyInputPoints;
-    public final int powerMaximumValue;
-    public final DataBlock gui;
-
-    public final Vec3d itemOutputPoint;
     public final int itemOutputRatioBase;
     public final int itemOutputRatioMod;
-    public final Vec3i fluidOutputPoint;
-    public final boolean allowThrowItems;
-    public final String autoFillTanks;
+    public final boolean allowThrowInput;
+    public final boolean allowThrowOutput;
     public final Vec3d initialVelocity;
     public final boolean useRedstoneControl;
     public final Vec3i redstoneControlPoint;
 
+    //fluids
+    public final List<Vec3i> fluidHandlePoints;
+    public final Set<Vec3i> possibleTrackPositions;
+    public final int tankCapability;
+    public final boolean isFluidToStocks;//true is from pipe to stock, false is the opposite
+    public final String autoInteractWithStocks;
+//    public final List<Vec3i> energyInputPoints;
+//    public final int powerMaximumValue;
+//    public final DataBlock gui;
+
+
+    private static final List<Vec3i> fluidOutputPositions;//All relative possible positions for searching
+
+    static {
+        fluidOutputPositions = new ArrayList<>();
+        for (int x = -6; x <= 6; x++) {//Store the possible relative poses for fluid output in order to avoid more calculation
+            for (int y = 0; y > -8; y--) {
+                for (int z = -6; z <= 6; z++) {
+                    if (x * x + z * z <= 36) {//Radius == 6
+                        fluidOutputPositions.add(new Vec3i(x, y, z));
+                    }
+                }
+            }
+        }
+    }
+
     MultiblockDefinition(String multiblockID, DataBlock object) throws Exception {
+        //Standards
         this.mbID = multiblockID;
-        this.name = object.getValue("name").asString().toUpperCase();
+        this.name = object.getValue("name").asString();
         this.type = MultiblockTypes.valueOf(object.getValue("type").asString());
 
+        //Structure
         this.length = object.getValue("length").asInteger();
         this.height = object.getValue("height").asInteger();
         this.width = object.getValue("width").asInteger();
         this.structure = new HashMap<>();
-        DataBlock blocks = object.getBlock("structure");
+        DataBlock struct = object.getBlock("structure");
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < length; z++) {
                     String vec = String.format("%s,%s,%s", x, y, z);
-                    if (blocks.getValue(vec).asString() != null) {
-                        structure.put(new Vec3i(x, y, z), blocks.getValue(vec).asString());
+                    if (struct.getValue(vec).asString() != null) {
+                        structure.put(new Vec3i(x, y, z), struct.getValue(vec).asString());
                     }
                 }
             }
@@ -73,73 +87,77 @@ public class MultiblockDefinition {
             throw new IllegalArgumentException("You must include the center block in the structure!");
         }
 
-        DataBlock input = object.getBlock("input");
+        DataBlock item = object.getBlock("item");
         this.itemInputPoints = new LinkedList<>();
-        List<DataBlock.Value> items = input.getValues("item_input_point");
-        if (items != null) {
-            items.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(itemInputPoints::add);
-        }
-        this.fluidInputPoints = new LinkedList<>();
-        List<DataBlock.Value> fluids = input.getValues("fluid_input_point");
-        if (fluids != null) {
-            fluids.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(fluidInputPoints::add);
-        }
-        this.energyInputPoints = new LinkedList<>();
-        List<DataBlock.Value> energy = input.getValues("energy_input_point");
-        if (energy != null) {
-            energy.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(energyInputPoints::add);
-        }
-        this.allowThrowInput = input.getValue("allow_throw").asBoolean();
-        if (this.type == TRANSPORTER) {
-            this.inventoryHeight = input.getValue("inventory_height").asInteger();
-            this.inventoryWidth = input.getValue("inventory_width").asInteger();
-            this.tankCapability = input.getValue("tank_capability_mb").asInteger();
-            this.powerMaximumValue = 0;
-        } else if (this.type == CRAFTER) {
-            this.inventoryHeight = 0;
-            this.inventoryWidth = 0;
-            this.tankCapability = 0;
-            this.powerMaximumValue = input.getValue("power_limit_rf").asInteger();
-        } else {//DETECTOR
-            this.inventoryHeight = 0;
-            this.inventoryWidth = 0;
-            this.tankCapability = 0;
-            this.powerMaximumValue = 0;
-        }
+        if (item != null) {
+            List<DataBlock.Value> itemInputPoint = item.getValues("item_input_point");
+            if (itemInputPoint != null) {
+                itemInputPoint.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(itemInputPoints::add);
+            }
+            this.allowThrowInput = item.getValue("allow_throw_input").asBoolean();
+            this.inventoryHeight = item.getValue("inventory_height").asInteger();
+            this.inventoryWidth = item.getValue("inventory_width").asInteger();
+            this.itemOutputPoint = toVec3d(item.getValue("item_output_point").asString());
+            this.itemOutputRatioBase = item.getValue("output_ratio_items_per_sec").asInteger() / 20;
+            this.itemOutputRatioMod = item.getValue("output_ratio_items_per_sec").asInteger() % 20;
 
-        DataBlock output = object.getBlock("output");
-        this.itemOutputPoint = toVec3d(output.getValue("item_output_point").asString());
-        this.itemOutputRatioBase = output.getValue("output_ratio_items_per_sec").asInteger() / 20;
-        this.itemOutputRatioMod = output.getValue("output_ratio_items_per_sec").asInteger() % 20;
-        this.fluidOutputPoint = toVec3i(output.getValue("fluid_output_point").asString());
-        if (itemOutputPoint != null) {
-            this.allowThrowItems = output.getValue("should_throw").asBoolean();
-            this.initialVelocity = toVec3d(output.getValue("initial_velocity").asString());
+            if (itemOutputPoint != null) {
+                this.allowThrowOutput = item.getValue("should_throw_output").asBoolean();
+                this.initialVelocity = toVec3d(item.getValue("initial_velocity").asString());
 
-            this.useRedstoneControl = output.getValue("redstone_control").asBoolean();
-            if (this.useRedstoneControl) {
-                this.redstoneControlPoint = toVec3i(output.getValue("redstone_control_point").asString());
+                this.useRedstoneControl = item.getValue("redstone_control").asBoolean();
+                if (this.useRedstoneControl) {
+                    this.redstoneControlPoint = toVec3i(item.getValue("redstone_control_point").asString());
+                } else {
+                    this.redstoneControlPoint = null;
+                }
             } else {
+                this.allowThrowOutput = false;
+                this.initialVelocity = Vec3d.ZERO;
+                this.useRedstoneControl = false;
                 this.redstoneControlPoint = null;
             }
         } else {
-            this.allowThrowItems = false;
+            this.itemOutputPoint = null;
+            this.inventoryHeight = 0;
+            this.inventoryWidth = 0;
+            this.itemOutputRatioBase = 0;
+            this.itemOutputRatioMod = 0;
+            this.allowThrowInput = false;
+            this.allowThrowOutput = false;
             this.initialVelocity = Vec3d.ZERO;
             this.useRedstoneControl = false;
             this.redstoneControlPoint = null;
         }
 
-        if (this.fluidOutputPoint != null && output.getValue("auto_fill") != null) {
-            this.autoFillTanks = output.getValue("auto_fill").asBoolean().toString();
-        } else {
-            this.autoFillTanks = null;
-        }
+        DataBlock fluid = object.getBlock("fluid");
+        this.fluidHandlePoints = new LinkedList<>();
+        this.possibleTrackPositions = new HashSet<>();
+        if (fluid != null) {
+            List<DataBlock.Value> fluids = fluid.getValues("fluid_handle_points");
+            if (fluids != null) {
+                fluids.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(fluidHandlePoints::add);
+            }
 
-        DataBlock properties = object.getBlock("properties");
-        if (this.type == CRAFTER) {
-            this.gui = CAML.parse(properties.getValue("gui").asIdentifier().getResourceStream());
+            List<DataBlock.Value> trackHandlePoints = fluid.getValues("track_handle_points");
+            if(trackHandlePoints != null){
+                trackHandlePoints.stream()
+                        .map(DataBlock.Value::asString)
+                        .map(MultiblockDefinition::toVec3i)
+                        .forEach(vec3i -> fluidOutputPositions.stream().map(vec3i::add).forEach(possibleTrackPositions::add));
+            }
+            this.tankCapability = fluid.getValue("tank_capability_mb").asInteger();
+
+            this.isFluidToStocks = fluid.getValue("pipes_to_stocks").asBoolean();
+            if(fluid.getValue("auto_interact") != null) {
+                this.autoInteractWithStocks = fluid.getValue("auto_interact").asBoolean().toString();
+            }else{
+                this.autoInteractWithStocks = null;
+            }
         } else {
-            this.gui = null;
+            this.tankCapability = 0;
+            this.isFluidToStocks = false;//true is from pipe to stock, false is the opposite
+            this.autoInteractWithStocks = null;
         }
 
         //Put these at the bottom as them use the properties above

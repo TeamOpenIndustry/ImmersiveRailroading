@@ -11,9 +11,11 @@ import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
+import io.netty.util.internal.UnstableApi;
 
 import java.util.List;
 
+@UnstableApi
 @Deprecated
 public class CustomCrafterMultiblock extends Multiblock {
     private final MultiblockDefinition def;
@@ -76,9 +78,10 @@ public class CustomCrafterMultiblock extends Multiblock {
 
         @Override
         public int getInvSize(Vec3i offset) {
-            if(this.def.gui.getBlocks("slot") == null)
-                return 0;
-            return this.def.gui.getBlocks("slot").size();
+//            if(this.def.gui.getBlocks("slot") == null)
+//                return 0;
+//            return this.def.gui.getBlocks("slot").size();
+            return 0;
         }
 
         @Override
@@ -130,7 +133,7 @@ public class CustomCrafterMultiblock extends Multiblock {
                 if (def.center.equals(offset)) {
                     if (def.redstoneControlPoint == null)
                         return;
-                    if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowItems) {
+                    if (world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowOutput) {
                         ItemStackHandler handler = getTile(Vec3i.ZERO).getContainer();
                         int slotIndex = handler.getSlotCount() - 1;
                         while (handler.get(slotIndex).getCount() == 0) {
@@ -157,7 +160,7 @@ public class CustomCrafterMultiblock extends Multiblock {
 
         @Override
         public boolean canReceiveFluid(Vec3i offset) {
-            return def.fluidInputPoints.stream().anyMatch(offset::equals);
+            return def.fluidHandlePoints.stream().anyMatch(offset::equals);
         }
 
         @Override
@@ -177,7 +180,8 @@ public class CustomCrafterMultiblock extends Multiblock {
 
         @Override
         public boolean canRecievePower(Vec3i offset) {
-            return def.energyInputPoints.stream().anyMatch(offset::equals);
+            return false;
+//            return def.energyInputPoints.stream().anyMatch(offset::equals);
         }
 
         //Helpers

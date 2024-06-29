@@ -1,7 +1,6 @@
 {
     "pack": "null",
     "register": [
-        "transporter",
-        "crafter"
+        "transporter"
     ]
 }

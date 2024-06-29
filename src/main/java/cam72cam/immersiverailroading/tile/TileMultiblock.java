@@ -178,6 +178,14 @@ public class TileMultiblock extends BlockEntityTickable {
      */
 
     public void onBreakEvent() {
+        if(this.isCustom && !this.offset.equals(((CustomTransporterMultiblock.TransporterMbInstance)this.getMultiblock()).def.center)){
+            if (replaced != null) {
+                getWorld().setBlock(getPos(), replaced);
+            }
+
+            return;
+        }
+
         for (int slot = 0; slot < container.getSlotCount(); slot++) {
             ItemStack item = container.get(slot);
             if (!item.isEmpty()) {
