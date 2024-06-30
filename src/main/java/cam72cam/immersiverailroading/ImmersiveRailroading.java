@@ -114,17 +114,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
 				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
                 for (String s : DefinitionManager.multiblocks.keySet()) {
-                    switch (DefinitionManager.multiblocks.get(s).type) {
-                        case TRANSPORTER:
-                            MultiblockRegistry.register(DefinitionManager.multiblocks.get(s).name,
-                                new CustomTransporterMultiblock(DefinitionManager.multiblocks.get(s)));
-                            break;
-                            //Too unstable to use
-//                        case CRAFTER:
-//                            MultiblockRegistry.register(DefinitionManager.multiblocks.get(s).name,
-//                                    new CustomCrafterMultiblock(DefinitionManager.multiblocks.get(s)));
-//                            break;
-                    }
+                    MultiblockRegistry.register(DefinitionManager.multiblocks.get(s).name,
+                            new CustomTransporterMultiblock(DefinitionManager.multiblocks.get(s)));
                 }
                 TileMultiblockRender.registerOthers();
 				IRFuzzy.applyFallbacks();
@@ -141,7 +132,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				BlockRender.register(IRBlocks.BLOCK_RAIL_GAG, RailBaseModel::getModel, TileRailGag.class);
 				BlockRender.register(IRBlocks.BLOCK_RAIL_PREVIEW, RailPreviewRender::render, TileRailPreview.class);
 				BlockRender.register(IRBlocks.BLOCK_MULTIBLOCK, TileMultiblockRender::render, TileMultiblock.class);
-                BlockRender.register(IRBlocks.BLOCK_MULTIBLOCK, TileMultiblockRender::render, TileMultiblock.class);
 
 				ItemRender.register(IRItems.ITEM_PLATE, new PlateItemModel());
 				ItemRender.register(IRItems.ITEM_AUGMENT, new RailAugmentItemModel());

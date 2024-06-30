@@ -22,7 +22,7 @@
         "2,2,3": "light_engineering_block"
     },
     "center": "2,0,0",
-    "model": "immersiverailroading:multiblocks/un1.obj",
+    "model": "immersiverailroading:models/multiblocks/template.obj",
 
     "item": {
         "item_input_point": ["2,0,0"],

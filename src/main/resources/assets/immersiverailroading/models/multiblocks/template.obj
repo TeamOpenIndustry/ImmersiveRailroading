@@ -1,6 +1,6 @@
 # Blender 3.6.4
 # www.blender.org
-mtllib un1.mtl
+mtllib template.mtl
 o cube
 v -5.000000 0.000000 0.000000
 v -5.000000 0.000000 -1.000000
