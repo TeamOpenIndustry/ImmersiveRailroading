@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
@@ -48,7 +47,7 @@ public class CargoUnload {
             freight.getWorld().dropItem(
                     freight.cargoItems.extract(slotIndex,(int)Math.floor(openFactor * 3),false),//20~60 per sec
                     freight.getModelMatrix().apply(this.getPos().add(offset)),
-                    freight.getModelMatrix().apply(offset.scale(4)));
+                    offset.scale(0.2).rotateYaw(freight.getRotationYaw() - 90));
         }
     }
 }

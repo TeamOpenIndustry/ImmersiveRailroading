@@ -29,6 +29,8 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	@TagField("PERCENT_FULL")
 	private int percentFull = 0;
 
+    protected transient int ticks = 0;
+
 	public abstract int getInventorySize();
 	public abstract int getInventoryWidth();
 
@@ -124,10 +126,11 @@ public abstract class Freight extends EntityCoupleableRollingStock {
     @Override
     public void onTick() {
         super.onTick();
+        ticks++;
         FreightModel<?, ?> model = (FreightModel<?, ?>) this.getDefinition().getModel();
         if(getWorld().isServer){
             //inputs
-            if (this.getCurrentSpeed().metric() <= 10.8 && getTickCount() % 5 == 0) {//3m/s
+            if (this.getCurrentSpeed().metric() <= 10.8 && ticks % 2 == 0) {//3m/s and don't refresh it every tick
                 List<ItemStack> stacks = model.getCargoNearbyItems(this);
 
                 if (!stacks.isEmpty()) {

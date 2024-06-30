@@ -267,7 +267,9 @@ public class CustomTransporterMultiblock extends Multiblock {
         public boolean autoInteract = false;
 
         public MultiblockStorager(MultiblockDefinition def) {
-            if (def.autoInteractWithStocks.equals("true")) {
+            if(def.autoInteractWithStocks == null){
+                fluidStatus = 0;
+            } else if (def.autoInteractWithStocks.equals("true")) {
                 fluidStatus = 1;
                 autoInteract = true;
             } else if (def.autoInteractWithStocks.equals("false")) {

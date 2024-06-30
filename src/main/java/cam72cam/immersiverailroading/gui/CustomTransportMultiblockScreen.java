@@ -201,7 +201,8 @@ public class CustomTransportMultiblockScreen implements IScreen {
                 return entry1.getKey().getDisplayName().compareTo(entry2.getKey().getDisplayName());
             });
 
-            GUIHelpers.drawCenteredString("Inventory", 50, 0, 0xFFFFFF, matrix4);
+            GUIHelpers.drawCenteredString("Inventory" + (def.inventoryWidth * def.inventoryHeight == 0 ? " is unavailable":""),
+                    50, 0, 0xFFFFFF, matrix4);
             for (int i = 0; i < list.size(); i++) {
                 if (map.get(list.get(i).getKey().getDisplayName()).getRight() != 0) {
                     if (i % 10 == 0 && i != 0) {
