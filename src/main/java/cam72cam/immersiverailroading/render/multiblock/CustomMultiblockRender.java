@@ -65,7 +65,7 @@ public class CustomMultiblockRender implements IMultiblockRender {
             }
             if (MinecraftClient.isReady() && MinecraftClient.getPlayer().getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_MANUAL)) {
                 base.frames.render(state);
-                for (Vec3i track : CustomTransporterMultiblock.packages.get(te.getPos()).trackList) {
+                for (Vec3i track : CustomTransporterMultiblock.storages.get(te.getPos()).trackList) {
                     RenderState state1 = state.clone().lighting(true).lightmap(1, 1).translate(-track.x, -track.y, -track.z);
                     try (VBO.Binding vbo = fluid_output.binder().bind(state1)) {
                         vbo.draw();

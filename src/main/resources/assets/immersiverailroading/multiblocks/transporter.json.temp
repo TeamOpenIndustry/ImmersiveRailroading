@@ -49,5 +49,5 @@
                               #Set false to let players select the stocks they want to interact with in game
     }
 
-    #You can hold the manual in your secondary hand to see the bounds.
+    #You can hold the manual on your secondary hand to see the bounds.
 }

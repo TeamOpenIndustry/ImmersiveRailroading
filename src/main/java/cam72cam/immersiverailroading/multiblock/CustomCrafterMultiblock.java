@@ -11,11 +11,9 @@ import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
-import io.netty.util.internal.UnstableApi;
 
 import java.util.List;
 
-@UnstableApi
 @Deprecated
 public class CustomCrafterMultiblock extends Multiblock {
     private final MultiblockDefinition def;

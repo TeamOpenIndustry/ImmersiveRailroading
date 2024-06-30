@@ -63,7 +63,7 @@ public class MultiblockDefinition {
     MultiblockDefinition(String multiblockID, DataBlock object) throws Exception {
         //Standards
         this.mbID = multiblockID;
-        this.name = object.getValue("name").asString();
+        this.name = object.getValue("name").asString().toUpperCase();
         this.type = MultiblockTypes.valueOf(object.getValue("type").asString());
 
         //Structure
@@ -72,16 +72,14 @@ public class MultiblockDefinition {
         this.width = object.getValue("width").asInteger();
         this.structure = new HashMap<>();
         DataBlock struct = object.getBlock("structure");
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                for (int z = 0; z < length; z++) {
-                    String vec = String.format("%s,%s,%s", x, y, z);
-                    if (struct.getValue(vec).asString() != null) {
-                        structure.put(new Vec3i(x, y, z), struct.getValue(vec).asString());
-                    }
-                }
+        struct.getValueMap().forEach((s, value) -> {
+            Vec3i vec3i = toVec3i(s);
+            if(vec3i.x >= 0 && vec3i.x < width
+            && vec3i.y >= 0 && vec3i.y < height
+            && vec3i.z >= 0 && vec3i.z < length){
+                structure.put(vec3i, value.asString());
             }
-        }
+        });
         this.center = toVec3i(object.getValue("center").asString());
         if (!structure.containsKey(center)) {
             throw new IllegalArgumentException("You must include the center block in the structure!");
@@ -156,7 +154,7 @@ public class MultiblockDefinition {
             }
         } else {
             this.tankCapability = 0;
-            this.isFluidToStocks = false;//true is from pipe to stock, false is the opposite
+            this.isFluidToStocks = false;
             this.autoInteractWithStocks = null;
         }
 

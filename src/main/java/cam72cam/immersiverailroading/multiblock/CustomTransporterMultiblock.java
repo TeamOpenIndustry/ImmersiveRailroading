@@ -33,10 +33,10 @@ public class CustomTransporterMultiblock extends Multiblock {
      * rewrite manual
      */
     private final MultiblockDefinition def;
-    public static final HashMap<Vec3i, MultiblockPackage> packages;
+    public static final HashMap<Vec3i, MultiblockStorager> storages;
 
     static {
-        packages = new HashMap<>();
+        storages = new HashMap<>();
     }
 
     public CustomTransporterMultiblock(MultiblockDefinition def) {
@@ -77,7 +77,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
     @Override
     protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
-        packages.put(origin.add(def.center.rotate(rot)), new MultiblockPackage(this.def));
+        storages.put(origin.add(def.center.rotate(rot)), new MultiblockStorager(this.def));
         return new TransporterMbInstance(world, origin, rot, this.def);
     }
 
@@ -89,7 +89,7 @@ public class CustomTransporterMultiblock extends Multiblock {
         public TransporterMbInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
             super(world, origin, rot);
             this.def = def;
-            packages.get(getPos(def.center)).refreshSelf(this, false);
+            storages.get(getPos(def.center)).refreshSelf(this, false);
         }
 
         @Override
@@ -197,7 +197,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             if (def.tankCapability != 0) {
                 //Handle fluid interaction with stock
                 if (def.fluidHandlePoints != null && def.center.equals(offset) && world.isServer && ticks % 10 == 0) {
-                    packages.get(getPos(def.center)).refreshSelf(this, true);
+                    storages.get(getPos(def.center)).refreshSelf(this, true);
                 }
 
                 //Handle fluid interaction with pipe
@@ -257,8 +257,8 @@ public class CustomTransporterMultiblock extends Multiblock {
         }
     }
 
-    //A hack to storage some extra information
-    public static class MultiblockPackage {
+    //A hack to storage some extra information bound with the instance
+    public static class MultiblockStorager {
         public HashMap<String, FreightTank> stockMap = new HashMap<>();
         public HashMap<String, String> guiMap = new HashMap<>();
         public List<Vec3i> trackList = new LinkedList<>();
@@ -266,7 +266,7 @@ public class CustomTransporterMultiblock extends Multiblock {
         public int fluidStatus = 0;//Autofill tanks wrapper: 0 is N/A, 1 is true, 2 is false
         public boolean autoInteract = false;
 
-        public MultiblockPackage(MultiblockDefinition def) {
+        public MultiblockStorager(MultiblockDefinition def) {
             if (def.autoInteractWithStocks.equals("true")) {
                 fluidStatus = 1;
                 autoInteract = true;
@@ -321,7 +321,7 @@ public class CustomTransporterMultiblock extends Multiblock {
                 this.targetTank = null;
             }
 
-            if (handleFluid) {//Avoid NullPointerException caused by initializing
+            if (handleFluid) {//Avoid NullPointerException caused by initialization
                 if (instance.def.isFluidToStocks) {//Output to stock
                     if (fluidStatus == 0) {//Output controlled by gui
                         if (autoInteract) {//Output to all available tanks

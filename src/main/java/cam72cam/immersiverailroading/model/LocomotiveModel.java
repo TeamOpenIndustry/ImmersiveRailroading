@@ -165,7 +165,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     public List<ItemStack> getCargoNearbyItems(EntityRollingStock stock) {
         List<ItemStack> stacks = super.getCargoNearbyItems(stock);
         if(cargoFillFront != null){
-            stacks.addAll(cargoFillRear.getDroppedItem(stock.getWorld(), stock));
+            stacks.addAll(cargoFillFront.getDroppedItem(stock.getWorld(), stock));
         }
         if(cargoFillRear != null){
             stacks.addAll(cargoFillRear.getDroppedItem(stock.getWorld(), stock));
