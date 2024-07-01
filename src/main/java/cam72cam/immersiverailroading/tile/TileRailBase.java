@@ -1068,4 +1068,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
     public void stockOverhead(EntityMoveableRollingStock stock) {
 		this.overhead = stock;
     }
+
+    public EntityRollingStock getStockOverhead(){
+        return this.overhead;
+    }
 }

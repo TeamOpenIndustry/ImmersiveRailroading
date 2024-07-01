@@ -109,7 +109,12 @@ public class RailRollerMultiblock extends Multiblock {
 			return offset.equals(input) || offset.equals(output) ? 1 : 0;
 		}
 
-		@Override
+        @Override
+        public int getTankCapability(Vec3i offset) {
+            return 0;
+        }
+
+        @Override
 		public void tick(Vec3i offset) {
 			if (!offset.equals(crafter)) {
 				return;
@@ -183,12 +188,22 @@ public class RailRollerMultiblock extends Multiblock {
 			return offset.equals(input) && stack.is(IRItems.ITEM_CAST_RAIL);
 		}
 
-		@Override
-		public boolean isOutputSlot(Vec3i offset, int slot) {
-			return offset.equals(output);
-		}
+        @Override
+        public boolean canReceiveFluid(Vec3i offset) {
+            return false;
+        }
 
-		@Override
+        @Override
+        public boolean isItemOutputSlot(Vec3i offset, int slot) {
+            return offset.equals(output);
+        }
+
+        @Override
+        public boolean isFluidOutputSlot(Vec3i offset) {
+            return false;
+        }
+
+        @Override
 		public int getSlotLimit(Vec3i offset, int slot) {
 			return offset.equals(input) || offset.equals(output) ? 1 : 0;
 		}

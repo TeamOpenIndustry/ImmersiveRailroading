@@ -1,18 +1,22 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.world.World;
+import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 import java.util.*;
@@ -22,6 +26,7 @@ public class CargoItems {
     private Map<UUID, Long> lastUpdate = new HashMap<>();
 
     private final List<ModelComponent> components;
+    private final List<Pair<Vec3d, Vec3d>> hitBox;
 
     public static CargoItems get(ComponentProvider provider) {
         List<ModelComponent> found = provider.parseAll(ModelComponentType.CARGO_ITEMS_X);
@@ -30,6 +35,18 @@ public class CargoItems {
 
     public CargoItems(List<ModelComponent> components) {
         this.components = components;
+        this.hitBox = new LinkedList<>();
+        this.components.forEach(modelComponent -> hitBox.add(Pair.of(modelComponent.min, modelComponent.max)));
+    }
+
+    public List<ItemStack> getDroppedItem(World world, EntityRollingStock stock){
+        Matrix4 model = stock.getModelMatrix();
+        List<ItemStack> list = new LinkedList<>();
+        for (Pair<Vec3d, Vec3d> box : this.hitBox) {
+            list.addAll(world.getDroppedItems(
+                IBoundingBox.from(model.apply(box.getLeft()), model.apply(box.getRight()))));
+        }
+        return list;
     }
 
     public <T extends Freight> void postRender(T stock, RenderState state) {

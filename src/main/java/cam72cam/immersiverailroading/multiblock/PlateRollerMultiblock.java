@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3i;
@@ -128,7 +127,12 @@ public class PlateRollerMultiblock extends Multiblock {
 			return offset.equals(input) || offset.equals(output) ? 1 : 0;
 		}
 
-		@Override
+        @Override
+        public int getTankCapability(Vec3i offset) {
+            return 0;
+        }
+
+        @Override
 		public void tick(Vec3i offset) {
 			if (!offset.equals(crafter)) {
 				return;
@@ -181,7 +185,7 @@ public class PlateRollerMultiblock extends Multiblock {
 				// Try to start crafting
 				if (IRFuzzy.steelBlockOrFallback().matches(input) && output.isEmpty() && !craftingTe.getCraftItem().isEmpty()) {
 					input.setCount(input.getCount() - 1);
-					inputTe.getContainer().set(0, input);;
+					inputTe.getContainer().set(0, input);
 					progress = 100;
 					craftingTe.setCraftProgress(100);
 				}
@@ -198,12 +202,22 @@ public class PlateRollerMultiblock extends Multiblock {
 			return offset.equals(input) && IRFuzzy.steelBlockOrFallback().matches(stack);
 		}
 
-		@Override
-		public boolean isOutputSlot(Vec3i offset, int slot) {
-			return offset.equals(output);
-		}
+        @Override
+        public boolean canReceiveFluid(Vec3i offset) {
+            return false;
+        }
 
-		@Override
+        @Override
+        public boolean isItemOutputSlot(Vec3i offset, int slot) {
+            return offset.equals(output);
+        }
+
+        @Override
+        public boolean isFluidOutputSlot(Vec3i offset) {
+            return false;
+        }
+
+        @Override
 		public int getSlotLimit(Vec3i offset, int slot) {
 			return offset.equals(input) || offset.equals(output) ? 1 : 0;
 		}

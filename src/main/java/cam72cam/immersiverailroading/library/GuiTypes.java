@@ -4,8 +4,7 @@ import cam72cam.immersiverailroading.*;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.gui.container.*;
-import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
-import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
+import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.config.ConfigGui;
@@ -31,6 +30,7 @@ public class GuiTypes {
     public static final BlockGUI STEAM_HAMMER = GuiRegistry.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
     public static final BlockGUI CASTING = GuiRegistry.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);
     public static final BlockGUI PLATE_ROLLER = CASTING;
+    public static final BlockGUI CUSTOM_TRANSPORT_MB_GUI = GuiRegistry.registerBlock(TileMultiblock.class, CustomTransportMultiblockScreen::new);
     private static IScreen createMultiblockScreen(TileMultiblock mb) {
         if (!mb.isLoaded()) {
             return null;

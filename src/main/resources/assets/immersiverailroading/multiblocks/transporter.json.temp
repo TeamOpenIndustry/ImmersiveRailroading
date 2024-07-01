@@ -1,0 +1,53 @@
+#This is a template file in JSON format, everything after '#' is comment
+#For positions, in Blender the pos is (x,y,z) and here is(-x, z, y)
+{
+    "name": "demo1", #Required: The name of your multiblock
+    "type": "TRANSPORTER", #Required: The type of your multiblock(TRANSPORTER/CRAFTER/DETECTOR, now only TRANSPORTER is implied)
+
+    "width": 5, #Required: Maximum width of your mb(Blender's X direction)
+    "height": 4, #Required: Maximum height of your mb(Blender's Z direction)
+    "length": 4, #Required: Maximum length of your mb(Blender's Y direction)
+    "structure": { #Required: structure of your mb. See CustomTransporterMultiblock$parseFuzzy to know which kind of blocks you can use.
+        "0,0,0": "light_engineering_block", #Position : block type, positions must be integer(Vec3i)
+        "1,0,0": "light_engineering_block", #Currently we only have light_engineering_block, heavy_engineering_block and steels.
+        "2,0,0": "light_engineering_block", #Position here (-x,z,y) takes up the space from (x,y,z) to (x+1,y+1,z+1) in Blender
+        "3,0,0": "light_engineering_block", 
+        "4,0,0": "light_engineering_block",
+        "0,1,0": "light_engineering_block",
+        "1,1,0": "light_engineering_block",
+        "2,1,0": "light_engineering_block",
+        "3,1,0": "light_engineering_block",
+        "4,1,0": "light_engineering_block",
+        "2,2,0": "light_engineering_block",
+        "2,2,1": "light_engineering_block",
+        "2,3,2": "light_engineering_block",
+        "2,2,3": "light_engineering_block"
+    },
+    "center": "2,0,0", #Required: The placement offset of your mb. Make sure it is contained in the "structure" block
+    "model": "immersiverailroading:multiblocks/un1.obj", #Required: The ResourceLocation of your model
+
+    "item": { #Optional: If your multiblock can have inventory, then define me
+        "item_input_point": ["2,0,0"], #Required: Positions that can receive items, position must be integer(Vec3i)
+        "redstone_control":true, #Required: Should item output controlled by RS power?
+        "redstone_control_point":"0,0,0", #Required if "redstone_control" is true: Position which can receive RS Power to control the output, position must be integer(Vec3i)
+        "inventory_height": 3, #Required: The height of your inventory
+        "inventory_width": 10, #Required: The width of your inventory
+        "allow_throw_input": true, #Required: If true, you can throw items to "item_input_point" to get them loaded
+        "item_output_point":"4,4,5", #Required: The position of your item unloading point, positions cam be any number(Vec3d)
+        "initial_velocity": "6,2,6", #Required: The initial speed when the items are thrown, positions cam be any number(Vec3d)
+        "output_ratio_items_per_sec": 5 #Required: How many items should be thrown in a second?
+    },
+
+    "fluid": { #Optional: If your multiblock can have tank, then define me
+        "fluid_handle_points": ["2,0,0"], #Required: Positions which can interact with pipes from other mods, position must be integer(Vec3i)
+        "track_handle_points": ["2,2,3"], #Required: Positions which can interact with stocks on nearby (Horizontal distance <= 6 and Vertical distance in [-8, 0]) tracks, position must be integer(Vec3i)
+        "pipes_to_stocks": false, #Required: Is your tank a FLUID_LOADER-like(Receive fluid from pipes then send them
+                #to stocks)? Set false to make it a FLUID_UNLOADER-like(Receive fluid from stocks then send them to pipes)
+        "tank_capability_mb": 20000, #Required: The capability of your tank in milibucket
+        "auto_interact": true #Optional: Should the multiblock interact with stocks within the bounds automatically?
+                              #Set true to fix it to auto mode and set false to fix it in manual mode
+                              #Not define this to let players choose whether to manually or automatically use in game
+    }
+
+    #You can hold the manual on your secondary hand to see the bounds.
+}

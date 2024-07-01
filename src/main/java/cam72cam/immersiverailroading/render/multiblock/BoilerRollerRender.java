@@ -43,7 +43,7 @@ public class BoilerRollerRender implements IMultiblockRender {
 
 		state.translate(0.5, 0, 0.5);
 		state.rotate(te.getRotation() - 90, 0, 1, 0);
-		state.translate(-3.35, 0, -2.5);
+		state.translate(-3.5, 0, -2.5);
 
 		try (OBJRender.Binding vbo = model.binder().bind(state)) {
 			//TODO better animation
