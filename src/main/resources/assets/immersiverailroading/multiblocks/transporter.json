@@ -40,8 +40,7 @@
     "fluid": {
         "fluid_handle_points": ["2,0,0"],
         "track_handle_points": ["2,2,3"],
-        "pipes_to_stocks": false,
-        "tank_capability_mb": 20000,
-        "auto_interact": true
+        "pipes_to_stocks": true,
+        "tank_capability_mb": 20000
     }
 }

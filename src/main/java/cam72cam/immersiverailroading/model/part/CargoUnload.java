@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 
 import java.util.List;
@@ -43,11 +44,14 @@ public class CargoUnload {
         double openFactor = freight.getControlPosition(this.controlGroup);
         if (openFactor != 0) {
             //For some stocks if we directly drop the items it will enter a cycle of being loaded and unloaded, so we'd better add an offset here
-            Vec3d offset = this.getPos().z > 0 ? new Vec3d(0,0,0.25) : new Vec3d(0,0,-0.25);
-            freight.getWorld().dropItem(
-                    freight.cargoItems.extract(slotIndex,(int)Math.floor(openFactor * 3),false),//20~60 per sec
-                    freight.getModelMatrix().apply(this.getPos().add(offset)),
-                    offset.scale(0.2).rotateYaw(freight.getRotationYaw() - 90));
+            Vec3d offset = this.getPos().z > 0 ? new Vec3d(0,0,0.5) : new Vec3d(0,0,-0.5);
+            if(freight.getRotationYaw() % 90 == 0){
+                //TODO: We should add a flag to ItemEntity to mark that it just have been dropped...
+                freight.getWorld().dropItem(
+                        freight.cargoItems.extract(slotIndex, (int) Math.floor(openFactor * 3), false),//20~60 per sec
+                        freight.getModelMatrix().apply(this.getPos().add(offset)),
+                        VecUtil.rotateWrongYaw(offset.scale(-0.2), freight.getRotationYaw()));
+            }
         }
     }
 }

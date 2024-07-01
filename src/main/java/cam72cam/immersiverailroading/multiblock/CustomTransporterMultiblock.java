@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.fluid.ITank;
@@ -18,9 +19,9 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 
-import java.util.*;
-
-import static cam72cam.immersiverailroading.render.multiblock.CustomMultiblockRender.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Added a way of customizing your own multiblocks
@@ -94,7 +95,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
         @Override
         public boolean onBlockActivated(Player player, Player.Hand hand, Vec3i offset) {
-            if (world.isServer) {
+            if (world.isClient) {
                 Vec3i pos = getPos(def.center);
                 GuiTypes.CUSTOM_TRANSPORT_MB_GUI.open(player, pos);
             }
@@ -175,11 +176,13 @@ public class CustomTransporterMultiblock extends Multiblock {
                                 vec3d = vec3d.add(-1, 0, -1);
                                 break;
                             case 90:
-                                vec3d = vec3d.add(east);
+                                vec3d = vec3d.add(-1,0,0);
                                 break;
                             case -90:
-                                vec3d = vec3d.add(west);
+                            case 270:
+                                vec3d = vec3d.add(0,0,-1);
                         }
+                        ModCore.info(String.valueOf((int) (this.getRotation() + 90)));
                         if (def.itemOutputRatioBase != 0) {
                             world.dropItem(handler.extract(slotIndex, def.itemOutputRatioBase, false),
                                     vec3d.rotateYaw(this.getRotation() + 90).add(origin),

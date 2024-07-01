@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.gui;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
 import cam72cam.immersiverailroading.multiblock.CustomCrafterMultiblock;
 import cam72cam.immersiverailroading.multiblock.CustomTransporterMultiblock;
+import cam72cam.immersiverailroading.net.MultiblockSetStockPacket;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.entity.Player;
@@ -45,7 +46,7 @@ public class CustomTransportMultiblockScreen implements IScreen {
                 180, 20, "null", pack.guiMap) {
             @Override
             public void onClick(String option) {
-                pack.setTargetTank(option);
+                new MultiblockSetStockPacket(option, pack).sendToServer();
             }
         };
         Button selectButton;
@@ -173,7 +174,12 @@ public class CustomTransportMultiblockScreen implements IScreen {
                 GUIHelpers.getScreenHeight() / 4d, 0.5);
         GUIHelpers.drawCenteredString(name, 0, 0, 0xFFFFFF, mat2);
         mat2.translate(0, 20, 0);
-        String fluidType = tile.getFluidContainer().getContents().getFluid().ident.toLowerCase();
+        String fluidType;
+        try {
+            fluidType = tile.getFluidContainer().getContents().getFluid().ident.toLowerCase();
+        }catch (NullPointerException e){
+            fluidType = "null";
+        }
         GUIHelpers.drawCenteredString("Fluid: " + (fluidType.equals("empty") ? "null" : fluidType),
                 0, 0, 0xFFFFFF, mat2);
         mat2.translate(0, 20, 0);

@@ -9,17 +9,14 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
-import cam72cam.mod.event.CommonEvents;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.system.CallbackI;
 import util.Matrix4;
 
 import java.util.*;
@@ -39,9 +36,7 @@ public class CargoItems {
     public CargoItems(List<ModelComponent> components) {
         this.components = components;
         this.hitBox = new LinkedList<>();
-        this.components.forEach(modelComponent -> {
-            hitBox.add(Pair.of(modelComponent.min, modelComponent.max));
-        });
+        this.components.forEach(modelComponent -> hitBox.add(Pair.of(modelComponent.min, modelComponent.max)));
     }
 
     public List<ItemStack> getDroppedItem(World world, EntityRollingStock stock){

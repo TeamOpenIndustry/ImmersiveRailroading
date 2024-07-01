@@ -147,7 +147,7 @@ public class MultiblockDefinition {
             this.tankCapability = fluid.getValue("tank_capability_mb").asInteger();
 
             this.isFluidToStocks = fluid.getValue("pipes_to_stocks").asBoolean();
-            if(fluid.getValue("auto_interact") != null) {
+            if(fluid.getValue("auto_interact").asBoolean() != null) {
                 this.autoInteractWithStocks = fluid.getValue("auto_interact").asBoolean().toString();
             }else{
                 this.autoInteractWithStocks = null;
