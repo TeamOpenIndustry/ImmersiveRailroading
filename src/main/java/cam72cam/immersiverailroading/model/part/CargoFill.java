@@ -29,12 +29,14 @@ public class CargoFill {
     }
 
     public CargoFill(List<ModelComponent> cargoLoads, ModelState state, boolean showCurrentLoadOnly) {
-        hitBox = new LinkedList<>();
+        this.hitBox = new LinkedList<>();
+        for (ModelComponent cargoLoad : cargoLoads) {
+            this.hitBox.add(Pair.of(cargoLoad.min, cargoLoad.max));
+        }
 
         state.push(settings -> settings.add((ModelState.GroupVisibility) (stock, group) -> {
             int percentFull = stock instanceof Freight ? ((Freight) stock).getPercentCargoFull() : 100;
             for (ModelComponent cargoLoad : cargoLoads) {
-                hitBox.add(Pair.of(cargoLoad.min, cargoLoad.max));
                 if (cargoLoad.id <= percentFull) {
                     if (cargoLoad.modelIDs.contains(group)) {
                         return true;
@@ -49,7 +51,7 @@ public class CargoFill {
         })).include(cargoLoads);
     }
 
-    public List<ItemStack> getDroppedItem(World world, EntityRollingStock stock){
+    public List<ItemStack> getDroppedItem(World world, EntityRollingStock stock) {
         Matrix4 model = stock.getModelMatrix();
         List<ItemStack> list = new LinkedList<>();
         for (Pair<Vec3d, Vec3d> box : this.hitBox) {

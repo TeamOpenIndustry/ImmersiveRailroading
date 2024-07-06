@@ -132,7 +132,12 @@ public enum ModelComponentType {
 	}
 
 	public static boolean shouldRender(String group) {
-		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_") || group.contains("CARGO_ITEMS");
+		return group.contains("CHIMNEY_")
+                || group.contains("CHIMINEY_")
+                || group.contains("PRESSURE_VALVE_")
+                || group.contains("EXHAUST_")
+                || group.contains("CARGO_ITEMS")
+                || group.contains("CARGO_UNLOAD");
 	}
 
     public static class ModelPosition {
