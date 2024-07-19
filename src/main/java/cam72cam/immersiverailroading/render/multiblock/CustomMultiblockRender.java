@@ -44,6 +44,8 @@ public class CustomMultiblockRender implements IMultiblockRender {
     public void render(TileMultiblock te, RenderState state, float partialTicks) {
         MultiblockModel base = refer.get(te.getName()).model;
 
+//        System.out.println(refer.get(te.getName()).possibleTrackPositions);
+
         int temp = (int) (te.getRotation() - 90);
         Vec3i t = refer.get(te.getName()).center.rotate(te.geFacing());
         state.translate(-t.x, t.y, -t.z);
@@ -61,7 +63,7 @@ public class CustomMultiblockRender implements IMultiblockRender {
 
         if (base != null) {
             try (OBJRender.Binding vbo = base.binder().bind(state)) {
-                vbo.draw();
+                vbo.draw(base.whitelist);
             }
             if (MinecraftClient.isReady() && MinecraftClient.getPlayer().getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_MANUAL)) {
                 base.frames.render(state);

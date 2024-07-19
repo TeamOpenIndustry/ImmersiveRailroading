@@ -22,6 +22,6 @@ public class MultiblockSetStockPacket extends Packet {
 
     @Override
     protected void handle() {
-        pack.setTargetTank(name);
+        pack.setTargetStock(name);
     }
 }

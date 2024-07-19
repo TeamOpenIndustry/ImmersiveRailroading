@@ -265,7 +265,7 @@ public class CustomTransporterMultiblock extends Multiblock {
         public HashMap<String, FreightTank> stockMap = new HashMap<>();
         public HashMap<String, String> guiMap = new HashMap<>();
         public List<Vec3i> trackList = new LinkedList<>();
-        public FreightTank targetTank;
+        public FreightTank targetStock;
         public int fluidStatus = 0;//Autofill tanks wrapper: 0 is N/A, 1 is true, 2 is false
         public boolean autoInteract = false;
 
@@ -280,8 +280,8 @@ public class CustomTransporterMultiblock extends Multiblock {
             }
         }
 
-        public void setTargetTank(String name) {
-            this.targetTank = stockMap.getOrDefault(name, null);
+        public void setTargetStock(String name) {
+            this.targetStock = stockMap.getOrDefault(name, null);
         }
 
         public boolean setAutoInteract(boolean autoFill) {
@@ -296,7 +296,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             final HashMap<String, FreightTank> refreshedStockMap = new HashMap<>();
             final HashMap<String, String> refreshedGuiStringMap = new HashMap<>();
             final List<Vec3i> refreshedTrackList = new LinkedList<>();
-            final Rotation rot1 = instance.rot == Rotation.COUNTERCLOCKWISE_90
+            final Rotation invertedRot = instance.rot == Rotation.COUNTERCLOCKWISE_90
                     ? Rotation.CLOCKWISE_90
                     : instance.rot == Rotation.CLOCKWISE_90
                     ? Rotation.COUNTERCLOCKWISE_90
@@ -307,7 +307,7 @@ public class CustomTransporterMultiblock extends Multiblock {
                 position = position.rotate(instance.rot).add(instance.origin);
                 TileRailBase tile = instance.world.getBlockEntity(position, TileRailBase.class);
                 if (tile != null) {
-                    refreshedTrackList.add(position.subtract(instance.getPos(Vec3i.ZERO)).rotate(rot1));
+                    refreshedTrackList.add(position.subtract(instance.getPos(Vec3i.ZERO)).rotate(invertedRot));
                     EntityRollingStock tank = tile.getStockOverhead();
                     if (tank instanceof FreightTank && ((FreightTank) tank).getCurrentSpeed().metric() <= 1) {
                         refreshedStockMap.put(tank.getDefinition().name() + "_" + tank.getUUID().toString().substring(0, 6),
@@ -322,8 +322,8 @@ public class CustomTransporterMultiblock extends Multiblock {
             this.guiMap = refreshedGuiStringMap;
             this.trackList = refreshedTrackList;
 
-            if (!this.stockMap.containsValue(this.targetTank)) {
-                this.targetTank = null;
+            if (!this.stockMap.containsValue(this.targetStock)) {
+                this.targetStock = null;
             }
 
             if (handleFluid) {//Avoid NullPointerException caused by initialization
@@ -332,15 +332,15 @@ public class CustomTransporterMultiblock extends Multiblock {
                         if (autoInteract) {//Output to all available tanks
                             this.stockMap.values().forEach(stock ->
                                     instance.getTile(instance.def.center).getFluidContainer().fill(stock.theTank, 300, false));
-                        } else if (this.targetTank != null) {
-                            instance.getTile(instance.def.center).getFluidContainer().fill(this.targetTank.theTank, 300, false);
+                        } else if (this.targetStock != null) {
+                            instance.getTile(instance.def.center).getFluidContainer().fill(this.targetStock.theTank, 300, false);
                         }
                     } else {//Output controlled by json
                         if (fluidStatus == 1) {//Should automatically fill the stocks
                             this.stockMap.values().forEach(stock ->
                                     instance.getTile(instance.def.center).getFluidContainer().fill(stock.theTank, 300, false));
                         } else {
-                            instance.getTile(instance.def.center).getFluidContainer().fill(this.targetTank.theTank, 300, false);
+                            instance.getTile(instance.def.center).getFluidContainer().fill(this.targetStock.theTank, 300, false);
                         }
                     }
                 } else {//Output to pipe(input from stocks)
@@ -348,15 +348,15 @@ public class CustomTransporterMultiblock extends Multiblock {
                         if (autoInteract) {
                             this.stockMap.values().forEach(stock ->
                                     instance.getTile(instance.def.center).getFluidContainer().drain(stock.theTank, 300, false));
-                        } else if (this.targetTank != null) {
-                            instance.getTile(instance.def.center).getFluidContainer().drain(this.targetTank.theTank, 300, false);
+                        } else if (this.targetStock != null) {
+                            instance.getTile(instance.def.center).getFluidContainer().drain(this.targetStock.theTank, 300, false);
                         }
                     } else {//Input controlled by json
                         if (fluidStatus == 1) {//Should automatically fill from stocks
                             this.stockMap.values().forEach(stock ->
                                     instance.getTile(instance.def.center).getFluidContainer().drain(stock.theTank, 300, false));
                         } else {
-                            instance.getTile(instance.def.center).getFluidContainer().drain(this.targetTank.theTank, 300, false);
+                            instance.getTile(instance.def.center).getFluidContainer().drain(this.targetStock.theTank, 300, false);
                         }
                     }
                 }

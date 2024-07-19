@@ -14,9 +14,9 @@ public class MultiblockDefinition {
     public final String name;
     public final MultiblockTypes type;
 
-    public final int length;
-    public final int height;
-    public final int width;
+    public int height;
+    public int width;
+    public int length;
     public final HashMap<Vec3i, String> structure;
     public final Vec3i center;
     public final MultiblockModel model;//-x is left, +y is front, origin in blender is origin in game
@@ -75,8 +75,8 @@ public class MultiblockDefinition {
         struct.getValueMap().forEach((s, value) -> {
             Vec3i vec3i = toVec3i(s);
             if(vec3i.x >= 0 && vec3i.x < width
-            && vec3i.y >= 0 && vec3i.y < height
-            && vec3i.z >= 0 && vec3i.z < length){
+                    && vec3i.y >= 0 && vec3i.y < height
+                    && vec3i.z >= 0 && vec3i.z < length){
                 structure.put(vec3i, value.asString());
             }
         });
@@ -84,6 +84,7 @@ public class MultiblockDefinition {
         if (!structure.containsKey(center)) {
             throw new IllegalArgumentException("You must include the center block in the structure!");
         }
+        this.model = new MultiblockModel(object.getValue("model").asIdentifier(), 0, this);
 
         DataBlock item = object.getBlock("item");
         this.itemInputPoints = new LinkedList<>();
@@ -95,7 +96,7 @@ public class MultiblockDefinition {
             this.allowThrowInput = item.getValue("allow_throw_input").asBoolean();
             this.inventoryHeight = item.getValue("inventory_height").asInteger();
             this.inventoryWidth = item.getValue("inventory_width").asInteger();
-            this.itemOutputPoint = toVec3d(item.getValue("item_output_point").asString());
+            this.itemOutputPoint = model.getHandlers("ITEM_OUTPUT").get(0);
             this.itemOutputRatioBase = item.getValue("output_ratio_items_per_sec").asInteger() / 20;
             this.itemOutputRatioMod = item.getValue("output_ratio_items_per_sec").asInteger() % 20;
 
@@ -116,9 +117,9 @@ public class MultiblockDefinition {
                 this.redstoneControlPoint = null;
             }
         } else {
-            this.itemOutputPoint = null;
             this.inventoryHeight = 0;
             this.inventoryWidth = 0;
+            this.itemOutputPoint = null;
             this.itemOutputRatioBase = 0;
             this.itemOutputRatioMod = 0;
             this.allowThrowInput = false;
@@ -128,22 +129,20 @@ public class MultiblockDefinition {
             this.redstoneControlPoint = null;
         }
 
-        DataBlock fluid = object.getBlock("fluid");
         this.fluidHandlePoints = new LinkedList<>();
         this.possibleTrackPositions = new HashSet<>();
+        DataBlock fluid = object.getBlock("fluid");
         if (fluid != null) {
-            List<DataBlock.Value> fluids = fluid.getValues("fluid_handle_points");
+            List<DataBlock.Value> fluids = fluid.getValues("pipe_interaction_points");
             if (fluids != null) {
                 fluids.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(fluidHandlePoints::add);
             }
 
-            List<DataBlock.Value> trackHandlePoints = fluid.getValues("track_handle_points");
-            if(trackHandlePoints != null){
-                trackHandlePoints.stream()
-                        .map(DataBlock.Value::asString)
-                        .map(MultiblockDefinition::toVec3i)
-                        .forEach(vec3i -> fluidOutputPositions.stream().map(vec3i::add).forEach(possibleTrackPositions::add));
-            }
+            model.getHandlers("FLUID_HANDLER").forEach(vec3d ->
+                            fluidOutputPositions.stream()
+                                    .map(vec3i -> vec3i.add(new Vec3i(vec3d.x, vec3d.y, vec3d.z)))
+                                    .forEach(possibleTrackPositions::add));
+
             this.tankCapability = fluid.getValue("tank_capability_mb").asInteger();
 
             this.isFluidToStocks = fluid.getValue("pipes_to_stocks").asBoolean();
@@ -158,8 +157,7 @@ public class MultiblockDefinition {
             this.autoInteractWithStocks = null;
         }
 
-        //Put these at the bottom as them use the properties above
-        this.model = new MultiblockModel(object.getValue("model").asIdentifier(), 0, this);
+        model.generateStaticModels();
         CustomMultiblockRender.addDef(this);
     }
 

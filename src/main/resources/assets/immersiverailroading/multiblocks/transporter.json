@@ -26,7 +26,6 @@
 
     "item": {
         "item_input_point": ["2,0,0"],
-        "item_output_point":"4,4,5",
         "redstone_control":true,
         "redstone_control_point":"0,0,0",
         "inventory_height": 3,
@@ -39,7 +38,6 @@
 
     "fluid": {
         "fluid_handle_points": ["2,0,0"],
-        "track_handle_points": ["2,2,3"],
         "pipes_to_stocks": true,
         "tank_capability_mb": 20000
     }
