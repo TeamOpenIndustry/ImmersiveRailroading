@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
@@ -47,10 +48,10 @@ public class StephensonValveGear extends ConnectingRodValveGear {
 
         state.include(cylinder);
 
-        state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) -> {
+        state.push(builder -> builder.add((ModelState.Animator) (animatable, partialTicks) -> {
             Matrix4 matrix = new Matrix4();
 
-            Vec3d connRodMovment = connRodMovement(stock);
+            Vec3d connRodMovment = connRodMovement(animatable.asStock());
 
             // X: rear driving rod X - driving rod height/2 (hack assuming diameter == height)
             // Y: Center of the rod
@@ -76,10 +77,10 @@ public class StephensonValveGear extends ConnectingRodValveGear {
             return matrix;
         })).include(drivingRod);
 
-        state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) -> {
+        state.push(builder -> builder.add((ModelState.Animator) (animatable, partialTicks) -> {
             Matrix4 matrix = new Matrix4();
 
-            Vec3d connRodMovment = connRodMovement(stock);
+            Vec3d connRodMovment = connRodMovement(animatable.asStock());
 
             // Piston movement is rod movement offset by the rotation radius
             // Not 100% accurate, missing the offset due to angled driving rod

@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.ControlSoundsDefinition;
@@ -319,8 +320,8 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         GlobalRender.drawText(str, state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
     }
 
-    public float getValue(EntityMoveableRollingStock stock) {
-        float pos = stock.getControlPosition(this) + offset;
+    public float getValue(IAnimatable animatable) {
+        float pos = animatable.getControlPosition(this) + offset;
         return (invert ? 1 - pos : pos) - (part.type == ModelComponentType.REVERSER_X || part.type == ModelComponentType.THROTTLE_BRAKE_X ? 0.5f : 0);
     }
 

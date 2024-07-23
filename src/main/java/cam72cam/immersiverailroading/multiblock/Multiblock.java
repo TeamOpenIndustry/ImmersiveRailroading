@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ChatText;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
@@ -23,7 +24,7 @@ import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.BlockInfo;
 import cam72cam.mod.world.World;
 
-public abstract class Multiblock {
+public abstract class Multiblock implements IAnimatable {
 	// z y x
 	private final FuzzyProvider[][][] components;
 	private final String name;

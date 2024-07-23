@@ -27,8 +27,8 @@ public class ConnectingRodValveGear extends ValveGear {
         this.connectingRod = connectingRod;
         this.centerOfWheels = ModelComponent.center(wheels.wheels.stream().map(x -> x.wheel).collect(Collectors.toList()));
 
-        state.push(settings -> settings.add((ModelState.Animator) (stock, partialTicks) -> {
-            Vec3d connRodMovment = connRodMovement(stock);
+        state.push(settings -> settings.add((ModelState.Animator) (animatable, partialTicks) -> {
+            Vec3d connRodMovment = connRodMovement(animatable.asStock());
             return new Matrix4().translate(-connRodRadius(), 0, 0).translate(connRodMovment.x, connRodMovment.z, 0);
         })).include(connectingRod);
     }

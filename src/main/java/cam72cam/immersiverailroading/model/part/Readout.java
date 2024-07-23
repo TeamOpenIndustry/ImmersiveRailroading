@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.DataBlock;
@@ -57,8 +58,8 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     }
 
     @Override
-    public float getValue(EntityMoveableRollingStock stock) {
-        float pos = positions.getOrDefault(stock.getUUID(), 0f);
+    public float getValue(IAnimatable animatable) {
+        float pos = positions.getOrDefault(animatable.asStock().getUUID(), 0f);
         pos = Math.min(1, Math.max(0, (pos - rangeMin) / (rangeMax - rangeMin)));
         pos = pos + offset;
         return invert ? 1 - pos : pos;

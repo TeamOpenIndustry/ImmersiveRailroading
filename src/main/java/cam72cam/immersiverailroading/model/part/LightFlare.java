@@ -112,8 +112,8 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         }
 
         ModelState mystate = state.push(builder -> builder
-                .add((ModelState.Lighter) (stock) ->
-                        new ModelState.LightState(null, null, blinkFullBright ? !isBlinkOff(stock) : !isLightOff(stock), null)
+                .add((ModelState.Lighter) (animatable) ->
+                        new ModelState.LightState(null, null, blinkFullBright ? !isBlinkOff(animatable.asStock()) : !isLightOff(animatable.asStock()), null)
                 )
         );
         mystate.include(component);
