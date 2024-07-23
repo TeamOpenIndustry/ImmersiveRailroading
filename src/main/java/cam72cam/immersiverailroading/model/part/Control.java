@@ -1,14 +1,13 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.ControlSoundsDefinition;
+import cam72cam.immersiverailroading.registry.parts.ControlSoundsDefinition;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
@@ -30,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Control<T extends EntityMoveableRollingStock> extends Interactable<T> {
+public class Control<T extends IAnimatable> extends Interactable<T> {
     public final String controlGroup;
     public final String label;
     public final boolean toggle;
@@ -50,11 +49,11 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     private final Map<Axis, Float> scales = new HashMap<>();
     private final Map<Axis, Float> scaleRot = new HashMap<>();
 
-    public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos) {
+    public static <T extends IAnimatable> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type, ModelPosition pos) {
         return provider.parseAll(type, pos).stream().map(part1 -> new Control<T>(part1, state, provider.internal_model_scale, provider.widgetConfig)).collect(Collectors.toList());
     }
 
-    public static <T extends EntityMoveableRollingStock> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type) {
+    public static <T extends IAnimatable> List<Control<T>> get(ComponentProvider provider, ModelState state, ModelComponentType type) {
         return provider.parseAll(type).stream().map(part1 -> new Control<T>(part1, state, provider.internal_model_scale, provider.widgetConfig)).collect(Collectors.toList());
     }
 
@@ -180,14 +179,14 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
 
         if (hide) {
             state = state.push(builder ->
-                    builder.add((ModelState.GroupVisibility) (stock, group) -> getValue(stock) != 1)
+                    builder.add((ModelState.GroupVisibility) (animatable, group) -> getValue(animatable) != 1)
             );
         }
 
         if (!(rotationPoint == null && translations.isEmpty() && scales.isEmpty())) {
             state = state.push(builder -> {
-                builder.add((ModelState.GroupAnimator) (stock, group, partialTicks) -> {
-                    float valuePercent = getValue(stock);
+                builder.add((ModelState.GroupAnimator) (animatable, group, partialTicks) -> {
+                    float valuePercent = getValue(animatable);
 
                     Matrix4 m = new Matrix4();
 
@@ -256,21 +255,21 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         return WordUtils.capitalizeFully(label.name().replace("_X", "").replaceAll("_CONTROL", "").replaceAll("_", " ").toLowerCase(Locale.ROOT));
     }
 
-    public void postRender(T stock, RenderState state, float partialTicks) {
+    public void postRenderStock(T stock, RenderState state, float partialTicks) {
         if (!ConfigGraphics.interactiveComponentsOverlay) {
             return;
         }
 
-        if (!stock.playerCanDrag(MinecraftClient.getPlayer(), this)) {
+        if (!stock.asStock().playerCanDrag(MinecraftClient.getPlayer(), this)) {
             return;
         }
 
-        if (MinecraftClient.getPlayer().getPosition().distanceTo(stock.getPosition()) > stock.getDefinition().getLength(stock.gauge)) {
+        if (MinecraftClient.getPlayer().getPosition().distanceTo(stock.asStock().getPosition()) > stock.asStock().getDefinition().getLength(stock.asStock().gauge)) {
             return;
         }
 
-        boolean isPressed = stock.getControlPressed(this);
-        if (!isPressed && Math.abs(lookedAt - stock.getWorld().getTicks()) > 2) {
+        boolean isPressed = stock.asStock().getControlPressed(this);
+        if (!isPressed && Math.abs(lookedAt - stock.asStock().getWorld().getTicks()) > 2) {
             return;
         }
 
@@ -281,7 +280,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         switch (part.type) {
             case TRAIN_BRAKE_X:
             case INDEPENDENT_BRAKE_X:
-                if (!stock.getDefinition().isLinearBrakeControl()) {
+                if (!stock.asStock().getDefinition().isLinearBrakeControl()) {
                      break;
                 }
                 // Fallthrough
@@ -316,41 +315,41 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         if (isPressed) {
             str = TextColor.BOLD.wrap(str);
         }
-        GlobalRender.drawText(str, state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
+        GlobalRender.drawText(str, state, pos, 0.2f, 180 - stock.asStock().getRotationYaw() - 90);
     }
 
-    public float getValue(EntityMoveableRollingStock stock) {
-        float pos = stock.getControlPosition(this) + offset;
+    public float getValue(IAnimatable animatable) {
+        float pos = animatable.getControlPosition(this) + offset;
         return (invert ? 1 - pos : pos) - (part.type == ModelComponentType.REVERSER_X || part.type == ModelComponentType.THROTTLE_BRAKE_X ? 0.5f : 0);
     }
 
-    public Vec3d transform(Vec3d point, T stock) {
+    public Vec3d transform(Vec3d point, T animatable) {
         float partialTicks = 0;
-        Matrix4 m = state.getGroupMatrix(stock, modelId, partialTicks);
+        Matrix4 m = state.getGroupMatrix(animatable, modelId, partialTicks);
         if (m == null) {
-            m = stock.getModelMatrix();
+            m = animatable.getModelMatrix();
         } else {
-            m = stock.getModelMatrix().multiply(m);
+            m = animatable.getModelMatrix().multiply(m);
         }
         return m.apply(point);
     }
 
     @Override
-    public Vec3d center(EntityRollingStock stock) {
-        return transform(part.center, (T)stock);
+    public Vec3d center(IAnimatable animatable) {
+        return transform(part.center, (T)animatable);
     }
 
     @Override
-    public IBoundingBox getBoundingBox(EntityRollingStock stock) {
+    public IBoundingBox getBoundingBox(IAnimatable animatable) {
         return IBoundingBox.from(
-                transform(part.min, (T)stock),
-                transform(part.max, (T)stock)
+                transform(part.min, (T)animatable),
+                transform(part.max, (T)animatable)
         );
     }
 
     /** Client only! */
     private Vec3d lastClientLook = null;
-    public float clientMovementDelta(Player player, EntityRollingStock stockRaw) {
+    public float clientMovementDelta(Player player, IAnimatable animatableRaw) {
         /*
           -X
         -Z * +Z
@@ -361,21 +360,21 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             return 1;
         }
 
-        T stock = (T)stockRaw;
+        T stock = (T)animatableRaw;
 
         float delta = 0;
 
-        Vec3d partPos = transform(center, stock).subtract(stock.getPosition());
-        Vec3d current = player.getPositionEyes().subtract(stock.getPosition());
+        Vec3d partPos = transform(center, stock).subtract(stock.asStock().getPosition());
+        Vec3d current = player.getPositionEyes().subtract(stock.asStock().getPosition());
         Vec3d look = player.getLookVector();
         // Rescale along look vector
         double len = 1 + current.add(look).distanceTo(partPos);
         current = current.add(look.scale(len));
-        current = current.rotateYaw(stock.getRotationYaw());
+        current = current.rotateYaw(stock.asStock().getRotationYaw());
 
         if (lastClientLook != null) {
             Vec3d movement = current.subtract(lastClientLook);
-            movement = movement.rotateYaw(-stock.getRotationYaw());
+            movement = movement.rotateYaw(-stock.asStock().getRotationYaw());
             float applied = Math.min(0.1f, (float) (movement.length()*1));
             if (rotationDegrees <= 180) {
                 float value = stock.getControlPosition(this);//getValue(stock);  // Does this work with invert???
@@ -411,16 +410,16 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         lastClientLook = null;
     }
 
-    public void effects(T stock) {
-        ControlSoundsDefinition sounds = stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
+    public void effects(T animatable) {
+        ControlSoundsDefinition sounds = animatable.asStock().getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
         if (sounds != null) {
-            sounds.effects(stock, stock.getControlPressed(this), stock.getControlPosition(this), center(stock));
+            sounds.effects(animatable.asStock(), animatable.asStock().getControlPressed(this), animatable.getControlPosition(this), center(animatable));
         }
     }
-    public void removed(T stock) {
-        ControlSoundsDefinition sounds = stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
+    public void removed(T animatable) {
+        ControlSoundsDefinition sounds = animatable.asStock().getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
         if (sounds != null) {
-            sounds.removed(stock);
+            sounds.removed(animatable.asStock());
         }
     }
 }

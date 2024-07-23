@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.LightDefinition;
+import cam72cam.immersiverailroading.registry.parts.LightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
@@ -112,8 +112,8 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         }
 
         ModelState mystate = state.push(builder -> builder
-                .add((ModelState.Lighter) (stock) ->
-                        new ModelState.LightState(null, null, blinkFullBright ? !isBlinkOff(stock) : !isLightOff(stock), null)
+                .add((ModelState.Lighter) (animatable) ->
+                        new ModelState.LightState(null, null, blinkFullBright ? !isBlinkOff(animatable.asStock()) : !isLightOff(animatable.asStock()), null)
                 )
         );
         mystate.include(component);

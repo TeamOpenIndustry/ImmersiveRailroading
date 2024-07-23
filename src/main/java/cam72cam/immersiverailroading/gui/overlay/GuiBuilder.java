@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.parts.ControlSoundsDefinition;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.util.MergedBlocks;
 import cam72cam.mod.MinecraftClient;
@@ -63,7 +63,7 @@ public class GuiBuilder {
     private final Float scaley;
 
     private final Map<Float, Integer> colors = new HashMap<>();
-    private final EntityRollingStockDefinition.ControlSoundsDefinition sound;
+    private final ControlSoundsDefinition sound;
 
     private final List<GuiBuilder> elements;
 
@@ -174,7 +174,7 @@ public class GuiBuilder {
         this.setting_default = data.getValue("setting_default").asFloat();
         this.texture_variant = data.getValue("texture_variant").asString();
         DataBlock soundBlock = data.getBlock("sound");
-        this.sound = soundBlock != null ? new EntityRollingStockDefinition.ControlSoundsDefinition(soundBlock) : null;
+        this.sound = soundBlock != null ? new ControlSoundsDefinition(soundBlock) : null;
         this.global = data.getValue("global").asBoolean(false);
         this.invert = data.getValue("invert").asBoolean(false);
         this.translucent = data.getValue("translucent").asBoolean(data.getValue("hide").asBoolean(false));

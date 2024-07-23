@@ -7,8 +7,8 @@ import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.Quilling;
+import cam72cam.immersiverailroading.registry.parts.SoundDefinition;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -24,11 +24,11 @@ public class Whistle {
     private final Quilling quilling;
     private final PartSound whistle;
 
-    public static Whistle get(ComponentProvider provider, ModelState state, Quilling quilling, EntityRollingStockDefinition.SoundDefinition fallback) {
+    public static Whistle get(ComponentProvider provider, ModelState state, Quilling quilling, SoundDefinition fallback) {
         return new Whistle(provider.parse(ModelComponentType.WHISTLE), state, quilling, fallback);
     }
 
-    public Whistle(ModelComponent whistle, ModelState state, Quilling quilling, EntityRollingStockDefinition.SoundDefinition fallback) {
+    public Whistle(ModelComponent whistle, ModelState state, Quilling quilling, SoundDefinition fallback) {
         this.component = whistle;
         this.quilling = quilling;
         this.whistle = new PartSound(fallback, true, 150, ConfigSound.SoundCategories.Locomotive.Steam::whistle);

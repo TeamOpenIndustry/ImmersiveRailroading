@@ -4,12 +4,13 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
+import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
 import cam72cam.mod.item.ItemStack;
@@ -101,9 +102,9 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     @Override
     protected void initStates() {
         super.initStates();
-        frontLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getFrontLocomotiveMatrix(s)));
+        frontLocomotive = base.push(settings -> settings.add((IAnimatable a, float partialTicks) -> getFrontLocomotiveMatrix(a.asStock())));
         frontLocomotiveRocking = addRoll(frontLocomotive);
-        rearLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getRearLocomotiveMatrix(s)));
+        rearLocomotive = base.push(settings -> settings.add((IAnimatable a, float partialTicks) -> getRearLocomotiveMatrix(a.asStock())));
         rearLocomotiveRocking = addRoll(rearLocomotive);
     }
 

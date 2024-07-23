@@ -6,6 +6,8 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.model.animation.ControlPositionMapper;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
@@ -27,10 +29,9 @@ import util.Matrix4;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable {
+public class EntityRollingStock extends CustomEntity implements ITickable, IClickable, IKillable, IAnimatable {
 	@TagField("defID")
     protected String defID;
 	@TagField("gauge")
@@ -265,6 +266,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return texture;
 	}
 
+    @Override
 	public Matrix4 getModelMatrix() {
 		return this.modelMatrix.get(getPosition()).copy();
 	}
@@ -277,6 +279,48 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	@TagField(value="controlPositions", mapper = ControlPositionMapper.class)
 	protected Map<String, Pair<Boolean, Float>> controlPositions = new HashMap<>();
 
+    @Override
+    public float defaultControlPosition(Control<?> control) {
+        return 0;
+    }
+
+    @Override
+    public Pair<Boolean, Float> getControlData(String control) {
+        return controlPositions.getOrDefault(control, Pair.of(false, 0f));
+    }
+
+    @Override
+    public Pair<Boolean, Float> getControlData(Control<?> control) {
+        return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, defaultControlPosition(control)));
+    }
+
+    @Override
+    public float getControlPosition(Control<?> control) {
+        return getControlData(control).getRight();
+    }
+
+    @Override
+    public float getControlPosition(String control) {
+        return getControlData(control).getRight();
+    }
+
+    @Override
+    public void setControlPosition(Control<?> control, float val) {
+        val = Math.min(1, Math.max(0, val));
+        controlPositions.put(control.controlGroup, Pair.of(getControlPressed(control), val));
+    }
+
+    @Override
+    public void setControlPosition(String control, float val) {
+        val = Math.min(1, Math.max(0, val));
+        controlPositions.put(control, Pair.of(false, val));
+    }
+
+    @Override
+    public void setControlPositions(ModelComponentType type, float val) {
+        getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
+    }
+
 	public void onDragStart(Control<?> control) {
 		setControlPressed(control, true);
 	}
@@ -287,73 +331,25 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 	}
 
 	public void onDragRelease(Control<?> control) {
-		setControlPressed(control, false);
+        setControlPressed(control, false);
 
-		if (control.toggle) {
-			setControlPosition(control, Math.abs(getControlPosition(control) - 1));
-		}
-		if (control.press) {
-			setControlPosition(control, 0);
-		}
-	}
+        if (control.toggle) {
+            setControlPosition(control, Math.abs(getControlPosition(control) - 1));
+        }
+        if (control.press) {
+            setControlPosition(control, 0);
+        }
+    }
 
-	protected float defaultControlPosition(Control<?> control) {
-		return 0;
-	}
+    public boolean getControlPressed(Control<?> control) {
+        return getControlData(control).getLeft();
+    }
 
-	public Pair<Boolean, Float> getControlData(String control) {
-		return controlPositions.getOrDefault(control, Pair.of(false, 0f));
-	}
-
-	public Pair<Boolean, Float> getControlData(Control<?> control) {
-		return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, defaultControlPosition(control)));
-	}
-
-	public boolean getControlPressed(Control<?> control) {
-		return getControlData(control).getLeft();
-	}
-
-	public void setControlPressed(Control<?> control, boolean pressed) {
-		controlPositions.put(control.controlGroup, Pair.of(pressed, getControlPosition(control)));
-	}
-
-	public float getControlPosition(Control<?> control) {
-		return getControlData(control).getRight();
-	}
-
-	public float getControlPosition(String control) {
-		return getControlData(control).getRight();
-	}
-
-	public void setControlPosition(Control<?> control, float val) {
-		val = Math.min(1, Math.max(0, val));
-		controlPositions.put(control.controlGroup, Pair.of(getControlPressed(control), val));
-	}
-
-	public void setControlPosition(String control, float val) {
-		val = Math.min(1, Math.max(0, val));
-		controlPositions.put(control, Pair.of(false, val));
-	}
-
-	public void setControlPositions(ModelComponentType type, float val) {
-		getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
-	}
+    public void setControlPressed(Control<?> control, boolean pressed) {
+        controlPositions.put(control.controlGroup, Pair.of(pressed, getControlPosition(control)));
+    }
 
 	public boolean playerCanDrag(Player player, Control<?> control) {
 		return control.part.type != ModelComponentType.INDEPENDENT_BRAKE_X || player.hasPermission(Permissions.BRAKE_CONTROL);
-	}
-
-
-	private static class ControlPositionMapper implements TagMapper<Map<String, Pair<Boolean, Float>>> {
-		@Override
-		public TagAccessor<Map<String, Pair<Boolean, Float>>> apply(
-				Class<Map<String, Pair<Boolean, Float>>> type,
-				String fieldName,
-				TagField tag) throws SerializationException {
-			return new TagAccessor<>(
-					(d, o) -> d.setMap(fieldName, o, Function.identity(), x -> new TagCompound().setBoolean("pressed", x.getLeft()).setFloat("pos", x.getRight())),
-					d -> d.getMap(fieldName, Function.identity(), x -> Pair.of(x.hasKey("pressed") && x.getBoolean("pressed"), x.getFloat("pos")))
-			);
-		}
 	}
 }

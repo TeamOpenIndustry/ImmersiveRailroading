@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
@@ -91,17 +92,17 @@ public class WalschaertsValveGear extends StephensonValveGear {
         state.include(todo);
 
         // This is pretty terrible
-        state = state.push(builder -> builder.add((ModelState.GroupAnimator) (stock, group, partialTicks) -> {
+        state = state.push(builder -> builder.add((ModelState.GroupAnimator) (animatable, group, partialTicks) -> {
 
-            float wheelAngle = super.angle(stock.distanceTraveled);
-            float reverser = stock instanceof Locomotive ? ((Locomotive) stock).getReverser() : 0;
+            float wheelAngle = super.angle(animatable.asStock().distanceTraveled);
+            float reverser = animatable instanceof Locomotive ? ((Locomotive) animatable).getReverser() : 0;
 
             // Center of the connecting rod, may not line up with a wheel directly
             Vec3d connRodPos = super.connectingRod.center;
             // Wheel Center is the center of all wheels, may not line up with a wheel directly
             // The difference between these centers is the radius of the connecting rod movement
             double connRodRadius = connRodPos.x - centerOfWheels.x;
-            // Find new connecting rod pos based on the connecting rod rod radius
+            // Find new connecting rod pos based on the connecting rod radius
             Vec3d connRodMovment = VecUtil.fromWrongYaw(connRodRadius, (float) wheelAngle);
 
 

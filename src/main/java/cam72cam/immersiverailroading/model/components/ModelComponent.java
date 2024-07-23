@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.model.components;
 
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.model.obj.OBJModel;
@@ -47,16 +47,16 @@ public class ModelComponent {
         return max.z - min.z;
     }
 
-    public Vec3d min(EntityRollingStock stock) {
-        return worldPosition(min, stock);
+    public Vec3d min(IAnimatable animatable) {
+        return worldPosition(min, animatable);
     }
 
-    public Vec3d center(EntityRollingStock stock) {
-        return worldPosition(center, stock);
+    public Vec3d center(IAnimatable animatable) {
+        return worldPosition(center, animatable);
     }
 
-    public Vec3d max(EntityRollingStock stock) {
-        return worldPosition(max, stock);
+    public Vec3d max(IAnimatable animatable) {
+        return worldPosition(max, animatable);
     }
 
     public static Vec3d center(List<ModelComponent> components) {
@@ -78,8 +78,8 @@ public class ModelComponent {
         return new Vec3d((minX + maxX)/2, (minY + maxY)/2, (minZ + maxZ)/2);
     }
 
-    public static Vec3d worldPosition(Vec3d pos, EntityRollingStock stock) {
-        return stock.getModelMatrix().apply(pos);
+    public static Vec3d worldPosition(Vec3d pos, IAnimatable animatable) {
+        return animatable.getModelMatrix().apply(pos);
     }
 
     public List<OBJGroup> groups() {
