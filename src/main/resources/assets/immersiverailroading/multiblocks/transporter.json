@@ -1,0 +1,57 @@
+{
+    "name": "demo1",
+    "type": "TRANSPORTER",
+
+    "width": 5,
+    "height": 4,
+    "length": 4,
+    "structure": {
+        "0,0,0": "light_engineering_block",
+        "1,0,0": "light_engineering_block",
+        "2,0,0": "light_engineering_block",
+        "3,0,0": "light_engineering_block",
+        "4,0,0": "light_engineering_block",
+        "0,1,0": "light_engineering_block",
+        "1,1,0": "light_engineering_block",
+        "2,1,0": "light_engineering_block",
+        "3,1,0": "light_engineering_block",
+        "4,1,0": "light_engineering_block",
+        "2,2,0": "light_engineering_block",
+        "2,2,1": "light_engineering_block",
+        "2,3,2": "light_engineering_block",
+        "2,2,3": "light_engineering_block"
+    },
+    "center": "2,0,0",
+    "model": "immersiverailroading:models/multiblocks/template.obj",
+
+    "item": {
+        "item_input_point": ["2,0,0"],
+        "redstone_control":true,
+        "redstone_control_point":"0,0,0",
+        "inventory_height": 3,
+        "inventory_width": 10,
+        "allow_throw_input": true,
+        "should_throw_output": true,
+        "initial_velocity": "6,2,6",
+
+        "animatrix": {
+            "anim": "immersiverailroading:models/multiblocks/template_item.anim",
+            "fps": 60,
+            "transport_frame": 120,
+            "items_output_per_loop": 5
+        }
+    },
+
+    "fluid": {
+        "fluid_handle_points": ["2,0,0"],
+        "pipes_to_stocks": true,
+        "tank_capability_mb": 20000,
+
+        "animatrix": {
+            "anim": "immersiverailroading:models/multiblocks/template_fluid.anim",
+            "fps": 60,
+            "transport_frame": 120,
+            "fluid_output_mb_per_loop": 5
+        }
+    }
+}

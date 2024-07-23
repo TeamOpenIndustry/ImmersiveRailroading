@@ -1,14 +1,14 @@
 {
-	"locomotives": [
-	],
-	"tender": [
-	],
-	"hand_car": [
-	],
-	"passenger": [
-	],
-	"freight": [
-	],
-	"tank": [
-	]
+    "locomotives": [
+    ],
+    "tender": [
+    ],
+    "hand_car": [
+    ],
+    "passenger": [
+    ],
+    "freight": [
+    ],
+    "tank": [
+    ]
 }

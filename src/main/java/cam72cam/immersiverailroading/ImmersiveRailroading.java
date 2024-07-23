@@ -78,6 +78,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
 				Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(MultiblockSelectCraftPacket::new, PacketDirection.ClientToServer);
+                Packet.register(MultiblockSetStockPacket::new, PacketDirection.ClientToServer);
 				Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 				Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
 				Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
@@ -113,6 +114,11 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
 				MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
 				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
+                for (String s : DefinitionManager.multiblocks.keySet()) {
+                    MultiblockRegistry.register(DefinitionManager.multiblocks.get(s).name,
+                            new CustomTransporterMultiblock(DefinitionManager.multiblocks.get(s)));
+                }
+                TileMultiblockRender.registerOthers();
 				IRFuzzy.applyFallbacks();
 				break;
 		}
