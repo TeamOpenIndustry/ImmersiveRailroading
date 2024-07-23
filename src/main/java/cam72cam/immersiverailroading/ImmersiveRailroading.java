@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.parts.ControlSoundsDefinition;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.item.*;
@@ -223,7 +223,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				});
 
 				ClientEvents.TICK.subscribe(GuiBuilder::onClientTick);
-				ClientEvents.TICK.subscribe(EntityRollingStockDefinition.ControlSoundsDefinition::cleanupStoppedSounds);
+				ClientEvents.TICK.subscribe(ControlSoundsDefinition::cleanupStoppedSounds);
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
 

@@ -15,7 +15,8 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
+import cam72cam.immersiverailroading.registry.parts.AnimationDefinition;
+import cam72cam.immersiverailroading.registry.parts.SoundDefinition;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
@@ -108,7 +109,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         };
 
         animations = new ArrayList<>();
-        for (EntityRollingStockDefinition.AnimationDefinition animDef : def.animations) {
+        for (AnimationDefinition animDef : def.animations) {
             if (animDef.valid()) {
                 animations.add(new StockAnimation(animDef, def.internal_model_scale));
             }
@@ -357,9 +358,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
         state.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
         state.rotate(sway.getRollDegrees(stock, partialTicks), 1, 0, 0);
-        controls.forEach(c -> c.postRender(stock, state, partialTicks));
-        doors.forEach(c -> c.postRender(stock, state, partialTicks));
-        gauges.forEach(c -> c.postRender(stock, state, partialTicks));
+        controls.forEach(c -> c.postRenderStock(stock, state, partialTicks));
+        doors.forEach(c -> c.postRenderStock(stock, state, partialTicks));
+        gauges.forEach(c -> c.postRenderStock(stock, state, partialTicks));
         headlights.forEach(x -> x.postRender(stock, state));
     }
 

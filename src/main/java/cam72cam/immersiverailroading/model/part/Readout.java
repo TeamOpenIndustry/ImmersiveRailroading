@@ -52,9 +52,9 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     }
 
     @Override
-    public void effects(T stock) {
-        super.effects(stock);
-        positions.put(stock.getUUID(), position.apply((T) stock));
+    public void effects(T animatable) {
+        super.effects(animatable);
+        positions.put(animatable.getUUID(), position.apply((T) animatable));
     }
 
     @Override

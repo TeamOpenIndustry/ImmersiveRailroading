@@ -1,21 +1,19 @@
 package cam72cam.immersiverailroading.model.animation;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.part.Control;
 import org.apache.commons.lang3.tuple.Pair;
+import util.Matrix4;
 
 public interface IAnimatable {
+    Matrix4 getModelMatrix();
+
     float defaultControlPosition(Control<?> control);
 
     Pair<Boolean, Float> getControlData(String control);
 
     Pair<Boolean, Float> getControlData(Control<?> control);
-
-    boolean getControlPressed(Control<?> control);
-
-    void setControlPressed(Control<?> control, boolean pressed);
 
     float getControlPosition(Control<?> control);
 

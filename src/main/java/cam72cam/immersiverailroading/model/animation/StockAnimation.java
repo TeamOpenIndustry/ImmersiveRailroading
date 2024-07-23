@@ -4,8 +4,8 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.model.part.PartSound;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition.AnimationMode;
+import cam72cam.immersiverailroading.registry.parts.AnimationDefinition;
+import cam72cam.immersiverailroading.registry.parts.AnimationDefinition.AnimationMode;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import util.Matrix4;
 
