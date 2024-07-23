@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.Permissions;
@@ -163,6 +164,12 @@ public class TileMultiblock extends BlockEntityTickable {
     /*
      * BlockType Functions to pass on to the multiblock
      */
+
+    @Override
+    public boolean tryBreak(Player player) {
+        return player.getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_LARGE_WRENCH);
+    }
+
     public void breakBlock() {
         if (getMultiblock() != null) {
             getMultiblock().onBreak();

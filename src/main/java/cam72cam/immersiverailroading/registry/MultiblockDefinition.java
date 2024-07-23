@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.render.multiblock.CustomMultiblockRender;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.resource.Identifier;
 
 import java.util.*;
 
@@ -97,8 +98,8 @@ public class MultiblockDefinition {
             this.inventoryHeight = item.getValue("inventory_height").asInteger();
             this.inventoryWidth = item.getValue("inventory_width").asInteger();
             this.itemOutputPoint = model.getHandlers("ITEM_OUTPUT").get(0);
-            this.itemOutputRatioBase = item.getValue("output_ratio_items_per_sec").asInteger() / 20;
-            this.itemOutputRatioMod = item.getValue("output_ratio_items_per_sec").asInteger() % 20;
+            this.itemOutputRatioBase = item.getValue("output_ratio_items_per_loop").asInteger() / 20;
+            this.itemOutputRatioMod = item.getValue("output_ratio_items_per_loop").asInteger() % 20;
 
             if (itemOutputPoint != null) {
                 this.allowThrowOutput = item.getValue("should_throw_output").asBoolean();
@@ -179,5 +180,21 @@ public class MultiblockDefinition {
             throw new IllegalArgumentException("Contains invalid vector: %s");
         }
         return new Vec3d(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
+    }
+
+    public static class MultiblockAnimation{
+        public final Identifier animatrix;
+        public final String animationMode;
+        public final float fps;
+        public final int transportTime;
+        public final int transportAmount;
+
+        public MultiblockAnimation(Identifier animatrix, String animationMode, int fps, int transportTime, int transportAmount) {
+            this.animatrix = animatrix;
+            this.animationMode = animationMode;
+            this.fps = fps;
+            this.transportTime = transportTime;
+            this.transportAmount = transportAmount;
+        }
     }
 }

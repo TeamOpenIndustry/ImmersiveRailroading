@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.fluid.ITank;
@@ -85,12 +84,11 @@ public class CustomTransporterMultiblock extends Multiblock {
     public class TransporterMbInstance extends MultiblockInstance {
         public final MultiblockDefinition def;
         private long ticks = 0;
-//        public HashMap<String, FreightTank> stockMap;
 
         public TransporterMbInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
             super(world, origin, rot);
             this.def = def;
-            storages.get(getPos(def.center)).refreshSelf(this, false);
+            storages.get(getPos(def.center)).onTick(this, false);
         }
 
         @Override
@@ -182,7 +180,6 @@ public class CustomTransporterMultiblock extends Multiblock {
                             case 270:
                                 vec3d = vec3d.add(0,0,-1);
                         }
-                        ModCore.info(String.valueOf((int) (this.getRotation() + 90)));
                         if (def.itemOutputRatioBase != 0) {
                             world.dropItem(handler.extract(slotIndex, def.itemOutputRatioBase, false),
                                     vec3d.rotateYaw(this.getRotation() + 90).add(origin),
@@ -200,7 +197,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             if (def.tankCapability != 0) {
                 //Handle fluid interaction with stock
                 if (def.fluidHandlePoints != null && def.center.equals(offset) && world.isServer && ticks % 10 == 0) {
-                    storages.get(getPos(def.center)).refreshSelf(this, true);
+                    storages.get(getPos(def.center)).onTick(this, true);
                 }
 
                 //Handle fluid interaction with pipe
@@ -260,7 +257,7 @@ public class CustomTransporterMultiblock extends Multiblock {
         }
     }
 
-    //A hack to storage some extra information bound with the instance
+    //A hack to storage some extra information with the instance
     public static class MultiblockStorager {
         public HashMap<String, FreightTank> stockMap = new HashMap<>();
         public HashMap<String, String> guiMap = new HashMap<>();
@@ -284,7 +281,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             this.targetStock = stockMap.getOrDefault(name, null);
         }
 
-        public boolean setAutoInteract(boolean autoFill) {
+        public boolean shouldAutoInteract(boolean autoFill) {
             if (fluidStatus == 0) {
                 this.autoInteract = autoFill;
                 return true;
@@ -292,7 +289,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             return false;
         }
 
-        public void refreshSelf(TransporterMbInstance instance, boolean handleFluid) {
+        public void onTick(TransporterMbInstance instance, boolean handleFluid) {
             final HashMap<String, FreightTank> refreshedStockMap = new HashMap<>();
             final HashMap<String, String> refreshedGuiStringMap = new HashMap<>();
             final List<Vec3i> refreshedTrackList = new LinkedList<>();

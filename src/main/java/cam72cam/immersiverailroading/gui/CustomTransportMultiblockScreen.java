@@ -65,13 +65,13 @@ public class CustomTransportMultiblockScreen implements IScreen {
                 @Override
                 public void onClick(Player.Hand hand) {
                     if (this.getText().equals("Enable auto fill")) {
-                        if (pack.setAutoInteract(true)) {
+                        if (pack.shouldAutoInteract(true)) {
                             selectButton.setEnabled(false);
                             tankSelector.setVisible(false);
                             this.setText("Disable auto fill");
                         }
                     } else {
-                        if (pack.setAutoInteract(false)) {
+                        if (pack.shouldAutoInteract(false)) {
                             selectButton.setEnabled(true);
                             this.setText("Enable auto fill");
                         }
@@ -102,13 +102,13 @@ public class CustomTransportMultiblockScreen implements IScreen {
                 @Override
                 public void onClick(Player.Hand hand) {
                     if (this.getText().equals("Enable auto drain")) {
-                        if (pack.setAutoInteract(true)) {
+                        if (pack.shouldAutoInteract(true)) {
                             selectButton.setEnabled(false);
                             tankSelector.setVisible(false);
                             this.setText("Disable auto drain");
                         }
                     } else {
-                        if (pack.setAutoInteract(false)) {
+                        if (pack.shouldAutoInteract(false)) {
                             selectButton.setEnabled(true);
                             this.setText("Enable auto drain");
                         }

@@ -21,8 +21,12 @@ import cam72cam.mod.world.World;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ItemLargeWrench extends CustomItem {
+    public static final ExecutorService pool = Executors.newFixedThreadPool(15);
+
 	public ItemLargeWrench() {
 		super(ImmersiveRailroading.MODID, "item_large_wrench");
 
@@ -76,9 +80,9 @@ public class ItemLargeWrench extends CustomItem {
 					}
 				}
 			}
-		} else if (player.hasPermission(Permissions.MACHINIST)) {
+		} else if (player.hasPermission(Permissions.MACHINIST) && world.isServer) {
 			for (String key : MultiblockRegistry.keys()) {
-				if (MultiblockRegistry.get(key).tryCreate(world, pos)) {
+				if (MultiblockRegistry.get(key).tryCreate(world, player, pos)) {
 					return ClickResult.ACCEPTED;
 				}
 			}
