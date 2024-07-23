@@ -2,11 +2,14 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.MultiblockModel;
 import cam72cam.immersiverailroading.multiblock.CustomTransporterMultiblock;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -17,7 +20,9 @@ import cam72cam.mod.render.opengl.VBO;
 import cam72cam.mod.resource.Identifier;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CustomMultiblockRender implements IMultiblockRender {
     public static final Vec3d north = new Vec3d(1, 0, 1);
@@ -63,16 +68,17 @@ public class CustomMultiblockRender implements IMultiblockRender {
 
         if (base != null) {
             try (OBJRender.Binding vbo = base.binder().bind(state)) {
-                vbo.draw(base.whitelist);
+                base.state.render(vbo, te, null, partialTicks);
             }
+
             if (MinecraftClient.isReady() && MinecraftClient.getPlayer().getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_MANUAL)) {
-                base.frames.render(state);
                 for (Vec3i track : CustomTransporterMultiblock.storages.get(te.getPos()).trackList) {
-                    RenderState state1 = state.clone().lighting(true).lightmap(1, 1).translate(-track.x, -track.y, -track.z);
-                    try (VBO.Binding vbo = fluid_output.binder().bind(state1)) {
+                    RenderState state2 = state.clone().lighting(true).lightmap(1, 1).translate(-track.x, -track.y, -track.z);
+                    try (VBO.Binding vbo = fluid_output.binder().bind(state2)) {
                         vbo.draw();
                     }
                 }
+                base.statics.render(state);
             }
         }
     }

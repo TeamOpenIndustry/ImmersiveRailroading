@@ -25,8 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ItemLargeWrench extends CustomItem {
-    public static final ExecutorService pool = Executors.newFixedThreadPool(15);
-
 	public ItemLargeWrench() {
 		super(ImmersiveRailroading.MODID, "item_large_wrench");
 

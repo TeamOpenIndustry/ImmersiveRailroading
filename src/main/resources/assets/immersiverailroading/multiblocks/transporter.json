@@ -33,12 +33,12 @@
         "allow_throw_input": true,
         "should_throw_output": true,
         "initial_velocity": "6,2,6",
+        "items_output_per_loop": 5,
 
         "animatrix": {
             "anim": "immersiverailroading:models/multiblocks/template_item.anim",
             "fps": 60,
-            "transport_frame": 120,
-            "items_output_per_loop": 5
+            "transport_frame": 120
         }
     },
 

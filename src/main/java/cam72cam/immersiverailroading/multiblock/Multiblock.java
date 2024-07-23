@@ -101,7 +101,6 @@ public abstract class Multiblock {
                 for (Vec3i offset : this.componentPositions) {
                     valid = valid && checkValid(world, origin, offset, rot);
                 }
-                ModCore.info("valid: " + valid);
                 if (valid) {
                     instance(world, origin, rot).onCreate();
                     return true;

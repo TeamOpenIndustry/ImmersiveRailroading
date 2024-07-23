@@ -97,9 +97,9 @@ public class MultiblockDefinition {
             this.allowThrowInput = item.getValue("allow_throw_input").asBoolean();
             this.inventoryHeight = item.getValue("inventory_height").asInteger();
             this.inventoryWidth = item.getValue("inventory_width").asInteger();
-            this.itemOutputPoint = model.getHandlers("ITEM_OUTPUT").get(0);
-            this.itemOutputRatioBase = item.getValue("output_ratio_items_per_loop").asInteger() / 20;
-            this.itemOutputRatioMod = item.getValue("output_ratio_items_per_loop").asInteger() % 20;
+            this.itemOutputPoint = model.itemOutputPoint.center.scale(-1);
+            this.itemOutputRatioBase = item.getValue("items_output_per_loop").asInteger() / 20;
+            this.itemOutputRatioMod = item.getValue("items_output_per_loop").asInteger() % 20;
 
             if (itemOutputPoint != null) {
                 this.allowThrowOutput = item.getValue("should_throw_output").asBoolean();
@@ -134,12 +134,12 @@ public class MultiblockDefinition {
         this.possibleTrackPositions = new HashSet<>();
         DataBlock fluid = object.getBlock("fluid");
         if (fluid != null) {
-            List<DataBlock.Value> fluids = fluid.getValues("pipe_interaction_points");
+            List<DataBlock.Value> fluids = fluid.getValues("fluid_handle_points");
             if (fluids != null) {
                 fluids.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(fluidHandlePoints::add);
             }
 
-            model.getHandlers("FLUID_HANDLER").forEach(vec3d ->
+            model.fluidHandlerPoints.stream().map(component -> component.center.scale(-1)).forEach(vec3d ->
                             fluidOutputPositions.stream()
                                     .map(vec3i -> vec3i.add(new Vec3i(vec3d.x, vec3d.y, vec3d.z)))
                                     .forEach(possibleTrackPositions::add));
@@ -167,7 +167,7 @@ public class MultiblockDefinition {
             return null;
         String[] split = origin.split(",");
         if (split.length != 3) {
-            throw new IllegalArgumentException("Contains invalid vector: %s");
+            throw new IllegalArgumentException("Invalid vector: %s");
         }
         return new Vec3i(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]));
     }
@@ -177,7 +177,7 @@ public class MultiblockDefinition {
             return null;
         String[] split = origin.split(",");
         if (split.length != 3) {
-            throw new IllegalArgumentException("Contains invalid vector: %s");
+            throw new IllegalArgumentException("Invalid vector: %s");
         }
         return new Vec3d(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
     }

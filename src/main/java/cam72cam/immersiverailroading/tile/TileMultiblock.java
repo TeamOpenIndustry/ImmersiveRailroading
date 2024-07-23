@@ -3,7 +3,11 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
+import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.model.animation.ControlPositionMapper;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
+import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.multiblock.CustomTransporterMultiblock;
 import cam72cam.immersiverailroading.multiblock.Multiblock.MultiblockInstance;
 import cam72cam.immersiverailroading.multiblock.MultiblockRegistry;
@@ -13,6 +17,7 @@ import cam72cam.mod.energy.Energy;
 import cam72cam.mod.energy.IEnergy;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.fluid.FluidTank;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.IInventory;
@@ -25,8 +30,13 @@ import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.BlockInfo;
+import org.apache.commons.lang3.tuple.Pair;
+import util.Matrix4;
 
-public class TileMultiblock extends BlockEntityTickable {
+import java.util.HashMap;
+import java.util.Map;
+
+public class TileMultiblock extends BlockEntityTickable implements IAnimatable {
 
     @TagField("replaced")
     private BlockInfo replaced;
@@ -341,5 +351,60 @@ public class TileMultiblock extends BlockEntityTickable {
     @Override
     public ItemStack onPick() {
         return ItemStack.EMPTY;
+    }
+
+    /*
+     * Animations
+     */
+
+    @TagSync
+    @TagField(value="controlPositions", mapper = ControlPositionMapper.class)
+    protected Map<String, Pair<Boolean, Float>> controlPositions = new HashMap<>();
+
+    @Override
+    public Matrix4 getModelMatrix() {
+        return null;
+    }
+
+    @Override
+    public float defaultControlPosition(Control<?> control) {
+        return 0;
+    }
+
+    @Override
+    public Pair<Boolean, Float> getControlData(String control) {
+        return controlPositions.getOrDefault(control, Pair.of(false, 0f));
+    }
+
+    @Override
+    public Pair<Boolean, Float> getControlData(Control<?> control) {
+        return controlPositions.getOrDefault(control.controlGroup, Pair.of(false, defaultControlPosition(control)));
+    }
+
+    @Override
+    public float getControlPosition(Control<?> control) {
+        return getControlData(control).getRight();
+    }
+
+    @Override
+    public float getControlPosition(String control) {
+        return getControlData(control).getRight();
+    }
+
+    @Override
+    public void setControlPosition(Control<?> control, float val) {
+//        val = Math.min(1, Math.max(0, val));
+//        controlPositions.put(control.controlGroup, Pair.of(getControlPressed(control), val));
+    }
+
+    @Override
+    public void setControlPosition(String control, float val) {
+        val = Math.min(1, Math.max(0, val));
+        controlPositions.put(control, Pair.of(false, val));
+    }
+
+    @Override
+    public void setControlPositions(ModelComponentType type, float val) {
+//        getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
     }
 }

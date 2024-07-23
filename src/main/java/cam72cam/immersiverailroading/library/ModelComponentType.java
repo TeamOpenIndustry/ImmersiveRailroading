@@ -115,6 +115,10 @@ public enum ModelComponentType {
 	BRAKE_PRESSURE_X("BRAKE_PRESSURE_#ID#"),
 	COUPLED_X("COUPLED_#ID#"),
 
+    //Multiblocks
+    FLUID_HANDLER("FLUID_HANDLER_#ID#"),
+    ITEM_OUTPUT("ITEM_OUTPUT"),
+
 	// REST
 	IMMERSIVERAILROADING_BASE_COMPONENT("IMMERSIVERAILROADING_BASE_COMPNOENT"),
 	REMAINING(""),
@@ -137,7 +141,9 @@ public enum ModelComponentType {
                 || group.contains("PRESSURE_VALVE_")
                 || group.contains("EXHAUST_")
                 || group.contains("CARGO_ITEMS")
-                || group.contains("CARGO_UNLOAD");
+                || group.contains("CARGO_UNLOAD")
+                || group.contains("FLUID_HANDLER")
+                || group.contains("ITEM_OUTPUT");
 	}
 
     public static class ModelPosition {

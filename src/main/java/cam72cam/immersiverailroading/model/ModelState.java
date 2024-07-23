@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.model;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.render.obj.OBJRender;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
@@ -258,10 +259,15 @@ public class ModelState {
             }
         }
 
-        // Required, TODO upstream checking or optional
-        LightState lighting = lighter.get(animatable);
-        boolean fullBright = lighting.fullBright != null && lighting.fullBright;
-        boolean hasInterior = lighting.hasInterior != null && lighting.hasInterior;
+
+        LightState lighting = null;
+        boolean fullBright = false;
+        boolean hasInterior = false;
+        if(lighter != null){
+            lighting = lighter.get(animatable);
+            fullBright = lighting.fullBright != null && lighting.fullBright;
+            hasInterior = lighting.hasInterior != null && lighting.hasInterior;
+        }
 
 
         Map<Pair<Float, Float>, List<String>> levels = new HashMap<>();
@@ -280,8 +286,7 @@ public class ModelState {
             lcgValue = lcgValue == null ? null : invertGroup ? 1 - lcgValue : lcgValue;
             Pair<Float, Float> key = null;
 
-            // TODO additional null checks around lighting fields
-            if (lcgValue == null || lcgValue > 0) {
+            if (lighting != null &&(lcgValue == null || lcgValue > 0)) {
                 if (fullBright && fullbrightGroup) {
                     key = Pair.of(1f, 1f);
                 } else if (lighting.interiorLight != null) {
