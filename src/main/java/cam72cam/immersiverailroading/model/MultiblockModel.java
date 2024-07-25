@@ -2,10 +2,11 @@ package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.animation.MultiblockAnimation;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
-import cam72cam.mod.ModCore;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.model.obj.OBJModel;
@@ -13,8 +14,11 @@ import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.render.opengl.VBO;
 import cam72cam.mod.resource.Identifier;
+import util.Matrix4;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MultiblockModel extends OBJModel {
     private static final OBJModel item_input;
@@ -49,8 +53,23 @@ public class MultiblockModel extends OBJModel {
         this.itemOutputPoint = provider.parse(ModelComponentType.ITEM_OUTPUT);
         this.fluidHandlerPoints = provider.parseAll(ModelComponentType.FLUID_HANDLER);
 
-        this.state = ModelState.construct(settings -> settings.add(
-                (ModelState.GroupVisibility) (animatable, group) -> !(group.contains("FLUID_HANDLER")||group.contains("ITEM_OUTPUT"))));
+        this.state = ModelState.construct(settings -> settings
+                .add((ModelState.GroupVisibility) (animatable, group) -> !(group.contains("FLUID_HANDLER")||group.contains("ITEM_OUTPUT")))
+                .add((ModelState.GroupAnimator) (animatable, group, partialTicks) -> {
+                    Matrix4 m = null;
+                    for (MultiblockAnimation animation : def.animations.values()) {
+                        Matrix4 found = animation.getMatrix((TileMultiblock) animatable, group, partialTicks);
+                        if (found != null) {
+                            if (m == null) {
+                                m = found;
+                            } else {
+                                m.multiply(found);
+                            }
+                        }
+                    }
+                    return m;
+                })
+        );
         this.state.include(itemOutputPoint);
         this.state.include(fluidHandlerPoints);
         this.state.include(provider.parse(ModelComponentType.WIDGET_X));
@@ -58,7 +77,7 @@ public class MultiblockModel extends OBJModel {
     }
 
     public void generateStaticModels(){
-        //Storage statics
+        //Storage static models along with the definition
         for (Vec3i input : definition.itemInputPoints) {
             statics.addCustom((s, t1) -> {
                 RenderState state1 = s.lighting(true).lightmap(1, 1).translate(-input.x, input.y, -input.z);

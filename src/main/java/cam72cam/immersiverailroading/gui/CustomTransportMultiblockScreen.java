@@ -1,8 +1,10 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.gui.components.ListSelector;
+import cam72cam.immersiverailroading.model.animation.MultiblockAnimation;
 import cam72cam.immersiverailroading.multiblock.CustomCrafterMultiblock;
 import cam72cam.immersiverailroading.multiblock.CustomTransporterMultiblock;
+import cam72cam.immersiverailroading.net.MultiblockControlChangePacket;
 import cam72cam.immersiverailroading.net.MultiblockSetStockPacket;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -12,12 +14,16 @@ import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.gui.screen.IScreen;
 import cam72cam.mod.gui.screen.IScreenBuilder;
+import cam72cam.mod.gui.screen.Slider;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.opengl.RenderState;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class CustomTransportMultiblockScreen implements IScreen {
     private final TileMultiblock tile;
@@ -26,6 +32,13 @@ public class CustomTransportMultiblockScreen implements IScreen {
 
     private String name;
     private final Map<String, Pair<ItemStack, Integer>> map = new HashMap<>();
+
+    private Button selectButton;
+    private Button autoInteract;
+    private Button controls;
+    private ControlGroupPanel panel;
+
+    private boolean renderInventory = true;
 
     public CustomTransportMultiblockScreen(TileMultiblock tile) {
         this.tile = tile;
@@ -40,6 +53,8 @@ public class CustomTransportMultiblockScreen implements IScreen {
 
     @Override
     public void init(IScreenBuilder screen) {
+        panel = new ControlGroupPanel(screen);
+
         CustomTransporterMultiblock.MultiblockStorager pack = CustomTransporterMultiblock.storages.get(tile.getPos());
 
         tankSelector = new ListSelector<String>(screen, (int) (GUIHelpers.getScreenWidth() / 2d - GUIHelpers.getScreenWidth() / 2.3d + 130),
@@ -49,14 +64,20 @@ public class CustomTransportMultiblockScreen implements IScreen {
                 new MultiblockSetStockPacket(option, pack).sendToServer();
             }
         };
-        Button selectButton;
-        Button autoInteract;
+        for(MultiblockAnimation animation : def.animations.values()){
+            panel.addButton(animation.def);
+        }
         if (def.isFluidToStocks) {
             //Outputs
-             selectButton = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4,
+            selectButton = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4,
                     120, 20, "Select fill target") {
                 @Override
                 public void onClick(Player.Hand hand) {
+                    renderInventory = tankSelector.isVisible();
+                    if(controls.getText().equals("Close control panel")) {
+                        controls.onClick(Player.Hand.PRIMARY);
+                        renderInventory = false;
+                    }
                     tankSelector.setVisible(!tankSelector.isVisible());
                 }
             };
@@ -68,6 +89,8 @@ public class CustomTransportMultiblockScreen implements IScreen {
                         if (pack.shouldAutoInteract(true)) {
                             selectButton.setEnabled(false);
                             tankSelector.setVisible(false);
+                            renderInventory = !controls.getText().equals("Close control panel");
+
                             this.setText("Disable auto fill");
                         }
                     } else {
@@ -94,6 +117,11 @@ public class CustomTransportMultiblockScreen implements IScreen {
                     120, 20, "Select drain source") {
                 @Override
                 public void onClick(Player.Hand hand) {
+                    renderInventory = tankSelector.isVisible();
+                    if(controls.getText().equals("Close control panel")) {
+                        controls.onClick(Player.Hand.PRIMARY);
+                        renderInventory = false;
+                    }
                     tankSelector.setVisible(!tankSelector.isVisible());
                 }
             };
@@ -105,6 +133,8 @@ public class CustomTransportMultiblockScreen implements IScreen {
                         if (pack.shouldAutoInteract(true)) {
                             selectButton.setEnabled(false);
                             tankSelector.setVisible(false);
+                            renderInventory = !controls.getText().equals("Close control panel");
+
                             this.setText("Disable auto drain");
                         }
                     } else {
@@ -137,7 +167,7 @@ public class CustomTransportMultiblockScreen implements IScreen {
             }
         };
 
-        if(def.tankCapability == 0){
+        if (def.tankCapability == 0) {
             selectButton.setText("Tank is unavailable");
             selectButton.setEnabled(false);
             autoInteract.setText("Tank is unavailable");
@@ -145,6 +175,24 @@ public class CustomTransportMultiblockScreen implements IScreen {
             delete.setText("Tank is unavailable");
             delete.setEnabled(false);
         }
+
+        controls = new Button(screen, (int) (-GUIHelpers.getScreenWidth() / 2.3d), GUIHelpers.getScreenHeight() / 4 + 60,
+                120, 20, "Open control panel") {
+            @Override
+            public void onClick(Player.Hand hand) {
+                if (this.getText().equals("Open control panel")) {
+                    if(tankSelector.isVisible()){
+                        tankSelector.setVisible(false);
+                    }
+                    renderInventory = false;
+                    this.setText("Close control panel");
+                } else {
+                    renderInventory = true;
+                    panel.disableAll();
+                    this.setText("Open control panel");
+                }
+            }
+        };
 
         screen.addButton(selectButton);
         screen.addButton(autoInteract);
@@ -177,7 +225,7 @@ public class CustomTransportMultiblockScreen implements IScreen {
         String fluidType;
         try {
             fluidType = tile.getFluidContainer().getContents().getFluid().ident.toLowerCase();
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             fluidType = "null";
         }
         GUIHelpers.drawCenteredString("Fluid: " + (fluidType.equals("empty") ? "null" : fluidType),
@@ -188,7 +236,7 @@ public class CustomTransportMultiblockScreen implements IScreen {
 
         matrix4.translate(GUIHelpers.getScreenWidth() / 16d + 150, GUIHelpers.getScreenHeight() / 16d, 0.5);
         Matrix4 matrix41 = matrix4.copy();
-        if (tankSelector != null && !tankSelector.isVisible()) {
+        if (renderInventory) {
             map.clear();
             for (int i = 0; i < tile.getContainer().getSlotCount(); i++) {
                 ItemStack stack = tile.getContainer().get(i);
@@ -207,7 +255,7 @@ public class CustomTransportMultiblockScreen implements IScreen {
                 return entry1.getKey().getDisplayName().compareTo(entry2.getKey().getDisplayName());
             });
 
-            GUIHelpers.drawCenteredString("Inventory" + (def.inventoryWidth * def.inventoryHeight == 0 ? " is unavailable":""),
+            GUIHelpers.drawCenteredString("Inventory" + (def.inventoryWidth * def.inventoryHeight == 0 ? " is unavailable" : ""),
                     50, 0, 0xFFFFFF, matrix4);
             for (int i = 0; i < list.size(); i++) {
                 if (map.get(list.get(i).getKey().getDisplayName()).getRight() != 0) {
@@ -222,6 +270,98 @@ public class CustomTransportMultiblockScreen implements IScreen {
                     GUIHelpers.drawCenteredString(" : " + list.get(i).getValue(), 30, 3, 0xFFFFFF, matrix41);
                 }
             }
+        } else if (controls.getText().equals("Close control panel")){
+            panel.refresh();
+            panel.draw();
+        }
+    }
+
+    private class ControlGroupPanel{
+        protected Button prevPage;
+        protected Button nextPage;
+        protected List<Button> buttons;
+
+        private IScreenBuilder builder;
+        private int page = 0;
+        private int yInPage = 0;
+
+        public ControlGroupPanel(IScreenBuilder builder) {
+            this.prevPage = new Button(builder, -5, -35,
+                    30, 20, "Prev") {
+                @Override
+                public void onClick(Player.Hand hand) {
+                    page --;
+                }
+            };
+
+            this.nextPage = new Button(builder, 125, -35,
+                    30, 20, "Next") {
+                @Override
+                public void onClick(Player.Hand hand) {
+                    page ++;
+                }
+            };
+
+            prevPage.setVisible(false);
+            nextPage.setVisible(false);
+
+            this.buttons = new LinkedList<>();
+            this.builder = builder;
+        }
+
+        protected void addButton(MultiblockDefinition.MultiblockAnimationDefinition def){
+            Pair<Boolean, Float> current = tile.getControlData(def.control_group);
+            Button button;
+            if(def.toggle){
+                button = new Button(builder, 0, -10 + yInPage * 20,
+                        150, 20, def.control_group + ": " + (tile.getControlPosition(def.control_group) == 1 ? "on" : "off")) {
+                    @Override
+                    public void onClick(Player.Hand hand) {
+                        setText(def.control_group + ": " + (tile.getControlPosition(def.control_group) == 1 ? "off" : "on"));
+                        new MultiblockControlChangePacket(tile.getPos(), def.control_group, 1 - tile.getControlPosition(def.control_group)).sendToServer();
+                    }
+                };
+            } else {
+                button = new Slider(builder, 0, -10 + yInPage * 20,
+                        def.control_group + ": ", 0, 1, tile.getControlPosition(def.control_group), true) {
+                    @Override
+                    public void onSlider() {
+                        new MultiblockControlChangePacket(tile.getPos(), def.control_group, (float) this.getValue()).sendToServer();
+                    }
+                };
+            }
+            button.setVisible(false);
+            buttons.add(button);
+            builder.addButton(button);
+
+            yInPage++;
+            if(yInPage >= 8){
+                yInPage = 0;
+            }
+        }
+
+        protected void draw(){
+            prevPage.setVisible(true);
+            nextPage.setVisible(true);
+            buttons.forEach(button -> button.setVisible(false));
+            for(int i = page * 8; i < Math.min(page * 8 + 8, buttons.size()); i++){
+                buttons.get(i).setVisible(true);
+            }
+        }
+
+        public void refresh() {
+            if(page == 0){
+                prevPage.setEnabled(false);
+            }
+            if(page * 8 + 8 >= buttons.size()){
+                nextPage.setEnabled(false);
+            }
+        }
+
+        public void disableAll() {
+            prevPage.setVisible(false);
+            nextPage.setVisible(false);
+            buttons.forEach(button -> button.setVisible(false));
         }
     }
 }

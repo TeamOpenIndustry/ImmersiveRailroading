@@ -7,6 +7,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 public interface IAnimatable {
+    //Add a control group map in the application classes
+
     Matrix4 getModelMatrix();
 
     float defaultControlPosition(Control<?> control);

@@ -1,13 +1,17 @@
 package cam72cam.immersiverailroading.registry;
 
+import cam72cam.immersiverailroading.library.AnimationMode;
 import cam72cam.immersiverailroading.library.MultiblockTypes;
 import cam72cam.immersiverailroading.model.MultiblockModel;
+import cam72cam.immersiverailroading.model.animation.Animatrix;
+import cam72cam.immersiverailroading.model.animation.MultiblockAnimation;
 import cam72cam.immersiverailroading.render.multiblock.CustomMultiblockRender;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.resource.Identifier;
 
+import java.io.IOException;
 import java.util.*;
 
 public class MultiblockDefinition {
@@ -35,9 +39,13 @@ public class MultiblockDefinition {
     public final boolean useRedstoneControl;
     public final Vec3i redstoneControlPoint;
 
+    public final MultiblockAnimationDefinition itemAnimation;
+    public float transportPercent = 0;
+    public int transportAmount = 0;
+    public float itemAnimFrameCount = 0;
+
     //fluids
     public final List<Vec3i> fluidHandlePoints;
-    public final Set<Vec3i> possibleTrackPositions;
     public final int tankCapability;
     public final boolean isFluidToStocks;//true is from pipe to stock, false is the opposite
     public final String autoInteractWithStocks;
@@ -45,27 +53,15 @@ public class MultiblockDefinition {
 //    public final int powerMaximumValue;
 //    public final DataBlock gui;
 
-
-    private static final List<Vec3i> fluidOutputPositions;//All relative possible positions for searching
-
-    static {
-        fluidOutputPositions = new ArrayList<>();
-        for (int x = -6; x <= 6; x++) {//Store the possible relative poses for fluid output in order to avoid more calculation
-            for (int y = 0; y > -8; y--) {
-                for (int z = -6; z <= 6; z++) {
-                    if (x * x + z * z <= 36) {//Radius == 6
-                        fluidOutputPositions.add(new Vec3i(x, y, z));
-                    }
-                }
-            }
-        }
-    }
+    //Animations
+    public final Map<String, MultiblockAnimation> animations;
 
     MultiblockDefinition(String multiblockID, DataBlock object) throws Exception {
         //Standards
         this.mbID = multiblockID;
         this.name = object.getValue("name").asString().toUpperCase();
         this.type = MultiblockTypes.valueOf(object.getValue("type").asString());
+        this.animations = new HashMap<>();
 
         //Structure
         this.length = object.getValue("length").asInteger();
@@ -97,11 +93,35 @@ public class MultiblockDefinition {
             this.allowThrowInput = item.getValue("allow_throw_input").asBoolean();
             this.inventoryHeight = item.getValue("inventory_height").asInteger();
             this.inventoryWidth = item.getValue("inventory_width").asInteger();
-            this.itemOutputPoint = model.itemOutputPoint.center.scale(-1);
-            this.itemOutputRatioBase = item.getValue("items_output_per_loop").asInteger() / 20;
-            this.itemOutputRatioMod = item.getValue("items_output_per_loop").asInteger() % 20;
+            if(item.getBlock("animation") != null){
+                this.itemOutputRatioBase = 0;
+                this.itemOutputRatioMod = 0;
 
-            if (itemOutputPoint != null) {
+                this.itemAnimation = new MultiblockAnimationDefinition(item.getBlock("animation"), "items");
+                this.animations.put("items", new MultiblockAnimation(itemAnimation));
+
+                int transportFrame = item.getBlock("animation").getValue("transport_frame").asInteger();
+                this.transportAmount = item.getBlock("animation").getValue("transport_amount_per_loop").asInteger();
+
+                try{
+                    this.itemAnimFrameCount = new Animatrix(this.itemAnimation.animatrix.getResourceStream(), 1).frameCount();
+                    this.transportPercent = (float) transportFrame / itemAnimFrameCount;
+                    if (transportPercent < 0 || transportPercent > 1) {
+                        throw new IllegalArgumentException(String.format("Invalid transport frame: must in range [0, %f]", itemAnimFrameCount));
+                    }
+                }catch (IOException e){
+                    this.itemAnimFrameCount = 0;
+                    ModCore.error(e.toString());
+                }
+            }else{
+                itemAnimation = null;
+                this.itemOutputRatioBase = item.getValue("items_output_per_sec").asInteger() / 20;
+                this.itemOutputRatioMod = item.getValue("items_output_per_sec").asInteger() % 20;
+            }
+
+            if (model.itemOutputPoint != null) {
+                this.itemOutputPoint = new Vec3d(-model.itemOutputPoint.center.x, model.itemOutputPoint.center.y, -model.itemOutputPoint.center.z);
+
                 this.allowThrowOutput = item.getValue("should_throw_output").asBoolean();
                 this.initialVelocity = toVec3d(item.getValue("initial_velocity").asString());
 
@@ -114,6 +134,7 @@ public class MultiblockDefinition {
             } else {
                 this.allowThrowOutput = false;
                 this.initialVelocity = Vec3d.ZERO;
+                this.itemOutputPoint = Vec3d.ZERO;
                 this.useRedstoneControl = false;
                 this.redstoneControlPoint = null;
             }
@@ -128,21 +149,16 @@ public class MultiblockDefinition {
             this.initialVelocity = Vec3d.ZERO;
             this.useRedstoneControl = false;
             this.redstoneControlPoint = null;
+            this.itemAnimation = null;
         }
 
         this.fluidHandlePoints = new LinkedList<>();
-        this.possibleTrackPositions = new HashSet<>();
         DataBlock fluid = object.getBlock("fluid");
         if (fluid != null) {
             List<DataBlock.Value> fluids = fluid.getValues("fluid_handle_points");
             if (fluids != null) {
                 fluids.stream().map(DataBlock.Value::asString).map(MultiblockDefinition::toVec3i).forEach(fluidHandlePoints::add);
             }
-
-            model.fluidHandlerPoints.stream().map(component -> component.center.scale(-1)).forEach(vec3d ->
-                            fluidOutputPositions.stream()
-                                    .map(vec3i -> vec3i.add(new Vec3i(vec3d.x, vec3d.y, vec3d.z)))
-                                    .forEach(possibleTrackPositions::add));
 
             this.tankCapability = fluid.getValue("tank_capability_mb").asInteger();
 
@@ -156,6 +172,20 @@ public class MultiblockDefinition {
             this.tankCapability = 0;
             this.isFluidToStocks = false;
             this.autoInteractWithStocks = null;
+        }
+
+
+        List<DataBlock> animationBlocks = object.getBlocks("animations");
+        if (animationBlocks != null) {
+            animationBlocks.stream()
+                    .map(block -> new MultiblockAnimationDefinition(block, null))
+                    .forEach(def -> {
+                        try {
+                            animations.put(def.control_group, new MultiblockAnimation(def));
+                        } catch (IOException e) {
+                            throw new RuntimeException("Invalid identifier of multiblock anim file");
+                        }
+                    });
         }
 
         model.generateStaticModels();
@@ -182,19 +212,19 @@ public class MultiblockDefinition {
         return new Vec3d(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
     }
 
-    public static class MultiblockAnimation{
-        public final Identifier animatrix;
-        public final String animationMode;
-        public final float fps;
-        public final int transportTime;
-        public final int transportAmount;
+    public static class MultiblockAnimationDefinition extends AnimationDefinition{
+        public final String control_group;
+        public final AnimationMode mode;
+        public final boolean toggle;
 
-        public MultiblockAnimation(Identifier animatrix, String animationMode, int fps, int transportTime, int transportAmount) {
-            this.animatrix = animatrix;
-            this.animationMode = animationMode;
-            this.fps = fps;
-            this.transportTime = transportTime;
-            this.transportAmount = transportAmount;
+        public MultiblockAnimationDefinition(DataBlock block, String cg) {
+            super(block);
+            control_group = cg == null ? block.getValue("control_group").asString() : cg;
+            if (control_group == null) {
+                throw new IllegalArgumentException(String.format("You must specify a control group for animation: %s", animatrix.toString()));
+            }
+            mode = AnimationMode.valueOf(block.getValue("mode").asString("LOOP").toUpperCase(Locale.ROOT));
+            toggle = block.getValue("toggle").asBoolean(true);
         }
     }
 }

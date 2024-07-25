@@ -35,23 +35,17 @@
         "initial_velocity": "6,2,6",
         "items_output_per_loop": 5,
 
-        "animatrix": {
-            "anim": "immersiverailroading:models/multiblocks/template_item.anim",
-            "fps": 60,
-            "transport_frame": 120
+        "animation": {
+            "animatrix": "immersiverailroading:models/multiblocks/temp.anim",
+            "frames_per_tick": 3,
+            "transport_frame": 60,
+            "transport_amount_per_loop": 10
         }
     },
 
     "fluid": {
         "fluid_handle_points": ["2,0,0"],
         "pipes_to_stocks": true,
-        "tank_capability_mb": 20000,
-
-        "animatrix": {
-            "anim": "immersiverailroading:models/multiblocks/template_fluid.anim",
-            "fps": 60,
-            "transport_frame": 120,
-            "fluid_output_mb_per_loop": 5
-        }
+        "tank_capability_mb": 20000
     }
 }

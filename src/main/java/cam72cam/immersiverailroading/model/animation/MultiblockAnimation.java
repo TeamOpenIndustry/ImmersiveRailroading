@@ -1,29 +1,26 @@
 package cam72cam.immersiverailroading.model.animation;
 
-import cam72cam.immersiverailroading.ConfigSound;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.AnimationMode;
-import cam72cam.immersiverailroading.model.part.PartSound;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableMap;
+import cam72cam.immersiverailroading.tile.TileMultiblock;
 import util.Matrix4;
 
 import java.io.IOException;
-import java.util.UUID;
 
-public class StockAnimation {
-    private final EntityRollingStockDefinition.StockAnimationDefinition def;
+//Modified from StockAnimation
+public class MultiblockAnimation {
     private final Animatrix animatrix;
-    private final ExpireableMap<UUID, Boolean> active;
-    private final ExpireableMap<UUID, Float> tickStart;
-    private final ExpireableMap<UUID, Float> tickStop;
+    private final ExpireableMap<String, Boolean> active;
+    private final ExpireableMap<String, Float> tickStart;
+    private final ExpireableMap<String, Float> tickStop;
     private final boolean looping;
-    private final PartSound sound;
 
-    public StockAnimation(EntityRollingStockDefinition.StockAnimationDefinition def, double internal_model_scale) throws IOException {
+    public final MultiblockDefinition.MultiblockAnimationDefinition def;
+
+    public MultiblockAnimation(MultiblockDefinition.MultiblockAnimationDefinition def) throws IOException {
         this.def = def;
-        this.animatrix = new Animatrix(def.animatrix.getResourceStream(), internal_model_scale);
+        this.animatrix = new Animatrix(def.animatrix.getResourceStream(), 1);
         tickStart = new ExpireableMap<>();
         tickStop = new ExpireableMap<>();
         active = new ExpireableMap<>();
@@ -39,11 +36,10 @@ public class StockAnimation {
             default:
                 looping = true;
         }
-        this.sound = def.sound != null ? new PartSound(def.sound, true, 20, ConfigSound.SoundCategories::animations) : null;
     }
 
-    public float getValue(EntityRollingStock stock) {
-        float value = def.control_group != null ? stock.getControlPosition(def.control_group) : def.readout.getValue(stock);
+    public float getValue(TileMultiblock tile) {
+        float value = tile.getControlPosition(def.control_group);
         value += def.offset;
         if (def.invert) {
             value = 1-value;
@@ -51,15 +47,15 @@ public class StockAnimation {
         return value;
     }
 
-    public float getPercent(EntityRollingStock stock, float partialTicks) {
-        float value = getValue(stock);
+    public float getPercent(TileMultiblock tile, float partialTicks) {
+        float value = getValue(tile);
 
         float total_ticks_per_loop = animatrix.frameCount() / def.frames_per_tick;
         if (def.mode == AnimationMode.LOOP_SPEED) {
             total_ticks_per_loop /= value;
         }
 
-        float tickCount = stock.getTickCount() + partialTicks;
+        float tickCount = tile.getRenderTicks() + partialTicks;
 
         switch (def.mode) {
             case VALUE:
@@ -67,7 +63,7 @@ public class StockAnimation {
             case PLAY_FORWARD:
             case PLAY_REVERSE:
             case PLAY_BOTH:
-                UUID key = stock.getUUID();
+                String key = tile.getPos().toString() + tile.getName();
                 float tickDelta;
                 if (value >= 0.95) {
                     // FORWARD
@@ -123,38 +119,7 @@ public class StockAnimation {
         return (tickCount % total_ticks_per_loop) / total_ticks_per_loop;
     }
 
-    public Matrix4 getMatrix(EntityRollingStock stock, String group, float partialTicks) {
-        return animatrix.groups().contains(group) ? animatrix.getMatrix(group, getPercent(stock, partialTicks), looping) : null;
-    }
-
-    public <ENTITY extends EntityMoveableRollingStock> void effects(ENTITY stock) {
-        if (sound != null) {
-            float volume = 0;
-            float pitch = 1;
-            switch (def.mode) {
-                case VALUE:
-                    volume = getValue(stock);
-                    break;
-                case PLAY_FORWARD:
-                case PLAY_REVERSE:
-                case PLAY_BOTH:
-                    volume = getPercent(stock, 0) > 0 && getPercent(stock, 0) < 1 ? 1 : 0;
-                    break;
-                case LOOP:
-                    volume = getValue(stock) > 0.95 ? 1 : 0;
-                    break;
-                case LOOP_SPEED:
-                    volume = getValue(stock) > 0 ? 1 : 0;
-                    pitch = getValue(stock);
-                    break;
-            }
-            sound.effects(stock, volume, pitch);
-        }
-    }
-
-    public <ENTITY extends EntityMoveableRollingStock> void removed(ENTITY stock) {
-        if (sound != null) {
-            sound.removed(stock);
-        }
+    public Matrix4 getMatrix(TileMultiblock tile, String group, float partialTicks) {
+        return animatrix.groups().contains(group) ? animatrix.getMatrix(group, getPercent(tile, partialTicks), looping) : null;
     }
 }

@@ -15,8 +15,6 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.registry.parts.AnimationDefinition;
-import cam72cam.immersiverailroading.registry.parts.SoundDefinition;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
@@ -109,7 +107,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         };
 
         animations = new ArrayList<>();
-        for (AnimationDefinition animDef : def.animations) {
+        for (EntityRollingStockDefinition.StockAnimationDefinition animDef : def.animations) {
             if (animDef.valid()) {
                 animations.add(new StockAnimation(animDef, def.internal_model_scale));
             }
@@ -117,7 +115,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         ModelState.GroupAnimator animators = (animatable, group, partialTicks) -> {
             Matrix4 m = null;
             for (StockAnimation animation : animations) {
-                Matrix4 found = animation.getMatrix((animatable.asStock()) , group, partialTicks);
+                Matrix4 found = animation.getMatrix(animatable.asStock(), group, partialTicks);
                 if (found != null) {
                     if (m == null) {
                         m = found;
@@ -149,8 +147,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         rearTrackers = new TrackFollowers(s -> new TrackFollower(s, bogeyRear != null ? bogeyRear.bogey : null,  bogeyRear != null ? bogeyRear.wheels : null, false));
 
         sndRand = (float) Math.random() / 10;
-        wheel_sound = new PartSound(new SoundDefinition(def.wheel_sound), true, 40, ConfigSound.SoundCategories.RollingStock::wheel);
-        slidingSound = new PartSound(new SoundDefinition(def.sliding_sound), true, 40, ConfigSound.SoundCategories.RollingStock::sliding);
+        wheel_sound = new PartSound(new EntityRollingStockDefinition.SoundDefinition(def.wheel_sound), true, 40, ConfigSound.SoundCategories.RollingStock::wheel);
+        slidingSound = new PartSound(new EntityRollingStockDefinition.SoundDefinition(def.sliding_sound), true, 40, ConfigSound.SoundCategories.RollingStock::sliding);
         flangeSound = new FlangeSound(def.flange_sound, true, 40);
         sway = new SwaySimulator();
     }
@@ -318,7 +316,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
         Binder binder = binder().texture(stock.getTexture()).lod(lod_level);
         try (
-                OBJRender.Binding bound = binder.bind(state);
+                OBJRender.Binding bound = binder.bind(state)
         ) {
             double backup = stock.distanceTraveled;
 
@@ -358,9 +356,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
         state.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
         state.rotate(sway.getRollDegrees(stock, partialTicks), 1, 0, 0);
-        controls.forEach(c -> c.postRenderStock(stock, state, partialTicks));
-        doors.forEach(c -> c.postRenderStock(stock, state, partialTicks));
-        gauges.forEach(c -> c.postRenderStock(stock, state, partialTicks));
+        controls.forEach(c -> c.postRender(stock, state, partialTicks));
+        doors.forEach(c -> c.postRender(stock, state, partialTicks));
+        gauges.forEach(c -> c.postRender(stock, state, partialTicks));
         headlights.forEach(x -> x.postRender(stock, state));
     }
 

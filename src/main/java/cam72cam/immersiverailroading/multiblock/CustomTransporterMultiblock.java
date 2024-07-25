@@ -18,25 +18,35 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Added a way of customizing your own multiblocks
  */
 public class CustomTransporterMultiblock extends Multiblock {
-    /*TODO:
-     * use Animatrix to Produce animation(I/O for factory)(NOT NOW)
-     * REWRITE CURRENT ANIMATION TO FIT MB(NOT NOW)
-     * new readouts(NOT NOW)
+    /*
+     * use Animatrix to Produce animation(I/O for factory)(DONE)
+     * REWRITE CURRENT ANIMATION TO FIT MB(DONE)
+     * new readouts(DONE)
      * rewrite manual
      */
     private final MultiblockDefinition def;
     public static final HashMap<Vec3i, MultiblockStorager> storages;
+    private static final List<Vec3i> fluidOutputPositions;//All relative possible positions for searching
 
     static {
+        fluidOutputPositions = new ArrayList<>();
         storages = new HashMap<>();
+        for (int x = -6; x <= 6; x++) {//Store the possible relative poses for fluid output in order to avoid more calculation
+            for (int y = 0; y > -8; y--) {
+                for (int z = -6; z <= 6; z++) {
+                    if (x * x + z * z <= 36) {//Radius == 6
+                        fluidOutputPositions.add(new Vec3i(x, y, z));
+                    }
+                }
+            }
+        }
     }
 
     public CustomTransporterMultiblock(MultiblockDefinition def) {
@@ -85,6 +95,9 @@ public class CustomTransporterMultiblock extends Multiblock {
         public final MultiblockDefinition def;
         private long ticks = 0;
 
+        private transient int transportCooldown;
+        private transient boolean shouldRefreshControlData = true;
+
         public TransporterMbInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
             super(world, origin, rot);
             this.def = def;
@@ -119,89 +132,31 @@ public class CustomTransporterMultiblock extends Multiblock {
         public void tick(Vec3i offset) {
             this.ticks += 1;
 
+            if(shouldRefreshControlData && def.center.equals(offset)){
+                def.animations.keySet().stream()
+                        .filter(s -> !getTile(offset).getControlPositions().containsKey(s))
+                        .forEach(s -> getTile(offset).setControlPosition(s, 0));
+                shouldRefreshControlData = false;
+            }
+
             if (def.inventoryHeight * def.inventoryWidth != 0) {
-                if (def.itemInputPoints.contains(offset)) {
-                    //Handle item(thrown) input
-                    if (def.allowThrowInput) {
-                        Vec3d vec3d = new Vec3d(getPos(offset));
-                        List<ItemStack> stacks = world.getDroppedItems(IBoundingBox.from(
-                                vec3d.subtract(0.5, 0.5, 0.5), vec3d.add(1.5, 1.5, 1.5)));
-                        ItemStackHandler handler = this.getTile(def.center)
-                                .getContainer();
-                        if (!stacks.isEmpty()) {
-                            for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
-                                ItemStack stack = stacks.get(fromSlot);
-                                int origCount = stack.getCount();
-
-                                if (stack.isEmpty()) {
-                                    continue;
-                                }
-
-                                for (int toSlot = 0; toSlot < handler.getSlotCount(); toSlot++) {
-                                    stack.setCount(handler.insert(toSlot, stack, false).getCount());
-                                    if (stack.isEmpty()) {
-                                        break;
-                                    }
-                                }
-
-                                if (origCount != stack.getCount()) {
-                                    stacks.set(fromSlot, stack);
-                                }
-                            }
-                        }
-                    }
+                if (def.itemInputPoints.contains(offset) && def.allowThrowInput) {
+                    receiveItems(offset);
                 }
 
-                //Handle item output
                 if (def.center.equals(offset)) {
-                    if (def.redstoneControlPoint == null) {
-                        if (def.useRedstoneControl)
-                            return;
-
-                    }
-                    if (def.redstoneControlPoint == null || world.getRedstone(getPos(def.redstoneControlPoint)) != 0 && def.allowThrowOutput) {
-                        ItemStackHandler handler = getTile(def.center).getContainer();
-                        int slotIndex = handler.getSlotCount() - 1;
-                        while (handler.get(slotIndex).getCount() == 0) {
-                            slotIndex--;
-                            if (slotIndex == -1) {
-                                return;
-                            }
-                        }
-                        Vec3d vec3d = new Vec3d(def.itemOutputPoint.internal());
-                        switch ((int) (this.getRotation() + 90)) {
-                            case 180:
-                                vec3d = vec3d.add(-1, 0, -1);
-                                break;
-                            case 90:
-                                vec3d = vec3d.add(-1,0,0);
-                                break;
-                            case -90:
-                            case 270:
-                                vec3d = vec3d.add(0,0,-1);
-                        }
-                        if (def.itemOutputRatioBase != 0) {
-                            world.dropItem(handler.extract(slotIndex, def.itemOutputRatioBase, false),
-                                    vec3d.rotateYaw(this.getRotation() + 90).add(origin),
-                                    def.initialVelocity.rotateYaw(this.getRotation() + 90).scale(0.05));
-                        }
-                        if (ticks % 20 <= def.itemOutputRatioMod) {
-                            world.dropItem(handler.extract(slotIndex, 1, false),
-                                    vec3d.rotateYaw(this.getRotation() + 90).add(origin),
-                                    def.initialVelocity.rotateYaw(this.getRotation() + 90).scale(0.05));
-                        }
-                    }
+                    extractItems(offset);
                 }
             }
 
             if (def.tankCapability != 0) {
                 //Handle fluid interaction with stock
-                if (def.fluidHandlePoints != null && def.center.equals(offset) && world.isServer && ticks % 10 == 0) {
+                if (def.fluidHandlePoints != null && def.center.equals(offset) && ticks % 10 == 0) {
                     storages.get(getPos(def.center)).onTick(this, true);
                 }
 
                 //Handle fluid interaction with pipe
-                if (!def.isFluidToStocks && def.fluidHandlePoints.contains(offset) && world.isServer) {
+                if (!def.isFluidToStocks && def.fluidHandlePoints.contains(offset)) {
                     Vec3i pos = getPos(offset);
                     List<ITank> tanks = new LinkedList<>();
                     for (Facing facing : Facing.values()) {
@@ -211,6 +166,100 @@ public class CustomTransporterMultiblock extends Multiblock {
                     }
 
                     tanks.forEach(t -> t.drain(getTile(def.center).getFluidContainer(), 50, false));
+                }
+            }
+        }
+
+        private void receiveItems(Vec3i offset) {
+            Vec3d vec3d = new Vec3d(getPos(offset));
+            List<ItemStack> stacks = world.getDroppedItems(IBoundingBox.from(
+                    vec3d.subtract(0.5, 0.5, 0.5), vec3d.add(1.5, 1.5, 1.5)));
+            ItemStackHandler handler = this.getTile(def.center)
+                    .getContainer();
+            if (!stacks.isEmpty()) {
+                for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
+                    ItemStack stack = stacks.get(fromSlot);
+                    int origCount = stack.getCount();
+
+                    if (stack.isEmpty()) {
+                        continue;
+                    }
+
+                    for (int toSlot = 0; toSlot < handler.getSlotCount(); toSlot++) {
+                        stack.setCount(handler.insert(toSlot, stack, false).getCount());
+                        if (stack.isEmpty()) {
+                            break;
+                        }
+                    }
+
+                    if (origCount != stack.getCount()) {
+                        stacks.set(fromSlot, stack);
+                    }
+                }
+            }
+        }
+
+        private void extractItems(Vec3i offset) {
+            transportCooldown--;
+            if (def.redstoneControlPoint == null && def.useRedstoneControl) {
+                return;
+            }
+            if ((def.redstoneControlPoint == null || world.getRedstone(getPos(def.redstoneControlPoint)) != 0) && def.allowThrowOutput) {
+                ItemStackHandler handler = getTile(def.center).getContainer();
+                int slotIndex = handler.getSlotCount() - 1;
+                while (handler.get(slotIndex).getCount() == 0) {
+                    slotIndex--;
+                    if (slotIndex == -1) {
+                        if (def.animations.get("items").getPercent(getTile(offset), 0) <= 0.05 ||
+                                def.animations.get("items").getPercent(getTile(offset), 0) >=0.95) {
+                            getTile(offset).setControlPosition("items", 0);
+                        }
+                        return;
+                    }
+                }
+                Vec3d vec3d = new Vec3d(def.itemOutputPoint.internal());
+                switch ((int) (this.getRotation() + 90)) {
+                    case 180:
+                        vec3d = vec3d.add(-1, 0, -1);
+                        break;
+                    case 90:
+                        vec3d = vec3d.add(-1, 0, 0);
+                        break;
+                    case -90:
+                    case 270:
+                        vec3d = vec3d.add(0, 0, -1);
+                }
+
+                if (getTile(offset).getControlData("items") == null) {
+                    getTile(offset).setControlPosition("items", 0);
+                }
+                getTile(offset).setControlPosition("items", 1);
+                if (def.itemAnimation != null) {
+                    if(world.isServer){
+                        if (Math.abs(def.animations.get("items").getPercent(getTile(offset), 0) - def.transportPercent) <= 0.05
+                                && transportCooldown <= 0) {
+                            world.dropItem(handler.extract(slotIndex, def.transportAmount, false),
+                                    vec3d.rotateYaw(this.getRotation() + 90).add(origin),
+                                    def.initialVelocity.rotateYaw(this.getRotation() + 90).scale(0.05));
+                            transportCooldown = (int) (def.itemAnimFrameCount / def.itemAnimation.frames_per_tick) - 4;
+                        }
+                    }
+                } else {
+                    if (def.itemOutputRatioBase != 0) {
+                        world.dropItem(handler.extract(slotIndex, def.itemOutputRatioBase, false),
+                                vec3d.rotateYaw(this.getRotation() + 90).add(origin),
+                                def.initialVelocity.rotateYaw(this.getRotation() + 90).scale(0.05));
+                    }
+                    if (ticks % 20 <= def.itemOutputRatioMod) {
+                        world.dropItem(handler.extract(slotIndex, 1, false),
+                                vec3d.rotateYaw(this.getRotation() + 90).add(origin),
+                                def.initialVelocity.rotateYaw(this.getRotation() + 90).scale(0.05));
+                    }
+                }
+            } else {
+                if (def.animations.get("items").getPercent(getTile(offset), 0) <= 0.05 ||
+                        def.animations.get("items").getPercent(getTile(offset), 0) >=0.95) {
+                    getTile(offset).setControlPosition("items", 0);
                 }
             }
         }
@@ -259,6 +308,10 @@ public class CustomTransporterMultiblock extends Multiblock {
 
     //A hack to storage some extra information with the instance
     public static class MultiblockStorager {
+        private final MultiblockDefinition def;
+        private final Set<Vec3i> possibleTrackPositions;
+        private Set<Vec3i> stockFluidHandlerPoints;
+
         public HashMap<String, FreightTank> stockMap = new HashMap<>();
         public HashMap<String, String> guiMap = new HashMap<>();
         public List<Vec3i> trackList = new LinkedList<>();
@@ -267,7 +320,11 @@ public class CustomTransporterMultiblock extends Multiblock {
         public boolean autoInteract = false;
 
         public MultiblockStorager(MultiblockDefinition def) {
-            if(def.autoInteractWithStocks == null){
+            this.def = def;
+            this.stockFluidHandlerPoints = new HashSet<>();
+            this.possibleTrackPositions = new HashSet<>();
+
+            if (def.autoInteractWithStocks == null) {
                 fluidStatus = 0;
             } else if (def.autoInteractWithStocks.equals("true")) {
                 fluidStatus = 1;
@@ -289,7 +346,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             return false;
         }
 
-        public void onTick(TransporterMbInstance instance, boolean handleFluid) {
+        public void onTick(TransporterMbInstance instance, boolean handle) {
             final HashMap<String, FreightTank> refreshedStockMap = new HashMap<>();
             final HashMap<String, String> refreshedGuiStringMap = new HashMap<>();
             final List<Vec3i> refreshedTrackList = new LinkedList<>();
@@ -300,7 +357,7 @@ public class CustomTransporterMultiblock extends Multiblock {
                     : instance.rot;//Rotate back
 
             //What if we add an event that is fired when the track map is updated...
-            for (Vec3i position : instance.def.possibleTrackPositions) {
+            for (Vec3i position : possibleTrackPositions) {
                 position = position.rotate(instance.rot).add(instance.origin);
                 TileRailBase tile = instance.world.getBlockEntity(position, TileRailBase.class);
                 if (tile != null) {
@@ -323,7 +380,10 @@ public class CustomTransporterMultiblock extends Multiblock {
                 this.targetStock = null;
             }
 
-            if (handleFluid) {//Avoid NullPointerException caused by initialization
+            if (handle) {//Avoid NullPointerException caused by initialization
+                if(instance.world.isServer){
+                    refreshTrackPositions(instance.getTile(instance.def.center));
+                }
                 if (instance.def.isFluidToStocks) {//Output to stock
                     if (fluidStatus == 0) {//Output controlled by gui
                         if (autoInteract) {//Output to all available tanks
@@ -357,6 +417,24 @@ public class CustomTransporterMultiblock extends Multiblock {
                         }
                     }
                 }
+            }
+        }
+
+
+        public void refreshTrackPositions(TileMultiblock tile){
+            Set<Vec3i> vecs = def.model.fluidHandlerPoints.stream()
+                    .map(component -> {
+                        return def.model.state.getGroupMatrix(tile, component.key, 0).apply(component.center);
+                    })
+                    .map(vec3d -> new Vec3i(vec3d.x, vec3d.y, vec3d.z))
+                    .collect(Collectors.toSet());
+            if(vecs.stream().anyMatch(vec3d -> !stockFluidHandlerPoints.contains(vec3d))){
+                this.stockFluidHandlerPoints = vecs;
+                possibleTrackPositions.clear();
+                this.stockFluidHandlerPoints.forEach(vec3d ->
+                        fluidOutputPositions.stream()
+                                .map(vec3i -> vec3i.add(new Vec3i(-vec3d.x, vec3d.y, -vec3d.z)))
+                                .forEach(possibleTrackPositions::add));
             }
         }
     }

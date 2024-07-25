@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.registry.parts.SoundDefinition;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.sound.ISound;
 
@@ -9,13 +9,13 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public class PartSound {
-    private final SoundDefinition def;
+    private final EntityRollingStockDefinition.SoundDefinition def;
     private final boolean canLoop;
     private final float attenuationDistance;
     private final Supplier<Float> category;
 
 
-    public PartSound(SoundDefinition def, boolean canLoop, float attenuationDistance, Supplier<Float> category) {
+    public PartSound(EntityRollingStockDefinition.SoundDefinition def, boolean canLoop, float attenuationDistance, Supplier<Float> category) {
         this.def = def;
         this.canLoop = canLoop;
         this.attenuationDistance = attenuationDistance;

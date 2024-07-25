@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.tile;
 
-import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -107,8 +106,6 @@ public class TileMultiblock extends BlockEntityTickable implements IAnimatable {
     public void update() {
         this.ticks += 1;
 
-        this.isCustom = this.getMultiblock() instanceof CustomTransporterMultiblock.TransporterMbInstance;
-
         if (offset != null && getMultiblock() != null) {
             this.getMultiblock().tick(offset);
         } else if (ticks > 20) {
@@ -174,11 +171,6 @@ public class TileMultiblock extends BlockEntityTickable implements IAnimatable {
     /*
      * BlockType Functions to pass on to the multiblock
      */
-
-    @Override
-    public boolean tryBreak(Player player) {
-        return player.getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_LARGE_WRENCH);
-    }
 
     public void breakBlock() {
         if (getMultiblock() != null) {
@@ -406,5 +398,9 @@ public class TileMultiblock extends BlockEntityTickable implements IAnimatable {
     @Override
     public void setControlPositions(ModelComponentType type, float val) {
 //        getDefinition().getModel().getControls().stream().filter(x -> x.part.type == type).forEach(c -> setControlPosition(c, val));
+    }
+
+    public Map<String, Pair<Boolean, Float>> getControlPositions() {
+        return controlPositions;
     }
 }
