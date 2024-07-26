@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.fluid.ITank;
@@ -17,6 +18,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
+import util.Matrix4;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -424,17 +426,19 @@ public class CustomTransporterMultiblock extends Multiblock {
         public void refreshTrackPositions(TileMultiblock tile){
             Set<Vec3i> vecs = def.model.fluidHandlerPoints.stream()
                     .map(component -> {
-                        return def.model.state.getGroupMatrix(tile, component.key, 0).apply(component.center);
+                        Matrix4 matrix = def.model.state.getGroupMatrix(tile, component.key, 0);
+                        return matrix != null ? matrix.apply(component.center) : VecUtil.IDENTITY_MATRIX.apply(component.center);
                     })
-                    .map(vec3d -> new Vec3i(vec3d.x, vec3d.y, vec3d.z))
+                    .map(vec3d -> new Vec3i(-vec3d.x, vec3d.y, -vec3d.z))
                     .collect(Collectors.toSet());
-            if(vecs.stream().anyMatch(vec3d -> !stockFluidHandlerPoints.contains(vec3d))){
+            if(vecs.stream().anyMatch(vec3i -> !stockFluidHandlerPoints.contains(vec3i))){
                 this.stockFluidHandlerPoints = vecs;
                 possibleTrackPositions.clear();
-                this.stockFluidHandlerPoints.forEach(vec3d ->
-                        fluidOutputPositions.stream()
-                                .map(vec3i -> vec3i.add(new Vec3i(-vec3d.x, vec3d.y, -vec3d.z)))
-                                .forEach(possibleTrackPositions::add));
+                this.stockFluidHandlerPoints.forEach(vec -> {
+                    fluidOutputPositions.stream()
+                            .map(vec3i -> vec3i.add(new Vec3i(vec.x, vec.y, vec.z)))
+                            .forEach(possibleTrackPositions::add);
+                });
             }
         }
     }

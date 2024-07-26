@@ -5,6 +5,11 @@ import cam72cam.mod.util.FastMath;
 import util.Matrix4;
 
 public class VecUtil {
+    public static final Matrix4 IDENTITY_MATRIX = new Matrix4(1,0,0,0,
+                                                              0,1,0,0,
+                                                              0,0,1,0,
+                                                              0,0,0,1);
+
 	private VecUtil() {
 		// Disable construction since java does not have static classes
 	}
