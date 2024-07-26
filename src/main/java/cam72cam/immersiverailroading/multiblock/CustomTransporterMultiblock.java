@@ -35,20 +35,10 @@ public class CustomTransporterMultiblock extends Multiblock {
      */
     private final MultiblockDefinition def;
     public static final HashMap<Vec3i, MultiblockStorager> storages;
-    private static final List<Vec3i> fluidOutputPositions;//All relative possible positions for searching
+    private final List<Vec3i> fluidOutputPositions;//All relative possible positions for searching
 
     static {
-        fluidOutputPositions = new ArrayList<>();
         storages = new HashMap<>();
-        for (int x = -6; x <= 6; x++) {//Store the possible relative poses for fluid output in order to avoid more calculation
-            for (int y = 0; y > -8; y--) {
-                for (int z = -6; z <= 6; z++) {
-                    if (x * x + z * z <= 36) {//Radius == 6
-                        fluidOutputPositions.add(new Vec3i(x, y, z));
-                    }
-                }
-            }
-        }
     }
 
     public CustomTransporterMultiblock(MultiblockDefinition def) {
@@ -57,6 +47,19 @@ public class CustomTransporterMultiblock extends Multiblock {
         //The center block should be built first...
         componentPositions.remove(def.center);
         componentPositions.add(0, def.center);
+
+        fluidOutputPositions = new ArrayList<>();
+        int bound = (int) Math.ceil(def.interactRadius);
+        float distance = def.interactRadius * def.interactRadius;
+        for (int x = -bound; x <= bound; x++) {//Store the possible relative poses for fluid output in order to avoid more calculation
+            for (int y = 0; y > -8; y--) {
+                for (int z = -bound; z <= bound; z++) {
+                    if (x * x + z * z <= distance) {
+                        fluidOutputPositions.add(new Vec3i(x, y, z));
+                    }
+                }
+            }
+        }
     }
 
     private static FuzzyProvider[][][] parseStructure(MultiblockDefinition def) {
@@ -153,7 +156,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
             if (def.tankCapability != 0) {
                 //Handle fluid interaction with stock
-                if (def.fluidHandlePoints != null && def.center.equals(offset) && ticks % 10 == 0) {
+                if (!def.fluidHandlePoints.isEmpty() && def.center.equals(offset) && ticks % 10 == 0) {
                     storages.get(getPos(def.center)).onTick(this, true);
                 }
 
@@ -309,7 +312,7 @@ public class CustomTransporterMultiblock extends Multiblock {
     }
 
     //A hack to storage some extra information with the instance
-    public static class MultiblockStorager {
+    public class MultiblockStorager {
         private final MultiblockDefinition def;
         private final Set<Vec3i> possibleTrackPositions;
         private Set<Vec3i> stockFluidHandlerPoints;
@@ -434,11 +437,9 @@ public class CustomTransporterMultiblock extends Multiblock {
             if(vecs.stream().anyMatch(vec3i -> !stockFluidHandlerPoints.contains(vec3i))){
                 this.stockFluidHandlerPoints = vecs;
                 possibleTrackPositions.clear();
-                this.stockFluidHandlerPoints.forEach(vec -> {
-                    fluidOutputPositions.stream()
-                            .map(vec3i -> vec3i.add(new Vec3i(vec.x, vec.y, vec.z)))
-                            .forEach(possibleTrackPositions::add);
-                });
+                this.stockFluidHandlerPoints.forEach(vec -> fluidOutputPositions.stream()
+                        .map(vec3i -> vec3i.add(new Vec3i(vec.x, vec.y, vec.z)))
+                        .forEach(possibleTrackPositions::add));
             }
         }
     }

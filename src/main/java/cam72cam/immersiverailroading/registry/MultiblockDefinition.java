@@ -22,12 +22,12 @@ public class MultiblockDefinition {
     public int height;
     public int width;
     public int length;
-    public final HashMap<Vec3i, String> structure;
+    public final HashMap<Vec3i, String> structure = new HashMap<>();
     public final Vec3i center;
     public final MultiblockModel model;//-x is left, +y is front, origin in blender is origin in game
 
     //items
-    public final List<Vec3i> itemInputPoints;
+    public final List<Vec3i> itemInputPoints = new LinkedList<>();
     public final Vec3d itemOutputPoint;
     public final int inventoryHeight;
     public final int inventoryWidth;
@@ -45,7 +45,8 @@ public class MultiblockDefinition {
     public float itemAnimFrameCount = 0;
 
     //fluids
-    public final List<Vec3i> fluidHandlePoints;
+    public final List<Vec3i> fluidHandlePoints = new LinkedList<>();
+    public final float interactRadius;
     public final int tankCapability;
     public final boolean isFluidToStocks;//true is from pipe to stock, false is the opposite
     public final String autoInteractWithStocks;
@@ -54,20 +55,18 @@ public class MultiblockDefinition {
 //    public final DataBlock gui;
 
     //Animations
-    public final Map<String, MultiblockAnimation> animations;
+    public final Map<String, MultiblockAnimation> animations = new HashMap<>();
 
     MultiblockDefinition(String multiblockID, DataBlock object) throws Exception {
         //Standards
         this.mbID = multiblockID;
         this.name = object.getValue("name").asString().toUpperCase();
         this.type = MultiblockTypes.valueOf(object.getValue("type").asString());
-        this.animations = new HashMap<>();
 
         //Structure
         this.length = object.getValue("length").asInteger();
         this.height = object.getValue("height").asInteger();
         this.width = object.getValue("width").asInteger();
-        this.structure = new HashMap<>();
         DataBlock struct = object.getBlock("structure");
         struct.getValueMap().forEach((s, value) -> {
             Vec3i vec3i = toVec3i(s);
@@ -84,7 +83,6 @@ public class MultiblockDefinition {
         this.model = new MultiblockModel(object.getValue("model").asIdentifier(), 0, this);
 
         DataBlock item = object.getBlock("item");
-        this.itemInputPoints = new LinkedList<>();
         if (item != null) {
             List<DataBlock.Value> itemInputPoint = item.getValues("item_input_point");
             if (itemInputPoint != null) {
@@ -152,7 +150,6 @@ public class MultiblockDefinition {
             this.itemAnimation = null;
         }
 
-        this.fluidHandlePoints = new LinkedList<>();
         DataBlock fluid = object.getBlock("fluid");
         if (fluid != null) {
             List<DataBlock.Value> fluids = fluid.getValues("fluid_handle_points");
@@ -161,6 +158,8 @@ public class MultiblockDefinition {
             }
 
             this.tankCapability = fluid.getValue("tank_capability_mb").asInteger();
+            float radius = fluid.getValue("stock_interact_radius_m").asFloat();
+            this.interactRadius = radius * (radius <= 0 ? -1 : 1);
 
             this.isFluidToStocks = fluid.getValue("pipes_to_stocks").asBoolean();
             if(fluid.getValue("auto_interact").asBoolean() != null) {
@@ -170,6 +169,7 @@ public class MultiblockDefinition {
             }
         } else {
             this.tankCapability = 0;
+            this.interactRadius = 0;
             this.isFluidToStocks = false;
             this.autoInteractWithStocks = null;
         }
