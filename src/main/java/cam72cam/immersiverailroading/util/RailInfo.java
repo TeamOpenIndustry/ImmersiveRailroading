@@ -55,6 +55,18 @@ public class RailInfo {
 		this.itemHeld = itemHeld;
 		this.uniqueID = generateID();
 	}
+
+	public RailInfo(RailInfo info) {
+		this.settings = info.settings;
+		this.placementInfo = info.placementInfo;
+		this.customInfo = info.customInfo;
+		this.switchState = info.switchState;
+		this.switchForced = info.switchForced;
+		this.tablePos = info.tablePos;
+		this.itemHeld = info.itemHeld;
+		this.uniqueID = info.uniqueID;
+	}
+
 	private String generateID() {
 		Object[] props = new Object [] {
 				this.settings.type,
@@ -278,7 +290,7 @@ public class RailInfo {
 		if (!placeTrack || (placeTrack && builder.canBuild())) {
 			if (player.getWorld().isServer) {
 				if (player.isCreative() && placeTrack) {
-					builder.build();
+					builder.build(null);
 					return Collections.emptyList();
 				}
 
@@ -330,7 +342,7 @@ public class RailInfo {
 				}
 
 				builder.setDrops(drops);
-				if (placeTrack) builder.build();
+				if (placeTrack) builder.build(null);
 				return drops;
 			}
 		}

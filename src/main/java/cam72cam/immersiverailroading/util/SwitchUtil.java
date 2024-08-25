@@ -1,6 +1,9 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.data.TrackInfo;
+import cam72cam.immersiverailroading.data.TrackPath;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
@@ -55,6 +58,37 @@ public class SwitchUtil {
 		}
 
 		return SwitchState.STRAIGHT;
+	}
+
+	public static TrackInfo getSwitchLeg(TrackInfo infoStraight, TrackInfo infoTurn, Vec3d position) {
+		IIterableTrack switchBuilder = (IIterableTrack) infoStraight.getBuilder(null);
+		IIterableTrack turnBuilder = (IIterableTrack) infoTurn.getBuilder(null);
+		double isOnStraight = switchBuilder.offsetFromTrack(infoStraight, Vec3i.ZERO, position);
+		double isOnTurn = turnBuilder.offsetFromTrack(infoTurn, Vec3i.ZERO, position);
+
+		if (Math.abs(isOnStraight - isOnTurn) > infoStraight.settings.gauge.scale() / 16) {
+			if (isOnStraight > isOnTurn) {
+				return infoTurn;
+			} else {
+				return infoStraight;
+			}
+		}
+
+		SwitchState state = infoStraight.switchState;
+		if (infoStraight.switchForced != SwitchState.NONE) {
+			state = infoStraight.switchForced;
+		}
+
+		switch (state) {
+			case TURN:
+				return infoTurn;
+			case STRAIGHT:
+				return infoStraight;
+			default:
+				// This should NOT happen!
+				//ImmersiveRailroading.warn("BUG BUG BUG SWITCH BUG");
+				return infoStraight;
+		}
 	}
 
 	public static boolean isRailPowered(TileRail rail) {

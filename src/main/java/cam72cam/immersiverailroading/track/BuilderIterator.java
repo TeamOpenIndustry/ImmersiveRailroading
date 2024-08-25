@@ -11,10 +11,6 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.serialization.SerializationException;
-import cam72cam.mod.serialization.TagCompound;
-import cam72cam.mod.serialization.TagSerializer;
-import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -23,14 +19,10 @@ import cam72cam.immersiverailroading.util.VecUtil;
 
 public abstract class BuilderIterator extends BuilderBase implements IIterableTrack {
 	protected HashSet<Pair<Integer, Integer>> positions;
-	
-	public BuilderIterator(RailInfo info, World world, Vec3i pos) {
-		this(info, world, pos, false);
-	}
 
 	public abstract List<PosStep> getPath(double stepSize);
 
-	public BuilderIterator(RailInfo info, World world, Vec3i pos, boolean endOfTrack) {
+	public BuilderIterator(RailInfo info, World world, Vec3i pos) {
 		super(info, world, pos);
 		
 		positions = new HashSet<>();
@@ -58,8 +50,6 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				0,
                 Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
 		);
-		int mainX = (int) Math.floor(path.get(path.size()/2).x+placeOff.x);
-		int mainZ = (int) Math.floor(path.get(path.size()/2).z+placeOff.z);
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale()/2));
 
 		for (PosStep cur : path) {
@@ -96,46 +86,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					flexPositions.add(gag);
 				}
 			}
-			if (!isFlex && endOfTrack) {
-				mainX = (int) Math.floor(gagPos.x+placeOff.x);
-				mainZ = (int) Math.floor(gagPos.z+placeOff.z);
-			}
 		}
-
-		if (!yOffset.containsKey(Pair.of(mainX, mainZ))) {
-			// Try a few different offsets
-			for (Facing value : Facing.values()) {
-				if (yOffset.containsKey(Pair.of(mainX + value.getXMultiplier(), mainZ + value.getZMultiplier()))) {
-					mainX += value.getXMultiplier();
-					mainZ += value .getZMultiplier();
-					break;
-				}
-			}
-		}
-		if (!yOffset.containsKey(Pair.of(mainX, mainZ))) {
-			// No luck, code is really borked now.  Throw an exception to help track this.
-			TagCompound debug = new TagCompound();
-			try {
-				TagSerializer.serialize(debug, info);
-			} catch (SerializationException e) {
-				throw new RuntimeException("Invalid track builder", e);
-			}
-			throw new RuntimeException("Invalid track builder " + debug.toString());
-		}
-
-		Vec3i mainPos = new Vec3i(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
-		this.setParentPos(mainPos);
-		TrackRail main = new TrackRail(this, mainPos	);
-		tracks.add(main);
-		main.setRailHeight(railHeights.get(Pair.of(mainX, mainZ)));
-		main.setBedHeight(bedHeights.get(Pair.of(mainX, mainZ)));
 
 		for (Pair<Integer, Integer> pair : positions) {
-			if (pair.getLeft() == mainX && pair.getRight() == mainZ) {
-				// Skip parent block
-				continue;
-			}
-			TrackBase tg = new TrackGag(this, new Vec3i(pair.getLeft(), yOffset.get(pair), pair.getRight()));
+			TrackBase tg = new TrackBase(this, new Vec3i(pair.getLeft(), yOffset.get(pair), pair.getRight()));
 			if (flexPositions.contains(pair)) {
 				tg.setFlexible();
 			}

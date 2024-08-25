@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.data.RegionPacket;
+import cam72cam.immersiverailroading.data.WorldData;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
@@ -18,6 +20,7 @@ import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.item.*;
 import cam72cam.immersiverailroading.render.multiblock.MBBlueprintRender;
 import cam72cam.immersiverailroading.render.multiblock.TileMultiblockRender;
+import cam72cam.immersiverailroading.render.rail.DataRender;
 import cam72cam.immersiverailroading.render.rail.RailPreviewRender;
 import cam72cam.immersiverailroading.thirdparty.CompatLoader;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -32,6 +35,7 @@ import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.event.ClientEvents;
+import cam72cam.mod.event.CommonEvents;
 import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.input.Keyboard.KeyCode;
 import cam72cam.mod.math.Vec3d;
@@ -42,6 +46,7 @@ import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.text.Command;
+import cam72cam.mod.world.World;
 
 import java.util.function.Function;
 
@@ -66,6 +71,11 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 		switch (event) {
 			case CONSTRUCT:
+				CommonEvents.WorldData.SAVE.subscribe(WorldData::save);
+				CommonEvents.WorldData.LOAD.subscribe(WorldData::load);
+				CommonEvents.WorldData.UNLOAD.subscribe(WorldData::unload);
+				World.onTick(WorldData::tick);
+
 				EntityRegistry.register(ImmersiveRailroading.instance, CarFreight::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, CarPassenger::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, CarTank::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
@@ -86,6 +96,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(ClientPartDragging.SeatPacket::new, PacketDirection.ClientToServer);
 				Packet.register(GuiBuilder.ControlChangePacket::new, PacketDirection.ClientToServer);
 				Packet.register(ItemPaintBrush.PaintBrushPacket::new, PacketDirection.ClientToServer);
+				Packet.register(RegionPacket::new, PacketDirection.ServerToClient);
 
 				ServerChronoState.register();
 
@@ -206,6 +217,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 						stock.getDefinition().getOverlay().render(state, stock);
 					}
 				});
+
+				GlobalRender.registerRender(DataRender::render);
 
 				ClientEvents.MOUSE_GUI.subscribe(evt -> {
 					if (!MinecraftClient.isReady()) {

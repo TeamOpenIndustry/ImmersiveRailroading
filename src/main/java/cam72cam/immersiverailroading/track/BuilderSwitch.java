@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.data.TrackInfo;
+import cam72cam.immersiverailroading.data.WorldData;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
@@ -48,16 +50,9 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		straightBuilderReal = new BuilderStraight(straightInfo.withSettings(b -> b.type = TrackItems.STRAIGHT), world, pos, true);
 		
 		turnBuilder.overrideFlexible = true;
-		
-		for(TrackBase turn : turnBuilder.tracks) {
-			if (turn instanceof TrackRail) {
-				turn.overrideParent(straightBuilder.getParentPos());
-			}
-		}
+
 		for (TrackBase straight : straightBuilder.tracks) {
-			if (straight instanceof TrackGag) {
-				straight.setFlexible();
-			}
+			straight.setFlexible();
 		}
 	}
 
@@ -116,9 +111,10 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	}
 	
 	@Override
-	public void build() {
-		straightBuilder.build();
-		turnBuilder.build();
+	public TrackInfo build(TrackInfo parent) {
+		TrackInfo straightInfo = straightBuilder.build(parent);
+		turnBuilder.build(straightInfo);
+		return straightInfo;
 	}
 	
 	@Override

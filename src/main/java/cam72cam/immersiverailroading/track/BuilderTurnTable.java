@@ -37,11 +37,10 @@ public class BuilderTurnTable extends BuilderBase {
 				positions.add(Pair.of((int)gagPos.x, (int)gagPos.z));
 			}
 		}
-		
-		this.setParentPos(offset.down());
-		TrackRail main = new TrackRail(this, offset.down());
-		tracks.add(main);
-		
+
+		// This is broken
+		// TODO this.setParentPos(offset.down());
+		// TODO I probably broke all of this
 		for (Pair<Integer, Integer> pair : positions) {
 			double toCenter = new Vec3d(pair.getLeft(), 0, pair.getRight()).length();
 			
@@ -49,16 +48,14 @@ public class BuilderTurnTable extends BuilderBase {
 				continue;
 			}
 			
-			if (!(pair.getLeft() == 0 && pair.getRight() == 0)) {
-				TrackGag tgu = new TrackGag(this, new Vec3i(pair.getLeft() + offset.x, offset.y-1, pair.getRight() + offset.z));
-				if (toCenter > info.settings.length-0.5) {
-					tgu.setHeight(1);
-					tgu.setFlexible();
-				}
-				tracks.add(tgu);
+			TrackBase tgu = new TrackBase(this, new Vec3i(pair.getLeft() + offset.x, offset.y-1, pair.getRight() + offset.z));
+			if (toCenter > info.settings.length-0.5) {
+				tgu.setHeight(1);
+				tgu.setFlexible();
 			}
-			
-			TrackBase tg = new TrackGag(this, new Vec3i(pair.getLeft() + offset.x, offset.y, pair.getRight() + offset.z));
+			tracks.add(tgu);
+
+			TrackBase tg = new TrackBase(this, new Vec3i(pair.getLeft() + offset.x, offset.y, pair.getRight() + offset.z));
 			tg.setHeight(0.000001f);
 			tg.solidNotRequired = true;
 			if (toCenter > info.settings.length-0.5) {

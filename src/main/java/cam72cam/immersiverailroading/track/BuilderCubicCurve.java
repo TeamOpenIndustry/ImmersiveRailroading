@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.data.TrackInfo;
+import cam72cam.immersiverailroading.data.WorldData;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -29,7 +31,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 	}
 
 	public BuilderCubicCurve(RailInfo info, World world, Vec3i pos, boolean endOfTrack) {
-		super(info, world, pos, endOfTrack);
+		super(info, world, pos);
 		CubicCurve curve = getCurve();
 		List<CubicCurve> subCurves = curve.subsplit((int) (101 * 2 * 3.1415f / 4));
 		if (subCurves.size() > 1) {
@@ -47,13 +49,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 				RailInfo subInfo = new RailInfo(info.settings.with(b -> b.type = TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
 
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, world, sPos);
-				if (subBuilders.size() != 0) {
-					for (TrackBase track : subBuilder.tracks) {
-						if (track instanceof TrackRail) {
-							track.overrideParent(subBuilders.get(0).getParentPos());
-						}
-					}
-				} else {
+				if (subBuilders.size() == 0) {
+					// For render
 					tracks = subBuilder.tracks;
 				}
 				subBuilders.add(subBuilder);
@@ -200,11 +197,16 @@ public class BuilderCubicCurve extends BuilderIterator {
 	}
 
 	@Override
-	public void build() {
+	public TrackInfo build(TrackInfo parent) {
 		if (subBuilders == null) {
-			super.build();
+			return super.build(parent);
 		} else {
-			subBuilders.forEach(BuilderBase::build);
+			WorldData data = WorldData.get(world);
+			TrackInfo info = data.allocateTrackInfo(this.info, parent);
+			for (BuilderBase subBuilder : subBuilders) {
+				subBuilder.build(info);
+			}
+			return info;
 		}
 	}
 

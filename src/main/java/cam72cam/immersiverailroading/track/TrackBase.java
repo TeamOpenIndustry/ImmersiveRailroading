@@ -1,35 +1,27 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.immersiverailroading.IRBlocks;
-import cam72cam.immersiverailroading.blocks.BlockRailBase;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.tile.TileRailGag;
+import cam72cam.immersiverailroading.data.TrackBlock;
+import cam72cam.immersiverailroading.data.TrackInfo;
+import cam72cam.immersiverailroading.data.WorldData;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.util.SingleCache;
 
-public abstract class TrackBase {
+public class TrackBase {
 	public BuilderBase builder;
 
 	protected Vec3i rel;
 	private float bedHeight;
 	private float railHeight;
 
-	protected BlockRailBase block;
-
 	private boolean flexible = false;
-
-	private Vec3i parent;
 
 	public boolean solidNotRequired;
 
-	public TrackBase(BuilderBase builder, Vec3i rel, BlockRailBase block) {
+	public TrackBase(BuilderBase builder, Vec3i rel) {
 		this.builder = builder;
 		this.rel = rel;
-		this.block = block;
 	}
 
 	private final SingleCache<Vec3i, Vec3i> downCache = new SingleCache<>(Vec3i::down);
@@ -48,73 +40,24 @@ public abstract class TrackBase {
             BlockUtil.isIRRail(builder.world, pos);
 	}
 
-	public boolean isOverTileRail() {
-		return builder.world.getBlockEntity(getPos(), TileRail.class) != null && this instanceof TrackGag;
-	}
-
-	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
 		Vec3i pos = getPos();
 
-		return isDownSolid(true) && (BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
+		return isDownSolid(true) && BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible);
 	}
 
-	public TileRailBase placeTrack(boolean actuallyPlace) {
+	public void placeTrack(WorldData data, TrackInfo trackInfo) {
 		Vec3i pos = getPos();
-
-		if (!actuallyPlace) {
-			TileRailGag tr = (TileRailGag) IRBlocks.BLOCK_RAIL_GAG.createBlockEntity(builder.world, pos);
-			if (parent != null) {
-				tr.setParent(parent);
-			} else {
-				tr.setParent(builder.getParentPos());
-			}
-			tr.setRailHeight(getRailHeight());
-			tr.setBedHeight(getBedHeight());
-			return tr;
-		}
 
 		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, pos.down(), false)) {
 			builder.world.setBlock(pos.down(), builder.info.settings.railBedFill);
 		}
 
 
-		TagCompound replaced = null;
-		int hasSnow = 0;
-		TileRailBase te = null;
-		if (!builder.world.isAir(pos)) {
-			if (builder.world.isBlock(pos, IRBlocks.BLOCK_RAIL_GAG)) {
-				te = builder.world.getBlockEntity(pos, TileRailBase.class);
-				if (te != null) {
-					replaced = te.getData();
-				}
-			} else {
-				hasSnow = builder.world.getSnowLevel(pos);
-				builder.world.breakBlock(pos);
-			}
-		}
-		
-        if (te != null) {
-            te.setWillBeReplaced(true);
-        }
-        builder.world.setBlock(pos, block);
-        if (te != null) {
-            te.setWillBeReplaced(false);
-        }
+		TrackBlock current = data.getTrackBlock(getPos());
+		data.setTrackBlock(getPos(), new TrackBlock(trackInfo, getRailHeight(), getBedHeight(), builder.world.getSnowLevel(pos), current));
 
-		TileRailBase tr = builder.world.getBlockEntity(pos, TileRailBase.class);
-		tr.setReplaced(replaced);
-		if (parent != null) {
-			tr.setParent(parent);
-		} else {
-			tr.setParent(builder.getParentPos());
-		}
-		tr.setRailHeight(getRailHeight());
-		tr.setBedHeight(getBedHeight());
-		for (int i = 0; i < hasSnow; i++) {
-			tr.handleSnowTick();
-		}
-		return tr;
+		//builder.world.setBlock(pos, block);
 	}
 
 	private final SingleCache<Vec3i, Vec3i> posCache = new SingleCache<>(pos -> pos.add(rel));
@@ -141,13 +84,5 @@ public abstract class TrackBase {
 
 	public void setFlexible() {
 		this.flexible  = true;
-	}
-
-	public boolean isFlexible() {
-		return this.flexible;
-	}
-
-	public void overrideParent(Vec3i blockPos) {
-		this.parent = blockPos;
 	}
 }

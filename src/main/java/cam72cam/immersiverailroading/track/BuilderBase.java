@@ -2,16 +2,15 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
+import cam72cam.immersiverailroading.data.TrackInfo;
+import cam72cam.immersiverailroading.data.WorldData;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.tile.TileRail;
-import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.serialization.TagCompound;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.world.World;
 
@@ -19,17 +18,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//TODO @cam72cam use Vec3i and Vec3i
-
-@SuppressWarnings("incomplete-switch")
 public abstract class BuilderBase {
 	protected final World world;
-	protected ArrayList<TrackBase> tracks = new ArrayList<TrackBase>();
+	protected ArrayList<TrackBase> tracks = new ArrayList<>();
 	
 	public RailInfo info;
 
 	public final Vec3i pos;
-	private Vec3i parent_pos;
+	private TrackInfo parent;
 
 	public boolean overrideFlexible = true;
 
@@ -39,10 +35,9 @@ public abstract class BuilderBase {
 		this.info = info;
 		this.world = world;
 		this.pos = pos;
-		parent_pos = pos;
 	}
 
-	public class VecYawPitch extends Vec3d {
+	public static class VecYawPitch extends Vec3d {
 		public final float yaw;
 		public final float pitch;
 		public final float length;
@@ -86,7 +81,7 @@ public abstract class BuilderBase {
 		return true;
 	}
 	
-	public void build() {
+	public TrackInfo build(TrackInfo parent) {
 		/*
 		Assume we have already tested.
 		There are a few edge cases which break with overlapping split builders
@@ -94,21 +89,19 @@ public abstract class BuilderBase {
 			return ;
 		}
 		*/
-		for(TrackBase track : tracks) {
-			if (!track.isOverTileRail()) {
-				track.placeTrack(true).markDirty();
-			} else {
-				// Track -> Base?
-				// To
-				// Track -> Placed -> Base?
 
-				TileRail rail = world.getBlockEntity(track.getPos(), TileRail.class);
-				TileRailBase placed = track.placeTrack(false);
-				placed.setReplaced(rail.getReplaced());
-				rail.setReplaced(placed.getData());
-				rail.markDirty();
-			}
+		WorldData data = WorldData.get(world);
+
+		TrackInfo trackInfo = data.allocateTrackInfo(info.offset(pos), parent);
+
+		// TODO
+		//trackInfo.setDrops(builder.drops);
+
+		for(TrackBase track : tracks) {
+			track.placeTrack(data, trackInfo);
 		}
+
+		return trackInfo;
 	}
 	
 	public List<TrackBase> getTracksForRender() {
@@ -120,11 +113,11 @@ public abstract class BuilderBase {
 	}
 
 	
-	public void setParentPos(Vec3i pos) {
-		parent_pos = this.pos.add(pos);
+	public void setParent(TrackInfo info) {
+		parent = info;
 	}
-	public Vec3i getParentPos() {
-		return parent_pos;
+	public TrackInfo getParent() {
+		return parent;
 	}
 	
 	public int costTies() {

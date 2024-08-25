@@ -17,16 +17,10 @@ public class BuilderCrossing extends BuilderBase {
 	public BuilderCrossing(RailInfo info, World world, Vec3i pos) {
 		super(info.withSettings(b -> b.length = 3), world, pos);
 
-		this.setParentPos(Vec3i.ZERO);
-		
-		tracks.add(new TrackRail(this, Vec3i.ZERO));
 		int blocks = 1;
 		for (int i = -blocks; i <=blocks; i ++) {
 			for (int j = -blocks; j <=blocks; j ++) {
-				if (i == 0 && j == 0) {
-					continue;
-				}
-				tracks.add(new TrackGag(this, new Vec3i(i, 0, j)));
+				tracks.add(new TrackBase(this, new Vec3i(i, 0, j)));
 			}
 		}
 	}
@@ -44,7 +38,7 @@ public class BuilderCrossing extends BuilderBase {
 		
 		for (double i = -trackOffset; i < info.settings.length - trackOffset; i+=info.settings.gauge.scale()) {
 			pos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, i-0.25), angle-90);
-			data.add(new VecYawPitch(pos.x, pos.y, pos.z-1, -angle, "RAIL_BASE"));
+			data.add(new VecYawPitch(pos.x, pos.y, pos.z - 1, -angle, "RAIL_BASE"));
 		}
 		angle -= 90;
 		
@@ -52,7 +46,7 @@ public class BuilderCrossing extends BuilderBase {
 		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.settings.length, "RAIL_RIGHT", "RAIL_LEFT"));
 		for (double i = -trackOffset; i < info.settings.length - trackOffset; i+=info.settings.gauge.scale()) {
 			pos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, i-0.25), angle-90);
-			data.add(new VecYawPitch(pos.x-1, pos.y, pos.z, -angle, "RAIL_BASE"));
+			data.add(new VecYawPitch(pos.x - 1, pos.y, pos.z, -angle, "RAIL_BASE"));
 		}
 		
 		return data;

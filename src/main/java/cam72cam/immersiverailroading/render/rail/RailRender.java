@@ -63,7 +63,19 @@ public class RailRender {
 		if (!isLoaded) {
 			startLoad();
 		} else {
-			RailBuilderRender.renderRailBuilder(info, renderData, state);
+			RailBuilderRender.renderRailBuilder(info, renderData, state, null);
+		}
+	}
+
+	public void renderRailModelMulti(RenderState state, List<Vec3d> positions) {
+		if (info.settings.type == TrackItems.TURNTABLE) {
+			load();
+		}
+
+		if (!isLoaded) {
+			startLoad();
+		} else {
+			RailBuilderRender.renderRailBuilder(info, renderData, state, positions);
 		}
 	}
 

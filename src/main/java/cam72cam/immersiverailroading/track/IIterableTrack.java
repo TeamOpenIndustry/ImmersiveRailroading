@@ -43,6 +43,7 @@ public interface IIterableTrack {
         }
 
 
+        // BUG this should actually interpolate between the two points!
         double resultSquared = Math.min(rightDistance, leftDistance);
 
         /*if (resultSquared != distSquared) {

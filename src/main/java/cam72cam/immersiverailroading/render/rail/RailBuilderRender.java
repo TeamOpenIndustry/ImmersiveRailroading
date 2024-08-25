@@ -5,12 +5,17 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.opengl.RenderContext;
 import cam72cam.mod.render.opengl.VBO;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.util.With;
 import cam72cam.mod.world.World;
+import org.lwjgl.opengl.GL11;
 import util.Matrix4;
 
 import java.util.List;
@@ -24,7 +29,7 @@ public class RailBuilderRender {
         }
     };
 
-    public static void renderRailBuilder(RailInfo info, List<VecYawPitch> renderData, RenderState state) {
+    public static void renderRailBuilder(RailInfo info, List<VecYawPitch> renderData, RenderState state, List<Vec3d> positions) {
         TrackModel model = DefinitionManager.getTrack(info.settings.track, info.settings.gauge.value());
         if (model == null) {
             return;
@@ -63,7 +68,17 @@ public class RailBuilderRender {
 
         MinecraftClient.startProfiler("irTrackModel");
         try (VBO.Binding vbo = cached.bind(state, info.settings.type == TrackItems.TURNTABLE)) {
-            vbo.draw();
+            if (positions == null) {
+                vbo.draw();
+            } else {
+                for (Vec3d position : positions) {
+                    float bll = MinecraftClient.getPlayer().getWorld().getBlockLightLevel(new Vec3i(position));
+                    float sll = MinecraftClient.getPlayer().getWorld().getSkyLightLevel(new Vec3i(position));
+                    try (With restore = RenderContext.apply(new RenderState().translate(position).lightmap(bll, sll))) {
+                        vbo.draw();
+                    }
+                }
+            }
         }
         MinecraftClient.endProfiler();
     }
