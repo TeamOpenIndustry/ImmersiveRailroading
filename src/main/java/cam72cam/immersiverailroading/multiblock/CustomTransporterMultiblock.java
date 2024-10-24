@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.fluid.ITank;
@@ -28,13 +27,14 @@ import java.util.stream.Collectors;
  */
 public class CustomTransporterMultiblock extends Multiblock {
     /*
-     * use Animatrix to Produce animation(I/O for factory)(DONE)
+     * TODO
+     * use Animatrix to Produce animation(I/O)(DONE)
      * REWRITE CURRENT ANIMATION TO FIT MB(DONE)
      * new readouts(DONE)
-     * rewrite manual
+     * rewrite animation panel
      */
     private final MultiblockDefinition def;
-    public static final HashMap<Vec3i, MultiblockStorager> storages;
+    public static final HashMap<Vec3i, MultiblockDataSaver> storages;
     private final List<Vec3i> fluidOutputPositions;//All relative possible positions for searching
 
     static {
@@ -92,7 +92,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
     @Override
     protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
-        storages.put(origin.add(def.center.rotate(rot)), new MultiblockStorager(this.def));
+        storages.put(origin.add(def.center.rotate(rot)), new MultiblockDataSaver(this.def));
         return new TransporterMbInstance(world, origin, rot, this.def);
     }
 
@@ -312,7 +312,7 @@ public class CustomTransporterMultiblock extends Multiblock {
     }
 
     //A hack to storage some extra information with the instance
-    public class MultiblockStorager {
+    public class MultiblockDataSaver {
         private final MultiblockDefinition def;
         private final Set<Vec3i> possibleTrackPositions;
         private Set<Vec3i> stockFluidHandlerPoints;
@@ -321,10 +321,10 @@ public class CustomTransporterMultiblock extends Multiblock {
         public HashMap<String, String> guiMap = new HashMap<>();
         public List<Vec3i> trackList = new LinkedList<>();
         public FreightTank targetStock;
-        public int fluidStatus = 0;//Autofill tanks wrapper: 0 is N/A, 1 is true, 2 is false
+        public int fluidStatus = 0;//Autofill tanks wrapper: 0 is N/A(Manual mode), 1 is true, 2 is false
         public boolean autoInteract = false;
 
-        public MultiblockStorager(MultiblockDefinition def) {
+        public MultiblockDataSaver(MultiblockDefinition def) {
             this.def = def;
             this.stockFluidHandlerPoints = new HashSet<>();
             this.possibleTrackPositions = new HashSet<>();
@@ -430,7 +430,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             Set<Vec3i> vecs = def.model.fluidHandlerPoints.stream()
                     .map(component -> {
                         Matrix4 matrix = def.model.state.getGroupMatrix(tile, component.key, 0);
-                        return matrix != null ? matrix.apply(component.center) : VecUtil.IDENTITY_MATRIX.apply(component.center);
+                        return matrix != null ? matrix.apply(component.center) : new Matrix4().setIdentity().apply(component.center);
                     })
                     .map(vec3d -> new Vec3i(-vec3d.x, vec3d.y, -vec3d.z))
                     .collect(Collectors.toSet());

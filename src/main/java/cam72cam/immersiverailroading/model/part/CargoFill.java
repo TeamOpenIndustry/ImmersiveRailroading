@@ -51,13 +51,7 @@ public class CargoFill {
         })).include(cargoLoads);
     }
 
-    public List<ItemStack> getDroppedItem(World world, EntityRollingStock stock) {
-        Matrix4 model = stock.getModelMatrix();
-        List<ItemStack> list = new LinkedList<>();
-        for (Pair<Vec3d, Vec3d> box : this.hitBox) {
-            list.addAll(world.getDroppedItems(
-                    IBoundingBox.from(model.apply(box.getLeft()), model.apply(box.getRight()))));
-        }
-        return list;
+    public boolean checkInBound(Vec3d pos) {
+        return this.hitBox.stream().anyMatch(box -> IBoundingBox.from(box.getLeft(), box.getRight()).contains(pos));
     }
 }

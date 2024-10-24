@@ -6,8 +6,12 @@ import cam72cam.immersiverailroading.model.part.Control;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
+//A hack to expand ModelState's usage
 public interface IAnimatable {
-    //Add a control group map in the application classes
+    //Add the code below in the implemented classes
+//    @TagSync
+//    @TagField(value="controlPositions", mapper = ControlPositionMapper.class)
+//    protected Map<String, Pair<Boolean, Float>> controlPositions = new HashMap<>();
 
     Matrix4 getModelMatrix();
 

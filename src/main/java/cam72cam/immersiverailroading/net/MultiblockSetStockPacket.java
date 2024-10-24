@@ -9,9 +9,9 @@ public class MultiblockSetStockPacket extends Packet {
     private String name;
 
     @TagField
-    private CustomTransporterMultiblock.MultiblockStorager pack;
+    private CustomTransporterMultiblock.MultiblockDataSaver pack;
 
-    public MultiblockSetStockPacket(String name, CustomTransporterMultiblock.MultiblockStorager packet) {
+    public MultiblockSetStockPacket(String name, CustomTransporterMultiblock.MultiblockDataSaver packet) {
         this.name = name;
         this.pack = packet;
     }

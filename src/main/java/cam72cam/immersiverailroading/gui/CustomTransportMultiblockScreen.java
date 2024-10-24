@@ -55,7 +55,7 @@ public class CustomTransportMultiblockScreen implements IScreen {
     public void init(IScreenBuilder screen) {
         panel = new ControlGroupPanel(screen);
 
-        CustomTransporterMultiblock.MultiblockStorager pack = CustomTransporterMultiblock.storages.get(tile.getPos());
+        CustomTransporterMultiblock.MultiblockDataSaver pack = CustomTransporterMultiblock.storages.get(tile.getPos());
 
         tankSelector = new ListSelector<String>(screen, (int) (GUIHelpers.getScreenWidth() / 2d - GUIHelpers.getScreenWidth() / 2.3d + 130),
                 180, 20, "null", pack.guiMap) {

@@ -5,14 +5,17 @@ import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.FreightModel;
+import cam72cam.immersiverailroading.model.part.CargoUnload;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
@@ -131,7 +134,10 @@ public abstract class Freight extends EntityCoupleableRollingStock {
         if(getWorld().isServer){
             //inputs
             if (this.getCurrentSpeed().metric() <= 10.8 && ticks % 2 == 0) {//3m/s and don't refresh it every tick
-                List<ItemStack> stacks = model.getCargoNearbyItems(this);
+				double temp = this.getDefinition().getLength(this.gauge) / 2;
+				Vec3d bound = new Vec3d(temp, temp, temp);
+				List<ItemStack> stacks = model.checkItems(this, getWorld().getItemEntitiesWithinBB(IBoundingBox.from(
+						this.getPosition().add(bound), this.getPosition().subtract(bound))));
 
                 if (!stacks.isEmpty()) {
                     //transfer to this.cargoItems
@@ -157,8 +163,10 @@ public abstract class Freight extends EntityCoupleableRollingStock {
                 }
             }
             //outputs
-            if (!(model.getUnloadingPoints() == null)) {
-                model.getUnloadingPoints().forEach(point -> point.tryToUnload(this));
+            if (model.getUnloadingPoints() != null) {
+                for (CargoUnload point : model.getUnloadingPoints()) {
+					point.tryToUnload(this);
+				}
             }
         }
     }

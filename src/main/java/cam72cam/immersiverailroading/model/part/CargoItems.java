@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
@@ -15,7 +14,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
@@ -39,14 +37,8 @@ public class CargoItems {
         this.components.forEach(modelComponent -> hitBox.add(Pair.of(modelComponent.min, modelComponent.max)));
     }
 
-    public List<ItemStack> getDroppedItem(World world, EntityRollingStock stock){
-        Matrix4 model = stock.getModelMatrix();
-        List<ItemStack> list = new LinkedList<>();
-        for (Pair<Vec3d, Vec3d> box : this.hitBox) {
-            list.addAll(world.getDroppedItems(
-                IBoundingBox.from(model.apply(box.getLeft()), model.apply(box.getRight()))));
-        }
-        return list;
+    public boolean checkInBound(Vec3d pos) {
+        return this.hitBox.stream().anyMatch(box -> IBoundingBox.from(box.getLeft(), box.getRight()).contains(pos));
     }
 
     public <T extends Freight> void postRender(T stock, RenderState state) {
