@@ -11,6 +11,7 @@ public class IRItems {
 	public static ItemRailAugment ITEM_AUGMENT = new ItemRailAugment();
 	public static ItemTrackBlueprint ITEM_TRACK_BLUEPRINT = new ItemTrackBlueprint();
 	public static ItemManual ITEM_MANUAL = new ItemManual();
+	public static ItemMultiblockBlueprint ITEM_MULTIBLOCK_BLUEPRINT = new ItemMultiblockBlueprint();
 	public static ItemRail ITEM_RAIL = new ItemRail();
 	public static ItemPlate ITEM_PLATE = new ItemPlate();
 	public static ItemCastRail ITEM_CAST_RAIL = new ItemCastRail();

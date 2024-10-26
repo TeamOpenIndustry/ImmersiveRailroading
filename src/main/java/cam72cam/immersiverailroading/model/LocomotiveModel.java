@@ -167,23 +167,16 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     }
 
     @Override
-    public List<ItemStack> checkItems(Freight stock, List<ItemEntity> entities) {
+    public List<ItemStack> getItemsWithin(Freight stock, List<ItemEntity> entities) {
         Matrix4f stockMatrix = stock.getModelMatrix().toMatrix4f();
         stockMatrix.invert();
         Matrix4 matrix4 = new Matrix4(stockMatrix);
         List<ItemStack> stacks = entities.stream().filter(entity -> {
             //Transform into stock's relative coordinate
             Vec3d pos = matrix4.apply(entity.getPosition().subtract(stock.getPosition()));
-            boolean flag = false;
-            if(this.cargoFillFront != null){
-                flag |= this.cargoFillFront.checkInBound(pos);
-            }
-            if(this.cargoFillRear != null){
-                flag |= this.cargoFillRear.checkInBound(pos);
-            }
-            return flag;
+            return (this.cargoFillFront != null && this.cargoFillFront.checkInBound(pos)) || (this.cargoFillRear != null && this.cargoFillRear.checkInBound(pos));
         }).map(ItemEntity::getContent).collect(Collectors.toList());
-        stacks.addAll(super.checkItems(stock, entities));
+        stacks.addAll(super.getItemsWithin(stock, entities));
         return stacks;
     }
 

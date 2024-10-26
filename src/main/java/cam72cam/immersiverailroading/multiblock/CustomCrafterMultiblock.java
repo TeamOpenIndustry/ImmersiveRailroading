@@ -14,7 +14,9 @@ import cam72cam.mod.world.World;
 
 import java.util.List;
 
-@Deprecated
+/**
+ * Unfinished, don't use
+ */
 public class CustomCrafterMultiblock extends Multiblock {
     private final MultiblockDefinition def;
 

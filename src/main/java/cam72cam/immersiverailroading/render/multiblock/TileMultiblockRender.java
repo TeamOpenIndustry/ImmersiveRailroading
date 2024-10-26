@@ -39,4 +39,8 @@ public class TileMultiblockRender {
 		}
 		return null;
 	}
+
+	public static IMultiblockRender getRendererByName(String name){
+		return renderers.getOrDefault(name, null);
+	}
 }

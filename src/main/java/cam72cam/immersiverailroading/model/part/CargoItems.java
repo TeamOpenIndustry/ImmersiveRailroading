@@ -14,7 +14,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
-import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 import java.util.*;
@@ -24,7 +23,7 @@ public class CargoItems {
     private Map<UUID, Long> lastUpdate = new HashMap<>();
 
     private final List<ModelComponent> components;
-    private final List<Pair<Vec3d, Vec3d>> hitBox;
+    private final List<IBoundingBox> hitBox;
 
     public static CargoItems get(ComponentProvider provider) {
         List<ModelComponent> found = provider.parseAll(ModelComponentType.CARGO_ITEMS_X);
@@ -34,11 +33,11 @@ public class CargoItems {
     public CargoItems(List<ModelComponent> components) {
         this.components = components;
         this.hitBox = new LinkedList<>();
-        this.components.forEach(modelComponent -> hitBox.add(Pair.of(modelComponent.min, modelComponent.max)));
+        this.components.forEach(modelComponent -> hitBox.add(IBoundingBox.from(modelComponent.min, modelComponent.max)));
     }
 
     public boolean checkInBound(Vec3d pos) {
-        return this.hitBox.stream().anyMatch(box -> IBoundingBox.from(box.getLeft(), box.getRight()).contains(pos));
+        return this.hitBox.stream().anyMatch(box -> box.contains(pos));
     }
 
     public <T extends Freight> void postRender(T stock, RenderState state) {

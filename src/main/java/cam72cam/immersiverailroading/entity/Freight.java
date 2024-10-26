@@ -136,7 +136,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
             if (this.getCurrentSpeed().metric() <= 10.8 && ticks % 2 == 0) {//3m/s and don't refresh it every tick
 				double temp = this.getDefinition().getLength(this.gauge) / 2;
 				Vec3d bound = new Vec3d(temp, temp, temp);
-				List<ItemStack> stacks = model.checkItems(this, getWorld().getItemEntitiesWithinBB(IBoundingBox.from(
+				List<ItemStack> stacks = model.getItemsWithin(this, getWorld().getItemEntitiesWithinBB(IBoundingBox.from(
 						this.getPosition().add(bound), this.getPosition().subtract(bound))));
 
                 if (!stacks.isEmpty()) {

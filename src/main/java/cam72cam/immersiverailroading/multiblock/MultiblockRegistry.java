@@ -21,6 +21,10 @@ public class MultiblockRegistry {
 		return new ArrayList<>(entries.keySet());
 	}
 
+	public static Map<String, Multiblock> entries(){
+		return entries;
+	}
+
 	public static List<Multiblock> registered() {
 		return new ArrayList<>(entries.values());
 	}

@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.model.part;
 
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
@@ -8,18 +7,14 @@ import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
-import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.world.World;
-import org.apache.commons.lang3.tuple.Pair;
-import util.Matrix4;
 
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class CargoFill {
-    private final List<Pair<Vec3d, Vec3d>> hitBox;
+    private final List<IBoundingBox> hitBox;
 
     public static CargoFill get(ComponentProvider provider, ModelState state, boolean showCurrentLoadOnly, ModelPosition pos) {
         List<ModelComponent> cargoLoads = pos == null ? provider.parseAll(ModelComponentType.CARGO_FILL_X) : provider.parseAll(ModelComponentType.CARGO_FILL_POS_X, pos);
@@ -31,7 +26,7 @@ public class CargoFill {
     public CargoFill(List<ModelComponent> cargoLoads, ModelState state, boolean showCurrentLoadOnly) {
         this.hitBox = new LinkedList<>();
         for (ModelComponent cargoLoad : cargoLoads) {
-            this.hitBox.add(Pair.of(cargoLoad.min, cargoLoad.max));
+            this.hitBox.add(IBoundingBox.from(cargoLoad.min, cargoLoad.max));
         }
 
         state.push(settings -> settings.add((ModelState.GroupVisibility) (stock, group) -> {
@@ -52,6 +47,6 @@ public class CargoFill {
     }
 
     public boolean checkInBound(Vec3d pos) {
-        return this.hitBox.stream().anyMatch(box -> IBoundingBox.from(box.getLeft(), box.getRight()).contains(pos));
+        return this.hitBox.stream().anyMatch(box -> box.contains(pos));
     }
 }

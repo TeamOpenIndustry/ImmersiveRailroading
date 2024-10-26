@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.ModCore;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
@@ -19,23 +20,18 @@ public class BoilerRollerRender implements IMultiblockRender {
 
 	@Override
 	public void render(TileMultiblock te, RenderState state, float partialTicks) {
-		if (model == null) {
-			try {
-				this.model = new OBJModel(new Identifier("immersiverailroading:models/multiblocks/boiler_rolling_machine.obj"), 0, null);
-				segments = new ArrayList<>();
-				product = new ArrayList<>();
-				rest = new ArrayList<>();
-				for (String name : model.groups.keySet()) {
-					if (name.contains("SEGMENT_")) {
-						segments.add(name);
-					} else if (name.contains("FINISHED_PREVIEW")) {
-						product.add(name);
-					} else {
-						rest.add(name);
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+		checkModel();
+
+		segments = new ArrayList<>();
+		product = new ArrayList<>();
+		rest = new ArrayList<>();
+		for (String name : model.groups.keySet()) {
+			if (name.contains("SEGMENT_")) {
+				segments.add(name);
+			} else if (name.contains("FINISHED_PREVIEW")) {
+				product.add(name);
+			} else {
+				rest.add(name);
 			}
 		}
 
@@ -54,6 +50,22 @@ public class BoilerRollerRender implements IMultiblockRender {
 			}
 
 			vbo.draw(rest);
+		}
+	}
+
+	public OBJModel getModel() {
+		checkModel();
+		return model;
+	}
+
+	@Override
+	public void checkModel() {
+		if(this.model == null){
+			try {
+				this.model = new OBJModel(new Identifier("immersiverailroading:models/multiblocks/boiler_rolling_machine.obj"), 0, null);
+			} catch (Exception e) {
+				ModCore.error(e.toString());
+			}
 		}
 	}
 }

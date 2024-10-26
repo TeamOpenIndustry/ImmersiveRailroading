@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.model.part.CargoFill;
 import cam72cam.immersiverailroading.model.part.CargoItems;
 import cam72cam.immersiverailroading.model.part.CargoUnload;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
-import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.ItemEntity;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -33,7 +32,7 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
         this.cargoUnload = CargoUnload.get(provider);
     }
 
-    public List<ItemStack> checkItems(Freight stock, List<ItemEntity> entities) {
+    public List<ItemStack> getItemsWithin(Freight stock, List<ItemEntity> entities) {
         Matrix4f stockMatrix = stock.getModelMatrix().toMatrix4f();
         stockMatrix.invert();
         Matrix4 matrix4 = new Matrix4(stockMatrix);
@@ -42,15 +41,7 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
                 .filter(entity -> {
                     //Transform into stock's relative coordinate
                     Vec3d pos = matrix4.apply(entity.getPosition());
-                    ModCore.info(String.valueOf(pos));
-                    boolean flag = false;
-                    if (this.cargoFill != null) {
-                        flag |= this.cargoFill.checkInBound(pos);
-                    }
-                    if (this.cargoItems != null) {
-                        flag |= this.cargoItems.checkInBound(pos);
-                    }
-                    return flag;
+                    return (this.cargoFill != null && this.cargoFill.checkInBound(pos)) || (this.cargoItems != null && this.cargoItems.checkInBound(pos));
                 })
                 .filter(entity -> !(entity.getThrower().equals(stock.getUUID()) && entity.getTickCount() >= 20))
                 .map(ItemEntity::getContent)

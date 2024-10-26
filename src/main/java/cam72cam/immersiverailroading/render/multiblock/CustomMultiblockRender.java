@@ -2,14 +2,11 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.MultiblockModel;
 import cam72cam.immersiverailroading.multiblock.CustomTransporterMultiblock;
 import cam72cam.immersiverailroading.registry.MultiblockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -20,9 +17,7 @@ import cam72cam.mod.render.opengl.VBO;
 import cam72cam.mod.resource.Identifier;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CustomMultiblockRender implements IMultiblockRender {
     public static final Vec3d north = new Vec3d(1, 0, 1);
@@ -30,7 +25,7 @@ public class CustomMultiblockRender implements IMultiblockRender {
     public static final Vec3d east = new Vec3d(0, 0, 1);
     private static final OBJModel fluid_output;
 
-    private static final Map<String, MultiblockDefinition> refer;
+    public static final Map<String, MultiblockDefinition> refer;
 
     static {
         refer = new HashMap<>();
@@ -48,8 +43,6 @@ public class CustomMultiblockRender implements IMultiblockRender {
     @Override
     public void render(TileMultiblock te, RenderState state, float partialTicks) {
         MultiblockModel base = refer.get(te.getName()).model;
-
-//        System.out.println(refer.get(te.getName()).possibleTrackPositions);
 
         int temp = (int) (te.getRotation() - 90);
         Vec3i t = refer.get(te.getName()).center.rotate(te.geFacing());
@@ -71,7 +64,9 @@ public class CustomMultiblockRender implements IMultiblockRender {
                 base.state.render(vbo, te, null, partialTicks);
             }
 
-            if (MinecraftClient.isReady() && MinecraftClient.getPlayer().getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_MANUAL)) {
+            if (MinecraftClient.isReady() &&
+                    (MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_MULTIBLOCK_BLUEPRINT)
+                            ||MinecraftClient.getPlayer().getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_MULTIBLOCK_BLUEPRINT))) {
                 for (Vec3i track : CustomTransporterMultiblock.storages.get(te.getPos()).trackList) {
                     RenderState state2 = state.clone().lighting(true).lightmap(1, 1).translate(-track.x, -track.y, -track.z);
                     try (VBO.Binding vbo = fluid_output.binder().bind(state2)) {
@@ -82,4 +77,13 @@ public class CustomMultiblockRender implements IMultiblockRender {
             }
         }
     }
+
+    //For base mbs...
+    @Override
+    public OBJModel getModel() {
+        return null;
+    }
+
+    @Override
+    public void checkModel() {}
 }

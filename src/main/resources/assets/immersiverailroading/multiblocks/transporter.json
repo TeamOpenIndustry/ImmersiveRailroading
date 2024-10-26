@@ -45,6 +45,7 @@
 
     "fluid": {
         "fluid_handle_points": ["2,0,0"],
+        "stock_interact_radius_m": 6,
         "pipes_to_stocks": true,
         "tank_capability_mb": 20000
     }
