@@ -20,10 +20,7 @@ import cam72cam.mod.render.opengl.RenderState;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CustomTransportMultiblockScreen implements IScreen {
     private final TileMultiblock tile;
@@ -65,7 +62,10 @@ public class CustomTransportMultiblockScreen implements IScreen {
             }
         };
         for(MultiblockAnimation animation : def.animations.values()){
-            panel.addButton(animation.def);
+            //This is a reserved CG which doesn't allow manual interact
+            if(!Objects.equals(animation.def.control_group, "items")){
+                panel.addButton(animation.def);
+            }
         }
         if (def.isFluidToStocks) {
             //Outputs

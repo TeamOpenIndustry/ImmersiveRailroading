@@ -61,13 +61,12 @@ public class MultiBlockSelectionGui implements IScreen {
         }
 
         Vec3d vec3d = model.centerOfGroups(model.groups());
-//        state.translate(vec3d.scale(-1));
-//        state.translate(new Vec3d(GUIHelpers.getScreenWidth()/2, GUIHelpers.getScreenHeight() /2, 0));
         state.translate((GUIHelpers.getScreenWidth()) / 2d, builder.getHeight() / 2d + 50, 400);
         int scale = GUIHelpers.getScreenWidth() / 40;
         double degrees = (System.currentTimeMillis() / 1000d) % 72 * 5;
         state.rotate(degrees, 0, 1, 0);
         state.scale(-scale, -scale, -scale);
+        //TODO optimization
         state.translate(- vec3d.z * Math.tan(Math.toRadians(degrees)), 0, 0);
         state.lightmap(1, 1);
         try(VBO.Binding binding = model.binder().bind(state)){
