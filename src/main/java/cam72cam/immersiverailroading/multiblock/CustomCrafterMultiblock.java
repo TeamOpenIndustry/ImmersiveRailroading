@@ -50,7 +50,7 @@ public class CustomCrafterMultiblock extends Multiblock {
 
     @Override
     public Vec3i placementPos() {
-        return Vec3i.ZERO;
+        return def.center;
     }
 
     @Override

@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.model.animation.Animatrix;
 import cam72cam.immersiverailroading.model.animation.MultiblockAnimation;
 import cam72cam.immersiverailroading.render.multiblock.CustomMultiblockRender;
 import cam72cam.immersiverailroading.util.DataBlock;
-import cam72cam.mod.ModCore;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 
@@ -50,15 +49,11 @@ public class MultiblockDefinition {
     public final int tankCapability;
     public final boolean isFluidToStocks;//true is from pipe to stock, false is the opposite
     public final String autoInteractWithStocks;
-//    public final List<Vec3i> energyInputPoints;
-//    public final int powerMaximumValue;
-//    public final DataBlock gui;
 
     //Animations
     public final Map<String, MultiblockAnimation> animations = new HashMap<>();
 
     MultiblockDefinition(String multiblockID, DataBlock object) throws Exception {
-        //Standards
         this.mbID = multiblockID;
         this.name = object.getValue("name").asString().toUpperCase();
         this.type = MultiblockTypes.valueOf(object.getValue("type").asString());
@@ -70,9 +65,9 @@ public class MultiblockDefinition {
         DataBlock struct = object.getBlock("structure");
         struct.getValueMap().forEach((s, value) -> {
             Vec3i vec3i = toVec3i(s);
-            if(vec3i.x >= 0 && vec3i.x < width
+            if (vec3i.x >= 0 && vec3i.x < width
                     && vec3i.y >= 0 && vec3i.y < height
-                    && vec3i.z >= 0 && vec3i.z < length){
+                    && vec3i.z >= 0 && vec3i.z < length) {
                 structure.put(vec3i, value.asString());
             }
         });
@@ -91,7 +86,7 @@ public class MultiblockDefinition {
             this.allowThrowInput = item.getValue("allow_throw_input").asBoolean();
             this.inventoryHeight = item.getValue("inventory_height").asInteger();
             this.inventoryWidth = item.getValue("inventory_width").asInteger();
-            if(item.getBlock("animation") != null){
+            if (item.getBlock("animation") != null) {
                 this.itemOutputRatioBase = 0;
                 this.itemOutputRatioMod = 0;
 
@@ -101,17 +96,13 @@ public class MultiblockDefinition {
                 int transportFrame = item.getBlock("animation").getValue("transport_frame").asInteger();
                 this.transportAmount = item.getBlock("animation").getValue("transport_amount_per_loop").asInteger();
 
-                try{
-                    this.itemAnimFrameCount = new Animatrix(this.itemAnimation.animatrix.getResourceStream(), 1).frameCount();
-                    this.transportPercent = (float) transportFrame / itemAnimFrameCount;
-                    if (transportPercent < 0 || transportPercent > 1) {
-                        throw new IllegalArgumentException(String.format("Invalid transport frame: must in range [0, %f]", itemAnimFrameCount));
-                    }
-                }catch (IOException e){
+                this.itemAnimFrameCount = new Animatrix(this.itemAnimation.animatrix.getResourceStream(), 1).frameCount();
+                this.transportPercent = (float) transportFrame / itemAnimFrameCount;
+                if (transportPercent < 0 || transportPercent > 1) {
                     this.itemAnimFrameCount = 0;
-                    ModCore.error(e.toString());
+                    throw new IllegalArgumentException(String.format("Invalid transport frame: must in range [0, %f]", itemAnimFrameCount));
                 }
-            }else{
+            } else {
                 itemAnimation = null;
                 this.itemOutputRatioBase = item.getValue("items_output_per_sec").asInteger() / 20;
                 this.itemOutputRatioMod = item.getValue("items_output_per_sec").asInteger() % 20;
@@ -126,6 +117,9 @@ public class MultiblockDefinition {
                 this.useRedstoneControl = item.getValue("redstone_control").asBoolean();
                 if (this.useRedstoneControl) {
                     this.redstoneControlPoint = toVec3i(item.getValue("redstone_control_point").asString());
+                    if (redstoneControlPoint == null) {
+                        throw new IllegalArgumentException("Must have redstone control points when redstone_control is true");
+                    }
                 } else {
                     this.redstoneControlPoint = null;
                 }
@@ -162,9 +156,9 @@ public class MultiblockDefinition {
             this.interactRadius = radius * (radius <= 0 ? -1 : 1);
 
             this.isFluidToStocks = fluid.getValue("pipes_to_stocks").asBoolean();
-            if(fluid.getValue("auto_interact").asBoolean() != null) {
+            if (fluid.getValue("auto_interact").asBoolean() != null) {
                 this.autoInteractWithStocks = fluid.getValue("auto_interact").asBoolean().toString();
-            }else{
+            } else {
                 this.autoInteractWithStocks = null;
             }
         } else {
@@ -212,7 +206,7 @@ public class MultiblockDefinition {
         return new Vec3d(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
     }
 
-    public static class MultiblockAnimationDefinition extends AnimationDefinition{
+    public static class MultiblockAnimationDefinition extends AnimationDefinition {
         public final String control_group;
         public final AnimationMode mode;
         public final boolean toggle;

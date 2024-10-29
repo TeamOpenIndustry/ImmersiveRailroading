@@ -34,12 +34,8 @@ public class CustomTransporterMultiblock extends Multiblock {
      * rewrite animation panel
      */
     private final MultiblockDefinition def;
-    public static final HashMap<Vec3i, MultiblockDataSaver> storages;
+    public static final HashMap<Vec3i, MultiblockDataSaver> storages = new HashMap<>();
     private final List<Vec3i> fluidOutputPositions;//All relative possible positions for searching
-
-    static {
-        storages = new HashMap<>();
-    }
 
     public CustomTransporterMultiblock(MultiblockDefinition def) {
         super(def.name, parseStructure(def));
@@ -51,7 +47,8 @@ public class CustomTransporterMultiblock extends Multiblock {
         fluidOutputPositions = new ArrayList<>();
         int bound = (int) Math.ceil(def.interactRadius);
         float distance = def.interactRadius * def.interactRadius;
-        for (int x = -bound; x <= bound; x++) {//Store the possible relative poses for fluid output in order to avoid more calculation
+        //Store the possible relative poses for fluid output in order to avoid more calculation
+        for (int x = -bound; x <= bound; x++) {
             for (int y = 0; y > -8; y--) {
                 for (int z = -bound; z <= bound; z++) {
                     if (x * x + z * z <= distance) {
@@ -62,6 +59,7 @@ public class CustomTransporterMultiblock extends Multiblock {
         }
     }
 
+    //(-x, z, y)
     private static FuzzyProvider[][][] parseStructure(MultiblockDefinition def) {
         FuzzyProvider[][][] provider = new FuzzyProvider[def.length][def.height][def.width];
         for (Vec3i entry : def.structure.keySet()) {
@@ -92,6 +90,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
     @Override
     protected MultiblockInstance newInstance(World world, Vec3i origin, Rotation rot) {
+        //We have to use this to save additional data here...
         storages.put(origin.add(def.center.rotate(rot)), new MultiblockDataSaver(this.def));
         return new TransporterMbInstance(world, origin, rot, this.def);
     }
@@ -100,11 +99,11 @@ public class CustomTransporterMultiblock extends Multiblock {
         public final MultiblockDefinition def;
         private long ticks = 0;
 
-        private transient int transportCooldown;
-        private transient boolean shouldRefreshControlData = true;
+        private int transportCooldown;
+        private boolean shouldInitialize = true;
 
-        public TransporterMbInstance(World world, Vec3i origin, Rotation rot, MultiblockDefinition def) {
-            super(world, origin, rot);
+        public TransporterMbInstance(World world, Vec3i origin, Rotation facing, MultiblockDefinition def) {
+            super(world, origin, facing);
             this.def = def;
             storages.get(getPos(def.center)).onTick(this, false);
         }
@@ -130,6 +129,7 @@ public class CustomTransporterMultiblock extends Multiblock {
 
         @Override
         public boolean isRender(Vec3i offset) {
+            //Only render the center block
             return offset.equals(def.center);
         }
 
@@ -137,13 +137,15 @@ public class CustomTransporterMultiblock extends Multiblock {
         public void tick(Vec3i offset) {
             this.ticks += 1;
 
-            if(shouldRefreshControlData && def.center.equals(offset)){
+            //As the tile isn't created in the constructor we have to init here
+            if (shouldInitialize && def.center.equals(offset)) {
                 def.animations.keySet().stream()
                         .filter(s -> !getTile(offset).getControlPositions().containsKey(s))
                         .forEach(s -> getTile(offset).setControlPosition(s, 0));
-                shouldRefreshControlData = false;
+                shouldInitialize = false;
             }
 
+            //If it has inventory then attempt to handle items
             if (def.inventoryHeight * def.inventoryWidth != 0) {
                 if (def.itemInputPoints.contains(offset) && def.allowThrowInput) {
                     receiveItems(offset);
@@ -154,6 +156,7 @@ public class CustomTransporterMultiblock extends Multiblock {
                 }
             }
 
+            //If it has tank then attempt to handle fluid
             if (def.tankCapability != 0) {
                 //Handle fluid interaction with stock
                 if (!def.fluidHandlePoints.isEmpty() && def.center.equals(offset) && ticks % 10 == 0) {
@@ -182,6 +185,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             ItemStackHandler handler = this.getTile(def.center)
                     .getContainer();
             if (!stacks.isEmpty()) {
+                //Basic merge function
                 for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
                     ItemStack stack = stacks.get(fromSlot);
                     int origCount = stack.getCount();
@@ -206,23 +210,20 @@ public class CustomTransporterMultiblock extends Multiblock {
 
         private void extractItems(Vec3i offset) {
             transportCooldown--;
-            if (def.redstoneControlPoint == null && def.useRedstoneControl) {
-                return;
-            }
-            if ((def.redstoneControlPoint == null || world.getRedstone(getPos(def.redstoneControlPoint)) != 0) && def.allowThrowOutput) {
+
+            if ((def.redstoneControlPoint == null || world.getRedstone(getPos(def.redstoneControlPoint)) != 0) //Have valid RS input
+                    && def.allowThrowOutput) {
                 ItemStackHandler handler = getTile(def.center).getContainer();
                 int slotIndex = handler.getSlotCount() - 1;
                 while (handler.get(slotIndex).getCount() == 0) {
                     slotIndex--;
                     if (slotIndex == -1) {
-                        if (def.animations.get("items").getPercent(getTile(offset), 0) <= 0.05 ||
-                                def.animations.get("items").getPercent(getTile(offset), 0) >=0.95) {
-                            getTile(offset).setControlPosition("items", 0);
-                        }
+                        //Empty inventory, stop transport
+                        getTile(offset).setControlPosition("items", 0);
                         return;
                     }
                 }
-                Vec3d vec3d = new Vec3d(def.itemOutputPoint.internal());
+                Vec3d vec3d = new Vec3d(def.itemOutputPoint.x, def.itemOutputPoint.y, def.itemOutputPoint.z);
                 switch ((int) (this.getRotation() + 90)) {
                     case 180:
                         vec3d = vec3d.add(-1, 0, -1);
@@ -235,12 +236,10 @@ public class CustomTransporterMultiblock extends Multiblock {
                         vec3d = vec3d.add(0, 0, -1);
                 }
 
-                if (getTile(offset).getControlData("items") == null) {
-                    getTile(offset).setControlPosition("items", 0);
-                }
                 getTile(offset).setControlPosition("items", 1);
+
                 if (def.itemAnimation != null) {
-                    if(world.isServer){
+                    if (world.isServer) {
                         if (Math.abs(def.animations.get("items").getPercent(getTile(offset), 0) - def.transportPercent) <= 0.05
                                 && transportCooldown <= 0) {
                             world.dropItem(handler.extract(slotIndex, def.transportAmount, false),
@@ -262,10 +261,8 @@ public class CustomTransporterMultiblock extends Multiblock {
                     }
                 }
             } else {
-                if (def.animations.get("items").getPercent(getTile(offset), 0) <= 0.05 ||
-                        def.animations.get("items").getPercent(getTile(offset), 0) >=0.95) {
-                    getTile(offset).setControlPosition("items", 0);
-                }
+                //Invalid RS input/don't allow output, stop transport
+                getTile(offset).setControlPosition("items", 0);
             }
         }
 
@@ -386,7 +383,7 @@ public class CustomTransporterMultiblock extends Multiblock {
             }
 
             if (handle) {//Avoid NullPointerException caused by initialization
-                if(instance.world.isServer){
+                if (instance.world.isServer) {
                     refreshTrackPositions(instance.getTile(instance.def.center));
                 }
                 if (instance.def.isFluidToStocks) {//Output to stock
@@ -426,7 +423,8 @@ public class CustomTransporterMultiblock extends Multiblock {
         }
 
 
-        public void refreshTrackPositions(TileMultiblock tile){
+        //When we placed/broke some track we need to refresh their poses
+        public void refreshTrackPositions(TileMultiblock tile) {
             Set<Vec3i> vecs = def.model.fluidHandlerPoints.stream()
                     .map(component -> {
                         Matrix4 matrix = def.model.state.getGroupMatrix(tile, component.key, 0);
@@ -434,7 +432,7 @@ public class CustomTransporterMultiblock extends Multiblock {
                     })
                     .map(vec3d -> new Vec3i(-vec3d.x, vec3d.y, -vec3d.z))
                     .collect(Collectors.toSet());
-            if(vecs.stream().anyMatch(vec3i -> !stockFluidHandlerPoints.contains(vec3i))){
+            if (vecs.stream().anyMatch(vec3i -> !stockFluidHandlerPoints.contains(vec3i))) {
                 this.stockFluidHandlerPoints = vecs;
                 possibleTrackPositions.clear();
                 this.stockFluidHandlerPoints.forEach(vec -> fluidOutputPositions.stream()
