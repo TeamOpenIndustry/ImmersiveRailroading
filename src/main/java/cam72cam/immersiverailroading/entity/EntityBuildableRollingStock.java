@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemPlate;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
@@ -362,7 +363,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 		}
 
 		if (this.isDead() && shouldDropItems(type, amount)) {
-			if(source.isPlayer() && source.asPlayer().isCreative()){
+			if(getWorld().isServer && !Config.ConfigBalance.StockDropInCreativeMode && source.isPlayer() && source.asPlayer().isCreative()){
 				return;
 			}
 

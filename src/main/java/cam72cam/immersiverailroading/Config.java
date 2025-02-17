@@ -222,6 +222,9 @@ public class Config {
 
 		@Comment("Round to nearest bucket")
 		public static boolean RoundStockTankToNearestBucket = true;
+
+		@Comment("Does stock drops itself/components when player is in creative mode?")
+		public static boolean StockDropInCreativeMode = false;
 	}
 
 	@Name("performance")
