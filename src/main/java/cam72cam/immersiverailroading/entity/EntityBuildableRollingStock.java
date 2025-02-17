@@ -362,6 +362,10 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 		}
 
 		if (this.isDead() && shouldDropItems(type, amount)) {
+			if(source.isPlayer() && source.asPlayer().isCreative()){
+				return;
+			}
+
 			if (isBuilt) {
 				ItemStack item = new ItemStack(IRItems.ITEM_ROLLING_STOCK, 1);
 				ItemRollingStock.Data data = new ItemRollingStock.Data(item);
