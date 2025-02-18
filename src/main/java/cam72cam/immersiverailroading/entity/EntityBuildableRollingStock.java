@@ -363,7 +363,7 @@ public class EntityBuildableRollingStock extends EntityRollingStock implements I
 		}
 
 		if (this.isDead() && shouldDropItems(type, amount)) {
-			if(getWorld().isServer && !Config.ConfigDebug.StockDropInCreativeMode && source.isPlayer() && source.asPlayer().isCreative()){
+			if(!Config.ConfigDebug.StockDropInCreativeMode && source.isPlayer() && source.asPlayer().isCreative()){
 				return;
 			}
 
