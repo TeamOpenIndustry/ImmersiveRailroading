@@ -288,7 +288,7 @@ public class Config {
 		public static int physicsFutureTicks = 10;
 
 		@Comment("Does stock drops itself/components when player is in creative mode?")
-		public static boolean StockDropInCreativeMode = false;
+		public static boolean stockDropInCreativeMode = true;
 	}
 
 	public static boolean isFuelRequired(Gauge gauge) {
