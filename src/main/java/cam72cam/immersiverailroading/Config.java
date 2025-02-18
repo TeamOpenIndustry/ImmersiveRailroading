@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.mod.config.ConfigFile;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.File;
 import cam72cam.mod.config.ConfigFile.Name;
@@ -287,7 +286,10 @@ public class Config {
 		@Comment("Number of physics steps to cache for future movement / send in packets.  DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING")
 		@Range(min = 10, max = 60)
 		public static int physicsFutureTicks = 10;
-    }
+
+		@Comment("Does stock drops itself/components when player is in creative mode?")
+		public static boolean stockDropInCreativeMode = true;
+	}
 
 	public static boolean isFuelRequired(Gauge gauge) {
 		return !(!ConfigBalance.FuelRequired || (!ConfigBalance.ModelFuelRequired && gauge.isModel()));
