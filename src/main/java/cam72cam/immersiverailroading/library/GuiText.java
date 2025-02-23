@@ -3,6 +3,8 @@ package cam72cam.immersiverailroading.library;
 import cam72cam.mod.text.TextUtil;
 
 public enum GuiText {
+	ON("label.on"),
+	OFF("label.off"),
 	LABEL_BRAKE("label.brake"),
 	LABEL_THROTTLE("label.throttle"),
 	LABEL_REVERSER("label.reverser"),

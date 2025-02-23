@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
+import cam72cam.immersiverailroading.gui.ManualGui;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -211,6 +212,12 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					if (!MinecraftClient.isReady()) {
 						return true;
 					}
+
+					if(ManualGui.isOpen && ManualGui.current != null){
+						ManualGui.current.onClick(evt);
+						return true;
+					}
+
 					Entity riding = MinecraftClient.getPlayer().getRiding();
 					if (!(riding instanceof EntityRollingStock)) {
 						return true;
