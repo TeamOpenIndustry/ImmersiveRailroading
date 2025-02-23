@@ -1,6 +1,6 @@
-### [Home](Home)
+### [Home](immersiverailroading:wiki/en\_us/home.md)
 # Guides
-### [Getting Started](/TeamOpenIndustry/ImmersiveRailroading/wiki/Getting-Started)
+### [Getting Started](immersiverailroading:wiki/en\_us/getting\_started.md)
 ### [Custom Curves](/TeamOpenIndustry/ImmersiveRailroading/wiki/Custom-Curves)
 ### [Open Computers](/TeamOpenIndustry/ImmersiveRailroading/wiki/Open-Computers)
 ## Driving Locomotives

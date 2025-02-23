@@ -1,14 +1,67 @@
 {
+	"pack": "Immersive Railroading",
 	"locomotives": [
+		"a1_peppercorn",
+		"big_boy",
+		"k4_pacific",
+		"e6_atlantic",
+		"a5_switcher",
+		"class_38",
+		"rodgers_460",
+		"skookum",
+		"br01",
+		"cooke_mogul",
+		"k36",
+		"firefly",
+		"iron_duke",
+		"ge_40_ton_boxcab",
+		"ge_b40_8",
+		"ge_b40_8w",
+		"ge_c44_9cw",
+		"emd_sd40-2",
+		"emd_sw1500",
+		"alco_rs1"
 	],
 	"tender": [
+		"a1_peppercorn_tender",
+		"big_boy_tender",
+		"k4_tender",
+		"e6_tender",
+		"a5_tender",
+		"class_38_tender",
+		"rodgers_460_tender",
+		"skookum_tender",
+		"br01_tender",
+		"cooke_tender",
+		"k36_tender"
 	],
 	"hand_car": [
+		"hand_car_1"
 	],
 	"passenger": [
+		"br_coach_mk1",
+		"b70baggage",
+		"p70coach1"
 	],
 	"freight": [
+		"boxcar_x26",
+		"usra_boxcar_classrr40",
+		"70t_hopper_slsf",
+		"attx_flatcar_1",
+		"dw_gondola",
+		"prr_flatcar_1",
+		"usra_hopper_55t",
+		"n5c_cabin_car",
+		"russell_snow_plow",
+		"drgw_3000class_boxcar",
+		"drgw_1000class_gondola",
+		"drgw_5500class_stockcar",
+		"drgw_rail_and_tie_outfit",
+		"waycar"
 	],
 	"tank": [
+		"tank_us2",
+		"kamx_t",
+		"slag_car_1"
 	]
 }

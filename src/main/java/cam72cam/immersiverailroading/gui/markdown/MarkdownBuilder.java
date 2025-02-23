@@ -1,91 +1,51 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
-import cam72cam.mod.text.TextColor;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static cam72cam.immersiverailroading.gui.markdown.MarkdownStyledText.*;
 
 /*
- * Currently supports following regex
- * Don't support inline url(WIP), you should make a separate line
+ * Beginning of md
  */
 public class MarkdownBuilder {
-    private static Map<String, Set<MarkdownStyle>> markerStyles;
-    private static final List<String> MARKER_PRIORITY = Arrays.asList(
-            "***", "~~~", "++", "**", "__", "~~", "*", "_", "+"
-    );
-
-    static {
-        markerStyles = new HashMap<>();
-        markerStyles.put("***", EnumSet.of(MarkdownStyle.BOLD, MarkdownStyle.ITALIC));
-        markerStyles.put("~~~", EnumSet.of(MarkdownStyle.STRIKETHROUGH));
-        markerStyles.put("++", EnumSet.of(MarkdownStyle.UNDERLINE));
-        markerStyles.put("**", EnumSet.of(MarkdownStyle.BOLD));
-        markerStyles.put("__", EnumSet.of(MarkdownStyle.BOLD));
-        markerStyles.put("~~", EnumSet.of(MarkdownStyle.STRIKETHROUGH));
-        markerStyles.put("*", EnumSet.of(MarkdownStyle.ITALIC));
-        markerStyles.put("_", EnumSet.of(MarkdownStyle.ITALIC));
-        markerStyles.put("+", EnumSet.of(MarkdownStyle.UNDERLINE));
-    }
-
-    public static List<String> build(InputStream stream) throws IOException {
+    public static List<List<MarkdownElement>> build(InputStream stream, int screenWidth) throws IOException {
         //Detect line by line
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        List<String> builtString = new ArrayList<>();
+        List<List<MarkdownElement>> builtString = new ArrayList<>();
         String str;
         while ((str = reader.readLine()) != null){
+            str = str.trim();
+            //TODO fix header with url
             if(str.startsWith("#")){
                 //Title
-                int count = 1;
-                while (str.charAt(count - 1) == '#'){
-                    count++;
+                builtString.add(parse(str.replaceAll("#", " ")));
+            } else if(str.startsWith("!")){
+                //Picture
+                MarkdownUrl url = MarkdownUrl.compileSingle(str.substring(1));
+                if(url != null) {
+                    builtString.add(Collections.singletonList(new MarkdownPicture(url.url)));
                 }
-                String input = str.substring(1).replaceAll("#", "  ");
-                List<MarkdownUrl> url = MarkdownUrl.detectUrls(input);
-                if(count <= 2){
-                    if(!url.isEmpty()){
-                        builtString.add(TextColor.BOLD.wrap(input.substring(0, url.get(0).start) +
-                                TextColor.BLUE.wrap(TextColor.UNDERLINE.wrap(url.get(0).text))
-                                + input.substring(url.get(0).end)));
-                        continue;
-                    }
-
-                    builtString.add(TextColor.BOLD.wrap(parse(input)));
-                } else {
-                    if(!url.isEmpty()){
-                        builtString.add(input.substring(0, url.get(0).start) +
-                                TextColor.BLUE.wrap(TextColor.UNDERLINE.wrap(url.get(0).text))
-                                + input.substring(url.get(0).end));
-                        continue;
-                    }
-                    builtString.add(parse(input));
+            } else {
+                if(!str.isEmpty()){
+                    List<List<MarkdownElement>> elements = MarkdownLineBreaker.breakLine(parse(str), screenWidth);
+                    builtString.addAll(elements);
+                }else {
+                    builtString.add(Collections.singletonList(new MarkdownStyledText("", Collections.emptySet())));
                 }
             }
         }
         return builtString;
     }
 
-    public static String parseWithUrl(String input){
-        List<MarkdownUrl> urls = MarkdownUrl.detectUrls(input);
-        StringBuilder builder = new StringBuilder();
-        int lastEnd = 0;
-        for(MarkdownUrl url : urls){
-            builder.append(parse(input.substring(lastEnd, url.start)));
-            lastEnd = url.end;
-        }
-        return builder.append(parse(input.substring(lastEnd))).toString();
-    }
-
-    public static String parse(String input){
+    public static List<MarkdownElement> parse(String input){
         //Deal with escapes
         input = serializeEscape(input);
-        List<Set<MarkdownStyle>> stateMap = new ArrayList<>(input.length());
-        Deque<Set<MarkdownStyle>> styleStack = new ArrayDeque<>();
+        List<Set<MarkdownStyledText.MarkdownTextStyle>> stateMap = new ArrayList<>(input.length());
+        Deque<Set<MarkdownStyledText.MarkdownTextStyle>> styleStack = new ArrayDeque<>();
         int i = 0;
 
         while (i < input.length()) {
@@ -107,14 +67,11 @@ public class MarkdownBuilder {
 
             if (!markerMatched) {
                 // 处理普通字符：合并栈中所有样式
-                Set<MarkdownStyle> currentStyles = mergeStackStyles(styleStack);
+                Set<MarkdownStyledText.MarkdownTextStyle> currentStyles = mergeStackStyles(styleStack);
                 stateMap.add(currentStyles);
                 i++;
             }
         }
-
-        // 阶段2：处理URL
-//        detectUrls(input, stateMap, urls);
 
         // 阶段3：合并相邻相同状态区间
         StringBuilder builder = new StringBuilder();
@@ -123,12 +80,11 @@ public class MarkdownBuilder {
                 builder.append(c);
             }
         }
+
+        //remove temp escape chars
         String result = deserializeEscape(builder.toString());
 
-        List<MarkdownElement> elements = mergeElements(result, stateMap);
-        builder = new StringBuilder();
-        elements.forEach(builder::append);
-        return builder.toString();
+        return mergeElements(result, stateMap);
     }
 
     public static String serializeEscape(String str){
@@ -155,15 +111,15 @@ public class MarkdownBuilder {
         return str;
     }
 
-    private static Set<MarkdownStyle> mergeStackStyles(Deque<Set<MarkdownStyle>> stack) {
-        Set<MarkdownStyle> styles = new HashSet<>();
-        for (Set<MarkdownStyle> s : stack) styles.addAll(s);
+    private static Set<MarkdownStyledText.MarkdownTextStyle> mergeStackStyles(Deque<Set<MarkdownStyledText.MarkdownTextStyle>> stack) {
+        Set<MarkdownStyledText.MarkdownTextStyle> styles = new HashSet<>();
+        for (Set<MarkdownStyledText.MarkdownTextStyle> s : stack) styles.addAll(s);
         return styles;
     }
 
     // 处理标记符号入栈/出栈
-    private static void handleMarker(String marker, Deque<Set<MarkdownStyle>> stack) {
-        Set<MarkdownStyle> styles = markerStyles.get(marker);
+    private static void handleMarker(String marker, Deque<Set<MarkdownStyledText.MarkdownTextStyle>> stack) {
+        Set<MarkdownStyledText.MarkdownTextStyle> styles = markerStyles.get(marker);
         if (stack.peek() != null && stack.peek().equals(styles)) {
             stack.pop(); // 闭合标记
         } else {
@@ -171,27 +127,27 @@ public class MarkdownBuilder {
         }
     }
 
-    private static List<MarkdownElement> mergeElements(String input, List<Set<MarkdownStyle>> stateMap) {
+    private static List<MarkdownElement> mergeElements(String input, List<Set<MarkdownStyledText.MarkdownTextStyle>> stateMap) {
         List<MarkdownElement> elements = new ArrayList<>();
         if (stateMap.isEmpty()) return elements;
 
-        Set<MarkdownStyle> currentStyles = new HashSet<>(stateMap.get(0));
+        Set<MarkdownStyledText.MarkdownTextStyle> currentStyles = new HashSet<>(stateMap.get(0));
         int start = 0;
 
         for (int i = 1; i < stateMap.size(); i++) {
             if (!stateMap.get(i).equals(currentStyles)) {
-                elements.add(createElement(input, start, i, currentStyles));
+                elements.addAll(createElement(input, start, i, currentStyles));
 
                 currentStyles = new HashSet<>(stateMap.get(i));
                 start = i;
             }
         }
-        elements.add(createElement(input, start, stateMap.size(), currentStyles));
+        elements.addAll(createElement(input, start, stateMap.size(), currentStyles));
 
         return elements;
     }
 
-    private static MarkdownElement createElement(String input, int start, int end, Set<MarkdownStyle> styles) {
-        return new MarkdownElement(input.substring(start, end), Collections.unmodifiableSet(styles));
+    private static List<MarkdownElement> createElement(String input, int start, int end, Set<MarkdownStyledText.MarkdownTextStyle> styles) {
+        return MarkdownUrl.splitByUrl(new MarkdownStyledText(input.substring(start, end), Collections.unmodifiableSet(styles)));
     }
 }

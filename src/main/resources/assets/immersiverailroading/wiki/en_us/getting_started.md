@@ -10,4 +10,4 @@ Continuing on with the creation of an A1 Peppercorn, we don't need another machi
 
 A word of warning: Steam Engines require a constant water supply when fueled, and if they boil off 75% or more of their water, there is a chance that they will explode. As such, it's a good idea to remove any fuel from idle Steam Engines, or ensure they have a constant supply of water through a Loader and fluid piping.
 
-Locomotives and cars can be instantly removed and picked up by using sneak + click on them.
+Locomotives and cars can be instantly removed and picked up by using sneak and click on them.

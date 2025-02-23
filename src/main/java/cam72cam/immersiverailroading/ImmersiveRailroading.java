@@ -213,8 +213,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 						return true;
 					}
 
-					if(ManualGui.isOpen && ManualGui.current != null){
-						ManualGui.current.onClick(evt);
+					if(ManualGui.isOpen && ManualGui.currentOpeningManual != null){
+						ManualGui.currentOpeningManual.onClick(evt);
 						return true;
 					}
 
