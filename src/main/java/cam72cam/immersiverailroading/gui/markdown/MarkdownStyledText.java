@@ -4,7 +4,7 @@ import cam72cam.mod.text.TextColor;
 
 import java.util.*;
 
-public class MarkdownStyledText extends MarkdownElement{
+public class MarkdownStyledText extends MarkdownElement {
     public final Set<MarkdownTextStyle> styles;
 
     public static final Map<String, Set<MarkdownTextStyle>> markerStyles;

@@ -1,22 +1,23 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
 import cam72cam.immersiverailroading.gui.ManualGui;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.text.TextColor;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MarkdownUrl extends MarkdownElement implements IClickable{
+public class MarkdownUrl extends MarkdownElement implements IClickable {
     public final Identifier url;
     public Rectangle2D section;
     public boolean inMain = false;
 
-    private static final Pattern URL_PATTERN = Pattern.compile("\\[(?<text>[^]]+?)]\\((?<url>\\S+?)\\)");
+    private static final Pattern URL_PATTERN = Pattern.compile("\\[(?<text>.*?)]\\((?<url>\\S+?)\\)");
 
     static {
         splittable = true;
@@ -34,14 +35,13 @@ public class MarkdownUrl extends MarkdownElement implements IClickable{
     public static MarkdownUrl compileSingle(String input){
         Matcher matcher = URL_PATTERN.matcher(input);
         if(matcher.find()) {
-            return new MarkdownUrl(matcher.group("text"),
-                    matcher.group("url"));
+            return new MarkdownUrl(matcher.group("text"), matcher.group("url"));
         } else {
             return null;
         }
     }
 
-    public static List<MarkdownElement> splitByUrl(MarkdownStyledText input) {
+    public static List<MarkdownElement> splitLineByUrl(MarkdownStyledText input) {
         List<MarkdownElement> urls = new ArrayList<>();
 
         Matcher matcher = URL_PATTERN.matcher(input.text);
@@ -81,11 +81,12 @@ public class MarkdownUrl extends MarkdownElement implements IClickable{
 
     @Override
     public void click() {
-        //TODO work with browser
-        if(!Objects.equals(this.url.getDomain(), "https")){
+        if(this.url.canLoad()){
             ManualGui.currentOpeningManual.changeContent(this.url);
+        } else if(this.url.getDomain().equals("https")){
+            MinecraftClient.getPlayer().sendMessage(PlayerMessage.url(this.url.toString()));
         } else {
-            //We should open it in browser
+            //TODO
         }
     }
 }

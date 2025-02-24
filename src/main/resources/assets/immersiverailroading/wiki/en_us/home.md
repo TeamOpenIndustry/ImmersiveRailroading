@@ -1,4 +1,4 @@
-![](immersiverailroading:textures/items/radio\_card.png)
+![](immersiverailroading:wiki/images/awyy1y7.png)
 ***
 
 [Immersive Railroading](https://minecraft.curseforge.com/projects/immersive-railroading) is a Minecraft mod for 1.16, 1.15, 1.14, 1.12, 1.11, 1.10, and 1.7. IR depends on [Universal Mod Core](https://www.curseforge.com/minecraft/mc-mods/universal-mod-core) and [Track API](https://www.curseforge.com/minecraft/mc-mods/track-api), so you'll need those mods as well.

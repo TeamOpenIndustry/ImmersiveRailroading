@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
+import cam72cam.mod.resource.Identifier;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,23 +19,36 @@ public class MarkdownBuilder {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         List<List<MarkdownElement>> builtString = new ArrayList<>();
         String str;
+        boolean lastLineIsSplit = false;
         while ((str = reader.readLine()) != null){
             str = str.trim();
+            //Deal with escapes
+            str = serializeEscape(str);
+
+            if(lastLineIsSplit && str.isEmpty()){
+                builtString.add(Collections.singletonList(new MarkdownSplitLine()));
+                lastLineIsSplit = false;
+                continue;
+            }
+
             //TODO fix header with url
             if(str.startsWith("#")){
                 //Title
-                builtString.add(parse(str.replaceAll("#", " ")));
+                builtString.add(Collections.singletonList(new MarkdownHeader(str)));
             } else if(str.startsWith("!")){
                 //Picture
                 MarkdownUrl url = MarkdownUrl.compileSingle(str.substring(1));
                 if(url != null) {
-                    builtString.add(Collections.singletonList(new MarkdownPicture(url.url)));
+                    builtString.add(Collections.singletonList(new MarkdownPicture(new Identifier(deserializeEscape(url.url.toString())))));
                 }
+            } else if(MarkdownSplitLine.validate(str)){
+                //Check split line
+                lastLineIsSplit = true;
             } else {
                 if(!str.isEmpty()){
                     List<List<MarkdownElement>> elements = MarkdownLineBreaker.breakLine(parse(str), screenWidth);
                     builtString.addAll(elements);
-                }else {
+                } else {
                     builtString.add(Collections.singletonList(new MarkdownStyledText("", Collections.emptySet())));
                 }
             }
@@ -42,8 +57,6 @@ public class MarkdownBuilder {
     }
 
     public static List<MarkdownElement> parse(String input){
-        //Deal with escapes
-        input = serializeEscape(input);
         List<Set<MarkdownStyledText.MarkdownTextStyle>> stateMap = new ArrayList<>(input.length());
         Deque<Set<MarkdownStyledText.MarkdownTextStyle>> styleStack = new ArrayDeque<>();
         int i = 0;
@@ -51,7 +64,7 @@ public class MarkdownBuilder {
         while (i < input.length()) {
             boolean markerMatched = false;
 
-            // 尝试匹配最长可能的标记（3 → 2 → 1字符）
+            // Try to match longest possible marker
             for (String marker : MARKER_PRIORITY) {
                 int len = marker.length();
                 if (i + len > input.length()) continue;
@@ -66,14 +79,12 @@ public class MarkdownBuilder {
             }
 
             if (!markerMatched) {
-                // 处理普通字符：合并栈中所有样式
                 Set<MarkdownStyledText.MarkdownTextStyle> currentStyles = mergeStackStyles(styleStack);
                 stateMap.add(currentStyles);
                 i++;
             }
         }
 
-        // 阶段3：合并相邻相同状态区间
         StringBuilder builder = new StringBuilder();
         for(char c : input.toCharArray()){
             if(c != '_' && c != '+' && c != '~' && c != '*'){
@@ -117,13 +128,12 @@ public class MarkdownBuilder {
         return styles;
     }
 
-    // 处理标记符号入栈/出栈
     private static void handleMarker(String marker, Deque<Set<MarkdownStyledText.MarkdownTextStyle>> stack) {
         Set<MarkdownStyledText.MarkdownTextStyle> styles = markerStyles.get(marker);
         if (stack.peek() != null && stack.peek().equals(styles)) {
-            stack.pop(); // 闭合标记
+            stack.pop();
         } else {
-            stack.push(styles); // 开始标记
+            stack.push(styles);
         }
     }
 
@@ -148,6 +158,6 @@ public class MarkdownBuilder {
     }
 
     private static List<MarkdownElement> createElement(String input, int start, int end, Set<MarkdownStyledText.MarkdownTextStyle> styles) {
-        return MarkdownUrl.splitByUrl(new MarkdownStyledText(input.substring(start, end), Collections.unmodifiableSet(styles)));
+        return MarkdownUrl.splitLineByUrl(new MarkdownStyledText(input.substring(start, end), Collections.unmodifiableSet(styles)));
     }
 }
