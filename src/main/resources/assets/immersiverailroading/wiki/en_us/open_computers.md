@@ -9,11 +9,13 @@ Placing a Adaptor next to or under a Detector Augment provides the following fun
 * getPos(): returns the augment's position
 * getAugmentType(): returns the augment's type
 
+(Don't forget to set the augment to COMPUTER mode by right-clicking it with a redstone torch)
+
 Placing a Adaptor next to or under a Loco Control Augment provides the following functions under components.ir_augment_control:
 
 * setThrottle(number): Sets the throttle to a value between -1 and 1 (reverse/forward)
 * setBrake(number): Sets the brake to a value between 0 and 1
-* horn(): fires off the locomotive's horn
+* setHorn(number): fires off the locomotive's horn for the given number of ticks
 * getPos(): returns the augment's position
 * getAugmentType(): returns the augment's type
 
@@ -22,5 +24,5 @@ These augments will also fire opencomputers events.  You can listen for them wit
 event_name, net_address, augment_type, stock_uuid = event.pull("ir_train_overhead")
 
 
-[image{200, 364, 0.143229166667, immersiverailroading:wiki/images/w7y6ohz.png}]
-[image{200, 523, 0.143229166667, immersiverailroading:wiki/images/bvv44dg.png}]
+![setup](immersiverailroading:wiki/images/oc1.png)
+![code](immersiverailroading:wiki/images/oc2.png)

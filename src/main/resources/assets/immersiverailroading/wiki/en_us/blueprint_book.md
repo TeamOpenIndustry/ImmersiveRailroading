@@ -1,8 +1,8 @@
-One of the core tools in Immersive Railroading. The Blueprint Book contains the blueprints for the machine present in the mod, and is the tool used to place them.  It also opens up an in-game wiki if the in-game wiki mod is installed.  Otherwise, it links to the wiki here on github.
+One of the core tools in Immersive Railroading. The Blueprint Book contains the blueprints for the machine present in the mod, and is the tool used to place them.  It also opens up an in-game wiki when right-click.
 
 Craft with a book and six steel ingots in an H-shape, with the book in the center like so:
 
-[image{200, 104, 1.02996254682, immersiverailroading:wiki/images/6erb7a7.png}]
+![Blueprint Book Crafting Recipe](immersiverailroading:wiki/images/book1.png)
 
 While holding the book with your crosshair in midair, sneak and right-click to toggle between the different machines. Currently, they are the Plate Rolling Machine, Boiler Machine, Steam Hammer, Casting Basin, and Rail Machine.
 
@@ -10,5 +10,4 @@ To place these machines, right-click on the ground with book in hand. The book w
 
 Preview shown when looking at the ground with the book:
 
-[image{200, 383, 0.537109375, immersiverailroading:wiki/images/uioghp2.png}]
-
+![Preview](immersiverailroading:wiki/images/book2.png)

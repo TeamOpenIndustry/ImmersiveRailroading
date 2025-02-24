@@ -13,7 +13,8 @@ public class MarkdownLineBreaker {
 
         while (!processingDeque.isEmpty()) {
             MarkdownElement element = processingDeque.poll();
-            int elementWidth = GUIHelpers.getTextWidth(element.text);
+            int elementWidth = (int) (GUIHelpers.getTextWidth(element.text) *
+                    ((element instanceof MarkdownStyledText && ((MarkdownStyledText) element).isBold()) ? 1.4 : 1));
 
             // If the element is oversize...
             if (elementWidth > screenWidth && currentLine.isEmpty()) {
@@ -41,7 +42,11 @@ public class MarkdownLineBreaker {
 
     private static void handleOversizeElement(MarkdownElement element, int screenWidth,
                                               Deque<MarkdownElement> queue, List<List<MarkdownElement>> lines) {
-        int splitPos = findOptimalSplitPosition(element.text, screenWidth);
+        double m = (element instanceof MarkdownStyledText && ((MarkdownStyledText) element).isBold()) ? 1.4 : 1;
+        int splitPos = findOptimalOrSpace(element.text, screenWidth, m);
+        if(splitPos == -1){//Very long string without spacing, use legacy method
+            splitPos = findOptimal(element.text, screenWidth, m);
+        }
         MarkdownElement[] splitElements = element.split(splitPos);
 
         List<MarkdownElement> newLine = new LinkedList<>();
@@ -54,7 +59,8 @@ public class MarkdownLineBreaker {
     private static void processLineBreak(MarkdownElement element, Deque<MarkdownElement> queue,
                                          List<MarkdownElement> currentLine, List<List<MarkdownElement>> lines,
                                          int currentWidth, int screenWidth) {
-        int splitPos = findOptimalSplitPosition(element.text, screenWidth - currentWidth);
+        double m = (element instanceof MarkdownStyledText && ((MarkdownStyledText) element).isBold()) ? 1.4 : 1;
+        int splitPos = findOptimalOrSpace(element.text, screenWidth - currentWidth, m);
         if (splitPos != -1) {
             MarkdownElement[] splitElements = element.split(splitPos);
 
@@ -68,14 +74,35 @@ public class MarkdownLineBreaker {
         }
     }
 
-    private static int findOptimalSplitPosition(String text, int maxWidth) {
+    //Legacy method
+    private static int findOptimal(String text, int maxWidth, double widthMultiplier){
         int low = 0;
         int high = text.length();
         int bestPos = 0;
 
         while (low <= high) {
             int mid = (low + high) / 2;
-            int currentWidth = GUIHelpers.getTextWidth(text.substring(0, mid));
+            int currentWidth = (int) (GUIHelpers.getTextWidth(text.substring(0, mid)) * widthMultiplier);
+
+            if (currentWidth <= maxWidth) {
+                bestPos = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+
+        return Math.max(1, Math.min(bestPos, text.length() - 1));
+    }
+
+    private static int findOptimalOrSpace(String text, int maxWidth, double widthMultiplier) {
+        int low = 0;
+        int high = text.length();
+        int bestPos = 0;
+
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            int currentWidth = (int) (GUIHelpers.getTextWidth(text.substring(0, mid)) * widthMultiplier);
 
             if (currentWidth <= maxWidth) {
                 bestPos = mid;

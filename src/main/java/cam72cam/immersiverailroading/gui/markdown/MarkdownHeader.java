@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui.markdown;
 
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.text.TextColor;
 import util.Matrix4;
 
 /*
@@ -43,29 +44,29 @@ public class MarkdownHeader extends MarkdownElement{
     }
 
     public boolean render(Matrix4 transform){
-        Vec3d movement = transform.apply(Vec3d.ZERO);
+        Vec3d offset = transform.apply(Vec3d.ZERO);
         if(this.level == 1){
-            transform.translate(-movement.x, -movement.y, 0);
+            transform.translate(-offset.x, -offset.y, 0);
             transform.scale(1.35, 1.35, 1.35);
-            transform.translate(movement.x * MarkdownHeader.LEVEL1, movement.y * MarkdownHeader.LEVEL1, 0);
+            transform.translate(offset.x * MarkdownHeader.LEVEL1, offset.y * MarkdownHeader.LEVEL1, 0);
             String str = this.apply();
             GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
 
-            transform.translate(-movement.x * MarkdownHeader.LEVEL1, -movement.y * MarkdownHeader.LEVEL1, 0);
+            transform.translate(-offset.x * MarkdownHeader.LEVEL1, -offset.y * MarkdownHeader.LEVEL1, 0);
             transform.scale(MarkdownHeader.LEVEL1, MarkdownHeader.LEVEL1, MarkdownHeader.LEVEL1);
-            transform.translate(movement.x, movement.y, 0);
+            transform.translate(offset.x, offset.y, 0);
             transform.translate(0, 4, 0);
             return true;
         } else if(this.level == 2){
-            transform.translate(-movement.x, -movement.y, 0);
+            transform.translate(-offset.x, -offset.y, 0);
             transform.scale(1.15, 1.15, 1.15);
-            transform.translate(movement.x * MarkdownHeader.LEVEL2, movement.y * MarkdownHeader.LEVEL2, 0);
+            transform.translate(offset.x * MarkdownHeader.LEVEL2, offset.y * MarkdownHeader.LEVEL2, 0);
             String str = this.apply();
             GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
 
-            transform.translate(-movement.x * MarkdownHeader.LEVEL2, -movement.y * MarkdownHeader.LEVEL2, 0);
+            transform.translate(-offset.x * MarkdownHeader.LEVEL2, -offset.y * MarkdownHeader.LEVEL2, 0);
             transform.scale(MarkdownHeader.LEVEL2, MarkdownHeader.LEVEL2, MarkdownHeader.LEVEL2);
-            transform.translate(movement.x, movement.y, 0);
+            transform.translate(offset.x, offset.y, 0);
             transform.translate(0, 2, 0);
             return true;
         }
@@ -77,7 +78,7 @@ public class MarkdownHeader extends MarkdownElement{
         if(level == -1){//Invalid
             return "";
         } else {
-            return text;
+            return TextColor.ITALIC.wrap(text);
         }
     }
 

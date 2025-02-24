@@ -4,6 +4,8 @@ You will encounter higher frame drops at these triangle counts:
 
 NOTE: Only tris you are currently looking at / that are visible will add to that value.
 
+//TODO Dynamic document
+
 # Immersive Railroading:
 A5 Switcher - **28,700 tris**  
 alco RS1 - **27,112 tris**  

@@ -9,32 +9,57 @@ import cam72cam.mod.gui.screen.IScreenBuilder;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
+import cam72cam.mod.text.TextColor;
+import org.apache.commons.lang3.tuple.MutablePair;
 import util.Matrix4;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.List;
+import java.util.Stack;
 
 public class ManualGui implements IScreen {
     //TODO Does it works fine on server?
+    //Yes as the class is client-only
     public static boolean isOpen;
     public static ManualGui currentOpeningManual;
+    //                                        page     page's mainOffset
+    private static final Stack<MutablePair<Identifier, Double>> pageStack;
+
+    private static final int HEADER_COLOR = 0xFF888888;
+    private static final int SIDEBAR_COLOR = 0xFFCCCCCC;
+    private static final int MAIN_COLOR = 0xFFFFFFFF;
+    private static final int CODE_COLOR = 0xFFDDDDDD;
+    private static final int SPLIT_LINE_COLOR = 0xFF888888;
+    private static final int FOOTER_COLOR = 0xFFEEEEEE;
+    private static final int BACKGROUND_COLOR = 0xCC000000;
+
+    private static final int WHITE = 0xFFFFFFFF;
+    private static final int BLACK = 0xFF000000;
 
     private int width;
     private int height;
-    //实现滚动
+    //Imply scroll
+    private double sidebarSpeed = 0;
     private double sidebarOffset = 0;
+    private double mainSpeed = 0;
     private double mainOffset = 0;
     private int sidebarHeight;
     private int mainHeight;
-    //      全文  行    元素
+    //     Whole Line   Element
     private List<List<MarkdownElement>> sidebar;
     private List<List<MarkdownElement>> footer;
     private Identifier lastPage;
-    private Identifier currentPage = new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/home.md");
     private List<List<MarkdownElement>> content;
 
-    //Will be called every time thi screen scale changes
+    private Rectangle2D prevPageButton;
+
+    static {
+        pageStack = new Stack<>();
+    }
+
+    //Will be called every time the screen scale changes
     //So there's no need to update line break manually
     @Override
     public void init(IScreenBuilder screen) {
@@ -43,7 +68,10 @@ public class ManualGui implements IScreen {
         try {
             sidebar = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_sidebar.md").getResourceStream(), screen.getWidth());
             footer = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_footer.md").getResourceStream(), screen.getWidth() - 120);
-            content = MarkdownBuilder.build(currentPage.getResourceStream(), screen.getWidth() - 240);
+            pageStack.push(MutablePair.of(new Identifier("immersiverailroading:wiki/en_us/home.md"), 0d));
+            content = MarkdownBuilder.build(pageStack.peek().getLeft().getResourceStream(), screen.getWidth() - 240);
+
+            prevPageButton = new Rectangle(60,5,10,10);
         } catch (IOException e) {
             throw new RuntimeException();
         }
@@ -58,6 +86,7 @@ public class ManualGui implements IScreen {
     public void onClose() {
         isOpen = false;
         currentOpeningManual = null;
+        pageStack.clear();
     }
 
     @Override
@@ -66,20 +95,20 @@ public class ManualGui implements IScreen {
         width = builder.getWidth();
         height = builder.getHeight();
 
-        if(lastPage != currentPage){
+        if(lastPage != pageStack.peek().getLeft()){
             try {
-                content = MarkdownBuilder.build(currentPage.getResourceStream(), width - 240);
+                content = MarkdownBuilder.build(pageStack.peek().getLeft().getResourceStream(), width - 240);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            mainOffset = 0;
-            lastPage = currentPage;
+            mainOffset = pageStack.peek().getValue();
+            lastPage = pageStack.peek().getLeft();
         }
 
         //Background
-        GUIHelpers.drawRect(0, 0, width, height, 0xCC000000);
-        GUIHelpers.drawRect(50, 0, width - 100, height, 0xFFFFFFFF);
-        GUIHelpers.drawRect(50, 20, 120, height - 20, 0xFFDDDDDD);
+        GUIHelpers.drawRect(0, 0, width, height, BACKGROUND_COLOR);
+        GUIHelpers.drawRect(50, 0, width - 100, height, MAIN_COLOR);
+        GUIHelpers.drawRect(50, 0, 120, height, SIDEBAR_COLOR);
 
         Matrix4 side = state.model_view().copy();
         side.translate(57, 27 - sidebarOffset, 0);
@@ -89,7 +118,8 @@ public class ManualGui implements IScreen {
         for(List<MarkdownElement> line : sidebar){
             int currWidth = 0;
             for(MarkdownElement element : line){
-                Vec3d movement = side.apply(Vec3d.ZERO);
+                //Show current matrix result
+                Vec3d offset = side.apply(Vec3d.ZERO);
 
                 if(element instanceof MarkdownHeader && ((MarkdownHeader) element).render(side)){
                     //Successfully rendered as header, continue
@@ -97,11 +127,11 @@ public class ManualGui implements IScreen {
                 } //Otherwise render as normal text
 
                 String str = element.apply();
-                GUIHelpers.drawString(str, 0, 0, 0xFF000000, side);
+                GUIHelpers.drawString(str, 0, 0, BLACK, side);
 
                 //Dynamically update urls' pos
                 if(element instanceof MarkdownUrl){
-                    ((MarkdownUrl) element).section = new Rectangle((int) movement.x, (int) movement.y,
+                    ((MarkdownUrl) element).section = new Rectangle((int) offset.x, (int) offset.y,
                             GUIHelpers.getTextWidth(str), 10);
                     ((MarkdownUrl) element).inMain = false;
                 }
@@ -120,7 +150,10 @@ public class ManualGui implements IScreen {
         for(List<MarkdownElement> line : content){
             int currWidth = 0;
             for(MarkdownElement element : line){
-                if(element instanceof MarkdownHeader && ((MarkdownHeader) element).render(side)){
+                //Show current matrix result
+                Vec3d offset = main.apply(Vec3d.ZERO);
+
+                if(element instanceof MarkdownHeader && ((MarkdownHeader) element).render(main)){
                     //Successfully rendered as header, continue
                     continue;
                 } //Otherwise render as normal text
@@ -128,7 +161,7 @@ public class ManualGui implements IScreen {
                 if (element instanceof MarkdownPicture) {
                     MarkdownPicture mdPicture = (MarkdownPicture) element;
                     int picHeight = (int) ((width - 240) * mdPicture.ratio);
-                    GUIHelpers.texturedRect(mdPicture.picture, (int) main.apply(Vec3d.ZERO).x, (int) main.apply(Vec3d.ZERO).y,
+                    GUIHelpers.texturedRect(mdPicture.picture, (int) offset.x, (int) offset.y,
                             width - 240, picHeight);
                     main.translate(0, picHeight, 0);
                     cachedHeight += picHeight;
@@ -136,18 +169,29 @@ public class ManualGui implements IScreen {
                 }
 
                 if(element instanceof MarkdownSplitLine){
-                    GUIHelpers.drawRect((int) main.apply(Vec3d.ZERO).x, (int) main.apply(Vec3d.ZERO).y,width - 240, 2,  0xFF888888);
+                    GUIHelpers.drawRect((int) offset.x, (int) offset.y,width - 240, 2,  SPLIT_LINE_COLOR);
                     main.translate(0, 2,0);
                     cachedHeight += 2;
                     continue;
                 }
 
+                if(element instanceof MarkdownStyledText &&((MarkdownStyledText) element).isCode()){
+                    //Draw code block
+                    String str = element.apply();
+                    GUIHelpers.drawRect((int) offset.x - 2, (int) offset.y - 1,
+                            GUIHelpers.getTextWidth(str) + 4, 12,  CODE_COLOR);
+                    GUIHelpers.drawString(str, (int) offset.x, (int) offset.y, BLACK);
+                    currWidth += GUIHelpers.getTextWidth(str) +2;
+                    main.translate(GUIHelpers.getTextWidth(str) + 2, 0, 0);
+                    continue;
+                }
+
                 String str = element.apply();
-                GUIHelpers.drawString(str, (int) main.apply(Vec3d.ZERO).x, (int) main.apply(Vec3d.ZERO).y, 0xFF000000);
+                GUIHelpers.drawString(str, (int) offset.x, (int) offset.y, BLACK);
 
                 //Dynamically update urls' pos
                 if(element instanceof MarkdownUrl){
-                    ((MarkdownUrl) element).section = new Rectangle((int) main.apply(Vec3d.ZERO).x, (int) main.apply(Vec3d.ZERO).y,
+                    ((MarkdownUrl) element).section = new Rectangle((int) offset.x, (int) offset.y,
                             GUIHelpers.getTextWidth(str), 10);
                     ((MarkdownUrl) element).inMain = true;
                 }
@@ -161,23 +205,27 @@ public class ManualGui implements IScreen {
         mainHeight = cachedHeight - 100;
 
         //Foreground(to hide text)
-        //Header rect
-        GUIHelpers.drawRect(50, 0, width - 100, 20, 0xFF888888);
         //Footer rect
         int lineCount = footer.size();
         GUIHelpers.drawRect(50, height - (10 * lineCount),
-                width - 100, 10 * lineCount, 0xFFEEEEEE);
+                width - 100, 10 * lineCount, FOOTER_COLOR);
 
         //Footer text
         for(List<MarkdownElement> line : footer){
             GUIHelpers.drawCenteredString(line.get(0).apply(),
-                    width / 2, builder.getHeight() - (10 * lineCount), 0xFF000000);
+                    width / 2, builder.getHeight() - (10 * lineCount), BLACK);
             lineCount --;
         }
+
+        //Header rect
+        GUIHelpers.drawRect(50, 0, width - 100, 20, HEADER_COLOR);
+        GUIHelpers.drawString(TextColor.BOLD.wrap("<-"), 60,5, WHITE);
     }
 
     public void changeContent(Identifier identifier){
-        this.currentPage = identifier;
+        if(!pageStack.peek().getLeft().equals(identifier)){
+            pageStack.push(MutablePair.of(identifier, 0d));
+        }
     }
 
     public void onClick(ClientEvents.MouseGuiEvent event){
@@ -185,24 +233,28 @@ public class ManualGui implements IScreen {
         if(event.scroll != 0) {
             switch (region) {
                 case 1:
-                    sidebarOffset = Math.max(0, Math.min(sidebarHeight, sidebarOffset - (event.scroll * 5)));
+                    sidebarSpeed =  Math.min(50, Math.max(-50, sidebarSpeed - (10 * event.scroll)));
                     return;
                 case 2:
-                    mainOffset = Math.max(0, Math.min(mainHeight, mainOffset - (event.scroll * 5)));
+                    mainSpeed =  Math.min(50, Math.max(-50, mainSpeed - (10 * event.scroll)));
                     return;
             }
         }
 
         if(event.action == ClientEvents.MouseAction.RELEASE){
+            if(prevPageButton.contains(event.x, event.y)){
+                if(pageStack.size() > 1){
+                    pageStack.pop();
+                }
+                return;
+            }
             switch (region) {
                 case 1:
-                    sidebar.forEach(line -> {
-                        line.stream().filter(e -> e instanceof MarkdownUrl).forEach(element -> {
-                            if(((MarkdownUrl) element).section.contains(event.x, event.y)){
-                                ((MarkdownUrl) element).click();
-                            }
-                        });
-                    });
+                    sidebar.forEach(line -> line.stream().filter(e -> e instanceof MarkdownUrl).forEach(element -> {
+                        if(((MarkdownUrl) element).section.contains(event.x, event.y)){
+                            ((MarkdownUrl) element).click();
+                        }
+                    }));
                     break;
                 case 2:
                     content.forEach(line -> line.stream().filter(e -> e instanceof MarkdownUrl).forEach(element -> {
@@ -213,6 +265,24 @@ public class ManualGui implements IScreen {
                     break;
             }
         }
+    }
+
+    //For scroll
+    public void onClientTick(){
+        this.mainOffset += mainSpeed;
+        this.sidebarOffset += sidebarSpeed;
+
+        sidebarOffset = Math.max(0, Math.min(sidebarHeight, sidebarOffset));
+        mainOffset = Math.max(0, Math.min(mainHeight, mainOffset));
+
+        pageStack.peek().setValue(mainOffset);
+
+        mainSpeed += mainSpeed > 0 ? -Math.min(mainSpeed, 3) :
+                    mainSpeed < 0 ? -Math.max(mainSpeed, -3) :
+                            0;
+        sidebarSpeed += sidebarSpeed > 0 ? -Math.min(sidebarSpeed, 3) :
+                sidebarSpeed < 0 ? -Math.max(sidebarSpeed, -3) :
+                        0;
     }
 
     public int detectRegion(int x, int y){

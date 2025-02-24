@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
+import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.resource.Identifier;
 
 import java.io.BufferedReader;
@@ -20,10 +21,18 @@ public class MarkdownBuilder {
         List<List<MarkdownElement>> builtString = new ArrayList<>();
         String str;
         boolean lastLineIsSplit = false;
+        boolean isCodeBlock = false;
         while ((str = reader.readLine()) != null){
             str = str.trim();
             //Deal with escapes
             str = serializeEscape(str);
+
+            if(isCodeBlock && !str.startsWith("```")){
+                //TODO make it don't ignore starting spaces
+                builtString.addAll(MarkdownLineBreaker.breakLine(
+                        Collections.singletonList(new MarkdownStyledText(str, EnumSet.of(MarkdownTextStyle.CODE))), screenWidth));
+                continue;
+            }
 
             if(lastLineIsSplit && str.isEmpty()){
                 builtString.add(Collections.singletonList(new MarkdownSplitLine()));
@@ -31,9 +40,9 @@ public class MarkdownBuilder {
                 continue;
             }
 
-            //TODO fix header with url
             if(str.startsWith("#")){
                 //Title
+                //CANNOT CONTAIN URL
                 builtString.add(Collections.singletonList(new MarkdownHeader(str)));
             } else if(str.startsWith("!")){
                 //Picture
@@ -41,12 +50,30 @@ public class MarkdownBuilder {
                 if(url != null) {
                     builtString.add(Collections.singletonList(new MarkdownPicture(new Identifier(deserializeEscape(url.url.toString())))));
                 }
+            } else if(str.startsWith("```")){
+                //Code block
+                isCodeBlock = ! isCodeBlock;
+            } else if(str.startsWith("* ") || str.startsWith("- ")){
+                //Unsorted list
+                List<List<MarkdownElement>> elements = MarkdownLineBreaker.breakLine(parse(str.substring(2)), screenWidth - GUIHelpers.getTextWidth("* "));
+                elements.get(0).add(0, new MarkdownStyledText("• ", Collections.emptySet()));
+                for(int i = 1; i < elements.size(); i++){
+                    elements.get(i).add(0, new MarkdownStyledText("  ", Collections.emptySet()));
+                }
+                builtString.addAll(elements);
             } else if(MarkdownSplitLine.validate(str)){
                 //Check split line
                 lastLineIsSplit = true;
             } else {
                 if(!str.isEmpty()){
+                    //Basic String
                     List<List<MarkdownElement>> elements = MarkdownLineBreaker.breakLine(parse(str), screenWidth);
+                    for (List<MarkdownElement> line : elements) {
+                        //If a line's first element starts with spacing...
+                        if(!line.isEmpty() && !line.get(0).text.isEmpty() && line.get(0).text.charAt(0) == ' '){
+                            line.get(0).text = line.get(0).text.substring(1);
+                        }
+                    }
                     builtString.addAll(elements);
                 } else {
                     builtString.add(Collections.singletonList(new MarkdownStyledText("", Collections.emptySet())));
@@ -87,7 +114,7 @@ public class MarkdownBuilder {
 
         StringBuilder builder = new StringBuilder();
         for(char c : input.toCharArray()){
-            if(c != '_' && c != '+' && c != '~' && c != '*'){
+            if(c != '+' && c != '~' && c != '*' && c != '`'){
                 builder.append(c);
             }
         }
@@ -100,25 +127,25 @@ public class MarkdownBuilder {
 
     public static String serializeEscape(String str){
         str = str.replaceAll("\\\\\\+", "ā");
-        str = str.replaceAll("\\\\\\_", "á");
+        str = str.replaceAll("\\\\`", "á");
         str = str.replaceAll("\\\\\\*", "ǎ");
-        str = str.replaceAll("\\\\\\~", "à");
-        str = str.replaceAll("\\\\\\[", "ō");
-        str = str.replaceAll("\\\\\\]", "ó");
-        str = str.replaceAll("\\\\\\(", "ǒ");
-        str = str.replaceAll("\\\\\\)", "ò");
+        str = str.replaceAll("\\\\~", "à");
+//        str = str.replaceAll("\\\\\\[", "ō");
+//        str = str.replaceAll("\\\\\\]", "ó");
+//        str = str.replaceAll("\\\\\\(", "ǒ");
+//        str = str.replaceAll("\\\\\\)", "ò");
         return str;
     }
 
     public static String deserializeEscape(String str){
         str = str.replaceAll("ā", "+");
-        str = str.replaceAll("á", "_");
+        str = str.replaceAll("á", "`");
         str = str.replaceAll("ǎ", "*");
         str = str.replaceAll("à", "~");
-        str = str.replaceAll("ō", "[");
-        str = str.replaceAll("ó", "]");
-        str = str.replaceAll("ǒ", "(");
-        str = str.replaceAll("ò", ")");
+//        str = str.replaceAll("ō", "[");
+//        str = str.replaceAll("ó", "]");
+//        str = str.replaceAll("ǒ", "(");
+//        str = str.replaceAll("ò", ")");
         return str;
     }
 

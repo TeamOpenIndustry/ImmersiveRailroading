@@ -8,26 +8,31 @@ public class MarkdownStyledText extends MarkdownElement {
     public final Set<MarkdownTextStyle> styles;
 
     public static final Map<String, Set<MarkdownTextStyle>> markerStyles;
-    public static final List<String> MARKER_PRIORITY = Arrays.asList("***", "~~~", "++", "**", "__", "~~", "*", "_", "+");
+    public static final List<String> MARKER_PRIORITY = Arrays.asList("***", "++", "**", "~~", "*", "`");
 
     static {
         splittable = true;
 
         markerStyles = new HashMap<>();
         markerStyles.put("***", EnumSet.of(MarkdownTextStyle.BOLD, MarkdownTextStyle.ITALIC));
-        markerStyles.put("~~~", EnumSet.of(MarkdownTextStyle.STRIKETHROUGH));
         markerStyles.put("++", EnumSet.of(MarkdownTextStyle.UNDERLINE));
         markerStyles.put("**", EnumSet.of(MarkdownTextStyle.BOLD));
-        markerStyles.put("__", EnumSet.of(MarkdownTextStyle.BOLD));
         markerStyles.put("~~", EnumSet.of(MarkdownTextStyle.STRIKETHROUGH));
         markerStyles.put("*", EnumSet.of(MarkdownTextStyle.ITALIC));
-        markerStyles.put("_", EnumSet.of(MarkdownTextStyle.ITALIC));
-        markerStyles.put("+", EnumSet.of(MarkdownTextStyle.UNDERLINE));
+        markerStyles.put("`", EnumSet.of(MarkdownTextStyle.CODE));
     }
 
     public MarkdownStyledText(String text, Set<MarkdownTextStyle> styles) {
         this.text = text;
         this.styles = styles;
+    }
+
+    public boolean isBold(){
+        return this.styles.contains(MarkdownTextStyle.BOLD);
+    }
+
+    public boolean isCode(){
+        return this.styles.contains(MarkdownTextStyle.CODE);
     }
 
     @Override
@@ -59,7 +64,8 @@ public class MarkdownStyledText extends MarkdownElement {
         BOLD(TextColor.BOLD),
         ITALIC(TextColor.ITALIC),
         STRIKETHROUGH(TextColor.STRIKETHROUGH),
-        UNDERLINE(TextColor.UNDERLINE);
+        UNDERLINE(TextColor.UNDERLINE),
+        CODE(TextColor.BLACK);
 
         public final TextColor wrapper;
 
