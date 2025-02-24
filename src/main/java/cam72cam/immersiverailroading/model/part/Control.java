@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.model.part;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
@@ -20,7 +19,6 @@ import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.text.TextColor;
-import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.util.Axis;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -271,8 +269,8 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             return;
         }
 
-        boolean isPressing = stock.getControlPressed(this);
-        if (!isPressing && Math.abs(lookedAt - stock.getWorld().getTicks()) > 2) {
+        boolean isPressed = stock.getControlPressed(this);
+        if (!isPressed && Math.abs(lookedAt - stock.getWorld().getTicks()) > 2) {
             return;
         }
 
@@ -281,9 +279,6 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
         String labelstate = "";
         float percent = getValue(stock) - offset;
         switch (part.type) {
-            case REVERSER_X:
-                percent *= -2;
-                // Fallthrough
             case TRAIN_BRAKE_X:
             case INDEPENDENT_BRAKE_X:
                 if (!stock.getDefinition().isLinearBrakeControl()) {
@@ -291,14 +286,18 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                 }
                 // Fallthrough
             case THROTTLE_X:
+            case REVERSER_X:
             case THROTTLE_BRAKE_X:
             case BELL_CONTROL_X:
             case WHISTLE_CONTROL_X:
             case HORN_CONTROL_X:
             case ENGINE_START_X:
             case CYLINDER_DRAIN_CONTROL_X:
+                if (part.type == ModelComponentType.REVERSER_X) {
+                    percent *= -2;
+                }
                 if (toggle || press) {
-                    labelstate = " (" + TextUtil.translate(percent == 1 ? GuiText.ON.getRaw() : GuiText.OFF.getRaw()) + ")";
+                    labelstate = percent == 1 ? " (On)" : " (Off)";
                 } else {
                     labelstate = String.format(" (%d%%)", (int)(percent * 100));
                 }
@@ -308,14 +307,13 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                     return;
                 }
                 if (toggle || press) {
-                    labelstate = " (" + TextUtil.translate(percent == 1 ? GuiText.ON.getRaw() : GuiText.OFF.getRaw()) + ")";
+                    labelstate = percent == 1 ? " (On)" : " (Off)";
                 } else {
                     labelstate = String.format(" (%d%%)", (int)(percent * 100));
                 }
         }
-        System.out.println(this.modelId);
         String str = (label != null ? label : formatLabel(part.type)) + labelstate;
-        if (isPressing) {
+        if (isPressed) {
             str = TextColor.BOLD.wrap(str);
         }
         GlobalRender.drawText(str, state, pos, 0.2f, 180 - stock.getRotationYaw() - 90);
