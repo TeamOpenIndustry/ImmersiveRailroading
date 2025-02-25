@@ -3,9 +3,6 @@ package cam72cam.immersiverailroading.gui.markdown;
 public abstract class MarkdownElement {
     public String text;
 
-    public static boolean splittable;
-
-
     /**
      * Apply this element to Renderable string
      */

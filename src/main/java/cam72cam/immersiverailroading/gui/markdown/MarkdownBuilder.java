@@ -6,17 +6,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.function.Function;
 
 import static cam72cam.immersiverailroading.gui.markdown.MarkdownStyledText.*;
 
 /*
- * Beginning of md
+ * Beginning of markdown
  */
 public class MarkdownBuilder {
+    public static final HashMap<String, Function<String, List<MarkdownDocument.MarkdownLine>>> SPECIAL_MATCHER = new HashMap<>();
+
     public static MarkdownDocument build(Identifier id, int screenWidth) throws IOException {
         //Detect line by line
         BufferedReader reader = new BufferedReader(new InputStreamReader(id.getResourceStream()));
         MarkdownDocument document = MarkdownDocument.getPageByID(id);
+
         //If it's loaded...
         if(!document.isEmpty()){
             if(document.getPageWidth() == screenWidth){
@@ -28,12 +32,39 @@ public class MarkdownBuilder {
         }
         //Otherwise we need to parse it
         String str;
+        //Interline state storage
         boolean lastLineIsSplit = false;
         boolean isCodeBlock = false;
+        boolean isInTips = false;
+
         while ((str = reader.readLine()) != null){
+            //Deal with custom logic first
+            String finalStr = str;
+            Optional<Map.Entry<String, Function<String, List<MarkdownDocument.MarkdownLine>>>> optionalFunc =
+                    SPECIAL_MATCHER.entrySet().stream().filter(entry -> finalStr.startsWith(entry.getKey())).findFirst();
+            if(optionalFunc.isPresent()){
+                document.addLines(optionalFunc.get().getValue().apply(str));
+                continue;
+            }
+
             //In code block there's no need to consider text style
             if(isCodeBlock && !str.startsWith("```")){
                 document.addLine(new MarkdownStyledText(str, EnumSet.of(MarkdownTextStyle.CODE)));
+                continue;
+            }
+
+            if(isInTips){
+                if(!str.startsWith(">")){
+                    document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText("")).isTipEnd(true));
+                    isInTips = false;
+                } else {
+                    if(str.length() > 1){//More than just 1 '>'
+                        document.addLine(new MarkdownDocument.MarkdownLine(parse(str.substring(Math.min(2, str.length() - 1)))));
+                    } else {//Only one '>'
+                        document.addLine(new MarkdownDocument.MarkdownLine(
+                                new MarkdownStyledText("")));
+                    }
+                }
                 continue;
             }
 
@@ -78,6 +109,12 @@ public class MarkdownBuilder {
             } else if(str.startsWith("* ") || str.startsWith("- ")){
                 //Unsorted list
                 document.addLine(new MarkdownDocument.MarkdownLine(parse(str.substring(2))).isUnorderedList(true));
+            } else if(str.startsWith("> ")){
+                //Tips
+                //Must be more than just 1 '>'
+                document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText("")).isTipStart(true));
+                document.addLine(new MarkdownDocument.MarkdownLine(parse(str.substring(Math.min(2, str.length() - 1)))));
+                isInTips = true;
             } else if(MarkdownSplitLine.validate(str)){
                 //Check split line
                 lastLineIsSplit = true;
@@ -90,8 +127,19 @@ public class MarkdownBuilder {
                 }
             }
         }
+        //Finalize
+        if(isInTips){
+            document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText("")).isTipEnd(true));
+        }
+        if(isCodeBlock){
+            document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText("")).isCodeBlockEnd(true));
+        }
         document.setPageWidth(screenWidth);
         return MarkdownLineBreaker.breakDocument(document, screenWidth);
+    }
+
+    public static void register(String prefix, Function<String, List<MarkdownDocument.MarkdownLine>> func){
+        SPECIAL_MATCHER.put(prefix, func);
     }
 
     public static List<MarkdownElement> parse(String input){
@@ -171,13 +219,19 @@ public class MarkdownBuilder {
                 start = i;
             }
         }
-        elements.addAll(createElement(input, start, stateMap.size(), currentStyles));
+        elements.addAll(createElement(input, start, currentStyles));
 
         return elements;
     }
 
+
     private static List<MarkdownElement> createElement(String input, int start, int end, Set<MarkdownStyledText.MarkdownTextStyle> styles) {
         return MarkdownUrl.splitLineByUrl(new MarkdownStyledText(input.substring(start, end), Collections.unmodifiableSet(styles)));
+    }
+
+    //For some edge cases, in order not to throw an IndexOutOfBoundException
+    private static List<MarkdownElement> createElement(String input, int start, Set<MarkdownStyledText.MarkdownTextStyle> styles) {
+        return MarkdownUrl.splitLineByUrl(new MarkdownStyledText(input.substring(start), Collections.unmodifiableSet(styles)));
     }
 
     public static String serializeEscape(String str){

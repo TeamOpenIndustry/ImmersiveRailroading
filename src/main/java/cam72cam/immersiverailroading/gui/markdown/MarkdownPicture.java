@@ -12,10 +12,6 @@ public class MarkdownPicture extends MarkdownElement {
     public double ratio;
     public BufferedImage image;
 
-    static {
-        splittable = false;
-    }
-
     public MarkdownPicture(Identifier picture) {
         this.picture = picture;
         try {

@@ -11,8 +11,6 @@ public class MarkdownStyledText extends MarkdownElement {
     public static final List<String> MARKER_PRIORITY = Arrays.asList("***", "++", "**", "~~", "*", "`");
 
     static {
-        splittable = true;
-
         markerStyles = new HashMap<>();
         markerStyles.put("***", EnumSet.of(MarkdownTextStyle.BOLD, MarkdownTextStyle.ITALIC));
         markerStyles.put("++", EnumSet.of(MarkdownTextStyle.UNDERLINE));

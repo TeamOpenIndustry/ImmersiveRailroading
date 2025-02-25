@@ -10,7 +10,6 @@ import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.text.TextColor;
 import org.apache.commons.lang3.tuple.MutablePair;
-import util.Matrix4;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -37,8 +36,8 @@ public class ManualGui implements IScreen {
     private int height;
     private MarkdownDocument sidebar;
     private MarkdownDocument footer;
-    private Identifier lastPage;
     private MarkdownDocument content;
+    private Identifier lastPage;
 
     private Rectangle2D prevPageButton;
 
@@ -53,11 +52,12 @@ public class ManualGui implements IScreen {
         isOpen = true;
         currentOpeningManual = this;
         try {
-            sidebar = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_sidebar.md"), screen.getWidth());
-            sidebar.setScrollRegion(new Rectangle(50, 20, 120, screen.getHeight() - 30));
             footer = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_footer.md"), screen.getWidth() - 120);
+            int footerHeight = footer.countLine() * 10;
+            sidebar = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_sidebar.md"), screen.getWidth());
+            sidebar.setScrollRegion(new Rectangle(50, 20, 120, screen.getHeight() - 20 - footerHeight));
             content = MarkdownBuilder.build(pageStack.peek().getLeft(), screen.getWidth() - 240);
-            content.setScrollRegion(new Rectangle(170,20,width-220,height-30));
+            content.setScrollRegion(new Rectangle(170,20,width - 220,height - 20 - footerHeight));
 
             prevPageButton = new Rectangle(60,5,10,10);
         } catch (IOException e) {
@@ -98,19 +98,20 @@ public class ManualGui implements IScreen {
         GUIHelpers.drawRect(50, 0, width - 100, height, MAIN_COLOR);
         GUIHelpers.drawRect(50, 0, 120, height, SIDEBAR_COLOR);
 
-        Matrix4 side = state.model_view().copy();
-        sidebar.render(side.translate(57, 27, 0));
+        //Markdown
+        sidebar.render(state.model_view().copy().translate(57, 27, 0));
+        content.render(state.model_view().copy().translate(180, 30, 0));
 
-        Matrix4 main = state.model_view().copy();
-        content.render(main.translate(180, 30, 0));
+        //Tooltip
+        if(sidebar.over != null){
+            sidebar.over.renderTooltip((int) sidebar.getScrollRegion().getMaxY());
+        } else if(content.over != null){
+            content.over.renderTooltip((int) content.getScrollRegion().getMaxY());
+        }
 
-        //Foreground(to hide text)
-        //Footer rect
+        //Footer
         int lineCount = footer.countLine();
-        GUIHelpers.drawRect(50, height - (10 * lineCount),
-                width - 100, 10 * lineCount, FOOTER_COLOR);
-
-        //Footer text
+        GUIHelpers.drawRect(50, height - (10 * lineCount), width - 100, 10 * lineCount, FOOTER_COLOR);
         for(MarkdownDocument.MarkdownLine l : footer.brokenLines){
             List<MarkdownElement> line = l.line;
             GUIHelpers.drawCenteredString(line.get(0).apply(),
@@ -118,7 +119,7 @@ public class ManualGui implements IScreen {
             lineCount --;
         }
 
-        //Header rect
+        //Header
         GUIHelpers.drawRect(50, 0, width - 100, 20, HEADER_COLOR);
         GUIHelpers.drawString(TextColor.BOLD.wrap("<-"), 60,5, WHITE);
     }

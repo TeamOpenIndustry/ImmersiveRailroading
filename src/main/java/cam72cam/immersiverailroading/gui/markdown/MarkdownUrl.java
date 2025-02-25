@@ -13,16 +13,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MarkdownUrl extends MarkdownElement implements IClickable {
+public class MarkdownUrl extends MarkdownElement implements IClickableElement {
     public final Identifier url;
     public Rectangle2D section;
     public boolean inMain = false;
 
+    //text may be empty; url mustn't be empty
     private static final Pattern URL_PATTERN = Pattern.compile("\\[(?<text>.*?)]\\((?<url>\\S+?)\\)");
-
-    static {
-        splittable = true;
-    }
 
     public MarkdownUrl(String text, String url) {
         this(text, new Identifier(url));
@@ -87,6 +84,18 @@ public class MarkdownUrl extends MarkdownElement implements IClickable {
             ManualGui.currentOpeningManual.pushContent(this.url);
         } else if(this.url.getDomain().equals("https")){
             MinecraftClient.getPlayer().sendMessage(PlayerMessage.url(this.url.toString()));
+        } else {
+            //What should we do?
+        }
+    }
+
+    @Override
+    public void renderTooltip(int bottomBound) {
+        if(this.url.canLoad()){
+            String[] path = this.url.getPath().split("/");
+            ManualTooltipRenderer.renderTooltip("Open page: " + path[path.length-1], bottomBound);
+        } else if(this.url.getDomain().equals("https")){
+            ManualTooltipRenderer.renderTooltip("Click to send this website to your dialog!", bottomBound);
         } else {
             //What should we do?
         }

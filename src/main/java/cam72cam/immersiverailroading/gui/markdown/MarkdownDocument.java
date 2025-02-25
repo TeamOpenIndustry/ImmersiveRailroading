@@ -11,16 +11,19 @@ import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
 
+//Storage content
 public class MarkdownDocument {
     public static HashMap<Identifier, MarkdownDocument> documents = new HashMap<>();
 
     public final Identifier page;
+    public IClickableElement over;
 
     protected List<MarkdownLine> original;
     protected int pageWidth;
     public List<MarkdownLine> brokenLines;
 
     private static final int CODE_COLOR = 0xFFDDDDDD;
+    private static final int TIPS_BAR_COLOR = 0xFF00DD00;
     private static final int SPLIT_LINE_COLOR = 0xFF888888;
 
     private static final int BLACK = 0xFF000000;
@@ -41,6 +44,12 @@ public class MarkdownDocument {
         this.page = page;
         this.original = new LinkedList<>();
         this.brokenLines = new LinkedList<>();
+    }
+
+    //For chained call
+    public MarkdownDocument addLines(List<MarkdownLine> lines) {
+        lines.forEach(this::addLine);
+        return this;
     }
 
     public MarkdownDocument addLine(MarkdownElement line){
@@ -84,12 +93,18 @@ public class MarkdownDocument {
         this.offset = offset;
     }
 
+    public Rectangle2D getScrollRegion() {
+        return scrollRegion;
+    }
+
     //Render a page and return its height
     public int render(Matrix4 matrix4){
         matrix4.translate(0, -offset, 0);
         int height = 0;
         boolean inCodeBlock = false;
+        boolean inTips = false;
         Vec3d offset;
+        over = null;
         for(MarkdownLine line : brokenLines){
             int currWidth = 0;
             offset = matrix4.apply(Vec3d.ZERO);
@@ -97,13 +112,21 @@ public class MarkdownDocument {
                 inCodeBlock = true;
                 //Draw code block
                 //In code block there is at most one text element
-                GUIHelpers.drawRect((int) offset.x , (int) offset.y ,
-                        pageWidth, 10, CODE_COLOR);
-                int delta = pageWidth - GUIHelpers.getTextWidth(line.line.get(0).apply());
-                matrix4.translate(delta, 0, 0);
-                GUIHelpers.drawString(line.line.get(0).apply(), 0, 0, BLACK, matrix4);
-                matrix4.translate(- delta, 10, 0);
-                height += 10;
+                if(!line.line.get(0).apply().isEmpty()){ //Contains language specification
+                    GUIHelpers.drawRect((int) offset.x, (int) offset.y,
+                            pageWidth, 10, CODE_COLOR);
+                    int delta = pageWidth - GUIHelpers.getTextWidth(line.line.get(0).apply());
+                    matrix4.translate(delta, 0, 0);
+                    GUIHelpers.drawString(line.line.get(0).apply(), 0, 0, BLACK, matrix4);
+                    matrix4.translate(-delta, 10, 0);
+                    height += 10;
+                } else {
+                    GUIHelpers.drawRect((int) offset.x, (int) offset.y,
+                            pageWidth, 5, CODE_COLOR);
+                    matrix4.translate(0, 5, 0);
+                    height += 5;
+
+                }
                 continue;
             } else if(line.codeBlockEnd) {
                 inCodeBlock = false;
@@ -123,6 +146,19 @@ public class MarkdownDocument {
                 height += 10;
                 continue;
             }
+
+            if(line.tipStart){
+                inTips = true;
+                continue;
+            } else if(line.tipEnd){
+                inTips = false;
+                continue;
+            }
+            if(inTips){
+                GUIHelpers.drawRect((int) offset.x , (int) offset.y ,
+                        MarkdownLine.LIST_PREFIX_WIDTH / 4, 10, TIPS_BAR_COLOR);
+            }
+
             for(MarkdownElement element : line.line){
                 //Show current matrix result
                 offset = matrix4.apply(Vec3d.ZERO);
@@ -172,6 +208,10 @@ public class MarkdownDocument {
                     ((MarkdownUrl) element).section = new Rectangle((int) offset.x, (int) offset.y,
                             GUIHelpers.getTextWidth(str), 10);
                     ((MarkdownUrl) element).inMain = false;
+
+                    if(((MarkdownUrl) element).section.contains(ManualTooltipRenderer.mouseX, ManualTooltipRenderer.mouseY)){
+                        over = (IClickableElement) element;
+                    }
                 }
 
                 currWidth += GUIHelpers.getTextWidth(str);
@@ -219,6 +259,8 @@ public class MarkdownDocument {
         public boolean unorderedList = false;
         public boolean codeBlockStart = false;
         public boolean codeBlockEnd = false;
+        public boolean tipStart = false;
+        public boolean tipEnd = false;
         public static final int LIST_PREFIX_WIDTH = GUIHelpers.getTextWidth("  ");
 
         public MarkdownLine(MarkdownElement element){
@@ -241,6 +283,16 @@ public class MarkdownDocument {
 
         public MarkdownLine isCodeBlockEnd(boolean isCodeBlockEnd){
             this.codeBlockEnd = isCodeBlockEnd;
+            return this;
+        }
+
+        public MarkdownLine isTipStart(boolean tipStart) {
+            this.tipStart = tipStart;
+            return this;
+        }
+
+        public MarkdownLine isTipEnd(boolean tipEnd) {
+            this.tipEnd = tipEnd;
             return this;
         }
     }

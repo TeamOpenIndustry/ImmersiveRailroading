@@ -19,11 +19,6 @@ public class MarkdownTitle extends MarkdownElement {
     public static final double LEVEL1 = 1/1.35;
     public static final double LEVEL2 = 1/1.15;
 
-
-    static {
-        splittable = false;
-    }
-
     public MarkdownTitle(String text) {
         label: {
             for (int i = 0; i < text.length(); i++) {
