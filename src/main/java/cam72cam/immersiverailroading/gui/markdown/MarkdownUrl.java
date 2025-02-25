@@ -3,9 +3,11 @@ package cam72cam.immersiverailroading.gui.markdown;
 import cam72cam.immersiverailroading.gui.ManualGui;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
+import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.text.TextColor;
+import util.Matrix4;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -13,13 +15,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MarkdownUrl extends MarkdownElement implements IClickableElement {
+public class MarkdownUrl extends MarkdownClickableElement {
     public final Identifier url;
     public Rectangle2D section;
-    public boolean inMain = false;
 
     //text may be empty; url mustn't be empty
     private static final Pattern URL_PATTERN = Pattern.compile("\\[(?<text>.*?)]\\((?<url>\\S+?)\\)");
+    private static final int BLACK = 0xFF000000;
 
     public MarkdownUrl(String text, String url) {
         this(text, new Identifier(url));
@@ -78,6 +80,14 @@ public class MarkdownUrl extends MarkdownElement implements IClickableElement {
     }
 
     @Override
+    public int render(Matrix4 transform, int pageWidth) {
+        String str = this.apply();
+        GUIHelpers.drawString(str, 0, 0, BLACK, transform);
+        transform.translate(GUIHelpers.getTextWidth(str), 0, 0);
+        return 0;
+    }
+
+    @Override
     public void click() {
         ModCore.info(this.url.toString());
         if(this.url.canLoad()){
@@ -93,9 +103,9 @@ public class MarkdownUrl extends MarkdownElement implements IClickableElement {
     public void renderTooltip(int bottomBound) {
         if(this.url.canLoad()){
             String[] path = this.url.getPath().split("/");
-            ManualTooltipRenderer.renderTooltip("Open page: " + path[path.length-1], bottomBound);
+            ManualHoverRenderer.renderTooltip("Open page: " + path[path.length-1], bottomBound);
         } else if(this.url.getDomain().equals("https")){
-            ManualTooltipRenderer.renderTooltip("Click to send this website to your dialog!", bottomBound);
+            ManualHoverRenderer.renderTooltip("Click to send this website to your dialog!", bottomBound);
         } else {
             //What should we do?
         }

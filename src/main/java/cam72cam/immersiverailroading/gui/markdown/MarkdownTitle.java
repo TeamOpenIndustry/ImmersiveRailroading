@@ -39,14 +39,14 @@ public class MarkdownTitle extends MarkdownElement {
         this.level = level;
     }
 
-    public boolean render(Matrix4 transform){
+    public int render(Matrix4 transform, int pageWidth){
         Vec3d offset = transform.apply(Vec3d.ZERO);
+        String str = this.apply();
         if(this.level == 1){
             //Scale matrix
             transform.translate(-offset.x, -offset.y, 0);
             transform.scale(1.35, 1.35, 1.35);
             transform.translate(offset.x * MarkdownTitle.LEVEL1, offset.y * MarkdownTitle.LEVEL1, 0);
-            String str = this.apply();
             GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
 
             //Revert matrix
@@ -56,13 +56,12 @@ public class MarkdownTitle extends MarkdownElement {
 
             //Move down(4 == 14 - 10)
             transform.translate(0, 4, 0);
-            return true;
+            return 4;
         } else if(this.level == 2){
             //Scale matrix
             transform.translate(-offset.x, -offset.y, 0);
             transform.scale(1.15, 1.15, 1.15);
             transform.translate(offset.x * MarkdownTitle.LEVEL2, offset.y * MarkdownTitle.LEVEL2, 0);
-            String str = this.apply();
             GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
 
             //Revert matrix
@@ -71,9 +70,11 @@ public class MarkdownTitle extends MarkdownElement {
             transform.translate(offset.x, offset.y, 0);
             //Move down(2 == 12 - 10)
             transform.translate(0, 2, 0);
-            return true;
+            return 2;
+        } else {
+            GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
+            return 0;
         }
-        return false;
     }
 
     @Override

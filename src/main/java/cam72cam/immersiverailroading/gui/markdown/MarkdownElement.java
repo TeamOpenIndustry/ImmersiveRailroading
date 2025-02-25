@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
+import util.Matrix4;
+
 public abstract class MarkdownElement {
     public String text;
 
@@ -12,4 +14,9 @@ public abstract class MarkdownElement {
      * Split this element into two smaller ones
      */
     public abstract MarkdownElement[] split(int splitPos);
+
+    /**
+     * Render the element and return it;s height
+     */
+    public abstract int render(Matrix4 transform, int pageWidth);
 }

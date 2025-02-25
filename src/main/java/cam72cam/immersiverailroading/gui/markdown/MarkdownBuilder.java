@@ -33,6 +33,7 @@ public class MarkdownBuilder {
         //Otherwise we need to parse it
         String str;
         //Interline state storage
+        //TODO move to MarkdownMultilineElement
         boolean lastLineIsSplit = false;
         boolean isCodeBlock = false;
         boolean isInTips = false;

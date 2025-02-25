@@ -1,6 +1,9 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
+import cam72cam.mod.gui.helpers.GUIHelpers;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.text.TextColor;
+import util.Matrix4;
 
 import java.util.*;
 
@@ -9,6 +12,9 @@ public class MarkdownStyledText extends MarkdownElement {
 
     public static final Map<String, Set<MarkdownTextStyle>> markerStyles;
     public static final List<String> MARKER_PRIORITY = Arrays.asList("***", "++", "**", "~~", "*", "`");
+
+    private static final int CODE_COLOR = 0xFFDDDDDD;
+    private static final int BLACK = 0xFF000000;
 
     static {
         markerStyles = new HashMap<>();
@@ -60,6 +66,22 @@ public class MarkdownStyledText extends MarkdownElement {
         return new MarkdownElement[]{
                 new MarkdownStyledText(this.text.substring(0, splitPos), this.styles),
                 new MarkdownStyledText(this.text.substring(i), this.styles)};
+    }
+
+    @Override
+    public int render(Matrix4 transform, int pageWidth) {
+        String str = this.apply();
+        if(this.hasCode()){
+            Vec3d offset = transform.apply(Vec3d.ZERO);
+            GUIHelpers.drawRect((int) offset.x - 2, (int) offset.y - 1,
+                    GUIHelpers.getTextWidth(str) + 4, 12, CODE_COLOR);
+            GUIHelpers.drawString(str, 0, 0, BLACK, transform);
+            transform.translate(GUIHelpers.getTextWidth(str) + 2, 0, 0);
+        } else {
+            GUIHelpers.drawString(str, 0, 0, BLACK, transform);
+            transform.translate(GUIHelpers.getTextWidth(str), 0, 0);
+        }
+        return 0;
     }
 
     public enum MarkdownTextStyle {

@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.gui.markdown;
 import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 
-public class ManualTooltipRenderer {
+public class ManualHoverRenderer {
     public static int mouseX;
     public static int mouseY;
 

@@ -16,7 +16,7 @@ public class MarkdownDocument {
     public static HashMap<Identifier, MarkdownDocument> documents = new HashMap<>();
 
     public final Identifier page;
-    public IClickableElement over;
+    public MarkdownClickableElement over;
 
     protected List<MarkdownLine> original;
     protected int pageWidth;
@@ -24,7 +24,6 @@ public class MarkdownDocument {
 
     private static final int CODE_COLOR = 0xFFDDDDDD;
     private static final int TIPS_BAR_COLOR = 0xFF00DD00;
-    private static final int SPLIT_LINE_COLOR = 0xFF888888;
 
     private static final int BLACK = 0xFF000000;
 
@@ -162,60 +161,24 @@ public class MarkdownDocument {
             for(MarkdownElement element : line.line){
                 //Show current matrix result
                 offset = matrix4.apply(Vec3d.ZERO);
-
-                //Title
-                if(element instanceof MarkdownTitle && ((MarkdownTitle) element).render(matrix4)){
-                    //Successfully rendered as header, continue
-                    continue;
-                } //Otherwise render as normal text
-
-                //Picture
-                if (element instanceof MarkdownPicture) {
-                    MarkdownPicture mdPicture = (MarkdownPicture) element;
-                    int picHeight = (int) (pageWidth * mdPicture.ratio);
-                    GUIHelpers.texturedRect(mdPicture.picture, (int) offset.x, (int) offset.y, pageWidth, picHeight);
-                    matrix4.translate(0, picHeight, 0);
-                    height += picHeight;
-                    continue;
-                }
-
-                //Split line
-                if(element instanceof MarkdownSplitLine){
-                    GUIHelpers.drawRect((int) offset.x, (int) offset.y, pageWidth, 2,  SPLIT_LINE_COLOR);
-                    matrix4.translate(0, 2,0);
-                    height += 2;
-                    continue;
-                }
+                height += element.render(matrix4, pageWidth);
 
                 String str = element.apply();
 
-                //Inline code
-                if(element instanceof MarkdownStyledText && ((MarkdownStyledText) element).hasCode()){
-                    //Draw code block
-                    GUIHelpers.drawRect((int) offset.x - 2, (int) offset.y - 1,
-                            GUIHelpers.getTextWidth(str) + 4, 12, CODE_COLOR);
-                    GUIHelpers.drawString(str, 0, 0, BLACK, matrix4);
-                    currWidth += GUIHelpers.getTextWidth(str) + 2;
-                    matrix4.translate(GUIHelpers.getTextWidth(str) + 2, 0, 0);
-                    continue;
+                if(element instanceof MarkdownStyledText){
+                    currWidth += GUIHelpers.getTextWidth(str) + (((MarkdownStyledText) element).hasCode() ? 2 : 0);
                 }
 
-                GUIHelpers.drawString(str, 0, 0, BLACK, matrix4);
-
-                //Url
                 //Dynamically update urls' pos
-                if(element instanceof MarkdownUrl){
-                    ((MarkdownUrl) element).section = new Rectangle((int) offset.x, (int) offset.y,
+                if(element instanceof MarkdownClickableElement){
+                    currWidth += GUIHelpers.getTextWidth(str);
+                    ((MarkdownClickableElement) element).section = new Rectangle((int) offset.x, (int) offset.y,
                             GUIHelpers.getTextWidth(str), 10);
-                    ((MarkdownUrl) element).inMain = false;
 
-                    if(((MarkdownUrl) element).section.contains(ManualTooltipRenderer.mouseX, ManualTooltipRenderer.mouseY)){
-                        over = (IClickableElement) element;
+                    if(((MarkdownClickableElement) element).section.contains(ManualHoverRenderer.mouseX, ManualHoverRenderer.mouseY)){
+                        over = (MarkdownClickableElement) element;
                     }
                 }
-
-                currWidth += GUIHelpers.getTextWidth(str);
-                matrix4.translate(GUIHelpers.getTextWidth(str), 0, 0);
             }
             matrix4.translate(-currWidth, 10, 0);
             height += 10;
