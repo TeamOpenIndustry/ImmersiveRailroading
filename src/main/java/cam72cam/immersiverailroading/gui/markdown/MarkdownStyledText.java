@@ -22,16 +22,20 @@ public class MarkdownStyledText extends MarkdownElement {
         markerStyles.put("`", EnumSet.of(MarkdownTextStyle.CODE));
     }
 
+    public MarkdownStyledText(String text) {
+        this(text, Collections.emptySet());
+    }
+
     public MarkdownStyledText(String text, Set<MarkdownTextStyle> styles) {
         this.text = text;
         this.styles = styles;
     }
 
-    public boolean isBold(){
+    public boolean hasBold(){
         return this.styles.contains(MarkdownTextStyle.BOLD);
     }
 
-    public boolean isCode(){
+    public boolean hasCode(){
         return this.styles.contains(MarkdownTextStyle.CODE);
     }
 

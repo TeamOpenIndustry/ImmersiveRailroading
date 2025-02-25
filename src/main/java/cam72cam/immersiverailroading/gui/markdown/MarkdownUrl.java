@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui.markdown;
 
 import cam72cam.immersiverailroading.gui.ManualGui;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.text.TextColor;
@@ -81,12 +82,13 @@ public class MarkdownUrl extends MarkdownElement implements IClickable {
 
     @Override
     public void click() {
+        ModCore.info(this.url.toString());
         if(this.url.canLoad()){
-            ManualGui.currentOpeningManual.changeContent(this.url);
+            ManualGui.currentOpeningManual.pushContent(this.url);
         } else if(this.url.getDomain().equals("https")){
             MinecraftClient.getPlayer().sendMessage(PlayerMessage.url(this.url.toString()));
         } else {
-            //TODO
+            //What should we do?
         }
     }
 }

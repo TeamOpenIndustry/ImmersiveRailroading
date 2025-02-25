@@ -6,7 +6,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class MarkdownPicture extends MarkdownElement{
+public class MarkdownPicture extends MarkdownElement {
     public Identifier picture;
 
     public double ratio;

@@ -4,21 +4,52 @@ import cam72cam.mod.gui.helpers.GUIHelpers;
 
 import java.util.*;
 
+import static cam72cam.immersiverailroading.gui.markdown.MarkdownDocument.MarkdownLine.LIST_PREFIX_WIDTH;
+
 public class MarkdownLineBreaker {
-    public static List<List<MarkdownElement>> breakLine(List<MarkdownElement> elements, int screenWidth) {
+    public static MarkdownDocument breakDocument(MarkdownDocument document, int screenWidth){
+        document.brokenLines.clear();
+        for (MarkdownDocument.MarkdownLine markdownLine : document.original) {
+            if(markdownLine.codeBlockStart || markdownLine.codeBlockEnd){
+                //No need to split
+                document.brokenLines.add(markdownLine);
+                continue;
+            }
+
+            List<List<MarkdownElement>> lines;
+            if(markdownLine.unorderedList){
+                lines = breakLine(markdownLine, screenWidth - LIST_PREFIX_WIDTH);
+                lines.get(0).add(0, new MarkdownStyledText("• "));
+                for(int i = 1; i < lines.size(); i++){
+                    lines.get(i).add(0, new MarkdownStyledText("  "));
+                }
+            }else {
+                lines = breakLine(markdownLine, screenWidth);
+            }
+            lines.forEach(l -> document.brokenLines.add(new MarkdownDocument.MarkdownLine(l)));
+        }
+
+        return document;
+    }
+
+    public static List<List<MarkdownElement>> breakLine(MarkdownDocument.MarkdownLine elements, int screenWidth) {
         List<List<MarkdownElement>> lines = new LinkedList<>();
-        Deque<MarkdownElement> processingDeque = new LinkedList<>(elements);
+        Deque<MarkdownElement> processingDeque = new LinkedList<>(elements.line);
         List<MarkdownElement> currentLine = new LinkedList<>();
         int currentLineWidth = 0;
 
         while (!processingDeque.isEmpty()) {
             MarkdownElement element = processingDeque.poll();
-            int elementWidth = (int) (GUIHelpers.getTextWidth(element.text) *
-                    ((element instanceof MarkdownStyledText && ((MarkdownStyledText) element).isBold()) ? 1.4 : 1));
+            //Bold text is wider; Title is wider too
+            double multiplier = (element instanceof MarkdownStyledText && ((MarkdownStyledText) element).hasBold()) ? 1.4 :
+                                (element instanceof MarkdownTitle && ((MarkdownTitle) element).level == 1) ? 1.35 :
+                                (element instanceof MarkdownTitle && ((MarkdownTitle) element).level == 2) ? 1.15 :
+                                1;
+            int elementWidth = (int) (GUIHelpers.getTextWidth(element.text) * multiplier);
 
             // If the element is oversize...
             if (elementWidth > screenWidth && currentLine.isEmpty()) {
-                handleOversizeElement(element, screenWidth, processingDeque, lines);
+                handleOversizeElement(element, screenWidth, processingDeque, lines, multiplier);
                 continue;
             }
 
@@ -27,7 +58,7 @@ public class MarkdownLineBreaker {
                 currentLine.add(element);
                 currentLineWidth += elementWidth;
             } else {
-                processLineBreak(element, processingDeque, currentLine, lines, currentLineWidth, screenWidth);
+                processLineBreak(element, processingDeque, currentLine, lines, currentLineWidth, screenWidth, multiplier);
                 currentLine = new LinkedList<>();
                 currentLineWidth = 0;
             }
@@ -41,11 +72,10 @@ public class MarkdownLineBreaker {
     }
 
     private static void handleOversizeElement(MarkdownElement element, int screenWidth,
-                                              Deque<MarkdownElement> queue, List<List<MarkdownElement>> lines) {
-        double m = (element instanceof MarkdownStyledText && ((MarkdownStyledText) element).isBold()) ? 1.4 : 1;
-        int splitPos = findOptimalOrSpace(element.text, screenWidth, m);
+                                              Deque<MarkdownElement> queue, List<List<MarkdownElement>> lines, double multiplier) {
+        int splitPos = findOptimalPosOrSpace(element.text, screenWidth, multiplier);
         if(splitPos == -1){//Very long string without spacing, use legacy method
-            splitPos = findOptimal(element.text, screenWidth, m);
+            splitPos = findOptimalPos(element.text, screenWidth, multiplier);
         }
         MarkdownElement[] splitElements = element.split(splitPos);
 
@@ -58,9 +88,8 @@ public class MarkdownLineBreaker {
 
     private static void processLineBreak(MarkdownElement element, Deque<MarkdownElement> queue,
                                          List<MarkdownElement> currentLine, List<List<MarkdownElement>> lines,
-                                         int currentWidth, int screenWidth) {
-        double m = (element instanceof MarkdownStyledText && ((MarkdownStyledText) element).isBold()) ? 1.4 : 1;
-        int splitPos = findOptimalOrSpace(element.text, screenWidth - currentWidth, m);
+                                         int currentWidth, int screenWidth, double multiplier) {
+        int splitPos = findOptimalPosOrSpace(element.text, screenWidth - currentWidth, multiplier);
         if (splitPos != -1) {
             MarkdownElement[] splitElements = element.split(splitPos);
 
@@ -74,8 +103,21 @@ public class MarkdownLineBreaker {
         }
     }
 
+    private static int findOptimalPosOrSpace(String text, int maxWidth, double widthMultiplier) {
+        int result = findOptimalPos(text, maxWidth, widthMultiplier);
+
+        //Try to find a space to break down
+        for(int i = result; i >= 1; i--){
+            if(text.charAt(i) ==' '){
+                return i;
+            }
+        }
+        //Can't find space, we'd better move it fully to the next line
+        return -1;
+    }
+
     //Legacy method
-    private static int findOptimal(String text, int maxWidth, double widthMultiplier){
+    private static int findOptimalPos(String text, int maxWidth, double widthMultiplier){
         int low = 0;
         int high = text.length();
         int bestPos = 0;
@@ -93,34 +135,5 @@ public class MarkdownLineBreaker {
         }
 
         return Math.max(1, Math.min(bestPos, text.length() - 1));
-    }
-
-    private static int findOptimalOrSpace(String text, int maxWidth, double widthMultiplier) {
-        int low = 0;
-        int high = text.length();
-        int bestPos = 0;
-
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            int currentWidth = (int) (GUIHelpers.getTextWidth(text.substring(0, mid)) * widthMultiplier);
-
-            if (currentWidth <= maxWidth) {
-                bestPos = mid;
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-
-        int result = Math.max(1, Math.min(bestPos, text.length() - 1));
-
-        //Try to find a space to break down
-        for(int i = result; i >= 1; i--){
-            if(text.charAt(i) ==' '){
-                return i;
-            }
-        }
-        //Can't break, move to next line
-        return -1;
     }
 }

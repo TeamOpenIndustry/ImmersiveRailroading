@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
-public class MarkdownSplitLine extends MarkdownElement{
+public class MarkdownSplitLine extends MarkdownElement {
 
     private static final char[] allowed = new char[]{'*', '-', '_'};
 

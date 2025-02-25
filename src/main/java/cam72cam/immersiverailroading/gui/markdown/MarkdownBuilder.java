@@ -1,11 +1,9 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
-import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.resource.Identifier;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
@@ -15,27 +13,36 @@ import static cam72cam.immersiverailroading.gui.markdown.MarkdownStyledText.*;
  * Beginning of md
  */
 public class MarkdownBuilder {
-    public static List<List<MarkdownElement>> build(InputStream stream, int screenWidth) throws IOException {
+    public static MarkdownDocument build(Identifier id, int screenWidth) throws IOException {
         //Detect line by line
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        List<List<MarkdownElement>> builtString = new ArrayList<>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(id.getResourceStream()));
+        MarkdownDocument document = MarkdownDocument.getPageByID(id);
+        //If it's loaded...
+        if(!document.isEmpty()){
+            if(document.getPageWidth() == screenWidth){
+                return document;
+            } else {
+                document.setPageWidth(screenWidth);
+                return MarkdownLineBreaker.breakDocument(document, screenWidth);
+            }
+        }
+        //Otherwise we need to parse it
         String str;
         boolean lastLineIsSplit = false;
         boolean isCodeBlock = false;
         while ((str = reader.readLine()) != null){
-            str = str.trim();
-            //Deal with escapes
-            str = serializeEscape(str);
-
+            //In code block there's no need to consider text style
             if(isCodeBlock && !str.startsWith("```")){
-                //TODO make it don't ignore starting spaces
-                builtString.addAll(MarkdownLineBreaker.breakLine(
-                        Collections.singletonList(new MarkdownStyledText(str, EnumSet.of(MarkdownTextStyle.CODE))), screenWidth));
+                document.addLine(new MarkdownStyledText(str, EnumSet.of(MarkdownTextStyle.CODE)));
                 continue;
             }
 
+            //Deal with escapes
+            str = serializeEscape(str);
+            str = str.trim();
+
             if(lastLineIsSplit && str.isEmpty()){
-                builtString.add(Collections.singletonList(new MarkdownSplitLine()));
+                document.addLine(new MarkdownSplitLine());
                 lastLineIsSplit = false;
                 continue;
             }
@@ -43,44 +50,48 @@ public class MarkdownBuilder {
             if(str.startsWith("#")){
                 //Title
                 //CANNOT CONTAIN URL
-                builtString.add(Collections.singletonList(new MarkdownHeader(str)));
+                document.addLine(Collections.singletonList(new MarkdownTitle(str)));
             } else if(str.startsWith("!")){
                 //Picture
                 MarkdownUrl url = MarkdownUrl.compileSingle(str.substring(1));
                 if(url != null) {
-                    builtString.add(Collections.singletonList(new MarkdownPicture(new Identifier(deserializeEscape(url.url.toString())))));
+                    document.addLine(new MarkdownPicture(new Identifier(deserializeEscape(url.url.toString()))));
                 }
             } else if(str.startsWith("```")){
                 //Code block
-                isCodeBlock = ! isCodeBlock;
+                if(isCodeBlock){
+                    document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText(""))
+                            .isCodeBlockEnd(true));
+                    isCodeBlock = false;
+                }else {
+                    if(str.length() > 3){
+                        //Meaning it has language mark
+                        document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText(str.substring(3)))
+                                .isCodeBlockStart(true));
+                    } else {
+                        //Language is empty
+                        document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText(""))
+                                .isCodeBlockStart(true));
+                    }
+                    isCodeBlock = true;
+                }
             } else if(str.startsWith("* ") || str.startsWith("- ")){
                 //Unsorted list
-                List<List<MarkdownElement>> elements = MarkdownLineBreaker.breakLine(parse(str.substring(2)), screenWidth - GUIHelpers.getTextWidth("* "));
-                elements.get(0).add(0, new MarkdownStyledText("• ", Collections.emptySet()));
-                for(int i = 1; i < elements.size(); i++){
-                    elements.get(i).add(0, new MarkdownStyledText("  ", Collections.emptySet()));
-                }
-                builtString.addAll(elements);
+                document.addLine(new MarkdownDocument.MarkdownLine(parse(str.substring(2))).isUnorderedList(true));
             } else if(MarkdownSplitLine.validate(str)){
                 //Check split line
                 lastLineIsSplit = true;
             } else {
                 if(!str.isEmpty()){
                     //Basic String
-                    List<List<MarkdownElement>> elements = MarkdownLineBreaker.breakLine(parse(str), screenWidth);
-                    for (List<MarkdownElement> line : elements) {
-                        //If a line's first element starts with spacing...
-                        if(!line.isEmpty() && !line.get(0).text.isEmpty() && line.get(0).text.charAt(0) == ' '){
-                            line.get(0).text = line.get(0).text.substring(1);
-                        }
-                    }
-                    builtString.addAll(elements);
+                    document.addLine(parse(str));
                 } else {
-                    builtString.add(Collections.singletonList(new MarkdownStyledText("", Collections.emptySet())));
+                    document.addLine(new MarkdownStyledText(""));
                 }
             }
         }
-        return builtString;
+        document.setPageWidth(screenWidth);
+        return MarkdownLineBreaker.breakDocument(document, screenWidth);
     }
 
     public static List<MarkdownElement> parse(String input){
@@ -106,49 +117,27 @@ public class MarkdownBuilder {
             }
 
             if (!markerMatched) {
+                //Pure text, add to stateMap
                 Set<MarkdownStyledText.MarkdownTextStyle> currentStyles = mergeStackStyles(styleStack);
                 stateMap.add(currentStyles);
                 i++;
             }
         }
 
+        //Build a string that matches stateMap
         StringBuilder builder = new StringBuilder();
         for(char c : input.toCharArray()){
             if(c != '+' && c != '~' && c != '*' && c != '`'){
                 builder.append(c);
             }
         }
-
-        //remove temp escape chars
+        //remove temporary escape chars
         String result = deserializeEscape(builder.toString());
 
         return mergeElements(result, stateMap);
     }
 
-    public static String serializeEscape(String str){
-        str = str.replaceAll("\\\\\\+", "ā");
-        str = str.replaceAll("\\\\`", "á");
-        str = str.replaceAll("\\\\\\*", "ǎ");
-        str = str.replaceAll("\\\\~", "à");
-//        str = str.replaceAll("\\\\\\[", "ō");
-//        str = str.replaceAll("\\\\\\]", "ó");
-//        str = str.replaceAll("\\\\\\(", "ǒ");
-//        str = str.replaceAll("\\\\\\)", "ò");
-        return str;
-    }
-
-    public static String deserializeEscape(String str){
-        str = str.replaceAll("ā", "+");
-        str = str.replaceAll("á", "`");
-        str = str.replaceAll("ǎ", "*");
-        str = str.replaceAll("à", "~");
-//        str = str.replaceAll("ō", "[");
-//        str = str.replaceAll("ó", "]");
-//        str = str.replaceAll("ǒ", "(");
-//        str = str.replaceAll("ò", ")");
-        return str;
-    }
-
+    //Turn all styles in the queue into one set
     private static Set<MarkdownStyledText.MarkdownTextStyle> mergeStackStyles(Deque<Set<MarkdownStyledText.MarkdownTextStyle>> stack) {
         Set<MarkdownStyledText.MarkdownTextStyle> styles = new HashSet<>();
         for (Set<MarkdownStyledText.MarkdownTextStyle> s : stack) styles.addAll(s);
@@ -157,13 +146,16 @@ public class MarkdownBuilder {
 
     private static void handleMarker(String marker, Deque<Set<MarkdownStyledText.MarkdownTextStyle>> stack) {
         Set<MarkdownStyledText.MarkdownTextStyle> styles = markerStyles.get(marker);
+        //If stack's peek value equals current means current is the end of corresponding style, pop it
         if (stack.peek() != null && stack.peek().equals(styles)) {
             stack.pop();
         } else {
+            //Otherwise it's the beginning
             stack.push(styles);
         }
     }
 
+    //Split the string by stateMap(merge all neighbour char elements with the same style into one element)
     private static List<MarkdownElement> mergeElements(String input, List<Set<MarkdownStyledText.MarkdownTextStyle>> stateMap) {
         List<MarkdownElement> elements = new ArrayList<>();
         if (stateMap.isEmpty()) return elements;
@@ -186,5 +178,21 @@ public class MarkdownBuilder {
 
     private static List<MarkdownElement> createElement(String input, int start, int end, Set<MarkdownStyledText.MarkdownTextStyle> styles) {
         return MarkdownUrl.splitLineByUrl(new MarkdownStyledText(input.substring(start, end), Collections.unmodifiableSet(styles)));
+    }
+
+    public static String serializeEscape(String str){
+        str = str.replaceAll("\\\\\\+", "ā");
+        str = str.replaceAll("\\\\`", "á");
+        str = str.replaceAll("\\\\\\*", "ǎ");
+        str = str.replaceAll("\\\\~", "à");
+        return str;
+    }
+
+    public static String deserializeEscape(String str){
+        str = str.replaceAll("ā", "+");
+        str = str.replaceAll("á", "`");
+        str = str.replaceAll("ǎ", "*");
+        str = str.replaceAll("à", "~");
+        return str;
     }
 }

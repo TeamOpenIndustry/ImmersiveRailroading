@@ -7,12 +7,12 @@ import util.Matrix4;
 
 /*
   Will scale by level
-  1 -> scale to 1.5x
-  2 -> scale to 1.2x
-  3+ -> just like regular text
+  1 -> scale to 1.35x and italicize
+  2 -> scale to 1.15x and italicize
+  3+ -> To regular text, don't handle
   CANNOT CONTAIN URL
  */
-public class MarkdownHeader extends MarkdownElement{
+public class MarkdownTitle extends MarkdownElement {
     //Starting from 1
     public int level;
 
@@ -24,7 +24,7 @@ public class MarkdownHeader extends MarkdownElement{
         splittable = false;
     }
 
-    public MarkdownHeader(String text) {
+    public MarkdownTitle(String text) {
         label: {
             for (int i = 0; i < text.length(); i++) {
                 if (text.charAt(i) != '#') {
@@ -33,12 +33,13 @@ public class MarkdownHeader extends MarkdownElement{
                     break label;
                 }
             }
+            //All the chars are '#'
             this.text = text;
             this.level = -1;
         }
     }
 
-    public MarkdownHeader(String text, int level) {
+    public MarkdownTitle(String text, int level) {
         this.text = text;
         this.level = level;
     }
@@ -46,27 +47,34 @@ public class MarkdownHeader extends MarkdownElement{
     public boolean render(Matrix4 transform){
         Vec3d offset = transform.apply(Vec3d.ZERO);
         if(this.level == 1){
+            //Scale matrix
             transform.translate(-offset.x, -offset.y, 0);
             transform.scale(1.35, 1.35, 1.35);
-            transform.translate(offset.x * MarkdownHeader.LEVEL1, offset.y * MarkdownHeader.LEVEL1, 0);
+            transform.translate(offset.x * MarkdownTitle.LEVEL1, offset.y * MarkdownTitle.LEVEL1, 0);
             String str = this.apply();
             GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
 
-            transform.translate(-offset.x * MarkdownHeader.LEVEL1, -offset.y * MarkdownHeader.LEVEL1, 0);
-            transform.scale(MarkdownHeader.LEVEL1, MarkdownHeader.LEVEL1, MarkdownHeader.LEVEL1);
+            //Revert matrix
+            transform.translate(-offset.x * MarkdownTitle.LEVEL1, -offset.y * MarkdownTitle.LEVEL1, 0);
+            transform.scale(MarkdownTitle.LEVEL1, MarkdownTitle.LEVEL1, MarkdownTitle.LEVEL1);
             transform.translate(offset.x, offset.y, 0);
+
+            //Move down(4 == 14 - 10)
             transform.translate(0, 4, 0);
             return true;
         } else if(this.level == 2){
+            //Scale matrix
             transform.translate(-offset.x, -offset.y, 0);
             transform.scale(1.15, 1.15, 1.15);
-            transform.translate(offset.x * MarkdownHeader.LEVEL2, offset.y * MarkdownHeader.LEVEL2, 0);
+            transform.translate(offset.x * MarkdownTitle.LEVEL2, offset.y * MarkdownTitle.LEVEL2, 0);
             String str = this.apply();
             GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
 
-            transform.translate(-offset.x * MarkdownHeader.LEVEL2, -offset.y * MarkdownHeader.LEVEL2, 0);
-            transform.scale(MarkdownHeader.LEVEL2, MarkdownHeader.LEVEL2, MarkdownHeader.LEVEL2);
+            //Revert matrix
+            transform.translate(-offset.x * MarkdownTitle.LEVEL2, -offset.y * MarkdownTitle.LEVEL2, 0);
+            transform.scale(MarkdownTitle.LEVEL2, MarkdownTitle.LEVEL2, MarkdownTitle.LEVEL2);
             transform.translate(offset.x, offset.y, 0);
+            //Move down(2 == 12 - 10)
             transform.translate(0, 2, 0);
             return true;
         }
@@ -89,12 +97,12 @@ public class MarkdownHeader extends MarkdownElement{
             i++;
             if(i == this.text.length()){//rest are all space
                 return new MarkdownElement[]{
-                        new MarkdownHeader(this.text.substring(0, splitPos), this.level),
-                        new MarkdownHeader("", this.level)};
+                        new MarkdownTitle(this.text.substring(0, splitPos), this.level),
+                        new MarkdownTitle("", this.level)};
             }
         }
         return new MarkdownElement[]{
-                new MarkdownHeader(this.text.substring(0, splitPos), this.level),
-                new MarkdownHeader(this.text.substring(0, splitPos), this.level)};
+                new MarkdownTitle(this.text.substring(0, splitPos), this.level),
+                new MarkdownTitle(this.text.substring(0, splitPos), this.level)};
     }
 }
