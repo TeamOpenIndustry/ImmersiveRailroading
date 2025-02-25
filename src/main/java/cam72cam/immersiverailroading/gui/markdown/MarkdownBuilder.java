@@ -33,24 +33,16 @@ public class MarkdownBuilder {
         //Otherwise we need to parse it
         String str;
         //Interline state storage
-        //TODO move to MarkdownMultilineElement
         boolean lastLineIsSplit = false;
-        boolean isCodeBlock = false;
         boolean isInTips = false;
 
         while ((str = reader.readLine()) != null){
             //Deal with custom logic first
-            String finalStr = str;
+            String finalStr = str.trim();
             Optional<Map.Entry<String, Function<String, List<MarkdownDocument.MarkdownLine>>>> optionalFunc =
                     SPECIAL_MATCHER.entrySet().stream().filter(entry -> finalStr.startsWith(entry.getKey())).findFirst();
             if(optionalFunc.isPresent()){
                 document.addLines(optionalFunc.get().getValue().apply(str));
-                continue;
-            }
-
-            //In code block there's no need to consider text style
-            if(isCodeBlock && !str.startsWith("```")){
-                document.addLine(new MarkdownStyledText(str, EnumSet.of(MarkdownTextStyle.CODE)));
                 continue;
             }
 
@@ -90,23 +82,8 @@ public class MarkdownBuilder {
                     document.addLine(new MarkdownPicture(new Identifier(deserializeEscape(url.url.toString()))));
                 }
             } else if(str.startsWith("```")){
-                //Code block
-                if(isCodeBlock){
-                    document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText(""))
-                            .isCodeBlockEnd(true));
-                    isCodeBlock = false;
-                }else {
-                    if(str.length() > 3){
-                        //Meaning it has language mark
-                        document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText(str.substring(3)))
-                                .isCodeBlockStart(true));
-                    } else {
-                        //Language is empty
-                        document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText(""))
-                                .isCodeBlockStart(true));
-                    }
-                    isCodeBlock = true;
-                }
+                //Code block, let specific proxy class parse it
+                MarkdownCodeBlock.parse(reader, document, str);
             } else if(str.startsWith("* ") || str.startsWith("- ")){
                 //Unsorted list
                 document.addLine(new MarkdownDocument.MarkdownLine(parse(str.substring(2))).isUnorderedList(true));
@@ -131,9 +108,6 @@ public class MarkdownBuilder {
         //Finalize
         if(isInTips){
             document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText("")).isTipEnd(true));
-        }
-        if(isCodeBlock){
-            document.addLine(new MarkdownDocument.MarkdownLine(new MarkdownStyledText("")).isCodeBlockEnd(true));
         }
         document.setPageWidth(screenWidth);
         return MarkdownLineBreaker.breakDocument(document, screenWidth);

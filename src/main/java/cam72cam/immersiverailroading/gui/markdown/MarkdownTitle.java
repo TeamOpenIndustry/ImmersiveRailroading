@@ -39,6 +39,32 @@ public class MarkdownTitle extends MarkdownElement {
         this.level = level;
     }
 
+    @Override
+    public String apply() {
+        if(level == -1){//Invalid
+            return "";
+        } else {
+            return TextColor.ITALIC.wrap(text);
+        }
+    }
+
+    @Override
+    public MarkdownElement[] split(int splitPos) {
+        int i = splitPos;
+        while (this.text.charAt(i) == ' '){
+            i++;
+            if(i == this.text.length()){//rest are all space
+                return new MarkdownElement[]{
+                        new MarkdownTitle(this.text.substring(0, splitPos), this.level),
+                        new MarkdownTitle("", this.level)};
+            }
+        }
+        return new MarkdownElement[]{
+                new MarkdownTitle(this.text.substring(0, splitPos), this.level),
+                new MarkdownTitle(this.text.substring(0, splitPos), this.level)};
+    }
+
+    @Override
     public int render(Matrix4 transform, int pageWidth){
         Vec3d offset = transform.apply(Vec3d.ZERO);
         String str = this.apply();
@@ -75,30 +101,5 @@ public class MarkdownTitle extends MarkdownElement {
             GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
             return 0;
         }
-    }
-
-    @Override
-    public String apply() {
-        if(level == -1){//Invalid
-            return "";
-        } else {
-            return TextColor.ITALIC.wrap(text);
-        }
-    }
-
-    @Override
-    public MarkdownElement[] split(int splitPos) {
-        int i = splitPos;
-        while (this.text.charAt(i) == ' '){
-            i++;
-            if(i == this.text.length()){//rest are all space
-                return new MarkdownElement[]{
-                        new MarkdownTitle(this.text.substring(0, splitPos), this.level),
-                        new MarkdownTitle("", this.level)};
-            }
-        }
-        return new MarkdownElement[]{
-                new MarkdownTitle(this.text.substring(0, splitPos), this.level),
-                new MarkdownTitle(this.text.substring(0, splitPos), this.level)};
     }
 }

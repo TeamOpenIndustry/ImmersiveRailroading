@@ -5,16 +5,15 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MarkdownStockProvider {
-    public static final String PREFIX = "[Stock]";
+public class MarkdownStockProvider extends MarkdownSyntaxProvider{
+    public MarkdownStockProvider() {
+        super("[list_stocks]");
+    }
 
-    public static List<MarkdownDocument.MarkdownLine> getLines(String str){
-//        if(str.length() <= 7){
-//            return Collections.emptyList();
-//        } else {
+    @Override
+    public List<MarkdownDocument.MarkdownLine> parse(String str){
             return DefinitionManager.getDefinitionNames().stream()
                     .map(string -> new MarkdownDocument.MarkdownLine(new MarkdownStyledText(string)))
                     .collect(Collectors.toList());
-//        }
     }
 }

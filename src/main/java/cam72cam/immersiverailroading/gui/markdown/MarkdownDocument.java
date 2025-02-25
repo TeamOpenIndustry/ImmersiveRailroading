@@ -107,25 +107,18 @@ public class MarkdownDocument {
         for(MarkdownLine line : brokenLines){
             int currWidth = 0;
             offset = matrix4.apply(Vec3d.ZERO);
+            //Draw code block
             if(line.codeBlockStart){
                 inCodeBlock = true;
                 //Draw code block
                 //In code block there is at most one text element
-                if(!line.line.get(0).apply().isEmpty()){ //Contains language specification
-                    GUIHelpers.drawRect((int) offset.x, (int) offset.y,
-                            pageWidth, 10, CODE_COLOR);
-                    int delta = pageWidth - GUIHelpers.getTextWidth(line.line.get(0).apply());
-                    matrix4.translate(delta, 0, 0);
-                    GUIHelpers.drawString(line.line.get(0).apply(), 0, 0, BLACK, matrix4);
-                    matrix4.translate(-delta, 10, 0);
-                    height += 10;
-                } else {
-                    GUIHelpers.drawRect((int) offset.x, (int) offset.y,
-                            pageWidth, 5, CODE_COLOR);
-                    matrix4.translate(0, 5, 0);
-                    height += 5;
-
-                }
+                GUIHelpers.drawRect((int) offset.x, (int) offset.y,
+                        pageWidth, 10, CODE_COLOR);
+                int delta = pageWidth - GUIHelpers.getTextWidth(line.line.get(0).apply());
+                matrix4.translate(delta, 0, 0);
+                GUIHelpers.drawString(line.line.get(0).apply(), 0, 0, BLACK, matrix4);
+                matrix4.translate(-delta, 10, 0);
+                height += 10;
                 continue;
             } else if(line.codeBlockEnd) {
                 inCodeBlock = false;
@@ -146,6 +139,7 @@ public class MarkdownDocument {
                 continue;
             }
 
+            //Draw tips block
             if(line.tipStart){
                 inTips = true;
                 continue;
@@ -197,9 +191,10 @@ public class MarkdownDocument {
     //Handle click
     public void onMouseRelease(ClientEvents.MouseGuiEvent event){
         if(this.scrollRegion.contains(event.x, event.y)){
-            this.brokenLines.forEach(line -> line.line.stream().filter(e -> e instanceof MarkdownUrl).forEach(element -> {
-                if(((MarkdownUrl) element).section.contains(event.x, event.y)){
-                    ((MarkdownUrl) element).click();
+            this.brokenLines.forEach(line -> line.line.stream().filter(e -> e instanceof MarkdownClickableElement)
+                    .forEach(element -> {
+                if(((MarkdownClickableElement) element).section.contains(event.x, event.y)){
+                    ((MarkdownClickableElement) element).click();
                 }
             }));
         }

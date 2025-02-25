@@ -16,7 +16,7 @@ public abstract class MarkdownElement {
     public abstract MarkdownElement[] split(int splitPos);
 
     /**
-     * Render the element and return it;s height
+     * Render the element and return its height
      */
     public abstract int render(Matrix4 transform, int pageWidth);
 }
