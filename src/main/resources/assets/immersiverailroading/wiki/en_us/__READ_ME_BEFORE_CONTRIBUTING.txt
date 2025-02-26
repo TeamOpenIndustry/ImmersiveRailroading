@@ -30,9 +30,9 @@ Syntax below me must be in separate line(s):
 # Lv.1 Title
 
 ## Lv.2 Title
-
 *****
 (The line above is a split line, which is a line that consists entirely of one of them: */-/_)
+(There's no need to create empty lines before or after a split line manually, it is a single-line syntax here and empty lines will be added automatically)
 
 -----
 (Another split line)

@@ -42,9 +42,11 @@ public class MarkdownSplitLine extends MarkdownElement {
 
     @Override
     public int render(Matrix4 transform, int pageWidth) {
+        transform.translate(0, 10,0);
         Vec3d offset = transform.apply(Vec3d.ZERO);
         GUIHelpers.drawRect((int) offset.x, (int) offset.y, pageWidth, 2,  SPLIT_LINE_COLOR);
         transform.translate(0, 2,0);
-        return 2;
+        transform.translate(0, 10,0);
+        return 22;
     }
 }

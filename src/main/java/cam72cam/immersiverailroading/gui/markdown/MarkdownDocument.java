@@ -62,14 +62,15 @@ public class MarkdownDocument {
         boolean inTips = false;
         Vec3d offset;
         hoveredElement = null;
+        //We need the iterator so here we use while instead of for each
         Iterator<MarkdownLine> lineIterator = brokenLines.iterator();
         while (lineIterator.hasNext()){
             MarkdownLine line = lineIterator.next();
             int currWidth = 0;
             //Stores current matrix result
             offset = matrix4.apply(Vec3d.ZERO);
-            //Let proxy class do it
             if(line.codeBlockStart){
+                //Let proxy class do it
                 height += MarkdownCodeBlock.render(matrix4, lineIterator, this, line);
                 continue;
             }
@@ -87,12 +88,20 @@ public class MarkdownDocument {
                         MarkdownLine.LIST_PREFIX_WIDTH / 4, 10, TIPS_BAR_COLOR);
             }
 
+            //Should we translate the matrix to next line manually?
+            boolean shouldStartANewLine = false;
+
             for(MarkdownElement element : line.elements){
                 //Show current matrix result
                 offset = matrix4.apply(Vec3d.ZERO);
                 height += element.render(matrix4, pageWidth);
 
                 String str = element.apply();
+
+                //These two element could be used multiply times in a line so they can't auto start new line, need manual translate
+                if(element instanceof MarkdownStyledText || element instanceof MarkdownUrl){
+                    shouldStartANewLine = true;
+                }
 
                 if(element instanceof MarkdownStyledText){
                     currWidth += GUIHelpers.getTextWidth(str) + (((MarkdownStyledText) element).hasCode() ? 2 : 0);
@@ -109,8 +118,11 @@ public class MarkdownDocument {
                     }
                 }
             }
-            matrix4.translate(-currWidth, 10, 0);
-            height += 10;
+            matrix4.translate(-currWidth, 0, 0);
+            if(shouldStartANewLine){
+                matrix4.translate(0, 10, 0);
+                height += 10;
+            }
         }
         this.pageHeight = height - 100;
         return height;

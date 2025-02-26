@@ -45,6 +45,6 @@ public class MarkdownPicture extends MarkdownElement {
         int picHeight = (int) (pageWidth * this.ratio);
         GUIHelpers.texturedRect(this.picture, (int) offset.x, (int) offset.y, pageWidth, picHeight);
         transform.translate(0, picHeight, 0);
-        return picHeight - 10;
+        return picHeight;
     }
 }

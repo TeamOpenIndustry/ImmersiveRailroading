@@ -90,9 +90,9 @@ public class MarkdownTitle extends MarkdownElement {
             transform.scale(MarkdownTitle.LEVEL1, MarkdownTitle.LEVEL1, MarkdownTitle.LEVEL1);
             transform.translate(offset.x, offset.y, 0);
 
-            //Move down(4 == 14 - 10)
-            transform.translate(0, 4, 0);
-            return 4;
+            //Move down
+            transform.translate(0, 14, 0);
+            return 14;
         } else if(this.level == 2){
             //Scale matrix
             transform.translate(-offset.x, -offset.y, 0);
@@ -104,12 +104,13 @@ public class MarkdownTitle extends MarkdownElement {
             transform.translate(-offset.x * MarkdownTitle.LEVEL2, -offset.y * MarkdownTitle.LEVEL2, 0);
             transform.scale(MarkdownTitle.LEVEL2, MarkdownTitle.LEVEL2, MarkdownTitle.LEVEL2);
             transform.translate(offset.x, offset.y, 0);
-            //Move down(2 == 12 - 10)
-            transform.translate(0, 2, 0);
+            //Move down
+            transform.translate(0, 12, 0);
             return 2;
         } else {
             GUIHelpers.drawString(str, 0, 0, DEFAULT_TEXT_COLOR, transform);
-            return 0;
+            transform.translate(0, 10, 0);
+            return 10;
         }
     }
 }
