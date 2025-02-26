@@ -14,23 +14,18 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
+
+import static cam72cam.immersiverailroading.gui.markdown.Colors.*;
 
 public class ManualGui implements IScreen {
     public static boolean isOpen;
     public static ManualGui currentOpeningManual;
     //                                        page     page's mainOffset
     private static final Stack<MutablePair<Identifier, Double>> pageStack = new Stack<>();
-
-    private static final int HEADER_COLOR = 0xFF888888;
-    private static final int SIDEBAR_COLOR = 0xFFCCCCCC;
-    private static final int MAIN_COLOR = 0xFFFFFFFF;
-    private static final int FOOTER_COLOR = 0xFFEEEEEE;
-    private static final int BACKGROUND_COLOR = 0xCC000000;
-
-    private static final int WHITE = 0xFFFFFFFF;
-    private static final int BLACK = 0xFF000000;
+    private static final HashMap<Identifier, String> sidebarNameMap = new HashMap<>();
 
     private int width;
     private int height;
@@ -53,9 +48,14 @@ public class ManualGui implements IScreen {
         currentOpeningManual = this;
         try {
             footer = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_footer.md"), screen.getWidth() - 120);
-            int footerHeight = footer.countLine() * 10;
+            int footerHeight = footer.getLineCount() * 10;
             sidebar = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_sidebar.md"), screen.getWidth());
             sidebar.setScrollRegion(new Rectangle(50, 20, 120, screen.getHeight() - 20 - footerHeight));
+            //Maintain a map to replace url file name with pre-defined name
+            sidebar.getOriginalLines().forEach(line ->
+                    line.getElements().stream()
+                            .filter(element -> element instanceof MarkdownUrl)
+                            .forEach(element -> sidebarNameMap.put(((MarkdownUrl) element).destination, element.text)));
             content = MarkdownBuilder.build(pageStack.peek().getLeft(), screen.getWidth() - 240);
             content.setScrollRegion(new Rectangle(170,20,width - 220,height - 20 - footerHeight));
 
@@ -83,13 +83,14 @@ public class ManualGui implements IScreen {
         height = builder.getHeight();
 
         if(lastPage != pageStack.peek().getLeft()){
+            //Meaning that we should refresh it
             try {
                 content = MarkdownBuilder.build(pageStack.peek().getLeft(), width - 240);
                 content.setScrollRegion(new Rectangle(170,20,width-220,height-30));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            content.setOffset(pageStack.peek().getValue());
+            content.setVerticalOffset(pageStack.peek().getValue());
             lastPage = pageStack.peek().getLeft();
         }
 
@@ -103,25 +104,34 @@ public class ManualGui implements IScreen {
         content.render(state.model_view().copy().translate(180, 30, 0));
 
         //Tooltip
-        if(sidebar.over != null){
-            sidebar.over.renderTooltip((int) sidebar.getScrollRegion().getMaxY());
-        } else if(content.over != null){
-            content.over.renderTooltip((int) content.getScrollRegion().getMaxY());
+        //Currently only MarkdownUrl inherits MarkdownClickableElement, need change when more types are added
+        for(MarkdownDocument screen : new MarkdownDocument[]{sidebar, content}){
+            if(screen.getHoveredElement() != null){
+                MarkdownUrl clickable = (MarkdownUrl) screen.getHoveredElement();
+                if (sidebarNameMap.containsKey(clickable.destination)) {
+                    clickable.renderTooltip("Open page: "
+                                    + sidebarNameMap.getOrDefault(clickable.destination, "UNDEFINED"),
+                            (int) screen.getScrollRegion().getMaxY());
+                } else {
+                    clickable.renderTooltip((int) screen.getScrollRegion().getMaxY());
+                }
+                break;
+            }
         }
 
         //Footer
-        int lineCount = footer.countLine();
+        int lineCount = footer.getLineCount();
         GUIHelpers.drawRect(50, height - (10 * lineCount), width - 100, 10 * lineCount, FOOTER_COLOR);
-        for(MarkdownDocument.MarkdownLine l : footer.brokenLines){
-            List<MarkdownElement> line = l.line;
+        for(MarkdownDocument.MarkdownLine l : footer.getBrokenLines()){
+            List<MarkdownElement> line = l.getElements();
             GUIHelpers.drawCenteredString(line.get(0).apply(),
-                    width / 2, builder.getHeight() - (10 * lineCount), BLACK);
+                    width / 2, builder.getHeight() - (10 * lineCount), DEFAULT_TEXT_COLOR);
             lineCount --;
         }
 
         //Header
         GUIHelpers.drawRect(50, 0, width - 100, 20, HEADER_COLOR);
-        GUIHelpers.drawString(TextColor.BOLD.wrap("<-"), 60,5, WHITE);
+        GUIHelpers.drawString(TextColor.BOLD.wrap("<-"), 60,5, BUTTON_COLOR);
     }
 
     public void pushContent(Identifier identifier){
@@ -150,8 +160,8 @@ public class ManualGui implements IScreen {
 
     //For scroll
     public void onClientTick(){
-        sidebar.onClientTick();
-        content.onClientTick();
-        pageStack.peek().setValue(content.getOffset());
+        sidebar.handleScrollOnTicks();
+        content.handleScrollOnTicks();
+        pageStack.peek().setValue(content.getVerticalOffset());
     }
 }

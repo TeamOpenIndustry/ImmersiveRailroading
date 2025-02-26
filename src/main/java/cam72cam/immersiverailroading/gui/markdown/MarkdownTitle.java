@@ -5,16 +5,25 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.text.TextColor;
 import util.Matrix4;
 
-/*
-  Will scale by level
-  1 -> scale to 1.35x and italicize
-  2 -> scale to 1.15x and italicize
-  3+ -> To regular text, don't handle
-  CANNOT CONTAIN URL
+import static cam72cam.immersiverailroading.gui.markdown.Colors.*;
+
+/**
+ * Element class representing a title
+ * <p>
+ * Text will be scale by level:
+ * <p>
+ * 1 -> scale to 1.35x and italicize
+ * <p>
+ * 2 -> scale to 1.15x and italicize
+ * <p>
+ * 3+ -> Italic regular text
+ * <p>
+ * CANNOT CONTAIN URL
+ * @see MarkdownElement
  */
 public class MarkdownTitle extends MarkdownElement {
     //Starting from 1
-    public int level;
+    public final int level;
 
     public static final double LEVEL1 = 1/1.35;
     public static final double LEVEL2 = 1/1.15;
@@ -29,7 +38,7 @@ public class MarkdownTitle extends MarkdownElement {
                 }
             }
             //All the chars are '#'
-            this.text = text;
+            this.text = "";
             this.level = -1;
         }
     }
@@ -53,9 +62,10 @@ public class MarkdownTitle extends MarkdownElement {
         int i = splitPos;
         while (this.text.charAt(i) == ' '){
             i++;
-            if(i == this.text.length()){//rest are all space
+            if(i == this.text.length()){//Reaching end, which means chars after splitPos are all spaces
                 return new MarkdownElement[]{
                         new MarkdownTitle(this.text.substring(0, splitPos), this.level),
+                        //Just return empty string
                         new MarkdownTitle("", this.level)};
             }
         }
@@ -73,7 +83,7 @@ public class MarkdownTitle extends MarkdownElement {
             transform.translate(-offset.x, -offset.y, 0);
             transform.scale(1.35, 1.35, 1.35);
             transform.translate(offset.x * MarkdownTitle.LEVEL1, offset.y * MarkdownTitle.LEVEL1, 0);
-            GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
+            GUIHelpers.drawString(str, 0, 0, DEFAULT_TEXT_COLOR, transform);
 
             //Revert matrix
             transform.translate(-offset.x * MarkdownTitle.LEVEL1, -offset.y * MarkdownTitle.LEVEL1, 0);
@@ -88,7 +98,7 @@ public class MarkdownTitle extends MarkdownElement {
             transform.translate(-offset.x, -offset.y, 0);
             transform.scale(1.15, 1.15, 1.15);
             transform.translate(offset.x * MarkdownTitle.LEVEL2, offset.y * MarkdownTitle.LEVEL2, 0);
-            GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
+            GUIHelpers.drawString(str, 0, 0, DEFAULT_TEXT_COLOR, transform);
 
             //Revert matrix
             transform.translate(-offset.x * MarkdownTitle.LEVEL2, -offset.y * MarkdownTitle.LEVEL2, 0);
@@ -98,7 +108,7 @@ public class MarkdownTitle extends MarkdownElement {
             transform.translate(0, 2, 0);
             return 2;
         } else {
-            GUIHelpers.drawString(str, 0, 0, 0xFF000000, transform);
+            GUIHelpers.drawString(str, 0, 0, DEFAULT_TEXT_COLOR, transform);
             return 0;
         }
     }

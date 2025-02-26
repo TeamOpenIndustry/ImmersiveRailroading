@@ -3,8 +3,7 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.gui.ManualGui;
-import cam72cam.immersiverailroading.gui.markdown.ManualHoverRenderer;
-import cam72cam.immersiverailroading.gui.markdown.MarkdownStockProvider;
+import cam72cam.immersiverailroading.gui.markdown.*;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -209,8 +208,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 						stock.getDefinition().getOverlay().render(state, stock);
 					}
 				});
-
-				new MarkdownStockProvider();
 
 				ClientEvents.MOUSE_GUI.subscribe(evt -> {
 					if (!MinecraftClient.isReady()) {

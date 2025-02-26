@@ -4,16 +4,20 @@ import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
 import util.Matrix4;
 
-public class MarkdownSplitLine extends MarkdownElement {
+import static cam72cam.immersiverailroading.gui.markdown.Colors.*;
 
-    private static final char[] allowed = new char[]{'*', '-', '_'};
-    private static final int SPLIT_LINE_COLOR = 0xFF888888;
+/**
+ * Element class representing a split line
+ * @see MarkdownElement
+ */
+public class MarkdownSplitLine extends MarkdownElement {
+    private static final char[] ALLOWED_CHARS_FOR_SPLIT = new char[]{'*', '-', '_'};
 
     public static boolean validate(String str){
         if(str.length() < 3){
             return false;
         }
-        for(char c : allowed){
+        for(char c : ALLOWED_CHARS_FOR_SPLIT){
             label: {
                 for (int i = 0; i < str.length(); i++) {
                     if (str.charAt(i) != c) {

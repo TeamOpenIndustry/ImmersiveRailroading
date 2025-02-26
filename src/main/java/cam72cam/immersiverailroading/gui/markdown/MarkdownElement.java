@@ -2,6 +2,14 @@ package cam72cam.immersiverailroading.gui.markdown;
 
 import util.Matrix4;
 
+/**
+ * Abstract element class
+ * @see MarkdownTitle
+ * @see MarkdownStyledText
+ * @see MarkdownPicture
+ * @see MarkdownSplitLine
+ * @see MarkdownClickableElement
+ */
 public abstract class MarkdownElement {
     public String text;
 

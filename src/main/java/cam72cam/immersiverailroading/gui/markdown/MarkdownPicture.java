@@ -9,11 +9,15 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+/**
+ * Element class representing a picture
+ * @see MarkdownElement
+ */
 public class MarkdownPicture extends MarkdownElement {
-    public Identifier picture;
+    public final Identifier picture;
 
-    public double ratio;
-    public BufferedImage image;
+    public final double ratio;
+    public final BufferedImage image;
 
     public MarkdownPicture(Identifier picture) {
         this.picture = picture;

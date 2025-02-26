@@ -6,140 +6,75 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
 import util.Matrix4;
 
+import javax.annotation.Nonnull;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
 
-//Storage content
+import static cam72cam.immersiverailroading.gui.markdown.Colors.*;
+
+/**
+ * Storage class to store Markdown file's content
+ */
 public class MarkdownDocument {
-    public static HashMap<Identifier, MarkdownDocument> documents = new HashMap<>();
+    //All cached document
+    //TODO Maybe we should to use ExpireableMap?
+    private static final HashMap<Identifier, MarkdownDocument> DOCUMENTS = new HashMap<>();
 
     public final Identifier page;
-    public MarkdownClickableElement over;
-
-    protected List<MarkdownLine> original;
-    protected int pageWidth;
-    public List<MarkdownLine> brokenLines;
-
-    private static final int CODE_COLOR = 0xFFDDDDDD;
-    private static final int TIPS_BAR_COLOR = 0xFF00DD00;
-
-    private static final int BLACK = 0xFF000000;
-
+    protected final List<MarkdownLine> originalLines;
+    protected final List<MarkdownLine> brokenLines;
     private Rectangle2D scrollRegion;
     private double scrollSpeed;
-    private double offset;
+    private double verticalOffset;
+    private int pageWidth;
     private int pageHeight;
+    private MarkdownClickableElement hoveredElement;
 
-    public static MarkdownDocument getPageByID(Identifier id){
-        if(!documents.containsKey(id)){
-            documents.put(id, new MarkdownDocument(id));
-        }
-        return documents.get(id);
-    }
-
+    /**
+     * Internal constructor class
+     * @param page This page's content location
+     */
     private MarkdownDocument(Identifier page) {
         this.page = page;
-        this.original = new LinkedList<>();
+        this.originalLines = new LinkedList<>();
         this.brokenLines = new LinkedList<>();
     }
 
-    //For chained call
-    public MarkdownDocument addLines(List<MarkdownLine> lines) {
-        lines.forEach(this::addLine);
-        return this;
+    /**
+     * Try to get a cached page
+     * @param id The page's content location
+     * @return The cached page or a new page if not present
+     */
+    public static synchronized MarkdownDocument getOrComputePageByID(Identifier id){
+        return DOCUMENTS.computeIfAbsent(id, MarkdownDocument::new);
     }
 
-    public MarkdownDocument addLine(MarkdownElement line){
-        return this.addLine(Collections.singletonList(line));
-    }
-
-    public MarkdownDocument addLine(List<MarkdownElement> line){
-        return this.addLine(new MarkdownLine(line));
-    }
-
-    public MarkdownDocument addLine(MarkdownLine line){
-        this.original.add(line);
-        return this;
-    }
-
-    public int countLine(){
-        return brokenLines.size();
-    }
-
-    public boolean isEmpty(){
-        return this.original.isEmpty();
-    }
-
-    public int getPageWidth() {
-        return pageWidth;
-    }
-
-    public void setPageWidth(int pageWidth) {
-        this.pageWidth = pageWidth;
-    }
-
-    public void setScrollRegion(Rectangle2D scrollRegion) {
-        this.scrollRegion = scrollRegion;
-    }
-
-    public double getOffset() {
-        return offset;
-    }
-
-    public void setOffset(double offset) {
-        this.offset = offset;
-    }
-
-    public Rectangle2D getScrollRegion() {
-        return scrollRegion;
-    }
-
-    //Render a page and return its height
-    public int render(Matrix4 matrix4){
-        matrix4.translate(0, -offset, 0);
+    /**
+     * Render this page and return the height
+     * @param matrix4 Transform matrix
+     * @return Height of the page
+     */
+    public int render(@Nonnull Matrix4 matrix4){
+        matrix4.translate(0, -verticalOffset, 0);
         int height = 0;
-        boolean inCodeBlock = false;
         boolean inTips = false;
         Vec3d offset;
-        over = null;
-        for(MarkdownLine line : brokenLines){
+        hoveredElement = null;
+        Iterator<MarkdownLine> lineIterator = brokenLines.iterator();
+        while (lineIterator.hasNext()){
+            MarkdownLine line = lineIterator.next();
             int currWidth = 0;
+            //Stores current matrix result
             offset = matrix4.apply(Vec3d.ZERO);
-            //Draw code block
+            //Let proxy class do it
             if(line.codeBlockStart){
-                inCodeBlock = true;
-                //Draw code block
-                //In code block there is at most one text element
-                GUIHelpers.drawRect((int) offset.x, (int) offset.y,
-                        pageWidth, 10, CODE_COLOR);
-                int delta = pageWidth - GUIHelpers.getTextWidth(line.line.get(0).apply());
-                matrix4.translate(delta, 0, 0);
-                GUIHelpers.drawString(line.line.get(0).apply(), 0, 0, BLACK, matrix4);
-                matrix4.translate(-delta, 10, 0);
-                height += 10;
-                continue;
-            } else if(line.codeBlockEnd) {
-                inCodeBlock = false;
-                //Draw code block ending
-                GUIHelpers.drawRect((int) offset.x , (int) offset.y ,
-                        pageWidth, 5, CODE_COLOR);
-                matrix4.translate(0, 5, 0);
-                height += 5;
-                continue;
-            }
-            if(inCodeBlock){
-                //In code block there is at most one text element
-                GUIHelpers.drawRect((int) offset.x , (int) offset.y ,
-                        pageWidth, 10, CODE_COLOR);
-                GUIHelpers.drawString(line.line.get(0).apply(), 0, 0, BLACK, matrix4);
-                matrix4.translate(0, 10, 0);
-                height += 10;
+                height += MarkdownCodeBlock.render(matrix4, lineIterator, this, line);
                 continue;
             }
 
-            //Draw tips block
+            //Tips block have a green bar
             if(line.tipStart){
                 inTips = true;
                 continue;
@@ -152,7 +87,7 @@ public class MarkdownDocument {
                         MarkdownLine.LIST_PREFIX_WIDTH / 4, 10, TIPS_BAR_COLOR);
             }
 
-            for(MarkdownElement element : line.line){
+            for(MarkdownElement element : line.elements){
                 //Show current matrix result
                 offset = matrix4.apply(Vec3d.ZERO);
                 height += element.render(matrix4, pageWidth);
@@ -163,14 +98,14 @@ public class MarkdownDocument {
                     currWidth += GUIHelpers.getTextWidth(str) + (((MarkdownStyledText) element).hasCode() ? 2 : 0);
                 }
 
-                //Dynamically update urls' pos
+                //Dynamically update clickable elements' pos(for now only url is included)
                 if(element instanceof MarkdownClickableElement){
                     currWidth += GUIHelpers.getTextWidth(str);
                     ((MarkdownClickableElement) element).section = new Rectangle((int) offset.x, (int) offset.y,
                             GUIHelpers.getTextWidth(str), 10);
 
                     if(((MarkdownClickableElement) element).section.contains(ManualHoverRenderer.mouseX, ManualHoverRenderer.mouseY)){
-                        over = (MarkdownClickableElement) element;
+                        hoveredElement = (MarkdownClickableElement) element;
                     }
                 }
             }
@@ -181,54 +116,146 @@ public class MarkdownDocument {
         return height;
     }
 
-    //Transform page in Y axis
-    public void onScroll(ClientEvents.MouseGuiEvent event){
-        if(scrollRegion != null && scrollRegion.contains(event.x, event.y)){
-            this.scrollSpeed =  Math.min(50, Math.max(-50, this.scrollSpeed - (10 * event.scroll)));
+    /**
+     * addLine and overloads and addLines to simplify external use
+     * @param lines Given lines
+     * @return This
+     */
+    public MarkdownDocument addLines(List<MarkdownLine> lines) {
+        lines.forEach(this::addLine);
+        return this;
+    }
+
+    //Overloads
+    public MarkdownDocument addLine(MarkdownElement line){
+        return this.addLine(Collections.singletonList(line));
+    }
+
+    public MarkdownDocument addLine(List<MarkdownElement> line){
+        return this.addLine(new MarkdownLine(line));
+    }
+
+    public MarkdownDocument addLine(MarkdownLine line){
+        this.originalLines.add(line);
+        return this;
+    }
+
+    //Method used by rendering manual's footer
+    public int getLineCount(){
+        return brokenLines.size();
+    }
+
+    public boolean isEmpty(){
+        return this.originalLines.isEmpty();
+    }
+
+    public void clearCache(){
+        this.originalLines.clear();
+        this.brokenLines.clear();
+    }
+
+    public int getPageWidth() {
+        return pageWidth;
+    }
+
+    public void setPageWidth(int pageWidth) {
+        this.pageWidth = pageWidth;
+    }
+
+    public MarkdownClickableElement getHoveredElement() {
+        return hoveredElement;
+    }
+
+    public List<MarkdownLine> getBrokenLines() {
+        return brokenLines;
+    }
+
+    public List<MarkdownLine> getOriginalLines() {
+        return originalLines;
+    }
+
+    public void setScrollRegion(Rectangle2D scrollRegion) {
+        this.scrollRegion = scrollRegion;
+    }
+
+    public double getVerticalOffset() {
+        return verticalOffset;
+    }
+
+    public void setVerticalOffset(double verticalOffset) {
+        this.verticalOffset = verticalOffset;
+    }
+
+    public Rectangle2D getScrollRegion() {
+        return scrollRegion;
+    }
+
+    /**
+     * Change scroll speed based on input
+     * @param scrollEvent mouse scroll input
+     */
+    public void onScroll(ClientEvents.MouseGuiEvent scrollEvent){
+        //Check validate
+        if(scrollRegion != null && scrollRegion.contains(scrollEvent.x, scrollEvent.y)){
+            this.scrollSpeed =  Math.min(50, Math.max(-50, this.scrollSpeed - (10 * scrollEvent.scroll)));
         }
     }
 
-    //Handle click
-    public void onMouseRelease(ClientEvents.MouseGuiEvent event){
-        if(this.scrollRegion.contains(event.x, event.y)){
-            this.brokenLines.forEach(line -> line.line.stream().filter(e -> e instanceof MarkdownClickableElement)
+    /**
+     * Try to find child elements that can be invoked by this click
+     * @param releaseEvent We only consider a mouse release as a click
+     */
+    public void onMouseRelease(ClientEvents.MouseGuiEvent releaseEvent){
+        if(this.scrollRegion.contains(releaseEvent.x, releaseEvent.y)){
+            this.brokenLines.forEach(line -> line.elements.stream().filter(e -> e instanceof MarkdownClickableElement)
                     .forEach(element -> {
-                if(((MarkdownClickableElement) element).section.contains(event.x, event.y)){
+                if(((MarkdownClickableElement) element).section.contains(releaseEvent.x, releaseEvent.y)){
                     ((MarkdownClickableElement) element).click();
                 }
             }));
         }
     }
 
-    //Reduce scroll speed
-    public void onClientTick(){
-        this.offset += (int) scrollSpeed;
+    /**
+     * Reduce scroll speed on client ticks
+     */
+    public void handleScrollOnTicks(){
+        this.verticalOffset += (int) scrollSpeed;
 
-        offset = Math.max(0, Math.min(pageHeight, offset));
+        verticalOffset = Math.max(0, Math.min(pageHeight, verticalOffset));
 
         scrollSpeed += scrollSpeed > 0 ? -Math.min(scrollSpeed, 3) :
-                scrollSpeed < 0 ? -Math.max(scrollSpeed, -3) :
-                        0;
+                       scrollSpeed < 0 ? -Math.max(scrollSpeed, -3) :
+                       0;
     }
 
+    /**
+     * Storage class to store documents' single line and interline status
+     */
     public static class MarkdownLine{
-        public List<MarkdownElement> line;
+        //For those need to indent by 2 * x spaces
+        public static final int LIST_PREFIX_WIDTH = GUIHelpers.getTextWidth("  ");
+        private final List<MarkdownElement> elements;
         //Store interline state to control rendering
         public boolean unorderedList = false;
         public boolean codeBlockStart = false;
         public boolean codeBlockEnd = false;
         public boolean tipStart = false;
         public boolean tipEnd = false;
-        public static final int LIST_PREFIX_WIDTH = GUIHelpers.getTextWidth("  ");
 
-        public MarkdownLine(MarkdownElement element){
-            this(Collections.singletonList(element));
+        private MarkdownLine(List<MarkdownElement> elements){
+            this.elements = elements;
         }
 
-        public MarkdownLine(List<MarkdownElement> line) {
-            this.line = line;
+        public static MarkdownLine create(MarkdownElement element){
+            return create(Collections.singletonList(element));
         }
 
+        public static MarkdownLine create(List<MarkdownElement> line) {
+            return new MarkdownLine(line);
+        }
+
+        //Allow chained call to optimize object creation
         public MarkdownLine isUnorderedList(boolean isUnorderedList){
             this.unorderedList = isUnorderedList;
             return this;
@@ -252,6 +279,11 @@ public class MarkdownDocument {
         public MarkdownLine isTipEnd(boolean tipEnd) {
             this.tipEnd = tipEnd;
             return this;
+        }
+
+        //Get the line's content for rendering
+        public List<MarkdownElement> getElements() {
+            return elements;
         }
     }
 }
