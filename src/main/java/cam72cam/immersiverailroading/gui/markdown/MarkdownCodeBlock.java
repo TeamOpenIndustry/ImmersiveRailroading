@@ -69,8 +69,9 @@ public class MarkdownCodeBlock {
 
         while (iterator.hasNext()){
             MarkdownDocument.MarkdownLine line = iterator.next();
+            offset = matrix4.apply(Vec3d.ZERO);
             if(line.codeBlockEnd){
-                //Draw footer line and language specification mark
+                //Draw footer line
                 GUIHelpers.drawRect((int) offset.x, (int) offset.y,
                         document.getPageWidth(), 5, CODE_BACKGROUND_COLOR);
                 matrix4.translate(0, 5, 0);
