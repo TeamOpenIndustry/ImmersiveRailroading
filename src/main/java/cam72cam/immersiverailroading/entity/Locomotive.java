@@ -257,7 +257,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 
 	@Override
-	protected float defaultControlPosition(Control<?> control) {
+    public float defaultControlPosition(Control<?> control) {
 		switch (control.part.type) {
 			case THROTTLE_BRAKE_X:
 			case REVERSER_X:

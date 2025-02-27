@@ -48,7 +48,7 @@ public class ItemTrackBlueprint extends CustomItem {
 	@Override
 	public void onClickAir(Player player, World world, Player.Hand hand) {
 		if (world.isClient && hand == Player.Hand.PRIMARY) {
-			GuiTypes.RAIL.open(player);
+			GuiTypes.RAIL_SELECTOR.open(player);
         }
 	}
 	

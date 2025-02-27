@@ -81,6 +81,7 @@ public enum ModelComponentType {
 	CARGO_FILL_X("CARGO_FILL_#ID#", false),
 	CARGO_FILL_POS_X("CARGO_FILL_#POS#_#ID#", false),
 	CARGO_ITEMS_X("CARGO_ITEMS_#ID#", false),
+    CARGO_UNLOAD_X("CARGO_UNLOAD_#ID#", false),
 
 	// Lights
 	HEADLIGHT_X("HEADLIGHT_#ID#", false),
@@ -114,6 +115,10 @@ public enum ModelComponentType {
 	BRAKE_PRESSURE_X("BRAKE_PRESSURE_#ID#"),
 	COUPLED_X("COUPLED_#ID#"),
 
+    //Multiblocks
+    FLUID_HANDLER("FLUID_HANDLER_#ID#"),
+    ITEM_OUTPUT("ITEM_OUTPUT"),
+
 	// REST
 	IMMERSIVERAILROADING_BASE_COMPONENT("IMMERSIVERAILROADING_BASE_COMPNOENT"),
 	REMAINING(""),
@@ -131,7 +136,14 @@ public enum ModelComponentType {
 	}
 
 	public static boolean shouldRender(String group) {
-		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_") || group.contains("CARGO_ITEMS");
+		return group.contains("CHIMNEY_")
+                || group.contains("CHIMINEY_")
+                || group.contains("PRESSURE_VALVE_")
+                || group.contains("EXHAUST_")
+                || group.contains("CARGO_ITEMS")
+                || group.contains("CARGO_UNLOAD")
+                || group.contains("FLUID_HANDLER")
+                || group.contains("ITEM_OUTPUT");
 	}
 
     public static class ModelPosition {

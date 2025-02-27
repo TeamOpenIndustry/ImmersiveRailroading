@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.LightDefinition;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Vec3d;
@@ -84,7 +83,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         this.invert = component.modelIDs.stream().anyMatch(g -> g.contains("_LINVERT_") || g.startsWith("LINVERT_") || g.endsWith("_LINVERT"));
 
         // This is bad...
-        LightDefinition config = def.getLight(component.type.toString()
+        EntityRollingStockDefinition.LightDefinition config = def.getLight(component.type.toString()
                 .replace("_X", "_" + component.id)
                 .replace("_POS_", "_" + component.pos + "_")
         );
@@ -104,7 +103,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
                 }
             }
         } else {
-            this.lightTex = LightDefinition.default_light_tex;
+            this.lightTex = EntityRollingStockDefinition.LightDefinition.default_light_tex;
             this.blinkIntervalTicks = 0;
             this.blinkOffsetTicks = 0;
             this.blinkFullBright = true;
@@ -112,8 +111,8 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         }
 
         ModelState mystate = state.push(builder -> builder
-                .add((ModelState.Lighter) (stock) ->
-                        new ModelState.LightState(null, null, blinkFullBright ? !isBlinkOff(stock) : !isLightOff(stock), null)
+                .add((ModelState.Lighter) (animatable) ->
+                        new ModelState.LightState(null, null, blinkFullBright ? !isBlinkOff(animatable.asStock()) : !isLightOff(animatable.asStock()), null)
                 )
         );
         mystate.include(component);
@@ -143,7 +142,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
             return;
         }
 
-        Vec3d flareOffset = new Vec3d(forward ? component.min.x - 0.02 : component.max.x + 0.02, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2);;
+        Vec3d flareOffset = new Vec3d(forward ? component.min.x - 0.02 : component.max.x + 0.02, (component.min.y + component.max.y) / 2, (component.min.z + component.max.z) / 2);
         if (location != null) {
             // TODO this does not actually work
             Matrix4 m = location.apply(stock);

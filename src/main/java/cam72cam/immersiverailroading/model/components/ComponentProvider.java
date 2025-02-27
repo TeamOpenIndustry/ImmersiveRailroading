@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.model.components;
 
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
-import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.mod.model.obj.OBJModel;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -11,13 +11,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ComponentProvider {
-    public final StockModel<?, ?> model;
+    public final OBJModel model;
     private final Set<String> groups;
     public Map<String, DataBlock> widgetConfig;
     private final List<ModelComponent> components;
     public double internal_model_scale;
 
-    public ComponentProvider(StockModel<?, ?> model, double internal_model_scale, Map<String, DataBlock> widgetConfig) {
+    public ComponentProvider(OBJModel model, double internal_model_scale, Map<String, DataBlock> widgetConfig) {
         this.model = model;
         this.groups = new HashSet<>(model.groups());
         this.widgetConfig = widgetConfig;

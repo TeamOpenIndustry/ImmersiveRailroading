@@ -6,11 +6,16 @@ import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.math.Vec3d;
 
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 public class CargoFill {
+    private final List<IBoundingBox> hitBox;
+
     public static CargoFill get(ComponentProvider provider, ModelState state, boolean showCurrentLoadOnly, ModelPosition pos) {
         List<ModelComponent> cargoLoads = pos == null ? provider.parseAll(ModelComponentType.CARGO_FILL_X) : provider.parseAll(ModelComponentType.CARGO_FILL_POS_X, pos);
         // Make sure that cargo loads are in order for showCurrentLoadOnly (if enabled)
@@ -19,6 +24,11 @@ public class CargoFill {
     }
 
     public CargoFill(List<ModelComponent> cargoLoads, ModelState state, boolean showCurrentLoadOnly) {
+        this.hitBox = new LinkedList<>();
+        for (ModelComponent cargoLoad : cargoLoads) {
+            this.hitBox.add(IBoundingBox.from(cargoLoad.min, cargoLoad.max));
+        }
+
         state.push(settings -> settings.add((ModelState.GroupVisibility) (stock, group) -> {
             int percentFull = stock instanceof Freight ? ((Freight) stock).getPercentCargoFull() : 100;
             for (ModelComponent cargoLoad : cargoLoads) {
@@ -36,4 +46,7 @@ public class CargoFill {
         })).include(cargoLoads);
     }
 
+    public boolean checkInBound(Vec3d pos) {
+        return this.hitBox.stream().anyMatch(box -> box.contains(pos));
+    }
 }

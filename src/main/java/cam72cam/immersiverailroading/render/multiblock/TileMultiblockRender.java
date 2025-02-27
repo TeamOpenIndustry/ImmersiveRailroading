@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.render.multiblock;
 
 import cam72cam.immersiverailroading.multiblock.*;
+import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.BlendMode;
@@ -20,6 +21,12 @@ public class TileMultiblockRender {
 		renderers.put(CastingMultiblock.NAME, new CastingRender());
 	}
 
+    public static void registerOthers(){
+        for (String s : DefinitionManager.multiblocks.keySet()) {
+            renderers.put(s, new CustomMultiblockRender());
+        }
+    }
+
 	public static StandardModel render(TileMultiblock te) {
 		if (te.isLoaded() && te.isRender()) {
 			IMultiblockRender renderer = renderers.get(te.getName());
@@ -31,5 +38,9 @@ public class TileMultiblockRender {
 			}
 		}
 		return null;
+	}
+
+	public static IMultiblockRender getRendererByName(String name){
+		return renderers.getOrDefault(name, null);
 	}
 }

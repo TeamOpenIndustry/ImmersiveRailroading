@@ -31,7 +31,6 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -102,7 +101,7 @@ public abstract class EntityRollingStockDefinition {
     public double rollingResistanceCoefficient;
     public double directFrictionCoefficient;
 
-    public List<AnimationDefinition> animations;
+    public List<StockAnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
     public Map<String, DataBlock> widgetConfig;
 
@@ -146,36 +145,21 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    public static class AnimationDefinition {
-        public enum AnimationMode {
-            VALUE,
-            PLAY_FORWARD,
-            PLAY_REVERSE,
-            PLAY_BOTH,
-            LOOP,
-            LOOP_SPEED
-        }
+    public static class StockAnimationDefinition extends AnimationDefinition{
         public final String control_group;
-        public final AnimationMode mode;
         public final Readouts readout;
-        public final Identifier animatrix;
-        public final float offset;
-        public final boolean invert;
-        public final float frames_per_tick;
+        public final AnimationMode mode;
         public final SoundDefinition sound;
 
-        public AnimationDefinition(DataBlock obj) {
+        public StockAnimationDefinition(DataBlock obj) {
+            super(obj);
             control_group = obj.getValue("control_group").asString();
             String readout = obj.getValue("readout").asString();
             this.readout = readout != null ? Readouts.valueOf(readout.toUpperCase(Locale.ROOT)) : null;
             if (control_group == null && readout == null) {
                 throw new IllegalArgumentException("Must specify either a control group or a readout for an animation");
             }
-            animatrix = obj.getValue("animatrix").asIdentifier();
             mode = AnimationMode.valueOf(obj.getValue("mode").asString().toUpperCase(Locale.ROOT));
-            offset = obj.getValue("offset").asFloat(0f);
-            invert = obj.getValue("invert").asBoolean(false);
-            frames_per_tick = obj.getValue("frames_per_tick").asFloat(1f);
             sound = SoundDefinition.getOrDefault(obj, "sound");
         }
 
@@ -540,7 +524,7 @@ public abstract class EntityRollingStockDefinition {
         }
         if (aobjs != null) {
             for (DataBlock entry : aobjs) {
-                animations.add(new AnimationDefinition(entry));
+                animations.add(new StockAnimationDefinition(entry));
             }
         }
 
@@ -899,5 +883,4 @@ public abstract class EntityRollingStockDefinition {
     public double getBrakeShoeFriction() {
         return brakeCoefficient;
     }
-
 }

@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
@@ -56,10 +57,10 @@ public class CustomValveGear extends ValveGear {
             throw new RuntimeException(e);
         }
 
-        state.push(settings -> settings.add((ModelState.GroupAnimator) (stock, group, partialTicks) -> animation.getMatrix(
+        state.push(settings -> settings.add((ModelState.GroupAnimator) (animatable, group, partialTicks) -> animation.getMatrix(
                 group,
-                stock instanceof Locomotive ? ((Locomotive) stock).getReverser() : 0.0f,
-                angle(stock.distanceTraveled) / 360,
+                animatable instanceof Locomotive ? ((Locomotive) animatable).getReverser() : 0.0f,
+                angle(animatable.asStock().distanceTraveled) / 360,
                 true
         ))).include(components);
 

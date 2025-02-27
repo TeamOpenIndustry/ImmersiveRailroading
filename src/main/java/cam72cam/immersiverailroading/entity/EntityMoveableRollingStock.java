@@ -212,7 +212,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     @Override
-    protected float defaultControlPosition(Control<?> control) {
+    public float defaultControlPosition(Control<?> control) {
         switch (control.part.type) {
             case INDEPENDENT_BRAKE_X:
                 return getDefinition().isLinearBrakeControl() ? 0 : 0.5f;

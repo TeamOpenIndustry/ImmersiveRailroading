@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import java.util.ArrayList;
 
+import cam72cam.mod.ModCore;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
@@ -17,22 +18,18 @@ public class SteamHammerRender implements IMultiblockRender {
 
 	@Override
 	public void render(TileMultiblock te, RenderState state, float partialTicks) {
-		if (model == null) {
-			try {
-				this.model = new OBJModel(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f, null);
-				this.hammer = new ArrayList<>();
-				this.rest = new ArrayList<>();
-				for (String group : model.groups()) {
-					if (group.contains("Hammer")) {
-						hammer.add(group);
-					} else {
-						rest.add(group);
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		checkModel();
+
+        this.hammer = new ArrayList<>();
+        this.rest = new ArrayList<>();
+        for (String group : model.groups()) {
+            if (group.contains("Hammer")) {
+                hammer.add(group);
+            } else {
+                rest.add(group);
+            }
+        }
+
 		SteamHammerInstance mb = (SteamHammerInstance) te.getMultiblock();
 
 		//state.scale(2, 2, 2);
@@ -53,4 +50,20 @@ public class SteamHammerRender implements IMultiblockRender {
 			vbo.draw(hammer, s -> s.translate(0, dist, 0));
 		}
 	}
+
+    public OBJModel getModel() {
+        checkModel();
+        return model;
+    }
+
+    @Override
+    public void checkModel() {
+        if (model == null) {
+            try {
+                this.model = new OBJModel(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"), -0.1f, null);
+            } catch (Exception e) {
+				ModCore.error(e.toString());
+            }
+        }
+    }
 }

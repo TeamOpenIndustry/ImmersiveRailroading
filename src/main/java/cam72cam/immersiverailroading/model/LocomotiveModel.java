@@ -1,19 +1,26 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
-import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.mod.entity.ItemEntity;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import util.Matrix4;
 
+import javax.vecmath.Matrix4f;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends LocomotiveDefinition> extends FreightTankModel<ENTITY, DEFINITION> {
     private List<ModelComponent> components;
@@ -99,9 +106,9 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     @Override
     protected void initStates() {
         super.initStates();
-        frontLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getFrontLocomotiveMatrix(s)));
+        frontLocomotive = base.push(settings -> settings.add((IAnimatable a, float partialTicks) -> getFrontLocomotiveMatrix(a.asStock())));
         frontLocomotiveRocking = addRoll(frontLocomotive);
-        rearLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getRearLocomotiveMatrix(s)));
+        rearLocomotive = base.push(settings -> settings.add((IAnimatable a, float partialTicks) -> getRearLocomotiveMatrix(a.asStock())));
         rearLocomotiveRocking = addRoll(rearLocomotive);
     }
 
@@ -157,6 +164,20 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         }
 
         bell.removed(stock);
+    }
+
+    @Override
+    public List<ItemStack> getItemsWithin(Freight stock, List<ItemEntity> entities) {
+        Matrix4f stockMatrix = stock.getModelMatrix().toMatrix4f();
+        stockMatrix.invert();
+        Matrix4 matrix4 = new Matrix4(stockMatrix);
+        List<ItemStack> stacks = entities.stream().filter(entity -> {
+            //Transform into stock's relative coordinate
+            Vec3d pos = matrix4.apply(entity.getPosition().subtract(stock.getPosition()));
+            return (this.cargoFillFront != null && this.cargoFillFront.checkInBound(pos)) || (this.cargoFillRear != null && this.cargoFillRear.checkInBound(pos));
+        }).map(ItemEntity::getContent).collect(Collectors.toList());
+        stacks.addAll(super.getItemsWithin(stock, entities));
+        return stacks;
     }
 
     private Matrix4 getFrontLocomotiveMatrix(EntityMoveableRollingStock s) {

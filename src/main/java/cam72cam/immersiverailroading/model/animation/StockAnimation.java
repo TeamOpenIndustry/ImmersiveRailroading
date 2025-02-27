@@ -3,9 +3,9 @@ package cam72cam.immersiverailroading.model.animation;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.library.AnimationMode;
 import cam72cam.immersiverailroading.model.part.PartSound;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition.AnimationMode;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import util.Matrix4;
 
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class StockAnimation {
-    private final AnimationDefinition def;
+    private final EntityRollingStockDefinition.StockAnimationDefinition def;
     private final Animatrix animatrix;
     private final ExpireableMap<UUID, Boolean> active;
     private final ExpireableMap<UUID, Float> tickStart;
@@ -21,7 +21,7 @@ public class StockAnimation {
     private final boolean looping;
     private final PartSound sound;
 
-    public StockAnimation(AnimationDefinition def, double internal_model_scale) throws IOException {
+    public StockAnimation(EntityRollingStockDefinition.StockAnimationDefinition def, double internal_model_scale) throws IOException {
         this.def = def;
         this.animatrix = new Animatrix(def.animatrix.getResourceStream(), internal_model_scale);
         tickStart = new ExpireableMap<>();

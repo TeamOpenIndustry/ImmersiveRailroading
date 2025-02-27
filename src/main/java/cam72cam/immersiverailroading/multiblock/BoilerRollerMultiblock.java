@@ -113,7 +113,12 @@ public class BoilerRollerMultiblock extends Multiblock {
 			return offset.equals(crafting) ? 2 : 0;
 		}
 
-		@Override
+        @Override
+        public int getTankCapability(Vec3i offset) {
+            return 0;
+        }
+
+        @Override
 		public void tick(Vec3i offset) {
 			if (!offset.equals(crafting)) {
 				return;
@@ -181,11 +186,21 @@ public class BoilerRollerMultiblock extends Multiblock {
 			return false;
 		}
 
-		@Override
-		public boolean isOutputSlot(Vec3i pos, int slot) {
-			//TODO
-			return false;
-		}
+        @Override
+        public boolean canReceiveFluid(Vec3i offset) {
+            return false;
+        }
+
+        @Override
+        public boolean isItemOutputSlot(Vec3i offset, int slot) {
+            //TODO
+            return false;
+        }
+
+        @Override
+        public boolean isFluidOutputSlot(Vec3i offset) {
+            return false;
+        }
 
 		@Override
 		public int getSlotLimit(Vec3i offset, int slot) {

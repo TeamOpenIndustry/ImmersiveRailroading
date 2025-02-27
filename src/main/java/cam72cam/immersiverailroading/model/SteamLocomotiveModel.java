@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigSound;
+import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveSteam;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ModelComponentType;
@@ -43,8 +44,10 @@ public class SteamLocomotiveModel extends LocomotiveModel<LocomotiveSteam, Locom
     protected void parseComponents(ComponentProvider provider, LocomotiveSteamDefinition def) {
         firebox = provider.parse(ModelComponentType.FIREBOX);
         rocking.push(builder -> {
-            builder.add((ModelState.Lighter) stock -> {
-                return new ModelState.LightState(null, null, !Config.isFuelRequired(stock.gauge) || ((LocomotiveSteam)stock).getBurnTime().values().stream().anyMatch(x -> x > 1), null);
+            builder.add((ModelState.Lighter) animatable -> {
+                return new ModelState.LightState(null, null,
+                        !Config.isFuelRequired(animatable.asStock().gauge) ||
+                                ((LocomotiveSteam)animatable).getBurnTime().values().stream().anyMatch(x -> x > 1), null);
             });
         }).include(firebox);
 

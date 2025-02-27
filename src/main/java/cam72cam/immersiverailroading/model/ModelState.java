@@ -1,8 +1,9 @@
 package cam72cam.immersiverailroading.model;
 
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.model.animation.IAnimatable;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.render.obj.OBJRender;
 import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
@@ -44,12 +45,12 @@ public class ModelState {
         return created;
     }
 
-    public Matrix4 getMatrix(EntityMoveableRollingStock stock, float partialTicks) {
-        return animator != null ? animator.getMatrix(stock, partialTicks) : null;
+    public Matrix4 getMatrix(IAnimatable animatable, float partialTicks) {
+        return animator != null ? animator.getMatrix(animatable, partialTicks) : null;
     }
-    public Matrix4 getGroupMatrix(EntityMoveableRollingStock stock, String group, float partialTicks) {
-        Matrix4 groupMatrix = groupAnimator != null ? groupAnimator.getMatrix(stock, group, partialTicks) : null;
-        Matrix4 baseMatrix = getMatrix(stock, partialTicks);
+    public Matrix4 getGroupMatrix(IAnimatable animatable, String group, float partialTicks) {
+        Matrix4 groupMatrix = groupAnimator != null ? groupAnimator.getMatrix(animatable, group, partialTicks) : null;
+        Matrix4 baseMatrix = getMatrix(animatable, partialTicks);
         if (groupMatrix == null) {
             return baseMatrix;
         }
@@ -71,11 +72,11 @@ public class ModelState {
 
     @FunctionalInterface
     public interface Animator {
-        Matrix4 getMatrix(EntityMoveableRollingStock stock, float partialTicks);
+        Matrix4 getMatrix(IAnimatable animatable, float partialTicks);
         default Animator merge(Animator other) {
-            return (EntityMoveableRollingStock stock, float partialTicks) -> {
-                Matrix4 ourMatrix = this.getMatrix(stock, partialTicks);
-                Matrix4 newMatrix = other.getMatrix(stock, partialTicks);
+            return (IAnimatable animatable, float partialTicks) -> {
+                Matrix4 ourMatrix = this.getMatrix(animatable, partialTicks);
+                Matrix4 newMatrix = other.getMatrix(animatable, partialTicks);
                 if (ourMatrix == null) {
                     return newMatrix;
                 }
@@ -88,11 +89,11 @@ public class ModelState {
     }
     @FunctionalInterface
     public interface GroupAnimator {
-        Matrix4 getMatrix(EntityMoveableRollingStock stock, String group, float partialTicks);
+        Matrix4 getMatrix(IAnimatable animatable, String group, float partialTicks);
         default GroupAnimator merge(GroupAnimator other) {
-            return (stock, g, partialTicks) -> {
-                Matrix4 ourMatrix = this.getMatrix(stock, g, partialTicks);
-                Matrix4 newMatrix = other.getMatrix(stock, g, partialTicks);
+            return (animatable, g, partialTicks) -> {
+                Matrix4 ourMatrix = this.getMatrix(animatable, g, partialTicks);
+                Matrix4 newMatrix = other.getMatrix(animatable, g, partialTicks);
                 if (ourMatrix == null) {
                     return newMatrix;
                 }
@@ -106,12 +107,12 @@ public class ModelState {
 
     @FunctionalInterface
     public interface GroupVisibility {
-        Boolean visible(EntityMoveableRollingStock stock, String group);
+        Boolean visible(IAnimatable animatable, String group);
 
         default GroupVisibility merge(GroupVisibility other) {
-            return (stock, group) -> {
-                Boolean ourVisible = this.visible(stock, group);
-                Boolean otherVisible = other.visible(stock, group);
+            return (animatable, group) -> {
+                Boolean ourVisible = this.visible(animatable, group);
+                Boolean otherVisible = other.visible(animatable, group);
                 if (ourVisible == null) {
                     return otherVisible;
                 }
@@ -125,9 +126,9 @@ public class ModelState {
 
     @FunctionalInterface
     public interface Lighter {
-        LightState get(EntityMoveableRollingStock stock);
+        LightState get(IAnimatable animatable);
         default Lighter merge(Lighter lighter) {
-            return stock -> this.get(stock).merge(lighter.get(stock));
+            return animatable -> this.get(animatable).merge(lighter.get(animatable));
         }
     }
 
@@ -163,7 +164,7 @@ public class ModelState {
 
 
     public static class Builder {
-        public static Consumer<Builder> FULLBRIGHT = builder -> builder.add((Lighter) stock -> LightState.FULLBRIGHT);
+        public static Consumer<Builder> FULLBRIGHT = builder -> builder.add((Lighter) animatable -> LightState.FULLBRIGHT);
         private Animator animator;
         private GroupAnimator groupAnimator;
         private GroupVisibility groupVisibility;
@@ -226,7 +227,7 @@ public class ModelState {
     }
 
     // TODO check performance impact of streams
-    public void render(OBJRender.Binding vbo, EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
+    public void render(OBJRender.Binding vbo, IAnimatable animatable, List<ModelComponentType> available, float partialTicks) {
         // Get all groups that we can render from components that are available
         List<String> groups = new ArrayList<>();
         for (ModelComponent component : components) {
@@ -241,27 +242,32 @@ public class ModelState {
         // Filter out groups that aren't currently visible
         if (groupVisibility != null) {
             groups = groups.stream().filter(group -> {
-                Boolean visible = groupVisibility.visible(stock, group);
+                Boolean visible = groupVisibility.visible(animatable, group);
                 return visible == null || visible;
             }).collect(Collectors.toList());
         }
 
-        Matrix4 matrix = animator != null ? animator.getMatrix(stock, partialTicks) : null;
+        Matrix4 matrix = animator != null ? animator.getMatrix(animatable, partialTicks) : null;
 
         Map<String, Matrix4> animatedGroups = new HashMap<>();
         if (groupAnimator != null) {
             for (String group : groups) {
-                Matrix4 m = groupAnimator.getMatrix(stock, group, partialTicks);
+                Matrix4 m = groupAnimator.getMatrix(animatable, group, partialTicks);
                 if (m != null) {
                     animatedGroups.put(group, m);
                 }
             }
         }
 
-        // Required, TODO upstream checking or optional
-        LightState lighting = lighter.get(stock);
-        boolean fullBright = lighting.fullBright != null && lighting.fullBright;
-        boolean hasInterior = lighting.hasInterior != null && lighting.hasInterior;
+
+        LightState lighting = null;
+        boolean fullBright = false;
+        boolean hasInterior = false;
+        if(lighter != null){
+            lighting = lighter.get(animatable);
+            fullBright = lighting.fullBright != null && lighting.fullBright;
+            hasInterior = lighting.hasInterior != null && lighting.hasInterior;
+        }
 
 
         Map<Pair<Float, Float>, List<String>> levels = new HashMap<>();
@@ -276,12 +282,11 @@ public class ModelState {
             boolean interiorGroup = interiorCache.computeIfAbsent(group, g -> hasGroupFlag(g, "INTERIOR"));
             boolean fullbrightGroup = fullbrightCache.computeIfAbsent(group, g -> hasGroupFlag(g, "FULLBRIGHT"));
 
-            Float lcgValue = lcg != null ? stock.getControlPosition(lcg) : null;
+            Float lcgValue = lcg != null ? animatable.getControlPosition(lcg) : null;
             lcgValue = lcgValue == null ? null : invertGroup ? 1 - lcgValue : lcgValue;
             Pair<Float, Float> key = null;
 
-            // TODO additional null checks around lighting fields
-            if (lcgValue == null || lcgValue > 0) {
+            if (lighting != null &&(lcgValue == null || lcgValue > 0)) {
                 if (fullBright && fullbrightGroup) {
                     key = Pair.of(1f, 1f);
                 } else if (lighting.interiorLight != null) {
@@ -330,7 +335,7 @@ public class ModelState {
         });
 
         for (ModelState child : children) {
-            child.render(vbo, stock, available, partialTicks);
+            child.render(vbo, animatable, available, partialTicks);
         }
     }
 }

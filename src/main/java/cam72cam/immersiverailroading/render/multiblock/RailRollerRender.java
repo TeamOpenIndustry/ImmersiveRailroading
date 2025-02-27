@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.mod.ModCore;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
@@ -20,25 +21,21 @@ public class RailRollerRender implements IMultiblockRender {
 
 	@Override
 	public void render(TileMultiblock te, RenderState state, float partialTicks) {
-		if (model == null) {
-			try {
-				this.model = new OBJModel(new Identifier(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.1f, null);
-				input = new ArrayList<>();
-				output = new ArrayList<>();
-				rest = new ArrayList<>();
-				for (String name : model.groups.keySet()) {
-					if (name.contains("INPUT_CAST")) {
-						input.add(name);
-					} else if (name.contains("OUTPUT_RAIL")) {
-						output.add(name);
-					} else {
-						rest.add(name);
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		checkModel();
+
+        input = new ArrayList<>();
+        output = new ArrayList<>();
+        rest = new ArrayList<>();
+        for (String name : model.groups.keySet()) {
+            if (name.contains("INPUT_CAST")) {
+                input.add(name);
+            } else if (name.contains("OUTPUT_RAIL")) {
+                output.add(name);
+            } else {
+                rest.add(name);
+            }
+        }
+
 		state.translate(0.5, 0, 0.5);
 		state.rotate(te.getRotation() - 90, 0, 1, 0);
 		state.translate(-1.5, 0, 0.5);
@@ -61,4 +58,20 @@ public class RailRollerRender implements IMultiblockRender {
 			vbo.draw(rest);
 		}
 	}
+
+    public OBJModel getModel() {
+        checkModel();
+        return model;
+    }
+
+    @Override
+    public void checkModel() {
+		if(this.model == null){
+			try {
+				this.model = new OBJModel(new Identifier(ImmersiveRailroading.MODID, "models/multiblocks/rail_machine.obj"), 0.1f, null);
+			} catch (Exception e) {
+				ModCore.error(e.toString());
+			}
+		}
+    }
 }

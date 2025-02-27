@@ -4,14 +4,18 @@ import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.model.FreightModel;
+import cam72cam.immersiverailroading.model.part.CargoUnload;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
@@ -28,6 +32,8 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	@TagField("PERCENT_FULL")
 	private int percentFull = 0;
 
+    protected transient int ticks = 0;
+
 	public abstract int getInventorySize();
 	public abstract int getInventoryWidth();
 
@@ -37,10 +43,10 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 	}
 
 	/*
-	 * 
+	 *
 	 * EntityRollingStock Overrides
 	 */
-	
+
 	@Override
 	public void onAssemble() {
 		super.onAssemble();
@@ -52,7 +58,7 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 		initContainerFilter();
 	}
-	
+
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
@@ -75,7 +81,6 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		if (clickRes != ClickResult.PASS) {
 			return clickRes;
 		}
-
 		if (!this.isBuilt()) {
 			return ClickResult.PASS;
 		}
@@ -121,7 +126,52 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		return ClickResult.PASS;
 	}
 
-	protected boolean openGui(Player player) {
+    @Override
+    public void onTick() {
+        super.onTick();
+        ticks++;
+        FreightModel<?, ?> model = (FreightModel<?, ?>) this.getDefinition().getModel();
+        if(getWorld().isServer){
+            //inputs
+            if (this.getCurrentSpeed().metric() <= 10.8 && ticks % 2 == 0) {//3m/s and don't refresh it every tick
+				double temp = this.getDefinition().getLength(this.gauge) / 2;
+				Vec3d bound = new Vec3d(temp, temp, temp);
+				List<ItemStack> stacks = model.getItemsWithin(this, getWorld().getItemEntitiesWithinBB(IBoundingBox.from(
+						this.getPosition().add(bound), this.getPosition().subtract(bound))));
+
+                if (!stacks.isEmpty()) {
+                    //transfer to this.cargoItems
+                    for (int fromSlot = 0; fromSlot < stacks.size(); fromSlot++) {
+                        ItemStack stack = stacks.get(fromSlot);
+                        int origCount = stack.getCount();
+
+                        if (stack.isEmpty()) {
+                            continue;
+                        }
+
+                        for (int toSlot = 0; toSlot < this.cargoItems.getSlotCount(); toSlot++) {
+                            stack.setCount(this.cargoItems.insert(toSlot, stack, false).getCount());
+                            if (stack.isEmpty()) {
+                                break;
+                            }
+                        }
+
+                        if (origCount != stack.getCount()) {
+                            stacks.set(fromSlot, stack);
+                        }
+                    }
+                }
+            }
+            //outputs
+            if (model.getUnloadingPoints() != null) {
+                for (CargoUnload point : model.getUnloadingPoints()) {
+					point.tryToUnload(this);
+				}
+            }
+        }
+    }
+
+    protected boolean openGui(Player player) {
 		if (getInventorySize() == 0) {
 			return false;
 		}
@@ -146,13 +196,13 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		itemCount = itemInsideCount;
 		percentFull = this.getInventorySize() > 0 ? stacksWithStuff * 100 / this.getInventorySize() : 100;
 	}
-	
+
 	public int getPercentCargoFull() {
 		return percentFull;
 	}
 
 	protected void initContainerFilter() {
-		
+
 	}
 
 	@Override

@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.ControlSoundsDefinition;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
@@ -180,14 +180,14 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
 
         if (hide) {
             state = state.push(builder ->
-                    builder.add((ModelState.GroupVisibility) (stock, group) -> getValue(stock) != 1)
+                    builder.add((ModelState.GroupVisibility) (animatable, group) -> getValue(animatable.asStock()) != 1)
             );
         }
 
         if (!(rotationPoint == null && translations.isEmpty() && scales.isEmpty())) {
             state = state.push(builder -> {
-                builder.add((ModelState.GroupAnimator) (stock, group, partialTicks) -> {
-                    float valuePercent = getValue(stock);
+                builder.add((ModelState.GroupAnimator) (animatable, group, partialTicks) -> {
+                    float valuePercent = getValue(animatable.asStock());
 
                     Matrix4 m = new Matrix4();
 
@@ -282,7 +282,7 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             case TRAIN_BRAKE_X:
             case INDEPENDENT_BRAKE_X:
                 if (!stock.getDefinition().isLinearBrakeControl()) {
-                     break;
+                    break;
                 }
                 // Fallthrough
             case THROTTLE_X:
@@ -412,13 +412,13 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
     }
 
     public void effects(T stock) {
-        ControlSoundsDefinition sounds = stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
+        EntityRollingStockDefinition.ControlSoundsDefinition sounds = stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
         if (sounds != null) {
             sounds.effects(stock, stock.getControlPressed(this), stock.getControlPosition(this), center(stock));
         }
     }
     public void removed(T stock) {
-        ControlSoundsDefinition sounds = stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
+        EntityRollingStockDefinition.ControlSoundsDefinition sounds = stock.getDefinition().getControlSound(part.type.name().replace("_X", "_" + part.id));
         if (sounds != null) {
             sounds.removed(stock);
         }

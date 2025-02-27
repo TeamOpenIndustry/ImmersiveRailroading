@@ -76,8 +76,11 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				Packet.register(BuildableStockSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(ItemRailUpdatePacket::new, PacketDirection.ClientToServer);
+				Packet.register(ItemMultiblockUpdatePacket::new, PacketDirection.ClientToServer);
 				Packet.register(MRSSyncPacket::new, PacketDirection.ServerToClient);
 				Packet.register(MultiblockSelectCraftPacket::new, PacketDirection.ClientToServer);
+                Packet.register(MultiblockSetStockPacket::new, PacketDirection.ClientToServer);
+                Packet.register(MultiblockControlChangePacket::new, PacketDirection.ClientToServer);
 				Packet.register(PreviewRenderPacket::new, PacketDirection.ServerToClient);
 				Packet.register(SoundPacket::new, PacketDirection.ServerToClient);
 				Packet.register(KeyPressPacket::new, PacketDirection.ClientToServer);
@@ -113,6 +116,11 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				MultiblockRegistry.register(RailRollerMultiblock.NAME, new RailRollerMultiblock());
 				MultiblockRegistry.register(BoilerRollerMultiblock.NAME, new BoilerRollerMultiblock());
 				MultiblockRegistry.register(CastingMultiblock.NAME, new CastingMultiblock());
+                for (String s : DefinitionManager.multiblocks.keySet()) {
+                    MultiblockRegistry.register(DefinitionManager.multiblocks.get(s).name,
+                            new CustomTransporterMultiblock(DefinitionManager.multiblocks.get(s)));
+                }
+                TileMultiblockRender.registerOthers();
 				IRFuzzy.applyFallbacks();
 				break;
 		}
@@ -143,6 +151,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ItemRender.register(IRItems.ITEM_PAINT_BRUSH, ObjItemRender.getModelFor(new Identifier(MODID, "models/item/paint_brush.obj"), new Vec3d(0.5, 0.25, 0.5), 3));
 				ItemRender.register(IRItems.ITEM_RADIO_CONTROL_CARD, new Identifier(MODID, "items/radio_card"));
 				ItemRender.register(IRItems.ITEM_MANUAL, new Identifier(MODID, "items/engineerslexicon"));
+				ItemRender.register(IRItems.ITEM_MULTIBLOCK_BLUEPRINT, new Identifier(MODID, "items/engineerslexicon"));
 				ItemRender.register(IRItems.ITEM_TRACK_EXCHANGER, new TrackExchangerModel());
 
 				IEntityRender<EntityMoveableRollingStock> stockRender = new IEntityRender<EntityMoveableRollingStock>() {
@@ -194,7 +203,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				break;
 			case SETUP:
 				GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
-				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
+				GlobalRender.registerItemMouseover(IRItems.ITEM_MULTIBLOCK_BLUEPRINT, MBBlueprintRender::renderMouseover);
 
 				GlobalRender.registerOverlay((state, pt) -> {
 					Entity riding = MinecraftClient.getPlayer().getRiding();
