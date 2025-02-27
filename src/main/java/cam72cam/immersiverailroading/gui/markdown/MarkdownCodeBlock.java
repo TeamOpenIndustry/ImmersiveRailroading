@@ -51,7 +51,7 @@ public class MarkdownCodeBlock {
      * @param iterator Lines iterator
      * @param document Source document
      * @param currentLine Current iterated line which can't be gotten by iterator.next()
-     * @return The code block's height fo further use
+     * @return The code block's height for further use
      */
     public static int render(Matrix4 matrix4, Iterator<MarkdownDocument.MarkdownLine> iterator,
                              MarkdownDocument document, MarkdownDocument.MarkdownLine currentLine){

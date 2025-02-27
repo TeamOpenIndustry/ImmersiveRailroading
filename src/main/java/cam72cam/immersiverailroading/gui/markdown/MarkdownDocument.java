@@ -9,6 +9,7 @@ import util.Matrix4;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import static cam72cam.immersiverailroading.gui.markdown.Colors.*;
 /**
  * Storage class to store Markdown file's content
  */
+@SuppressWarnings("unused")
 public class MarkdownDocument {
     //All cached document
     //TODO Maybe we should to use ExpireableMap?
@@ -49,6 +51,21 @@ public class MarkdownDocument {
      */
     public static synchronized MarkdownDocument getOrComputePageByID(Identifier id){
         return DOCUMENTS.computeIfAbsent(id, MarkdownDocument::new);
+    }
+
+    /**
+     * Provide an API for dynamic generated content
+     * @param id The cached page need to be cleared
+     */
+    public static synchronized void refreshByID(Identifier id){
+        Optional.ofNullable(DOCUMENTS.get(id)).ifPresent(document -> {
+            document.clearCache();
+            try {
+                MarkdownBuilder.build(id, document.getPageWidth());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     /**
@@ -161,7 +178,7 @@ public class MarkdownDocument {
         return this.originalLines.isEmpty();
     }
 
-    public void clearCache(){
+    private void clearCache(){
         this.originalLines.clear();
         this.brokenLines.clear();
     }
