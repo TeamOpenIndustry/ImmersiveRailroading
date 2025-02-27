@@ -6,6 +6,7 @@ package cam72cam.immersiverailroading.gui.markdown;
 public class Colors {
     public static final int BACKGROUND_COLOR = 0xCC000000;
     public static final int BUTTON_COLOR = 0xFFFFFFFF;
+    public static final int BUTTON_DISABLED_COLOR = 0xFFCCCCCC;
     public static final int FOOTER_COLOR = 0xFFEEEEEE;
     public static final int HEADER_COLOR = 0xFF888888;
     public static final int HOVER_BOUNDARY_COLOR = 0xFF555555;

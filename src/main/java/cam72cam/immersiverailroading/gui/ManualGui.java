@@ -24,7 +24,8 @@ public class ManualGui implements IScreen {
     public static boolean isOpen;
     public static ManualGui currentOpeningManual;
     //                                        page     page's mainOffset
-    private static final Stack<MutablePair<Identifier, Double>> pageStack = new Stack<>();
+    private static final Stack<MutablePair<Identifier, Double>> historyPageStack = new Stack<>();
+    private static final Stack<MutablePair<Identifier, Double>> futurePageStack = new Stack<>();
     private static final HashMap<Identifier, String> sidebarNameMap = new HashMap<>();
 
     private int width;
@@ -35,9 +36,10 @@ public class ManualGui implements IScreen {
     private Identifier lastPage;
 
     private Rectangle2D prevPageButton;
+    private Rectangle2D nextPageButton;
 
     static {
-        pageStack.push(MutablePair.of(new Identifier("immersiverailroading:wiki/en_us/home.md"), 0d));
+        historyPageStack.push(MutablePair.of(new Identifier("immersiverailroading:wiki/en_us/home.md"), 0d));
     }
 
     //Will be called every time the screen scale changes
@@ -56,10 +58,11 @@ public class ManualGui implements IScreen {
                     line.getElements().stream()
                             .filter(element -> element instanceof MarkdownUrl)
                             .forEach(element -> sidebarNameMap.put(((MarkdownUrl) element).destination, element.text)));
-            content = MarkdownBuilder.build(pageStack.peek().getLeft(), screen.getWidth() - 240);
+            content = MarkdownBuilder.build(historyPageStack.peek().getLeft(), screen.getWidth() - 240);
             content.setScrollRegion(new Rectangle(170,20,width - 220,height - 20 - footerHeight));
 
             prevPageButton = new Rectangle(60,5,10,10);
+            nextPageButton = new Rectangle(80,5,10,10);
         } catch (IOException e) {
             throw new RuntimeException();
         }
@@ -82,16 +85,16 @@ public class ManualGui implements IScreen {
         width = builder.getWidth();
         height = builder.getHeight();
 
-        if(lastPage != pageStack.peek().getLeft()){
+        if(lastPage != historyPageStack.peek().getLeft()){
             //Meaning that we should refresh it
             try {
-                content = MarkdownBuilder.build(pageStack.peek().getLeft(), width - 240);
+                content = MarkdownBuilder.build(historyPageStack.peek().getLeft(), width - 240);
                 content.setScrollRegion(new Rectangle(170,20,width-220,height-30));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            content.setVerticalOffset(pageStack.peek().getValue());
-            lastPage = pageStack.peek().getLeft();
+            content.setVerticalOffset(historyPageStack.peek().getValue());
+            lastPage = historyPageStack.peek().getLeft();
         }
 
         //Background
@@ -131,12 +134,22 @@ public class ManualGui implements IScreen {
 
         //Header
         GUIHelpers.drawRect(50, 0, width - 100, 20, HEADER_COLOR);
-        GUIHelpers.drawString(TextColor.BOLD.wrap("<-"), 60,5, BUTTON_COLOR);
+        GUIHelpers.drawString(TextColor.BOLD.wrap("<-"), 60, 5,
+                historyPageStack.size() != 1 ? BUTTON_COLOR : BUTTON_DISABLED_COLOR);
+        GUIHelpers.drawString(TextColor.BOLD.wrap("->"), 80, 5,
+                !futurePageStack.isEmpty() ? BUTTON_COLOR : BUTTON_DISABLED_COLOR);
     }
 
     public void pushContent(Identifier identifier){
-        if(!pageStack.peek().getLeft().equals(identifier)){
-            pageStack.push(MutablePair.of(identifier, 0d));
+        this.pushContent(identifier, 0d);
+    }
+
+    public void pushContent(Identifier identifier, double offset){
+        if(!historyPageStack.peek().getLeft().equals(identifier)){
+            historyPageStack.push(MutablePair.of(identifier, offset));
+            if(!futurePageStack.isEmpty() && identifier != futurePageStack.peek().getLeft()){
+                futurePageStack.clear();
+            }
         }
     }
 
@@ -148,10 +161,15 @@ public class ManualGui implements IScreen {
 
         if(event.action == ClientEvents.MouseAction.RELEASE){
             if(prevPageButton.contains(event.x, event.y)){
-                if(pageStack.size() > 1){
-                    pageStack.pop();
+                if(historyPageStack.size() > 1){
+                    futurePageStack.push(historyPageStack.pop());
                 }
                 return;
+            } else if(nextPageButton.contains(event.x, event.y)){
+                if(!futurePageStack.isEmpty()){
+                    pushContent(futurePageStack.peek().getLeft(), futurePageStack.peek().getRight());
+                    futurePageStack.pop();
+                }
             }
             sidebar.onMouseRelease(event);
             content.onMouseRelease(event);
@@ -162,6 +180,6 @@ public class ManualGui implements IScreen {
     public void onClientTick(){
         sidebar.handleScrollOnTicks();
         content.handleScrollOnTicks();
-        pageStack.peek().setValue(content.getVerticalOffset());
+        historyPageStack.peek().setValue(content.getVerticalOffset());
     }
 }
