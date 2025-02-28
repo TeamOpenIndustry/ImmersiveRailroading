@@ -105,8 +105,8 @@ public class MarkdownUrl extends MarkdownClickableElement {
 
     @Override
     public void click() {
-        if(this.destination.canLoad()){
-            ManualGui.currentOpeningManual.pushContent(this.destination);
+        if(this.destination.canLoad() && this.destination.getPath().endsWith(".md")){
+            ManualGui.pushContent(this.destination);
         } else if(this.destination.getDomain().equals("https")){
             MinecraftClient.getPlayer().sendMessage(PlayerMessage.url(this.destination.toString()));
         } else {

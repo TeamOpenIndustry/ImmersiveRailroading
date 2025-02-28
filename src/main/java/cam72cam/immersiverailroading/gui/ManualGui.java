@@ -21,12 +21,13 @@ import java.util.Stack;
 import static cam72cam.immersiverailroading.gui.markdown.Colors.*;
 
 public class ManualGui implements IScreen {
-    public static boolean isOpen;
-    public static ManualGui currentOpeningManual;
+    private static ManualGui currentOpeningManual;
     //                                        page     page's mainOffset
     private static final Stack<MutablePair<Identifier, Double>> historyPageStack = new Stack<>();
     private static final Stack<MutablePair<Identifier, Double>> futurePageStack = new Stack<>();
     private static final HashMap<Identifier, String> sidebarNameMap = new HashMap<>();
+    private static final Rectangle2D prevPageButton;
+    private static final Rectangle2D nextPageButton;
 
     private int width;
     private int height;
@@ -35,34 +36,29 @@ public class ManualGui implements IScreen {
     private MarkdownDocument content;
     private Identifier lastPage;
 
-    private Rectangle2D prevPageButton;
-    private Rectangle2D nextPageButton;
-
     static {
         historyPageStack.push(MutablePair.of(new Identifier("immersiverailroading:wiki/en_us/home.md"), 0d));
+        prevPageButton = new Rectangle(60,5,10,10);
+        nextPageButton = new Rectangle(80,5,10,10);
     }
 
     //Will be called every time the screen scale changes
     //So there's no need to update line break manually
     @Override
     public void init(IScreenBuilder screen) {
-        isOpen = true;
         currentOpeningManual = this;
         try {
             footer = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_footer.md"), screen.getWidth() - 120);
             int footerHeight = footer.getLineCount() * 10;
             sidebar = MarkdownBuilder.build(new Identifier(ImmersiveRailroading.MODID, "wiki/en_us/_sidebar.md"), screen.getWidth());
             sidebar.setScrollRegion(new Rectangle(50, 20, 120, screen.getHeight() - 20 - footerHeight));
-            //Maintain a map to replace url file name with pre-defined name
+            //Maintain a map to replace Markdown file name in url with pre-defined name
             sidebar.getOriginalLines().forEach(line ->
                     line.getElements().stream()
                             .filter(element -> element instanceof MarkdownUrl)
                             .forEach(element -> sidebarNameMap.put(((MarkdownUrl) element).destination, element.text)));
             content = MarkdownBuilder.build(historyPageStack.peek().getLeft(), screen.getWidth() - 240);
             content.setScrollRegion(new Rectangle(170,20,width - 220,height - 20 - footerHeight));
-
-            prevPageButton = new Rectangle(60,5,10,10);
-            nextPageButton = new Rectangle(80,5,10,10);
         } catch (IOException e) {
             throw new RuntimeException();
         }
@@ -75,7 +71,6 @@ public class ManualGui implements IScreen {
 
     @Override
     public void onClose() {
-        isOpen = false;
         currentOpeningManual = null;
     }
 
@@ -140,11 +135,15 @@ public class ManualGui implements IScreen {
                 !futurePageStack.isEmpty() ? BUTTON_COLOR : BUTTON_DISABLED_COLOR);
     }
 
-    public void pushContent(Identifier identifier){
-        this.pushContent(identifier, 0d);
+    public static void pushContent(Identifier identifier){
+        pushContent(identifier, 0d);
     }
 
-    public void pushContent(Identifier identifier, double offset){
+    public static void pushContent(Identifier identifier, double offset){
+        if(currentOpeningManual == null){
+            return;
+        }
+
         if(!historyPageStack.peek().getLeft().equals(identifier)){
             historyPageStack.push(MutablePair.of(identifier, offset));
             if(!futurePageStack.isEmpty() && identifier != futurePageStack.peek().getLeft()){
@@ -153,10 +152,15 @@ public class ManualGui implements IScreen {
         }
     }
 
-    public void onClick(ClientEvents.MouseGuiEvent event){
+    //Return true if the event is handled
+    public static boolean onClick(ClientEvents.MouseGuiEvent event){
+        if(currentOpeningManual == null){
+            return false;
+        }
+
         if(event.scroll != 0) {
-            sidebar.onScroll(event);
-            content.onScroll(event);
+            currentOpeningManual.sidebar.onScroll(event);
+            currentOpeningManual.content.onScroll(event);
         }
 
         if(event.action == ClientEvents.MouseAction.RELEASE){
@@ -164,22 +168,29 @@ public class ManualGui implements IScreen {
                 if(historyPageStack.size() > 1){
                     futurePageStack.push(historyPageStack.pop());
                 }
-                return;
+                //Terminates unnecessary call of sidebar&content's onMouseRelease as the mouse's pos cannot inside them
+                return true;
             } else if(nextPageButton.contains(event.x, event.y)){
                 if(!futurePageStack.isEmpty()){
                     pushContent(futurePageStack.peek().getLeft(), futurePageStack.peek().getRight());
                     futurePageStack.pop();
                 }
+                return true;
             }
-            sidebar.onMouseRelease(event);
-            content.onMouseRelease(event);
+            currentOpeningManual.sidebar.onMouseRelease(event);
+            currentOpeningManual.content.onMouseRelease(event);
         }
+        return true;
     }
 
     //For scroll
-    public void onClientTick(){
-        sidebar.handleScrollOnTicks();
-        content.handleScrollOnTicks();
-        historyPageStack.peek().setValue(content.getVerticalOffset());
+    public static void onClientTick(){
+        if(currentOpeningManual == null){
+            return;
+        }
+
+        currentOpeningManual.sidebar.handleScrollOnTicks();
+        currentOpeningManual.content.handleScrollOnTicks();
+        historyPageStack.peek().setValue(currentOpeningManual.content.getVerticalOffset());
     }
 }

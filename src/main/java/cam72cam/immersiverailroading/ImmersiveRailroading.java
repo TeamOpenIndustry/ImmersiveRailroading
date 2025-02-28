@@ -216,8 +216,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 					ManualHoverRenderer.updateMousePosition(evt);
 
-					if(ManualGui.isOpen && ManualGui.currentOpeningManual != null){
-						ManualGui.currentOpeningManual.onClick(evt);
+					if(ManualGui.onClick(evt)){
 						return true;
 					}
 
@@ -233,11 +232,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				});
 
 				ClientEvents.TICK.subscribe(GuiBuilder::onClientTick);
-				ClientEvents.TICK.subscribe(() -> {
-					if(ManualGui.isOpen && ManualGui.currentOpeningManual != null){
-						ManualGui.currentOpeningManual.onClientTick();
-					}
-				});
+				ClientEvents.TICK.subscribe(ManualGui::onClientTick);
 				ClientEvents.TICK.subscribe(EntityRollingStockDefinition.ControlSoundsDefinition::cleanupStoppedSounds);
 
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
