@@ -27,6 +27,7 @@ public class MarkdownDocument {
     public final Identifier page;
     protected final List<MarkdownLine> originalLines;
     protected final List<MarkdownLine> brokenLines;
+    private final HashMap<String, Integer> pageProperties;
     private Rectangle2D scrollRegion;
     private double scrollSpeed;
     private double verticalOffset;
@@ -42,6 +43,7 @@ public class MarkdownDocument {
         this.page = page;
         this.originalLines = new LinkedList<>();
         this.brokenLines = new LinkedList<>();
+        this.pageProperties = new HashMap<>();
     }
 
     /**
@@ -54,7 +56,7 @@ public class MarkdownDocument {
     }
 
     /**
-     * Provide an API for dynamic generated content
+     * API method for dynamic generated content
      * @param id The cached page need to be cleared
      */
     public static synchronized void refreshByID(Identifier id){
@@ -66,6 +68,24 @@ public class MarkdownDocument {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    /**
+     * API method for dynamic generated content, like control groups saved along a page
+     * @param name Name of the property
+     * @param state Set it's state to given value
+     */
+    public void changeProperty(String name, int state){
+        this.pageProperties.put(name, state);
+    }
+
+    /**
+     * API method for dynamic generated content, like control groups saved along a page
+     * @param name Name of the property
+     * @return The stored value, or -1 if not present
+     */
+    public int getProperty(String name){
+        return this.pageProperties.getOrDefault(name, -1);
     }
 
     /**
@@ -118,19 +138,20 @@ public class MarkdownDocument {
                 //These two element could be used multiply times in a line so they can't auto start new line, need manual translate
                 if(element instanceof MarkdownStyledText || element instanceof MarkdownUrl){
                     shouldStartANewLine = true;
-                }
-
-                if(element instanceof MarkdownStyledText){
-                    currWidth += GUIHelpers.getTextWidth(str) + (((MarkdownStyledText) element).hasCode() ? 2 : 0);
+                    currWidth += GUIHelpers.getTextWidth(str);
+                    if(element instanceof MarkdownStyledText && ((MarkdownStyledText) element).hasCode()){
+                        currWidth += 2;
+                    }
                 }
 
                 //Dynamically update clickable elements' pos(for now only url is included)
                 if(element instanceof MarkdownClickableElement){
-                    currWidth += GUIHelpers.getTextWidth(str);
-                    ((MarkdownClickableElement) element).section = new Rectangle((int) offset.x, (int) offset.y,
+                    MarkdownClickableElement clickable = (MarkdownClickableElement) element;
+                    clickable.section = new Rectangle((int) offset.x, (int) offset.y,
                             GUIHelpers.getTextWidth(str), 10);
 
-                    if(((MarkdownClickableElement) element).section.contains(ManualHoverRenderer.mouseX, ManualHoverRenderer.mouseY)){
+                    if(this.scrollRegion.contains(ManualHoverRenderer.mouseX, ManualHoverRenderer.mouseY)
+                           && clickable.section.contains(ManualHoverRenderer.mouseX, ManualHoverRenderer.mouseY)){
                         hoveredElement = (MarkdownClickableElement) element;
                     }
                 }
