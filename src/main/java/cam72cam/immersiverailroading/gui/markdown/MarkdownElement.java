@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.gui.markdown;
 
-import util.Matrix4;
+import cam72cam.mod.render.opengl.RenderState;
 
 /**
  * Abstract element class
@@ -26,5 +26,5 @@ public abstract class MarkdownElement {
     /**
      * Render the element and return its height
      */
-    public abstract int render(Matrix4 transform, int pageWidth);
+    public abstract int render(RenderState state, int pageWidth);
 }

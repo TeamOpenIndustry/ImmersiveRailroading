@@ -3,10 +3,10 @@ package cam72cam.immersiverailroading.gui.markdown;
 import cam72cam.immersiverailroading.gui.ManualGui;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.gui.helpers.GUIHelpers;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.text.TextColor;
-import util.Matrix4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,10 +96,10 @@ public class MarkdownUrl extends MarkdownClickableElement {
     }
 
     @Override
-    public int render(Matrix4 transform, int pageWidth) {
+    public int render(RenderState state, int pageWidth) {
         String str = this.apply();
-        GUIHelpers.drawString(str, 0, 0, DEFAULT_TEXT_COLOR, transform);
-        transform.translate(GUIHelpers.getTextWidth(str), 0, 0);
+        GUIHelpers.drawString(str, 0, 0, DEFAULT_TEXT_COLOR, state.model_view());
+        state.translate(GUIHelpers.getTextWidth(str), 0, 0);
         return 0;
     }
 

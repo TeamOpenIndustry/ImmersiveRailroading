@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.gui.markdown;
 
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
-import util.Matrix4;
+import cam72cam.mod.render.opengl.RenderState;
 
 import static cam72cam.immersiverailroading.gui.markdown.Colors.*;
 
@@ -41,12 +41,12 @@ public class MarkdownSplitLine extends MarkdownElement {
     }
 
     @Override
-    public int render(Matrix4 transform, int pageWidth) {
-        transform.translate(0, 10,0);
-        Vec3d offset = transform.apply(Vec3d.ZERO);
+    public int render(RenderState state, int pageWidth) {
+        state.translate(0, 10,0);
+        Vec3d offset = state.model_view().apply(Vec3d.ZERO);
         GUIHelpers.drawRect((int) offset.x, (int) offset.y, pageWidth, 2,  SPLIT_LINE_COLOR);
-        transform.translate(0, 2,0);
-        transform.translate(0, 10,0);
+        state.translate(0, 2,0);
+        state.translate(0, 10,0);
         return 22;
     }
 }

@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.gui.markdown;
 import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
-import util.Matrix4;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -90,11 +90,11 @@ public class MarkdownDocument {
 
     /**
      * Render this page and return the height
-     * @param matrix4 Transform matrix
+     * @param state Gui RenderState
      * @return Height of the page
      */
-    public int render(@Nonnull Matrix4 matrix4){
-        matrix4.translate(0, -verticalOffset, 0);
+    public int render(@Nonnull RenderState state){
+        state.translate(0, -verticalOffset, 0);
         int height = 0;
         boolean inTips = false;
         Vec3d offset;
@@ -105,10 +105,10 @@ public class MarkdownDocument {
             MarkdownLine line = lineIterator.next();
             int currWidth = 0;
             //Stores current matrix result
-            offset = matrix4.apply(Vec3d.ZERO);
+            offset = state.model_view().apply(Vec3d.ZERO);
             if(line.codeBlockStart){
                 //Let proxy class do it
-                height += MarkdownCodeBlock.render(matrix4, lineIterator, this, line);
+                height += MarkdownCodeBlock.render(state, lineIterator, this, line);
                 continue;
             }
 
@@ -130,8 +130,8 @@ public class MarkdownDocument {
 
             for(MarkdownElement element : line.elements){
                 //Show current matrix result
-                offset = matrix4.apply(Vec3d.ZERO);
-                height += element.render(matrix4, pageWidth);
+                offset = state.model_view().apply(Vec3d.ZERO);
+                height += element.render(state, pageWidth);
 
                 String str = element.apply();
 
@@ -156,9 +156,9 @@ public class MarkdownDocument {
                     }
                 }
             }
-            matrix4.translate(-currWidth, 0, 0);
+            state.translate(-currWidth, 0, 0);
             if(shouldStartANewLine){
-                matrix4.translate(0, 10, 0);
+                state.translate(0, 10, 0);
                 height += 10;
             }
         }

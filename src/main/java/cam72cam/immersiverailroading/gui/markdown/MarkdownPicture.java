@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.gui.markdown;
 
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
-import util.Matrix4;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -40,11 +40,11 @@ public class MarkdownPicture extends MarkdownElement {
     }
 
     @Override
-    public int render(Matrix4 transform, int pageWidth) {
-        Vec3d offset = transform.apply(Vec3d.ZERO);
+    public int render(RenderState state, int pageWidth) {
+        Vec3d offset = state.model_view().apply(Vec3d.ZERO);
         int picHeight = (int) (pageWidth * this.ratio);
         GUIHelpers.texturedRect(this.picture, (int) offset.x, (int) offset.y, pageWidth, picHeight);
-        transform.translate(0, picHeight, 0);
+        state.translate(0, picHeight, 0);
         return picHeight;
     }
 }

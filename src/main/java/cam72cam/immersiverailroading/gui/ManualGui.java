@@ -98,8 +98,8 @@ public class ManualGui implements IScreen {
         GUIHelpers.drawRect(50, 0, 120, height, SIDEBAR_COLOR);
 
         //Markdown
-        sidebar.render(state.model_view().copy().translate(57, 27, 0));
-        content.render(state.model_view().copy().translate(180, 30, 0));
+        sidebar.render(state.clone().translate(57, 27, 0));
+        content.render(state.clone().translate(180, 30, 0));
 
         //Tooltip
         //Currently only MarkdownUrl inherits MarkdownClickableElement, need change when more types are added
