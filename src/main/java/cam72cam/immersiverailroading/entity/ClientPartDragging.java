@@ -180,6 +180,10 @@ public class ClientPartDragging {
             Double min = null;
 
             for (EntityRollingStock stock : world.getEntities(EntityRollingStock.class)) {
+                if(stock instanceof EntityBuildableRollingStock && !((EntityBuildableRollingStock) stock).isBuilt()){
+                    continue;
+                }
+
                 if (stock.getPosition().distanceToSquared(player.getPosition()) > stock.getDefinition().getLength(stock.gauge) * stock.getDefinition().getLength(stock.gauge)) {
                     continue;
                 }
