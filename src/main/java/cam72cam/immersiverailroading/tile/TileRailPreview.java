@@ -4,11 +4,13 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -71,19 +73,33 @@ public class TileRailPreview extends BlockEntityTickable {
 		this.customInfo = info;
 		if (customInfo != null) {
 			RailSettings settings = RailSettings.from(item);
-			double lx = Math.abs(customInfo.placementPosition.x - placementInfo.placementPosition.x);
-			double lz = Math.abs(customInfo.placementPosition.z - placementInfo.placementPosition.z);
-			switch (settings.type) {
-				case TURN:
-					settings = settings.with(b -> {
-						double length = (lx + lz )/2+1;
-						length *= 90/b.degrees;
-						b.length = (int) Math.round(length);
-					});
-					break;
-				case STRAIGHT:
-				case SLOPE:
-					settings = settings.with(b -> b.length = (int) Math.round(Math.max(lx, lz) + 1));
+			float yaw = settings.type == TrackItems.TURN ? placementInfo.yaw / 2 : placementInfo.yaw;
+			if(settings.type ==TrackItems.TURN
+					|| settings.type == TrackItems.STRAIGHT
+					|| settings.type == TrackItems.SLOPE){
+				Vec3d placeOffset = new Vec3d(
+						customInfo.placementPosition.x - placementInfo.placementPosition.x,
+						0,
+						customInfo.placementPosition.z - placementInfo.placementPosition.z
+				);
+				Vec3d unit = new Vec3d(0, 0, 1).rotateYaw(yaw);
+				int shadowLength = (int) Math.round(VecUtil.dotMultiply(placeOffset, unit));
+				int length;
+
+				switch (settings.type) {
+					case TURN:
+						double sin = Math.sin(Math.toRadians(settings.degrees / 2));
+						length = sin != 0d
+								 ? Math.max(0, (int) ((shadowLength / 2d) / sin)) + 1
+								 : 1;
+						break;
+					case STRAIGHT:
+					case SLOPE:
+					default:
+						length = Math.max(0, shadowLength) + 1;
+						break;
+				}
+				settings = settings.with(b -> b.length = length);
 			}
 
 			settings.write(item);

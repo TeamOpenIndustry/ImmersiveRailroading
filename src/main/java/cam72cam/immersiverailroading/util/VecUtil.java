@@ -61,4 +61,8 @@ public class VecUtil {
 	public static Vec3d between(Vec3d front, Vec3d rear) {
 		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
 	}
+
+	public static double dotMultiply(Vec3d a, Vec3d b){
+		return a.x * b.x + a.y * b.y + a.z * b.z;
+	}
 }
