@@ -69,45 +69,45 @@ public class TileRailPreview extends BlockEntityTickable {
 		info = null;
 	}
 
-	public void setCustomInfo(PlacementInfo info) {
-		this.customInfo = info;
-		if (customInfo != null) {
-			RailSettings settings = RailSettings.from(item);
-			float yaw = settings.type == TrackItems.TURN ? placementInfo.yaw / 2 : placementInfo.yaw;
-			if(settings.type ==TrackItems.TURN
-					|| settings.type == TrackItems.STRAIGHT
-					|| settings.type == TrackItems.SLOPE){
-				Vec3d placeOffset = new Vec3d(
-						customInfo.placementPosition.x - placementInfo.placementPosition.x,
-						0,
-						customInfo.placementPosition.z - placementInfo.placementPosition.z
-				);
-				Vec3d unit = new Vec3d(0, 0, 1).rotateYaw(yaw);
-				int shadowLength = (int) Math.round(VecUtil.dotMultiply(placeOffset, unit));
-				int length;
+    public void setCustomInfo(PlacementInfo info) {
+        this.customInfo = info;
+        if (customInfo != null) {
+            RailSettings settings = RailSettings.from(item);
+            float yaw = settings.type == TrackItems.TURN ? placementInfo.yaw / 2 : placementInfo.yaw;
+            if(settings.type ==TrackItems.TURN
+                    || settings.type == TrackItems.STRAIGHT
+                    || settings.type == TrackItems.SLOPE){
+                Vec3d placeOffset = new Vec3d(
+                        customInfo.placementPosition.x - placementInfo.placementPosition.x,
+                        0,
+                        customInfo.placementPosition.z - placementInfo.placementPosition.z
+                );
+                Vec3d unit = new Vec3d(0, 0, 1).rotateYaw(yaw);
+                int shadowLength = (int) Math.round(VecUtil.dotMultiply(placeOffset, unit));
+                int length;
 
-				switch (settings.type) {
-					case TURN:
-						double sin = Math.sin(Math.toRadians(settings.degrees / 2));
-						length = sin != 0d
-								 ? Math.max(0, (int) ((shadowLength / 2d) / sin)) + 1
-								 : 1;
-						break;
-					case STRAIGHT:
-					case SLOPE:
-					default:
-						length = Math.max(0, shadowLength) + 1;
-						break;
-				}
-				settings = settings.with(b -> b.length = length);
-			}
+                switch (settings.type) {
+                    case TURN:
+                        double sin = Math.sin(Math.toRadians(settings.degrees / 2));
+                        length = sin != 0d
+                                 ? Math.max(0, (int) ((shadowLength / 2d) / sin)) + 1
+                                 : 1;
+                        break;
+                    case STRAIGHT:
+                    case SLOPE:
+                    default:
+                        length = Math.max(0, shadowLength) + 1;
+                        break;
+                }
+                settings = settings.with(b -> b.length = length);
+            }
 
-			settings.write(item);
-		}
-		this.markDirty();
-	}
-	
-	public void setPlacementInfo(PlacementInfo info) {
+            settings.write(item);
+        }
+        this.markDirty();
+    }
+    
+    public void setPlacementInfo(PlacementInfo info) {
 		this.placementInfo = info;
 		this.markDirty();
 	}

@@ -63,7 +63,15 @@ public class ItemGoldenSpike extends CustomItem {
 					if (tr.isAboveRails()) {
 						tepos = tepos.down();
 					}
-					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), hit.subtract(0, hit.y, 0).add(pos).subtract(tepos)));
+					//If x or z < 0 there are some weird things...
+					Vec3d finalPos = hit.subtract(0, hit.y, 0).add(pos).subtract(tepos);
+					if(finalPos.x < 0){
+						finalPos = finalPos.add(1,0,0);
+					}
+					if(finalPos.z < 0){
+						finalPos = finalPos.add(0,0,1);
+					}
+					tr.setCustomInfo(new PlacementInfo(tr.getItem(), player.getYawHead(), finalPos));
 				}
 			}
 		}
