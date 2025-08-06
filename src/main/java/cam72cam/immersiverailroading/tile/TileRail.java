@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
@@ -49,7 +50,7 @@ public class TileRail extends TileRailBase {
 	
 	@Override
 	public double getRenderDistance() {
-		return 8*32;
+		return ConfigGraphics.TrackRenderDistance;
 	}
 
 	public void setSwitchState(SwitchState state) {
