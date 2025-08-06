@@ -218,7 +218,7 @@ public class TrackGui implements IScreen {
 		//height = 20;
 		//xtop = GUIHelpers.getScreenWidth() / 2 - width;
 		//ytop = -GUIHelpers.getScreenHeight() / 4;
-		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 6);
+		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 5);
 
 		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
 				DefinitionManager.getTrack(settings.track),
@@ -286,9 +286,8 @@ public class TrackGui implements IScreen {
 				settings.isPreview = isPreviewCB.isChecked();
 			}
 		};
-		ytop += height;
 
-		isGradeCrossingCB = new CheckBox(screen, xtop+2, ytop+2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing) {
+		isGradeCrossingCB = new CheckBox(screen, xtop+102, ytop+2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.isGradeCrossing = isGradeCrossingCB.isChecked();
