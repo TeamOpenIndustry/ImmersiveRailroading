@@ -37,11 +37,11 @@ public enum Stat {
                     Speed speed = ((EntityMoveableRollingStock) stock).getCurrentSpeed();
                     switch (ConfigGraphics.speedUnit) {
                         case mph:
-                            return String.format("%.2f", Math.abs(speed.imperial()));
+                            return String.format("%.0f", Math.abs(speed.imperial()));
                         case ms:
-                            return String.format("%.2f", Math.abs(speed.metersPerSecond()));
+                            return String.format("%.0f", Math.abs(speed.metersPerSecond()));
                         case kmh:
-                            return String.format("%.2f", Math.abs(speed.metric()));
+                            return String.format("%.0f", Math.abs(speed.metric()));
                     }
                 }
                 return "";
