@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
@@ -110,7 +111,9 @@ public class TrackGui implements IScreen {
 			}
 			int max = 1000;
 			if (settings.type.isTable()) {
-				max = BuilderTurnTable.maxLength(settings.gauge);
+				max = settings.type == TrackItems.TURNTABLE
+					  ? BuilderTurnTable.maxLength(settings.gauge)
+					  : BuilderTransferTable.maxLength(settings.gauge);
 			}
 			if (val > 0 && val <= max) {
 				settings.length = val;
@@ -129,7 +132,10 @@ public class TrackGui implements IScreen {
 				settings.gauge = gauge;
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
 				if (settings.type.isTable()) {
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), BuilderTurnTable.maxLength(settings.gauge))); // revalidate
+					int max = settings.type == TrackItems.TURNTABLE
+							  ? BuilderTurnTable.maxLength(settings.gauge)
+							  : BuilderTransferTable.maxLength(settings.gauge);
+					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
 				}
 			}
 		};
@@ -155,7 +161,10 @@ public class TrackGui implements IScreen {
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
 				if (settings.type.isTable()) {
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), BuilderTurnTable.maxLength(settings.gauge))); // revalidate
+					int max = settings.type == TrackItems.TURNTABLE
+							  ? BuilderTurnTable.maxLength(settings.gauge)
+							  : BuilderTransferTable.maxLength(settings.gauge);
+					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
@@ -169,7 +178,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		//Transfer table doesn't have this property so we can have them overlapped
+		//Transfer table doesn't have these property so we can have them overlapped
 		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
 			@Override
 			public void onClick(Player.Hand hand) {

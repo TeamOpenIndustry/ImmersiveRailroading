@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Rotation;
@@ -13,10 +14,12 @@ import java.util.List;
 
 public class BuilderTransferTable extends BuilderBase {
     public BuilderTransferTable(RailInfo info, World world, Vec3i pos) {
-        super(info.withSettings(b -> b.length = Math.min(info.settings.length, BuilderTurnTable.maxLength(info.settings.gauge))), world, pos);
+        super(info.withSettings(b -> b.length = Math.min(info.settings.length, BuilderTransferTable.maxLength(info.settings.gauge))), world, pos);
 
         int vertMin = -info.settings.length / 2;
-        int vertMax = info.settings.length % 2 == 0 ? info.settings.length/2 : info.settings.length/2 + 1;
+        int vertMax = info.settings.length % 2 == 0
+                      ? info.settings.length/2
+                      : info.settings.length/2 + 1;
 
         int halfGauge = (int) Math.floor((info.settings.gauge.value() * 1.1 + 0.5) / 2);
         int width = info.settings.transfertableEntrySpacing * (info.settings.transfertableEntryCount - 1) + halfGauge + 2;
@@ -52,9 +55,11 @@ public class BuilderTransferTable extends BuilderBase {
                 tracks.add(gag);
             }
         }
+    }
 
-//        this.first = new Vec3i(info.placementInfo.placementPosition);
-//        this.rot = Rotation.from(info.placementInfo.facing().getOpposite());
+    @Override
+    public List<TrackBase> getTracksForRender() {
+        return this.tracks;
     }
 
     @Override
@@ -62,17 +67,19 @@ public class BuilderTransferTable extends BuilderBase {
         List<VecYawPitch> list = new ArrayList<>();
 
         if (info.itemHeld) {
-            for (int i = 0; i < info.settings.length; i += info.settings.length - 1) {
-                for (int j = 0; j < info.settings.transfertableEntryCount; j++) {
-                    Vec3i vec = new Vec3i(-j * info.settings.transfertableEntrySpacing, 1, i)
-                            .rotate(Rotation.from(info.placementInfo.facing()));
-                    list.add(new VecYawPitch(vec.x, vec.y, vec.z, info.placementInfo.facing().getAngle()));
-                }
+            for (int i = 0; i < info.settings.transfertableEntryCount; i++) {
+                Vec3i head = new Vec3i(-i * info.settings.transfertableEntrySpacing, 1, 0)
+                        .rotate(Rotation.from(info.placementInfo.facing()));
+                list.add(new VecYawPitch(head.x, head.y, head.z, info.placementInfo.facing().getAngle()));
+
+                Vec3i tail = new Vec3i(-i * info.settings.transfertableEntrySpacing, 1, info.settings.length - 1)
+                        .rotate(Rotation.from(info.placementInfo.facing()));
+                list.add(new VecYawPitch(tail.x, tail.y, tail.z, info.placementInfo.facing().getAngle()));
             }
         }
 
-        Vec3d vec = new Vec3d(-info.tablePos, 1, info.settings.length / 2d - 0.5).rotateYaw(-info.placementInfo.facing().getAngle() + 180);
-        list.add(new VecYawPitch(vec.x, vec.y, vec.z, info.placementInfo.facing().getAngle(), 0, info.settings.length, "RAIL_RIGHT", "RAIL_LEFT"));
+        Vec3d center = new Vec3d(-info.tablePos, 1, info.settings.length / 2d - 0.5).rotateYaw(-info.placementInfo.facing().getAngle() + 180);
+        list.add(new VecYawPitch(center.x, center.y, center.z, info.placementInfo.facing().getAngle(), 0, info.settings.length, "RAIL_RIGHT", "RAIL_LEFT"));
         return list;
     }
 
@@ -85,7 +92,6 @@ public class BuilderTransferTable extends BuilderBase {
     }
 
     public int costBed() {
-        //TODO suit transfer table
         return (int)Math.ceil(this.tracks.size()/2.0 * 0.1 * Config.ConfigBalance.BedCostMultiplier);
     }
 
@@ -102,8 +108,7 @@ public class BuilderTransferTable extends BuilderBase {
         return (int)Math.ceil(!this.info.settings.railBedFill.isEmpty() ? fillCount : 0);
     }
 
-    @Override
-    public List<TrackBase> getTracksForRender() {
-        return this.tracks;
+    public static int maxLength(Gauge gauge){
+        return (int)(60 * gauge.scale());
     }
 }
