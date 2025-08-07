@@ -11,6 +11,7 @@ public enum TrackItems {
 	TURN,
 	SWITCH,
 	TURNTABLE,
+	TRANSFERTABLE,
 	CUSTOM,
 	;
 	
@@ -55,6 +56,16 @@ public enum TrackItems {
 		switch (this) {
 			case TURN:
 			case SWITCH:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean shouldRestrictLength() {
+		switch (this){
+			case TURNTABLE:
+			case TRANSFERTABLE:
 				return true;
 			default:
 				return false;

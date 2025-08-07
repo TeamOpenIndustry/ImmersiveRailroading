@@ -33,6 +33,8 @@ public enum GuiText {
 	TRACK_POSITION("track.position"),
 	TRACK_SMOOTHING("track.smoothing"),
 	TRACK_DIRECTION("track.direction"),
+	TRACK_TRANSFER_TABLE_ENTRY_COUNT("track.transfer_table_entry_count"),
+	TRACK_TRANSFER_TABLE_ENTRY_SPACING("track.transfer_table_entry_spacing"),
 	TRACK_PLACE_BLUEPRINT_TRUE("track.place_blueprint_true"),
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
 	

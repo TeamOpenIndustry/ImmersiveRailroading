@@ -66,13 +66,15 @@ public class RailInfo {
 				this.settings.track,
 				this.settings.smoothing,
 				this.settings.isGradeCrossing,
+				this.settings.transfertableEntryCount,
+				this.settings.transfertableEntrySpacing,
 				this.switchState,
 				this.switchForced,
 				this.tablePos,
 				this.placementInfo.yaw,
 				this.placementInfo.direction,
 				this.customInfo.yaw,
-				this.customInfo.direction,
+				this.customInfo.direction
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.posType != TrackPositionType.FIXED) {
@@ -186,6 +188,8 @@ public class RailInfo {
 			return new BuilderTurnTable(this, world, pos);
 		case CUSTOM:
 			return new BuilderCubicCurve(this, world, pos);
+		case TRANSFERTABLE:
+			return new BuilderTransferTable(this, world, pos);
 		}
 		return null;
 	}
@@ -402,7 +406,7 @@ public class RailInfo {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
 			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}

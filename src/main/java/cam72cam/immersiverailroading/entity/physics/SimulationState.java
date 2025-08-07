@@ -348,25 +348,15 @@ public class SimulationState {
             return;
         }
 
-        boolean isTurnTable = false;
+        boolean isTable = false;
         if (Math.abs(distance) < 0.0001) {
-
             TileRailBase frontBase = trackFront instanceof TileRailBase ? (TileRailBase) trackFront : null;
             TileRailBase rearBase  = trackRear instanceof TileRailBase ? (TileRailBase) trackRear : null;
-            isTurnTable = frontBase != null &&
-                    (
-                            //frontBase.getTicksExisted() < 100 ||
-                                    frontBase.getParentTile() != null &&
-                                            frontBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
-                    );
-            isTurnTable = isTurnTable || rearBase != null &&
-                    (
-                            //rearBase.getTicksExisted() < 100 ||
-                                    rearBase.getParentTile() != null &&
-                                            rearBase.getParentTile().info.settings.type == TrackItems.TURNTABLE
-                    );
-
-            if (!isTurnTable) {
+            isTable = checkTileType(frontBase, TrackItems.TURNTABLE)
+                      || checkTileType(rearBase, TrackItems.TURNTABLE)
+                      || checkTileType(frontBase, TrackItems.TRANSFERTABLE)
+                      || checkTileType(rearBase, TrackItems.TRANSFERTABLE);
+            if (!isTable) {
                 return;
             }
         }
@@ -402,7 +392,7 @@ public class SimulationState {
             yawRear += 180;
         }
 
-        if (isTurnTable) {
+        if (isTable) {
             yawFront = yaw;
             yawRear = yaw;
         }
@@ -445,5 +435,11 @@ public class SimulationState {
         brakeAdhesionNewtons *= Config.ConfigBalance.brakeMultiplier;
 
         return rollingResistanceNewtons + blockResistanceNewtons + brakeAdhesionNewtons + directResistance + startingFriction;
+    }
+
+    private boolean checkTileType(TileRailBase base, TrackItems type) {
+        return base != null
+                && base.getParentTile() != null
+                && base.getParentTile().info.settings.type == type;
     }
 }
