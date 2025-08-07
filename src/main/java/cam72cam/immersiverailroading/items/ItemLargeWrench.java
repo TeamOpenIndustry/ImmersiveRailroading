@@ -14,7 +14,6 @@ import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
-import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
@@ -66,7 +65,6 @@ public class ItemLargeWrench extends CustomItem {
 				}
 				if (world.isServer) {
 					while (te != null) {
-						System.out.println(te);
 						TileRail parent = te.getParentTile();
 						if (parent != null) {
 							if (parent.info.settings.type == TrackItems.TURNTABLE) {
@@ -76,13 +74,7 @@ public class ItemLargeWrench extends CustomItem {
 												hit.add(pos))) + parent.info.placementInfo.yaw);
 								break;
 							} else if (parent.info.settings.type == TrackItems.TRANSFERTABLE){
-								int halfGauge = (int) Math.floor((parent.info.settings.gauge.value() * 1.1 + 0.5) / 2);
-								int width = parent.info.settings.transfertableEntrySpacing
-										* (parent.info.settings.transfertableEntryCount - 1) + halfGauge + 2;
-								Vec3i mainOffset = new Vec3i(-width / 2, 1, parent.info.settings.length/2);
-								mainOffset = mainOffset.rotate(Rotation.from(parent.info.placementInfo.facing()));
-
-								parent.setTransferTablePosition(pos.subtract(parent.getPos().subtract(mainOffset)).rotate(Rotation.from(parent.info.placementInfo.facing().getOpposite())));
+								parent.clickOnTransferTable(parent, pos);
 								break;
 							}
 						}

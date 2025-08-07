@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Rotation;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
@@ -91,54 +92,58 @@ public class TileRail extends TileRailBase {
 		this.tableIndex = dest;
 	}
 
-	public void setTransferTablePosition(Vec3i positionClicked){
-		this.tableIndex = Math.max(0,
-								   Math.min(info.settings.transfertableEntryCount - 1,
-											Math.round((float) Math.abs(positionClicked.x) / this.info.settings.transfertableEntrySpacing)));
+	public void clickOnTransferTable(TileRail parent, Vec3i pos){
+		int halfGauge = (int) Math.floor((parent.info.settings.gauge.value() * 1.1 + 0.5) / 2);
+		int width = parent.info.settings.transfertableEntrySpacing * (parent.info.settings.transfertableEntryCount - 1) + halfGauge + 2;
+		Vec3i mainOffset = new Vec3i(-width / 2, 1, parent.info.settings.length/2)
+				             .rotate(Rotation.from(parent.info.placementInfo.facing()));
+
+		Vec3i offset = pos.subtract(parent.getPos().subtract(mainOffset)).rotate(Rotation.from(parent.info.placementInfo.facing().getOpposite()));
+
+		this.tableIndex = Math.max(0, Math.min(info.settings.transfertableEntryCount - 1, Math.round(Math.abs((float) offset.x) / this.info.settings.transfertableEntrySpacing)));
 	}
 
 	@Override
 	public void update() {
 		super.update();
 
-		if (getWorld().isServer && info != null && info.settings.type == TrackItems.TURNTABLE) {
-			int slotsPerCircle = Config.ConfigBalance.AnglePlacementSegmentation * 4;
-			float desiredPosition = (360f / slotsPerCircle) * tableIndex;
-			double speed = Config.ConfigBalance.TurnTableSpeed;
-			if (desiredPosition != info.tablePos) {
-				if (Math.abs(desiredPosition - info.tablePos) < speed) {
-					info = info.with(b -> b.tablePos = desiredPosition);
-				} else {
-					// Again, this math is horrific and is probably wayyyyy overcomplicated
-					double dp = MathUtil.deltaAngle(info.tablePos + speed, desiredPosition);
-					double dn = MathUtil.deltaAngle(info.tablePos - speed, desiredPosition);
-					dp = MathUtil.deltaAngle(0, dp + 360);
-					dn = MathUtil.deltaAngle(0, dn + 360);
-					double delta = Math.abs(dp) <
-							Math.abs(dn) ?
-							speed : -speed;
-					info = info.with(b -> b.tablePos = (((b.tablePos + delta) % 360) + 360) % 360);
+		if(getWorld().isServer && info != null && info.settings.type.isTable()){
+			boolean shouldUpdate = false;
+			if (info.settings.type == TrackItems.TURNTABLE) {
+				int slotsPerCircle = Config.ConfigBalance.AnglePlacementSegmentation * 4;
+				float desiredPosition = (360f / slotsPerCircle) * tableIndex;
+				double speed = Config.ConfigBalance.TurnTableSpeed;
+				if (desiredPosition != info.tablePos) {
+					if (Math.abs(desiredPosition - info.tablePos) < speed) {
+						info = info.with(b -> b.tablePos = desiredPosition);
+					} else {
+						// Again, this math is horrific and is probably wayyyyy overcomplicated
+						double dp = MathUtil.deltaAngle(info.tablePos + speed, desiredPosition);
+						double dn = MathUtil.deltaAngle(info.tablePos - speed, desiredPosition);
+						dp = MathUtil.deltaAngle(0, dp + 360);
+						dn = MathUtil.deltaAngle(0, dn + 360);
+						double delta = Math.abs(dp) < Math.abs(dn) ? speed : -speed;
+						info = info.with(b -> b.tablePos = (((b.tablePos + delta) % 360) + 360) % 360);
+					}
+					shouldUpdate = true;
 				}
-				this.markDirty();
-				List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);
-				for(EntityCoupleableRollingStock stock : ents) {
-					stock.states.forEach(state -> state.dirty = true);
-					Simulation.forceQuickUpdates = true;
+			} else {
+				//Must be transfer table
+				float desiredPosition = tableIndex * info.settings.transfertableEntrySpacing;
+				double speed = Config.ConfigBalance.TransferTableSpeed;
+				if (desiredPosition != info.tablePos) {
+					if (Math.abs(desiredPosition - info.tablePos) < speed * 2) {
+						info = info.with(b -> b.tablePos = desiredPosition);
+					} else {
+						double delta = desiredPosition - info.tablePos < 0 ? -speed : speed;
+						info = info.with(b -> b.tablePos += delta);
+					}
+					shouldUpdate = true;
 				}
 			}
-		}
-		if (getWorld().isServer && info != null && info.settings.type == TrackItems.TRANSFERTABLE) {
-			float desiredPosition = tableIndex * info.settings.transfertableEntrySpacing;
-			double speed = Config.ConfigBalance.TransferTableSpeed;
-			if (desiredPosition != info.tablePos) {
-				if (Math.abs(desiredPosition - info.tablePos) < speed * 2) {
-					info = info.with(b -> b.tablePos = desiredPosition);
-				} else {
-					double delta = desiredPosition - info.tablePos < 0 ? -speed : speed;
-					info = info.with(b -> b.tablePos += delta);
-				}
+			if(shouldUpdate){
 				this.markDirty();
-				int maxRange = (int) (Math.max(info.settings.length, info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount) * 0.6);
+				int maxRange = Math.max(info.settings.length, info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount);
 				List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < maxRange, EntityCoupleableRollingStock.class);
 				for(EntityCoupleableRollingStock stock : ents) {
 					stock.states.forEach(state -> state.dirty = true);
