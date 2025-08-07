@@ -11,8 +11,8 @@ public enum TrackItems {
 	TURN,
 	SWITCH,
 	TURNTABLE,
-	TRANSFERTABLE,
 	CUSTOM,
+	TRANSFERTABLE,
 	;
 	
 	@Override
