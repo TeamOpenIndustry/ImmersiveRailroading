@@ -62,7 +62,7 @@ public enum TrackItems {
 		}
 	}
 
-	public boolean shouldRestrictLength() {
+	public boolean isTable() {
 		switch (this){
 			case TURNTABLE:
 			case TRANSFERTABLE:

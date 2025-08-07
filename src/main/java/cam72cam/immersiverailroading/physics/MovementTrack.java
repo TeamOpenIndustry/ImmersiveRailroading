@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.track.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.mod.math.Rotation;
 import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -128,6 +129,44 @@ public class MovementTrack {
 			Vec3d forward = center.add(VecUtil.fromWrongYaw(fromCenter, angle));
 			Vec3d backward = center.add(VecUtil.fromWrongYaw(fromCenter, angle + 180));
 			
+			if (forward.distanceToSquared(currentPosition) < backward.distanceToSquared(currentPosition)) {
+				return forward;
+			} else {
+				return backward;
+			}
+		} else if (rail.info.settings.type == TrackItems.TRANSFERTABLE) {
+			double tablePos = rail.getParentTile().info.tablePos;
+
+			int halfGauge = (int) Math.floor((rail.info.settings.gauge.value() * 1.1 + 0.5) / 2);
+			int width = rail.info.settings.transfertableEntrySpacing * (rail.info.settings.transfertableEntryCount - 1) + halfGauge + 2;
+			Vec3i mainOffset = new Vec3i(-width / 2, 1, rail.info.settings.length/2);
+			Vec3d start = new Vec3d(rail.getPos().subtract(mainOffset.rotate(Rotation.from(rail.info.placementInfo.facing()))));
+			double xValue;
+			switch (rail.info.placementInfo.facing()){
+				case SOUTH:
+					xValue = -tablePos - rail.info.placementInfo.placementPosition.x % 1 - 1;
+					break;
+				case NORTH:
+					xValue = -tablePos + rail.info.placementInfo.placementPosition.x % 1;
+					break;
+				case EAST:
+					xValue = -tablePos + rail.info.placementInfo.placementPosition.z % 1;
+					break;
+				case WEST:
+					xValue = -tablePos - rail.info.placementInfo.placementPosition.z % 1 - 1;
+					break;
+				default:
+					//WTH
+					return null;
+			}
+			start = start.add(new Vec3d(xValue,  2 + heightOffset, rail.info.settings.length / 2).rotateYaw(
+					-rail.info.placementInfo.facing().getAngle() + 180));
+			currentPosition = currentPosition.add(delta);
+
+			double fromCenter = currentPosition.distanceTo(start);
+
+			Vec3d forward = start.add(VecUtil.fromWrongYaw(fromCenter, -rail.info.placementInfo.facing().getAngle() + 180));
+			Vec3d backward = start.add(VecUtil.fromWrongYaw(fromCenter, -rail.info.placementInfo.facing().getAngle()));
 			if (forward.distanceToSquared(currentPosition) < backward.distanceToSquared(currentPosition)) {
 				return forward;
 			} else {

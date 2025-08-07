@@ -41,7 +41,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		if (info.settings.type == TrackItems.CROSSING) {
 			scale = 0.95 / 3;
 		}
-		if (info.settings.type == TrackItems.TURNTABLE) {
+		if (info.settings.type.isTable()) {
 			scale *= 0.25;
 		}
 		state.scale(-scale, -scale * 2, scale);

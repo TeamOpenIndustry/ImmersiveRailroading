@@ -109,7 +109,7 @@ public class TrackGui implements IScreen {
 				return false;
 			}
 			int max = 1000;
-			if (settings.type.shouldRestrictLength()) {
+			if (settings.type.isTable()) {
 				max = BuilderTurnTable.maxLength(settings.gauge);
 			}
 			if (val > 0 && val <= max) {
@@ -128,7 +128,7 @@ public class TrackGui implements IScreen {
 			public void onClick(Gauge gauge) {
 				settings.gauge = gauge;
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
-				if (settings.type.shouldRestrictLength()) {
+				if (settings.type.isTable()) {
 					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), BuilderTurnTable.maxLength(settings.gauge))); // revalidate
 				}
 			}
@@ -154,7 +154,7 @@ public class TrackGui implements IScreen {
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
-				if (settings.type.shouldRestrictLength()) {
+				if (settings.type.isTable()) {
 					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), BuilderTurnTable.maxLength(settings.gauge))); // revalidate
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
@@ -457,7 +457,7 @@ public class TrackGui implements IScreen {
 		double tablePos = settings.type == TrackItems.TURNTABLE
 						  ? (frame / 2.0) % 360
 						  : settings.type == TrackItems.TRANSFERTABLE
-							? (frame / 2.0) % settings.transfertableEntrySpacing * (settings.transfertableEntryCount - 1)
+							? (frame / 10.0) % settings.transfertableEntrySpacing * (settings.transfertableEntryCount - 1)
 							: 0;
 		RailInfo info = new RailInfo(
 				settings.immutable().with(b -> {
@@ -465,7 +465,7 @@ public class TrackGui implements IScreen {
 					if (length < 5) {
 						length = 5;
 					}
-					if (settings.type == TrackItems.TURNTABLE) {
+					if (settings.type.isTable()) {
 						length = Math.min(25, Math.max(10, length));
 					}
 					b.length = length;
@@ -475,7 +475,7 @@ public class TrackGui implements IScreen {
 
 		int length = info.settings.length;
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;
-		if (settings.type == TrackItems.TURNTABLE) {
+		if (settings.type.isTable()) {
 			scale /= 2;
 		}
 

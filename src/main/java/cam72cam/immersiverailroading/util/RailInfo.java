@@ -66,8 +66,6 @@ public class RailInfo {
 				this.settings.track,
 				this.settings.smoothing,
 				this.settings.isGradeCrossing,
-				this.settings.transfertableEntryCount,
-				this.settings.transfertableEntrySpacing,
 				this.switchState,
 				this.switchForced,
 				this.tablePos,
@@ -88,6 +86,12 @@ public class RailInfo {
 		}
 		if (settings.type == TrackItems.TURNTABLE) {
 			id += Config.ConfigBalance.AnglePlacementSegmentation;
+		}
+		if (settings.type == TrackItems.TRANSFERTABLE) {
+			id += this.settings.transfertableEntryCount;
+			id += this.settings.transfertableEntrySpacing;
+		}
+		if (settings.type.isTable()) {
 			id += this.itemHeld;
 		}
 		return id;
@@ -186,10 +190,10 @@ public class RailInfo {
 			return new BuilderSwitch(this, world, pos);
 		case TURNTABLE:
 			return new BuilderTurnTable(this, world, pos);
-		case CUSTOM:
-			return new BuilderCubicCurve(this, world, pos);
 		case TRANSFERTABLE:
 			return new BuilderTransferTable(this, world, pos);
+		case CUSTOM:
+			return new BuilderCubicCurve(this, world, pos);
 		}
 		return null;
 	}

@@ -60,7 +60,7 @@ public class TileRail extends TileRailBase {
 		}
 	}
 
-	public void setTablePosition(float angle) {
+	public void setTurnTablePosition(float angle) {
 
 		angle = ((angle % 360) + 360) % 360;
 		int slotsPerCircle = Config.ConfigBalance.AnglePlacementSegmentation * 4;
@@ -87,6 +87,12 @@ public class TileRail extends TileRailBase {
 		this.tableIndex = dest;
 	}
 
+	public void setTransferTablePosition(Vec3i positionClicked){
+		this.tableIndex = Math.max(0,
+								   Math.min(info.settings.transfertableEntryCount - 1,
+											Math.round((float) Math.abs(positionClicked.x) / this.info.settings.transfertableEntrySpacing)));
+	}
+
 	@Override
 	public void update() {
 		super.update();
@@ -111,6 +117,26 @@ public class TileRail extends TileRailBase {
 				}
 				this.markDirty();
 				List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < info.settings.length, EntityCoupleableRollingStock.class);
+				for(EntityCoupleableRollingStock stock : ents) {
+					stock.states.forEach(state -> state.dirty = true);
+					Simulation.forceQuickUpdates = true;
+				}
+			}
+		}
+		if (getWorld().isServer && info != null && info.settings.type == TrackItems.TRANSFERTABLE) {
+			float desiredPosition = tableIndex * info.settings.transfertableEntrySpacing;
+			//TODO Migrate to IR config
+			double speed = 0.1/* * IRPConfig.TransferTableSpeedMultiplier*/;
+			if (desiredPosition != info.tablePos) {
+				if (Math.abs(desiredPosition - info.tablePos) < speed * 2) {
+					info = info.with(b -> b.tablePos = desiredPosition);
+				} else {
+					double delta = desiredPosition - info.tablePos < 0 ? -speed : speed;
+					info = info.with(b -> b.tablePos += delta);
+				}
+				this.markDirty();
+				int maxRange = (int) (Math.max(info.settings.length, info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount) * 0.6);
+				List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < maxRange, EntityCoupleableRollingStock.class);
 				for(EntityCoupleableRollingStock stock : ents) {
 					stock.states.forEach(state -> state.dirty = true);
 					Simulation.forceQuickUpdates = true;

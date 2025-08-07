@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.ExpireableMap;
@@ -10,7 +9,6 @@ import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.immersiverailroading.track.BuilderBase.VecYawPitch;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.world.World;
 import util.Matrix4;
 
 import java.util.List;
@@ -62,7 +60,7 @@ public class RailBuilderRender {
         }
 
         MinecraftClient.startProfiler("irTrackModel");
-        try (VBO.Binding vbo = cached.bind(state, info.settings.type == TrackItems.TURNTABLE)) {
+        try (VBO.Binding vbo = cached.bind(state, info.settings.type.isTable())) {
             vbo.draw();
         }
         MinecraftClient.endProfiler();

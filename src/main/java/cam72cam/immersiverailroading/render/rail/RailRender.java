@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.TrackBase;
@@ -56,7 +55,7 @@ public class RailRender {
 		isLoading = false;
 	}
 	public void renderRailModel(RenderState state) {
-		if (info.settings.type == TrackItems.TURNTABLE) {
+		if (info.settings.type.isTable()) {
 			load();
 		}
 
