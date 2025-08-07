@@ -95,6 +95,7 @@ track.immersiverailroading:class.crossing=Пересечение
 track.immersiverailroading:class.slope=Подъём
 track.immersiverailroading:class.turn=Кривая
 track.immersiverailroading:class.turntable=Поворотный круг
+track.immersiverailroading:class.transfertable=Трансбордер
 track.immersiverailroading:class.switch=Стрелка
 track.immersiverailroading:class.custom=Настраиваемый
 

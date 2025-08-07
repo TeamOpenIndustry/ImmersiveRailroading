@@ -95,6 +95,7 @@ track.immersiverailroading:class.crossing=Kreuzung
 track.immersiverailroading:class.slope=Steigung
 track.immersiverailroading:class.turn=Kurve
 track.immersiverailroading:class.turntable=Drehscheibe
+track.immersiverailroading:class.transfertable=Schiebebühne
 track.immersiverailroading:class.switch=Weiche
 
 track.immersiverailroading:position.fixed=Fixiert

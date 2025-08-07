@@ -18,6 +18,8 @@ public enum GuiText {
 	SELECTOR_GRADE_CROSSING("selector.grade_crossing"),
 	SELECTOR_GAUGE("selector.gauge"),
 	SELECTOR_TRACK("selector.track"),
+	SELECTOR_TRANSFER_TABLE_ENTRY_COUNT("selector.transfer_table_entry_count"),
+	SELECTOR_TRANSFER_TABLE_ENTRY_SPACING("selector.transfer_table_entry_spacing"),
 	SELECTOR_PLATE_TYPE("selector.plate_type"),
 	SELECTOR_PLATE_BOILER("selector.plate_boiler"),
 	SELECTOR_CAST_SINGLE("selector.cast_single"),
@@ -33,8 +35,6 @@ public enum GuiText {
 	TRACK_POSITION("track.position"),
 	TRACK_SMOOTHING("track.smoothing"),
 	TRACK_DIRECTION("track.direction"),
-	TRACK_TRANSFER_TABLE_ENTRY_COUNT("track.transfer_table_entry_count"),
-	TRACK_TRANSFER_TABLE_ENTRY_SPACING("track.transfer_table_entry_spacing"),
 	TRACK_PLACE_BLUEPRINT_TRUE("track.place_blueprint_true"),
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
 	

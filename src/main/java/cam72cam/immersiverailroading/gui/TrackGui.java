@@ -184,7 +184,7 @@ public class TrackGui implements IScreen {
 			public void onSlider() {
 				settings.transfertableEntryCount = (int) this.getValue();
 				transfertableEntryCountSlider.setText(
-						GuiText.TRACK_TRANSFER_TABLE_ENTRY_COUNT.toString((int) transfertableEntryCountSlider.getValue()));
+						GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_COUNT.toString((int) transfertableEntryCountSlider.getValue()));
 			}
 		};
 		transfertableEntryCountSlider.onSlider();
@@ -204,7 +204,7 @@ public class TrackGui implements IScreen {
 			public void onSlider() {
 				settings.transfertableEntrySpacing = (int) this.getValue();
 				transfertableEntrySpacingSlider.setText(
-						GuiText.TRACK_TRANSFER_TABLE_ENTRY_SPACING.toString((int) transfertableEntrySpacingSlider.getValue()));
+						GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_SPACING.toString((int) transfertableEntrySpacingSlider.getValue()));
 			}
 		};
 		transfertableEntrySpacingSlider.onSlider();
