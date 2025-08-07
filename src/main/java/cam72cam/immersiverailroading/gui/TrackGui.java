@@ -457,7 +457,7 @@ public class TrackGui implements IScreen {
 		double tablePos = settings.type == TrackItems.TURNTABLE
 						  ? (frame / 2.0) % 360
 						  : settings.type == TrackItems.TRANSFERTABLE
-							? (frame / 10.0) % settings.transfertableEntrySpacing * (settings.transfertableEntryCount - 1)
+							? (frame / 50.0) % settings.transfertableEntrySpacing * (settings.transfertableEntryCount - 1)
 							: 0;
 		RailInfo info = new RailInfo(
 				settings.immutable().with(b -> {
@@ -465,7 +465,7 @@ public class TrackGui implements IScreen {
 					if (length < 5) {
 						length = 5;
 					}
-					if (settings.type.isTable()) {
+					if (settings.type == TrackItems.TURNTABLE) {
 						length = Math.min(25, Math.max(10, length));
 					}
 					b.length = length;

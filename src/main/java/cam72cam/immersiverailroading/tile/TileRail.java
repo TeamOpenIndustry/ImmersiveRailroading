@@ -43,6 +43,10 @@ public class TileRail extends TileRailBase {
 			if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 				length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 			}
+			if (info.settings.type == TrackItems.TRANSFERTABLE) {
+				//It is rectangular and length&width may differ a lot
+				length = Math.max(info.settings.length, info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount);
+			}
 			boundingBox = IBoundingBox.ORIGIN.grow(new Vec3d(length, length, length));
 		}
 		return boundingBox;
@@ -125,8 +129,7 @@ public class TileRail extends TileRailBase {
 		}
 		if (getWorld().isServer && info != null && info.settings.type == TrackItems.TRANSFERTABLE) {
 			float desiredPosition = tableIndex * info.settings.transfertableEntrySpacing;
-			//TODO Migrate to IR config
-			double speed = 0.1/* * IRPConfig.TransferTableSpeedMultiplier*/;
+			double speed = Config.ConfigBalance.TransferTableSpeed;
 			if (desiredPosition != info.tablePos) {
 				if (Math.abs(desiredPosition - info.tablePos) < speed * 2) {
 					info = info.with(b -> b.tablePos = desiredPosition);
@@ -187,7 +190,7 @@ public class TileRail extends TileRailBase {
 
 	public void spawnDrops(Vec3d pos) {
 		if (getWorld().isServer) {
-			if (drops != null && drops.size() != 0) {
+			if (drops != null && !drops.isEmpty()) {
 				for(ItemStack drop : drops) {
 					getWorld().dropItem(drop, pos);
 				}
