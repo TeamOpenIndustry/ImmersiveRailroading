@@ -5,14 +5,20 @@ import cam72cam.mod.text.TextUtil;
 import java.util.Locale;
 
 public enum TrackItems {
-	STRAIGHT,
-	CROSSING,
-	SLOPE,
-	TURN,
-	SWITCH,
-	TURNTABLE,
-	CUSTOM,
-	;
+	STRAIGHT(0),
+	CROSSING(1),
+	SLOPE(2),
+	TURN(3),
+	SWITCH(4),
+	TURNTABLE(5),
+	CUSTOM(7),
+	TRANSFERTABLE(6);
+
+	private final int order;
+
+	TrackItems(int order){
+		this.order = order;
+	}
 	
 	@Override
 	public String toString() {
@@ -59,5 +65,19 @@ public enum TrackItems {
 			default:
 				return false;
 		}
+	}
+
+	public boolean isTable() {
+		switch (this){
+			case TURNTABLE:
+			case TRANSFERTABLE:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public int getOrder() {
+		return this.order;
 	}
 }

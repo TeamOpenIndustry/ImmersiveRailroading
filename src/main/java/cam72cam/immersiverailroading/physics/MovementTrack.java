@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.track.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.mod.math.Rotation;
 import cam72cam.mod.world.World;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -114,20 +115,51 @@ public class MovementTrack {
 		if (rail.info.settings.type == TrackItems.CROSSING) {
 			delta = VecUtil.fromWrongYaw(distance, Facing.fromAngle(VecUtil.toWrongYaw(delta)).getAngle());
 			return currentPosition.add(delta);
-		} else if (rail.info.settings.type == TrackItems.TURNTABLE) {
+		} else if (rail.info.settings.type.isTable()) {
 			double tablePos = rail.getParentTile().info.tablePos;
-			
+
 			currentPosition = currentPosition.add(delta);
-			
-			Vec3d center = new Vec3d(rail.getParentTile().getPos()).add(0.5, 1 + heightOffset, 0.5);
-			
-			double fromCenter = currentPosition.distanceTo(center);
-			
-			float angle = (float)tablePos + rail.info.placementInfo.facing().getAngle();
-			
-			Vec3d forward = center.add(VecUtil.fromWrongYaw(fromCenter, angle));
-			Vec3d backward = center.add(VecUtil.fromWrongYaw(fromCenter, angle + 180));
-			
+			Facing placementFacing = rail.info.placementInfo.facing();
+			Vec3d center, forward, backward;
+			double distanceToCenter;
+			float angle;
+			if (rail.info.settings.type == TrackItems.TURNTABLE) {
+				angle = (float) tablePos + placementFacing.getAngle();
+				center = new Vec3d(rail.getParentTile().getPos()).add(0.5, 1 + heightOffset, 0.5);
+				distanceToCenter = currentPosition.distanceTo(center);
+			} else {
+				//Must be transfer table
+				int halfGauge = (int) Math.floor((rail.info.settings.gauge.value() * 1.1 + 0.5) / 2);
+				int width = rail.info.settings.transfertableEntrySpacing * (rail.info.settings.transfertableEntryCount - 1) + halfGauge + 2;
+				Vec3i mainOffset = new Vec3i(-width / 2, 1, rail.info.settings.length / 2);
+				center = new Vec3d(rail.getPos().subtract(mainOffset.rotate(Rotation.from(placementFacing))));
+				double xValue;
+				switch (placementFacing) {
+					case SOUTH:
+						xValue = -tablePos - rail.info.placementInfo.placementPosition.x % 1 - 1;
+						break;
+					case NORTH:
+						xValue = -tablePos + rail.info.placementInfo.placementPosition.x % 1;
+						break;
+					case EAST:
+						xValue = -tablePos + rail.info.placementInfo.placementPosition.z % 1;
+						break;
+					case WEST:
+						xValue = -tablePos - rail.info.placementInfo.placementPosition.z % 1 - 1;
+						break;
+					default:
+						//WTH
+						return null;
+				}
+				angle = -placementFacing.getAngle() + 180;
+				center = center.add(
+						new Vec3d(xValue, 2 + heightOffset, rail.info.settings.length / 2d).rotateYaw(angle));
+				distanceToCenter = currentPosition.distanceTo(center);
+			}
+
+			forward = center.add(VecUtil.fromWrongYaw(distanceToCenter, angle));
+			backward = center.add(VecUtil.fromWrongYaw(distanceToCenter, angle + 180));
+
 			if (forward.distanceToSquared(currentPosition) < backward.distanceToSquared(currentPosition)) {
 				return forward;
 			} else {

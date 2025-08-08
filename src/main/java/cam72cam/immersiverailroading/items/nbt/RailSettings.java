@@ -22,8 +22,10 @@ public class RailSettings {
     public final boolean isPreview;
     public final boolean isGradeCrossing;
     public final String track;
+    public final int transfertableEntryCount;
+    public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -37,6 +39,8 @@ public class RailSettings {
         this.isPreview = isPreview;
         this.isGradeCrossing = isGradeCrossing;
         this.curvosity = curvosity;
+        this.transfertableEntryCount = count;
+        this.transfertableEntrySpacing = spacing;
     }
 
     public void write(ItemStack stack) {
@@ -132,6 +136,11 @@ public class RailSettings {
         @TagField("track")
         public String track;
 
+        @TagField("transfertableEntryCount")
+        public int transfertableEntryCount;
+        @TagField("transfertableEntrySpacing")
+        public int transfertableEntrySpacing;
+
         private Mutable(RailSettings settings) {
             this.gauge = settings.gauge;
             this.track = settings.track;
@@ -146,6 +155,8 @@ public class RailSettings {
             this.railBedFill = settings.railBedFill;
             this.isPreview = settings.isPreview;
             this.isGradeCrossing = settings.isGradeCrossing;
+            this.transfertableEntryCount = settings.transfertableEntryCount;
+            this.transfertableEntrySpacing = settings.transfertableEntrySpacing;
         }
 
         private Mutable(TagCompound data) throws SerializationException {
@@ -163,6 +174,8 @@ public class RailSettings {
             isPreview = false;
             isGradeCrossing = false;
             curvosity = 1;
+            transfertableEntryCount = 1;
+            transfertableEntrySpacing = 1;
 
             TagSerializer.deserialize(data, this);
         }
@@ -181,7 +194,9 @@ public class RailSettings {
                     railBed,
                     railBedFill,
                     isPreview,
-                    isGradeCrossing
+                    isGradeCrossing,
+                    transfertableEntryCount,
+                    transfertableEntrySpacing
             );
         }
     }

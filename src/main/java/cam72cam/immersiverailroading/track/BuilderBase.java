@@ -11,7 +11,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
-import cam72cam.mod.serialization.TagCompound;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.world.World;
 
@@ -24,7 +23,7 @@ import java.util.List;
 @SuppressWarnings("incomplete-switch")
 public abstract class BuilderBase {
 	protected final World world;
-	protected ArrayList<TrackBase> tracks = new ArrayList<TrackBase>();
+	protected ArrayList<TrackBase> tracks = new ArrayList<>();
 	
 	public RailInfo info;
 
@@ -161,7 +160,7 @@ public abstract class BuilderBase {
 				if (!ITrack.isRail(world, main) && (i == 0 || !world.isSnow(main))) {
 					world.setToAir(main);
 				}
-				if (info.settings.gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.settings.type != TrackItems.SLOPE && info.settings.type != TrackItems.TURNTABLE) {
+				if (info.settings.gauge.isModel() && ConfigDamage.enableSideBlockClearing && info.settings.type != TrackItems.SLOPE && !info.settings.type.isTable()) {
 					for (Facing facing : Facing.HORIZONTALS) {
 						Vec3i pos = main.offset(facing);
 						if (!ITrack.isRail(world, pos)) {

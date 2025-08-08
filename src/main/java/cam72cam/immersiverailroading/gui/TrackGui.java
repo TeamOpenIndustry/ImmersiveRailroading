@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
@@ -48,6 +49,9 @@ public class TrackGui implements IScreen {
 	private Button directionButton;
 	private Button bedTypeButton;
 	private Button bedFillButton;
+
+	private Slider transfertableEntryCountSlider;
+	private Slider transfertableEntrySpacingSlider;
 
 	private final List<ItemStack> oreDict;
 
@@ -106,8 +110,10 @@ public class TrackGui implements IScreen {
 				return false;
 			}
 			int max = 1000;
-			if (settings.type == TrackItems.TURNTABLE) {
-				max = BuilderTurnTable.maxLength(settings.gauge);
+			if (settings.type.isTable()) {
+				max = settings.type == TrackItems.TURNTABLE
+					  ? BuilderTurnTable.maxLength(settings.gauge)
+					  : BuilderTransferTable.maxLength(settings.gauge);
 			}
 			if (val > 0 && val <= max) {
 				settings.length = val;
@@ -125,8 +131,11 @@ public class TrackGui implements IScreen {
 			public void onClick(Gauge gauge) {
 				settings.gauge = gauge;
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
-				if (settings.type == TrackItems.TURNTABLE) {
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), BuilderTurnTable.maxLength(settings.gauge))); // revalidate
+				if (settings.type.isTable()) {
+					int max = settings.type == TrackItems.TURNTABLE
+							  ? BuilderTurnTable.maxLength(settings.gauge)
+							  : BuilderTransferTable.maxLength(settings.gauge);
+					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
 				}
 			}
 		};
@@ -141,6 +150,7 @@ public class TrackGui implements IScreen {
 		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING)
+						.sorted(Comparator.comparingInt(TrackItems::getOrder))
 						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
 		) {
 			@Override
@@ -151,9 +161,14 @@ public class TrackGui implements IScreen {
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
-				if (settings.type == TrackItems.TURNTABLE) {
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), BuilderTurnTable.maxLength(settings.gauge))); // revalidate
+				if (settings.type.isTable()) {
+					int max = settings.type == TrackItems.TURNTABLE
+							  ? BuilderTurnTable.maxLength(settings.gauge)
+							  : BuilderTransferTable.maxLength(settings.gauge);
+					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
 				}
+				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
+				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 			}
 		};
 		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
@@ -164,6 +179,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
+		//Transfer table doesn't have these property so we can have them overlapped
 		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
 			@Override
 			public void onClick(Player.Hand hand) {
@@ -172,6 +188,16 @@ public class TrackGui implements IScreen {
 			}
 		};
 		smoothingButton.setVisible(settings.type.hasSmoothing());
+
+		transfertableEntryCountSlider = new Slider(screen, 25+xtop, ytop, "", 1, 71, settings.transfertableEntryCount, false) {
+			@Override
+			public void onSlider() {
+				settings.transfertableEntryCount = (int) this.getValue();
+				transfertableEntryCountSlider.setText(
+						GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_COUNT.toString((int) transfertableEntryCountSlider.getValue()));
+			}
+		};
+		transfertableEntryCountSlider.onSlider();
 		ytop += height;
 
 		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(settings.direction)) {
@@ -182,6 +208,16 @@ public class TrackGui implements IScreen {
 			}
 		};
 		directionButton.setVisible(settings.type.hasDirection());
+
+		transfertableEntrySpacingSlider = new Slider(screen, 25+xtop, ytop, "", 1, 15, settings.transfertableEntrySpacing, false) {
+			@Override
+			public void onSlider() {
+				settings.transfertableEntrySpacing = (int) this.getValue();
+				transfertableEntrySpacingSlider.setText(
+						GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_SPACING.toString((int) transfertableEntrySpacingSlider.getValue()));
+			}
+		};
+		transfertableEntrySpacingSlider.onSlider();
 		ytop += height;
 
 
@@ -210,6 +246,8 @@ public class TrackGui implements IScreen {
 		degreesSlider.setVisible(settings.type.hasQuarters());
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
+		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
+		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 
 
 
@@ -426,6 +464,11 @@ public class TrackGui implements IScreen {
 		}
 
 		// This could be more efficient...
+		double tablePos = settings.type == TrackItems.TURNTABLE
+						  ? (frame / 2.0) % 360
+						  : settings.type == TrackItems.TRANSFERTABLE
+							? (frame / 50.0) % (settings.transfertableEntrySpacing * (settings.transfertableEntryCount - 1))
+							: 0;
 		RailInfo info = new RailInfo(
 				settings.immutable().with(b -> {
 					int length = b.length;
@@ -438,11 +481,11 @@ public class TrackGui implements IScreen {
 					b.length = length;
 				}),
 				new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null),
-				null, SwitchState.NONE, SwitchState.NONE, settings.type == TrackItems.TURNTABLE ? (frame / 2.0) % 360 : 0, true);
+				null, SwitchState.NONE, SwitchState.NONE, tablePos, true);
 
 		int length = info.settings.length;
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;
-		if (settings.type == TrackItems.TURNTABLE) {
+		if (settings.type.isTable()) {
 			scale /= 2;
 		}
 

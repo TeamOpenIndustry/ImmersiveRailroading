@@ -76,6 +76,8 @@ gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
 gui.immersiverailroading:selector.position=Position: %s
 gui.immersiverailroading:selector.smoothing=Vertical Smoothing: %s
 gui.immersiverailroading:selector.direction=Direction: %s
+gui.immersiverailroading:selector.transfer_table_entry_count=Transfer Table Entries: %s
+gui.immersiverailroading:selector.transfer_table_entry_spacing=Distance Between Entries: %s
 gui.immersiverailroading:selector.place_blueprint=Place Blueprint
 gui.immersiverailroading:selector.grade_crossing=Grade Crossing
 gui.immersiverailroading:selector.plate_type=Plate Type: %s
@@ -133,6 +135,7 @@ track.immersiverailroading:class.crossing=Crossing
 track.immersiverailroading:class.slope=Slope
 track.immersiverailroading:class.turn=Turn
 track.immersiverailroading:class.turntable=Turn Table
+track.immersiverailroading:class.transfertable=Transfer Table
 track.immersiverailroading:class.switch=Switch
 track.immersiverailroading:class.custom=Custom Curve
 

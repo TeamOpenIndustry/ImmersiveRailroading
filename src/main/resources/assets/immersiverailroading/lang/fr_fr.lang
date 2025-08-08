@@ -120,6 +120,7 @@ track.immersiverailroading:class.crossing=Croisement
 track.immersiverailroading:class.slope=Rampe
 track.immersiverailroading:class.turn=Courbe
 track.immersiverailroading:class.turntable=Pont tournant
+track.immersiverailroading:class.transfertable=Pont transbordeur
 track.immersiverailroading:class.switch=Aiguillage
 track.immersiverailroading:class.custom=Courbe personnalisée
 
