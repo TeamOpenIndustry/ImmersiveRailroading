@@ -91,6 +91,7 @@ public class CubicCurve {
 
         resRev.add(p2);
         double precision = 5;
+        double stepSizeSquared = stepSize * stepSize;
 
         double t = 0;
         while (t <= 0.5) {
@@ -101,7 +102,7 @@ public class CubicCurve {
 
                 for (;t < 1 + delta; t+=delta) {
                     Vec3d pos = position(t);
-                    if (pos.distanceTo(prev) > stepSize) {
+                    if (pos.distanceToSquared(prev) > stepSizeSquared) {
                         // We passed it, just barely
                         t -= delta;
                         break;
@@ -122,7 +123,7 @@ public class CubicCurve {
 
                 for (;t > lt - delta; t-=delta) {
                     Vec3d pos = position(t);
-                    if (pos.distanceTo(prev) > stepSize) {
+                    if (pos.distanceToSquared(prev) > stepSizeSquared) {
                         // We passed it, just barely
                         t += delta;
                         break;
@@ -134,6 +135,11 @@ public class CubicCurve {
             }
         }
         Collections.reverse(resRev);
+        //For some reason these 2 point may be too close, so check here
+        if(res.get(res.size() - 1).distanceToSquared(resRev.get(0)) <= 0.0001 * stepSizeSquared){//ie.0.01 * stepSize
+            Vec3d revStart = resRev.remove(0);
+            res.set(res.size() - 1, res.get(res.size() - 1).add(revStart).scale(0.5));
+        }
         res.addAll(resRev);
         return res;
     }
