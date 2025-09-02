@@ -251,11 +251,28 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (!nbt.hasKey("railHeight")) {
 				railHeight = bedHeight;
 			}
+		case 4:
+			if (this instanceof TileRail) {
+				TileRail tr = ((TileRail) this);
+				if (tr.info.settings.type == TrackItems.SLOPE && tr.info.customInfo != null && tr.info.customInfo.placementPosition != null) {
+					// Force to 1 block offset
+					tr.info = tr.info.with(mod -> {
+						Vec3d placement = mod.customInfo.placementPosition;
+						Vec3d control = mod.customInfo.control;
+						mod.customInfo = new PlacementInfo(
+								new Vec3d(placement.x, mod.placementInfo.placementPosition.y+1, placement.z),
+								mod.customInfo.direction,
+								mod.customInfo.yaw,
+								control == null ? null : new Vec3d(control.x, mod.placementInfo.placementPosition.y+1, control.z)
+						);
+					});
+				}
+			}
 		}
 	}
 	@Override
 	public void save(TagCompound nbt) {
-		nbt.setInteger("version", 4);
+		nbt.setInteger("version", 5);
 	}
 
 	public TileRail getParentTile() {
