@@ -82,6 +82,7 @@ public abstract class EntityRollingStockDefinition {
     private double passengerCompartmentWidth;
     private double weight;
     private int maxPassengers;
+    private int snowLayers;
     private float interiorLightLevel;
     private boolean hasIndependentBrake;
     private boolean hasPressureBrake;
@@ -501,6 +502,8 @@ public abstract class EntityRollingStockDefinition {
             lights.getBlockMap().forEach((key, block) -> this.lights.put(key, new LightDefinition(block)));
         }
 
+        snowLayers = properties.getValue("snow_layers").asInteger();
+
         DataBlock sounds = data.getBlock("sounds");
         wheel_sound = sounds.getValue("wheels").asIdentifier();
         clackFront = clackRear = sounds.getValue("clack").asIdentifier();
@@ -903,6 +906,9 @@ public abstract class EntityRollingStockDefinition {
 
     public double getBrakeShoeFriction() {
         return brakeCoefficient;
+    }
+    public int getSnowLayers() {
+        return snowLayers;
     }
 
 }

@@ -60,6 +60,8 @@ properties =                # Required:
     swayMultiplier = 1  # Optional: How much the stock should sway when going over bumpy tracks / joints
     tiltMultiplier = 0  # Optional: How much the stock should tilt into curves
 
+    snow_layers = 1  # Optional: How many snow layers are left after clearing snow
+
     interior_light_level = 0.4  # Optional: How bright the interior should be by default
 
 # Exterior Light Properties
