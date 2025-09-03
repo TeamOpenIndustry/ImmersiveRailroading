@@ -300,10 +300,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return this.willBeReplaced;
 	}
 
-	public void cleanSnow() {
+	public void cleanSnow(int snowLevel) {
 		int snow = this.getSnowLayers();
-		if (snow > 1) {
-			this.setSnowLayers(1);
+		if (snow > snowLevel) {
+			this.setSnowLayers(snowLevel);
 			int snowDown = snow -1;
 			for (int i = 1; i <= 3; i ++) {
 				Facing[] horiz = Facing.values().clone();
@@ -943,7 +943,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		if (stack.isValidTool(ToolType.SHOVEL)) {
 			if (this.getWorld().isServer) {
-				this.cleanSnow();
+				this.cleanSnow(1);
 				this.setSnowLayers(0);
 				stack.damageItem(1, player);
 			}

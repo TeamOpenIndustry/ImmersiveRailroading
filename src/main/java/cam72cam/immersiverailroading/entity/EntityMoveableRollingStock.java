@@ -253,7 +253,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
                 for (Vec3i bp : state.trackToUpdate) {
                     TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
                     if (te != null) {
-                        te.cleanSnow();
+                        te.cleanSnow(this.getDefinition().getSnowLayers());
                         te.stockOverhead(this);
                     }
                 }
