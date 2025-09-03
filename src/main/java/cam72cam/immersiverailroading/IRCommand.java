@@ -1,12 +1,19 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.entity.Freight;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.text.Command;
 import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.world.World;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
@@ -32,13 +39,39 @@ public class IRCommand extends Command {
 
 	@Override
 	public boolean execute(Consumer<PlayerMessage> sender, Optional<Player> player, String[] args) {
-		if (args.length != 1) {
+		if (args.length == 0) {
 			return false;
 		}
-		if (args[0].equals("reload")) {
-			ImmersiveRailroading.warn("Reloading Immersive Railroading definitions");
-			DefinitionManager.initDefinitions();
-			ImmersiveRailroading.info("Done reloading Immersive Railroading definitions");
+		if (args[0].equals("cargoFill")) {
+			if (player.isPresent()) {
+				int distance = 2;
+				if (args.length > 1) {
+					try {
+						distance = Integer.parseInt(args[1]);
+					} catch (NumberFormatException e) {
+						sender.accept(PlayerMessage.direct("Invalid number " + args[1]));
+						return true;
+					}
+				}
+				IBoundingBox bb = player.get().getBounds().grow(new Vec3d(distance, 4, distance));
+				List<Freight> carsNearby = player.get().getWorld().getEntities((Freight stock) -> bb.intersects(stock.getBounds()), Freight.class);
+				ItemStack stack = player.get().getHeldItem(Player.Hand.PRIMARY);
+
+				if (carsNearby.isEmpty()) {
+					sender.accept(PlayerMessage.direct("No rolling stock within range to fill"));
+				}
+
+				for (Freight freight : carsNearby) {
+					sender.accept(PlayerMessage.direct(String.format("Filling %s@%s with %s", freight.getDefinition().name(), new Vec3i(freight.getPosition()), stack.getDisplayName())));
+					for (int i = 0; i < freight.cargoItems.getSlotCount(); i++) {
+						if (stack.isEmpty() || freight.cargoItems.get(i).isEmpty()) {
+							freight.cargoItems.set(i, stack.copy());
+						}
+					}
+				}
+			} else {
+				sender.accept(PlayerMessage.direct("This command is not supported for non-players (yet)"));
+			}
 			return true;
 		}
 		

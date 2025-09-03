@@ -56,12 +56,7 @@ public class PartSound {
         }
     }
 
-    private final ExpireableMap<UUID, Sounds> entitySounds = new ExpireableMap<UUID, Sounds>() {
-        @Override
-        public void onRemove(UUID key, Sounds value) {
-            value.terminate();
-        }
-    };
+    private final ExpireableMap<UUID, Sounds> entitySounds = new ExpireableMap<>((key, value) -> value.terminate());
 
     public void effects(EntityMoveableRollingStock stock, boolean enabled) {
         effects(stock, enabled ? 1 : 0, 1);
