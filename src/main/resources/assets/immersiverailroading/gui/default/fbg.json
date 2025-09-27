@@ -1,0 +1,85 @@
+{
+  "elements": [
+    {
+      "comment": "spannung",
+      "screen_x": "MIDDLE",
+      "screen_y": "BOTTOM",
+      "import": [
+        "immersiverailroading:gui/default/common/scale.caml"
+      ],
+      "elements": [
+        {
+          "comment": "Wireless Remotecontrol",
+          "x": -70,
+          "y": -95,
+          "image": "immersiverailroading:gui/fbg/fbg.png",
+          "elements": [
+            {
+              "comment": "Throttle",
+              "x": 37,
+              "y": 54,
+              "image": "immersiverailroading:gui/fbg/fbg_energy.png",
+              "translate": {
+                "x": 0,
+                "y": -31
+              },
+              "scale": {
+                "y": 1
+              },
+              "readout": "THROTTLE"
+            },
+            {
+              "comment": "Train Brake",
+              "x": 82,
+              "y": 54,
+              "image": "immersiverailroading:gui/fbg/fbg_train_brake.png",
+              "invert": false,
+              "translate": {
+                "x": 0,
+                "y": -31
+              },
+              "scale": {
+                "y": 1
+              },
+              "readout": "BRAKE_PRESSURE"
+            },
+            {
+              "comment": "Ind Brake",
+              "x": 95,
+              "y": 54,
+              "image": "immersiverailroading:gui/fbg/fbg_ind_brake.png",
+              "translate": {
+                "x": 0,
+                "y": -31
+              },
+              "scale": {
+                "y": 1
+              },
+              "readout": "INDEPENDENT_BRAKE"
+            },
+            {
+              "comment": "Reverser",
+              "x": 59,
+              "y": 41,
+              "image": "immersiverailroading:gui/fbg/fbg_zero.png",
+              "translate": {
+                "x": 0,
+                "y": -8
+              },
+              "readout": "REVERSER"
+            },
+            {
+              "comment": "speed readout",
+              "x": 62,
+              "y": 22,
+              "text": {
+                "value": "stat.speed",
+                "height": 4
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]  
+}    
