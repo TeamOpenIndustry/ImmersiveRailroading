@@ -28,8 +28,15 @@ public enum Stat {
     UNITS_CARGO_FILL,
     ;
 
+    private static final String[] formats = {"%.0f", "%.1f", "%.2f", "%.3f", "%。4f", "%.5f"};
+
     public String getValue(EntityRollingStock stock) {
+        return this.getValue(stock, getDefaultDecimal());
+    }
+
+    public String getValue(EntityRollingStock stock, int digit) {
         Float temp = null;
+        String format = formats[digit];
 
         switch (this) {
             case SPEED:
@@ -37,11 +44,11 @@ public enum Stat {
                     Speed speed = ((EntityMoveableRollingStock) stock).getCurrentSpeed();
                     switch (ConfigGraphics.speedUnit) {
                         case mph:
-                            return String.format("%.2f", Math.abs(speed.imperial()));
+                            return String.format(format, Math.abs(speed.imperial()));
                         case ms:
-                            return String.format("%.2f", Math.abs(speed.metersPerSecond()));
+                            return String.format(format, Math.abs(speed.metersPerSecond()));
                         case kmh:
-                            return String.format("%.2f", Math.abs(speed.metric()));
+                            return String.format(format, Math.abs(speed.metric()));
                     }
                 }
                 return "";
@@ -50,11 +57,11 @@ public enum Stat {
                     Speed speed = ((Locomotive)stock).getDefinition().getMaxSpeed(stock.gauge);
                     switch (ConfigGraphics.speedUnit) {
                         case mph:
-                            return String.format("%.0f", Math.abs(speed.imperial()));
+                            return String.format(format, Math.abs(speed.imperial()));
                         case ms:
-                            return String.format("%.0f", Math.abs(speed.metersPerSecond()));
+                            return String.format(format, Math.abs(speed.metersPerSecond()));
                         case kmh:
-                            return String.format("%.0f", Math.abs(speed.metric()));
+                            return String.format(format, Math.abs(speed.metric()));
                     }
                 }
                 return "";
@@ -62,12 +69,12 @@ public enum Stat {
                 return ConfigGraphics.speedUnit.toUnitString();
             case LIQUID:
                 return stock instanceof FreightTank ?
-                        String.format("%.1f",
+                        String.format(format,
                                 ((FreightTank) stock).getLiquidAmount() / (float)Fluid.BUCKET_VOLUME)
                         : "";
             case MAX_LIQUID:
                 return stock instanceof FreightTank ?
-                        String.format("%.1f",
+                        String.format(format,
                                 ((FreightTank)stock).getTankCapacity().MilliBuckets() / (float)Fluid.BUCKET_VOLUME)
                         : "";
             case UNITS_LIQUID:
@@ -75,10 +82,10 @@ public enum Stat {
 
             case BOILER_PRESSURE:
                 return stock instanceof LocomotiveSteam ?
-                        String.format("%.1f", ConfigGraphics.pressureUnit.convertFromPSI(((LocomotiveSteam) stock).getBoilerPressure())) : "";
+                        String.format(format, ConfigGraphics.pressureUnit.convertFromPSI(((LocomotiveSteam) stock).getBoilerPressure())) : "";
             case MAX_BOILER_PRESSURE:
                 return stock instanceof LocomotiveSteam ?
-                        String.format("%.1f", ConfigGraphics.pressureUnit.convertFromPSI((float)((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge)))
+                        String.format(format, ConfigGraphics.pressureUnit.convertFromPSI((float)((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge)))
                         : "";
             case UNITS_BOILER_PRESSURE:
                 return ConfigGraphics.pressureUnit.toUnitString();
@@ -90,7 +97,7 @@ public enum Stat {
                 if (stock instanceof LocomotiveDiesel) {
                     temp = ((LocomotiveDiesel) stock).getEngineTemperature();
                 }
-                return temp != null ? String.format("%.1f", ConfigGraphics.temperatureUnit.convertFromCelcius(temp)) : "";
+                return temp != null ? String.format(format, ConfigGraphics.temperatureUnit.convertFromCelcius(temp)) : "";
             case MAX_TEMPERATURE:
                 if (stock instanceof LocomotiveSteam) {
                     temp = 100f;
@@ -98,7 +105,7 @@ public enum Stat {
                 if (stock instanceof LocomotiveDiesel) {
                     temp = 150f;
                 }
-                return temp != null ? String.format("%.1f", ConfigGraphics.temperatureUnit.convertFromCelcius(temp)) : "";
+                return temp != null ? String.format(format, ConfigGraphics.temperatureUnit.convertFromCelcius(temp)) : "";
             case UNITS_TEMPERATURE:
                 return ConfigGraphics.temperatureUnit.toUnitString();
             case BRAKE_PRESSURE:
@@ -122,6 +129,39 @@ public enum Stat {
         }
         return "";
     }
+
+    public boolean hasDecimalSetting() {
+        switch (this) {
+            case SPEED:
+            case MAX_SPEED:
+            case LIQUID:
+            case MAX_LIQUID:
+            case BOILER_PRESSURE:
+            case MAX_BOILER_PRESSURE:
+            case TEMPERATURE:
+            case MAX_TEMPERATURE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private int getDefaultDecimal() {
+        switch (this) {
+            case LIQUID:
+            case MAX_LIQUID:
+            case BOILER_PRESSURE:
+            case MAX_BOILER_PRESSURE:
+            case TEMPERATURE:
+            case MAX_TEMPERATURE:
+                return 1;
+            case SPEED:
+            case MAX_SPEED:
+            default:
+                return 0;
+        }
+    }
+
     @Override
     public String toString() {
         return "stat." + this.name().toLowerCase(Locale.ROOT);

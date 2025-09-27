@@ -7,8 +7,10 @@ properties =
 
     cab_car = False             # Optional: Cab Cars don't have any motive power, but can be MU'd
     # The following are ignored if cab_car = True
-    horsepower = null           # Required
-    tractive_effort_lbf = null  # Required
+    horsepower = null              # Required
+    power_kw = null               # Required if horsepower not defined
+    tractive_effort_lbf = null     # Required
+    tractive_effort_newton = null  # Required if lbf not defined
     max_speed_kmh = null        # Required
     multi_unit_capable = False  # Optional: Defaults to true for Diesel Electrics
 

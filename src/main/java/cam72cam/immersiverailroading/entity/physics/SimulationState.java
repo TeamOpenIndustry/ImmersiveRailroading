@@ -286,7 +286,9 @@ public class SimulationState {
             if (BlockUtil.isIRRail(config.world, bp)) {
                 trackToUpdate.add(bp);
             } else {
-                if (Config.ConfigDamage.TrainsBreakBlocks && !BlockUtil.isIRRail(config.world, bp.up())) {
+                if (Config.ConfigDamage.TrainsBreakBlocks
+                        && !BlockUtil.isWhitelisted(config.world, bp)
+                        && !BlockUtil.isIRRail(config.world, bp.up())) {
                     if (bp.y >= position.y - (position.y % 1)) { // Prevent it from breaking blocks under the pitched train (bb expanded)
                         interferingBlocks.add(bp);
                         interferingResistance += config.world.getBlockHardness(bp);

@@ -87,28 +87,24 @@ public abstract class Multiblock {
 		return component.matches(world.getItemStack(pos));
     }
 
-    public boolean tryCreate(World world, Vec3i pos) {
-        for (Rotation rot : Rotation.values()) {
-            Optional<Vec3i> validLocation =
-                    this.componentPositions.parallelStream()
-                                           .filter(activationLocation -> {
-                                               Vec3i origin = pos.subtract(activationLocation.rotate(rot));
-                                               return this.componentPositions
-                                                       .stream()
-                                                       .allMatch(offset -> checkValid(world, origin, offset, rot));
-                                           }).findFirst();
-
-            if (validLocation.isPresent()) {
-                Vec3i activationLocation = validLocation.get();
-                Vec3i origin = pos.subtract(activationLocation.rotate(rot));
-                if (world.isServer) {
-                    instance(world, origin, rot).onCreate();
-                }
-                return true;
-            }
-        }
-        return false;
-    }
+	public boolean tryCreate(World world, Vec3i pos) {
+		for (Vec3i activationLocation : this.componentPositions) {
+			for (Rotation rot : Rotation.values()) {
+				Vec3i origin = pos.subtract(activationLocation.rotate(rot));
+				boolean valid = true;
+				for (Vec3i offset : this.componentPositions) {
+					valid = valid && checkValid(world, origin, offset, rot);
+				}
+				if (valid) {
+					if (world.isServer) {
+						instance(world, origin, rot).onCreate();
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	public abstract Vec3i placementPos();
 	public void place(World world, Player player, Vec3i pos, Rotation rot) {

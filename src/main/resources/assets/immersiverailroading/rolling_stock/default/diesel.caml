@@ -9,6 +9,10 @@ properties =
     throttle_notches = 8 # Optional: Number of throttle notches in the cab
     dynamic_traction_control = false # If the onboard computer can try to prevent wheel slip
     horn_sustained = False # Optional: Should the horn repeat
+    # fuel_override: "water:1000" # Optional: add fluid filter for this locomotive, and if you want you can also override burntime here
+    # fuel_override: "ethanol:1700"
+    # fuel_override: "gasoline" # "gasoline" will use 100 defined in config as burntime
+    # fuel_override: "lava" # "lava" will be skipped in default environment because it neither exist in default config nor have burntime specified here
 
 sounds =
     idle = "immersiverailroading:sounds/diesel/default/idle.ogg"    # Optional: See sound_definition.caml for details

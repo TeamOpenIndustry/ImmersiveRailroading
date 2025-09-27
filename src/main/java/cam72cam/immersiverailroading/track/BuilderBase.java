@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackModelPart;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
@@ -41,25 +42,31 @@ public abstract class BuilderBase {
 		parent_pos = pos;
 	}
 
-	public class VecYawPitch extends Vec3d {
+	public static class VecYawPitch extends Vec3d {
 		public final float yaw;
 		public final float pitch;
 		public final float length;
-		public final List<String> groups;
+		public final List<TrackModelPart> parts;
+		public final List<VecYawPitch> children = new ArrayList<>();
 		
-		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, String... groups) {
-			this(xIn, yIn, zIn, yaw, 0, groups);
+		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, TrackModelPart... parts) {
+			this(xIn, yIn, zIn, yaw, 0, parts);
 		}
-		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, String... groups) {
-			this(xIn, yIn, zIn, yaw, pitch, -1, groups);
+		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, TrackModelPart... parts) {
+			this(xIn, yIn, zIn, yaw, pitch, -1, parts);
 		}
-		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, float length, String... groups) {
+		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, float length, TrackModelPart... parts) {
 			super(xIn, yIn, zIn);
 			this.yaw = yaw;
-			this.groups = Arrays.asList(groups);
+			this.parts = Arrays.asList(parts);
 			this.pitch = pitch;
 			this.length = length;
 		}
+
+		public void addChild(VecYawPitch another){
+			this.children.add(another);
+		}
+
 		public float getYaw() {
 			return this.yaw;
 		}
@@ -69,8 +76,8 @@ public abstract class BuilderBase {
 		public float getLength() {
 			return this.length;
 		}
-		public List<String> getGroups() {
-			return this.groups;
+		public List<TrackModelPart> getParts() {
+			return this.parts;
 		}
 	}
 	

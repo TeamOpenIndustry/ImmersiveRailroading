@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.library;
+package cam72cam.immersiverailroading.library.unit;
 
 public enum TemperatureDisplayType {
     celcius,
@@ -13,7 +13,7 @@ public enum TemperatureDisplayType {
             case farenheit:
                 return (value * 9f/5f) + 32f;
             case kelvin:
-                return value + 270f;
+                return value + 273.15f;
         }
     }
 

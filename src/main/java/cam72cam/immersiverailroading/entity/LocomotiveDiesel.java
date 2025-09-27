@@ -16,8 +16,7 @@ import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.serialization.TagField;
 
-import java.util.List;
-import java.util.OptionalDouble;
+import java.util.*;
 
 public class LocomotiveDiesel extends Locomotive {
 
@@ -161,7 +160,7 @@ public class LocomotiveDiesel extends Locomotive {
 	@Override
 	public double getAppliedTractiveEffort(Speed speed) {
 		if (isRunning() && (getEngineTemperature() > 75 || !Config.isFuelRequired(gauge))) {
-			double maxPower_W = this.getDefinition().getHorsePower(gauge) * 745.7d;
+			double maxPower_W = this.getDefinition().getWatt(gauge);
 			double efficiency = 0.82; // Similar to a *lot* of imperial references
 			double speed_M_S = (Math.abs(speed.metric())/3.6);
 			double maxPowerAtSpeed = maxPower_W * efficiency / Math.max(0.001, speed_M_S);
@@ -221,9 +220,12 @@ public class LocomotiveDiesel extends Locomotive {
 		
 		if (this.getLiquidAmount() > 0 && isRunning()) {
 			float consumption = Math.abs(getThrottle()) + 0.05f;
-			float burnTime = BurnUtil.getBurnTime(this.getLiquid());
+			float burnTime = getDefinition().getOverriddenFuels().getOrDefault(this.getLiquid(), 0);
 			if (burnTime == 0) {
-				burnTime = 200; //Default to 200 for unregistered liquids
+				burnTime = BurnUtil.getBurnTime(this.getLiquid());
+			}
+			if (burnTime == 0) {
+				burnTime = 200;
 			}
 			burnTime *= getDefinition().getFuelEfficiency()/100f;
 			burnTime *= (Config.ConfigBalance.locoDieselFuelEfficiency / 100f);
@@ -253,10 +255,11 @@ public class LocomotiveDiesel extends Locomotive {
 
 		setEngineTemperature(engineTemperature);
 	}
-	
+
 	@Override
 	public List<Fluid> getFluidFilter() {
-		return BurnUtil.burnableFluids();
+		Set<Fluid> set = getDefinition().getOverriddenFuels().keySet();
+		return set.isEmpty() ? BurnUtil.burnableFluids() : new ArrayList<>(set);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackModelPart;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Rotation;
@@ -79,7 +80,8 @@ public class BuilderTransferTable extends BuilderBase {
         }
 
         Vec3d center = new Vec3d(-info.tablePos, 1, info.settings.length / 2d - 0.5).rotateYaw(-info.placementInfo.facing().getAngle() + 180);
-        list.add(new VecYawPitch(center.x, center.y, center.z, info.placementInfo.facing().getAngle(), 0, info.settings.length, "RAIL_RIGHT", "RAIL_LEFT"));
+        list.add(new VecYawPitch(center.x, center.y, center.z, info.placementInfo.facing().getAngle(), 0, info.settings.length,
+                                 TrackModelPart.RAIL_LEFT, TrackModelPart.RAIL_RIGHT, TrackModelPart.TABLE));
         return list;
     }
 

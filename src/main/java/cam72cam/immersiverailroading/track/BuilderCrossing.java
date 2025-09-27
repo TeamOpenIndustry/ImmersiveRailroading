@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.track;
 import java.util.ArrayList;
 import java.util.List;
 
+import cam72cam.immersiverailroading.library.TrackModelPart;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
@@ -40,19 +41,19 @@ public class BuilderCrossing extends BuilderBase {
 		double trackOffset = (1-info.settings.gauge.scale())/4;
 		
 		Vec3d pos = VecUtil.rotateWrongYaw(Vec3d.ZERO, angle-90);
-		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.settings.length, "RAIL_RIGHT", "RAIL_LEFT"));
+		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.settings.length, TrackModelPart.RAIL_RIGHT, TrackModelPart.RAIL_LEFT));
 		
 		for (double i = -trackOffset; i < info.settings.length - trackOffset; i+=info.settings.gauge.scale()) {
 			pos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, i-0.25), angle-90);
-			data.add(new VecYawPitch(pos.x, pos.y, pos.z-1, -angle, "RAIL_BASE"));
+			data.add(new VecYawPitch(pos.x, pos.y, pos.z-1, -angle, TrackModelPart.RAIL_BASE));
 		}
 		angle -= 90;
 		
 		pos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, 0), angle-90);
-		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.settings.length, "RAIL_RIGHT", "RAIL_LEFT"));
+		data.add(new VecYawPitch(pos.x, pos.y, pos.z, -angle, 0, info.settings.length, TrackModelPart.RAIL_RIGHT, TrackModelPart.RAIL_LEFT));
 		for (double i = -trackOffset; i < info.settings.length - trackOffset; i+=info.settings.gauge.scale()) {
 			pos = VecUtil.rotateWrongYaw(new Vec3d(0, 0, i-0.25), angle-90);
-			data.add(new VecYawPitch(pos.x-1, pos.y, pos.z, -angle, "RAIL_BASE"));
+			data.add(new VecYawPitch(pos.x-1, pos.y, pos.z, -angle, TrackModelPart.RAIL_BASE));
 		}
 		
 		return data;

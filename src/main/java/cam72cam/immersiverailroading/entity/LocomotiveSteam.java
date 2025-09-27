@@ -98,7 +98,7 @@ public class LocomotiveSteam extends Locomotive {
 		// This is terrible, but allows wheel slip for both legacy and updated hp vs te
 		double traction_N = Math.max(
 				this.getDefinition().getStartingTractionNewtons(gauge),
-				this.getDefinition().getHorsePower(gauge) * 375 / Math.max(Math.abs(speed.imperial()), 1.0)
+				this.getDefinition().getWatt(gauge) * 0.5 / Math.max(Math.abs(speed.imperial()), 1.0)
 		);
 		if (Config.isFuelRequired(gauge)) {
 			traction_N = traction_N / this.getDefinition().getMaxPSI(gauge) * this.getBoilerPressure();
@@ -286,7 +286,7 @@ public class LocomotiveSteam extends Locomotive {
 			}
 			
 			// Pressure relief valve
-			int maxPSI = this.getDefinition().getMaxPSI(gauge);
+			int maxPSI = (int) this.getDefinition().getMaxPSI(gauge);
 			pressureValve = boilerPressure > maxPSI;
 			if (boilerPressure > maxPSI) {
 				waterUsed += boilerPressure - maxPSI;

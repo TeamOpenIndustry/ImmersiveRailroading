@@ -60,6 +60,11 @@ public class Config {
 		@Comment("Trains should break block")
 		public static boolean TrainsBreakBlocks = true;
 
+		@Comment("Which block is reserved if TrainsBreakBlocks is true")
+		public static String[] TrainsIgnoreBlocks = new String[]{
+				"littletiles:blocklittletiles"
+		};
+
 		@Comment("How hard are blocks to break by rolling stock?")
 		@Range(min = 0, max = 500)
 		public static int blockHardness = 50;
