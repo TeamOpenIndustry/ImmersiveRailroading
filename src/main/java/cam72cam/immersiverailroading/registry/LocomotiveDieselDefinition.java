@@ -10,9 +10,11 @@ import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.DieselLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
+import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.resource.Identifier;
 
 import java.io.IOException;
+import java.util.*;
 
 public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     public SoundDefinition idle;
@@ -20,6 +22,7 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
     public SoundDefinition horn;
     private double fuelCapacity_l;
     private int fuelEfficiency;
+    private Map<Fluid, Integer> overriddenFuels;
     private boolean hornSus;
     private int notches;
     private float enginePitchRange;
@@ -42,9 +45,33 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
         if (!isCabCar()) {
             fuelCapacity_l = properties.getValue("fuel_capacity_l").asInteger() * internal_inv_scale * Config.ConfigBalance.DieselLocomotiveTankMultiplier;
             fuelEfficiency = properties.getValue("fuel_efficiency_%").asInteger();
+            List<DataBlock.Value> override = properties.getValues("fuel_override");
+            if (override != null) {
+                Map<Fluid, Integer> filter = new HashMap<>();
+                for (DataBlock.Value value : override) {
+                    String s = value.asString("");
+                    if (s.contains(":")) {
+                        // [fluid_name]:[burn_time]
+                        String[] split = s.split(":");
+                        Fluid fluid = Fluid.getFluid(split[0]);
+                        if(fluid != null){
+                            filter.put(fluid, Integer.valueOf(split[1]));
+                        }
+                    } else if (Config.ConfigBalance.dieselFuels.containsKey(s)) {
+                        Fluid fluid = Fluid.getFluid(s);
+                        if(fluid != null){
+                            filter.put(fluid, Config.ConfigBalance.dieselFuels.get(s));
+                        }
+                    }
+                }
+                overriddenFuels = filter;
+            } else {
+                overriddenFuels = Collections.emptyMap();
+            }
             hasDynamicTractionControl = properties.getValue("dynamic_traction_control").asBoolean();
         } else {
             fuelCapacity_l = 0;
+            overriddenFuels = Collections.emptyMap();
         }
         notches = properties.getValue("throttle_notches").asInteger();
 
@@ -100,5 +127,9 @@ public class LocomotiveDieselDefinition extends LocomotiveDefinition {
 
     public float getEnginePitchRange() {
         return enginePitchRange;
+    }
+
+    public Map<Fluid, Integer> getOverriddenFuels() {
+        return overriddenFuels;
     }
 }

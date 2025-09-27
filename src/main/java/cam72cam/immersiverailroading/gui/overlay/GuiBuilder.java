@@ -364,8 +364,26 @@ public class GuiBuilder {
         if (text != null) {
             String out = text;
             for (Stat stat : Stat.values()) {
-                if (out.contains(stat.toString())) {
-                    out = out.replace(stat.toString(), stat.getValue(stock));
+                String statStr = stat.toString();
+                int index = out.indexOf(statStr);
+                if (index == -1 /* !contain() */ ) continue;
+
+                if (stat.hasDecimalSetting()) {
+                    int decimalIndex = index + statStr.length();
+
+                    if (decimalIndex + 1 < out.length() // Check if we have both dot and number
+                        && out.charAt(decimalIndex) == '.'
+                        && Character.isDigit(out.charAt(decimalIndex + 1))) {
+                        // [stat].[digit(0~5)]
+                        int dig = Character.getNumericValue(out.charAt(decimalIndex + 1));
+                        dig = Math.min(5, Math.max(0, dig));
+
+                        out = out.replace(out.substring(index, decimalIndex + 2), stat.getValue(stock, dig));
+                    } else {
+                        out = out.replace(statStr, stat.getValue(stock));
+                    }
+                } else {
+                    out = out.replace(statStr, stat.getValue(stock));
                 }
             }
             for (GuiText label : new GuiText[]{GuiText.LABEL_THROTTLE, GuiText.LABEL_REVERSER, GuiText.LABEL_BRAKE}) {

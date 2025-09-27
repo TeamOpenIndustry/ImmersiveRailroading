@@ -49,12 +49,16 @@ public class ModelComponent {
                 switch (x) {
                     case "LINVERT":
                         linvert = true;
+                        break;
                     case "INTERIOR":
                         interior = true;
+                        break;
                     case "FULLBRIGHT":
                         fullbright = true;
+                        break;
                     case "ALPHA":
                         transparent = true;
+                        break;
                 }
             }
 

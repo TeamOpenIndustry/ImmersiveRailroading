@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.util.Facing;
@@ -46,57 +45,56 @@ public class PlacementInfo {
 		double hitX = hit.x % 1;
 		double hitZ = hit.z % 1;
 
-		switch(settings.posType) {
-		case FIXED:
-			hitX = 0.5f;
-			hitZ = 0.5f;
-			break;
-		case PIXELS:
-			hitX = ((int)(hitX * 16)) / 16f;
-			hitZ = ((int)(hitZ * 16)) / 16f;
-			break;
-		case PIXELS_LOCKED:
-			hitX = ((int)(hitX * 16)) / 16f;
-			hitZ = ((int)(hitZ * 16)) / 16f;
-
-			if (quarter != 0) {
-				break;
-			}
-
-			switch (facing()) {
-			case EAST:
-			case WEST:
+		switch (settings.posType) {
+			case FIXED:
+				hitX = 0.5f;
 				hitZ = 0.5f;
 				break;
-			case NORTH:
-			case SOUTH:
-				hitX = 0.5f;
+			case PIXELS:
+				hitX = ((int) (hitX * 16)) / 16f;
+				hitZ = ((int) (hitZ * 16)) / 16f;
+				//Fall through
+			case SMOOTH:
+				if (hit.z < 0) {
+					hitZ += 1;
+				}
+				if (hit.x < 0) {
+					hitX += 1;
+				}
 				break;
-			default:
-				break;
-			}
-			break;
-		case SMOOTH:
-			// NOP
-			break;
-		case SMOOTH_LOCKED:
-			if (quarter != 0) {
-				break;
-			}
+			case PIXELS_LOCKED:
+				hitX = ((int) (hitX * 16)) / 16f;
+				hitZ = ((int) (hitZ * 16)) / 16f;
+				//Fall through
+			case SMOOTH_LOCKED:
+				if (quarter != 0) {
+					if (hit.z < 0) {
+						hitZ += 1;
+					}
+					if (hit.x < 0) {
+						hitX += 1;
+					}
+					break;
+				}
 
-			switch (facing()) {
-			case EAST:
-			case WEST:
-				hitZ = 0.5f;
+				switch (facing()) {
+					case EAST:
+					case WEST:
+						hitZ = 0.5f;
+						if (hit.x < 0) {
+							hitX += 1;
+						}
+						break;
+					case NORTH:
+					case SOUTH:
+						hitX = 0.5f;
+						if (hit.z < 0) {
+							hitZ += 1;
+						}
+						break;
+					default:
+				}
 				break;
-			case NORTH:
-			case SOUTH:
-				hitX = 0.5f;
-				break;
-			default:
-				break;
-			}
-			break;
 		}
 
 		this.placementPosition = new Vec3d(new Vec3i(hit)).add(hitX, 0, hitZ);
