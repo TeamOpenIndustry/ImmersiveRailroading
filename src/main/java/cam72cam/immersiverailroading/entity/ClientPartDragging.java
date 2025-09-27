@@ -39,6 +39,8 @@ public class ClientPartDragging {
             if (targetInteractable instanceof Control) {
                 float value = targetStock.getControlPosition((Control<?>) targetInteractable);
                 // Same as GuiBuilder
+                if (((Control<?>) targetInteractable).press || ((Control<?>) targetInteractable).toggle)
+                    return false;
                 if (targetStock instanceof LocomotiveDiesel && targetInteractable.part.type == ModelComponentType.REVERSER_X) {
                     value += scroll > 0 ? 0.5 : -0.5;
                 } else {
