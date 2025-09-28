@@ -40,7 +40,7 @@ public class TrackModel extends OBJModel{
                 groups.put(part, parts);
             }
             groupNamesMapper.put("single", groups);
-            randomMap.put("single", () -> "single");
+            randomMap = Collections.singletonMap("single", () -> "single");
             this.order = new TrackOrder(Collections.singletonList("single"));
             List<String> rails = this.groups().stream()
                                      .filter(group -> TrackModelPart.RAIL_LEFT.is(group) || TrackModelPart.RAIL_RIGHT.is(group))
