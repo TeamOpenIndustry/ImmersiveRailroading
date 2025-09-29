@@ -125,7 +125,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			} catch (SerializationException e) {
 				throw new RuntimeException("Invalid track builder", e);
 			}
-			throw new RuntimeException("Invalid track builder " + debug.toString());
+			throw new RuntimeException("Invalid track builder " + debug);
 		}
 
 		Vec3i mainPos = new Vec3i(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
@@ -168,13 +168,13 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 	@Override
 	public List<VecYawPitch> getRenderData() {
-		List<VecYawPitch> data = new ArrayList<VecYawPitch>();
+		List<VecYawPitch> data = new ArrayList<>();
 
 		double scale = info.settings.gauge.scale();
 		Pair<Double, List<PosStep>> pair = getPathForRender(scale * info.getTrackModel().spacing);
 		List<PosStep> points = pair.getRight();
-        scale = pair.getLeft() / info.getTrackModel().spacing;
-		scale *= 1.005;//Avoid some gaps
+        float renderScale = (float) (pair.getLeft() / info.getTrackModel().spacing);
+		renderScale *= 1.005f;//Avoid some gaps
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
 		int switchSize = 0;
@@ -223,17 +223,17 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				angle = delta(prev.yaw, next.yaw);
 			}
 			if (angle != 0) {
-				VecYawPitch vec = new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, (float) scale, TrackModelPart.RAIL_BASE);
+				VecYawPitch vec = new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, renderScale, TrackModelPart.RAIL_BASE);
 				if (direction == TrackDirection.RIGHT) {
-					vec.addChild(new VecYawPitch(switchPos.x, switchPos.y, switchPos.z, switchPos.yaw, switchPos.pitch, (1 - angle / 180) * (float) scale, TrackModelPart.RAIL_LEFT));
-					vec.addChild(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, (1 + angle / 180) * (float) scale, TrackModelPart.RAIL_RIGHT));
+					vec.addChild(new VecYawPitch(switchPos.x, switchPos.y, switchPos.z, switchPos.yaw, switchPos.pitch, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
+					vec.addChild(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));
 				} else {
-					vec.addChild(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, (1 - angle / 180) * (float) scale, TrackModelPart.RAIL_LEFT));
-					vec.addChild(new VecYawPitch(switchPos.x, switchPos.y, switchPos.z, switchPos.yaw, switchPos.pitch, (1 + angle / 180) * (float) scale, TrackModelPart.RAIL_RIGHT));
+					vec.addChild(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
+					vec.addChild(new VecYawPitch(switchPos.x, switchPos.y, switchPos.z, switchPos.yaw, switchPos.pitch, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));
 				}
 				data.add(vec);
 			} else {
-				data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, (float) scale));
+				data.add(new VecYawPitch(cur.x, cur.y, cur.z, cur.yaw, cur.pitch, renderScale));
 			}
 		}
 		

@@ -56,16 +56,24 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
             muliUnitCapable = true;
             factorOfAdhesion = 0;
         } else {
-            if (properties.getValue("horsepower").asInteger() != null) {
-                power_kW = properties.getValue("horsepower").asInteger() * PowerDisplayType.hpToKW * internal_inv_scale;
+            if (properties.getValue("horsepower").asFloat() != null) {
+                power_kW = properties.getValue("horsepower").asFloat() * PowerDisplayType.hpToKW * internal_inv_scale;
+            } else if (properties.getValue("power_hp").asFloat() != null) {
+                power_kW = properties.getValue("power_hp").asFloat() * PowerDisplayType.hpToKW * internal_inv_scale;
+            } else if (properties.getValue("power_kw").asFloat() != null) {
+                power_kW = properties.getValue("power_kw").asFloat() * internal_inv_scale;
             } else {
-                power_kW = properties.getValue("kilowatt").asInteger() *  internal_inv_scale;
+                power_kW = properties.getValue("power_w").asFloat() / 1000 * internal_inv_scale;
             }
-            if (properties.getValue("tractive_effort_lbf").asInteger() != null) {
-                traction_N = properties.getValue("tractive_effort_lbf").asInteger() * ForceDisplayType.lbfToNewton * internal_inv_scale;
+
+            if (properties.getValue("tractive_effort_lbf").asFloat() != null) {
+                traction_N = properties.getValue("tractive_effort_lbf").asFloat() * ForceDisplayType.lbfToNewton * internal_inv_scale;
+            } else if (properties.getValue("tractive_effort_kn").asFloat() != null) {
+                traction_N = properties.getValue("tractive_effort_kn").asFloat() * 1000 * internal_inv_scale;
             } else {
-                traction_N = properties.getValue("tractive_effort_newton").asInteger() *  internal_inv_scale;
+                traction_N = properties.getValue("tractive_effort_n").asFloat() * internal_inv_scale;
             }
+
             factorOfAdhesion = properties.getValue("factor_of_adhesion").asDouble(4);
             maxSpeed = Speed.fromMetric(properties.getValue("max_speed_kmh").asDouble() * internal_inv_scale);
             muliUnitCapable = properties.getValue("multi_unit_capable").asBoolean();
@@ -90,31 +98,31 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         tips.add(GuiText.LOCO_WORKS.toString(this.works));
         if (!isCabCar) {
             float power = ConfigGraphics.powerUnit.convertFromWatt(this.getWatt(gauge));
-            String p = String.format("%.2f", power);
+            String p = String.format("%.0f", power);
             tips.add(GuiText.LOCO_POWER.toString(p) + ConfigGraphics.powerUnit.toUnitString());
             float force = ConfigGraphics.forceUnit.convertFromNewton(this.getStartingTractionNewtons(gauge));
-            String f = String.format("%.2f", force);
+            String f = String.format("%.0f", force);
             tips.add(GuiText.LOCO_TRACTION.toString(f) + ConfigGraphics.forceUnit.toUnitString());
             float speed = (float) ConfigGraphics.speedUnit.convertFromKmh(this.getMaxSpeed(gauge).metric());
-            String v = String.format("%.2f", speed);
+            String v = String.format("%.0f", speed);
             tips.add(GuiText.LOCO_MAX_SPEED.toString(v) + ConfigGraphics.speedUnit.toUnitString());
         }
         return tips;
     }
 
-    public int getHorsePower(Gauge gauge) {
-        return (int) Math.ceil(gauge.scale() * this.power_kW * PowerDisplayType.kwToHp);
+    public float getHorsePower(Gauge gauge) {
+        return (float) (gauge.scale() * this.power_kW * PowerDisplayType.kwToHp);
     }
 
-    public int getWatt(Gauge gauge) {
-        return (int) Math.ceil(gauge.scale() * this.power_kW * 1000);
+    public float getWatt(Gauge gauge) {
+        return (float) (gauge.scale() * this.power_kW * 1000);
     }
 
     /**
      * @return tractive effort in newtons
      */
-    public int getStartingTractionNewtons(Gauge gauge) {
-        return (int) Math.ceil(gauge.scale() * this.traction_N);
+    public float getStartingTractionNewtons(Gauge gauge) {
+        return (float) (gauge.scale() * this.traction_N);
     }
 
     public Speed getMaxSpeed(Gauge gauge) {
