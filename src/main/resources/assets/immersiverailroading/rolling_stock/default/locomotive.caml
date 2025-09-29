@@ -3,21 +3,27 @@ import: "immersiverailroading:rolling_stock/default/base.caml"
 works = null # Optional: Displayed as part of the item tooltip
 
 properties =
-    hasRadioEquipment = False # Optional: Most locomotives don't support remote control
+    hasRadioEquipment = False      # Optional: Most locomotives don't support remote control
 
-    cab_car = False             # Optional: Cab Cars don't have any motive power, but can be MU'd
-    # The following are ignored if cab_car = True
-    horsepower = null              # Required
-    power_kw = null               # Required if horsepower not defined
-    tractive_effort_lbf = null     # Required
-    tractive_effort_newton = null  # Required if lbf not defined
-    max_speed_kmh = null        # Required
-    multi_unit_capable = False  # Optional: Defaults to true for Diesel Electrics
-
-    isLinkedBrakeThrottle = False # Optional: Should the throttle / brake controls be connected?
-    toggle_bell = True            # Optional: Should the bell be toggled on/off or should it require you to hold a button to activate?
-    cog = False                   # Optional: provides near infinite traction when on cog-enabled track
+    isLinkedBrakeThrottle = False  # Optional: Should the throttle / brake controls be connected?
+    toggle_bell = True             # Optional: Should the bell be toggled on/off or should it require you to hold a button to activate?
+    cog = False                    # Optional: provides near infinite traction when on cog-enabled track
 
     # Overrides
-    independent_brake = True      # Optional: Does this piece of stock have an independent brake?  Usually False except for Locomotives
-    linear_brake_control = False  # Optional: Make brakes move in a linear fashion, TODO FIX/REMOVE THIS
+    independent_brake = True       # Optional: Does this piece of stock have an independent brake?  Defaults to False except for Locomotives
+    linear_brake_control = False   # Optional: Make brakes move in a linear fashion, TODO FIX/REMOVE THIS
+
+    cab_car = False                # Optional: Cab Cars don't have any motive power, but can be MU'd
+
+    # The following are ignored if cab_car = True
+    power_hp = null                # Required: Any power definition
+    power_kw = null
+    power_w = null
+    horsepower = null              # Old format for power
+
+    tractive_effort_lbf = null     # Required: any of the tractive_effort definitions
+    tractive_effort_kn = null      #
+    tractive_effort_n = null       #
+
+    max_speed_kmh = null           # Required
+    multi_unit_capable = False      # Optional: Defaults to true for diesels

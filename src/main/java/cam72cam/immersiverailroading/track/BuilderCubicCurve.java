@@ -62,7 +62,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		}
 	}
 
-	private HashMap<Double, List<PosStep>> cache;
+	private HashMap<Double, Pair<Double, List<PosStep>>> cache;
 
 	public CubicCurve getCurve() {
 		Vec3d nextPos = new Vec3d(new Vec3i(VecUtil.fromYaw(info.settings.length, info.placementInfo.yaw + 45)));
@@ -110,7 +110,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		}
 
 		if (cache.containsKey(targetStepSize)) {
-			return Pair.of(targetStepSize, cache.get(targetStepSize));
+			return cache.get(targetStepSize);
 		}
 
 		List<PosStep> res = new ArrayList<>();
@@ -127,8 +127,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 			count += 1;
 		}
 		double stepSize = length / count;
-		if (stepSize * 3 > 1000){//There may be over 1 pieces in the same cache section, rebuild cache
-			curve.lengthWithCache((int) (stepSize * 3));
+		if (count * 3 > 1000){//There may be over 1 pieces in the same cache section, rebuild cache
+			curve.lengthWithCache(count * 3);
 		}
 
 		List<Vec3d> points = curve.toList(stepSize);
@@ -158,8 +158,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 			}
 			res.add(new PosStep(p, yaw, pitch));
 		}
-		cache.put(targetStepSize, res);
-		return Pair.of(stepSize, cache.get(targetStepSize));
+		cache.put(targetStepSize, Pair.of(stepSize, res));
+		return cache.get(targetStepSize);
 	}
 
 	/* OVERRIDES */
