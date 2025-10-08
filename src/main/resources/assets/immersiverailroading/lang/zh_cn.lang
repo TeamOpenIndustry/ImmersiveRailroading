@@ -236,10 +236,10 @@ multiblock.immersiverailroading:steam_hammer=蒸汽锤
 
 immersiverailroading:crafting_type.casting=需要在铸造盆中铸造
 immersiverailroading:crafting_type.casting_hammer=需要在铸造盆中铸造，并在蒸汽锤中冲压
-immersiverailroading:crafting_type.plate_small=需要小型板材
-immersiverailroading:crafting_type.plate_medium=需要中型板材
-immersiverailroading:crafting_type.plate_large=需要大型板材
-immersiverailroading:crafting_type.plate_boiler=需要锅炉板材
+immersiverailroading:crafting_type.plate_small=需要在板材辊压机中制造
+immersiverailroading:crafting_type.plate_medium=需要在板材辊压机中制造
+immersiverailroading:crafting_type.plate_large=需要在板材辊压机中制造
+immersiverailroading:crafting_type.plate_boiler=需要在板材辊压机中制造，并在锅炉卷板机中处理
 
 itemGroup.immersiverailroading.main=沉浸铁路
 itemGroup.immersiverailroading.locomotive=沉浸铁路丨机车
@@ -251,24 +251,24 @@ death.attack.immersiverailroading:casting=%s 发现熔化的金属并不适合�
 death.attack.immersiverailroading:hitByTrain=%s 被火车创飞了
 death.attack.immersiverailroading:hitByTrainInDarkness=%s 没能察觉飞驰过来的火车头灯
 
-immersiverailroading:detector_mode.simple=当前Augment模式：检测货物
-immersiverailroading:detector_mode.speed=当前Augment模式：检测速度
-immersiverailroading:detector_mode.passengers=当前Augment模式：检测乘客数
-immersiverailroading:detector_mode.cargo=当前Augment模式：检测货物的存储百分比
-immersiverailroading:detector_mode.liquid=当前Augment模式：检测流体的存储百分比
-immersiverailroading:detector_mode.computer=当前Augment模式：使用OC/CC的电脑
-immersiverailroading:loco_control_mode.throttle=当前Augment模式：控制节流阀
-immersiverailroading:loco_control_mode.reverser=当前Augment模式：控制换向器
-immersiverailroading:loco_control_mode.brake=当前Augment模式：控制制动
-immersiverailroading:loco_control_mode.horn=当前Augment模式：控制风笛
-immersiverailroading:loco_control_mode.computer=当前Augment模式：使用OC/CC的电脑
-immersiverailroading:loco_control_mode.bell=当前Augment模式：控制警铃
-immersiverailroading:coupler_augment_mode.engaged=当前Augment模式：连挂车厢
-immersiverailroading:coupler_augment_mode.disengaged=当前Augment模式：解挂车厢
-immersiverailroading:redstone_mode.enabled=当前Augment模式设置为常开
-immersiverailroading:redstone_mode.required=当前Augment模式设置为需要红石信号输入以工作
-immersiverailroading:redstone_mode.inverted=当前Augment模式设置为无红石信号输入以工作
-immersiverailroading:redstone_mode.disabled=当前Augment模式设置为停用
+immersiverailroading:detector_mode.simple=检测货物
+immersiverailroading:detector_mode.speed=检测速度
+immersiverailroading:detector_mode.passengers=检测乘客数
+immersiverailroading:detector_mode.cargo=检测货物的存储百分比
+immersiverailroading:detector_mode.liquid=检测流体的存储百分比
+immersiverailroading:detector_mode.computer=使用OC/CC的电脑
+immersiverailroading:loco_control_mode.throttle=控制节流阀
+immersiverailroading:loco_control_mode.reverser=控制换向器
+immersiverailroading:loco_control_mode.brake=控制制动
+immersiverailroading:loco_control_mode.horn=控制风笛
+immersiverailroading:loco_control_mode.computer=使用OC/CC的电脑
+immersiverailroading:loco_control_mode.bell=控制警铃
+immersiverailroading:coupler_augment_mode.engaged=连挂车厢
+immersiverailroading:coupler_augment_mode.disengaged=解挂车厢
+immersiverailroading:redstone_mode.enabled=常开
+immersiverailroading:redstone_mode.required=有红石信号输入以工作
+immersiverailroading:redstone_mode.inverted=无红石信号输入以工作
+immersiverailroading:redstone_mode.disabled=停用
 
 immersiverailroading:switch_state.none=无
 immersiverailroading:switch_state.straight=直向
@@ -326,7 +326,7 @@ immersiverailroading:entity.tender.k36_tender=K36 Tender
 immersiverailroading:entity.tender.rodgers_460_tender=Rodgers Ten Wheeler Tender
 immersiverailroading:entity.tender.skookum_tender=Skookum Tender
 
-immersiverailroading:entity.hand_car.hand_car_1=Hand Car
+immersiverailroading:entity.hand_car.hand_car_1=手摇车
 
 immersiverailroading:entity.passenger.b70baggage=PRR B70 Baggage
 immersiverailroading:entity.passenger.br_coach_mk1=BR Coach MK1
