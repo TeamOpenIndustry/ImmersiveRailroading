@@ -20,20 +20,20 @@ public class ConfigGraphics {
 	@Comment( "Self explanatory" )
 	public static boolean trainsOnTheBrain = true;
 	
-	@Comment("What unit to use for speedometer. (kmh, mph or ms)" )
+	@Comment("What unit to display speed in (kmh, ms, mph)")
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;
 
-	@Comment("What unit to display pressure in (psi, bar, kpa)")
-	public static PressureDisplayType pressureUnit = PressureDisplayType.psi;
+	@Comment("What unit to display pressure in (psi, kpa, bar)")
+	public static PressureDisplayType pressureUnit = PressureDisplayType.bar;
 
-	@Comment("What unit to display pressure in (psi, bar)")
+	@Comment("What unit to display temperature in (celcius, kelvin, farenheit)")
 	public static TemperatureDisplayType temperatureUnit = TemperatureDisplayType.celcius;
 
-	@Comment("What unit to display locomotive power in (W, kW, horsepower)")
-	public static PowerDisplayType powerUnit = PowerDisplayType.w;
+	@Comment("What unit to display locomotive power in (w, kw, ps (metric horsepower), horsepower (imperial horsepower))")
+	public static PowerDisplayType powerUnit = PowerDisplayType.kw;
 
-	@Comment("What unit to display locomotive traction force in (N, kN, lbf)")
-	public static ForceDisplayType forceUnit = ForceDisplayType.n;
+	@Comment("What unit to display locomotive traction force in (kn, n, lbf)")
+	public static ForceDisplayType forceUnit = ForceDisplayType.kn;
 
 	@Comment( "How long to keep textures in memory after they have left the screen (higher numbers = smoother game play, lower numbers = less GPU memory used)")
 	@Range(min = 0, max = 100)

@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity.physics.chrono;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.world.World;
@@ -63,7 +64,7 @@ public class ClientChronoState implements ChronoState {
             client.tickID = server.tickID;
         } else {
             // Standard skew assumption
-            client.tickSkew += Math.max(-5, Math.min(5, delta)) / 100;
+            client.tickSkew += MathUtil.clamp(delta, -5, 5) / 100;
         }
     }
 

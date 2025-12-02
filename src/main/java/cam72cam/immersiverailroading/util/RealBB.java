@@ -166,7 +166,7 @@ public class RealBB implements IBoundingBox {
 		double hack = 0.05;
 		Double intersect = intersectsAt(other.min().subtract(hack, 0, hack), other.max().add(hack, 0, hack), true).getRight();
 		double minY = other.min().y;
-		return Math.max(-0.1, Math.min(0.1, intersect - minY));
+		return MathUtil.clamp(intersect - minY, -0.1, 0.1);
 	}
 	@Override
 	public double calculateZOffset(IBoundingBox other, double offsetZ) {
@@ -214,17 +214,16 @@ public class RealBB implements IBoundingBox {
 			actualYMax = this.centerY;
 
 			Rectangle2D bds = otherShape.getBounds2D();
-			
 
 			double px = bds.getMinX() - (this.centerX - length/2);
-			double pz =bds.getMinY() - (this.centerZ - width/2);
+			double pz = bds.getMinY() - (this.centerZ - width/2);
 			double Px = bds.getMaxX() - (this.centerX - length/2);
-			double Pz =bds.getMaxY() - (this.centerZ - width/2);
-			
-			double cx = Math.max(0, Math.min(length, px));
-			double cz = Math.max(0, Math.min(width, pz));
-			double Cx = Math.max(0, Math.min(length, Px));
-			double Cz = Math.max(0, Math.min(width, Pz));
+			double Pz = bds.getMaxY() - (this.centerZ - width/2);
+
+			double cx = MathUtil.clamp(px, 0, length);
+			double cz = MathUtil.clamp(pz, 0, width);
+			double Cx = MathUtil.clamp(Px, 0, length);
+			double Cz = MathUtil.clamp(Pz, 0, width);
 
 			cx = (cx/length*xRes);
 			cz = (cz/width*zRes);

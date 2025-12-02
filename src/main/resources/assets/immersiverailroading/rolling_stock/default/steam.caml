@@ -3,10 +3,12 @@ import: "immersiverailroading:rolling_stock/default/locomotive.caml"
 properties =
     # The following is ignored if cab_car is set to True
     water_capacity_l = null   # Required: Boiler fluid capacity in liters
-    max_pressure_psi = null   # Required: Any max pressure definition
-    max_pressure_bar = null
+
+    max_pressure_bar = null   # Required: Any max pressure definition
     max_pressure_kpa = null
+    max_pressure_psi = null
     max_psi = null            # Old format for max pressure
+
     firebox =                 # Firebox Properties
         slots = null          # Required: Number of slots in this container
         width = null          # Required: Width of the container, recommended to be a numeric factor of the width ex: 32 and 8

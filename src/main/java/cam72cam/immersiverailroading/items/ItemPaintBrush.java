@@ -147,7 +147,7 @@ public class ItemPaintBrush extends CustomItem {
 					getPlayer().sendMessage(ChatText.BRUSH_NO_VARIANTS.getMessage());
 				} else if (Config.ConfigDebug.debugPaintBrush) {
 					//This is a debug log so use the untranslated Mode name
-					getPlayer().sendMessage(ChatText.BRUSH_NEXT.getMessage(
+					getPlayer().sendMessage(ChatText.BRUSH_NEXT_DEBUG.getMessage(
 							stock.getDefinition().textureNames.getOrDefault(stock.getTexture(), "Unknown"),
 							mode.toTranslatedString()));
 				}

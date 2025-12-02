@@ -3,10 +3,10 @@ package cam72cam.immersiverailroading.physics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
-import cam72cam.immersiverailroading.track.PosStep;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.math.Rotation;
@@ -172,7 +172,7 @@ public class MovementTrack {
 			 * trying to move.  Instead we should probably calculate the vector between the closest pos
 			 * and the current pos and move distance along that.  How would that work for slopes at the ends? just fine?
 			 */
-			List<PosStep> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25 * rail.info.settings.gauge.scale());
+			List<VecYPR> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25 * rail.info.settings.gauge.scale());
 			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.getPos()).add(0, heightOffset, 0);
 			Vec3d target = currentPosition.add(delta);
 			Vec3d relative = target.subtract(center);
@@ -183,8 +183,8 @@ public class MovementTrack {
 			}
 			if (positions.size() == 1) {
 				// track with length == 1
-				PosStep pos = positions.get(0);
-				Vec3d offset = VecUtil.fromYaw(delta.length(), pos.yaw);
+				VecYPR pos = positions.get(0);
+				Vec3d offset = VecUtil.fromYaw(delta.length(), pos.getYaw());
 				Vec3d result = currentPosition.add(offset);
 				Vec3d resultOpposite = currentPosition.subtract(offset);
 				if (result.distanceToSquared(target) < resultOpposite.distanceToSquared(target)) {
@@ -226,8 +226,8 @@ public class MovementTrack {
 				}
 			}
 
-			PosStep leftPos = positions.get(left);
-			PosStep rightPos = positions.get(right);
+			VecYPR leftPos = positions.get(left);
+			VecYPR rightPos = positions.get(right);
 
 			if (leftDistance < 0.000001) {
 				return center.add(leftPos);

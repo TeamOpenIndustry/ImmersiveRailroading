@@ -60,6 +60,8 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
                 power_kW = properties.getValue("horsepower").asFloat() * PowerDisplayType.hpToKW * internal_inv_scale;
             } else if (properties.getValue("power_hp").asFloat() != null) {
                 power_kW = properties.getValue("power_hp").asFloat() * PowerDisplayType.hpToKW * internal_inv_scale;
+            } else if (properties.getValue("power_ps").asFloat() != null) {
+                power_kW = properties.getValue("power_ps").asFloat() * PowerDisplayType.PSToKW * internal_inv_scale;
             } else if (properties.getValue("power_kw").asFloat() != null) {
                 power_kW = properties.getValue("power_kw").asFloat() * internal_inv_scale;
             } else {
@@ -99,19 +101,19 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
         if (!isCabCar) {
             float power = ConfigGraphics.powerUnit.convertFromWatt(this.getWatt(gauge));
             String p = String.format("%.0f", power);
-            tips.add(GuiText.LOCO_POWER.toString(p) + ConfigGraphics.powerUnit.toUnitString());
+            tips.add(GuiText.LOCO_POWER.toString(p) + " " + ConfigGraphics.powerUnit.toUnitString());
             float force = ConfigGraphics.forceUnit.convertFromNewton(this.getStartingTractionNewtons(gauge));
             String f = String.format("%.0f", force);
-            tips.add(GuiText.LOCO_TRACTION.toString(f) + ConfigGraphics.forceUnit.toUnitString());
+            tips.add(GuiText.LOCO_TRACTION.toString(f) + " " + ConfigGraphics.forceUnit.toUnitString());
             float speed = (float) ConfigGraphics.speedUnit.convertFromKmh(this.getMaxSpeed(gauge).metric());
             String v = String.format("%.0f", speed);
-            tips.add(GuiText.LOCO_MAX_SPEED.toString(v) + ConfigGraphics.speedUnit.toUnitString());
+            tips.add(GuiText.LOCO_MAX_SPEED.toString(v) + " " + ConfigGraphics.speedUnit.toUnitString());
         }
         return tips;
     }
 
     public float getHorsePower(Gauge gauge) {
-        return (float) (gauge.scale() * this.power_kW * PowerDisplayType.kwToHp);
+        return (float) (gauge.scale() * this.power_kW * PowerDisplayType.kWToHp);
     }
 
     public float getWatt(Gauge gauge) {

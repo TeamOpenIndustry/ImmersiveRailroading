@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.Quilling;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
@@ -64,21 +65,21 @@ public class Whistle {
                         soundDampener = 0.4f;
                     }
                     if (soundDampener < 1) {
-                        soundDampener += 0.1;
+                        soundDampener += 0.1f;
                     }
                     delta = hornPull - pullString;
                 } else {
                     if (soundDampener > 0) {
-                        soundDampener -= 0.07;
+                        soundDampener -= 0.07f;
                     }
                     // Player probably released key or has net lag
                     delta = -pullString;
                 }
 
                 if (pullString == 0) {
-                    pullString += delta * 0.55;
+                    pullString += delta * 0.55f;
                 } else {
-                    pullString += Math.max(Math.min(delta, maxDelta), -maxDelta);
+                    pullString += MathUtil.clamp(delta, -maxDelta, maxDelta);
                 }
                 pullString = Math.min(pullString, (float) quilling.maxPull);
 
@@ -147,7 +148,7 @@ public class Whistle {
 
             float darken = 0;
             float thickness = 1;
-            double smokeMod = Math.min(1, Math.max(0.2, Math.abs(stock.getCurrentSpeed().minecraft()) * 2));
+            double smokeMod = MathUtil.clamp(Math.abs(stock.getCurrentSpeed().minecraft()) * 2, 0.2, 1);
             int lifespan = (int) (40 * (1 + smokeMod * stock.gauge.scale()));
             double verticalSpeed = 0.8f * stock.gauge.scale();
             double size = 0.3 * (0.8 + smokeMod) * stock.gauge.scale();

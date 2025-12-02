@@ -135,14 +135,14 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	}
 
 	@Override
-	public List<VecYawPitch> getRenderData() {
-		List<VecYawPitch> data = straightBuilder.getRenderData();
+	public List<VecYPR> getRenderData() {
+		List<VecYPR> data = straightBuilder.getRenderData();
 		data.addAll(turnBuilder.getRenderData());
 		return data;
 	}
 
 	@Override
-	public List<PosStep> getPath(double stepSize) {
+	public List<VecYPR> getPath(double stepSize) {
 		return realStraightBuilder.getPath(stepSize);
 	}
 }

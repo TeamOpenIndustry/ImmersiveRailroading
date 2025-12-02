@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.gui.screen.IScreen;
@@ -118,7 +119,7 @@ public class PlateRollerGUI implements IScreen {
 		ItemPlate.Data data = new ItemPlate.Data(currentItem);
 		data.gauge = gauge;
 		data.write();
-		currentItem.setCount(Math.min(64, Math.max(1, (int) Math.floor(data.type.platesPerBlock() / gauge.scale()))));
+		currentItem.setCount(MathUtil.clamp((int) Math.floor(data.type.platesPerBlock() / gauge.scale()), 1, 64));
 		tile.setCraftItem(currentItem);
     }
 }

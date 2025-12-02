@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.util.JSON;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.mod.gui.Progress;
 import cam72cam.mod.resource.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
@@ -131,7 +132,8 @@ public class DefinitionManager {
             ImmersiveRailroading.catching(ex);
         }
 
-        int loadingThreads = Math.max(1, Math.min(processors, (int) (maxMemory / (ConfigPerformance.megabytesReservedPerStockLoadingThread * 1024L * 1024L))));
+        long bytesPerThread = ConfigPerformance.megabytesReservedPerStockLoadingThread * 1024L * 1024L;
+        int loadingThreads = MathUtil.clamp((int) (maxMemory / bytesPerThread), 1, processors);
         ImmersiveRailroading.info("Using %s threads to load Immersive Railroading (%sMB per thread)", loadingThreads, ConfigPerformance.megabytesReservedPerStockLoadingThread);
         ForkJoinPool stockLoadingPool = new ForkJoinPool(loadingThreads, pool -> {
             final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);

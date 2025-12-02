@@ -45,16 +45,15 @@ chat.immersiverailroading:build.missing=缺失 %s
 chat.immersiverailroading:augment.set=Augment过滤器设置为仅与 %s 交互
 chat.immersiverailroading:augment.reset=清空Augment过滤器
 chat.immersiverailroading:misc.wood_planks=木板
-chat.immersiverailroading:build.invalid_block=（x=%s y=%s z=%s）处有非法方块
+chat.immersiverailroading:build.invalid_block=（x=%s y=%s z=%s）处有不可替换的方块，请先清除后再放置多方块结构！
 chat.immersiverailroading:radio.link=遥控卡已连接到机车
 chat.immersiverailroading:radio.relink=遥控卡已重连到新的机车
 chat.immersiverailroading:radio.unlink=遥控卡已与机车断开连接
 chat.immersiverailroading:radio.nolink=遥控卡未连接到任何机车
 chat.immersiverailroading:radio.cant_link=%s 机车没有无线控制系统，无法连接
 chat.immersiverailroading:brush.no.variants=这辆车没有涂装变体
-#Used for debug, don't translate
-chat.immersiverailroading:brush.next=This stock's livery has been set to %s using %s
-chat.immersiverailroading:brush.mode.set=油漆刷模式已切换为: %s
+chat.immersiverailroading:brush.next_debug=这辆车的涂装已设置为：%s（%s模式）
+chat.immersiverailroading:brush.mode.set=油漆刷模式已切换为：%s
 chat.immersiverailroading:brush.mode.gui=涂装选择菜单
 chat.immersiverailroading:brush.mode.random_single=随机（仅此车厢）
 chat.immersiverailroading:brush.mode.random_coupled=随机 (整列车)
@@ -63,25 +62,25 @@ chat.immersiverailroading:switch_state.locked=道岔方向已锁定为 %s
 chat.immersiverailroading:switch_state.reset=最后使用此钥匙锁定的道岔已成功解锁!
 chat.immersiverailroading:switch_state.cant_reset=此钥匙尚未与任何道岔绑定!
 chat.immersiverailroading:switch_state.already_reset=最后使用此钥匙锁定的道岔已被解锁!
-chat.immersiverailroading:multiblock.select=已选择多方块结构: %s
+chat.immersiverailroading:multiblock.select=已选择多方块结构：%s
 
 gui.immersiverailroading:label.brake=制动
 gui.immersiverailroading:label.throttle=节流阀
 gui.immersiverailroading:label.reverser=换向器
-gui.immersiverailroading:slider.zoom=缩放比例:
+gui.immersiverailroading:slider.zoom=缩放比例：
 gui.immersiverailroading:selector.page=第 %s 页，共 %s 页
 gui.immersiverailroading:selector.type=类型：%s
 gui.immersiverailroading:selector.gauge=轨距：%s
-gui.immersiverailroading:selector.track=轨道样式: %s
+gui.immersiverailroading:selector.track=轨道样式：%s
 gui.immersiverailroading:selector.quarters=%s 度弯道
 gui.immersiverailroading:selector.curvosity=%s 曲率
 gui.immersiverailroading:selector.rail_bed=道床类型：%s
 gui.immersiverailroading:selector.rail_bed_fill=道床填方类型：%s
 gui.immersiverailroading:selector.position=位置锁定方式：%s
-gui.immersiverailroading:selector.smoothing=垂直平滑: %s
+gui.immersiverailroading:selector.smoothing=垂直平滑：%s
 gui.immersiverailroading:selector.direction=方向：%s
-gui.immersiverailroading:selector.transfer_table_entry_count=移车台轨道数: %s
-gui.immersiverailroading:selector.transfer_table_entry_spacing=移车台轨道间距: %s
+gui.immersiverailroading:selector.transfer_table_entry_count=移车台轨道数：%s
+gui.immersiverailroading:selector.transfer_table_entry_spacing=移车台轨道间距：%s
 gui.immersiverailroading:selector.place_blueprint=放置蓝图
 gui.immersiverailroading:selector.grade_crossing=设置为平交道口
 gui.immersiverailroading:selector.plate_type=板材类型：%s
@@ -99,7 +98,7 @@ gui.immersiverailroading:item.radio_card.linked_to=已连接至 %s
 gui.immersiverailroading:item.radio_card.not_linked=未连接至任何机车
 
 gui.immersiverailroading:item.track_exchanger=对空气右击打开GUI，对轨道右击应用所选类型
-gui.immersiverailroading:item.paint_brush.mode=当前模式: %s
+gui.immersiverailroading:item.paint_brush.mode=当前模式：%s
 gui.immersiverailroading:item.paint_brush.description=潜行右击以循环切换模式
 gui.immersiverailroading:none=无
 
@@ -109,16 +108,16 @@ gui.immersiverailroading:track.gauge=轨距：%s
 gui.immersiverailroading:track.quarters=%s 度转弯
 gui.immersiverailroading:track.curvosity=%s 曲率
 gui.immersiverailroading:track.position=位置锁定方式：%s
+gui.immersiverailroading:track.smoothing=垂直平滑：%s
 gui.immersiverailroading:track.direction=方向：%s
-gui.immersiverailroading:track.smoothing=垂直平滑: %s
 gui.immersiverailroading:track.rail_bed=道床：%s
 gui.immersiverailroading:track.rail_bed_fill=道床填方：%s
 gui.immersiverailroading:track.place_blueprint_true=放置轨道蓝图
 gui.immersiverailroading:track.place_blueprint_false=直接放置轨道
 
 gui.immersiverailroading:loco.works=服务公司：%s
-gui.immersiverailroading:loco.horse_power=马力：%s
-gui.immersiverailroading:loco.tractive_effort=牵引力：%s 牛
+gui.immersiverailroading:loco.power=功率：%s
+gui.immersiverailroading:loco.tractive_effort=牵引力：%s
 gui.immersiverailroading:loco.max_speed=最高速度：%s
 gui.immersiverailroading:stock.gauge=轨距：%s
 gui.immersiverailroading:stock.texture=涂装：%s
@@ -129,14 +128,14 @@ gui.immersiverailroading:stock.weight=重量：%s Kg
 gui.immersiverailroading:stock.modeler=模型作者：%s
 gui.immersiverailroading:stock.pack=所属资源包：%s
 
+gui.immersiverailroading:overlay.on=开
+gui.immersiverailroading:overlay.off=关
+
 immersiverailroading:gauge.brunel=布鲁内尔轨
 immersiverailroading:gauge.standard=标准轨
 immersiverailroading:gauge.narrow=窄轨
 immersiverailroading:gauge.minecraft=Minecraft轨
 immersiverailroading:gauge.model=模型轨
-
-gui.immersiverailroading:overlay.on=开
-gui.immersiverailroading:overlay.off=关
 
 immersiverailroading:plate.small=小型板材
 immersiverailroading:plate.medium=中型板材
@@ -189,12 +188,12 @@ part.immersiverailroading:component.crankshaft=发动机曲轴
 part.immersiverailroading:component.piston=活塞
 part.immersiverailroading:component.fan=风机
 part.immersiverailroading:component.drive_shaft=传动轴
-part.immersiverailroading:component.smokebox=烟箱
 part.immersiverailroading:component.gearbox=传动齿轮箱
 part.immersiverailroading:component.fluid_coupling=液力耦合器
 part.immersiverailroading:component.final_drive=最终传动
 part.immersiverailroading:component.torque_converter=液力变矩器
 part.immersiverailroading:component.firebox=燃烧室
+part.immersiverailroading:component.smokebox=烟箱
 part.immersiverailroading:component.steam_chest=汽室
 part.immersiverailroading:component.steam_chest_pos=车架汽室
 part.immersiverailroading:component.boiler_segment=锅炉段
@@ -237,10 +236,10 @@ multiblock.immersiverailroading:steam_hammer=蒸汽锤
 
 immersiverailroading:crafting_type.casting=需要在铸造盆中铸造
 immersiverailroading:crafting_type.casting_hammer=需要在铸造盆中铸造，并在蒸汽锤中冲压
-immersiverailroading:crafting_type.plate_small=需要小型板材
-immersiverailroading:crafting_type.plate_medium=需要中型板材
-immersiverailroading:crafting_type.plate_large=需要大型板材
-immersiverailroading:crafting_type.plate_boiler=需要锅炉板材
+immersiverailroading:crafting_type.plate_small=需要在板材辊压机中制造
+immersiverailroading:crafting_type.plate_medium=需要在板材辊压机中制造
+immersiverailroading:crafting_type.plate_large=需要在板材辊压机中制造
+immersiverailroading:crafting_type.plate_boiler=需要在板材辊压机中制造，并在锅炉卷板机中处理
 
 itemGroup.immersiverailroading.main=沉浸铁路
 itemGroup.immersiverailroading.locomotive=沉浸铁路丨机车
@@ -252,24 +251,24 @@ death.attack.immersiverailroading:casting=%s 发现熔化的金属并不适合�
 death.attack.immersiverailroading:hitByTrain=%s 被火车创飞了
 death.attack.immersiverailroading:hitByTrainInDarkness=%s 没能察觉飞驰过来的火车头灯
 
-immersiverailroading:detector_mode.simple=当前Augment模式：检测货物
-immersiverailroading:detector_mode.speed=当前Augment模式：检测速度
-immersiverailroading:detector_mode.passengers=当前Augment模式：检测乘客数
-immersiverailroading:detector_mode.cargo=当前Augment模式：检测货物的存储百分比
-immersiverailroading:detector_mode.liquid=当前Augment模式：检测流体的存储百分比
-immersiverailroading:detector_mode.computer=当前Augment模式：使用OC/CC的电脑
-immersiverailroading:loco_control_mode.throttle=当前Augment模式：控制节流阀
-immersiverailroading:loco_control_mode.reverser=当前Augment模式：控制换向器
-immersiverailroading:loco_control_mode.brake=当前Augment模式：控制制动
-immersiverailroading:loco_control_mode.horn=当前Augment模式：控制风笛
-immersiverailroading:loco_control_mode.computer=当前Augment模式：使用OC/CC的电脑
-immersiverailroading:loco_control_mode.bell=当前Augment模式：控制警铃
-immersiverailroading:coupler_augment_mode.engaged=当前Augment模式：连挂车厢
-immersiverailroading:coupler_augment_mode.disengaged=当前Augment模式：解挂车厢
-immersiverailroading:redstone_mode.enabled=当前Augment模式设置为常开
-immersiverailroading:redstone_mode.required=当前Augment模式设置为需要红石信号输入以工作
-immersiverailroading:redstone_mode.inverted=当前Augment模式设置为无红石信号输入以工作
-immersiverailroading:redstone_mode.disabled=当前Augment模式设置为停用
+immersiverailroading:detector_mode.simple=检测货物
+immersiverailroading:detector_mode.speed=检测速度
+immersiverailroading:detector_mode.passengers=检测乘客数
+immersiverailroading:detector_mode.cargo=检测货物的存储百分比
+immersiverailroading:detector_mode.liquid=检测流体的存储百分比
+immersiverailroading:detector_mode.computer=使用OC/CC的电脑
+immersiverailroading:loco_control_mode.throttle=控制节流阀
+immersiverailroading:loco_control_mode.reverser=控制换向器
+immersiverailroading:loco_control_mode.brake=控制制动
+immersiverailroading:loco_control_mode.horn=控制风笛
+immersiverailroading:loco_control_mode.computer=使用OC/CC的电脑
+immersiverailroading:loco_control_mode.bell=控制警铃
+immersiverailroading:coupler_augment_mode.engaged=连挂车厢
+immersiverailroading:coupler_augment_mode.disengaged=解挂车厢
+immersiverailroading:redstone_mode.enabled=常开
+immersiverailroading:redstone_mode.required=有红石信号输入以工作
+immersiverailroading:redstone_mode.inverted=无红石信号输入以工作
+immersiverailroading:redstone_mode.disabled=停用
 
 immersiverailroading:switch_state.none=无
 immersiverailroading:switch_state.straight=直向
@@ -294,7 +293,7 @@ ir_keys.dead_mans_switch=失能开关
 ir_keys.start_stop_engine=启动/停止发动机
 ir_keys.config=配置菜单
 
-# Default pack's train name
+# Default pack's train name. Translation is optional.
 immersiverailroading:entity.locomotives.a1_peppercorn=A1 Peppercorn
 immersiverailroading:entity.locomotives.a5_switcher=A5 Switcher
 immersiverailroading:entity.locomotives.alco_rs1=RS-1
@@ -327,7 +326,7 @@ immersiverailroading:entity.tender.k36_tender=K36 Tender
 immersiverailroading:entity.tender.rodgers_460_tender=Rodgers Ten Wheeler Tender
 immersiverailroading:entity.tender.skookum_tender=Skookum Tender
 
-immersiverailroading:entity.hand_car.hand_car_1=Hand Car
+immersiverailroading:entity.hand_car.hand_car_1=手摇车
 
 immersiverailroading:entity.passenger.b70baggage=PRR B70 Baggage
 immersiverailroading:entity.passenger.br_coach_mk1=BR Coach MK1

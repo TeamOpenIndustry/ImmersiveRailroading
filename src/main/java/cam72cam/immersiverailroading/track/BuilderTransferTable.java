@@ -64,24 +64,24 @@ public class BuilderTransferTable extends BuilderBase {
     }
 
     @Override
-    public List<VecYawPitch> getRenderData() {
-        List<VecYawPitch> list = new ArrayList<>();
+    public List<VecYPR> getRenderData() {
+        List<VecYPR> list = new ArrayList<>();
 
         if (info.itemHeld) {
             for (int i = 0; i < info.settings.transfertableEntryCount; i++) {
                 Vec3i head = new Vec3i(-i * info.settings.transfertableEntrySpacing, 1, 0)
                         .rotate(Rotation.from(info.placementInfo.facing()));
-                list.add(new VecYawPitch(head.x, head.y, head.z, info.placementInfo.facing().getAngle()));
+                list.add(new VecYPR(head.x, head.y, head.z, info.placementInfo.facing().getAngle()));
 
                 Vec3i tail = new Vec3i(-i * info.settings.transfertableEntrySpacing, 1, info.settings.length - 1)
                         .rotate(Rotation.from(info.placementInfo.facing()));
-                list.add(new VecYawPitch(tail.x, tail.y, tail.z, info.placementInfo.facing().getAngle()));
+                list.add(new VecYPR(tail.x, tail.y, tail.z, info.placementInfo.facing().getAngle()));
             }
         }
 
         Vec3d center = new Vec3d(-info.tablePos, 1, info.settings.length / 2d - 0.5).rotateYaw(-info.placementInfo.facing().getAngle() + 180);
-        list.add(new VecYawPitch(center.x, center.y, center.z, info.placementInfo.facing().getAngle(), 0, info.settings.length,
-                                 TrackModelPart.RAIL_LEFT, TrackModelPart.RAIL_RIGHT, TrackModelPart.TABLE));
+        list.add(new VecYPR(center.x, center.y, center.z, info.placementInfo.facing().getAngle(), 0, 0, info.settings.length,
+                            TrackModelPart.RAIL_LEFT, TrackModelPart.RAIL_RIGHT, TrackModelPart.TABLE));
         return list;
     }
 

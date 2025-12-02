@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
@@ -477,7 +478,7 @@ public class TrackGui implements IScreen {
 						length = 5;
 					}
 					if (settings.type == TrackItems.TURNTABLE) {
-						length = Math.min(25, Math.max(10, length));
+						length = MathUtil.clamp(length, 10, 25);
 					}
 					b.length = length;
 				}),

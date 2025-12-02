@@ -1,12 +1,14 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.MergedBlocks;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.config.ConfigFile;
@@ -43,7 +45,7 @@ public class GuiBuilder {
     private final String text;
     private final float textHeight;
 
-    private final Readouts readout;
+    private Readouts readout;
     private final String control;
     private final String setting;
     private final String texture_variant;
@@ -168,7 +170,16 @@ public class GuiBuilder {
 
         // Controls
         String readout = data.getValue("readout").asString();
-        this.readout = readout != null ? Readouts.valueOf(readout.toUpperCase(Locale.ROOT)) : null;
+        if (readout != null) {
+            try {
+                this.readout = Readouts.valueOf(readout.toUpperCase(Locale.ROOT));
+            } catch (Exception e) {
+                ImmersiveRailroading.warn("The readout %s is not a valid readout, skipped.", readout.toUpperCase(Locale.ROOT));
+                this.readout = null;
+            }
+        } else {
+            this.readout = null;
+        }
         this.control = data.getValue("control").asString();
         this.setting = data.getValue("setting").asString();
         this.setting_default = data.getValue("setting_default").asFloat();
@@ -376,7 +387,7 @@ public class GuiBuilder {
                         && Character.isDigit(out.charAt(decimalIndex + 1))) {
                         // [stat].[digit(0~5)]
                         int dig = Character.getNumericValue(out.charAt(decimalIndex + 1));
-                        dig = Math.min(5, Math.max(0, dig));
+                        dig = MathUtil.clamp(dig, 0, 5);
 
                         out = out.replace(out.substring(index, decimalIndex + 2), stat.getValue(stock, dig));
                     } else {

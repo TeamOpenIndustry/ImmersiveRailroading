@@ -10,7 +10,6 @@ import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -85,7 +84,10 @@ public class TileRailPreview extends BlockEntityTickable {
 							? placementInfo.yaw + ((settings.direction == TrackDirection.LEFT ? -1 : 1) * (settings.degrees / 2)) //Calculate arc direction for turn
 							: placementInfo.yaw; //Simply use its yaw
 				Vec3d unit = new Vec3d(0, 0, 1).rotateYaw(yaw);
-				int shadowLength = (int) Math.round(VecUtil.dotProduct(placeOffset, unit));
+				//TODO Replace me with UMC method once #170 is merged
+                int shadowLength = (int) Math.round(placeOffset.x * unit.x
+													+ placeOffset.y * unit.y
+													+ placeOffset.z * unit.z);
 				int length;
 
 				switch (settings.type) {
@@ -122,7 +124,7 @@ public class TileRailPreview extends BlockEntityTickable {
 				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getYawHead(), hit));
 			}
 			return false;
-		} else if (!player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE)) {
+		} else if (getWorld().isClient && !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE)) {
 			GuiTypes.RAIL_PREVIEW.open(player, getPos());
 			return true;
 		}
