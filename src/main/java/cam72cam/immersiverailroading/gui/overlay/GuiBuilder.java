@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
@@ -45,7 +44,7 @@ public class GuiBuilder {
     private final String text;
     private final float textHeight;
 
-    private Readouts readout;
+    private final Readouts readout;
     private final String control;
     private final String setting;
     private final String texture_variant;
@@ -170,16 +169,7 @@ public class GuiBuilder {
 
         // Controls
         String readout = data.getValue("readout").asString();
-        if (readout != null) {
-            try {
-                this.readout = Readouts.valueOf(readout.toUpperCase(Locale.ROOT));
-            } catch (Exception e) {
-                ImmersiveRailroading.warn("The readout %s is not a valid readout, skipped.", readout.toUpperCase(Locale.ROOT));
-                this.readout = null;
-            }
-        } else {
-            this.readout = null;
-        }
+        this.readout = readout != null ? Readouts.valueOf(readout.toUpperCase(Locale.ROOT)) : null;
         this.control = data.getValue("control").asString();
         this.setting = data.getValue("setting").asString();
         this.setting_default = data.getValue("setting_default").asFloat();
