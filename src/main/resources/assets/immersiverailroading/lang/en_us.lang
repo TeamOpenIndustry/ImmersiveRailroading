@@ -20,6 +20,7 @@ item.immersiverailroading:item_golden_spike.name=Golden Spike
 item.immersiverailroading:item_radio_control_card.name=Train Radio-control Card
 item.immersiverailroading:item_switch_key.name=Switch Key
 item.immersiverailroading:item_track_exchanger.name=Track Exchanger
+item.immersiverailroading:item_consist_placer.name=Consist Placer
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
@@ -115,6 +116,8 @@ gui.immersiverailroading:track.rail_bed_fill=Bed Fill:    %s
 gui.immersiverailroading:track.place_blueprint_true=Place:      Blueprint
 gui.immersiverailroading:track.place_blueprint_false=Place:      Track
 
+
+gui.immersiverailroading:unit.count=Stocks:         %s
 gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.power=Power:          %s
 gui.immersiverailroading:loco.tractive_effort=Tractive Eff:  %s
@@ -246,6 +249,7 @@ itemGroup.immersiverailroading.locomotive=Immersive Railroading Locomotives
 itemGroup.immersiverailroading.stock=Immersive Railroading Stock
 itemGroup.immersiverailroading.passenger=Immersive Railroading Passenger
 itemGroup.immersiverailroading.components=Immersive Railroading Components
+itemGroup.immersiverailroading.unit=Immersive Railroading Units
 
 death.attack.immersiverailroading:casting=%s discovered that molten metal does not make a good swimming pool
 death.attack.immersiverailroading:hitByTrain=%s failed to outrun a train

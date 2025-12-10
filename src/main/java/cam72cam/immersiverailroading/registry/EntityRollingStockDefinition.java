@@ -817,6 +817,13 @@ public abstract class EntityRollingStockDefinition {
         return tips;
     }
 
+    public List<String> getModelerTooltip() {
+        List<String> tips = new ArrayList<>();
+        tips.add(GuiText.MODELER_TOOLTIP.toString(modelerName));
+        tips.add(GuiText.PACK_TOOLTIP.toString(packName));
+        return tips;
+    }
+
     protected StockModel<?, ?> createModel() throws Exception {
         return new StockModel<>(this);
     }

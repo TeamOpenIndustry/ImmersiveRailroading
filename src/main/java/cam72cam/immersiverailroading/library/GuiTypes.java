@@ -27,6 +27,9 @@ public class GuiTypes {
     public static final BlockGUI RAIL_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, TrackGui::new);
     public static final GUI TRACK_EXCHANGER = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "TRACK_EXCHANGER"), TrackExchangerGui::new);
     public static final GUI PAINT_BRUSH = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "PAINT_BRUSH"), PaintBrushPicker::new);
+    public static final GUI CONSIST_PLACER_MAIN = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "consist"), ConsistPlacerGui::new);
+    public static final GUI CONSIST_EDIT = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "consist_edit"), ConsistPlacerGui.EditPanel::new);
+    public static final GUI CONSIST_ADD_STOCK = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "consist_add"), ConsistPlacerGui.AdditionPanel::new);
 
     public static final BlockGUI STEAM_HAMMER = GuiRegistry.registerBlockContainer(TileMultiblock.class, SteamHammerContainer::new);
     public static final BlockGUI CASTING = GuiRegistry.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);

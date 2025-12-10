@@ -1,13 +1,9 @@
 package cam72cam.immersiverailroading.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -15,9 +11,12 @@ import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.registry.ConsistDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.mod.text.PlayerMessage;
 import cam72cam.mod.util.DegreeFuncs;
 import cam72cam.mod.world.World;
 import cam72cam.mod.item.ClickResult;
@@ -100,6 +99,102 @@ public class SpawnUtil {
 			stack.setCount(stack.getCount()-1);
 			player.setHeldItem(hand, stack);
 		}
+		return ClickResult.ACCEPTED;
+	}
+
+	public static ClickResult placeConsist(Player player, World worldIn, Vec3i pos, List<ConsistDefinition.Stock> stocks, Map<String, Float> defaultCGs) {
+		if(worldIn.isClient) {
+			return ClickResult.REJECTED;
+		}
+
+		Vec3d spawnPos = new Vec3d(pos);
+		ITrack initTE = ITrack.get(worldIn, spawnPos.add(0, 0.7, 0), true);
+		if (initTE == null || !player.isCreative()) {
+			return ClickResult.REJECTED;
+		}
+		double trackGauge = initTE.getTrackGauge();
+		Gauge gauge = Gauge.from(trackGauge);
+
+		double offset;
+		float yaw = player.getYawHead();
+		List<EntityRollingStock> shutdown = new LinkedList<>();
+
+		for (int i = stocks.size() - 1; i >= 0; i--){
+			ConsistDefinition.Stock s = stocks.get(i);
+			EntityRollingStockDefinition def = s.definition;
+			initTE = ITrack.get(worldIn, spawnPos.add(0, 0.7, 0), true);
+
+			if(initTE == null) {
+				player.sendMessage(PlayerMessage.direct("Invalid position for consist detected, this consist creation is stopped!"));
+				shutdown.forEach(Entity::kill);
+				return ClickResult.REJECTED;
+			}
+
+			offset = def.getCouplerPosition(s.direction.shouldFlip() ? CouplerType.FRONT : CouplerType.BACK, gauge) - ConfigDebug.couplerRange;
+			float originalRot = yaw;
+			if (s.direction.shouldFlip()) {
+				// Flip rotation
+				yaw = (originalRot + 180);
+			}
+			EntityRollingStock stock = def.spawn(worldIn, spawnPos.add(0.5, 0.1, 0.5), yaw, gauge, s.texture);
+
+			Vec3d center = stock.getPosition();
+			center = initTE.getNextPosition(center, VecUtil.fromWrongYaw(-0.1, originalRot));
+			center = initTE.getNextPosition(center, VecUtil.fromWrongYaw(0.1, originalRot));
+			center = initTE.getNextPosition(center, VecUtil.fromWrongYaw(offset, originalRot));
+			stock.setPosition(center);
+
+			if (stock instanceof EntityMoveableRollingStock) {
+				EntityMoveableRollingStock moveable = (EntityMoveableRollingStock) stock;
+				ITrack centerte = ITrack.get(worldIn, center, true);
+				if (centerte != null) {
+					float frontDistance = moveable.getDefinition().getBogeyFront(gauge);
+					float rearDistance = moveable.getDefinition().getBogeyRear(gauge);
+					Vec3d front = centerte.getNextPosition(center, VecUtil.fromWrongYaw(frontDistance, yaw));
+					Vec3d rear = centerte.getNextPosition(center, VecUtil.fromWrongYaw(rearDistance, yaw));
+
+					moveable.setRotationYaw(VecUtil.toWrongYaw(front.subtract(rear)));
+					float pitch = (-VecUtil.toPitch(front.subtract(rear)) - 90);
+					if (DegreeFuncs.delta(pitch, 0) > 90) {
+						pitch = 180 - pitch;
+					}
+					moveable.setRotationPitch(pitch);
+
+					moveable.setPosition(
+							rear.add(front.subtract(rear).scale(frontDistance / (frontDistance - rearDistance))));
+
+					ITrack frontte = ITrack.get(worldIn, front, true);
+					if (frontte != null) {
+						Vec3d frontNext = frontte.getNextPosition(front, VecUtil.fromWrongYaw(0.1 * gauge.scale(),
+																							  moveable.getRotationYaw()));
+						moveable.setFrontYaw(VecUtil.toWrongYaw(frontNext.subtract(front)));
+					}
+
+					ITrack rearte = ITrack.get(worldIn, rear, true);
+					if (rearte != null) {
+						Vec3d rearNext = rearte.getNextPosition(rear, VecUtil.fromWrongYaw(0.1 * gauge.scale(),
+																						   moveable.getRotationYaw()));
+						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.subtract(rear)));
+					}
+				}
+				moveable.newlyPlaced = true;
+			}
+
+			if (stock instanceof EntityBuildableRollingStock) {
+				((EntityBuildableRollingStock)stock).setComponents(def.getItemComponents());
+			}
+			worldIn.spawnEntity(stock);
+			shutdown.add(stock);
+			defaultCGs.forEach(stock::setControlPosition);
+
+			Vec3d length = VecUtil.fromWrongYaw(def.getCouplerPosition(s.direction.shouldFlip()
+																	   ? CouplerType.FRONT
+																	   : CouplerType.BACK, stock.gauge), originalRot);
+
+			spawnPos = center.add(length);
+			yaw = originalRot;
+		}
+
 		return ClickResult.ACCEPTED;
 	}
 }

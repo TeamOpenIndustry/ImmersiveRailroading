@@ -147,6 +147,23 @@ public abstract class ListSelector<T> {
         }
     }
 
+    public void search(String s) {
+        search.setText(s);
+    }
+
+    public String getSearching() {
+        return search.getText();
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+        updateSearch(search.getText());
+    }
+
+    public int getPage() {
+        return page;
+    }
+
     @FunctionalInterface
     public interface ButtonRenderer<T> {
         void render(Button button, int x, int y, T value);

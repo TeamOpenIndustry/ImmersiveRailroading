@@ -20,6 +20,7 @@ item.immersiverailroading:item_golden_spike.name=Штырь
 item.immersiverailroading:item_radio_control_card.name=Радиоконтроллер для поездов
 item.immersiverailroading:item_switch_key.name=Служебный ключ
 item.immersiverailroading:item_track_exchanger.name=Реконструктор рельс
+item.immersiverailroading:item_consist_placer=[Need translate]
 
 tile.immersiverailroading:block_rail.name=Железнодорожный путь
 tile.immersiverailroading:block_rail_gag.name=Балласт

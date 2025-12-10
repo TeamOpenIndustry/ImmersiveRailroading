@@ -20,6 +20,7 @@ item.immersiverailroading:item_golden_spike.name=Clou dorée (Golden Spike)
 item.immersiverailroading:item_radio_control_card.name=Carte de radiocommande
 item.immersiverailroading:item_switch_key.name=Clef d'aiguillage
 item.immersiverailroading:item_track_exchanger.name=Echangeur de voie
+item.immersiverailroading:item_consist_placer=[Need translate]
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)

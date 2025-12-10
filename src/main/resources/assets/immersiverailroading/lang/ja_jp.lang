@@ -20,6 +20,7 @@ item.immersiverailroading:item_golden_spike.name=ゴールデン・スパイク
 item.immersiverailroading:item_radio_control_card.name=無線コントローラ
 item.immersiverailroading:item_switch_key.name=スイッチキー
 item.immersiverailroading:item_track_exchanger.name=レール変換装置
+item.immersiverailroading:item_consist_placer=[Need translate]
 
 tile.immersiverailroading:block_rail.name=レール
 tile.immersiverailroading:block_rail_gag.name=レール（ダミー）

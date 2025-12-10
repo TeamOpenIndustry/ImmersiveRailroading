@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.items.ItemGoldenSpike;
 
 public class IRItems {
 	public static ItemRollingStock ITEM_ROLLING_STOCK = new ItemRollingStock();
+	public static ItemConsistPlacer ITEM_CONSIST_PLACER = new ItemConsistPlacer();
 	public static ItemRollingStockComponent ITEM_ROLLING_STOCK_COMPONENT = new ItemRollingStockComponent();
 	public static ItemLargeWrench ITEM_LARGE_WRENCH = new ItemLargeWrench();
 	public static ItemHook ITEM_HOOK = new ItemHook();

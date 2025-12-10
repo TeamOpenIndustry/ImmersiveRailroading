@@ -20,6 +20,7 @@ item.immersiverailroading:item_golden_spike.name=金道钉
 item.immersiverailroading:item_radio_control_card.name=列车无线遥控卡
 item.immersiverailroading:item_switch_key.name=道岔钥匙
 item.immersiverailroading:item_track_exchanger.name=轨道样式更换器
+item.immersiverailroading:item_consist_placer=[Need translate]
 
 tile.immersiverailroading:block_rail.name=轨道
 tile.immersiverailroading:block_rail_gag.name=轨道（占位）
