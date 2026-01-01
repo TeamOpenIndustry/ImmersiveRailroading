@@ -84,7 +84,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
 
-		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos).linearize(info.settings.smoothing);
+		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos).linearize(info.settings.smoothing,info.settings.pitchStart,info.settings.pitchEnd);
 		ctrl1 = adjusted.ctrl1;
 		ctrl2 = adjusted.ctrl2;
 

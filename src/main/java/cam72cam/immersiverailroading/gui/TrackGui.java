@@ -35,7 +35,6 @@ import static cam72cam.immersiverailroading.gui.components.GuiUtils.fitString;
 
 public class TrackGui implements IScreen {
 	long frame;
-
 	private TileRailPreview te;
 	private Button typeButton;
 	private TextField lengthInput;
@@ -60,9 +59,37 @@ public class TrackGui implements IScreen {
 
 	private ListSelector<Gauge> gaugeSelector;
 	private ListSelector<TrackItems> typeSelector;
-	private ListSelector<TrackDefinition>  trackSelector;
+	private ListSelector<TrackDefinition> trackSelector;
 	private ListSelector<ItemStack> railBedSelector;
 	private ListSelector<ItemStack> railBedFillSelector;
+
+	//TODO:trun界面增加一个按钮选择sim/real，advancedSwitch界面增加一个按钮切换第n条曲线，spiralCurve的曲率滑条变成两个文本框
+
+	//spiralCurve
+	private TextField nearRadius;
+	private TextField farRadius;
+	//advancedSwitch
+	private Button toggleSwitchCurve;
+
+	//current cubic-curve simulated turn will have larger error at large radius, like R2000
+	private Button toggleTurnType;
+
+	//TODO:两点y微调功能要两个滑条，放在最下面？
+
+	//global,for all types
+	private Slider nearHeightOffsetSlider;
+	private Slider farHeightOffsetSlider;
+
+	//TODO:纵曲线平滑方式
+
+	//vertical smooth config
+	private Slider nearPitchSlider;
+	private Slider farPitchSlider;
+
+	//The UK, US, and Canada use parabolas, China uses arcs.
+
+	//do we need this? Two tangents and points already determine the radius, but does anyone need a smaller radius?
+//	private TextField verticalRadius;
 
 	private double zoom = 1;
 
@@ -257,7 +284,7 @@ public class TrackGui implements IScreen {
 		//height = 20;
 		//xtop = GUIHelpers.getScreenWidth() / 2 - width;
 		//ytop = -GUIHelpers.getScreenHeight() / 4;
-		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 5);
+		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 7);
 
 		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
 				DefinitionManager.getTrack(settings.track),
@@ -317,6 +344,28 @@ public class TrackGui implements IScreen {
 				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.posType));
 			}
 		};
+		ytop += height;
+
+		nearPitchSlider = new Slider(screen, 25+xtop, ytop, "near pitch:", -45.0, 45.0, settings.pitchTag.getFloat("start"), true) {
+			@Override
+			public void onSlider() {
+				settings.pitchTag.setFloat("start",(float) this.getValue());
+				nearPitchSlider.setText("near pitch:"+String.format("%.2f", settings.pitchTag.getFloat("start")));
+			}
+		};
+		nearPitchSlider.onSlider();
+
+		ytop += height;
+
+		farPitchSlider = new Slider(screen, 25+xtop, ytop, "far pitch:", -45.0, 45.0, settings.pitchTag.getFloat("end"), true) {
+			@Override
+			public void onSlider() {
+				settings.pitchTag.setFloat("end",(float) this.getValue());
+				farPitchSlider.setText("far pitch:"+String.format("%.2f", settings.pitchTag.getFloat("end")));
+			}
+		};
+		farPitchSlider.onSlider();
+
 		ytop += height;
 
 		isPreviewCB = new CheckBox(screen, xtop+2, ytop+2, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), settings.isPreview) {

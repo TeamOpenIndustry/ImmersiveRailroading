@@ -215,7 +215,7 @@ public class CubicCurve {
     }
 
 
-    public CubicCurve linearize(TrackSmoothing smoothing) {
+    public CubicCurve linearize(TrackSmoothing smoothing,float pitchStart,float pitchEnd) {
         double start = p1.distanceTo(ctrl1);
         double middle = ctrl1.distanceTo(ctrl2);
         double end = ctrl2.distanceTo(p2);
@@ -245,6 +245,38 @@ public class CubicCurve {
                         ctrl2,
                         p2
                 );
+            case CUSTOM:
+                // 1. 原切线方向（水平投影单位向量）
+                Vec3d tanStart = ctrl1.subtract(p1);          // 原手柄
+                Vec3d tanEnd   = p2.subtract(ctrl2);
+
+                double hLenStart = Math.hypot(tanStart.x, tanStart.z);
+                double hLenEnd   = Math.hypot(tanEnd.x, tanEnd.z);
+
+                Vec3d hDirStart = hLenStart > 0
+                        ? new Vec3d(tanStart.x / hLenStart, 0, tanStart.z / hLenStart)
+                        : new Vec3d(1, 0, 0);   // 退化时给一个默认方向
+                Vec3d hDirEnd   = hLenEnd > 0
+                        ? new Vec3d(tanEnd.x / hLenEnd, 0, tanEnd.z / hLenEnd)
+                        : new Vec3d(1, 0, 0);
+
+                // 2. 按俯仰角合成新手柄
+                double vyStart = Math.tan(Math.toRadians(pitchStart)) *
+                        Math.hypot(tanStart.x, tanStart.z);
+                double vyEnd   = Math.tan(Math.toRadians(pitchEnd)) *
+                        Math.hypot(tanEnd.x, tanEnd.z);
+
+                Vec3d newCtrl1 = p1.add(new Vec3d(
+                        hDirStart.x * hLenStart,
+                        vyStart,
+                        hDirStart.z * hLenStart));
+                Vec3d newCtrl2 = p2.subtract(new Vec3d(
+                        hDirEnd.x * hLenEnd,
+                        vyEnd,
+                        hDirEnd.z * hLenEnd));
+
+                return new CubicCurve(p1, newCtrl1, newCtrl2, p2);
+
             case BOTH: default:
                 return this;
         }

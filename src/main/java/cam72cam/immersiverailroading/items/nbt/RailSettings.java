@@ -14,6 +14,8 @@ public class RailSettings {
     public final int length;
     public final float degrees;
     public final float curvosity;
+    public float pitchStart;
+    public float pitchEnd;
     public final TrackPositionType posType;
     public final TrackSmoothing smoothing;
     public final TrackDirection direction;
@@ -25,7 +27,7 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, float pitchStart, float pitchEnd, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -41,8 +43,9 @@ public class RailSettings {
         this.curvosity = curvosity;
         this.transfertableEntryCount = count;
         this.transfertableEntrySpacing = spacing;
+        this.pitchStart = pitchStart;
+        this.pitchEnd = pitchEnd;
     }
-
     public void write(ItemStack stack) {
         TagCompound data = new TagCompound();
         try {
@@ -135,7 +138,8 @@ public class RailSettings {
         public boolean isGradeCrossing;
         @TagField("track")
         public String track;
-
+        @TagField(value = "pitch")
+        public TagCompound pitchTag;
         @TagField("transfertableEntryCount")
         public int transfertableEntryCount;
         @TagField("transfertableEntrySpacing")
@@ -144,6 +148,11 @@ public class RailSettings {
         private Mutable(RailSettings settings) {
             this.gauge = settings.gauge;
             this.track = settings.track;
+
+            pitchTag = new TagCompound();
+            pitchTag.setFloat("start", settings.pitchStart);
+            pitchTag.setFloat("end",  settings.pitchEnd);
+
             this.type = settings.type;
             this.length = settings.length;
             this.degrees = settings.degrees;
@@ -164,6 +173,11 @@ public class RailSettings {
             gauge = Gauge.from(Gauge.STANDARD);
             type = TrackItems.STRAIGHT;
             track = "default";
+
+            pitchTag = new TagCompound();
+            pitchTag.setFloat("start", 0.0f);
+            pitchTag.setFloat("end", 0.0f);
+
             length = 10;
             degrees = 90;
             posType = TrackPositionType.FIXED;
@@ -190,6 +204,8 @@ public class RailSettings {
                     curvosity,
                     posType,
                     smoothing,
+                    pitchTag.getFloat("start"),
+                    pitchTag.getFloat("end"),
                     direction,
                     railBed,
                     railBedFill,

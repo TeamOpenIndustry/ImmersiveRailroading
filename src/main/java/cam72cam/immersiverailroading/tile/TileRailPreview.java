@@ -164,6 +164,11 @@ public class TileRailPreview extends BlockEntityTickable {
         if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();
 		}
+
+		System.out.println("markDirty >>> " +
+				"placement=" + placementInfo.placementPosition +
+				" custom=" + (customInfo == null ? "null" : customInfo.placementPosition) +
+				" pitch=" + RailSettings.from(item).pitchStart+","+RailSettings.from(item).pitchEnd);
 	}
 
 	public boolean isMulti() {
