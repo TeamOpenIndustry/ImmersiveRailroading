@@ -16,7 +16,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 
@@ -117,7 +116,7 @@ public class ItemRailAugment extends CustomItem {
 
 	@Override
 	public String getCustomName(ItemStack stack) {
-		return TextUtil.translate("item.immersiverailroading:item_augment." + new Data(stack).augment.name() + ".name");
+		return new Data(stack).augment.toString();
 	}
 
 	public static class Data extends ItemDataSerializer {

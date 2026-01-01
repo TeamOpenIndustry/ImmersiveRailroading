@@ -18,6 +18,7 @@ public enum ChatText {
 	COUPLER_STATUS_COUPLED("coupler.status.coupled"),
 	COUPLER_STATUS_DECOUPLED_ENGAGED("coupler.status.decoupled.engaged"),
 	COUPLER_STATUS_DECOUPLED_DISENGAGED("coupler.status.decoupled.disengaged"),
+	AUGMENT_FILTER_FAIL("augment.filter_fail"),
 	BUILD_MISSING("build.missing"),
 	SET_AUGMENT_FILTER("augment.set"),
 	RESET_AUGMENT_FILTER("augment.reset"),

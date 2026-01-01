@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class RealBB implements IBoundingBox {
 	private final Vec3d min;
+    private final Vec3d center;
 	private final Vec3d max;
 	private final double front;
 	private final double rear;
@@ -79,6 +80,7 @@ public class RealBB implements IBoundingBox {
 		}
 
 		this.min = new Vec3d(xMin + centerX, centerY, zMin + centerZ);
+        this.center = new Vec3d(centerX, centerY, centerZ);
 		this.max = new Vec3d(xMax + centerX, centerY + height, zMax + centerZ);
 	}
 
@@ -87,7 +89,12 @@ public class RealBB implements IBoundingBox {
 		return min;
 	}
 
-	@Override
+    @Override
+    public Vec3d center() {
+        return center;
+    }
+
+    @Override
 	public Vec3d max() {
 		return max;
 	}
@@ -246,7 +253,17 @@ public class RealBB implements IBoundingBox {
 		return intersectsAt(min, max, true).getLeft();
 	}
 
-	@Override
+    @Override
+    public IBoundingBox expandToFit(IBoundingBox other) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean intersectsSegment(Vec3d start, Vec3d end) {
+        return false;
+    }
+
+    @Override
 	public boolean contains(Vec3d vec) {
 		return this.intersectsAt(vec, vec, false).getLeft();
 	}

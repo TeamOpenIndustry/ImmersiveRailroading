@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading;
 
+import cam72cam.immersiverailroading.library.ScrollMode;
 import cam72cam.immersiverailroading.library.unit.*;
 import cam72cam.mod.config.ConfigFile.Comment;
 import cam72cam.mod.config.ConfigFile.Name;
@@ -81,4 +82,7 @@ public class ConfigGraphics {
 
 	@Comment("Should semi-transparent parts render? Disable this if you are experiencing problems with semi-transparent parts when using a Shader")
 	public static boolean RenderSemiTransparentParts = true;
+	
+	@Comment("Change scroll mode between 'ALL', 'ONLY_ROT_TRANSLATION' (allow scrolling only for rotations and translations) or 'NONE' (prevent scrolling on all parts).")
+	public static ScrollMode scrollMode = ScrollMode.ALL;
 }

@@ -22,6 +22,11 @@ public enum GuiText {
 	SELECTOR_TRACK("selector.track"),
 	SELECTOR_TRANSFER_TABLE_ENTRY_COUNT("selector.transfer_table_entry_count"),
 	SELECTOR_TRANSFER_TABLE_ENTRY_SPACING("selector.transfer_table_entry_spacing"),
+	SELECTOR_AUGMENT_DETECT("selector.augment.detect"),
+	SELECTOR_AUGMENT_REDSTONE("selector.augment.redstone"),
+	SELECTOR_AUGMENT_PUSHPULL("selector.augment.pushpull"),
+	SELECTOR_AUGMENT_COUPLER("selector.augment.coupler"),
+	SELECTOR_AUGMENT_CONTROL("selector.augment.control"),
 	SELECTOR_PLATE_TYPE("selector.plate_type"),
 	SELECTOR_PLATE_BOILER("selector.plate_boiler"),
 	SELECTOR_CAST_SINGLE("selector.cast_single"),
@@ -60,9 +65,15 @@ public enum GuiText {
 	RADIO_CARD_NOT_LINKED("item.radio_card.not_linked"),
 	MODELER_TOOLTIP("stock.modeler"),
 	PACK_TOOLTIP("stock.pack"),
+	TAG_TOOLTIP("stock.tag"),
 	TRACK_SWITCHER_TOOLTIP("item.track_exchanger"),
 	PAINT_BRUSH_MODE_TOOLTIP("item.paint_brush.mode"),
 	PAINT_BRUSH_DESCRIPTION_TOOLTIP("item.paint_brush.description"),
+
+	LABEL_CURRENT_AUGMENT("label.current_augment"),
+	LABEL_ACTUATOR_FILTER("label.actuator_filter"),
+	LABEL_INCLUDED_TAG("label.included_tag"),
+	LABEL_EXCLUDED_TAG("label.excluded_tag"),
 
 	ON("overlay.on"),
 	OFF("overlay.off"),
@@ -70,6 +81,7 @@ public enum GuiText {
 	;
 
 	private final String value;
+  
 	GuiText(String value) {
 		this.value = value;
 	}

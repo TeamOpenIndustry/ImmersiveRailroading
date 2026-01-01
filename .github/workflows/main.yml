@@ -10,13 +10,40 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        branch: [1.7.10-forge, 1.10.2-forge, 1.11.2-forge, 1.12.2-forge, 1.14.4-forge, 1.15.2-forge, 1.16.5-forge, 1.17.1-forge, 1.18.2-forge, 1.19.4-forge, 1.20.1-forge]
+          include:
+            # Initialize java
+            - branch: 1.7.10-forge
+              java-version: '8'
+            - branch: 1.10.2-forge
+              java-version: '8'
+            - branch: 1.11.2-forge
+              java-version: '8'
+            - branch: 1.12.2-forge
+              java-version: '8'
+            - branch: 1.14.4-forge
+              java-version: '8'
+            - branch: 1.15.2-forge
+              java-version: '8'
+            - branch: 1.16.5-forge
+              java-version: '8'
+            - branch: 1.17.1-forge
+              java-version: '16'
+            - branch: 1.18.2-forge
+              java-version: '17'
+            - branch: 1.19.4-forge
+              java-version: '17'
+            - branch: 1.20.1-forge
+              java-version: '17'
+            - branch: 1.20.4-neoforge
+              java-version: '17'
+            - branch: 1.21.1-neoforge
+              java-version: '21'
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 1.8
+    - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '8'
+        java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
     - name: keyscan
       run: mkdir -p ~/.ssh/ && ssh-keyscan -t rsa teamopenindustry.cc >> ~/.ssh/known_hosts

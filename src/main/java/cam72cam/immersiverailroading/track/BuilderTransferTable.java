@@ -38,6 +38,7 @@ public class BuilderTransferTable extends BuilderBase {
                 if(i == vertMin || i == vertMax - 1 || j == -halfGauge -1 -width / 2 || j == width - 1 -width / 2) {
                     gag1.setBedHeight(1);
                     gag1.setFlexible();
+                    gag1.setScaleModel(false);
                 }
                 tracks.add(gag1);
             }

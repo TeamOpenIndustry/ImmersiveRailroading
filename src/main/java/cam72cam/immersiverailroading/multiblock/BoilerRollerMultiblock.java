@@ -20,8 +20,10 @@ import cam72cam.mod.sound.StandardSound;
 import cam72cam.mod.world.World;
 
 public class BoilerRollerMultiblock extends Multiblock {
-	private static FuzzyProvider slab = () -> Fuzzy.STONE_SLAB;
 	public static final String NAME = "BOILER_MACHINE";
+
+	private static final FuzzyProvider slab = () -> Fuzzy.STONE_SLAB;
+
 	private static final Vec3i render = new Vec3i(2,0,0);
 	private static final Vec3i power = new Vec3i(5,0,3);
 	private static final Vec3i crafting = new Vec3i(2,0,4);
@@ -86,17 +88,21 @@ public class BoilerRollerMultiblock extends Multiblock {
 
 						craftTe.getContainer().set(1, ItemStack.EMPTY);
 					}
+					craftTe.markDirty();
 				} else if (held.is(IRItems.ITEM_PLATE) && new ItemPlate.Data(held).type == PlateType.BOILER) {
 					TileMultiblock craftTe = getTile(crafting);
 					if (craftTe == null) {
 						return false;
 					}
-					if (craftTe.getContainer().get(0).isEmpty()) {
+
+					//Make sure the multiblock is empty for animation
+					if (craftTe.getContainer().get(0).isEmpty() && craftTe.getContainer().get(1).isEmpty()) {
 						ItemStack inputStack = held.copy();
 						inputStack.setCount(1);
 						craftTe.getContainer().set(0, inputStack);
 						held.shrink(1);
 						player.setHeldItem(hand, held);
+						craftTe.markDirty();
 					}
 				}
 			}
@@ -138,7 +144,7 @@ public class BoilerRollerMultiblock extends Multiblock {
 				}
 				return;
 			}
-			
+
 			// Decrement craft progress down to 0
 			if (craftTe.getCraftProgress() != 0) {
 				IEnergy energy = powerTe.getEnergy(null);
@@ -177,13 +183,13 @@ public class BoilerRollerMultiblock extends Multiblock {
 
 		@Override
 		public boolean canInsertItem(Vec3i pos, int slot, ItemStack stack) {
-			//TODO
+			//TODO IInventory API
 			return false;
 		}
 
 		@Override
 		public boolean isOutputSlot(Vec3i pos, int slot) {
-			//TODO
+			//TODO IInventory API
 			return false;
 		}
 
@@ -219,6 +225,13 @@ public class BoilerRollerMultiblock extends Multiblock {
 				return false;
 			}
 			return !craftTe.getContainer().get(1).isEmpty();
+		}
+
+		public int getCraftProgress() {
+			if (getTile(crafting) != null) {
+				return getTile(crafting).getCraftProgress();
+			}
+			return 0;
 		}
 
 		private int powerRequired() {

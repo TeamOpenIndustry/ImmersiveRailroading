@@ -56,7 +56,9 @@ public class RailBaseModel {
 			return model;
 		}
 
-		height = height + 0.1f * (float)gauge.scale();
+		if(te.isScaleModel()){
+			height = height + 0.1f * (float) gauge.scale();
+		}
 
 		if (snow != 0) {
 			model.addSnow(snow + (int)(height * 8), new Matrix4());

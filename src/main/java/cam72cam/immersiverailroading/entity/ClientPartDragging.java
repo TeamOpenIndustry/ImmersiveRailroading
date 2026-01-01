@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ScrollMode;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.model.part.Interactable;
 import cam72cam.immersiverailroading.model.part.Seat;
@@ -37,8 +38,16 @@ public class ClientPartDragging {
     private boolean scroll(double scroll) {
         if (MinecraftClient.isReady() && targetInteractable != null) {
             if (targetInteractable instanceof Control) {
+                if (ConfigGraphics.scrollMode.equals(ScrollMode.NONE)) {
+                    return true;
+                }
                 float value = targetStock.getControlPosition((Control<?>) targetInteractable);
                 // Same as GuiBuilder
+                if (ConfigGraphics.scrollMode.equals(ScrollMode.ALL)) {
+                    //Continue
+                } else if (!(ConfigGraphics.scrollMode.equals(ScrollMode.ONLY_ROT_TRANSLATION) && (((Control<?>) targetInteractable).rotation || ((Control<?>) targetInteractable).translation))) {
+                    return true;
+                }
                 if (targetStock instanceof LocomotiveDiesel && targetInteractable.part.type == ModelComponentType.REVERSER_X) {
                     value += scroll > 0 ? 0.5 : -0.5;
                 } else {

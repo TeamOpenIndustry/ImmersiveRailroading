@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -22,6 +23,7 @@ public class CargoItems {
     private Map<UUID, Long> lastUpdate = new HashMap<>();
 
     private final List<ModelComponent> components;
+    public final List<IBoundingBox> boxes;
 
     public static CargoItems get(ComponentProvider provider) {
         List<ModelComponent> found = provider.parseAll(ModelComponentType.CARGO_ITEMS_X);
@@ -29,7 +31,10 @@ public class CargoItems {
     }
 
     public CargoItems(List<ModelComponent> components) {
+        this.boxes = new ArrayList<>();
         this.components = components;
+
+        this.components.forEach(component -> boxes.add(IBoundingBox.from(component.min, component.max)));
     }
 
     public <T extends Freight> void postRender(T stock, RenderState state) {

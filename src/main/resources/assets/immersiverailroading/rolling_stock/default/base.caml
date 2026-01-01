@@ -2,6 +2,9 @@
 name = null      # Required: Stock Name
 modeler = "N/A"  # Optional: Modeler Name
 pack = "N/A"     # Optional: Pack Name
+# tags: Optional, stock's tags used by augment/displayed as tooltip
+# tags: In CAML, specify this multiple times for multiple lines
+# tags: In JSON, specify this as ["tag#1", "tag#2", "etc..."]
 
 # Model information
 darken_model = 0            # Deprecated: legacy feature

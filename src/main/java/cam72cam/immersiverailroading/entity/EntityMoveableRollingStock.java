@@ -484,7 +484,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         for (Vec3i bp : track) {
             TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
             if (te != null) {
-                if (te.getAugment() == Augment.SPEED_RETARDER) {
+                if (te.getAugment() == Augment.SPEED_RETARDER && te.canInteractWith(this)) {
                     double red = getWorld().getRedstone(bp);
                     retardedNewtons += red / 15f / track.size() * newtons;
                 }

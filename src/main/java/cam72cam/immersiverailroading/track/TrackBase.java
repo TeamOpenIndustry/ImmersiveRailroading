@@ -17,6 +17,8 @@ public abstract class TrackBase {
 	protected Vec3i rel;
 	private float bedHeight;
 	private float railHeight;
+	//Override default value
+	private boolean scaleModel = true;
 
 	protected BlockRailBase block;
 
@@ -52,7 +54,6 @@ public abstract class TrackBase {
 		return builder.world.getBlockEntity(getPos(), TileRail.class) != null && this instanceof TrackGag;
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
 		Vec3i pos = getPos();
 
@@ -71,6 +72,7 @@ public abstract class TrackBase {
 			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
+			tr.setScaleModel(isScaleModel());
 			return tr;
 		}
 
@@ -111,6 +113,7 @@ public abstract class TrackBase {
 		}
 		tr.setRailHeight(getRailHeight());
 		tr.setBedHeight(getBedHeight());
+		tr.setScaleModel(isScaleModel());
 		for (int i = 0; i < hasSnow; i++) {
 			tr.handleSnowTick();
 		}
@@ -137,6 +140,12 @@ public abstract class TrackBase {
 	}
 	public float getRailHeight() {
 		return railHeight;
+	}
+	public void setScaleModel(boolean scaleModel) {
+		this.scaleModel = scaleModel;
+	}
+	public boolean isScaleModel() {
+		return scaleModel;
 	}
 
 	public void setFlexible() {

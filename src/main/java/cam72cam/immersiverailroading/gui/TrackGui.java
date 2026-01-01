@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
+import cam72cam.immersiverailroading.gui.components.NumberInputer;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -38,6 +39,8 @@ public class TrackGui implements IScreen {
 	private TileRailPreview te;
 	private Button typeButton;
 	private TextField lengthInput;
+    //TODO How do we handle dynamic range?
+//	private NumberInputer lengthInput;
 	private Slider degreesSlider;
 	private Slider curvositySlider;
 	private CheckBox isPreviewCB;
@@ -124,32 +127,43 @@ public class TrackGui implements IScreen {
 		int height = 20;
 		int xtop = -GUIHelpers.getScreenWidth() / 2;
 		int ytop = -GUIHelpers.getScreenHeight() / 4;
-
-		this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
-		this.lengthInput.setText("" + settings.length);
-		this.lengthInput.setValidator(s -> {
-			if (s == null || s.length() == 0) {
-				return true;
-			}
-			int val;
-			try {
-				val = Integer.parseInt(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			int max = 1000;
-			if (settings.type.isTable()) {
-				max = settings.type == TrackItems.TURNTABLE
-					  ? BuilderTurnTable.maxLength(settings.gauge)
-					  : BuilderTransferTable.maxLength(settings.gauge);
-			}
-			if (val > 0 && val <= max) {
-				settings.length = val;
-				return true;
-			}
-			return false;
-		});
-		this.lengthInput.setFocused(true);
+        this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
+        this.lengthInput.setText("" + settings.length);
+        this.lengthInput.setValidator(s -> {
+            if (s == null || s.length() == 0) {
+                return true;
+            }
+            int val;
+            try {
+                val = Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+            int max = 1000;
+            if (settings.type.isTable()) {
+                max = settings.type == TrackItems.TURNTABLE
+                      ? BuilderTurnTable.maxLength(settings.gauge)
+                      : BuilderTransferTable.maxLength(settings.gauge);
+            }
+            if (val > 0 && val <= max) {
+                settings.length = val;
+                return true;
+            }
+            return false;
+        });
+        this.lengthInput.setFocused(true);
+//		this.lengthInput = new NumberInputer(screen, xtop, ytop, width, height, "Length:", "", 10, 1000, settings.length,
+//                                             true, true, val -> {
+//            int max = 1000;
+//            if (settings.type.isTable()) {
+//                max = settings.type == TrackItems.TURNTABLE
+//                      ? BuilderTurnTable.maxLength(settings.gauge)
+//                      : BuilderTransferTable.maxLength(settings.gauge);
+//            }
+//            if (val > 0 && val <= max) {
+//                settings.length = val.intValue();
+//            }
+//        });
 		ytop += height;
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
@@ -163,7 +177,9 @@ public class TrackGui implements IScreen {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
 							  : BuilderTransferTable.maxLength(settings.gauge);
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+
+                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+//					lengthInput.setValue(Math.min((int)lengthInput.getValue(), max)); // revalidate
 				}
 			}
 		};
@@ -193,7 +209,8 @@ public class TrackGui implements IScreen {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
 							  : BuilderTransferTable.maxLength(settings.gauge);
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+//					lengthInput.setValue(Math.min((int) lengthInput.getValue(), max)); // revalidate
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);

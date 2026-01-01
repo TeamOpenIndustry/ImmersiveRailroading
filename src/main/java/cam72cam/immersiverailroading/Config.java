@@ -97,6 +97,9 @@ public class Config {
 
 		@Comment("Enable coupler slack")
 		public static boolean slackEnabled = true;
+
+        @Comment("Enable CARGO_FILL and CARGO_ITEMS load items dropped to the world")
+        public static boolean allowCargoLoadDroppedItem = true;
     }
 
 	@Name("balance")

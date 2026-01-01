@@ -52,6 +52,7 @@ public class BuilderTurnTable extends BuilderBase {
 				if (toCenter > info.settings.length-0.5) {
 					tgu.setHeight(1);
 					tgu.setFlexible();
+					tgu.setScaleModel(false);
 				}
 				tracks.add(tgu);
 			}
