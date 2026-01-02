@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.entity.Tender;
 import cam72cam.mod.gui.container.IContainerBuilder;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.render.opengl.RenderState;
 
 public class TenderContainer extends BaseContainer {
     public final Tender stock;
@@ -14,7 +15,7 @@ public class TenderContainer extends BaseContainer {
         this.template = Fuzzy.BUCKET.example();
     }
 
-    public void draw(IContainerBuilder container) {
+    public void draw(IContainerBuilder container, RenderState state) {
         int currY = 0;
         int horizSlots = stock.getInventoryWidth();
         int inventoryRows = (int) Math.ceil(((double)stock.getInventorySize()-2) / horizSlots);

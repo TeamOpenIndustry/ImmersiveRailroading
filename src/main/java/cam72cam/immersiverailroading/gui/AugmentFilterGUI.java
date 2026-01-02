@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.*;
+import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.render.opengl.RenderState;
@@ -73,23 +74,21 @@ public class AugmentFilterGUI implements IScreen {
 
         Function<Enum<?>, String> translate = e -> TextUtil.translate(e.toString());
 
-        stockDetectorMode = new Button(screen, xtop + xOffset, ytop + yOffset, buttonWidth, buttonHeight, GuiText.SELECTOR_AUGMENT_DETECT + translate.apply(properties.stockDetectorMode)) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                properties.stockDetectorMode = next(properties.stockDetectorMode, Player.Hand.PRIMARY);
-                stockDetectorMode.setText(GuiText.SELECTOR_AUGMENT_DETECT + translate.apply(properties.stockDetectorMode));
-            }
-        };
+        stockDetectorMode = new Button(screen, xtop + xOffset, ytop + yOffset, buttonWidth, buttonHeight,
+                                       GuiText.SELECTOR_AUGMENT_DETECT + translate.apply(properties.stockDetectorMode),
+                                       (hand, button) -> {
+                                           properties.stockDetectorMode = next(properties.stockDetectorMode, Player.Hand.PRIMARY);
+                                           button.setText(GuiText.SELECTOR_AUGMENT_DETECT + translate.apply(properties.stockDetectorMode));
+                                       });
         stockDetectorMode.setEnabled(this.augment == Augment.DETECTOR);
         yOffset += 25;
 
-        redstoneMode = new Button(screen, xtop + xOffset, ytop + yOffset, buttonWidth, buttonHeight, GuiText.SELECTOR_AUGMENT_REDSTONE + translate.apply(properties.redstoneMode)) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                properties.redstoneMode = next(properties.redstoneMode, Player.Hand.PRIMARY);
-                redstoneMode.setText(GuiText.SELECTOR_AUGMENT_REDSTONE + translate.apply(properties.redstoneMode));
-            }
-        };
+        redstoneMode = new Button(screen, xtop + xOffset, ytop + yOffset, buttonWidth, buttonHeight,
+                                  GuiText.SELECTOR_AUGMENT_REDSTONE + translate.apply(properties.redstoneMode),
+                                  (hand, button) -> {
+                                      properties.redstoneMode = next(properties.redstoneMode, Player.Hand.PRIMARY);
+                                      button.setText(GuiText.SELECTOR_AUGMENT_REDSTONE + translate.apply(properties.redstoneMode));
+                                  });
         redstoneMode.setEnabled(this.augment == Augment.COUPLER
                                 || this.augment == Augment.ITEM_LOADER
                                 || this.augment == Augment.ITEM_UNLOADER
@@ -97,13 +96,11 @@ public class AugmentFilterGUI implements IScreen {
                                 || this.augment == Augment.FLUID_UNLOADER);
         yOffset += 25;
 
-        pushpull = new CheckBox(screen, xtop + xOffset, ytop + yOffset, GuiText.SELECTOR_AUGMENT_PUSHPULL.toString(), properties.pushpull) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                properties.pushpull = !properties.pushpull;
-                pushpull.setChecked(properties.pushpull);
-            }
-        };
+        pushpull = new CheckBox(screen, xtop + xOffset, ytop + yOffset, GuiText.SELECTOR_AUGMENT_PUSHPULL.toString(), properties.pushpull,
+                                (hand, checkBox) -> {
+                                    properties.pushpull = !properties.pushpull;
+                                    checkBox.setChecked(properties.pushpull);
+                                });
         pushpull.setEnabled(this.augment == Augment.COUPLER
                             || this.augment == Augment.ITEM_LOADER
                             || this.augment == Augment.ITEM_UNLOADER
@@ -111,29 +108,29 @@ public class AugmentFilterGUI implements IScreen {
                             || this.augment == Augment.FLUID_UNLOADER);
         yOffset += 15;
 
-        couplerMode = new Button(screen, xtop + xOffset, ytop + yOffset, buttonWidth, buttonHeight, GuiText.SELECTOR_AUGMENT_COUPLER + translate.apply(properties.couplerAugmentMode)) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                properties.couplerAugmentMode = next(properties.couplerAugmentMode, Player.Hand.PRIMARY);
-                couplerMode.setText(GuiText.SELECTOR_AUGMENT_COUPLER + translate.apply(properties.couplerAugmentMode));
-            }
-        };
+        couplerMode = new Button(screen, xtop + xOffset, ytop + yOffset, buttonWidth, buttonHeight,
+                                 GuiText.SELECTOR_AUGMENT_COUPLER + translate.apply(properties.couplerAugmentMode),
+                                 (hand, button) -> {
+                                     properties.couplerAugmentMode = next(properties.couplerAugmentMode, Player.Hand.PRIMARY);
+                                     button.setText(GuiText.SELECTOR_AUGMENT_COUPLER + translate.apply(properties.couplerAugmentMode));
+                                 });
         couplerMode.setEnabled(this.augment == Augment.COUPLER);
         yOffset += 25;
 
-        locoControlMode = new Button(screen, xtop + xOffset, ytop + yOffset, buttonWidth, buttonHeight, GuiText.SELECTOR_AUGMENT_CONTROL + translate.apply(properties.locoControlMode)) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                properties.locoControlMode = next(properties.locoControlMode, Player.Hand.PRIMARY);
-                locoControlMode.setText(GuiText.SELECTOR_AUGMENT_CONTROL + translate.apply(properties.locoControlMode));
-            }
-        };
+        locoControlMode = new Button(screen, xtop + xOffset, ytop + yOffset, buttonWidth, buttonHeight,
+                                     GuiText.SELECTOR_AUGMENT_CONTROL + translate.apply(properties.locoControlMode),
+                                     (hand, button) -> {
+                                         properties.locoControlMode = next(properties.locoControlMode, Player.Hand.PRIMARY);
+                                         button.setText(GuiText.SELECTOR_AUGMENT_CONTROL + translate.apply(properties.locoControlMode));
+                                     });
         locoControlMode.setEnabled(this.augment == Augment.LOCO_CONTROL);
     }
 
     @Override
-    public void onEnterKey(IScreenBuilder builder) {
-        builder.close();
+    public void onKeyType(IScreenBuilder builder, Keyboard.KeyCode keyCode) {
+        if (keyCode == Keyboard.KeyCode.NUMPADENTER || keyCode == Keyboard.KeyCode.RETURN) {
+            builder.close();
+        }
     }
 
     @Override

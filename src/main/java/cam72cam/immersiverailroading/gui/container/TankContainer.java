@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.entity.FreightTank;
 import cam72cam.mod.gui.container.IContainerBuilder;
 import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.render.opengl.RenderState;
 
 public class TankContainer extends BaseContainer {
     public final FreightTank stock;
@@ -14,7 +15,7 @@ public class TankContainer extends BaseContainer {
         this.template = Fuzzy.BUCKET.example();
     }
 
-    public void draw(IContainerBuilder container){
+    public void draw(IContainerBuilder container, RenderState state){
         int currY = 0;
         int horizSlots = 10;
         int inventoryRows = 4;

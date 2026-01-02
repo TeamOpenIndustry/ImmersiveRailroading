@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.gui.container.IContainer;
 import cam72cam.mod.gui.container.IContainerBuilder;
+import cam72cam.mod.render.opengl.RenderState;
 
 public class SteamHammerContainer implements IContainer {
     private final TileMultiblock tile;
@@ -12,7 +13,7 @@ public class SteamHammerContainer implements IContainer {
         this.tile = tile;
     }
 
-    public void draw(IContainerBuilder container){
+    public void draw(IContainerBuilder container, RenderState state){
         int currY = 0;
         int horizSlots = 10;
         int inventoryRows = 4;

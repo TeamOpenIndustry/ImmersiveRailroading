@@ -21,6 +21,7 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.*;
+import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -156,12 +157,8 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		gaugeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_GAUGE.toString(settings.gauge)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				showSelector(gaugeSelector);
-			}
-		};
+		gaugeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_GAUGE.toString(settings.gauge),
+                                 (hand, button) -> showSelector(gaugeSelector));
 		ytop += height;
 
 		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
@@ -189,32 +186,23 @@ public class TrackGui implements IScreen {
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 			}
 		};
-		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				showSelector(typeSelector);
-			}
-		};
+		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type),
+                                (hand, button) -> showSelector(typeSelector));
 		ytop += height;
 
 		//Transfer table doesn't have these property so we can have them overlapped
-		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.smoothing = next(settings.smoothing, hand);
-				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
-			}
-		};
+		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing),
+                                     (hand, button) -> {
+                                         settings.smoothing = next(settings.smoothing, hand);
+                                         button.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
+                                     });
 		smoothingButton.setVisible(settings.type.hasSmoothing());
 
-		transfertableEntryCountSlider = new Slider(screen, 25+xtop, ytop, "", 1, 71, settings.transfertableEntryCount, false) {
-			@Override
-			public void onSlider() {
-				settings.transfertableEntryCount = (int) this.getValue();
-				transfertableEntryCountSlider.setText(
-						GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_COUNT.toString((int) transfertableEntryCountSlider.getValue()));
-			}
-		};
+		transfertableEntryCountSlider = new Slider(screen, 25+xtop, ytop, "", 1, 71, settings.transfertableEntryCount, false,
+                                                   slider -> {
+                                                       settings.transfertableEntryCount = (int) slider.getValue();
+                                                       slider.setText(GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_COUNT.toString((int) slider.getValue()));
+                                                   });
 		transfertableEntryCountSlider.onSlider();
 		ytop += height;
 
@@ -238,25 +226,19 @@ public class TrackGui implements IScreen {
 		transfertableEntrySpacingSlider.onSlider();
 		ytop += height;
 
-
-		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
-			@Override
-			public void onSlider() {
-				settings.degrees = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
-				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
-			}
-		};
+		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false,
+                                        slider -> {
+                                            settings.degrees = slider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
+                                            slider.setText(GuiText.SELECTOR_QUARTERS.toString(slider.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+                                        });
 		degreesSlider.onSlider();
 		ytop += height;
 
-
-		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
-			@Override
-			public void onSlider() {
-				settings.curvosity = (float) this.getValue();
-				curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", settings.curvosity)));
-			}
-		};
+		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true,
+                                          slider -> {
+                                              settings.curvosity = (float) slider.getValue();
+                                              slider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", settings.curvosity)));
+                                          });
 		curvositySlider.onSlider();
 		ytop += height;
 
@@ -285,12 +267,8 @@ public class TrackGui implements IScreen {
 				trackButton.setText(GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24)));
 			}
 		};
-		trackButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24))) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				showSelector(trackSelector);
-			}
-		};
+		trackButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24)),
+                                 (hand, button) -> showSelector(trackSelector));
 		ytop += height;
 
 		railBedSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.railBed,
@@ -302,12 +280,8 @@ public class TrackGui implements IScreen {
 				bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)));
 			}
 		};
-		bedTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed))) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				showSelector(railBedSelector);
-			}
-		};
+		bedTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)),
+                                   (hand, button) -> showSelector(railBedSelector));
 		ytop += height;
 
 		railBedFillSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.railBedFill,
@@ -319,46 +293,28 @@ public class TrackGui implements IScreen {
 				bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)));
 			}
 		};
-		bedFillButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill))) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				showSelector(railBedFillSelector);
-			}
-		};
+		bedFillButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)),
+                                   (hand, button) -> showSelector(railBedFillSelector));
 		ytop += height;
 
-		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.posType)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.posType = next(settings.posType, hand);
-				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.posType));
-			}
-		};
+		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.posType),
+                                   (hand, button) -> {
+                                       settings.posType = next(settings.posType, hand);
+                                       posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.posType));
+                                   });
 		ytop += height;
 
-		isPreviewCB = new CheckBox(screen, xtop+2, ytop+2, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), settings.isPreview) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.isPreview = isPreviewCB.isChecked();
-			}
-		};
+		isPreviewCB = new CheckBox(screen, xtop+2, ytop+2, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), settings.isPreview,
+                                   (hand, checkBox) -> settings.isPreview = checkBox.isChecked());
 //		ytop += height;
 
-		isGradeCrossingCB = new CheckBox(screen, xtop+102, ytop+2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.isGradeCrossing = isGradeCrossingCB.isChecked();
-			}
-		};
+		isGradeCrossingCB = new CheckBox(screen, xtop+102, ytop+2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing,
+                                         (hand, checkBox) -> settings.isGradeCrossing = checkBox.isChecked());
 		ytop += height;
 
 		Slider zoom_slider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
-										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true) {
-			@Override
-			public void onSlider() {
-				zoom = this.getValue();
-			}
-		};
+										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true,
+                                        slider -> zoom = slider.getValue());
 	}
 
 	private void showSelector(ListSelector<?> selector) {
@@ -373,12 +329,14 @@ public class TrackGui implements IScreen {
 		selector.setVisible(!isVisible);
 	}
 
-	@Override
-	public void onEnterKey(IScreenBuilder builder) {
-		builder.close();
-	}
+    @Override
+    public void onKeyType(IScreenBuilder builder, Keyboard.KeyCode keyCode) {
+        if (keyCode == Keyboard.KeyCode.NUMPADENTER || keyCode == Keyboard.KeyCode.RETURN) {
+            IScreen.super.onKeyType(builder, keyCode);
+        }
+    }
 
-	@Override
+    @Override
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {

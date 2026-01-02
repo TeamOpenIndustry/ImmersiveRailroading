@@ -14,8 +14,9 @@ import cam72cam.mod.gui.helpers.ItemPickerGUI;
 import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.gui.screen.IScreen;
 import cam72cam.mod.gui.screen.IScreenBuilder;
+import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.item.ItemStack;
-import util.Matrix4;
+import cam72cam.mod.render.opengl.RenderState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,40 +50,36 @@ public class TrackExchangerGui implements IScreen {
 
 	@Override
 	public void init(IScreenBuilder screen) {
-		trackSelector = new Button(screen, -100, 1 * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				track = next(DefinitionManager.getTrackIDs(), track, hand);
-				trackSelector.setText(GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
-			}
-		};
-		bedTypeButton = new Button(screen, -100, 2 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(railBed))) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
-					if (bed != null) {
-						TrackExchangerGui.this.railBed = bed;
-						bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed)));
-					}
-					screen.show();
-				});
-				ip.choosenItem = railBed;
-				ip.show();
-			}
-		};
-		gaugeButton = new Button(screen, -100, 3 * 22, GuiText.SELECTOR_GAUGE.toString(gauge)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				gauge = next(Gauge.values(), gauge, hand);
-				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
-			}
-		};
+		trackSelector = new Button(screen, -100, 1 * 22, GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(this.track).name),
+                                   (hand, button) -> {
+                                       track = next(DefinitionManager.getTrackIDs(), track, hand);
+                                       button.setText(GuiText.SELECTOR_TRACK.toString(DefinitionManager.getTrack(track).name));
+                                   });
+		bedTypeButton = new Button(screen, -100, 2 * 22, GuiText.SELECTOR_RAIL_BED.toString(getStackName(railBed)),
+                                   ((hand, button) -> {
+                                       ItemPickerGUI ip = new ItemPickerGUI(oreDict, (ItemStack bed) -> {
+                                           if (bed != null) {
+                                               TrackExchangerGui.this.railBed = bed;
+                                               button.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(bed)));
+                                           }
+                                           screen.show();
+                                       });
+                                       ip.choosenItem = railBed;
+                                       ip.show();
+                                   }));
+		gaugeButton = new Button(screen, -100, 3 * 22, GuiText.SELECTOR_GAUGE.toString(gauge),
+                                 (hand, button) -> {
+                                     gauge = next(Gauge.values(), gauge, hand);
+                                     button.setText(GuiText.SELECTOR_GAUGE.toString(gauge));
+                                 });
 	}
 
-	@Override
-	public void onEnterKey(IScreenBuilder builder) {
-		builder.close();
-	}
+    @Override
+    public void onKeyType(IScreenBuilder builder, Keyboard.KeyCode keyCode) {
+        if (keyCode == Keyboard.KeyCode.NUMPADENTER || keyCode == Keyboard.KeyCode.RETURN) {
+            builder.close();
+        }
+    }
 
 	@Override
 	public void onClose() {
@@ -90,7 +87,7 @@ public class TrackExchangerGui implements IScreen {
 	}
 
 	@Override
-	public void draw(IScreenBuilder builder) {
+	public void draw(IScreenBuilder builder, RenderState state) {
 		int scale = 8;
 		// This could be more efficient...
 		RailSettings settings = new RailSettings(gauge,
@@ -111,14 +108,13 @@ public class TrackExchangerGui implements IScreen {
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		settings.write(stack);
 
-		Matrix4 matrix = new Matrix4();
-		matrix.translate(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
-		matrix.scale(scale, scale, 1);
-		GUIHelpers.drawItem(stack, 0, 0, matrix);
+		state.translate(GUIHelpers.getScreenWidth() / 2 + builder.getWidth() / 4, builder.getHeight() / 4, 0);
+		state.scale(scale, scale, 1);
+		GUIHelpers.drawItem(stack, 0, 0, state.model_view());
 
-		matrix.setIdentity();
-		matrix.translate(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
-		matrix.scale(-scale, scale, 1);
-		GUIHelpers.drawItem(stack, 0, 0, matrix);
+		state.model_view().setIdentity();
+		state.translate(GUIHelpers.getScreenWidth() / 2 - builder.getWidth() / 4, builder.getHeight() / 4, 0);
+		state.scale(-scale, scale, 1);
+		GUIHelpers.drawItem(stack, 0, 0, state.model_view());
 	}
 }

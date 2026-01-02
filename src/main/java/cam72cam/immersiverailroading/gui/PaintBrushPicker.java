@@ -10,9 +10,9 @@ import cam72cam.immersiverailroading.library.PaintBrushMode;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.*;
+import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
@@ -60,44 +60,35 @@ public class PaintBrushPicker implements IScreen {
         }.setVisible(true);
 
         Slider zoom_slider = new Slider(screen, xtop + width, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
-                                        GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true) {
-            @Override
-            public void onSlider() {
-                zoom = this.getValue();
-            }
-        };
+                                        GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true,
+                                        slider -> zoom = slider.getValue());
 
         width = 100;
         Button random = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width, height,
-                                   GuiText.SELECTOR_PAINTBRUSH_RANDOM.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                variant = ItemPaintBrush.nextRandomTexture(stock, variant);
-            }
-        };
+                                   GuiText.SELECTOR_PAINTBRUSH_RANDOM.toString(),
+                                   (hand, button) -> variant = ItemPaintBrush.nextRandomTexture(stock, variant));
 
         Button apply = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, (int) (GUIHelpers.getScreenHeight()*0.75 - height*2),
-                                  width, height, GuiText.SELECTOR_PAINTBRUSH_TO_STOCK.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, false).sendToServer();
-                screen.close();
-            }
-        };
+                                  width, height, GuiText.SELECTOR_PAINTBRUSH_TO_STOCK.toString(),
+                                  (hand, button) -> {
+                                      new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, false).sendToServer();
+                                      screen.close();
+                                  });
+
         Button apply_connected = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
-                                            width, height, GuiText.SELECTOR_PAINTBRUSH_TO_TRAIN.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, true).sendToServer();
-                screen.close();
-            }
-        };
+                                            width, height, GuiText.SELECTOR_PAINTBRUSH_TO_TRAIN.toString(),
+                                            (hand, button) -> {
+                                                new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, true).sendToServer();
+                                                screen.close();
+                                            });
     }
 
     @Override
-    public void onEnterKey(IScreenBuilder builder) {
-        new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, false).sendToServer();
-        builder.close();
+    public void onKeyType(IScreenBuilder builder, Keyboard.KeyCode keyCode) {
+        if (keyCode == Keyboard.KeyCode.NUMPADENTER || keyCode == Keyboard.KeyCode.RETURN) {
+            new ItemPaintBrush.PaintBrushPacket(stock, PaintBrushMode.GUI, variant, false).sendToServer();
+            builder.close();
+        }
     }
 
     @Override
