@@ -88,7 +88,7 @@ public class ItemManual extends CustomItem {
 			if (facing == Facing.UP) {
 				realPos = realPos.up();
 			}
-			current.place(world, player, realPos, Rotation.from(Facing.fromAngle(player.getYawHead()+180)));
+			current.place(world, player, realPos, Rotation.from(Facing.fromAngle(player.getRotationYawHead()+180)));
 		}
 		return ClickResult.ACCEPTED;
 	}

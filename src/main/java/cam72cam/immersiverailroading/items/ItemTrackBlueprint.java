@@ -83,13 +83,13 @@ public class ItemTrackBlueprint extends CustomItem {
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
+				PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0));
 				te.setup(stack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0));
 		RailInfo info = new RailInfo(stack, placementInfo, null);
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;

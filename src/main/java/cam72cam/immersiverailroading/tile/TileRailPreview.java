@@ -121,7 +121,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (player.isCrouching()) {
 			if (getWorld().isServer) {
-				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getYawHead(), hit));
+				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getRotationYawHead(), hit));
 			}
 			return false;
 		} else if (getWorld().isClient && !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE)) {

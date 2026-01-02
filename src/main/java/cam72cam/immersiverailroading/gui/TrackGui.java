@@ -206,23 +206,19 @@ public class TrackGui implements IScreen {
 		transfertableEntryCountSlider.onSlider();
 		ytop += height;
 
-		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(settings.direction)) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.direction = next(settings.direction, hand);
-				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
-			}
-		};
+		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(settings.direction),
+                                     (hand, button) -> {
+                                         settings.direction = next(settings.direction, hand);
+                                         button.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
+                                     });
 		directionButton.setVisible(settings.type.hasDirection());
 
-		transfertableEntrySpacingSlider = new Slider(screen, 25+xtop, ytop, "", 1, 15, settings.transfertableEntrySpacing, false) {
-			@Override
-			public void onSlider() {
-				settings.transfertableEntrySpacing = (int) this.getValue();
-				transfertableEntrySpacingSlider.setText(
-						GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_SPACING.toString((int) transfertableEntrySpacingSlider.getValue()));
-			}
-		};
+		transfertableEntrySpacingSlider = new Slider(screen, 25+xtop, ytop, "", 1, 15, settings.transfertableEntrySpacing, false,
+                                                     slider -> {
+                                                         settings.transfertableEntrySpacing = (int) slider.getValue();
+                                                         slider.setText(
+                                                                 GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_SPACING.toString((int) slider.getValue()));
+                                                     });
 		transfertableEntrySpacingSlider.onSlider();
 		ytop += height;
 
