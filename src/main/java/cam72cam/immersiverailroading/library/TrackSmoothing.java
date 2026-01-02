@@ -9,7 +9,8 @@ public enum TrackSmoothing {
 	NEAR,
 	FAR,
 	NEITHER,
-	CUSTOM;
+//	VERTICAL_ARC,
+	VERTICAL_LINER;
 
 	@Override
 	public String toString() {

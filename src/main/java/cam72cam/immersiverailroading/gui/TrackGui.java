@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
-import cam72cam.immersiverailroading.gui.components.NumberInputer;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -66,8 +65,6 @@ public class TrackGui implements IScreen {
 	private ListSelector<ItemStack> railBedSelector;
 	private ListSelector<ItemStack> railBedFillSelector;
 
-	//TODO:trun界面增加一个按钮选择sim/real，advancedSwitch界面增加一个按钮切换第n条曲线，spiralCurve的曲率滑条变成两个文本框
-
 	//spiralCurve
 	private TextField nearRadius;
 	private TextField farRadius;
@@ -77,13 +74,9 @@ public class TrackGui implements IScreen {
 	//current cubic-curve simulated turn will have larger error at large radius, like R2000
 	private Button toggleTurnType;
 
-	//TODO:两点y微调功能要两个滑条，放在最下面？
-
 	//global,for all types
 	private Slider nearHeightOffsetSlider;
 	private Slider farHeightOffsetSlider;
-
-	//TODO:纵曲线平滑方式
 
 	//vertical smooth config
 	private Slider nearPitchSlider;
@@ -363,6 +356,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
+		//TODO:change to TextField
 		nearPitchSlider = new Slider(screen, 25+xtop, ytop, "near pitch:", -45.0, 45.0, settings.pitchTag.getFloat("start"), true) {
 			@Override
 			public void onSlider() {

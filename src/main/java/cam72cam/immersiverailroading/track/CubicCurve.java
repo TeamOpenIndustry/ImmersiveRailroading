@@ -245,40 +245,75 @@ public class CubicCurve {
                         ctrl2,
                         p2
                 );
-            case CUSTOM:
-                // 1. 原切线方向（水平投影单位向量）
-                Vec3d tanStart = ctrl1.subtract(p1);          // 原手柄
-                Vec3d tanEnd   = p2.subtract(ctrl2);
-
-                double hLenStart = Math.hypot(tanStart.x, tanStart.z);
-                double hLenEnd   = Math.hypot(tanEnd.x, tanEnd.z);
-
-                Vec3d hDirStart = hLenStart > 0
-                        ? new Vec3d(tanStart.x / hLenStart, 0, tanStart.z / hLenStart)
-                        : new Vec3d(1, 0, 0);   // 退化时给一个默认方向
-                Vec3d hDirEnd   = hLenEnd > 0
-                        ? new Vec3d(tanEnd.x / hLenEnd, 0, tanEnd.z / hLenEnd)
-                        : new Vec3d(1, 0, 0);
-
-                // 2. 按俯仰角合成新手柄
-                double vyStart = Math.tan(Math.toRadians(pitchStart)) *
-                        Math.hypot(tanStart.x, tanStart.z);
-                double vyEnd   = Math.tan(Math.toRadians(pitchEnd)) *
-                        Math.hypot(tanEnd.x, tanEnd.z);
-
-                Vec3d newCtrl1 = p1.add(new Vec3d(
-                        hDirStart.x * hLenStart,
-                        vyStart,
-                        hDirStart.z * hLenStart));
-                Vec3d newCtrl2 = p2.subtract(new Vec3d(
-                        hDirEnd.x * hLenEnd,
-                        vyEnd,
-                        hDirEnd.z * hLenEnd));
-
-                return new CubicCurve(p1, newCtrl1, newCtrl2, p2);
-
+            case VERTICAL_LINER:
+                return linearVertical(p1, ctrl1, ctrl2, p2, pitchStart, pitchEnd);
+//            case VERTICAL_ARC:
+//                return arcVertical(p1, ctrl1, ctrl2, p2, pitchStart, pitchEnd);
             case BOTH: default:
                 return this;
         }
     }
+
+    private static CubicCurve linearVertical(
+            Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2,
+            float pitchStart, float pitchEnd
+    ) {
+        Vec3d tanStart = ctrl1.subtract(p1);
+        Vec3d tanEnd   = p2.subtract(ctrl2);
+        double hLenStart = Math.hypot(tanStart.x, tanStart.z);
+        double hLenEnd   = Math.hypot(tanEnd.x, tanEnd.z);
+        Vec3d hDirStart = hLenStart > 0 ?
+                new Vec3d(tanStart.x / hLenStart, 0, tanStart.z / hLenStart) :
+                new Vec3d(1, 0, 0);
+        Vec3d hDirEnd   = hLenEnd   > 0 ?
+                new Vec3d(tanEnd.x   / hLenEnd,   0, tanEnd.z   / hLenEnd) :
+                new Vec3d(1, 0, 0);
+
+        double vyStart = Math.tan(Math.toRadians(pitchStart)) * hLenStart;
+        double vyEnd   = Math.tan(Math.toRadians(pitchEnd))   * hLenEnd;
+
+        Vec3d newCtrl1 = p1.add(hDirStart.scale(hLenStart))
+                .add(0, vyStart, 0);
+        Vec3d newCtrl2 = p2.subtract(hDirEnd.scale(hLenEnd))
+                .subtract(0, vyEnd, 0);
+        return new CubicCurve(p1, newCtrl1, newCtrl2, p2);
+    }
+
+//    private static CubicCurve arcVertical(
+//            Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2,
+//            float pitchStart, float pitchEnd
+//    ) {
+//        Vec3d tanStart = ctrl1.subtract(p1);
+//        Vec3d tanEnd   = p2.subtract(ctrl2);
+//
+//        double hLenStart = Math.hypot(tanStart.x, tanStart.z);
+//        double hLenEnd   = Math.hypot(tanEnd.x, tanEnd.z);
+//        if (hLenStart < 1e-6 || hLenEnd < 1e-6) {
+//            return new CubicCurve(p1, ctrl1, ctrl2, p2);
+//        }
+//
+//        Vec3d hDirStart = hLenStart > 0 ?
+//                new Vec3d(tanStart.x / hLenStart, 0, tanStart.z / hLenStart) :
+//                new Vec3d(1, 0, 0);
+//        Vec3d hDirEnd   = hLenEnd   > 0 ?
+//                new Vec3d(tanEnd.x   / hLenEnd,   0, tanEnd.z   / hLenEnd) :
+//                new Vec3d(1, 0, 0);
+//
+//        // 1. 直接角度差（无 tan → arctan）
+//        double Δθ   = Math.toRadians(Math.abs(pitchEnd - pitchStart));   // 总转角
+//        double k    = (4.0 * (1.0 - Math.cos(Δθ / 2.0))) / (3.0 * Math.sin(Δθ / 2.0));   // 最优柄长系数
+//        double handle = k * 0.5 * Math.hypot(p1.x - p2.x, p1.z - p2.z) / Math.sin(Δθ / 2.0);   // 最优柄长（与不对称无关）
+//
+//        // 2. 只动 y 值 → 平面形状不变
+//        double vyStart = handle * Math.sin(Math.toRadians(pitchStart));
+//        double vyEnd   = handle * Math.sin(Math.toRadians(pitchEnd));
+//
+//        Vec3d c1 = p1.add(hDirStart.scale(hLenStart))                           // 只动平面走向
+//                .add(0, vyStart, 0);                                      // 只动 y
+//        Vec3d c2 = p2.subtract(hDirEnd.scale(hLenEnd))                         // 只动平面走向
+//                .subtract(0, vyEnd, 0);                                  // 只动 y
+//
+//        return new CubicCurve(p1, c1, c2, p2);
+//    }
+
 }
