@@ -140,52 +140,47 @@ public class TrackGui implements IScreen {
 //        });
 		ytop += height;
 
-		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
-				Gauge.values().stream().collect(Collectors.toMap(Gauge::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
-		) {
-			@Override
-			public void onClick(Gauge gauge) {
-				settings.gauge = gauge;
-				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
-				if (settings.type.isTable()) {
-					int max = settings.type == TrackItems.TURNTABLE
-							  ? BuilderTurnTable.maxLength(settings.gauge)
-							  : BuilderTransferTable.maxLength(settings.gauge);
-
-                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
-//					lengthInput.setValue(Math.min((int)lengthInput.getValue(), max)); // revalidate
-				}
-			}
-		};
+		gaugeSelector = new ListSelector<>(screen, width, 100, height, settings.gauge,
+				Gauge.values().stream().collect(Collectors.toMap(Gauge::toString, g -> g, (u, v) -> u, LinkedHashMap::new)),
+                (sel, option) -> {
+                    settings.gauge = option;
+                    gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
+                    if (settings.type.isTable()) {
+                        int max = settings.type == TrackItems.TURNTABLE
+                                  ? BuilderTurnTable.maxLength(settings.gauge)
+                                  : BuilderTransferTable.maxLength(settings.gauge);
+                        lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+//					    lengthInput.setValue(Math.min((int)lengthInput.getValue(), max)); // revalidate
+                    }
+                }
+		);
 		gaugeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_GAUGE.toString(settings.gauge),
                                  (hand, button) -> showSelector(gaugeSelector));
 		ytop += height;
 
-		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
+		typeSelector = new ListSelector<>(screen, width, 100, height, settings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING)
 						.sorted(Comparator.comparingInt(TrackItems::getOrder))
-						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
-		) {
-			@Override
-			public void onClick(TrackItems option) {
-				settings.type = option;
-				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-				degreesSlider.setVisible(settings.type.hasQuarters());
-				curvositySlider.setVisible(settings.type.hasCurvosity());
-				smoothingButton.setVisible(settings.type.hasSmoothing());
-				directionButton.setVisible(settings.type.hasDirection());
-				if (settings.type.isTable()) {
-					int max = settings.type == TrackItems.TURNTABLE
-							  ? BuilderTurnTable.maxLength(settings.gauge)
-							  : BuilderTransferTable.maxLength(settings.gauge);
-                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
-//					lengthInput.setValue(Math.min((int) lengthInput.getValue(), max)); // revalidate
-				}
-				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
-				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
-			}
-		};
+						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new)),
+               (sel, option) -> {
+                   settings.type = option;
+                   typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
+                   degreesSlider.setVisible(settings.type.hasQuarters());
+                   curvositySlider.setVisible(settings.type.hasCurvosity());
+                   smoothingButton.setVisible(settings.type.hasSmoothing());
+                   directionButton.setVisible(settings.type.hasDirection());
+                   if (settings.type.isTable()) {
+                       int max = settings.type == TrackItems.TURNTABLE
+                                 ? BuilderTurnTable.maxLength(settings.gauge)
+                                 : BuilderTransferTable.maxLength(settings.gauge);
+                       lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+//					   lengthInput.setValue(Math.min((int) lengthInput.getValue(), max)); // revalidate
+                   }
+                   transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
+                   transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
+               }
+		);
 		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type),
                                 (hand, button) -> showSelector(typeSelector));
 		ytop += height;
@@ -216,8 +211,7 @@ public class TrackGui implements IScreen {
 		transfertableEntrySpacingSlider = new Slider(screen, 25+xtop, ytop, "", 1, 15, settings.transfertableEntrySpacing, false,
                                                      slider -> {
                                                          settings.transfertableEntrySpacing = (int) slider.getValue();
-                                                         slider.setText(
-                                                                 GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_SPACING.toString((int) slider.getValue()));
+                                                         slider.setText(GuiText.SELECTOR_TRANSFER_TABLE_ENTRY_SPACING.toString((int) slider.getValue()));
                                                      });
 		transfertableEntrySpacingSlider.onSlider();
 		ytop += height;
@@ -254,41 +248,33 @@ public class TrackGui implements IScreen {
 		//ytop = -GUIHelpers.getScreenHeight() / 4;
 		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 5);
 
-		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
+		trackSelector = new ListSelector<>(screen, width,  250, height,
 				DefinitionManager.getTrack(settings.track),
-				DefinitionManager.getTracks().stream().collect(Collectors.toMap(t -> t.name, g -> g, (u, v) -> u, LinkedHashMap::new))) {
-			@Override
-			public void onClick(TrackDefinition track) {
-				settings.track = track.trackID;
-				trackButton.setText(GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24)));
-			}
-		};
+				DefinitionManager.getTracks().stream().collect(Collectors.toMap(t -> t.name, g -> g, (u, v) -> u, LinkedHashMap::new)),
+                (sel, option) -> {
+                    settings.track = option.trackID;
+                    trackButton.setText(GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24)));
+                });
 		trackButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24)),
                                  (hand, button) -> showSelector(trackSelector));
 		ytop += height;
 
-		railBedSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.railBed,
-				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new))
-		) {
-			@Override
-			public void onClick(ItemStack option) {
-				settings.railBed = option;
-				bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)));
-			}
-		};
+		railBedSelector = new ListSelector<>(screen, width, 250, height, settings.railBed,
+				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new)),
+                (sel, option) -> {
+                    settings.railBed = option;
+                    bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)));
+                });
 		bedTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)),
                                    (hand, button) -> showSelector(railBedSelector));
 		ytop += height;
 
-		railBedFillSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.railBedFill,
-				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new))
-		) {
-			@Override
-			public void onClick(ItemStack option) {
-				settings.railBedFill = option;
-				bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)));
-			}
-		};
+		railBedFillSelector = new ListSelector<>(screen, width, 250, height, settings.railBedFill,
+				oreDict.stream().collect(Collectors.toMap(TrackGui::getStackName, g -> g, (u, v) -> u, LinkedHashMap::new)),
+                (sel, option) -> {
+                    settings.railBedFill = option;
+                    bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)));
+                });
 		bedFillButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)),
                                    (hand, button) -> showSelector(railBedFillSelector));
 		ytop += height;

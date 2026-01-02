@@ -47,17 +47,11 @@ public class PaintBrushPicker implements IScreen {
         int width = 200;
         int height = 20;
 
-        new ListSelector<String>(screen, 0, width, height, variant,
-                stock.getDefinition().textureNames.entrySet().stream()
-                        .collect(Collectors.toMap(
-                                Map.Entry::getValue, Map.Entry::getKey,
-                                (u, v) -> u, LinkedHashMap::new))
-        ) {
-            @Override
-            public void onClick(String option) {
-                variant = option;
-            }
-        }.setVisible(true);
+        new ListSelector<>(screen, 0, width, height, variant,
+                           stock.getDefinition().textureNames.entrySet().stream()
+                           .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (u, v) -> u, LinkedHashMap::new)),
+                           (sel, val) -> variant = val
+        ).setVisible(true);
 
         Slider zoom_slider = new Slider(screen, xtop + width, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
                                         GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true,

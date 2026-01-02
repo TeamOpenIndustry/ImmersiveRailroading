@@ -9,11 +9,12 @@ import cam72cam.mod.gui.screen.TextField;
 import cam72cam.mod.text.TextColor;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static cam72cam.immersiverailroading.gui.components.GuiUtils.fitString;
 
-public abstract class ListSelector<T> {
+public class ListSelector<T> {
     int width;
     T currentValue;
     Map<String, T> rawOptions;
@@ -29,10 +30,18 @@ public abstract class ListSelector<T> {
     Map<Button, Integer> buttonsX;
     Map<Button, Integer> buttonsY;
 
+    BiConsumer<ListSelector<T>, T> callback;
+
     public ListSelector(IScreenBuilder screen, int xOff, int width, int height, T currentValue, Map<String, T> rawOptions) {
+        this(screen, xOff, width, height, currentValue, rawOptions, (selector, val) -> {});
+    }
+
+    public ListSelector(IScreenBuilder screen, int xOff, int width, int height, T currentValue, Map<String, T> rawOptions,
+                        BiConsumer<ListSelector<T>, T> callback) {
         this.width = width;
         this.rawOptions = rawOptions;
         this.currentValue = currentValue;
+        this.callback = callback;
         visible = false;
         page = 0;
 
@@ -41,13 +50,11 @@ public abstract class ListSelector<T> {
 
         search = new TextField(screen, xtop, ytop, width - 1, height);
 
-        pagination = new Button(screen, xtop, ytop + height, width + 1, height, "") {
-            @Override
-            public void onClick(Player.Hand hand) {
-                page += hand == Player.Hand.PRIMARY ? 1 : -1;
-                updateSearch(search.getText());
-            }
-        };
+        pagination = new Button(screen, xtop, ytop + height, width + 1, height, "",
+                                (hand, button) -> {
+                                    page += hand == Player.Hand.PRIMARY ? 1 : -1;
+                                    updateSearch(search.getText());
+                                });
 
         pageSize = Math.max(1, GUIHelpers.getScreenHeight() / height - 2);
 
@@ -60,14 +67,12 @@ public abstract class ListSelector<T> {
         buttonsX = new HashMap<>();
         buttonsY = new HashMap<>();
         for (int i = 0; i < pageSize; i++) {
-            Button btn = new Button(screen, xtop, ytop + height * 2 + i * height, width + 1, height, "") {
-                @Override
-                public void onClick(Player.Hand hand) {
-                    ListSelector.this.currentValue = usableButtons.get(this);
-                    ListSelector.this.onClick(ListSelector.this.currentValue);
-                    ListSelector.this.updateSearch(search.getText());
-                }
-            };
+            Button btn = new Button(screen, xtop, ytop + height * 2 + i * height, width + 1, height, "",
+                                    (hand, button) -> {
+                                        this.currentValue = usableButtons.get(button);
+                                        this.callback.accept(ListSelector.this, ListSelector.this.currentValue);
+                                        this.updateSearch(search.getText());
+                                    });
             buttonsX.put(btn, xtop);
             buttonsY.put(btn, ytop + height * 2 + i * height);
             options.add(btn);
@@ -93,8 +98,6 @@ public abstract class ListSelector<T> {
     public boolean isVisible() {
         return visible;
     }
-
-    public abstract void onClick(T option);
 
     void updateSearch(String search) {
         Collection<String> names = search.isEmpty() ? rawOptions.keySet() : rawOptions.keySet().stream()
