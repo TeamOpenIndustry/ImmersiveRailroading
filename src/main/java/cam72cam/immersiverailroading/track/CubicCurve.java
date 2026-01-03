@@ -42,6 +42,129 @@ public class CubicCurve {
         return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2)).apply(new Matrix4().translate(0, 0, -radius));
     }
 
+    //https://help.autodesk.com/view/CIV3D/2025/ENU/?guid=GUID-DD7C0EA1-8465-45BA-9A39-FC05106FD822
+//    public static double cubicParabolaMaxAngle = Math.toDegrees(Math.atan(1.0/Math.sqrt(5)));
+    public static double cubicParabolaMaxAngle = 24.09484255211;//ease3Parabola will meet min R at this angle
+
+    //what should we store? angle and radius so this will match existing nbt storage?
+    public static CubicCurve cubicParabola(double Radius, double Len, boolean straightAtP1) {
+        double Len2 = Len * Len;
+        Vec3d p1, ctrl1, ctrl2, p2;
+        if (straightAtP1) {          //直线→缓和→圆
+            p1 = new Vec3d(0, 0, 0);
+            ctrl1 = new Vec3d(Len / 3.0, 0, 0);
+            ctrl2 = new Vec3d(2 * Len / 3.0, 0, 0);
+            p2 = new Vec3d(Len, 0, -Len2 / (6 * Radius));//these seems the best?
+
+            return new CubicCurve(p1, ctrl1, ctrl2, p2);
+        } else {                     //圆→缓和→直线
+            p1 = new Vec3d(0, 0, 0);
+            ctrl1 = new Vec3d(Len / 3.0, 0, Len2 / (6 * Radius));
+            ctrl2 = new Vec3d(2 * Len / 3.0, 0, Len2 / (6 * Radius));
+            p2 = new Vec3d(Len, 0, Len2 / (6 * Radius));
+
+            Matrix4 quart = new Matrix4();
+            quart.rotate(Math.atan(0.5*Len/Radius), 0, 1, 0);
+
+            return new CubicCurve(p1, quart.apply(ctrl1), quart.apply(ctrl2), quart.apply(p2));
+        }
+    }
+
+    public static CubicCurve cubicParabolaAngle(double Radius, double angleDeg, boolean straightAtP1) {
+        double Len = 2 * Radius * Math.tan(Math.toRadians(angleDeg));
+        return cubicParabola(Radius, Len, straightAtP1);
+    }
+
+    public static CubicCurve cubicParabolaR1R2Angle(double Radius, double angleDeg, double nextRadius) {
+        //warning:angleDeg must be bigger than this.cubicParabolaMaxAngle, or Len will turn to NaN and stack overflow error will be thrown!
+        boolean shouldLocateAtP2 = nextRadius < Radius;
+        if(nextRadius < Radius){
+            double t = Radius;
+            Radius = nextRadius;
+            nextRadius = t;
+        }
+        double k = Radius/nextRadius;
+
+        double tanAngleDeg = Math.tan(Math.toRadians(angleDeg));
+        double k2 = k * k;
+        double delta = (1 - k2) * (1 - k2) - 4 * k2 * tanAngleDeg * tanAngleDeg;
+        double tanAtRadius = ( (1 - k2) - Math.sqrt(delta) ) / (2 * k2 * tanAngleDeg);//delta is dangerous
+        double len = 2*Radius*tanAtRadius;
+
+        return shouldLocateAtP2?cubicParabolaR1R2Len(nextRadius,Radius,len):cubicParabolaR1R2Len(Radius,nextRadius,len);
+    }
+    public static boolean isCubicParabolaDeltaValid(double Radius, double angleDeg, double nextRadius){
+        if(nextRadius < Radius){
+            double t = Radius;
+            Radius = nextRadius;
+            nextRadius = t;
+        }
+        double k = Radius/nextRadius;
+        double tanAngleDeg = Math.tan(Math.toRadians(angleDeg));
+        double k2 = k * k;
+        double delta = (1 - k2) * (1 - k2) - 4 * k2 * tanAngleDeg * tanAngleDeg;
+        return delta >= 0;
+    }
+//    R = 300;
+//    R2 = 1000;
+//    k = R/R2;
+//    L = 40;
+//    piece = L*(1-k)/3;
+//    a = 1/(6*R*L);
+//
+//    x = linspace(0,L,500);
+//    y_th = a*x.^3;
+//
+//    P0 = [k*L k^3*L^2/(6*R)];
+//    P1 = [k*L+piece k^3*L^2/(6*R)+piece*k^2*L/(2*R)];
+//    P2 = [k*L+piece*2  L^2/(6*R)-piece*L/(2*R)];
+//    P3 = [L      L^2/(6*R)];
+    public static CubicCurve cubicParabolaR1R2Len(double Radius, double nextRadius, double Len) {
+        boolean shouldLocateAtP2 = nextRadius < Radius;
+        if(nextRadius < Radius){
+            double t = Radius;
+            Radius = nextRadius;
+            nextRadius = t;
+        }
+        double k = Radius/nextRadius;
+        double piece = Len * (1-k)/3;
+        double k2 = k * k;
+        double k3 = k * k * k;
+        double Len2 = Len * Len;
+        double PL = piece * Len;
+
+        Vec3d p1, ctrl1, ctrl2, p2;
+        Matrix4 quart = new Matrix4();
+
+        if(!shouldLocateAtP2){
+            p1 = new Vec3d(k*Len, 0, k3*Len2/(6*Radius));
+            ctrl1 = new Vec3d(k*Len+piece, 0, k3*Len2/(6*Radius) + k2*PL/(2*Radius));
+            ctrl2 = new Vec3d(k*Len+piece*2, 0, Len2/(6*Radius) - PL/(2*Radius));
+            p2 = new Vec3d(Len, 0, Len2/(6*Radius));
+            //translate
+            double dx = p1.x;
+            double dz = p1.z;
+            p1 = p1.add(-dx,0,-dz);
+            p2 = p2.add(-dx,0,-dz);
+            ctrl1 = ctrl1.add(-dx,0,-dz);
+            ctrl2 = ctrl2.add(-dx,0,-dz);
+            //mirror
+            p2 = p2.add(0,0,-p2.z*2);
+            ctrl1 = ctrl1.add(0,0,-ctrl1.z*2);
+            ctrl2 = ctrl2.add(0,0,-ctrl2.z*2);
+
+            quart.rotate(-Math.atan(0.5*Len*k/nextRadius), 0, 1, 0);
+        }else{
+            p1 = new Vec3d(0,0,0);
+            ctrl1 = new Vec3d(piece, 0, PL/(2*Radius));
+            ctrl2 = new Vec3d(piece*2, 0, (1-k3)*Len2/(6*Radius)-k2*PL/(2*Radius));
+            p2 = new Vec3d(Len*(1-k), 0, (1-k3)*Len2/(6*Radius));
+
+            quart.rotate(Math.atan(0.5*Len/Radius), 0, 1, 0);
+        }
+        return new CubicCurve(quart.apply(p1), quart.apply(ctrl1), quart.apply(ctrl2), quart.apply(p2));
+    }
+
     public CubicCurve apply(Matrix4 mat) {
         return new CubicCurve(
                 mat.apply(p1),

@@ -9,9 +9,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.track.BuilderTransferTable;
-import cam72cam.immersiverailroading.track.BuilderTurnTable;
-import cam72cam.immersiverailroading.track.TrackBase;
+import cam72cam.immersiverailroading.track.*;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -66,8 +64,9 @@ public class TrackGui implements IScreen {
 	private ListSelector<ItemStack> railBedFillSelector;
 
 	//spiralCurve
-	private TextField nearRadius;
+//	private TextField nearRadius;
 	private TextField farRadius;
+	private Button toggleStraightAtP1;
 	//advancedSwitch
 	private Button toggleSwitchCurve;
 
@@ -87,6 +86,8 @@ public class TrackGui implements IScreen {
 	//do we need this? Two tangents and points already determine the radius, but does anyone need a smaller radius?
 //	private TextField verticalRadius;
 
+	//TODO: curves based on cubic-curve are limited, we will have to find new method for more complex curve and function,
+	// like completely decoupling vertical and horizontal curve, spiralCurve and real arc turn(this will looks better with big radius)
 	private double zoom = 1;
 
 	public TrackGui() {
@@ -139,6 +140,7 @@ public class TrackGui implements IScreen {
                       : BuilderTransferTable.maxLength(settings.gauge);
             }
             if (val > 0 && val <= max) {
+				if(settings.type == TrackItems.CUBICPARABOLA && !CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,val))return false;
                 settings.length = val;
                 return true;
             }
@@ -195,6 +197,7 @@ public class TrackGui implements IScreen {
 				settings.type = option;
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				degreesSlider.setVisible(settings.type.hasQuarters());
+				if(option == TrackItems.CUBICPARABOLA && settings.degrees > CubicCurve.cubicParabolaMaxAngle)settings.degrees = (float) CubicCurve.cubicParabolaMaxAngle;
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
@@ -262,12 +265,53 @@ public class TrackGui implements IScreen {
 		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
-				settings.degrees = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
+				float degreeValue = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
+				if(settings.type == TrackItems.CUBICPARABOLA){
+					while (degreeValue >= CubicCurve.cubicParabolaMaxAngle || !CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,settings.cubicParabolaTag.getInteger("farRadius"))){
+						degreeValue -= 90 / Config.ConfigBalance.AnglePlacementSegmentation;
+						if(degreeValue==0) break;
+					}
+				}
+				settings.degrees = settings.type == TrackItems.TURN ? degreeValue : (float) degreeValue;
 				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
 			}
 		};
 		degreesSlider.onSlider();
 		ytop += height;
+
+		this.toggleStraightAtP1 = new Button(screen, xtop, ytop, width, height, "isForward"+settings.cubicParabolaTag.getBoolean("isForward").toString()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				boolean wasForward = settings.cubicParabolaTag.getBoolean("isForward");
+				settings.cubicParabolaTag.setBoolean("isForward",!wasForward);
+				toggleStraightAtP1.setText("isForward"+settings.cubicParabolaTag.getBoolean("isForward").toString());
+			}
+		};
+		toggleStraightAtP1.setVisible(settings.type == TrackItems.CUBICPARABOLA);
+		ytop += height;
+
+		this.farRadius = new TextField(screen, xtop, ytop, width-1, height);
+		this.farRadius.setText("" + settings.cubicParabolaTag.getInteger("farRadius").toString());
+		this.farRadius.setValidator(s -> {
+			if (s == null || s.length() == 0) {
+				return true;
+			}
+			int val;
+			try {
+				val = Integer.parseInt(s);
+			} catch (NumberFormatException e) {
+				if(s.equals("-"))return true;
+				return false;
+			}
+			int max = 0x3f3f3f3f;
+			if (val >= -1 && val!=0 && val <= max && CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,val)) {
+				settings.cubicParabolaTag.setInteger("farRadius", val);
+				return true;
+			}
+			return false;
+		});
+		this.farRadius.setFocused(true);
+		this.farRadius.setVisible(settings.type == TrackItems.CUBICPARABOLA);
 
 
 		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
