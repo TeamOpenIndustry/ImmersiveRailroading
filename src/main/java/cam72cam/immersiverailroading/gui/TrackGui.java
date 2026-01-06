@@ -10,10 +10,7 @@ import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.*;
-import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
@@ -63,6 +60,11 @@ public class TrackGui implements IScreen {
 	private ListSelector<ItemStack> railBedSelector;
 	private ListSelector<ItemStack> railBedFillSelector;
 
+//multiWaySwitch
+	private ListSelector<SingleWayInfo> waySelector;
+	private Button wayButton;
+	private Button addWayButton;
+	private Button delWayButton;
 	//spiralCurve
 //	private TextField nearRadius;
 	private TextField farRadius;
@@ -210,6 +212,24 @@ public class TrackGui implements IScreen {
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
+				if(settings.type == TrackItems.MULTISWITCH){
+					if(settings.multiSwitchInfo!=null && settings.multiSwitchInfo.wayList.isEmpty()){
+						List<SingleWayInfo> wayInfoList = new ArrayList();
+						PlacementInfo defaultPos = new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null);
+
+						RailSettings defaultLeftTurn = new RailSettings(settings.gauge, settings.track, TrackItems.TURN, 20, 90, 1, settings.posType, settings.smoothing, settings.pitchTag.getFloat("start"), settings.pitchTag.getFloat("end"), true, -1, null, TrackDirection.LEFT, settings.railBed, settings.railBedFill, settings.isPreview, settings.isGradeCrossing, 1, 1);
+
+						RailSettings defaultRightTurn = defaultLeftTurn.with(mutable -> {
+							mutable.direction = TrackDirection.RIGHT;
+							mutable.length = 10;
+						});
+						SingleWayInfo default1 = new SingleWayInfo(defaultLeftTurn,defaultPos,1);
+						SingleWayInfo default2 = new SingleWayInfo(defaultRightTurn,defaultPos,2);
+						wayInfoList.add(default1);
+						wayInfoList.add(default2);
+						settings.multiSwitchInfo = new MultiSwitchInfo(wayInfoList, TrackItems.MULTISWITCH);
+					}
+				}
 			}
 		};
 		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
@@ -338,7 +358,7 @@ public class TrackGui implements IScreen {
 		//height = 20;
 		//xtop = GUIHelpers.getScreenWidth() / 2 - width;
 		//ytop = -GUIHelpers.getScreenHeight() / 4;
-		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 7);
+		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 8);
 
 		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
 				DefinitionManager.getTrack(settings.track),
@@ -353,6 +373,33 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				showSelector(trackSelector);
+			}
+		};
+		ytop += height;
+
+//		waySelector = new ListSelector<>(screen, width,  250, height,
+//				1,
+//				1) {
+//			@Override
+//			public void onClick() {
+//
+//			}
+//		}
+		wayButton = new Button(screen, xtop, ytop, width-60, height, "") {
+			@Override
+			public void onClick(Player.Hand hand) {
+//				showSelector(waySelector);
+			}
+		};
+		addWayButton = new Button(screen, xtop+width-50, ytop, height, height, "") {
+			@Override
+			public void onClick(Player.Hand hand) {
+
+			}
+		};
+		delWayButton = new Button(screen, xtop+width-20, ytop, height, height, "") {
+			@Override
+			public void onClick(Player.Hand hand) {
 			}
 		};
 		ytop += height;

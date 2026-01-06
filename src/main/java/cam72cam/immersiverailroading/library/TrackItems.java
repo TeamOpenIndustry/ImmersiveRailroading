@@ -13,8 +13,8 @@ public enum TrackItems {
 	TURNTABLE(5),
 	CUSTOM(7),
 	TRANSFERTABLE(6),
-
-	CUBICPARABOLA(8);
+	CUBICPARABOLA(8),
+	MULTISWITCH(9);
 
 	private final int order;
 
@@ -32,6 +32,7 @@ public enum TrackItems {
 			case TURN:
 			case SWITCH:
 			case CUBICPARABOLA:
+			case MULTISWITCH:
 				return true;
 			default:
 				return false;
@@ -42,6 +43,7 @@ public enum TrackItems {
 		switch (this) {
 			case SWITCH:
 			case CUSTOM:
+			case MULTISWITCH:
 				return true;
 			default:
 				return false;
@@ -54,6 +56,7 @@ public enum TrackItems {
 			case TURN:
 			case CUBICPARABOLA:
 			case SWITCH:
+			case MULTISWITCH:
 			case CUSTOM:
 				return true;
 			default:
@@ -66,6 +69,7 @@ public enum TrackItems {
 			case TURN:
 			case CUBICPARABOLA:
 			case SWITCH:
+			case MULTISWITCH:
 				return true;
 			default:
 				return false;

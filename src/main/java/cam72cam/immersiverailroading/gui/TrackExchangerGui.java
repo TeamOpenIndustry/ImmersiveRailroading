@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemTrackExchangerUpdatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
@@ -102,6 +103,7 @@ public class TrackExchangerGui implements IScreen {
 				TrackSmoothing.BOTH,
 				0,0,
 				true,-1,
+				new MultiSwitchInfo(new ArrayList<>(),TrackItems.MULTISWITCH),
 				TrackDirection.NONE,
 				railBed,
 				ItemStack.EMPTY,

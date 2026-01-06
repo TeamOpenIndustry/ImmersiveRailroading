@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
@@ -18,6 +19,8 @@ import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
+
+import java.util.ArrayList;
 
 public class TrackExchangerModel implements ItemRender.IItemModel {
 	private static OBJModel MODEL;
@@ -37,7 +40,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	public static void render(ItemStack stack, World world, RenderState state) {
 		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
 		RailInfo info = new RailInfo(
-                new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, 18, 0, 1, TrackPositionType.FIXED, TrackSmoothing.BOTH, 0, 0, true, -1, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false, 1, 1),
+                new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, 18, 0, 1, TrackPositionType.FIXED, TrackSmoothing.BOTH, 0, 0, true, -1, new MultiSwitchInfo(new ArrayList<>(),TrackItems.MULTISWITCH), TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false, 1, 1),
 				new PlacementInfo(Vec3d.ZERO, TrackDirection.NONE, 0, Vec3d.ZERO),
 				null,
 				SwitchState.NONE,

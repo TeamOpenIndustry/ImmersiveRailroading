@@ -2,9 +2,12 @@ package cam72cam.immersiverailroading.items.nbt;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.*;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @TagMapped(RailSettings.Mapper.class)
@@ -28,8 +31,9 @@ public class RailSettings {
     public final String track;
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
+    public final MultiSwitchInfo multiSwitchInfo;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, float pitchStart, float pitchEnd, boolean isForward, int farRadius, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, float pitchStart, float pitchEnd, boolean isForward, int farRadius, MultiSwitchInfo multiSwitchInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -49,6 +53,7 @@ public class RailSettings {
         this.pitchEnd = pitchEnd;
         this.isForward = isForward;
         this.farRadius = farRadius;
+        this.multiSwitchInfo = multiSwitchInfo;
     }
     public void write(ItemStack stack) {
         TagCompound data = new TagCompound();
@@ -150,6 +155,8 @@ public class RailSettings {
         public int transfertableEntryCount;
         @TagField("transfertableEntrySpacing")
         public int transfertableEntrySpacing;
+        @TagField("multiSwitchInfo")
+        public MultiSwitchInfo multiSwitchInfo;
 
         private Mutable(RailSettings settings) {
             this.gauge = settings.gauge;
@@ -162,6 +169,8 @@ public class RailSettings {
             cubicParabolaTag = new TagCompound();
             cubicParabolaTag.setBoolean("isForward", settings.isForward);
             cubicParabolaTag.setInteger("farRadius", settings.farRadius);
+
+            this.multiSwitchInfo = settings.multiSwitchInfo;
 
             this.type = settings.type;
             this.length = settings.length;
@@ -191,6 +200,8 @@ public class RailSettings {
             cubicParabolaTag = new TagCompound();
             cubicParabolaTag.setBoolean("isForward", true);
             cubicParabolaTag.setInteger("farRadius", -1);
+
+            multiSwitchInfo = new MultiSwitchInfo(new ArrayList<>(),TrackItems.MULTISWITCH);//parent level
 
             length = 10;
             degrees = 90;
@@ -222,6 +233,7 @@ public class RailSettings {
                     pitchTag.getFloat("end"),
                     cubicParabolaTag.getBoolean("isForward"),
                     cubicParabolaTag.getInteger("farRadius"),
+                    multiSwitchInfo,
                     direction,
                     railBed,
                     railBedFill,

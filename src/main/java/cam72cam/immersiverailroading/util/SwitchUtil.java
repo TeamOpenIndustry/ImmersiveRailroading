@@ -19,7 +19,7 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 
-		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM) {
+		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM && rail.info.settings.type != TrackItems.CUBICPARABOLA) {
 			return SwitchState.NONE;
 		}
 
@@ -27,7 +27,7 @@ public class SwitchUtil {
 		if (parent == null) {
 			return SwitchState.NONE;
 		}
-		if (parent.info.settings.type != TrackItems.SWITCH) {
+		if (parent.info.settings.type != TrackItems.SWITCH && parent.info.settings.type != TrackItems.MULTISWITCH) {
 			return SwitchState.NONE;
 		}
 
@@ -50,8 +50,33 @@ public class SwitchUtil {
 			return parent.info.switchForced;
 		}
 
-		if (isRailPowered(rail)) {
-			return SwitchState.TURN;
+		if(parent.info.settings.type == TrackItems.MULTISWITCH){
+			if (isRailPowered(rail)) {
+				return SwitchState.TURN;
+			}
+			//TODO:define level-state graph
+			switch (RailPoweredLevel(rail)){
+				case 0:
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+				case 9:
+				case 10:
+				case 11:
+				case 12:
+				case 13:
+				case 14:
+				case 15:
+			}
+		}else{
+			if (isRailPowered(rail)) {
+				return SwitchState.TURN;
+			}
 		}
 
 		return SwitchState.STRAIGHT;
@@ -76,5 +101,24 @@ public class SwitchUtil {
 			}
 		}
 		return false;
+	}
+
+	public static int RailPoweredLevel(TileRail rail) {
+		Vec3d redstoneOrigin = rail.info.placementInfo.placementPosition.add(rail.getPos());
+		double horiz = rail.info.settings.gauge.scale() * 1.1;
+		if (Config.ConfigDebug.oldNarrowWidth && rail.info.settings.gauge.value() < 1) {
+			horiz = horiz/2;
+		}
+		int scale = (int)Math.round(horiz);
+		for (int x = -scale; x <= scale; x++) {
+			for (int z = -scale; z <= scale; z++) {
+				Vec3i gagPos = new Vec3i(redstoneOrigin.add(new Vec3d(x, 0, z)));
+				TileRailBase gagRail = rail.getWorld().getBlockEntity(gagPos, TileRailBase.class);
+				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
+					return rail.getWorld().getRedstone(gagPos);
+				}
+			}
+		}
+		return 0;
 	}
 }
