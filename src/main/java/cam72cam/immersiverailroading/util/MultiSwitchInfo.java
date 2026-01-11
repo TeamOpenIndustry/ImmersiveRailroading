@@ -1,63 +1,190 @@
 package cam72cam.immersiverailroading.util;
 
-import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.*;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @TagMapped(MultiSwitchInfo.TagMapper.class)
 public class MultiSwitchInfo {
+    private static final RailSettings defaultSettings = new RailSettings(
+            Gauge.standard(),
+            "default",
+            TrackItems.TURN,
+            13,
+            90,
+            1f,
+            TrackPositionType.FIXED, TrackSmoothing.BOTH,
+            0f,0f,
+            true,-1,
+            TrackDirection.RIGHT,
+            ItemStack.EMPTY, ItemStack.EMPTY,
+            true,
+            false,
+            1,
+            1
+    );
+    private static final PlacementInfo defaultPos = new PlacementInfo(
+            new Vec3d(0.5, 0, 0.5), TrackDirection.LEFT, 0, null
+    );
 
-    public List<SingleWayInfo> wayList;
-    public TrackItems typeAsChild;
-    private int wayCount;
+    public final List<SingleWayInfo> wayList;
+    public final TrackItems realShapeType;
+    public final int orderAsChild;
 
-    public MultiSwitchInfo(List<SingleWayInfo> wayList, TrackItems typeAsChild) {
+    public MultiSwitchInfo(List<SingleWayInfo> wayList, TrackItems realShapeType, int orderAsChild) {
         this.wayList = wayList;
-        this.wayCount = wayList.size();
-        this.typeAsChild = typeAsChild;
+        this.realShapeType =  realShapeType;
+        this.orderAsChild = orderAsChild;
+    }
+
+    public static class Mutable {
+        @TagField(value = "wayList",mapper = WayListMapper.class)
+        public List<SingleWayInfo> wayList;
+        @TagField("realShapeType")
+        public TrackItems realShapeType;
+        @TagField("orderAsChild")
+        public int orderAsChild;
+
+        public Mutable(MultiSwitchInfo info) {
+            this.wayList = info.wayList;
+            this.realShapeType = info.realShapeType;
+            this.orderAsChild = info.orderAsChild;
+        }
+
+        public Mutable(TagCompound data) throws SerializationException {
+            // Defaults
+            realShapeType = TrackItems.STRAIGHT;
+            wayList = new ArrayList<>();
+            wayList.add(new SingleWayInfo(defaultSettings,defaultPos,null,0));
+            orderAsChild = 0;//0=straight(parent)as default;1=MID1,2=MID2,3=MID3,4=MID4,5=TURN
+
+            TagSerializer.deserialize(data, this);
+        }
+
+        public MultiSwitchInfo immutable() {
+            return new MultiSwitchInfo(
+                    wayList,
+                    realShapeType,
+                    orderAsChild
+            );
+        }
+    }
+
+    public MultiSwitchInfo.Mutable mutable() {
+        return new MultiSwitchInfo.Mutable(this);
+    }
+    public static MultiSwitchInfo from(ItemStack stack) {
+        TagCompound root = stack.getTagCompound();
+        if (root == null || !root.hasKey("multiSwitchInfo")) {
+            //default fallback
+            List<SingleWayInfo> wayList = new ArrayList<>();
+            wayList.add(new SingleWayInfo(defaultSettings,defaultPos,null,0));
+            return new MultiSwitchInfo(wayList, TrackItems.TURN, 0);
+        }
+
+        try {
+            TagCompound multiSwitchData = root.get("multiSwitchInfo");
+            return new MultiSwitchInfo.Mutable(multiSwitchData).immutable();
+        } catch (SerializationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void write(ItemStack stack) {
+        TagCompound root = stack.getTagCompound();
+        if (root == null) {
+            root = new TagCompound();
+        }
+
+        TagCompound multiSwitchData = new TagCompound();
+        try {
+            TagSerializer.serialize(multiSwitchData, mutable());
+        } catch (SerializationException e) {
+            ImmersiveRailroading.catching(e);
+        }
+
+        root.set("multiSwitchInfo", multiSwitchData);
+
+        stack.setTagCompound(root);
+    }
+    public MultiSwitchInfo with(Consumer<MultiSwitchInfo.Mutable> mod) {
+        MultiSwitchInfo.Mutable mutable = mutable();
+        mod.accept(mutable);
+        return mutable.immutable();
+    }
+    private static class WayListMapper implements cam72cam.mod.serialization.TagMapper<List<SingleWayInfo>> {
+        public TagAccessor<List<SingleWayInfo>> apply(Class<List<SingleWayInfo>> t, String fieldname, TagField tag) {
+            return new TagAccessor<>(
+                    (nbt, list) -> {
+                        if(list == null){
+                            nbt.remove(fieldname);
+                            return;
+                        }
+                        TagCompound wayListTag = new TagCompound();
+                        for (int i = 0; i < list.size(); i++) {
+                            TagCompound singleWayInfo = new TagCompound();
+                            try {
+                                TagSerializer.serialize(singleWayInfo, new SingleWayInfo.Mutable(list.get(i)));
+                            } catch (SerializationException e) {
+                                throw new RuntimeException(e);
+                            }
+                            wayListTag.set(i + "", singleWayInfo);
+                        }
+                        wayListTag.setInteger("amount",list.size());
+                        nbt.set(fieldname,wayListTag);
+                    },
+                    nbt -> {
+                        if(!nbt.hasKey(fieldname)){
+                            return null;
+                        }
+                        TagCompound wayListTag = nbt.get(fieldname);
+                        int amount = wayListTag.getInteger("amount");
+                        List<SingleWayInfo> list = new ArrayList<>();
+                        for (int i = 0; i < amount; i++) {
+                            try {
+                                list.add(new SingleWayInfo.Mutable(wayListTag.get(i + "")).immutable());
+                            } catch (SerializationException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        return list;
+                    }
+            );
+        }
     }
 
     static class TagMapper implements cam72cam.mod.serialization.TagMapper<MultiSwitchInfo> {
         @Override
         public TagAccessor<MultiSwitchInfo> apply(Class<MultiSwitchInfo> type, String fieldName, TagField tag) {
             return new TagAccessor<>(
-                    (w, o) -> {
+                    (d, o) -> {
                         if (o == null) {
-                            w.remove(fieldName);
+                            d.remove(fieldName);
                             return;
                         }
-
-                        TagCompound info = new TagCompound();
-                        TagCompound wayListTag = new TagCompound();
-                        for (int i = 0; i < o.wayList.size(); i++) {
-                            TagCompound singleWayInfo = new TagCompound();
-                            TagSerializer.serialize(singleWayInfo, new SingleWayInfo.Mutable(o.wayList.get(i)));
-                            wayListTag.set(i + "", singleWayInfo);
+                        TagCompound target = new TagCompound();
+                        try {
+                            TagSerializer.serialize(target, o.mutable());
+                        } catch (SerializationException e) {
+                            throw new RuntimeException(e);
                         }
-
-                        info.setEnum("typeAsChild", o.typeAsChild);
-                        info.setInteger("wayCount", o.wayCount);
-                        info.set("wayList", wayListTag);
-
-                        w.set(fieldName, info);
+                        d.set(fieldName, target);
                     },
-                    (d, w) -> {
-                        if (!d.hasKey(fieldName)) {
+                    d -> {
+                        if(!d.hasKey(fieldName)){
                             return null;
                         }
-                        TagCompound info = d.get(fieldName);
-
-                        TrackItems typeAsChild = info.getEnum("typeAsChild",TrackItems.class);
-                        int count = info.getInteger("wayCount");
-                        TagCompound wayListTag = info.get("wayList");
-
-                        List<SingleWayInfo> wayList = new ArrayList<>();
-                        for (int i = 0; i < count; i++) {
-                            wayList.add(new SingleWayInfo.Mutable(wayListTag.get(i + "")).immutable());
+                        try {
+                            return new MultiSwitchInfo.Mutable(d.get(fieldName)).immutable();
+                        } catch (SerializationException e) {
+                            throw new RuntimeException(e);
                         }
-                        return new MultiSwitchInfo(wayList,typeAsChild);
                     }
             );
         }

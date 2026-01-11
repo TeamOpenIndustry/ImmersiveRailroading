@@ -25,6 +25,7 @@ import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapper;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.sound.StandardSound;
@@ -42,6 +43,8 @@ import java.util.function.Predicate;
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	@TagField("parent")
 	private Vec3i parent;
+	@TagField(value = "childWay",mapper = Vec3iListMapper.class)//only used in parent of multiSwitch
+	private List<Vec3i> childWay = new ArrayList<>();
 	@TagField("height")
 	private float bedHeight = 0;
 	@TagField("railHeight")
@@ -235,6 +238,20 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void setParent(Vec3i pos) {
 		this.parent = pos.subtract(this.getPos());
 	}
+
+	public Vec3i getChild(int order) {
+		if(order < childWay.size()){
+			return childWay.get(order);
+		}else{
+			ImmersiveRailroading.warn("invalid TileRailBase:"+this);
+			return null;
+		}
+	}
+	public void setChildList(List<Vec3i> childWayParentPos) {
+		for(Vec3i pos:childWayParentPos){
+			childWay.add(pos.subtract(this.getPos()));
+		}
+	}
 	
 	public boolean isFlexible() {
 		return this.flexible || !(this instanceof TileRail);
@@ -318,6 +335,17 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return null;
 		}
 		TileRail te = getWorld().getBlockEntity(this.getParent(), TileRail.class);
+		if (te == null || te.info == null) {
+			return null;
+		}
+		return te;
+	}
+	public TileRail getChildWayTile(int order) {//TODO:对于普通道岔，父子两个就足够了，但是对于多开道岔需要获取该父级其他子级曲线的方法
+		//when this is called, getChild() shouldn't return null
+		if (this.getChild(order) == null) {
+			return null;
+		}
+		TileRail te = getWorld().getBlockEntity(this.getChild(order).add(this.getPos()), TileRail.class);
 		if (te == null || te.info == null) {
 			return null;
 		}
@@ -414,7 +442,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	private Collection<TileRail> tiles = null;
 	public Vec3d getNextPositionShort(Vec3d currentPosition, Vec3d motion) {
-		if (this.getReplaced() == null) {
+		if (this.getReplaced() == null) {//case1
 			// Simple common case, maybe this does not need to be optimized out of the for loop below?
 			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 			if (tile == null) {
@@ -425,8 +453,31 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
 
-			if (state == SwitchState.STRAIGHT) {
-				tile = tile.getParentTile();
+			int midState = -1;
+			switch (state){
+				case STRAIGHT:
+					tile = tile.getParentTile();
+					break;
+				case MID1:
+					midState = 0;
+					break;
+				case MID2:
+					midState = 1;
+					break;
+				case MID3:
+					midState = 2;
+					break;
+				case MID4:
+					midState = 3;
+					break;
+				case TURN:
+				case NONE:
+					midState = 4;
+					break;
+			}
+			if(midState!= -1 && midState != 4 && tile.getParentTile().info.settings.type == TrackItems.MULTISWITCH
+					&& tile.getParentTile().info.multiSwitchInfo.wayList.size()>midState){
+				tile = tile.getParentTile().getChildWayTile(midState);
 			}
 
 			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
@@ -434,6 +485,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				return potential;
 			}
 
+			System.out.println("case1,l="+tile.info.settings.length);
 			return currentPosition;
 		}
 		// Complex case with overlapping segments
@@ -452,24 +504,48 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 			tiles = tileMap.values();
 		}
-
+		System.out.println("case2");
 
 		Vec3d nextPos = currentPosition;
 		Vec3d predictedPos = currentPosition.add(motion);
 		boolean hasSwitchSet = false;
 
 		for (TileRail tile : tiles) {
-			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);//问题不是state本身体，而是tile不会被及时纠正
+			System.out.println("state:"+state);
 
-			if (state == SwitchState.STRAIGHT) {
-				tile = tile.getParentTile();
+			int midState = -1;
+			switch (state){
+				case STRAIGHT:
+					tile = tile.getParentTile();
+					break;
+				case MID1:
+					midState = 0;
+					break;
+				case MID2:
+					midState = 1;
+					break;
+				case MID3:
+					midState = 2;
+					break;
+				case MID4:
+					midState = 3;
+					break;
+				case TURN:
+				case NONE:
+					midState = 4;
+					break;
+			}
+			if(midState!= -1 && midState != 4 && tile.getParentTile().info.settings.type == TrackItems.MULTISWITCH
+					&& tile.getParentTile().info.multiSwitchInfo.wayList.size()>midState){
+				tile = tile.getParentTile().getChildWayTile(midState);
 			}
 
 			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
 			if (potential != null) {
 				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
 				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
-				if (state == SwitchState.TURN) {
+				if (state == SwitchState.TURN || state == SwitchState.MID1 || state == SwitchState.MID2 || state == SwitchState.MID3 || state == SwitchState.MID4) {//
 					// This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
 					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
 					float rotationYaw = VecUtil.toWrongYaw(motion);
@@ -1017,6 +1093,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return stack;
 		}
 		parent.info.settings.write(stack);
+		if(parent.info.multiSwitchInfo != null)parent.info.multiSwitchInfo.write(stack);
 		return stack;
 	}
 
@@ -1124,4 +1201,15 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
     public void stockOverhead(EntityMoveableRollingStock stock) {
 		this.overhead = stock;
     }
+
+	static class Vec3iListMapper implements TagMapper<List<Vec3i>> {
+		public TagAccessor<List<Vec3i>> apply(Class<List<Vec3i>> t, String f, TagField tag) {
+			return new TagAccessor<>(
+					(nbt, list) -> nbt.setList(f, list,
+							v -> new TagCompound().setVec3i("v", v)),
+					nbt -> nbt.getList(f,
+							tc -> tc.getVec3i("v"))
+			);
+		}
+	}
 }

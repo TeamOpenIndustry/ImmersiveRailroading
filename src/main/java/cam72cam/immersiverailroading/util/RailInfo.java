@@ -27,6 +27,7 @@ public class RailInfo {
 	public final RailSettings settings;
 	public final PlacementInfo placementInfo;
 	public final PlacementInfo customInfo;
+	public final MultiSwitchInfo multiSwitchInfo;
 
 	// Used for tile rendering only
 	public final SwitchState switchState;
@@ -37,11 +38,11 @@ public class RailInfo {
 	public final boolean itemHeld;
 
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
-		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false);
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
+		this(settings, placementInfo, customInfo, multiSwitchInfo, switchState, switchForced, tablePos, false);
 	}
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 			//#1566: Use customInfo to adjust slope height
@@ -53,6 +54,7 @@ public class RailInfo {
 		this.settings = settings;
 		this.placementInfo = placementInfo;
 		this.customInfo = customInfo;
+		this.multiSwitchInfo = multiSwitchInfo;
 		this.switchState = switchState;
 		this.switchForced = switchForced;
 		this.tablePos = tablePos;
@@ -80,7 +82,8 @@ public class RailInfo {
 				this.placementInfo.yaw,
 				this.placementInfo.direction,
 				this.customInfo.yaw,
-				this.customInfo.direction
+				this.customInfo.direction,
+				this.multiSwitchInfo
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.posType != TrackPositionType.FIXED) {
@@ -105,8 +108,12 @@ public class RailInfo {
 		return id;
 	}
 
-	public RailInfo(ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+	public RailInfo(ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo) {
+		this(RailSettings.from(settings), placementInfo, customInfo, multiSwitchInfo, SwitchState.NONE, SwitchState.NONE, 0);
+	}
+
+	public RailInfo(SingleWayInfo singleWayInfo) {
+		this(singleWayInfo.settings,singleWayInfo.placementInfo,singleWayInfo.customInfo,new MultiSwitchInfo(null,singleWayInfo.settings.type,singleWayInfo.wayOrder),SwitchState.NONE,SwitchState.NONE,0);
 	}
 
 	public RailInfo withSettings(Consumer<RailSettings.Mutable> mod) {
@@ -127,6 +134,8 @@ public class RailInfo {
 		public PlacementInfo placementInfo;
 		@TagField("custom")
 		public PlacementInfo customInfo;
+		@TagField("multiSwitchInfo")
+		public MultiSwitchInfo multiSwitchInfo;
 		@TagField("switchState")
 		public SwitchState switchState;
 		@TagField("switchForced")
@@ -141,6 +150,7 @@ public class RailInfo {
 			this.settings = info.settings;
 			this.placementInfo = info.placementInfo;
 			this.customInfo = info.customInfo;
+			this.multiSwitchInfo = info.multiSwitchInfo;
 			this.switchState = info.switchState;
 			this.switchForced = info.switchForced;
 			this.tablePos = info.tablePos;
@@ -160,6 +170,7 @@ public class RailInfo {
 					settings,
 					placementInfo,
 					customInfo,
+					multiSwitchInfo,
 					switchState,
 					switchForced,
 					tablePos,
@@ -422,8 +433,8 @@ public class RailInfo {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH ,  0, 0, true, -1, null, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
-			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH ,  0, 0, true, -1, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
+			return new RailInfo(settings, placementInfo, null, null, switchState, switchForced, tablePos);
 		}
 	}
 }

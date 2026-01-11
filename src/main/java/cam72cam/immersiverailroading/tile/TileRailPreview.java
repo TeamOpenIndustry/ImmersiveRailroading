@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.BlockEntityTickable;
@@ -70,7 +71,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	public void setCustomInfo(PlacementInfo info) {
 		this.customInfo = info;
-		if (customInfo != null) {
+		if (customInfo != null) {//TODO:multiSwitch way support logic
 			RailSettings settings = RailSettings.from(item);
 			if(settings.type ==TrackItems.TURN
 				|| settings.type == TrackItems.STRAIGHT
@@ -152,7 +153,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	public RailInfo getRailRenderInfo() {
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
-			info = new RailInfo(item, placementInfo, customInfo);
+			info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));//对吗
 		}
 		return info;
 	}
@@ -160,7 +161,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(item, placementInfo, customInfo);
+        info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));//对吗
         if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();
 		}

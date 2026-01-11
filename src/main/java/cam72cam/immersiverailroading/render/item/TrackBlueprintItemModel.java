@@ -21,8 +21,10 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	public StandardModel getModel(World world, ItemStack stack) {
 		return new StandardModel().addCustom((state, pt) -> TrackBlueprintItemModel.render(stack, world, state));
 	}
+
+	//render the model of inventory
 	public static void render(ItemStack stack, World world, RenderState state) {
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null);
+		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null, null);
 		info = info.withSettings(b -> b.length = 10);
 
 		state.cull_face(false);
@@ -54,6 +56,8 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	}
 
 	private static ExpireableMap<String, RailInfo> infoCache = new ExpireableMap<>();
+
+	//render the preview when mouse target at a block
 	public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d vec, RenderState state, float partialTicks) {
 		Vec3d hit = vec.subtract(pos);
 		World world = player.getWorld();
@@ -66,7 +70,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			}
 		}
 
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null);
+		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null,  null);
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {

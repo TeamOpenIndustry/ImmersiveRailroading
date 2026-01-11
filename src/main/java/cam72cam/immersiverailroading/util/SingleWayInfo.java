@@ -6,13 +6,13 @@ import cam72cam.mod.serialization.*;
 @TagMapped(SingleWayInfo.TagMapper.class)
 public class SingleWayInfo {
     public final RailSettings settings;
-//    public final PlacementInfo placementInfo;
+    public final PlacementInfo placementInfo;
     public final PlacementInfo customInfo;
     public final int wayOrder;
 
-    public SingleWayInfo(RailSettings settings,PlacementInfo customInfo,int wayOrder) {
+    public SingleWayInfo(RailSettings settings,PlacementInfo placementInfo, PlacementInfo customInfo,int wayOrder) {
         this.settings = settings;
-//        this.placementInfo = placementInfo;
+        this.placementInfo = placementInfo;
         this.customInfo = customInfo;
         this.wayOrder = wayOrder;
     }
@@ -29,7 +29,7 @@ public class SingleWayInfo {
 
         public Mutable(SingleWayInfo info) {
             this.settings = info.settings;
-//            this.placementInfo = info.placementInfo;
+            this.placementInfo = info.placementInfo;
             this.customInfo = info.customInfo;
             this.wayOrder = info.wayOrder;
         }
@@ -42,26 +42,36 @@ public class SingleWayInfo {
         public SingleWayInfo immutable() {
             return new SingleWayInfo(
                     settings,
-//                    placementInfo,
+                    placementInfo,
                     customInfo,
                     wayOrder
             );
         }
+    }
+
+    public SingleWayInfo.Mutable mutable() {
+        return new SingleWayInfo.Mutable(this);
     }
     static class TagMapper implements cam72cam.mod.serialization.TagMapper<SingleWayInfo> {
         @Override
         public TagAccessor<SingleWayInfo> apply(Class<SingleWayInfo> type, String fieldName, TagField tag) {
             return new TagAccessor<>(
                     (d, o) -> {
-                        if (o == null) {
-                            d.remove(fieldName);
-                            return;
+                        TagCompound target = new TagCompound();
+                        try {
+                            TagSerializer.serialize(target, o.mutable());
+                        } catch (SerializationException e) {
+                            throw new RuntimeException(e);
                         }
-                        TagCompound info = new TagCompound();
-                        TagSerializer.serialize(info, new SingleWayInfo.Mutable(o));
-                        d.set(fieldName, info);
+                        d.set(fieldName, target);
                     },
-                    (d, w) -> new SingleWayInfo.Mutable(d.get(fieldName)).immutable()
+                    d -> {
+                        try {
+                            return new SingleWayInfo.Mutable(d.get(fieldName)).immutable();
+                        } catch (SerializationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
             );
         }
     }

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackModelPart;
@@ -177,6 +178,32 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		renderScale *= 1.005f;//Avoid some gaps
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
+		if(info.multiSwitchInfo != null){//assume that switch ways are ordered by curve shape and pos
+			try {
+				switch (info.multiSwitchInfo.orderAsChild) {
+					case 0:
+						switchStraight = !(info.switchState == SwitchState.STRAIGHT);
+						break;
+					case 1:
+						switchStraight = !(info.switchState == SwitchState.MID1);
+						break;
+					case 2:
+						switchStraight = !(info.switchState == SwitchState.MID2);
+						break;
+					case 3:
+						switchStraight = !(info.switchState == SwitchState.MID3);
+						break;
+					case 4:
+						switchStraight = !(info.switchState == SwitchState.MID4);
+						break;
+					case 5:
+						switchStraight = !(info.switchState == SwitchState.TURN);
+						break;
+				}
+			}catch (Exception e) {
+				ImmersiveRailroading.warn("invalid multiSwitchInfo from info:"+info);
+			}
+		}
 		int switchSize = 0;
 		TrackDirection direction = info.placementInfo.direction;
 		if (switchStraight ) {
@@ -222,7 +249,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				VecYPR next = points.get(i+1);
 				angle = delta(prev.getYaw(), next.getYaw());
 			}
-			if (angle != 0) {
+			if (angle != 0) {//TODO: make both side of track movable
 				VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);
 				if (direction == TrackDirection.RIGHT) {
 					vec.addChild(new VecYPR(switchPos, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));

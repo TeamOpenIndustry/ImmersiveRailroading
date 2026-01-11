@@ -2,68 +2,64 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.immersiverailroading.util.SingleWayInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
-    private int wayCount = 0;
-    private List<BuilderIterator> curveList = new ArrayList<>();//get(0)->straightBuilderReal; others->turnBuilder
-    private BuilderCubicCurve parentBuilder;//->realStraightBuilder
-    private BuilderCubicCurve intersection;//->straightBuilder
+    //"Straight" is just a word from BuilderSwitch, can be 5 kinds of curves, it is used to mark the parent builders
+    private BuilderCubicCurve realStraightBuilder;
+    private BuilderIterator straightBuilder;
+    private BuilderCubicCurve straightBuilderReal;
+    private List<BuilderIterator> turnBuilders = new ArrayList<>();
 
     public BuilderMultiSwitch(RailInfo info, World world, Vec3i pos) {
         super(info, world, pos);
-        if( info.settings.multiSwitchInfo!=null && info.settings.multiSwitchInfo.typeAsChild==TrackItems.MULTISWITCH && !info.settings.multiSwitchInfo.wayList.isEmpty()){
 
-            wayCount = info.settings.multiSwitchInfo.wayList.size();
-            for(int i = 0;i<wayCount;i++){
-                SingleWayInfo wayInfo = info.settings.multiSwitchInfo.wayList.get(i);
-                RailInfo curveRailInfo = info.with(mutable -> {
-                    mutable.settings = wayInfo.settings;
-                    mutable.customInfo = wayInfo.customInfo;
-                });
+        List<Vec3i> childParentPosList = new ArrayList<>();
 
-                BuilderCubicCurve wayBuilder = constructBuilder(curveRailInfo,curveRailInfo.settings.type);
-                curveList.add(wayBuilder);
+        @Nullable
+        MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
 
-                if(i>0){//i>0
-                    parentBuilder.positions.retainAll(wayBuilder.positions);
-                    wayBuilder.overrideFlexible = true;
-                    for(TrackBase curve : wayBuilder.tracks) {
-                        if (curve instanceof TrackRail) {
-                            curve.overrideParent(intersection.getParentPos());
-                        }
-                    }
-                }else{//i=0
-                    parentBuilder = constructBuilder(curveRailInfo.withSettings(mutable -> {
-                        mutable.type = TrackItems.MULTISWITCH;
-                        mutable.multiSwitchInfo.typeAsChild = curveRailInfo.settings.type;
-                    }),curveRailInfo.settings.type);
-                    intersection = constructBuilder(curveRailInfo.withSettings(mutable -> {
-                        mutable.type = TrackItems.MULTISWITCH;
-                        mutable.multiSwitchInfo.typeAsChild = curveRailInfo.settings.type;
-                    }),curveRailInfo.settings.type);
+        int wayAmount = multiSwitchInfo != null ? multiSwitchInfo.wayList.size() : 0;
+        TrackItems realShapeOfStraight = multiSwitchInfo != null ? multiSwitchInfo.realShapeType:null;//需要保证，只要不是null，里面的内容就不是null
+
+        straightBuilder = constructBuilder(info,realShapeOfStraight);//子级别也是相同的info，只要父级正常构建子级就能正常构建
+        realStraightBuilder = constructBuilder(info,realShapeOfStraight);
+        straightBuilderReal = constructBuilder(info.withSettings(mutable -> mutable.type = realShapeOfStraight),realShapeOfStraight);
+
+        for(int i = 0 ; i<wayAmount; i++){
+            //Only STRAIGHT,SLOPE,TURN,CUBICPARABOLA,CUSTOM are valid
+            RailInfo turnInfo = new RailInfo(multiSwitchInfo.wayList.get(i));
+            BuilderIterator turnBuilder = (BuilderIterator) turnInfo.getBuilder(world,pos);
+
+            childParentPosList.add(turnBuilder.getParentPos());
+
+            turnBuilder.overrideFlexible = true;
+            for(TrackBase turn : turnBuilder.tracks) {
+                if (turn instanceof TrackRail) {
+                    turn.overrideParent(straightBuilder.getParentPos());
                 }
             }
-        }else if( info.settings.multiSwitchInfo!=null && info.settings.multiSwitchInfo.typeAsChild!=TrackItems.MULTISWITCH ){
-            intersection = constructBuilder(info,info.settings.multiSwitchInfo.typeAsChild);
-            parentBuilder = constructBuilder(info,info.settings.multiSwitchInfo.typeAsChild);
-            wayCount = 1;
-            curveList.add(constructBuilder(info.withSettings(mutable -> {mutable.type = info.settings.multiSwitchInfo.typeAsChild;}),info.settings.multiSwitchInfo.typeAsChild));
-        }else{
-            ImmersiveRailroading.warn("Invalid RailInfo:"+info);
+            straightBuilder.positions.retainAll(turnBuilder.positions);
+            turnBuilders.add(turnBuilder);
         }
 
-        //need catching if intersection is null, assume it doesn't happen in common cases for now
-        for (TrackBase curve : intersection.tracks) {
-            if (curve instanceof TrackGag) {
-                curve.setFlexible();
+        for (TrackBase straight : straightBuilder.tracks) {
+            if (straight instanceof TrackGag) {
+                straight.setFlexible();
+            }
+
+            Vec3i pos1 = straight.getPos();
+            Vec3i pos2 = straightBuilder.getParentPos();
+            if(pos1.equals(pos2)){
+                straight.setChildList(childParentPosList);//需要检查pos对不对,不知道有没有用了相对位置的
             }
         }
     }
@@ -88,89 +84,67 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
     @Override
     public List<BuilderBase> getSubBuilders() {
         List<BuilderBase> res = new ArrayList<>();
-        for (int i = 0; i < wayCount; i++) {
-            List<BuilderBase> sub = curveList.get(i).getSubBuilders();
-            if (sub == null) {
-                res.add(curveList.get(i));
+
+        for (BuilderIterator turn : turnBuilders) {
+            List<BuilderBase> subTurns = turn.getSubBuilders();
+            if (subTurns == null) {
+                res.add(turn);
             } else {
-                res.addAll(sub);
+                res.addAll(subTurns);
             }
         }
-        return res;
+
+        List<BuilderBase> subStraights = straightBuilderReal.getSubBuilders();
+        if (subStraights == null) {
+            res.add(straightBuilderReal);
+        } else {
+            res.addAll(subStraights);
+        }
+
+        return res.isEmpty() ? null : res;
     }
 
     @Override
     public int costTies() {
-        int costTiles = 0;
-        for(int i = 0;i<wayCount;i++){
-            if(i==0){
-                costTiles += intersection.costTies();
-            }else{
-                costTiles += curveList.get(i).costTies();
-            }
-        }
+        int costTiles = straightBuilder.costTies();
+        for(BuilderIterator turn : turnBuilders)costTiles += turn.costTies();
         return costTiles;
     }
 
     @Override
     public int costRails() {
-        int costRails = 0;
-        for(int i = 0;i<wayCount;i++){
-            if(i==0){
-                costRails += intersection.costRails();
-            }else{
-                costRails += curveList.get(i).costRails();
-            }
-        }
+        int costRails = straightBuilder.costRails();
+        for(BuilderIterator turn : turnBuilders)costRails += turn.costRails();
         return costRails;
     }
 
     @Override
     public int costBed() {
-        int costBed = 0;
-        for(int i = 0;i<wayCount;i++){
-            if(i==0){
-                costBed += intersection.costBed();
-            }else{
-                costBed += curveList.get(i).costBed();
-            }
-        }
+        int costBed = straightBuilder.costBed();
+        for(BuilderIterator turn : turnBuilders)costBed += turn.costBed();
         return costBed;
     }
 
     @Override
     public int costFill() {
-        int costFill = 0;
-        for(int i = 0;i<wayCount;i++){
-            if(i==0){
-                costFill += intersection.costFill();
-            }else{
-                costFill += curveList.get(i).costFill();
-            }
-        }
+        int costFill = straightBuilder.costFill();
+        for(BuilderIterator turn : turnBuilders)costFill += turn.costFill();
         return costFill;
     }
 
     @Override
     public void setDrops(List<ItemStack> drops) {
-        if(intersection!=null) intersection.setDrops(drops);
+        if(straightBuilder !=null) straightBuilder.setDrops(drops);
     }
 
 
     @Override
     public boolean canBuild() {
-        boolean canBuild = true;
-        for(int i = 0;i<wayCount;i++){
-            if(i==0){
-                if(!intersection.canBuild()){
-                    canBuild = false;
-                    break;
-                }
-            }else{
-                if(!curveList.get(i).canBuild()){
-                    canBuild = false;
-                    break;
-                }
+        boolean canBuild = straightBuilder.canBuild();
+        for(BuilderIterator turn : turnBuilders){
+            if(!turn.canBuild()){
+                canBuild = false;
+                break;
             }
         }
         return canBuild;
@@ -178,52 +152,32 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
 
     @Override
     public void build() {
-        for(int i = 0;i<wayCount;i++){
-            if(i==0){
-                intersection.build();
-            }else{
-                curveList.get(i).build();
-            }
-        }
+        straightBuilder.build();
+        for(BuilderIterator turn : turnBuilders)turn.build();
     }
 
     @Override
     public void clearArea() {
-        for(int i = 0;i<wayCount;i++){
-            if(i==0){
-                intersection.clearArea();
-            }else{
-                curveList.get(i).clearArea();
-            }
-        }
+        straightBuilder.clearArea();
+        for(BuilderIterator turn : turnBuilders)turn.clearArea();
     }
 
     @Override
     public List<TrackBase> getTracksForRender() {
-        if(curveList!=null&& !curveList.isEmpty()){
-            List<TrackBase> data = intersection.getTracksForRender();
-            for(int i = 1;i<wayCount;i++){
-                data.addAll(curveList.get(i).getTracksForRender());
-            }
-            return data;
-        }
-        return null;
+        List<TrackBase> data = straightBuilder.getTracksForRender();
+        for(BuilderIterator turn : turnBuilders)data.addAll(turn.getTracksForRender());
+        return data;
     }
 
     @Override
     public List<VecYPR> getRenderData() {
-        if(curveList!=null&& !curveList.isEmpty()){
-            List<VecYPR> data = intersection.getRenderData();
-            for(int i = 1;i<wayCount;i++){
-                data.addAll(curveList.get(i).getRenderData());
-            }
-            return data;
-        }
-        return null;
+        List<VecYPR> data = straightBuilder.getRenderData();
+//        for(BuilderIterator turn : turnBuilders)data.addAll(turn.getRenderData());
+        return data;
     }
 
     @Override
     public List<VecYPR> getPath(double stepSize) {
-        return parentBuilder.getPath(stepSize);
+        return realStraightBuilder.getPath(stepSize);
     }
 }

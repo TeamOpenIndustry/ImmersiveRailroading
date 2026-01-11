@@ -54,6 +54,8 @@ public class TrackGui implements IScreen {
 
 	private RailSettings.Mutable settings;
 
+	private MultiSwitchInfo.Mutable multiSwitchInfo;
+
 	private ListSelector<Gauge> gaugeSelector;
 	private ListSelector<TrackItems> typeSelector;
 	private ListSelector<TrackDefinition> trackSelector;
@@ -63,19 +65,18 @@ public class TrackGui implements IScreen {
 //multiWaySwitch
 	private ListSelector<SingleWayInfo> waySelector;
 	private Button wayButton;
+	private int selectedWay = 0;
+	private Button insertButton;
 	private Button addWayButton;
 	private Button delWayButton;
 	//spiralCurve
 //	private TextField nearRadius;
 	private TextField farRadius;
 	private Button toggleStraightAtP1;
-	//advancedSwitch
-	private Button toggleSwitchCurve;
 
 	//current cubic-curve simulated turn will have larger error at large radius, like R2000
-	private Button toggleTurnType;
 
-	//global,for all types
+	//global,for all types, judge y offset of placement and custom
 	private Slider nearHeightOffsetSlider;
 	private Slider farHeightOffsetSlider;
 
@@ -104,6 +105,7 @@ public class TrackGui implements IScreen {
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
 		settings = RailSettings.from(stack).mutable();
+		multiSwitchInfo = MultiSwitchInfo.from(stack).mutable();
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
 		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
@@ -213,22 +215,31 @@ public class TrackGui implements IScreen {
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				if(settings.type == TrackItems.MULTISWITCH){
-					if(settings.multiSwitchInfo!=null && settings.multiSwitchInfo.wayList.isEmpty()){
+//					if(multiSwitchInfo.wayList == null){
 						List<SingleWayInfo> wayInfoList = new ArrayList();
-						PlacementInfo defaultPos = new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null);
+						PlacementInfo defaultPos = new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.RIGHT, 0, null);
 
-						RailSettings defaultLeftTurn = new RailSettings(settings.gauge, settings.track, TrackItems.TURN, 20, 90, 1, settings.posType, settings.smoothing, settings.pitchTag.getFloat("start"), settings.pitchTag.getFloat("end"), true, -1, null, TrackDirection.LEFT, settings.railBed, settings.railBedFill, settings.isPreview, settings.isGradeCrossing, 1, 1);
+						RailSettings defaultLeftTurn = new RailSettings(settings.gauge, settings.track, TrackItems.TURN, 20, 90, 1, settings.posType, settings.smoothing, settings.pitchTag.getFloat("start"), settings.pitchTag.getFloat("end"), true, -1, TrackDirection.RIGHT, settings.railBed, settings.railBedFill, settings.isPreview, settings.isGradeCrossing, 1, 1);
 
 						RailSettings defaultRightTurn = defaultLeftTurn.with(mutable -> {
 							mutable.direction = TrackDirection.RIGHT;
+							mutable.length = 15;
+						});
+
+						RailSettings defaultMidTurn = defaultLeftTurn.with(mutable -> {
+							mutable.direction = TrackDirection.LEFT;
 							mutable.length = 10;
 						});
-						SingleWayInfo default1 = new SingleWayInfo(defaultLeftTurn,defaultPos,1);
-						SingleWayInfo default2 = new SingleWayInfo(defaultRightTurn,defaultPos,2);
+
+						SingleWayInfo default1 = new SingleWayInfo(defaultLeftTurn,defaultPos,defaultPos,0);
+						SingleWayInfo default2 = new SingleWayInfo(defaultMidTurn,defaultPos.withDirection(TrackDirection.LEFT),defaultPos,1);
+						SingleWayInfo default3 = new SingleWayInfo(defaultRightTurn,defaultPos,defaultPos,2);
 						wayInfoList.add(default1);
 						wayInfoList.add(default2);
-						settings.multiSwitchInfo = new MultiSwitchInfo(wayInfoList, TrackItems.MULTISWITCH);
-					}
+						wayInfoList.add(default3);
+						multiSwitchInfo.realShapeType = TrackItems.TURN;
+						multiSwitchInfo.wayList = wayInfoList;
+//					}
 				}
 			}
 		};
@@ -377,29 +388,50 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-//		waySelector = new ListSelector<>(screen, width,  250, height,
-//				1,
-//				1) {
-//			@Override
-//			public void onClick() {
-//
-//			}
-//		}
-		wayButton = new Button(screen, xtop, ytop, width-60, height, "") {
-			@Override
-			public void onClick(Player.Hand hand) {
-//				showSelector(waySelector);
-			}
-		};
-		addWayButton = new Button(screen, xtop+width-50, ytop, height, height, "") {
-			@Override
-			public void onClick(Player.Hand hand) {
+		SingleWayInfo defaultSettingsToWay = new SingleWayInfo(settings.immutable(),new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.LEFT, 0, null),null,0);
+		Map<String,SingleWayInfo> selectorWayList = new HashMap<>();
+		selectorWayList.put("default",defaultSettingsToWay);
+		for(int i=0;i<multiSwitchInfo.wayList.size();i++){
+			selectorWayList.put("way"+i,multiSwitchInfo.wayList.get(i));
+		}
 
+		//TODO: sync Map or change this to Button
+		waySelector = new ListSelector<SingleWayInfo>(screen, width, 250, height,multiSwitchInfo.wayList.get(selectedWay),selectorWayList) {
+			@Override
+			public void onClick(SingleWayInfo way) {
+				selectedWay = multiSwitchInfo.wayList.indexOf(way)+1;
+				wayButton.setText("selected way:"+selectedWay);//TODO:add in GuiText
 			}
 		};
-		delWayButton = new Button(screen, xtop+width-20, ytop, height, height, "") {
+		wayButton = new Button(screen, xtop, ytop, width-90, height, "selected way:"+selectedWay) {
 			@Override
 			public void onClick(Player.Hand hand) {
+				showSelector(waySelector);
+			}
+		};
+		insertButton = new Button(screen, xtop+width-80, ytop, height, height, "Insert") {
+			@Override
+			public void onClick(Player.Hand hand) {
+//				SingleWayInfo singleWayInfo;
+//				int seletedOrder = ;
+//				settings.multiSwitchInfo.wayList.add(seletedOrder,singleWayInfo);
+			}
+		};
+		addWayButton = new Button(screen, xtop+width-50, ytop, height, height, "Add") {
+			@Override
+			public void onClick(Player.Hand hand) {
+//				SingleWayInfo singleWayInfo;
+//				settings.multiSwitchInfo.wayList.add(singleWayInfo);
+			}
+		};
+		delWayButton = new Button(screen, xtop+width-20, ytop, height, height, "Del") {
+			@Override
+			public void onClick(Player.Hand hand) {
+				//in common case waylist and multiSwitchInfo should not be null
+				if(selectedWay>1 && selectedWay<multiSwitchInfo.wayList.size() && selectedWay+1<selectorWayList.size()){
+					multiSwitchInfo.wayList.remove(selectedWay);
+					selectorWayList.remove("way"+ (selectedWay + 1));
+				}
 			}
 		};
 		ytop += height;
@@ -516,9 +548,9 @@ public class TrackGui implements IScreen {
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings.immutable()).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), multiSwitchInfo.immutable()).sendToServer();
 			} else {
-				new ItemRailUpdatePacket(settings.immutable()).sendToServer();
+				new ItemRailUpdatePacket(settings.immutable(),  multiSwitchInfo.immutable()).sendToServer();
 			}
 		}
 	}
@@ -540,7 +572,7 @@ public class TrackGui implements IScreen {
 						rendered.type = TrackItems.STRAIGHT;
 					}),
 					new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null),
-					null, SwitchState.NONE, SwitchState.NONE, 0, true);
+					null, null, SwitchState.NONE, SwitchState.NONE, 0, true);
 
 			double scale = GUIHelpers.getScreenWidth() / 12.0 * zoom;
 
@@ -579,7 +611,7 @@ public class TrackGui implements IScreen {
 						rendered.type = TrackItems.STRAIGHT;
 					}),
 					new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null),
-					null, SwitchState.NONE, SwitchState.NONE, 0, true);
+					null, null, SwitchState.NONE, SwitchState.NONE, 0, true);
 
 			double scale = GUIHelpers.getScreenWidth() / 15.0 * zoom;
 
@@ -634,7 +666,7 @@ public class TrackGui implements IScreen {
 					b.length = length;
 				}),
 				new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null),
-				null, SwitchState.NONE, SwitchState.NONE, tablePos, true);
+				null, null, SwitchState.NONE, SwitchState.NONE, tablePos, true);
 
 		int length = info.settings.length;
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;

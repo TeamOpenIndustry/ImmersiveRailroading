@@ -9,10 +9,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
@@ -56,6 +53,7 @@ public class ItemTrackBlueprint extends CustomItem {
     public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
 		RailSettings stackInfo = RailSettings.from(stack);
+		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(stack);
 
 		if (world.isServer && hand == Player.Hand.SECONDARY) {
 			ItemStack blockinfo = world.getItemStack(pos);
@@ -65,6 +63,7 @@ public class ItemTrackBlueprint extends CustomItem {
 				stackInfo = stackInfo.with(b -> b.railBed = blockinfo);
 			}
 			stackInfo.write(stack);
+			multiSwitchInfo.write(stack);
 			return ClickResult.ACCEPTED;
 		}
 
@@ -90,7 +89,7 @@ public class ItemTrackBlueprint extends CustomItem {
 		}
 
 		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
-		RailInfo info = new RailInfo(stack, placementInfo, null);
+		RailInfo info = new RailInfo(stack, placementInfo, null, multiSwitchInfo);
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;
     }
