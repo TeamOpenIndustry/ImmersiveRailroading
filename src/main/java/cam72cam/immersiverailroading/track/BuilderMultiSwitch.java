@@ -1,9 +1,11 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.SingleWayInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
@@ -36,7 +38,7 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
 
         for(int i = 0 ; i<wayAmount; i++){
             //Only STRAIGHT,SLOPE,TURN,CUBICPARABOLA,CUSTOM are valid
-            RailInfo turnInfo = new RailInfo(multiSwitchInfo.wayList.get(i));
+            RailInfo turnInfo = fromSingleWayInfo(multiSwitchInfo.wayList.get(i));
             BuilderIterator turnBuilder = (BuilderIterator) turnInfo.getBuilder(world,pos);
 
             childParentPosList.add(turnBuilder.getParentPos());
@@ -62,6 +64,10 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
                 straight.setChildList(childParentPosList);//需要检查pos对不对,不知道有没有用了相对位置的
             }
         }
+    }
+
+    private RailInfo fromSingleWayInfo(SingleWayInfo singleWayInfo) {
+        return new RailInfo(singleWayInfo.settings,singleWayInfo.placementInfo,singleWayInfo.customInfo,new MultiSwitchInfo(null,singleWayInfo.settings.type,singleWayInfo.wayOrder,true), SwitchState.NONE,SwitchState.NONE,0);
     }
 
     private BuilderCubicCurve constructBuilder(RailInfo railInfo, TrackItems type) {
@@ -172,7 +178,7 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
     @Override
     public List<VecYPR> getRenderData() {
         List<VecYPR> data = straightBuilder.getRenderData();
-//        for(BuilderIterator turn : turnBuilders)data.addAll(turn.getRenderData());
+        for(BuilderIterator turn : turnBuilders)data.addAll(turn.getRenderData());
         return data;
     }
 

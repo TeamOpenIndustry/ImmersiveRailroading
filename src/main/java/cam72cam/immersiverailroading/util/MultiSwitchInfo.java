@@ -36,12 +36,14 @@ public class MultiSwitchInfo {
 
     public final List<SingleWayInfo> wayList;
     public final TrackItems realShapeType;
+    public final boolean isMultiSwitchWay;//this should only be overwrite to true in BuilderMultiSwitch
     public final int orderAsChild;
 
-    public MultiSwitchInfo(List<SingleWayInfo> wayList, TrackItems realShapeType, int orderAsChild) {
+    public MultiSwitchInfo(List<SingleWayInfo> wayList, TrackItems realShapeType, int orderAsChild, boolean isMultiSwitchWay) {
         this.wayList = wayList;
         this.realShapeType =  realShapeType;
         this.orderAsChild = orderAsChild;
+        this.isMultiSwitchWay = isMultiSwitchWay;
     }
 
     public static class Mutable {
@@ -52,10 +54,14 @@ public class MultiSwitchInfo {
         @TagField("orderAsChild")
         public int orderAsChild;
 
+        @TagField("isMultiSwtchWay")
+        public boolean isMultiSwtchWay;
+
         public Mutable(MultiSwitchInfo info) {
             this.wayList = info.wayList;
             this.realShapeType = info.realShapeType;
             this.orderAsChild = info.orderAsChild;
+            this.isMultiSwtchWay = info.isMultiSwitchWay;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -64,6 +70,7 @@ public class MultiSwitchInfo {
             wayList = new ArrayList<>();
             wayList.add(new SingleWayInfo(defaultSettings,defaultPos,null,0));
             orderAsChild = 0;//0=straight(parent)as default;1=MID1,2=MID2,3=MID3,4=MID4,5=TURN
+            isMultiSwtchWay = false;
 
             TagSerializer.deserialize(data, this);
         }
@@ -72,7 +79,8 @@ public class MultiSwitchInfo {
             return new MultiSwitchInfo(
                     wayList,
                     realShapeType,
-                    orderAsChild
+                    orderAsChild,
+                    isMultiSwtchWay
             );
         }
     }
@@ -86,7 +94,7 @@ public class MultiSwitchInfo {
             //default fallback
             List<SingleWayInfo> wayList = new ArrayList<>();
             wayList.add(new SingleWayInfo(defaultSettings,defaultPos,null,0));
-            return new MultiSwitchInfo(wayList, TrackItems.TURN, 0);
+            return new MultiSwitchInfo(wayList, TrackItems.TURN, 0, false);
         }
 
         try {

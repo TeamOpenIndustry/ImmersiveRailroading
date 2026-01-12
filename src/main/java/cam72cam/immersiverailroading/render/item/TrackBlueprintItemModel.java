@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.mod.render.*;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -24,7 +25,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 	//render the model of inventory
 	public static void render(ItemStack stack, World world, RenderState state) {
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null, null);
+		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null, MultiSwitchInfo.from(stack));
 		info = info.withSettings(b -> b.length = 10);
 
 		state.cull_face(false);
@@ -70,7 +71,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			}
 		}
 
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null,  null);
+		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null,  MultiSwitchInfo.from(stack));
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {

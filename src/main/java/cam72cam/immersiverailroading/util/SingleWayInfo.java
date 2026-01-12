@@ -1,7 +1,12 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.*;
+
+import java.util.Arrays;
 
 @TagMapped(SingleWayInfo.TagMapper.class)
 public class SingleWayInfo {
@@ -11,6 +16,13 @@ public class SingleWayInfo {
     public final int wayOrder;
 
     public SingleWayInfo(RailSettings settings,PlacementInfo placementInfo, PlacementInfo customInfo,int wayOrder) {
+        if (customInfo == null) {
+            customInfo = placementInfo;
+            if (settings.type == TrackItems.SLOPE) {
+                customInfo = customInfo.offset(new Vec3i(0,1,0));
+            }
+        }
+
         this.settings = settings;
         this.placementInfo = placementInfo;
         this.customInfo = customInfo;
@@ -74,5 +86,39 @@ public class SingleWayInfo {
                     }
             );
         }
+    }
+    @Override
+    public String toString() {
+        Object[] props = new Object [] {
+                this.wayOrder,
+                this.settings.type,
+                this.settings.length,
+                this.settings.degrees,
+                this.settings.curvosity,
+                this.settings.railBed,
+                this.settings.gauge,
+                this.settings.track,
+                this.settings.smoothing,
+                this.settings.pitchStart,
+                this.settings.pitchEnd,
+                this.settings.isForward,
+                this.settings.farRadius,
+                this.settings.isGradeCrossing,
+                this.placementInfo.yaw,
+                this.placementInfo.direction,
+                this.customInfo.yaw,
+                this.customInfo.direction,
+        };
+        String id = Arrays.toString(props);
+        if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.posType != TrackPositionType.FIXED) {
+            id += placementInfo.placementPosition.subtract(customInfo.placementPosition);
+        }
+        if (placementInfo.control != null) {
+            id += placementInfo.control;
+        }
+        if (customInfo.control != null) {
+            id += customInfo.control;
+        }
+        return id;
     }
 }

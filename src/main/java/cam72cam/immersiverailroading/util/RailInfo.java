@@ -83,7 +83,6 @@ public class RailInfo {
 				this.placementInfo.direction,
 				this.customInfo.yaw,
 				this.customInfo.direction,
-				this.multiSwitchInfo
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.posType != TrackPositionType.FIXED) {
@@ -105,15 +104,20 @@ public class RailInfo {
 		if (settings.type.isTable()) {
 			id += this.itemHeld;
 		}
+		if(this.multiSwitchInfo != null){
+			id += this.multiSwitchInfo.realShapeType;
+			id += this.multiSwitchInfo.orderAsChild;
+			if(this.multiSwitchInfo.wayList != null){//turnBuilder in MultiSwitchBuilder won't have wayList
+				for(int i = 0; i < this.multiSwitchInfo.wayList.size(); i++){
+					id += this.multiSwitchInfo.wayList.get(i);
+				}
+			}
+		}
 		return id;
 	}
 
 	public RailInfo(ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo) {
 		this(RailSettings.from(settings), placementInfo, customInfo, multiSwitchInfo, SwitchState.NONE, SwitchState.NONE, 0);
-	}
-
-	public RailInfo(SingleWayInfo singleWayInfo) {
-		this(singleWayInfo.settings,singleWayInfo.placementInfo,singleWayInfo.customInfo,new MultiSwitchInfo(null,singleWayInfo.settings.type,singleWayInfo.wayOrder),SwitchState.NONE,SwitchState.NONE,0);
 	}
 
 	public RailInfo withSettings(Consumer<RailSettings.Mutable> mod) {

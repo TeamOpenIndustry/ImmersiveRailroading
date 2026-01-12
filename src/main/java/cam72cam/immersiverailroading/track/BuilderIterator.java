@@ -178,7 +178,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		renderScale *= 1.005f;//Avoid some gaps
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
-		if(info.multiSwitchInfo != null){//assume that switch ways are ordered by curve shape and pos
+		if(info.multiSwitchInfo != null && info.multiSwitchInfo.isMultiSwitchWay){//assume that switch ways are ordered by curve shape and pos
 			try {
 				switch (info.multiSwitchInfo.orderAsChild) {
 					case 0:

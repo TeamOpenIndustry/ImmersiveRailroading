@@ -431,6 +431,7 @@ public class TrackGui implements IScreen {
 				if(selectedWay>1 && selectedWay<multiSwitchInfo.wayList.size() && selectedWay+1<selectorWayList.size()){
 					multiSwitchInfo.wayList.remove(selectedWay);
 					selectorWayList.remove("way"+ (selectedWay + 1));
+					selectedWay = 0;
 				}
 			}
 		};
@@ -666,7 +667,7 @@ public class TrackGui implements IScreen {
 					b.length = length;
 				}),
 				new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null),
-				null, null, SwitchState.NONE, SwitchState.NONE, tablePos, true);
+				null, multiSwitchInfo.immutable(), SwitchState.NONE, SwitchState.NONE, tablePos, true);//why
 
 		int length = info.settings.length;
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;
