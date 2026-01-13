@@ -177,8 +177,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		Predicate<EntityRollingStock> positive;
 		Predicate<EntityRollingStock> negative;
 		try {
-			positive = StockFilterCompiler.compile(this.positive);
-			negative = StockFilterCompiler.compile(this.negative);
+			positive = StockFilterCompiler.compile(this.positive, true);
+			negative = StockFilterCompiler.compile(this.negative, false);
 		} catch (Exception e) {
 			if (getWorld().isServer) {
 				getWorld().getEntities(Player.class).stream()

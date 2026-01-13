@@ -51,10 +51,11 @@ public class StockFilterCompiler {
         prefixes.put("nametag", (stock, content) -> stock.tag.equals(content));
     }
 
-    public static Predicate<EntityRollingStock> compile(String expression) {
+    public static Predicate<EntityRollingStock> compile(String expression, boolean defaultVal) {
         //A filter supports (/&&/||/) to add logic calculation
         if (expression == null || expression.trim().isEmpty()) {
-            return s -> true;
+            //If it's a positive filter then return true, otherwise return false then negate
+            return s -> defaultVal;
         }
 
         expression = expression.trim();
