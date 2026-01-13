@@ -107,6 +107,7 @@ public class RailInfo {
 		if(this.multiSwitchInfo != null){
 			id += this.multiSwitchInfo.realShapeType;
 			id += this.multiSwitchInfo.orderAsChild;
+			id += this.multiSwitchInfo.isMultiSwitchWay;
 			if(this.multiSwitchInfo.wayList != null){//turnBuilder in MultiSwitchBuilder won't have wayList
 				for(int i = 0; i < this.multiSwitchInfo.wayList.size(); i++){
 					id += this.multiSwitchInfo.wayList.get(i);
@@ -123,6 +124,7 @@ public class RailInfo {
 	public RailInfo withSettings(Consumer<RailSettings.Mutable> mod) {
 		return with(b -> b.settings = b.settings.with(mod));
 	}
+
 
 	public RailInfo offset(Vec3i offset) {
 		return with(b -> {

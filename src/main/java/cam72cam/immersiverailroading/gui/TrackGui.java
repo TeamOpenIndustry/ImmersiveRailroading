@@ -23,6 +23,7 @@ import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
@@ -53,44 +54,38 @@ public class TrackGui implements IScreen {
 	private final List<ItemStack> oreDict;
 
 	private RailSettings.Mutable settings;
-
-	private MultiSwitchInfo.Mutable multiSwitchInfo;
-
 	private ListSelector<Gauge> gaugeSelector;
 	private ListSelector<TrackItems> typeSelector;
 	private ListSelector<TrackDefinition> trackSelector;
 	private ListSelector<ItemStack> railBedSelector;
 	private ListSelector<ItemStack> railBedFillSelector;
 
-//multiWaySwitch
-	private ListSelector<SingleWayInfo> waySelector;
-	private Button wayButton;
-	private int selectedWay = 0;
-	private Button insertButton;
+	//multiWaySwitch
+	private ListSelector<TrackItems> subTypeSelector;
+	private MultiSwitchInfo.Mutable multiSwitchInfo;
+	private Button wayCircleButton;
+	private int selectedWay = 0;//0=default,1=MID1,2=MID2,3=MID3,4=MID4,5=TURN
+	private RailSettings.Mutable selectedWaySettings;
+	private Button insertWayButton;
 	private Button addWayButton;
 	private Button delWayButton;
 	//spiralCurve
-//	private TextField nearRadius;
-	private TextField farRadius;
+	// curves based on cubic-curve are limited in some case, we may need new types for more complex curve and function,
+	// like completely decoupling vertical and horizontal curve, more spiralCurve and real arc turn(this will looks better with big radius)?
+	private TextField farRadiusInput;
 	private Button toggleStraightAtP1;
 
-	//current cubic-curve simulated turn will have larger error at large radius, like R2000
-
-	//global,for all types, judge y offset of placement and custom
+	//micro judge
+	//TODO: for all types, be able to judge y offset of placement and custom
 	private Slider nearHeightOffsetSlider;
 	private Slider farHeightOffsetSlider;
 
 	//vertical smooth config
+	//TODO: change to textFiled?
 	private Slider nearPitchSlider;
 	private Slider farPitchSlider;
 
-	//The UK, US, and Canada use parabolas, China uses arcs.
-
-	//do we need this? Two tangents and points already determine the radius, but does anyone need a smaller radius?
-//	private TextField verticalRadius;
-
-	//TODO: curves based on cubic-curve are limited, we will have to find new method for more complex curve and function,
-	// like completely decoupling vertical and horizontal curve, spiralCurve and real arc turn(this will looks better with big radius)
+	//zoom
 	private double zoom = 1;
 
 	public TrackGui() {
@@ -125,8 +120,10 @@ public class TrackGui implements IScreen {
 		int height = 20;
 		int xtop = -GUIHelpers.getScreenWidth() / 2;
 		int ytop = -GUIHelpers.getScreenHeight() / 4;
+		updateSelectedWay(0);
+
         this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
-        this.lengthInput.setText("" + settings.length);
+        this.lengthInput.setText("" + (selectedWay==0 ? settings.length : selectedWaySettings.length));
         this.lengthInput.setValidator(s -> {
             if (s == null || s.length() == 0) {
                 return true;
@@ -145,7 +142,13 @@ public class TrackGui implements IScreen {
             }
             if (val > 0 && val <= max) {
 				if(settings.type == TrackItems.CUBICPARABOLA && !CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,val))return false;
-                settings.length = val;
+				if(selectedWay==0){
+					settings.length = val;
+				}else{
+					selectedWaySettings.length = val;
+					syncMultiSwitchInfo();
+				}
+
                 return true;
             }
             return false;
@@ -171,6 +174,8 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Gauge gauge) {
 				settings.gauge = gauge;
+				updateListSetting(mutable -> mutable.gauge = gauge);
+
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -190,6 +195,8 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
+
+
 		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING)
@@ -199,12 +206,38 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(TrackItems option) {
 				settings.type = option;
+
+				updateSelectedWay(0);
+
+				if(settings.type == TrackItems.CUBICPARABOLA && settings.degrees > CubicCurve.cubicParabolaMaxAngle) {
+					settings.degrees = (float) CubicCurve.cubicParabolaMaxAngle;
+					degreesSlider.setValue(settings.degrees * Config.ConfigBalance.AnglePlacementSegmentation / 90);
+				}else {
+					degreesSlider.setValue(settings.degrees * Config.ConfigBalance.AnglePlacementSegmentation / 90);
+				}
+				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(degreesSlider.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+
+				nearPitchSlider.setValue(settings.pitchTag.getFloat("start"));
+				nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
+
+				farPitchSlider.setValue(settings.pitchTag.getFloat("end"));
+				farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+
+				lengthInput.setText(""+settings.length);
+				farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
+
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				degreesSlider.setVisible(settings.type.hasQuarters());
-				if(option == TrackItems.CUBICPARABOLA && settings.degrees > CubicCurve.cubicParabolaMaxAngle)settings.degrees = (float) CubicCurve.cubicParabolaMaxAngle;
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
+				farRadiusInput.setVisible(settings.type.hasFarRadius());
+
+				insertWayButton.setVisible(settings.type.isMulti());
+				addWayButton.setVisible(settings.type.isMulti());
+				delWayButton.setVisible(settings.type.isMulti());
+				wayCircleButton.setVisible(settings.type.isMulti());
+
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
@@ -214,33 +247,6 @@ public class TrackGui implements IScreen {
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
-				if(settings.type == TrackItems.MULTISWITCH){
-//					if(multiSwitchInfo.wayList == null){
-						List<SingleWayInfo> wayInfoList = new ArrayList();
-						PlacementInfo defaultPos = new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.RIGHT, 0, null);
-
-						RailSettings defaultLeftTurn = new RailSettings(settings.gauge, settings.track, TrackItems.TURN, 20, 90, 1, settings.posType, settings.smoothing, settings.pitchTag.getFloat("start"), settings.pitchTag.getFloat("end"), true, -1, TrackDirection.RIGHT, settings.railBed, settings.railBedFill, settings.isPreview, settings.isGradeCrossing, 1, 1);
-
-						RailSettings defaultRightTurn = defaultLeftTurn.with(mutable -> {
-							mutable.direction = TrackDirection.RIGHT;
-							mutable.length = 15;
-						});
-
-						RailSettings defaultMidTurn = defaultLeftTurn.with(mutable -> {
-							mutable.direction = TrackDirection.LEFT;
-							mutable.length = 10;
-						});
-
-						SingleWayInfo default1 = new SingleWayInfo(defaultLeftTurn,defaultPos,defaultPos,0);
-						SingleWayInfo default2 = new SingleWayInfo(defaultMidTurn,defaultPos.withDirection(TrackDirection.LEFT),defaultPos,1);
-						SingleWayInfo default3 = new SingleWayInfo(defaultRightTurn,defaultPos,defaultPos,2);
-						wayInfoList.add(default1);
-						wayInfoList.add(default2);
-						wayInfoList.add(default3);
-						multiSwitchInfo.realShapeType = TrackItems.TURN;
-						multiSwitchInfo.wayList = wayInfoList;
-//					}
-				}
 			}
 		};
 		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
@@ -251,15 +257,58 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		//Transfer table doesn't have these property so we can have them overlapped
-		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
+		subTypeSelector = new ListSelector<TrackItems>(screen, width, 100, height, selectedWaySettings.type,
+				Arrays.stream(TrackItems.values())
+						.filter(i -> i != TrackItems.CROSSING && i != TrackItems.SWITCH && i != TrackItems.MULTISWITCH && i != TrackItems.TRANSFERTABLE && i != TrackItems.TURNTABLE )
+						.sorted(Comparator.comparingInt(TrackItems::getOrder))
+						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
+		) {
 			@Override
-			public void onClick(Player.Hand hand) {
-				settings.smoothing = next(settings.smoothing, hand);
-				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
+			public void onClick(TrackItems option) {
+				selectedWaySettings.type = option;
+				syncMultiSwitchInfo();
+
+				if(selectedWaySettings.type == TrackItems.CUBICPARABOLA && selectedWaySettings.degrees > CubicCurve.cubicParabolaMaxAngle) {//pitch的slider也需要
+					selectedWaySettings.degrees = (float) CubicCurve.cubicParabolaMaxAngle;
+					degreesSlider.setValue(selectedWaySettings.degrees * Config.ConfigBalance.AnglePlacementSegmentation / 90);
+				}else {
+					degreesSlider.setValue(selectedWaySettings.degrees * Config.ConfigBalance.AnglePlacementSegmentation / 90);
+				}
+				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(degreesSlider.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+
+				nearPitchSlider.setValue(selectedWaySettings.pitchTag.getFloat("start"));
+				nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
+
+				farPitchSlider.setValue(selectedWaySettings.pitchTag.getFloat("end"));
+				farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+
+				lengthInput.setText(""+selectedWaySettings.length);
+				farRadiusInput.setText(""+selectedWaySettings.cubicParabolaTag.getInteger("farRadius"));
+
+				typeButton.setText(GuiText.SELECTOR_TYPE.toString(selectedWaySettings.type));
+				degreesSlider.setVisible(selectedWaySettings.type.hasQuarters());
+				curvositySlider.setVisible(selectedWaySettings.type.hasCurvosity());
+				smoothingButton.setVisible(selectedWaySettings.type.hasSmoothing());
+				directionButton.setVisible(selectedWaySettings.type.hasDirection());
+				farRadiusInput.setVisible(selectedWaySettings.type.hasFarRadius());
 			}
 		};
-		smoothingButton.setVisible(settings.type.hasSmoothing());
+
+		//Transfer table doesn't have these property so we can have them overlapped
+		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(selectedWay==0?settings.smoothing:selectedWaySettings.smoothing)) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				if(selectedWay == 0) {
+					settings.smoothing = next(settings.smoothing, hand);
+					smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
+				} else{
+					selectedWaySettings.smoothing = next(selectedWaySettings.smoothing, hand);
+					smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(selectedWaySettings.smoothing));
+					syncMultiSwitchInfo();
+				}
+			}
+		};
+		smoothingButton.setVisible(selectedWay==0?settings.type.hasSmoothing():selectedWaySettings.type.hasSmoothing());
 
 		transfertableEntryCountSlider = new Slider(screen, 25+xtop, ytop, "", 1, 71, settings.transfertableEntryCount, false) {
 			@Override
@@ -272,14 +321,20 @@ public class TrackGui implements IScreen {
 		transfertableEntryCountSlider.onSlider();
 		ytop += height;
 
-		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(settings.direction)) {
+		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(selectedWay==0?settings.direction:selectedWaySettings.direction)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.direction = next(settings.direction, hand);
-				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
+				if(selectedWay==0) {
+					settings.direction = next(settings.direction, hand);
+					directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
+				}else {
+					selectedWaySettings.direction = next(selectedWaySettings.direction, hand);
+					directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(selectedWaySettings.direction));
+					syncMultiSwitchInfo();
+				}
 			}
 		};
-		directionButton.setVisible(settings.type.hasDirection());
+		directionButton.setVisible(selectedWay==0?settings.type.hasDirection():selectedWaySettings.type.hasDirection());
 
 		transfertableEntrySpacingSlider = new Slider(screen, 25+xtop, ytop, "", 1, 15, settings.transfertableEntrySpacing, false) {
 			@Override
@@ -293,37 +348,62 @@ public class TrackGui implements IScreen {
 		ytop += height;
 
 
-		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
+		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, selectedWay==0?(settings.degrees * Config.ConfigBalance.AnglePlacementSegmentation / 90):(selectedWaySettings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation), false) {
 			@Override
 			public void onSlider() {
 				float degreeValue = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
-				if(settings.type == TrackItems.CUBICPARABOLA){
-					while (degreeValue >= CubicCurve.cubicParabolaMaxAngle || !CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,settings.cubicParabolaTag.getInteger("farRadius"))){
-						degreeValue -= 90 / Config.ConfigBalance.AnglePlacementSegmentation;
-						if(degreeValue==0) break;
+				if(selectedWay==0) {
+					if(settings.type == TrackItems.CUBICPARABOLA){
+						while (degreeValue >= CubicCurve.cubicParabolaMaxAngle || !CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,settings.cubicParabolaTag.getInteger("farRadius"))){
+							degreeValue -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
+							if(Math.abs(degreeValue) < 1e-6) break;
+						}
 					}
+					settings.degrees = degreeValue;
+				}else {
+					if(selectedWaySettings.type == TrackItems.CUBICPARABOLA){
+						while (degreeValue >= CubicCurve.cubicParabolaMaxAngle || !CubicCurve.isCubicParabolaDeltaValid(selectedWaySettings.length,selectedWaySettings.degrees,selectedWaySettings.cubicParabolaTag.getInteger("farRadius"))){
+							degreeValue -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
+							if(Math.abs(degreeValue) < 1e-6) break;
+						}
+					}
+					selectedWaySettings.degrees = degreeValue;
+					syncMultiSwitchInfo();
 				}
-				settings.degrees = settings.type == TrackItems.TURN ? degreeValue : (float) degreeValue;
 				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
 			}
 		};
 		degreesSlider.onSlider();
 		ytop += height;
 
-		this.toggleStraightAtP1 = new Button(screen, xtop, ytop, width, height, "isForward"+settings.cubicParabolaTag.getBoolean("isForward").toString()) {
+
+		String toggleStraightAtP1Text;
+		if(selectedWay==0){
+			toggleStraightAtP1Text = "isForward"+settings.cubicParabolaTag.getBoolean("isForward");
+		}else {
+			toggleStraightAtP1Text = "isForward"+selectedWaySettings.cubicParabolaTag.getBoolean("isForward");
+		}
+		this.toggleStraightAtP1 = new Button(screen, xtop, ytop, width, height, toggleStraightAtP1Text) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				boolean wasForward = settings.cubicParabolaTag.getBoolean("isForward");
-				settings.cubicParabolaTag.setBoolean("isForward",!wasForward);
-				toggleStraightAtP1.setText("isForward"+settings.cubicParabolaTag.getBoolean("isForward").toString());
+				if(selectedWay==0){
+					boolean wasForward = settings.cubicParabolaTag.getBoolean("isForward");
+					settings.cubicParabolaTag.setBoolean("isForward",!wasForward);
+					toggleStraightAtP1.setText("isForward"+settings.cubicParabolaTag.getBoolean("isForward"));
+				}else {
+					boolean wasForward = selectedWaySettings.cubicParabolaTag.getBoolean("isForward");
+					selectedWaySettings.cubicParabolaTag.setBoolean("isForward",!wasForward);
+					toggleStraightAtP1.setText("isForward"+selectedWaySettings.cubicParabolaTag.getBoolean("isForward"));
+					syncMultiSwitchInfo();
+				}
 			}
 		};
-		toggleStraightAtP1.setVisible(settings.type == TrackItems.CUBICPARABOLA);
+		toggleStraightAtP1.setVisible(selectedWay==0 ? (settings.type == TrackItems.CUBICPARABOLA) : (selectedWaySettings.type == TrackItems.CUBICPARABOLA));
 		ytop += height;
 
-		this.farRadius = new TextField(screen, xtop, ytop, width-1, height);
-		this.farRadius.setText("" + settings.cubicParabolaTag.getInteger("farRadius").toString());
-		this.farRadius.setValidator(s -> {
+		this.farRadiusInput = new TextField(screen, xtop, ytop, width-1, height);
+		this.farRadiusInput.setText("" + (selectedWay==0 ? settings.cubicParabolaTag.getInteger("farRadius") : selectedWaySettings.cubicParabolaTag.getInteger("farRadius")));
+		this.farRadiusInput.setValidator(s -> {
 			if (s == null || s.length() == 0) {
 				return true;
 			}
@@ -335,32 +415,47 @@ public class TrackGui implements IScreen {
 				return false;
 			}
 			int max = 0x3f3f3f3f;
-			if (val >= -1 && val!=0 && val <= max && CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,val)) {
-				settings.cubicParabolaTag.setInteger("farRadius", val);
-				return true;
+			if(selectedWay==0) {
+				if (val >= -1 && val!=0 && val <= max && CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,val)) {
+					settings.cubicParabolaTag.setInteger("farRadius", val);
+					return true;
+				}
+			}else {
+				if (val >= -1 && val!=0 && val <= max && CubicCurve.isCubicParabolaDeltaValid(selectedWaySettings.length,selectedWaySettings.degrees,val)) {
+					selectedWaySettings.cubicParabolaTag.setInteger("farRadius", val);
+					syncMultiSwitchInfo();
+					return true;
+				}
 			}
+
 			return false;
 		});
-		this.farRadius.setFocused(true);
-		this.farRadius.setVisible(settings.type == TrackItems.CUBICPARABOLA);
+		this.farRadiusInput.setFocused(true);
+		this.farRadiusInput.setVisible(selectedWay==0 ? (settings.type == TrackItems.CUBICPARABOLA) : (selectedWaySettings.type == TrackItems.CUBICPARABOLA));
 
 
-		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
+		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, selectedWay==0?settings.curvosity:selectedWaySettings.curvosity, true) {
 			@Override
 			public void onSlider() {
-				settings.curvosity = (float) this.getValue();
-				curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", settings.curvosity)));
+				if(selectedWay == 0) {
+					settings.curvosity = (float) this.getValue();
+					curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", settings.curvosity)));
+				} else{
+					selectedWaySettings.curvosity = (float) this.getValue();
+					syncMultiSwitchInfo();
+					curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", selectedWaySettings.curvosity)));
+				}
 			}
 		};
 		curvositySlider.onSlider();
 		ytop += height;
 
-		directionButton.setVisible(settings.type.hasDirection());
-		degreesSlider.setVisible(settings.type.hasQuarters());
-		curvositySlider.setVisible(settings.type.hasCurvosity());
-		smoothingButton.setVisible(settings.type.hasSmoothing());
-		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
-		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
+		directionButton.setVisible(selectedWay==0?settings.type.hasDirection():selectedWaySettings.type.hasDirection());
+		degreesSlider.setVisible(selectedWay==0?settings.type.hasQuarters():selectedWaySettings.type.hasQuarters());
+		curvositySlider.setVisible(selectedWay==0?settings.type.hasCurvosity():selectedWaySettings.type.hasCurvosity());
+		smoothingButton.setVisible(selectedWay==0?settings.type.hasSmoothing():selectedWaySettings.type.hasSmoothing());
+		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE && selectedWay==0);
+		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE && selectedWay==0);
 
 
 
@@ -377,6 +472,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(TrackDefinition track) {
 				settings.track = track.trackID;
+				updateListSetting(mutable -> mutable.track = track.trackID);
 				trackButton.setText(GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24)));
 			}
 		};
@@ -388,53 +484,66 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		SingleWayInfo defaultSettingsToWay = new SingleWayInfo(settings.immutable(),new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.LEFT, 0, null),null,0);
-		Map<String,SingleWayInfo> selectorWayList = new HashMap<>();
-		selectorWayList.put("default",defaultSettingsToWay);
-		for(int i=0;i<multiSwitchInfo.wayList.size();i++){
-			selectorWayList.put("way"+i,multiSwitchInfo.wayList.get(i));
-		}
 
-		//TODO: sync Map or change this to Button
-		waySelector = new ListSelector<SingleWayInfo>(screen, width, 250, height,multiSwitchInfo.wayList.get(selectedWay),selectorWayList) {
-			@Override
-			public void onClick(SingleWayInfo way) {
-				selectedWay = multiSwitchInfo.wayList.indexOf(way)+1;
-				wayButton.setText("selected way:"+selectedWay);//TODO:add in GuiText
-			}
-		};
-		wayButton = new Button(screen, xtop, ytop, width-90, height, "selected way:"+selectedWay) {
+		//multiSwitch buttons
+		wayCircleButton = new Button(screen, xtop, ytop, width-105, height, "selected way:"+selectedWay) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				showSelector(waySelector);
-			}
-		};
-		insertButton = new Button(screen, xtop+width-80, ytop, height, height, "Insert") {
-			@Override
-			public void onClick(Player.Hand hand) {
-//				SingleWayInfo singleWayInfo;
-//				int seletedOrder = ;
-//				settings.multiSwitchInfo.wayList.add(seletedOrder,singleWayInfo);
-			}
-		};
-		addWayButton = new Button(screen, xtop+width-50, ytop, height, height, "Add") {
-			@Override
-			public void onClick(Player.Hand hand) {
-//				SingleWayInfo singleWayInfo;
-//				settings.multiSwitchInfo.wayList.add(singleWayInfo);
-			}
-		};
-		delWayButton = new Button(screen, xtop+width-20, ytop, height, height, "Del") {
-			@Override
-			public void onClick(Player.Hand hand) {
-				//in common case waylist and multiSwitchInfo should not be null
-				if(selectedWay>1 && selectedWay<multiSwitchInfo.wayList.size() && selectedWay+1<selectorWayList.size()){
-					multiSwitchInfo.wayList.remove(selectedWay);
-					selectorWayList.remove("way"+ (selectedWay + 1));
-					selectedWay = 0;
+				if(hand == Player.Hand.SECONDARY){
+					updateSelectedWay((selectedWay+1)%(multiSwitchInfo.wayList.size()+1));
+				}else {
+					updateSelectedWay((selectedWay-1+multiSwitchInfo.wayList.size()+1)%(multiSwitchInfo.wayList.size()+1));
+				}
+				if(selectedWay != 0){
+					showSelector(subTypeSelector);
+					subTypeSelector.onClick(selectedWaySettings.type);
+				}else {
+					subTypeSelector.setVisible(false);
+					typeSelector.onClick(settings.type);
 				}
 			}
 		};
+		insertWayButton = new Button(screen, xtop+width-100, ytop, height+20, height, "Insert") {
+			@Override
+			public void onClick(Player.Hand hand) {
+				SingleWayInfo singleWayInfo = new SingleWayInfo(SingleWayInfo.defaultSettings,SingleWayInfo.defaultPos,null,selectedWay-1);
+				multiSwitchInfo.wayList.add(selectedWay-1,singleWayInfo);
+				for(int i=selectedWay;i<multiSwitchInfo.wayList.size();i++) {
+					multiSwitchInfo.wayList.get(i).mutable().wayOrder++;
+				}
+				updateSelectedWay(selectedWay);
+			}
+		};
+		addWayButton = new Button(screen, xtop+width-60, ytop, height+5, height, "Add") {
+			@Override
+			public void onClick(Player.Hand hand) {
+				SingleWayInfo singleWayInfo = new SingleWayInfo(SingleWayInfo.defaultSettings,SingleWayInfo.defaultPos,null,multiSwitchInfo.wayList.size());
+				multiSwitchInfo.wayList.add(singleWayInfo);
+			}
+		};
+		delWayButton = new Button(screen, xtop+width-30, ytop, height+5, height, "Del") {
+			@Override
+			public void onClick(Player.Hand hand) {
+				//in common case waylist and multiSwitchInfo should not be null
+				if(selectedWay == 1 && multiSwitchInfo.wayList.size()>1) {
+					multiSwitchInfo.wayList.remove(0);
+					for(int i=0;i<multiSwitchInfo.wayList.size();i++) {
+						multiSwitchInfo.wayList.get(i).mutable().wayOrder--;
+					}
+					updateSelectedWay(1);
+				}else if(selectedWay != 0) {
+					multiSwitchInfo.wayList.remove(selectedWay-1);
+					for(int i=selectedWay-1;i<multiSwitchInfo.wayList.size();i++) {
+						multiSwitchInfo.wayList.get(i).mutable().wayOrder--;
+					}
+					updateSelectedWay(selectedWay-1);
+				}
+			}
+		};
+		insertWayButton.setVisible(settings.type.isMulti());
+		addWayButton.setVisible(settings.type.isMulti());
+		delWayButton.setVisible(settings.type.isMulti());
+		wayCircleButton.setVisible(settings.type.isMulti());
 		ytop += height;
 
 		railBedSelector = new ListSelector<ItemStack>(screen, width, 250, height, settings.railBed,
@@ -443,6 +552,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(ItemStack option) {
 				settings.railBed = option;
+				updateListSetting(mutable -> mutable.railBed = option);
 				bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)));
 			}
 		};
@@ -460,6 +570,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(ItemStack option) {
 				settings.railBedFill = option;
+				updateListSetting(mutable -> mutable.railBedFill = option);
 				bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)));
 			}
 		};
@@ -475,16 +586,18 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.posType = next(settings.posType, hand);
+				updateListSetting(mutable -> mutable.posType = settings.posType);
 				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.posType));
 			}
 		};
 		ytop += height;
 
-		//TODO:change to TextField
+		//TODO:change to TextField?
 		nearPitchSlider = new Slider(screen, 25+xtop, ytop, "near pitch:", -45.0, 45.0, settings.pitchTag.getFloat("start"), true) {
 			@Override
 			public void onSlider() {
 				settings.pitchTag.setFloat("start",(float) this.getValue());
+				updateListSetting(mutable -> mutable.pitchTag.setFloat("start",(float) this.getValue()));
 				nearPitchSlider.setText("near pitch:"+String.format("%.2f", settings.pitchTag.getFloat("start")));
 			}
 		};
@@ -492,10 +605,12 @@ public class TrackGui implements IScreen {
 
 		ytop += height;
 
+		//TODO:far pitch不能全同步修改
 		farPitchSlider = new Slider(screen, 25+xtop, ytop, "far pitch:", -45.0, 45.0, settings.pitchTag.getFloat("end"), true) {
 			@Override
 			public void onSlider() {
 				settings.pitchTag.setFloat("end",(float) this.getValue());
+				updateListSetting(mutable -> mutable.pitchTag.setFloat("end",(float) this.getValue()));
 				farPitchSlider.setText("far pitch:"+String.format("%.2f", settings.pitchTag.getFloat("end")));
 			}
 		};
@@ -507,6 +622,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.isPreview = isPreviewCB.isChecked();
+				updateListSetting(mutable -> mutable.isPreview = settings.isPreview);
 			}
 		};
 //		ytop += height;
@@ -515,6 +631,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.isGradeCrossing = isGradeCrossingCB.isChecked();
+				updateListSetting(mutable -> mutable.isGradeCrossing = settings.isGradeCrossing);
 			}
 		};
 		ytop += height;
@@ -533,11 +650,34 @@ public class TrackGui implements IScreen {
 
 		gaugeSelector.setVisible(false);
 		typeSelector.setVisible(false);
+		subTypeSelector.setVisible(false);
 		trackSelector.setVisible(false);
 		railBedSelector.setVisible(false);
 		railBedFillSelector.setVisible(false);
 
 		selector.setVisible(!isVisible);
+	}
+
+	private void updateSelectedWay(int i) {
+		selectedWay = i;
+		selectedWaySettings = selectedWay==0 ? settings : multiSwitchInfo.wayList.get(selectedWay-1).settings.mutable();
+		if(wayCircleButton!=null)wayCircleButton.setText("selected way:"+selectedWay);
+	}
+
+	private void syncMultiSwitchInfo() {
+		if(selectedWay>0){
+			SingleWayInfo update = multiSwitchInfo.wayList.get(selectedWay-1).with(mutable -> mutable.settings = selectedWaySettings.immutable());
+			multiSwitchInfo.wayList.set(selectedWay-1, update);
+		}
+	}
+
+	private void updateListSetting(Consumer<RailSettings.Mutable> mod) {
+		for (int i = 0; i < multiSwitchInfo.wayList.size(); i++) {
+			SingleWayInfo updated = multiSwitchInfo.wayList.get(i);
+			RailSettings t = updated.settings.with(mod);
+			updated = updated.with(m -> m.settings = t);
+			multiSwitchInfo.wayList.set(i, updated);
+		}
 	}
 
 	@Override

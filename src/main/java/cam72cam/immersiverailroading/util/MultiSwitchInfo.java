@@ -13,27 +13,6 @@ import java.util.function.Consumer;
 
 @TagMapped(MultiSwitchInfo.TagMapper.class)
 public class MultiSwitchInfo {
-    private static final RailSettings defaultSettings = new RailSettings(
-            Gauge.standard(),
-            "default",
-            TrackItems.TURN,
-            13,
-            90,
-            1f,
-            TrackPositionType.FIXED, TrackSmoothing.BOTH,
-            0f,0f,
-            true,-1,
-            TrackDirection.RIGHT,
-            ItemStack.EMPTY, ItemStack.EMPTY,
-            true,
-            false,
-            1,
-            1
-    );
-    private static final PlacementInfo defaultPos = new PlacementInfo(
-            new Vec3d(0.5, 0, 0.5), TrackDirection.LEFT, 0, null
-    );
-
     public final List<SingleWayInfo> wayList;
     public final TrackItems realShapeType;
     public final boolean isMultiSwitchWay;//this should only be overwrite to true in BuilderMultiSwitch
@@ -68,7 +47,7 @@ public class MultiSwitchInfo {
             // Defaults
             realShapeType = TrackItems.STRAIGHT;
             wayList = new ArrayList<>();
-            wayList.add(new SingleWayInfo(defaultSettings,defaultPos,null,0));
+            wayList.add(new SingleWayInfo(SingleWayInfo.defaultSettings,SingleWayInfo.defaultPos,null,0));
             orderAsChild = 0;//0=straight(parent)as default;1=MID1,2=MID2,3=MID3,4=MID4,5=TURN
             isMultiSwtchWay = false;
 
@@ -93,7 +72,7 @@ public class MultiSwitchInfo {
         if (root == null || !root.hasKey("multiSwitchInfo")) {
             //default fallback
             List<SingleWayInfo> wayList = new ArrayList<>();
-            wayList.add(new SingleWayInfo(defaultSettings,defaultPos,null,0));
+            wayList.add(new SingleWayInfo(SingleWayInfo.defaultSettings,SingleWayInfo.defaultPos,null,0));
             return new MultiSwitchInfo(wayList, TrackItems.TURN, 0, false);
         }
 
@@ -125,6 +104,19 @@ public class MultiSwitchInfo {
         MultiSwitchInfo.Mutable mutable = mutable();
         mod.accept(mutable);
         return mutable.immutable();
+    }
+
+    public static MultiSwitchInfo writePlacement(MultiSwitchInfo multiSwitchInfo,PlacementInfo placementInfo) {
+        if(multiSwitchInfo != null && multiSwitchInfo.wayList != null){
+            for(int i=0; i<multiSwitchInfo.wayList.size(); i++) {
+                SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(i);
+                SingleWayInfo finalSingleWayInfo = singleWayInfo;
+
+                singleWayInfo = singleWayInfo.with(m -> m.placementInfo = placementInfo.withDirection(finalSingleWayInfo.settings.direction));
+                multiSwitchInfo.wayList.set(i, singleWayInfo);
+            }
+        }
+        return multiSwitchInfo;
     }
     private static class WayListMapper implements cam72cam.mod.serialization.TagMapper<List<SingleWayInfo>> {
         public TagAccessor<List<SingleWayInfo>> apply(Class<List<SingleWayInfo>> t, String fieldname, TagField tag) {

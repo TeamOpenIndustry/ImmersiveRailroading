@@ -9,10 +9,11 @@ import cam72cam.immersiverailroading.util.SingleWayInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
     //"Straight" is just a word from BuilderSwitch, can be 5 kinds of curves, it is used to mark the parent builders
@@ -25,6 +26,7 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
         super(info, world, pos);
 
         List<Vec3i> childParentPosList = new ArrayList<>();
+        Map<Pair<Integer, Integer>, Integer> freq = new HashMap<>();
 
         @Nullable
         MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
@@ -36,27 +38,66 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
         realStraightBuilder = constructBuilder(info,realShapeOfStraight);
         straightBuilderReal = constructBuilder(info.withSettings(mutable -> mutable.type = realShapeOfStraight),realShapeOfStraight);
 
-        for(int i = 0 ; i<wayAmount; i++){
+        for (Pair<Integer, Integer> v : straightBuilder.positions) {
+            freq.merge(v, 1, Integer::sum);
+        }
+
+        for(int i = 0 ; i<wayAmount; i++) {
             //Only STRAIGHT,SLOPE,TURN,CUBICPARABOLA,CUSTOM are valid
             RailInfo turnInfo = fromSingleWayInfo(multiSwitchInfo.wayList.get(i));
             BuilderIterator turnBuilder = (BuilderIterator) turnInfo.getBuilder(world,pos);
+            turnBuilder.overrideFlexible = true;
+            turnBuilders.add(turnBuilder);
+
+            for (Pair<Integer, Integer> v : turnBuilder.positions) {
+                freq.merge(v, 1, Integer::sum);
+            }
+        }
+
+        Set<Pair<Integer, Integer>> uniquePositions = freq.entrySet().stream()
+                .filter(e -> e.getValue() == 1)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        straightBuilder.positions.retainAll(uniquePositions);
+
+        for(int i = 0 ; i<wayAmount; i++) {
+            BuilderIterator turnBuilder = turnBuilders.get(i);
+            turnBuilder.positions.retainAll(uniquePositions);
+
+            Pair<Integer, Integer> defaultRelParentPos = Pair.of(turnBuilder.getParentPos().x-turnBuilder.pos.x, turnBuilder.getParentPos().z-turnBuilder.pos.z);
+            if(!turnBuilder.positions.contains(defaultRelParentPos)) {//if parent is overlapped with straightBuilder
+                for(int j = turnBuilder.tracks.size()-1; j>=0; j--) {
+                    TrackBase turn = turnBuilder.tracks.get(j);
+
+                    Pair<Integer, Integer> turnPos = Pair.of(turn.rel.x,turn.rel.z);
+                    if (turn instanceof TrackGag && turnBuilder.positions.contains(turnPos)) {
+                        turnBuilder.replaceTrackRail(turn.getPos(),turnBuilder.getParentPos());
+                        break;
+                    }
+                }
+            }
 
             childParentPosList.add(turnBuilder.getParentPos());
 
-            turnBuilder.overrideFlexible = true;
-            for(TrackBase turn : turnBuilder.tracks) {
+            for(TrackBase turn : turnBuilder.tracks) {//override parent to straightBuilder
                 if (turn instanceof TrackRail) {
+                    System.out.println("trackRail of turn:"+turn.getPos());
                     turn.overrideParent(straightBuilder.getParentPos());
                 }
             }
-            straightBuilder.positions.retainAll(turnBuilder.positions);
-            turnBuilders.add(turnBuilder);
         }
 
         for (TrackBase straight : straightBuilder.tracks) {
             if (straight instanceof TrackGag) {
                 straight.setFlexible();
             }
+
+            if(straight instanceof TrackRail) {
+                System.out.println("straightRail of turn:"+straight.getPos());
+            }
+            //TODO:有时候遇到TrackRail寻路还有问题<=
+            // 以及把straight的父级也挪走？
 
             Vec3i pos1 = straight.getPos();
             Vec3i pos2 = straightBuilder.getParentPos();

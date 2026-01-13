@@ -86,6 +86,24 @@ public enum TrackItems {
 		}
 	}
 
+	public boolean isMulti() {
+		switch (this) {
+			case MULTISWITCH:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean hasFarRadius() {
+		switch (this) {
+			case CUBICPARABOLA:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	public int getOrder() {
 		return this.order;
 	}

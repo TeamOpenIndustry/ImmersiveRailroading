@@ -7,10 +7,7 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.track.IIterableTrack;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.MultiSwitchInfo;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.BlockEntityTickable;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -69,9 +66,9 @@ public class TileRailPreview extends BlockEntityTickable {
 		info = null;
 	}
 
-	public void setCustomInfo(PlacementInfo info) {
+	public void setCustomInfo(PlacementInfo info) {//TODO:multiSwitch way support logic
 		this.customInfo = info;
-		if (customInfo != null) {//TODO:multiSwitch way support logic
+		if (customInfo != null) {
 			RailSettings settings = RailSettings.from(item);
 			if(settings.type ==TrackItems.TURN
 				|| settings.type == TrackItems.STRAIGHT
@@ -115,6 +112,14 @@ public class TileRailPreview extends BlockEntityTickable {
 	
 	public void setPlacementInfo(PlacementInfo info) {
 		this.placementInfo = info;
+//		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+//		if(multiSwitchInfo != null && multiSwitchInfo.wayList != null){
+//			for(int i=0; i<multiSwitchInfo.wayList.size(); i++) {
+//				SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(i);
+//				singleWayInfo = singleWayInfo.with(m -> m.placementInfo = info);
+//				multiSwitchInfo.wayList.set(i, singleWayInfo);
+//			}
+//		}
 		this.markDirty();
 	}
 	
@@ -153,7 +158,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	public RailInfo getRailRenderInfo() {
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
-			info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));//对吗
+			info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));
 		}
 		return info;
 	}
@@ -161,7 +166,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));//对吗
+        info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));
         if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();
 		}

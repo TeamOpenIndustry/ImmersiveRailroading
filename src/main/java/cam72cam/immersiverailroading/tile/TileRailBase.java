@@ -511,7 +511,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		boolean hasSwitchSet = false;
 
 		for (TileRail tile : tiles) {
-			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);//问题不是state本身体，而是tile不会被及时纠正
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
 			System.out.println("state:"+state);
 
 			int midState = -1;
@@ -1093,7 +1093,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return stack;
 		}
 		parent.info.settings.write(stack);
-		if(parent.info.multiSwitchInfo != null)parent.info.multiSwitchInfo.write(stack);
+		if(parent.info.multiSwitchInfo != null){
+			if(parent.info.settings.type == TrackItems.MULTISWITCH){
+				parent.info.multiSwitchInfo.write(stack);
+			}else {
+				parent.info.multiSwitchInfo.with(mutable -> mutable.isMultiSwtchWay = false).write(stack);
+			}
+		}
 		return stack;
 	}
 

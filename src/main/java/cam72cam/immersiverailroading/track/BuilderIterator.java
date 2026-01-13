@@ -150,6 +150,44 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			tracks.add(tg);
 		}
 	}
+
+	public void replaceTrackRail(Vec3i newPos,Vec3i oldPos) {
+		int newTrackRailIndex = -1;
+		int oldTrackRailIndex = -1;
+		boolean foundNewTrackRail = false;
+		boolean foundOldTrackRail = false;
+		TrackRail trackAtNew = null;
+		TrackGag trackAtOld = null;
+
+		for(int i = 0; i<tracks.size(); i++) {
+			TrackBase track = tracks.get(i);
+
+			if(track instanceof TrackGag && track.getPos().equals(newPos)) {
+				trackAtNew = new TrackRail(this, track.rel);
+
+				trackAtNew.setRailHeight(track.getRailHeight());
+				trackAtNew.setBedHeight(track.getBedHeight());
+				foundNewTrackRail = true;
+				newTrackRailIndex = i;
+			}
+			if(track instanceof TrackRail && track.getPos().equals(oldPos)){
+				trackAtOld = new TrackGag(this, track.rel);
+
+				trackAtOld.setRailHeight(track.getRailHeight());
+				trackAtOld.setBedHeight(track.getBedHeight());
+				foundOldTrackRail = true;
+				oldTrackRailIndex = i;
+			}
+
+			if(foundOldTrackRail && foundNewTrackRail) {//do we need to set flex here?
+				tracks.set(newTrackRailIndex,trackAtNew);
+				tracks.set(oldTrackRailIndex,trackAtOld);
+				this.setParentPos(newPos.subtract(this.pos));
+				System.out.println("replaced "+oldPos+" with "+newPos);
+				break;
+			}
+		}
+	}
 	
 	@Override
 	public List<TrackBase> getTracksForRender() {

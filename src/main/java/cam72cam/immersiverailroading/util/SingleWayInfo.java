@@ -1,12 +1,14 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.immersiverailroading.library.*;
+import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.*;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 @TagMapped(SingleWayInfo.TagMapper.class)
 public class SingleWayInfo {
@@ -28,6 +30,27 @@ public class SingleWayInfo {
         this.customInfo = customInfo;
         this.wayOrder = wayOrder;
     }
+
+    public static final RailSettings defaultSettings = new RailSettings(
+            Gauge.standard(),
+            "default",
+            TrackItems.TURN,
+            15,
+            90,
+            1f,
+            TrackPositionType.FIXED, TrackSmoothing.BOTH,
+            0f,0f,
+            true,-1,
+            TrackDirection.RIGHT,
+            ItemStack.EMPTY, ItemStack.EMPTY,
+            true,
+            false,
+            1,
+            1
+    );
+    public static final PlacementInfo defaultPos = new PlacementInfo(
+            new Vec3d(0.5, 0, 0.5), TrackDirection.LEFT, 0, null
+    );
 
     public static class Mutable {
         @TagField("settings")
@@ -87,6 +110,13 @@ public class SingleWayInfo {
             );
         }
     }
+
+    public SingleWayInfo with(Consumer<SingleWayInfo.Mutable> mod) {
+        SingleWayInfo.Mutable mutable = mutable();
+        mod.accept(mutable);
+        return mutable.immutable();
+    }
+
     @Override
     public String toString() {
         Object[] props = new Object [] {

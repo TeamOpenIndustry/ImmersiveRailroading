@@ -4,11 +4,8 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.MultiSwitchInfo;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.render.*;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -24,9 +21,15 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	}
 
 	//render the model of inventory
-	public static void render(ItemStack stack, World world, RenderState state) {
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null, MultiSwitchInfo.from(stack));
+	public static void render(ItemStack stack, World world, RenderState state) {//TODO:correct way placement direction
+		PlacementInfo placementInfo = new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5));
+		RailInfo info = new RailInfo(stack, placementInfo, null, MultiSwitchInfo.from(stack));
 		info = info.withSettings(b -> b.length = 10);
+
+		MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
+		multiSwitchInfo = MultiSwitchInfo.writePlacement(multiSwitchInfo,placementInfo);
+		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
+		info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
 
 		state.cull_face(false);
 		state.lighting(false);
@@ -71,7 +74,14 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			}
 		}
 
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null,  MultiSwitchInfo.from(stack));
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0));
+		RailInfo info = new RailInfo(stack, placementInfo, null,  MultiSwitchInfo.from(stack));
+
+		MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
+		multiSwitchInfo = MultiSwitchInfo.writePlacement(multiSwitchInfo,placementInfo);
+		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
+		info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
+
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {

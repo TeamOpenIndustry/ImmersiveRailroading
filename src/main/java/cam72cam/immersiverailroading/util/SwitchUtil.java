@@ -19,7 +19,7 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 
-		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM && rail.info.settings.type != TrackItems.CUBICPARABOLA) {
+		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM && rail.info.settings.type != TrackItems.CUBICPARABOLA && rail.info.settings.type != TrackItems.MULTISWITCH) {
 			return SwitchState.NONE;
 		}
 
@@ -80,9 +80,9 @@ public class SwitchUtil {
 			if(targetMidState != -1 && targetMidState < parent.info.multiSwitchInfo.wayList.size()){
 				targetRail = parent.getChildWayTile(targetMidState);
 			}else if(targetMidState == -1 ){
-				targetRail = parent;
+				targetRail = parent;//NONE and STRAIGHT
 			}else{
-				return SwitchState.NONE;
+				targetRail = parent.getChildWayTile(parent.info.multiSwitchInfo.wayList.size()-1);//convert to the biggest one
 			}
 			IIterableTrack targetBuilder = (IIterableTrack) targetRail.info.getBuilder(rail.getWorld());
 
@@ -112,7 +112,7 @@ public class SwitchUtil {
 
 			//compare
 			if(targetOffset > rail.info.settings.gauge.scale() / 16){
-				if(targetState == SwitchState.TURN) {
+				if(targetState == SwitchState.TURN) {//应该改成最后一个？
 					return currentState;
 				}else {
 					if(currentState == SwitchState.TURN){
