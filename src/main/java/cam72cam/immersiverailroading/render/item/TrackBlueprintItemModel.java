@@ -21,15 +21,15 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	}
 
 	//render the model of inventory
-	public static void render(ItemStack stack, World world, RenderState state) {//TODO:correct way placement direction
+	public static void render(ItemStack stack, World world, RenderState state) {
 		PlacementInfo placementInfo = new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5));
-		RailInfo info = new RailInfo(stack, placementInfo, null, MultiSwitchInfo.from(stack));
+		RailInfo info = new RailInfo(stack, placementInfo, MultiSwitchInfo.from(stack).defaultCustom, MultiSwitchInfo.from(stack));
 		info = info.withSettings(b -> b.length = 10);
 
 		MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
 		multiSwitchInfo = MultiSwitchInfo.writePlacement(multiSwitchInfo,placementInfo);
 		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
-		info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
+		info = info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
 
 		state.cull_face(false);
 		state.lighting(false);
@@ -75,12 +75,12 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		}
 
 		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0));
-		RailInfo info = new RailInfo(stack, placementInfo, null,  MultiSwitchInfo.from(stack));
+		RailInfo info = new RailInfo(stack, placementInfo, MultiSwitchInfo.from(stack).defaultCustom,  MultiSwitchInfo.from(stack));
 
 		MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
 		multiSwitchInfo = MultiSwitchInfo.writePlacement(multiSwitchInfo,placementInfo);
 		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
-		info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
+		info = info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
 
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);

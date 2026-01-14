@@ -1,10 +1,8 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 
 import java.util.ArrayList;
@@ -15,14 +13,19 @@ import java.util.function.Consumer;
 public class MultiSwitchInfo {
     public final List<SingleWayInfo> wayList;
     public final TrackItems realShapeType;
-    public final boolean isMultiSwitchWay;//this should only be overwrite to true in BuilderMultiSwitch
+    public final PlacementInfo defaultCustom;//cache custom when confining ways in wayList, only be written and read in TileRailPreview
+    public final boolean isMultiSwitchWay;//this should only be written to true in BuilderMultiSwitch
+
+    //selectedWayOrder is stored in itemTrackBlueprint and can communicate with TrackGui
+//    public final int selectedWayOrder;//for itemBlueprint to tell goldenSpike which way to set
     public final int orderAsChild;
 
-    public MultiSwitchInfo(List<SingleWayInfo> wayList, TrackItems realShapeType, int orderAsChild, boolean isMultiSwitchWay) {
+    public MultiSwitchInfo(List<SingleWayInfo> wayList, TrackItems realShapeType, int orderAsChild, boolean isMultiSwitchWay, PlacementInfo defaultCustom) {
         this.wayList = wayList;
         this.realShapeType =  realShapeType;
         this.orderAsChild = orderAsChild;
         this.isMultiSwitchWay = isMultiSwitchWay;
+        this.defaultCustom = defaultCustom;
     }
 
     public static class Mutable {
@@ -32,15 +35,17 @@ public class MultiSwitchInfo {
         public TrackItems realShapeType;
         @TagField("orderAsChild")
         public int orderAsChild;
-
-        @TagField("isMultiSwtchWay")
-        public boolean isMultiSwtchWay;
+        @TagField("isMultiSwitchWay")
+        public boolean isMultiSwitchWay;
+        @TagField("defaultCustom")
+        public PlacementInfo defaultCustom;
 
         public Mutable(MultiSwitchInfo info) {
             this.wayList = info.wayList;
             this.realShapeType = info.realShapeType;
             this.orderAsChild = info.orderAsChild;
-            this.isMultiSwtchWay = info.isMultiSwitchWay;
+            this.isMultiSwitchWay = info.isMultiSwitchWay;
+            this.defaultCustom = info.defaultCustom;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -49,7 +54,8 @@ public class MultiSwitchInfo {
             wayList = new ArrayList<>();
             wayList.add(new SingleWayInfo(SingleWayInfo.defaultSettings,SingleWayInfo.defaultPos,null,0));
             orderAsChild = 0;//0=straight(parent)as default;1=MID1,2=MID2,3=MID3,4=MID4,5=TURN
-            isMultiSwtchWay = false;
+            isMultiSwitchWay = false;
+            defaultCustom = null;
 
             TagSerializer.deserialize(data, this);
         }
@@ -59,7 +65,8 @@ public class MultiSwitchInfo {
                     wayList,
                     realShapeType,
                     orderAsChild,
-                    isMultiSwtchWay
+                    isMultiSwitchWay,
+                    defaultCustom
             );
         }
     }
@@ -73,7 +80,7 @@ public class MultiSwitchInfo {
             //default fallback
             List<SingleWayInfo> wayList = new ArrayList<>();
             wayList.add(new SingleWayInfo(SingleWayInfo.defaultSettings,SingleWayInfo.defaultPos,null,0));
-            return new MultiSwitchInfo(wayList, TrackItems.TURN, 0, false);
+            return new MultiSwitchInfo(wayList, TrackItems.TURN, 0, false, null);
         }
 
         try {
@@ -100,10 +107,22 @@ public class MultiSwitchInfo {
 
         stack.setTagCompound(root);
     }
-    public MultiSwitchInfo with(Consumer<MultiSwitchInfo.Mutable> mod) {
-        MultiSwitchInfo.Mutable mutable = mutable();
-        mod.accept(mutable);
-        return mutable.immutable();
+
+    public static Integer getSelectedFrom(ItemStack stack) {//0=default,1=wayList[0],2=wayList[1],...
+        TagCompound root = stack.getTagCompound();
+        if (root == null || !root.hasKey("selectedWayOrder")) {
+            //default fallback
+            return 0;
+        }
+        return root.getInteger("selectedWayOrder");
+    }
+    public static void writeSelected(ItemStack stack,int selectedWayOrder) {
+        TagCompound root = stack.getTagCompound();
+        if (root == null) {
+            root = new TagCompound();
+        }
+        root.setInteger("selectedWayOrder", selectedWayOrder);
+        stack.setTagCompound(root);
     }
 
     public static MultiSwitchInfo writePlacement(MultiSwitchInfo multiSwitchInfo,PlacementInfo placementInfo) {
@@ -118,6 +137,33 @@ public class MultiSwitchInfo {
         }
         return multiSwitchInfo;
     }
+
+    public static MultiSwitchInfo writeCustom(MultiSwitchInfo multiSwitchInfo,PlacementInfo customInfo,int wayOrder) {//0=default,1=wayList[0],2=wayList[1],...
+        if(wayOrder<0)return multiSwitchInfo;
+        wayOrder--;
+        if(multiSwitchInfo != null && multiSwitchInfo.wayList != null && wayOrder<multiSwitchInfo.wayList.size()){
+            SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(wayOrder);
+            SingleWayInfo finalSingleWayInfo = singleWayInfo;
+
+            if(customInfo==null) {
+                singleWayInfo = singleWayInfo.with(m ->
+                        m.customInfo = null);
+            }else {
+                singleWayInfo = singleWayInfo.with(m ->
+                        m.customInfo = customInfo);
+            }
+
+            multiSwitchInfo.wayList.set(wayOrder, singleWayInfo);
+        }
+        return multiSwitchInfo;
+    }
+
+    public MultiSwitchInfo with(Consumer<MultiSwitchInfo.Mutable> mod) {
+        MultiSwitchInfo.Mutable mutable = mutable();
+        mod.accept(mutable);
+        return mutable.immutable();
+    }
+
     private static class WayListMapper implements cam72cam.mod.serialization.TagMapper<List<SingleWayInfo>> {
         public TagAccessor<List<SingleWayInfo>> apply(Class<List<SingleWayInfo>> t, String fieldname, TagField tag) {
             return new TagAccessor<>(

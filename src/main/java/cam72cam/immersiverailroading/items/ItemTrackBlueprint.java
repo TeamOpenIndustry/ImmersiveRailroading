@@ -83,10 +83,6 @@ public class ItemTrackBlueprint extends CustomItem {
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
 				PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
-
-				multiSwitchInfo = MultiSwitchInfo.writePlacement(multiSwitchInfo,placementInfo);
-				multiSwitchInfo.write(stack);
-
 				te.setup(stack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
@@ -96,7 +92,7 @@ public class ItemTrackBlueprint extends CustomItem {
 		RailInfo info = new RailInfo(stack, placementInfo, null, multiSwitchInfo);
 
 		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
-		info.with(mutable -> mutable.multiSwitchInfo = MultiSwitchInfo.writePlacement(finalMultiSwitchInfo,placementInfo));
+		info = info.with(mutable -> mutable.multiSwitchInfo = MultiSwitchInfo.writePlacement(finalMultiSwitchInfo,placementInfo));
 
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;

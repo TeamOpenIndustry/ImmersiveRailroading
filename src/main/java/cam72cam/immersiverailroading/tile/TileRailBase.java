@@ -1097,7 +1097,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if(parent.info.settings.type == TrackItems.MULTISWITCH){
 				parent.info.multiSwitchInfo.write(stack);
 			}else {
-				parent.info.multiSwitchInfo.with(mutable -> mutable.isMultiSwtchWay = false).write(stack);
+				parent.info.multiSwitchInfo.with(mutable -> mutable.isMultiSwitchWay = false).write(stack);
 			}
 		}
 		return stack;

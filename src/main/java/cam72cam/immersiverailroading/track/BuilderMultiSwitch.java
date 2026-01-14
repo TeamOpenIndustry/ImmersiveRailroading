@@ -108,7 +108,7 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
     }
 
     private RailInfo fromSingleWayInfo(SingleWayInfo singleWayInfo) {
-        return new RailInfo(singleWayInfo.settings,singleWayInfo.placementInfo,singleWayInfo.customInfo,new MultiSwitchInfo(null,singleWayInfo.settings.type,singleWayInfo.wayOrder,true), SwitchState.NONE,SwitchState.NONE,0);
+        return new RailInfo(singleWayInfo.settings,singleWayInfo.placementInfo,singleWayInfo.customInfo,new MultiSwitchInfo(null,singleWayInfo.settings.type,singleWayInfo.wayOrder,true,null), SwitchState.NONE,SwitchState.NONE,0);
     }
 
     private BuilderCubicCurve constructBuilder(RailInfo railInfo, TrackItems type) {

@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackDirection;
@@ -28,6 +29,8 @@ public class TileRailPreview extends BlockEntityTickable {
 	@TagField
 	private PlacementInfo customInfo;
 	@TagField
+	private boolean isCustomDirty = false;
+	@TagField
 	private boolean isAboveRails = false;
 
 	public ItemStack getItem() {
@@ -35,14 +38,22 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 	
 	public void setup(ItemStack stack, PlacementInfo info) {
-		this.item = stack.copy();
+		this.item = stack.copy();//multiSwitchInfo corrected here
 		this.placementInfo = info;
+
+		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writePlacement(MultiSwitchInfo.from(item),placementInfo);
+		multiSwitchInfo.write(item);
+
 		this.isAboveRails = BlockUtil.isIRRail(getWorld(), getPos().down()) && getWorld().getBlockEntity(getPos().down(), TileRailBase.class).getRailHeight() < 0.5;
 		this.markDirty();
 	}
 
 	public void setItem(ItemStack stack, Player player) {
-		this.item = stack.copy();
+		this.item = stack.copy();//multiSwitchInfo corrected here
+
+		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writePlacement(MultiSwitchInfo.from(item),placementInfo);
+		multiSwitchInfo.write(item);
+
 		RailSettings settings = RailSettings.from(item);
 
 		if (settings.direction != TrackDirection.NONE) {
@@ -66,10 +77,30 @@ public class TileRailPreview extends BlockEntityTickable {
 		info = null;
 	}
 
-	public void setCustomInfo(PlacementInfo info) {//TODO:multiSwitch way support logic
+	public void setCustomInfo(PlacementInfo info) {
 		this.customInfo = info;
 		if (customInfo != null) {
-			RailSettings settings = RailSettings.from(item);
+			RailSettings settings;
+
+			boolean replaceType = false;
+			Integer selectedOrder = MultiSwitchInfo.getSelectedFrom(item);
+			if(selectedOrder==0){
+				settings = RailSettings.from(item);
+				if(settings.type == TrackItems.MULTISWITCH) {
+					MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+					settings = settings.with(mutable -> mutable.type = multiSwitchInfo.realShapeType);
+					replaceType = true;
+				}
+			}else {
+				MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+				if(multiSwitchInfo!=null&&multiSwitchInfo.wayList!=null&&selectedOrder<=multiSwitchInfo.wayList.size()){
+					settings = multiSwitchInfo.wayList.get(selectedOrder-1).settings;
+				}else {
+					ImmersiveRailroading.warn("invalid multiSwitchInfo:"+multiSwitchInfo+",or selectedOrder:"+selectedOrder);
+					return;
+				}
+			}
+
 			if(settings.type ==TrackItems.TURN
 				|| settings.type == TrackItems.STRAIGHT
 				|| settings.type == TrackItems.SLOPE){
@@ -105,21 +136,32 @@ public class TileRailPreview extends BlockEntityTickable {
 				settings = settings.with(b -> b.length = length);
 			}
 
-			settings.write(item);
+			if(selectedOrder==0){
+				if(replaceType) {
+					settings = settings.with(mutable -> mutable.type = TrackItems.MULTISWITCH);
+					MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+					multiSwitchInfo = multiSwitchInfo.with(mutable -> mutable.defaultCustom = customInfo);//use defaultCustom when it is MultiSwitchInfo!
+					multiSwitchInfo.write(item);
+					isCustomDirty = true;
+				}
+				settings.write(item);
+			}else {
+				MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+				if(multiSwitchInfo!=null&&multiSwitchInfo.wayList!=null&&selectedOrder<=multiSwitchInfo.wayList.size()){
+					SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(selectedOrder-1);
+					RailSettings finalSettings = settings;
+					singleWayInfo = singleWayInfo.with(mutable -> mutable.settings = finalSettings);
+					multiSwitchInfo.wayList.set(selectedOrder-1,singleWayInfo);
+					multiSwitchInfo.write(item);
+					isCustomDirty = true;
+				}
+			}
 		}
 		this.markDirty();
 	}
 	
 	public void setPlacementInfo(PlacementInfo info) {
 		this.placementInfo = info;
-//		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
-//		if(multiSwitchInfo != null && multiSwitchInfo.wayList != null){
-//			for(int i=0; i<multiSwitchInfo.wayList.size(); i++) {
-//				SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(i);
-//				singleWayInfo = singleWayInfo.with(m -> m.placementInfo = info);
-//				multiSwitchInfo.wayList.set(i, singleWayInfo);
-//			}
-//		}
 		this.markDirty();
 	}
 	
@@ -158,7 +200,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	public RailInfo getRailRenderInfo() {
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
-			info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));
+			info = new RailInfo(item, placementInfo, MultiSwitchInfo.from(item).defaultCustom, MultiSwitchInfo.from(item));//try
 		}
 		return info;
 	}
@@ -166,7 +208,25 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));
+        info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));//selectedOrder==0
+
+		int selectedOrder = MultiSwitchInfo.getSelectedFrom(item);
+		if(selectedOrder>0 && isCustomDirty) {
+			MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writeCustom(MultiSwitchInfo.from(item),customInfo,selectedOrder);
+            info = info.with(mutable -> {
+				mutable.multiSwitchInfo = multiSwitchInfo;
+			});
+			multiSwitchInfo.write(item);
+		}
+		if(info.settings.type==TrackItems.MULTISWITCH) {
+			MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+            info = info.with(mutable -> {
+				mutable.customInfo = multiSwitchInfo.defaultCustom;
+			});
+		}
+
+		isCustomDirty = false;
+
         if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();
 		}
