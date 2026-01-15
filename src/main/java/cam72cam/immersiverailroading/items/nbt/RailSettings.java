@@ -16,6 +16,8 @@ public class RailSettings {
     public final float curvosity;
     public final float pitchStart;
     public final float pitchEnd;
+    public final float placementOffset;
+    public final float customOffset;
     public final boolean isForward;
     public final int farRadius;
     public final TrackPositionType posType;
@@ -29,7 +31,7 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, float pitchStart, float pitchEnd, boolean isForward, int farRadius, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, float pitchStart, float pitchEnd, float placementOffset, float customOffset, boolean isForward, int farRadius, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -47,6 +49,8 @@ public class RailSettings {
         this.transfertableEntrySpacing = spacing;
         this.pitchStart = pitchStart;
         this.pitchEnd = pitchEnd;
+        this.placementOffset = placementOffset;
+        this.customOffset = customOffset;
         this.isForward = isForward;
         this.farRadius = farRadius;
     }
@@ -162,6 +166,8 @@ public class RailSettings {
         public String track;
         @TagField(value = "pitch")
         public TagCompound pitchTag;
+        @TagField(value = "posOffset")
+        public TagCompound posOffsetTag;
         @TagField(value = "cubicParabola")
         public TagCompound cubicParabolaTag;
         @TagField("transfertableEntryCount")
@@ -176,6 +182,10 @@ public class RailSettings {
             pitchTag = new TagCompound();
             pitchTag.setFloat("start", settings.pitchStart);
             pitchTag.setFloat("end",  settings.pitchEnd);
+
+            posOffsetTag = new TagCompound();
+            posOffsetTag.setFloat("placementOffset", settings.placementOffset);
+            posOffsetTag.setFloat("customOffset", settings.customOffset);
 
             cubicParabolaTag = new TagCompound();
             cubicParabolaTag.setBoolean("isForward", settings.isForward);
@@ -205,6 +215,10 @@ public class RailSettings {
             pitchTag = new TagCompound();
             pitchTag.setFloat("start", 0.0f);
             pitchTag.setFloat("end", 0.0f);
+
+            posOffsetTag = new TagCompound();
+            posOffsetTag.setFloat("placementOffset", 0.0f);
+            posOffsetTag.setFloat("customOffset", 0.0f);
 
             cubicParabolaTag = new TagCompound();
             cubicParabolaTag.setBoolean("isForward", true);
@@ -238,6 +252,8 @@ public class RailSettings {
                     smoothing,
                     pitchTag.getFloat("start"),
                     pitchTag.getFloat("end"),
+                    posOffsetTag.getFloat("placementOffset"),
+                    posOffsetTag.getFloat("customOffset"),
                     cubicParabolaTag.getBoolean("isForward"),
                     cubicParabolaTag.getInteger("farRadius"),
                     direction,

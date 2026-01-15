@@ -198,34 +198,85 @@ public class TileRailPreview extends BlockEntityTickable {
 		return IBoundingBox.INFINITE;
 	}
 
-	public RailInfo getRailRenderInfo() {
+	public RailInfo getRailRenderInfo() {//not only for render, but also for build
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
-			info = new RailInfo(item, placementInfo, MultiSwitchInfo.from(item).defaultCustom, MultiSwitchInfo.from(item));//try
+			PlacementInfo custom;
+			if(RailSettings.from(item).type==TrackItems.MULTISWITCH) {
+				PlacementInfo defaultCustom = MultiSwitchInfo.from(item).defaultCustom;
+				custom = defaultCustom == null ? null : defaultCustom.withFloorYoffset(RailSettings.from(item).customOffset);
+			}else {
+				custom = customInfo;//non-MultiSwitch types
+			}
+
+			info = new RailInfo(item, placementInfo, custom, MultiSwitchInfo.from(item));
+
+			//write wayList placement & custom offset into info
+			writePosOffset();
 		}
-		return info;
+		return info;//build will go here
+	}
+
+	//TODO:把普通轨道的custom直接也存到multiSwitchInfo内？那么可以把多路道岔内的custom挪那里,并且删除info内的custom，另外多路道岔列表的placement应该没什么用，可能要删除
+	// 非道岔的普通曲线完成，table不知道，但是multiSwitch没完成,way0时，waylist内的placement未修改,default的custom在build生效，没build不生效
+
+	private void writePosOffset() {//write wayList placement & custom offset into info
+		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+		if(multiSwitchInfo!=null && multiSwitchInfo.wayList!=null) {
+			for(int i=0; i<multiSwitchInfo.wayList.size(); i++) {
+				SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(i);
+				SingleWayInfo finalSingleWayInfo = singleWayInfo;
+
+				singleWayInfo = singleWayInfo.with(mutable -> {
+					mutable.placementInfo = mutable.placementInfo.withFloorYoffset(RailSettings.from(item).placementOffset);
+					if(mutable.customInfo != null)mutable.customInfo = mutable.customInfo.withFloorYoffset(finalSingleWayInfo.settings.customOffset);
+				});
+				multiSwitchInfo.wayList.set(i,singleWayInfo);
+			}
+		}
+		info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo);
 	}
 
 	@Override
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));//selectedOrder==0
 
+		//selectedOrder==0:non-multiSwitch or straightBuilder(multiSwitch) of multiSwitch,selectedOrder>0:turnBuilder(multiSwitch)
 		int selectedOrder = MultiSwitchInfo.getSelectedFrom(item);
+
+		//update offset placement offset from item <= packet <= Gui
+		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(item).placementOffset);
+
+        info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));
+
+		//update custom if it is multiSwitch
 		if(selectedOrder>0 && isCustomDirty) {
 			MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writeCustom(MultiSwitchInfo.from(item),customInfo,selectedOrder);
             info = info.with(mutable -> {
 				mutable.multiSwitchInfo = multiSwitchInfo;
 			});
-			multiSwitchInfo.write(item);
+			multiSwitchInfo.write(item);//both item and info are updated
 		}
 		if(info.settings.type==TrackItems.MULTISWITCH) {
 			MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
-            info = info.with(mutable -> {
-				mutable.customInfo = multiSwitchInfo.defaultCustom;
+
+			PlacementInfo custom = multiSwitchInfo.defaultCustom;
+			if(custom!=null)custom = custom.withFloorYoffset(RailSettings.from(item).customOffset);
+			PlacementInfo finalCustom = custom;
+
+			info = info.with(mutable -> {
+				mutable.customInfo = finalCustom;//only need to overwrite info.customInfo, no update in item
 			});
 		}
-
 		isCustomDirty = false;
+
+		//update custom offset from item <= packet <= Gui if selectedOrder>0
+		if(selectedOrder==0) {//if selectedOrder == 0
+			customInfo = customInfo == null ? null : customInfo.withFloorYoffset(RailSettings.from(item).customOffset);
+			info = info.with(mutable -> mutable.customInfo = customInfo);
+		}
+
+		//write wayList placement & custom offset into info
+		writePosOffset();
 
         if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();

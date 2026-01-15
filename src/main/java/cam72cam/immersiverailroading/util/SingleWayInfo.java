@@ -40,6 +40,7 @@ public class SingleWayInfo {
             1f,
             TrackPositionType.FIXED, TrackSmoothing.BOTH,
             0f,0f,
+            0f,0f,
             true,-1,
             TrackDirection.RIGHT,
             ItemStack.EMPTY, ItemStack.EMPTY,

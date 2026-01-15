@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.item;
 
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
@@ -23,6 +24,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	//render the model of inventory
 	public static void render(ItemStack stack, World world, RenderState state) {
 		PlacementInfo placementInfo = new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5));
+		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(stack).placementOffset);
 		RailInfo info = new RailInfo(stack, placementInfo, MultiSwitchInfo.from(stack).defaultCustom, MultiSwitchInfo.from(stack));
 		info = info.withSettings(b -> b.length = 10);
 
@@ -75,6 +77,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		}
 
 		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0));
+		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(stack).placementOffset);
 		RailInfo info = new RailInfo(stack, placementInfo, MultiSwitchInfo.from(stack).defaultCustom,  MultiSwitchInfo.from(stack));
 
 		MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;

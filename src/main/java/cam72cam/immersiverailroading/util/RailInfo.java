@@ -72,6 +72,8 @@ public class RailInfo {
 				this.settings.track,
 				this.settings.smoothing,
 				this.settings.pitchStart,
+				this.settings.placementOffset,
+				this.settings.customOffset,
 				this.settings.pitchEnd,
 				this.settings.isForward,
 				this.settings.farRadius,
@@ -108,6 +110,7 @@ public class RailInfo {
 			id += this.multiSwitchInfo.realShapeType;
 			id += this.multiSwitchInfo.orderAsChild;
 			id += this.multiSwitchInfo.isMultiSwitchWay;
+			id += this.multiSwitchInfo.defaultCustom;
 			if(this.multiSwitchInfo.wayList != null){//turnBuilder in MultiSwitchBuilder won't have wayList
 				for(int i = 0; i < this.multiSwitchInfo.wayList.size(); i++){
 					id += this.multiSwitchInfo.wayList.get(i);
@@ -439,7 +442,7 @@ public class RailInfo {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH ,  0, 0, true, -1, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH ,  0, 0, 0, 0, true, -1, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
 			return new RailInfo(settings, placementInfo, null, null, switchState, switchForced, tablePos);
 		}
 	}

@@ -323,6 +323,12 @@ public class TrackGui implements IScreen {
 				farPitchSlider.setValue(settings.pitchTag.getFloat("end"));
 				farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
 
+				nearHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("placementOffset"));
+				nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
+
+				farHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("customOffset"));
+				farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
+
 				lengthInput.setText(""+settings.length);
 				farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
 
@@ -358,6 +364,31 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
+		//right panel
+		nearHeightOffsetSlider = new Slider(screen, xtop + width + 50, ytop, "near y offset:", 0.0, 1.0, settings.posOffsetTag.getFloat("placementOffset"), true) {
+			@Override
+			public void onSlider() {
+					settings.posOffsetTag.setFloat("placementOffset",(float) this.getValue());
+				updateListSetting(mutable -> mutable.posOffsetTag.setFloat("placementOffset",(float) this.getValue()));
+				nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
+			}
+		};
+		nearHeightOffsetSlider.onSlider();
+		farHeightOffsetSlider = new Slider(screen, xtop + width + 50, ytop + height, "far y offset:", 0.0, 1.0, selectedWay==0 ? settings.posOffsetTag.getFloat("customOffset") : selectedWaySettings.posOffsetTag.getFloat("customOffset"), true) {
+			@Override
+			public void onSlider() {
+				if(selectedWay==0) {
+					settings.posOffsetTag.setFloat("customOffset",(float) this.getValue());
+					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
+				}else {
+					selectedWaySettings.posOffsetTag.setFloat("customOffset",(float) this.getValue());
+					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("customOffset")));
+					syncMultiSwitchInfo();
+				}
+			}
+		};
+		farHeightOffsetSlider.onSlider();
+
 		subTypeSelector = new ListSelector<TrackItems>(screen, width, 100, height, selectedWaySettings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING && i != TrackItems.SWITCH && i != TrackItems.MULTISWITCH && i != TrackItems.TRANSFERTABLE && i != TrackItems.TURNTABLE )
@@ -383,6 +414,12 @@ public class TrackGui implements IScreen {
 
 					farPitchSlider.setValue(selectedWaySettings.pitchTag.getFloat("end"));
 					farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+
+					nearHeightOffsetSlider.setValue(selectedWaySettings.posOffsetTag.getFloat("placementOffset"));
+					nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("placementOffset")));
+
+					farHeightOffsetSlider.setValue(selectedWaySettings.posOffsetTag.getFloat("customOffset"));
+					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("customOffset")));
 
 					lengthInput.setText(""+selectedWaySettings.length);
 					farRadiusInput.setText(""+selectedWaySettings.cubicParabolaTag.getInteger("farRadius"));
@@ -415,6 +452,12 @@ public class TrackGui implements IScreen {
 
 					farPitchSlider.setValue(settings.pitchTag.getFloat("end"));
 					farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+
+					nearHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("placementOffset"));
+					nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
+
+					farHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("customOffset"));
+					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
 
 					lengthInput.setText(""+settings.length);
 					farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
