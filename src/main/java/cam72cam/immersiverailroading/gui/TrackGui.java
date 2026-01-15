@@ -172,7 +172,10 @@ public class TrackGui implements IScreen {
 
 		//pitch (right panel)
 		//TODO:change to TextField?
-		nearPitchSlider = new Slider(screen, xtop + width + 50, ytop, "near pitch:", -45.0, 45.0, settings.pitchTag.getFloat("start"), true) {
+
+		//we should read this from config file? tan(6) = 0.1051...
+		float angleLimit = 6;
+		nearPitchSlider = new Slider(screen, xtop + width + 50, ytop, "near pitch:", -angleLimit, angleLimit, settings.pitchTag.getFloat("start"), true) {
 			@Override
 			public void onSlider() {
 				settings.pitchTag.setFloat("start",(float) this.getValue());
@@ -183,7 +186,7 @@ public class TrackGui implements IScreen {
 		nearPitchSlider.onSlider();
 
 		ytop += height;
-		farPitchSlider = new Slider(screen, xtop + width + 50, ytop, "far pitch:", -45.0, 45.0, settings.pitchTag.getFloat("end"), true) {
+		farPitchSlider = new Slider(screen, xtop + width + 50, ytop, "far pitch:", -angleLimit, angleLimit, settings.pitchTag.getFloat("end"), true) {
 			@Override
 			public void onSlider() {
 				if(selectedWay == 0){
@@ -368,7 +371,11 @@ public class TrackGui implements IScreen {
 		nearHeightOffsetSlider = new Slider(screen, xtop + width + 50, ytop, "near y offset:", 0.0, 1.0, settings.posOffsetTag.getFloat("placementOffset"), true) {
 			@Override
 			public void onSlider() {
-					settings.posOffsetTag.setFloat("placementOffset",(float) this.getValue());
+				if(Math.abs(1-nearHeightOffsetSlider.getValue())<1e-6) {
+					nearHeightOffsetSlider.setValue(0.99);
+				}
+
+				settings.posOffsetTag.setFloat("placementOffset",(float) this.getValue());
 				updateListSetting(mutable -> mutable.posOffsetTag.setFloat("placementOffset",(float) this.getValue()));
 				nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
 			}
@@ -377,6 +384,10 @@ public class TrackGui implements IScreen {
 		farHeightOffsetSlider = new Slider(screen, xtop + width + 50, ytop + height, "far y offset:", 0.0, 1.0, selectedWay==0 ? settings.posOffsetTag.getFloat("customOffset") : selectedWaySettings.posOffsetTag.getFloat("customOffset"), true) {
 			@Override
 			public void onSlider() {
+				if(Math.abs(1-farHeightOffsetSlider.getValue())<1e-6) {
+					farHeightOffsetSlider.setValue(0.99);
+				}
+
 				if(selectedWay==0) {
 					settings.posOffsetTag.setFloat("customOffset",(float) this.getValue());
 					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
