@@ -82,7 +82,7 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
 
             for(TrackBase turn : turnBuilder.tracks) {//override parent to straightBuilder
                 if (turn instanceof TrackRail) {
-                    System.out.println("trackRail of turn:"+turn.getPos());
+//                    System.out.println("trackRail of turn:"+turn.getPos());
                     turn.overrideParent(straightBuilder.getParentPos());
                 }
             }
@@ -92,12 +92,10 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
             if (straight instanceof TrackGag) {
                 straight.setFlexible();
             }
-
-            if(straight instanceof TrackRail) {
-                System.out.println("straightRail of turn:"+straight.getPos());
-            }
-            //TODO:有时候遇到TrackRail寻路还有问题<=
-            // 以及把straight的父级也挪走？
+//            if(straight instanceof TrackRail) {
+//                System.out.println("straightRail of turn:"+straight.getPos());
+//            }
+            //also move trackRail in straightBuilder to another place?
 
             Vec3i pos1 = straight.getPos();
             Vec3i pos2 = straightBuilder.getParentPos();

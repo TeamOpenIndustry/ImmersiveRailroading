@@ -183,7 +183,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				tracks.set(newTrackRailIndex,trackAtNew);
 				tracks.set(oldTrackRailIndex,trackAtOld);
 				this.setParentPos(newPos.subtract(this.pos));
-				System.out.println("replaced "+oldPos+" with "+newPos);
+//				System.out.println("replaced "+oldPos+" with "+newPos);
 				break;
 			}
 		}
