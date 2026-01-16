@@ -150,6 +150,8 @@ track.immersiverailroading:class.turntable=Pont tournant
 track.immersiverailroading:class.transfertable=Pont transbordeur
 track.immersiverailroading:class.switch=Aiguillage
 track.immersiverailroading:class.custom=Courbe personnalisée
+track.immersiverailroading:class.cubicparabola=Parabole tertiaire
+track.immersiverailroading:class.multiswitch=Commutateur multipiste
 
 track.immersiverailroading:position.fixed=Fixée
 track.immersiverailroading:position.pixels=Pixels
@@ -161,6 +163,7 @@ track.immersiverailroading:smoothing.both=Les deux
 track.immersiverailroading:smoothing.near=Proche
 track.immersiverailroading:smoothing.far=Lointain
 track.immersiverailroading:smoothing.neither=Pas de lissage
+track.immersiverailroading:smoothing.pitch_locked_cubic=Angle verrouillé
 
 track.immersiverailroading:direction.none=Flexible
 track.immersiverailroading:direction.left=Verrouillée vers la droite

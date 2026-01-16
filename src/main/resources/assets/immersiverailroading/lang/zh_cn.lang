@@ -150,6 +150,8 @@ track.immersiverailroading:class.turntable=转车台
 track.immersiverailroading:class.transfertable=移车台
 track.immersiverailroading:class.switch=道岔
 track.immersiverailroading:class.custom=自定义曲线
+track.immersiverailroading:class.cubicparabola=三次抛物缓和曲线
+track.immersiverailroading:class.multiswitch=多路道岔
 
 track.immersiverailroading:position.fixed=对齐方块
 track.immersiverailroading:position.pixels=对齐像素
@@ -161,6 +163,7 @@ track.immersiverailroading:smoothing.both=双向平滑
 track.immersiverailroading:smoothing.near=仅近端平滑
 track.immersiverailroading:smoothing.far=仅远端平滑
 track.immersiverailroading:smoothing.neither=无平滑
+track.immersiverailroading:smoothing.pitch_locked_cubic=锁定角度
 
 track.immersiverailroading:direction.none=不锁定
 track.immersiverailroading:direction.left=锁定至右向

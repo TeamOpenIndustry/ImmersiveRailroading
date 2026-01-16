@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.library;
 
 import cam72cam.mod.text.TextUtil;
 
-public enum GuiText {
+public enum GuiText {//TODO:move newly added button text here and add translation
 	LABEL_BRAKE("label.brake"),
 	LABEL_THROTTLE("label.throttle"),
 	LABEL_REVERSER("label.reverser"),

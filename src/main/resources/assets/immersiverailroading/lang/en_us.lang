@@ -163,6 +163,8 @@ track.immersiverailroading:class.turntable=Turn Table
 track.immersiverailroading:class.transfertable=Transfer Table
 track.immersiverailroading:class.switch=Switch
 track.immersiverailroading:class.custom=Custom Curve
+track.immersiverailroading:class.cubicparabola=Cubic Parabola
+track.immersiverailroading:class.multiswitch=Multi-Switch
 
 track.immersiverailroading:position.fixed=Fixed
 track.immersiverailroading:position.pixels=Pixels
@@ -174,6 +176,7 @@ track.immersiverailroading:smoothing.both=Both
 track.immersiverailroading:smoothing.near=Near
 track.immersiverailroading:smoothing.far=Far
 track.immersiverailroading:smoothing.neither=Neither
+track.immersiverailroading:smoothing.pitch_locked_cubic=Pitch Locked
 
 track.immersiverailroading:direction.none=Flexible
 track.immersiverailroading:direction.left=Lock Right

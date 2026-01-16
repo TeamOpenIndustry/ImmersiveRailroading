@@ -150,6 +150,8 @@ track.immersiverailroading:class.turntable=転車台
 track.immersiverailroading:class.transfertable=トラバーサー
 track.immersiverailroading:class.switch=分岐器
 track.immersiverailroading:class.custom=カスタム
+track.immersiverailroading:class.cubicparabola=三次放物緩和曲線
+track.immersiverailroading:class.multiswitch=多路分岐器
 
 track.immersiverailroading:position.fixed=ブロックに単位
 track.immersiverailroading:position.pixels=ピクセル単位
@@ -161,6 +163,7 @@ track.immersiverailroading:smoothing.both=両者
 track.immersiverailroading:smoothing.near=近い
 track.immersiverailroading:smoothing.far=遠い
 track.immersiverailroading:smoothing.neither=どちらでもない
+track.immersiverailroading:smoothing.pitch_locked_cubic=ロック角度
 
 track.immersiverailroading:direction.none=両方向
 track.immersiverailroading:direction.left=左側に固定

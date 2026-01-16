@@ -150,6 +150,8 @@ track.immersiverailroading:class.turntable=Поворотный круг
 track.immersiverailroading:class.transfertable=Трансбордер
 track.immersiverailroading:class.switch=Стрелка
 track.immersiverailroading:class.custom=Настраиваемый
+track.immersiverailroading:class.cubicparabola=Третичная парабола
+track.immersiverailroading:class.multiswitch=Многоканальный переключатель
 
 track.immersiverailroading:position.fixed=Фиксированная блочная
 track.immersiverailroading:position.pixels=Пиксельная
@@ -161,6 +163,7 @@ track.immersiverailroading:smoothing.both=на обоих окончаниях �
 track.immersiverailroading:smoothing.near=в начале пути
 track.immersiverailroading:smoothing.far=в конце пути
 track.immersiverailroading:smoothing.neither=Нет
+track.immersiverailroading:smoothing.pitch_locked_cubic=Заблокированный угол
 
 track.immersiverailroading:direction.none=Нет
 track.immersiverailroading:direction.left=Только влево

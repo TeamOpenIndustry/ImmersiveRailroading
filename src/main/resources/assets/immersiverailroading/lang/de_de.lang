@@ -150,6 +150,8 @@ track.immersiverailroading:class.turntable=Drehscheibe
 track.immersiverailroading:class.transfertable=Schiebebühne
 track.immersiverailroading:class.switch=Weiche
 track.immersiverailroading:class.custom=Individuell
+track.immersiverailroading:class.cubicparabola=Dreifach gekrümmte Glättungskurve
+track.immersiverailroading:class.multiswitch=Mehrspur-Schalter
 
 track.immersiverailroading:position.fixed=Fixiert
 track.immersiverailroading:position.pixels=Pixel
@@ -161,6 +163,7 @@ track.immersiverailroading:smoothing.both=Beides
 track.immersiverailroading:smoothing.near=Nah
 track.immersiverailroading:smoothing.far=Fern
 track.immersiverailroading:smoothing.neither=Nichts
+track.immersiverailroading:smoothing.pitch_locked_cubic=Gesperrter Winkel
 
 track.immersiverailroading:direction.none=Flexibel
 track.immersiverailroading:direction.left=Sperre rechts

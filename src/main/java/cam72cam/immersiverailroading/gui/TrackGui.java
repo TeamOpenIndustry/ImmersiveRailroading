@@ -287,7 +287,7 @@ public class TrackGui implements IScreen {
 
 
 		//multiSwitch buttons (right panel)
-		wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 25, ytop, 85, height, "selected way:"+selectedWay) {
+		wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 85, height, "selected way:"+selectedWay) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(hand == Player.Hand.SECONDARY){
@@ -303,7 +303,7 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		showSubSelectorButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 25 + 85, ytop, 90, height, "Way "+GuiText.SELECTOR_TYPE.toString(selectedWay==0?multiSwitchInfo.realShapeType:selectedWaySettings.type)) {
+		showSubSelectorButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 85, ytop, 115, height, GuiText.SELECTOR_TYPE.toString(selectedWay==0?multiSwitchInfo.realShapeType:selectedWaySettings.type)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				showSelector(subTypeSelector);
@@ -548,7 +548,7 @@ public class TrackGui implements IScreen {
 					lengthInput.setText(""+selectedWaySettings.length);
 					//typeButton text should not be changd
 					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-					showSubSelectorButton.setText("Way "+GuiText.SELECTOR_TYPE.toString(selectedWaySettings.type));
+					showSubSelectorButton.setText(GuiText.SELECTOR_TYPE.toString(selectedWaySettings.type));
 				}else {
 					multiSwitchInfo.realShapeType = option;
 					syncMultiSwitchInfo();
@@ -601,7 +601,7 @@ public class TrackGui implements IScreen {
 					lengthInput.setText(""+settings.length);
 					//typeButton text should not be changd
 					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-					showSubSelectorButton.setText("Way "+GuiText.SELECTOR_TYPE.toString(multiSwitchInfo.realShapeType));
+					showSubSelectorButton.setText(GuiText.SELECTOR_TYPE.toString(multiSwitchInfo.realShapeType));
 				}
 				transfertableEntryCountSlider.setVisible(false);
 				transfertableEntrySpacingSlider.setVisible(false);

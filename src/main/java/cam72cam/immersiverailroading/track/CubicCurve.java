@@ -368,14 +368,14 @@ public class CubicCurve {
                         ctrl2,
                         p2
                 );
-            case VERTICAL_LINER:
-                return linearVertical(p1, ctrl1, ctrl2, p2, pitchStart, pitchEnd);
+            case PITCH_LOCKED_CUBIC:
+                return pitchLockedLiner(p1, ctrl1, ctrl2, p2, pitchStart, pitchEnd);
             case BOTH: default:
                 return this;
         }
     }
 
-    private static CubicCurve linearVertical(
+    private static CubicCurve pitchLockedLiner(
             Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2,
             float pitchStart, float pitchEnd
     ) {
