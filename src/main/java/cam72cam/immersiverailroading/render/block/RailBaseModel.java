@@ -37,6 +37,10 @@ public class RailBaseModel {
                     //TODO render switch and don't render turn
                     info = info.withSettings(b -> b.type = TrackItems.STRAIGHT);
                 }
+				if (info.settings.type == TrackItems.MULTISWITCH) {
+					RailInfo finalInfo = info;
+					info = info.withSettings(b -> b.type = finalInfo.multiSwitchInfo.realShapeType);
+				}
                 if (info.settings.type.isTable()) {
 					ItemStack held = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
                 	if (held.is(IRItems.ITEM_TRACK_BLUEPRINT) || held.is(IRItems.ITEM_GOLDEN_SPIKE)) {

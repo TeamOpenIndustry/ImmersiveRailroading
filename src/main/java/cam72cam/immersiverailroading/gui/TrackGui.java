@@ -81,8 +81,11 @@ public class TrackGui implements IScreen {
 	private Slider farHeightOffsetSlider;
 
 	//vertical smooth config
-	private Slider nearPitchSlider;
-	private Slider farPitchSlider;
+//	private Slider nearPitchSlider;
+//	private Slider farPitchSlider;
+	private TextField nearPitchInput;
+	private TextField farPitchInput;
+
 
 	//zoom
 	private double zoom = 1;
@@ -172,33 +175,88 @@ public class TrackGui implements IScreen {
 		//TODO:change to TextField?
 
 		//we should read this from config file? tan(6) = 0.1051...
-		float angleLimit = 6;
-		nearPitchSlider = new Slider(screen, xtop + width + 50, ytop, "near pitch:", -angleLimit, angleLimit, settings.pitchTag.getFloat("start"), true) {
-			@Override
-			public void onSlider() {
-				settings.pitchTag.setFloat("start",(float) this.getValue());
-				updateListSetting(mutable -> mutable.pitchTag.setFloat("start",(float) this.getValue()));
-				nearPitchSlider.setText("near pitch:"+String.format("%.2f", settings.pitchTag.getFloat("start")));
+//		float angleLimit = 6;
+//		nearPitchSlider = new Slider(screen, xtop + width + 50, ytop, "near pitch:", -angleLimit, angleLimit, settings.pitchTag.getFloat("start"), true) {
+//			@Override
+//			public void onSlider() {
+//				settings.pitchTag.setFloat("start",(float) this.getValue());
+//				updateListSetting(mutable -> mutable.pitchTag.setFloat("start",(float) this.getValue()));
+//				nearPitchSlider.setText("near pitch:"+String.format("%.2f", settings.pitchTag.getFloat("start")));
+//			}
+//		};
+//		nearPitchSlider.onSlider();
+
+		nearPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width-1, height);
+		nearPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("start")));
+		nearPitchInput.setValidator(s -> {
+			if (s == null || s.length() == 0) {
+				return true;
 			}
-		};
-		nearPitchSlider.onSlider();
+			float val;
+			try {
+				val = Float.parseFloat(s);//real angle = arctan(val/1000)
+			} catch (NumberFormatException e) {
+				if(s.equals(".")||s.equals("-"))return true;
+				return false;
+			}
+			Float max = 1000f;
+			if (Math.abs(val)<max) {
+				settings.pitchTag.setFloat("start", val);
+				updateListSetting(mutable -> mutable.pitchTag.setFloat("start", val));
+				return true;
+			}
+
+			return false;
+		});
+		nearPitchInput.setFocused(true);
+		nearPitchInput.setVisible(settings.type.hasSmoothing());
 
 		ytop += height;
-		farPitchSlider = new Slider(screen, xtop + width + 50, ytop, "far pitch:", -angleLimit, angleLimit, settings.pitchTag.getFloat("end"), true) {
-			@Override
-			public void onSlider() {
-				if(selectedWay == 0){
-					settings.pitchTag.setFloat("end",(float) this.getValue());
-					farPitchSlider.setText("far pitch:"+String.format("%.2f", settings.pitchTag.getFloat("end")));
-				}else {
-					selectedWaySettings.pitchTag.setFloat("end",(float) this.getValue());
-					farPitchSlider.setText("far pitch:"+String.format("%.2f", selectedWaySettings.pitchTag.getFloat("end")));
-					syncMultiSwitchInfo();
-				}
+//		farPitchSlider = new Slider(screen, xtop + width + 50, ytop, "far pitch:", -angleLimit, angleLimit, settings.pitchTag.getFloat("end"), true) {
+//			@Override
+//			public void onSlider() {
+//				if(selectedWay == 0){
+//					settings.pitchTag.setFloat("end",(float) this.getValue());
+//					farPitchSlider.setText("far pitch:"+String.format("%.2f", settings.pitchTag.getFloat("end")));
+//				}else {
+//					selectedWaySettings.pitchTag.setFloat("end",(float) this.getValue());
+//					farPitchSlider.setText("far pitch:"+String.format("%.2f", selectedWaySettings.pitchTag.getFloat("end")));
+//					syncMultiSwitchInfo();
+//				}
+//
+//			}
+//		};
+//		farPitchSlider.onSlider();
 
+		farPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width-1, height);
+		farPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("end")));
+		farPitchInput.setValidator(s -> {
+			if (s == null || s.length() == 0) {
+				return true;
 			}
-		};
-		farPitchSlider.onSlider();
+			float val;
+			try {
+				val = Float.parseFloat(s);//real angle = arctan(val/1000)
+			} catch (NumberFormatException e) {
+				if(s.equals(".")||s.equals("-"))return true;
+				return false;
+			}
+			Float max = 1000f;
+			if (Math.abs(val)<max) {
+				if(selectedWay == 0) {
+					settings.pitchTag.setFloat("end", val);
+					return true;
+				}else {
+					selectedWaySettings.pitchTag.setFloat("end", val);
+					syncMultiSwitchInfo();
+					return true;
+				}
+			}
+
+			return false;
+		});
+		farPitchInput.setFocused(true);
+		farPitchInput.setVisible(selectedWay==0 ? settings.type.hasSmoothing() : selectedWaySettings.type.hasSmoothing());
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
 				Gauge.values().stream().collect(Collectors.toMap(Gauge::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
@@ -229,7 +287,7 @@ public class TrackGui implements IScreen {
 
 
 		//multiSwitch buttons (right panel)
-		wayCircleButton = new Button(screen, xtop + width + 25, ytop, width-120, height, "selected way:"+selectedWay) {
+		wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 25, ytop, 85, height, "selected way:"+selectedWay) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(hand == Player.Hand.SECONDARY){
@@ -245,13 +303,15 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		showSubSelectorButton = new Button(screen, xtop + width + 25 + width -120, ytop, height+10, height, "type") {
+		showSubSelectorButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 25 + 85, ytop, 90, height, "Way "+GuiText.SELECTOR_TYPE.toString(selectedWay==0?multiSwitchInfo.realShapeType:selectedWaySettings.type)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				showSelector(subTypeSelector);
 			}
 		};
-		insertWayButton = new Button(screen, xtop + width + 25 + width - 90, ytop, height+20, height, "Insert") {
+
+		//go nextline
+		insertWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height, 50, height, "Insert") {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(selectedWay-1>=0 && multiSwitchInfo.wayList.size()<6-1){
@@ -264,7 +324,7 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		addWayButton = new Button(screen, xtop + width + 25 + width -50, ytop, height+5, height, "Add") {
+		addWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 + 50, ytop + height, 50, height, "Add") {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(multiSwitchInfo.wayList.size()<6-1){
@@ -282,7 +342,7 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		delWayButton = new Button(screen, xtop + width + 25 + width - 25, ytop, height+5, height, "Del") {
+		delWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 + 50*2, ytop + height, 50, height, "Del") {
 			@Override
 			public void onClick(Player.Hand hand) {
 				//in common case waylist and multiSwitchInfo should not be null
@@ -339,17 +399,27 @@ public class TrackGui implements IScreen {
 				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
 				directionButton.setVisible(settings.type.hasDirection());
 
-				nearPitchSlider.setValue(settings.pitchTag.getFloat("start"));
-				nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
+//				nearPitchSlider.setValue(settings.pitchTag.getFloat("start"));
+//				nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
+//				nearPitchSlider.setVisible(settings.type.hasSmoothing());
 
-				farPitchSlider.setValue(settings.pitchTag.getFloat("end"));
-				farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+//				farPitchSlider.setValue(settings.pitchTag.getFloat("end"));
+//				farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+//				farPitchSlider.setVisible(settings.type.hasSmoothing());
+
+				nearPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("start")));
+				nearPitchInput.setVisible(settings.type.hasSmoothing());
+
+				farPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("end")));
+				farPitchInput.setVisible(settings.type.hasSmoothing());
 
 				nearHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("placementOffset"));
 				nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
+				nearHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
 
 				farHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("customOffset"));
 				farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
+				farHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
 
 				farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
 				farRadiusInput.setVisible(settings.type.hasFarRadius());
@@ -376,11 +446,6 @@ public class TrackGui implements IScreen {
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
-
-				nearPitchSlider.setVisible(settings.type.hasSmoothing());
-				farPitchSlider.setVisible(settings.type.hasSmoothing());
-				nearHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
-				farHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
 			}
 		};
 		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
@@ -391,8 +456,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		//right panel
-		nearHeightOffsetSlider = new Slider(screen, xtop + width + 50, ytop, "near y offset:", 0.0, 1.0, settings.posOffsetTag.getFloat("placementOffset"), true) {
+		nearHeightOffsetSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height, "near y offset:", 0.0, 1.0, settings.posOffsetTag.getFloat("placementOffset"), true) {
 			@Override
 			public void onSlider() {
 				if(Math.abs(1-nearHeightOffsetSlider.getValue())<1e-6) {
@@ -405,7 +469,7 @@ public class TrackGui implements IScreen {
 			}
 		};
 		nearHeightOffsetSlider.onSlider();
-		farHeightOffsetSlider = new Slider(screen, xtop + width + 50, ytop + height, "far y offset:", 0.0, 1.0, selectedWay==0 ? settings.posOffsetTag.getFloat("customOffset") : selectedWaySettings.posOffsetTag.getFloat("customOffset"), true) {
+		farHeightOffsetSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height * 2, "far y offset:", 0.0, 1.0, selectedWay==0 ? settings.posOffsetTag.getFloat("customOffset") : selectedWaySettings.posOffsetTag.getFloat("customOffset"), true) {
 			@Override
 			public void onSlider() {
 				if(Math.abs(1-farHeightOffsetSlider.getValue())<1e-6) {
@@ -455,11 +519,19 @@ public class TrackGui implements IScreen {
 					directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(selectedWaySettings.direction));
 					directionButton.setVisible(selectedWaySettings.type.hasDirection());
 
-					nearPitchSlider.setValue(selectedWaySettings.pitchTag.getFloat("start"));
-					nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
+//					nearPitchSlider.setValue(selectedWaySettings.pitchTag.getFloat("start"));
+//					nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
+//					nearPitchSlider.setVisible(selectedWaySettings.type.hasSmoothing());
 
-					farPitchSlider.setValue(selectedWaySettings.pitchTag.getFloat("end"));
-					farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+//					farPitchSlider.setValue(selectedWaySettings.pitchTag.getFloat("end"));
+//					farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+//					farPitchSlider.setVisible(selectedWaySettings.type.hasSmoothing());
+
+					nearPitchInput.setText(String.format("%.2f", selectedWaySettings.pitchTag.getFloat("start")));
+					nearPitchInput.setVisible(selectedWaySettings.type.hasSmoothing());
+
+					farPitchInput.setText(String.format("%.2f", selectedWaySettings.pitchTag.getFloat("end")));
+					farPitchInput.setVisible(selectedWaySettings.type.hasSmoothing());
 
 					nearHeightOffsetSlider.setValue(selectedWaySettings.posOffsetTag.getFloat("placementOffset"));
 					nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("placementOffset")));
@@ -476,6 +548,7 @@ public class TrackGui implements IScreen {
 					lengthInput.setText(""+selectedWaySettings.length);
 					//typeButton text should not be changd
 					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
+					showSubSelectorButton.setText("Way "+GuiText.SELECTOR_TYPE.toString(selectedWaySettings.type));
 				}else {
 					multiSwitchInfo.realShapeType = option;
 					syncMultiSwitchInfo();
@@ -499,11 +572,19 @@ public class TrackGui implements IScreen {
 					directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
 					directionButton.setVisible(multiSwitchInfo.realShapeType.hasDirection());
 
-					nearPitchSlider.setValue(settings.pitchTag.getFloat("start"));
-					nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
+//					nearPitchSlider.setValue(settings.pitchTag.getFloat("start"));
+//					nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
+//					nearPitchSlider.setVisible(settings.type.hasSmoothing());
 
-					farPitchSlider.setValue(settings.pitchTag.getFloat("end"));
-					farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+//					farPitchSlider.setValue(settings.pitchTag.getFloat("end"));
+//					farPitchSlider.setText("far pitch:"+String.format("%.2f", farPitchSlider.getValue()));
+//					farPitchSlider.setVisible(settings.type.hasSmoothing());
+
+					nearPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("start")));
+					nearPitchInput.setVisible(settings.type.hasSmoothing());
+
+					farPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("end")));
+					farPitchInput.setVisible(settings.type.hasSmoothing());
 
 					nearHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("placementOffset"));
 					nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
@@ -520,6 +601,7 @@ public class TrackGui implements IScreen {
 					lengthInput.setText(""+settings.length);
 					//typeButton text should not be changd
 					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
+					showSubSelectorButton.setText("Way "+GuiText.SELECTOR_TYPE.toString(multiSwitchInfo.realShapeType));
 				}
 				transfertableEntryCountSlider.setVisible(false);
 				transfertableEntrySpacingSlider.setVisible(false);

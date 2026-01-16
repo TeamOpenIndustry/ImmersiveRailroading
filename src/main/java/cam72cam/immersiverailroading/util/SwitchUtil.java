@@ -212,16 +212,20 @@ public class SwitchUtil {
 		if (Config.ConfigDebug.oldNarrowWidth && rail.info.settings.gauge.value() < 1) {
 			horiz = horiz/2;
 		}
+
+		int maxPower = 0;
+
 		int scale = (int)Math.round(horiz);
 		for (int x = -scale; x <= scale; x++) {
 			for (int z = -scale; z <= scale; z++) {
 				Vec3i gagPos = new Vec3i(redstoneOrigin.add(new Vec3d(x, 0, z)));
 				TileRailBase gagRail = rail.getWorld().getBlockEntity(gagPos, TileRailBase.class);
 				if (gagRail != null && (rail.getPos().equals(gagRail.getParent()) || gagRail.getReplaced() != null)) {
-					return rail.getWorld().getRedstone(gagPos);
+					maxPower = Math.max(maxPower,rail.getWorld().getRedstone(gagPos));
 				}
 			}
 		}
-		return 0;
+		if(maxPower>0)System.out.println("maxPower:"+maxPower);
+		return maxPower;
 	}
 }

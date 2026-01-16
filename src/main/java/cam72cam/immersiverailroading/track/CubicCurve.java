@@ -379,6 +379,9 @@ public class CubicCurve {
             Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2,
             float pitchStart, float pitchEnd
     ) {
+        pitchStart = (float) Math.atan(pitchStart/1000f);
+        pitchEnd = (float) Math.atan(pitchEnd/1000f);
+
         Vec3d tanStart = ctrl1.subtract(p1);
         Vec3d tanEnd   = p2.subtract(ctrl2);
         double hLenStart = Math.hypot(tanStart.x, tanStart.z);
@@ -390,8 +393,8 @@ public class CubicCurve {
                 new Vec3d(tanEnd.x   / hLenEnd,   0, tanEnd.z   / hLenEnd) :
                 new Vec3d(1, 0, 0);
 
-        double vyStart = Math.tan(Math.toRadians(pitchStart)) * hLenStart;
-        double vyEnd   = Math.tan(Math.toRadians(pitchEnd))   * hLenEnd;
+        double vyStart = Math.tan(pitchStart) * hLenStart;
+        double vyEnd   = Math.tan(pitchEnd)   * hLenEnd;
 
         Vec3d newCtrl1 = p1.add(hDirStart.scale(hLenStart))
                 .add(0, vyStart, 0);
