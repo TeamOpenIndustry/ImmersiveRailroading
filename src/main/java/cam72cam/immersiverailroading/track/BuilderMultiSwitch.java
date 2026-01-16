@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
-    //"Straight" is just a word from BuilderSwitch, can be 5 kinds of curves, it is used to mark the parent builders
+    //"Straight" is just a name from BuilderSwitch, can be 5 kinds of curves, it is used to mark the parent builders
     private BuilderCubicCurve realStraightBuilder;
     private BuilderIterator straightBuilder;
     private BuilderCubicCurve straightBuilderReal;
@@ -32,9 +32,9 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
         MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
 
         int wayAmount = multiSwitchInfo != null ? multiSwitchInfo.wayList.size() : 0;
-        TrackItems realShapeOfStraight = multiSwitchInfo != null ? multiSwitchInfo.realShapeType:null;//需要保证，只要不是null，里面的内容就不是null
+        TrackItems realShapeOfStraight = multiSwitchInfo != null ? multiSwitchInfo.realShapeType:null;//if multi-info is not null then variable in it won't be null
 
-        straightBuilder = constructBuilder(info,realShapeOfStraight);//子级别也是相同的info，只要父级正常构建子级就能正常构建
+        straightBuilder = constructBuilder(info,realShapeOfStraight);//child level has the same info, as long as parent builder is build properly then child will be the same
         realStraightBuilder = constructBuilder(info,realShapeOfStraight);
         straightBuilderReal = constructBuilder(info.withSettings(mutable -> mutable.type = realShapeOfStraight),realShapeOfStraight);
 
@@ -45,6 +45,10 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
         for(int i = 0 ; i<wayAmount; i++) {
             //Only STRAIGHT,SLOPE,TURN,CUBICPARABOLA,CUSTOM are valid
             RailInfo turnInfo = fromSingleWayInfo(multiSwitchInfo.wayList.get(i));
+            turnInfo = turnInfo.with(mutable -> {
+                    mutable.multiSwitchInfo = mutable.multiSwitchInfo.with(mutable1 ->mutable1.isMultiSwitchWay = true);
+            });
+
             BuilderIterator turnBuilder = (BuilderIterator) turnInfo.getBuilder(world,pos);
             turnBuilder.overrideFlexible = true;
             turnBuilders.add(turnBuilder);

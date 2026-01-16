@@ -198,6 +198,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		return IBoundingBox.INFINITE;
 	}
 
+	//TODO:known that in real game, newly added types are not rendered properly with tilePreview
 	public RailInfo getRailRenderInfo() {//not only for render, but also for build
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
 			PlacementInfo custom;
@@ -216,9 +217,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		return info;//build will go here
 	}
 
-	//TODO:把普通轨道的custom直接也存到multiSwitchInfo内？那么可以把多路道岔内的custom挪那里,并且删除info内的custom，另外多路道岔列表的placement应该没什么用，可能要删除
-	// 非道岔的普通曲线完成，table不知道，但是multiSwitch没完成,way0时，waylist内的placement未修改,default的custom在build生效，没build不生效
-
+	//TODO:move custom of normal types in multiSwitchInfo/settings?
 	private void writePosOffset() {//write wayList placement & custom offset into info
 		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
 		if(multiSwitchInfo!=null && multiSwitchInfo.wayList!=null) {

@@ -216,6 +216,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		renderScale *= 1.005f;//Avoid some gaps
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
+		//TODO:haven't solved multiSwitch rendering not fit state
 		if(info.multiSwitchInfo != null && info.multiSwitchInfo.isMultiSwitchWay){//assume that switch ways are ordered by curve shape and pos
 			try {
 				switch (info.multiSwitchInfo.orderAsChild) {
@@ -244,6 +245,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		}
 		int switchSize = 0;
 		TrackDirection direction = info.placementInfo.direction;
+
+//		if(info.multiSwitchInfo != null && info.multiSwitchInfo.isMultiSwitchWay)direction = info.settings.direction;
+
 		if (switchStraight ) {
 			for (int i = 0; i < points.size(); i++) {
 				VecYPR cur = points.get(i);
@@ -287,7 +291,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				VecYPR next = points.get(i+1);
 				angle = delta(prev.getYaw(), next.getYaw());
 			}
-			if (angle != 0) {//TODO: make both side of track movable
+			if (angle != 0) {//TODO: make both side of track movable?
 				VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);
 				if (direction == TrackDirection.RIGHT) {
 					vec.addChild(new VecYPR(switchPos, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));

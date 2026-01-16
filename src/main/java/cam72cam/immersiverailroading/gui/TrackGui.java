@@ -77,12 +77,10 @@ public class TrackGui implements IScreen {
 	private Button toggleStraightAtP1;
 
 	//micro judge
-	//TODO: for all types, be able to judge y offset of placement and custom
 	private Slider nearHeightOffsetSlider;
 	private Slider farHeightOffsetSlider;
 
 	//vertical smooth config
-	//TODO: change to textFiled?
 	private Slider nearPitchSlider;
 	private Slider farPitchSlider;
 
@@ -239,6 +237,7 @@ public class TrackGui implements IScreen {
 				}else {
 					updateSelectedWay((selectedWay-1+multiSwitchInfo.wayList.size()+1)%(multiSwitchInfo.wayList.size()+1));
 				}
+
 				if(selectedWay==0){
 					subTypeSelector.onClick(multiSwitchInfo.realShapeType);
 				}else {
@@ -269,7 +268,16 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(multiSwitchInfo.wayList.size()<6-1){
-					SingleWayInfo singleWayInfo = new SingleWayInfo(SingleWayInfo.defaultSettings,SingleWayInfo.defaultPos,null,multiSwitchInfo.wayList.size());
+					SingleWayInfo singleWayInfo = new SingleWayInfo(SingleWayInfo.defaultSettings.with(
+							mutable -> {
+								mutable.pitchTag.setFloat("start",settings.pitchTag.getFloat("start"));
+								mutable.posOffsetTag.setFloat("placementOffset",settings.posOffsetTag.getFloat("placementOffset"));
+								mutable.gauge = settings.gauge;
+								mutable.track = settings.track;
+								mutable.railBed = settings.railBed;
+								mutable.railBedFill = settings.railBedFill;
+							}
+					),SingleWayInfo.defaultPos,null,multiSwitchInfo.wayList.size());
 					multiSwitchInfo.wayList.add(singleWayInfo);
 				}
 			}
@@ -319,6 +327,17 @@ public class TrackGui implements IScreen {
 					degreesSlider.setValue(settings.degrees * Config.ConfigBalance.AnglePlacementSegmentation / 90);
 				}
 				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(degreesSlider.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+				degreesSlider.setVisible(settings.type.hasQuarters());
+
+				curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", settings.curvosity)));
+				curvositySlider.setVisible(settings.type.hasCurvosity());
+				curvositySlider.setValue(settings.curvosity);
+
+				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
+				smoothingButton.setVisible(settings.type.hasSmoothing());
+
+				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
+				directionButton.setVisible(settings.type.hasDirection());
 
 				nearPitchSlider.setValue(settings.pitchTag.getFloat("start"));
 				nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
@@ -332,15 +351,15 @@ public class TrackGui implements IScreen {
 				farHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("customOffset"));
 				farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
 
-				lengthInput.setText(""+settings.length);
 				farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
+				farRadiusInput.setVisible(settings.type.hasFarRadius());
+
+				toggleStraightAtP1.setText("isForward:"+settings.cubicParabolaTag.getBoolean("isForward"));
+				toggleStraightAtP1.setVisible(settings.type.hasFarRadius());
+
+				lengthInput.setText(""+settings.length);
 
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-				degreesSlider.setVisible(settings.type.hasQuarters());
-				curvositySlider.setVisible(settings.type.hasCurvosity());
-				smoothingButton.setVisible(settings.type.hasSmoothing());
-				directionButton.setVisible(settings.type.hasDirection());
-				farRadiusInput.setVisible(settings.type.hasFarRadius());
 
 				insertWayButton.setVisible(settings.type.isMulti());
 				addWayButton.setVisible(settings.type.isMulti());
@@ -357,6 +376,11 @@ public class TrackGui implements IScreen {
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
+
+				nearPitchSlider.setVisible(settings.type.hasSmoothing());
+				farPitchSlider.setVisible(settings.type.hasSmoothing());
+				nearHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
+				farHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
 			}
 		};
 		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
@@ -419,6 +443,17 @@ public class TrackGui implements IScreen {
 						degreesSlider.setValue(selectedWaySettings.degrees * Config.ConfigBalance.AnglePlacementSegmentation / 90);
 					}
 					degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(degreesSlider.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+					degreesSlider.setVisible(selectedWaySettings.type.hasQuarters());
+
+					curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", selectedWaySettings.curvosity)));
+					curvositySlider.setValue(selectedWaySettings.curvosity);
+					curvositySlider.setVisible(selectedWaySettings.type.hasCurvosity());
+
+					smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(selectedWaySettings.smoothing));
+					smoothingButton.setVisible(selectedWaySettings.type.hasSmoothing());
+
+					directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(selectedWaySettings.direction));
+					directionButton.setVisible(selectedWaySettings.type.hasDirection());
 
 					nearPitchSlider.setValue(selectedWaySettings.pitchTag.getFloat("start"));
 					nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
@@ -432,20 +467,15 @@ public class TrackGui implements IScreen {
 					farHeightOffsetSlider.setValue(selectedWaySettings.posOffsetTag.getFloat("customOffset"));
 					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("customOffset")));
 
-					lengthInput.setText(""+selectedWaySettings.length);
 					farRadiusInput.setText(""+selectedWaySettings.cubicParabolaTag.getInteger("farRadius"));
-
-					//typeButton text should not be changd
-					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-
-					degreesSlider.setVisible(selectedWaySettings.type.hasQuarters());
-					curvositySlider.setVisible(selectedWaySettings.type.hasCurvosity());
-					smoothingButton.setVisible(selectedWaySettings.type.hasSmoothing());
-					directionButton.setVisible(selectedWaySettings.type.hasDirection());
 					farRadiusInput.setVisible(selectedWaySettings.type.hasFarRadius());
 
-					transfertableEntryCountSlider.setVisible(false);
-					transfertableEntrySpacingSlider.setVisible(false);
+					toggleStraightAtP1.setText("isForward:"+selectedWaySettings.cubicParabolaTag.getBoolean("isForward"));
+					toggleStraightAtP1.setVisible(selectedWaySettings.type.hasFarRadius());
+
+					lengthInput.setText(""+selectedWaySettings.length);
+					//typeButton text should not be changd
+					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				}else {
 					multiSwitchInfo.realShapeType = option;
 					syncMultiSwitchInfo();
@@ -457,6 +487,17 @@ public class TrackGui implements IScreen {
 						degreesSlider.setValue(settings.degrees * Config.ConfigBalance.AnglePlacementSegmentation / 90);
 					}
 					degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(degreesSlider.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+					degreesSlider.setVisible(multiSwitchInfo.realShapeType.hasQuarters());
+
+					curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", settings.curvosity)));
+					curvositySlider.setValue(settings.curvosity);
+					curvositySlider.setVisible(multiSwitchInfo.realShapeType.hasCurvosity());
+
+					smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
+					smoothingButton.setVisible(multiSwitchInfo.realShapeType.hasSmoothing());
+
+					directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
+					directionButton.setVisible(multiSwitchInfo.realShapeType.hasDirection());
 
 					nearPitchSlider.setValue(settings.pitchTag.getFloat("start"));
 					nearPitchSlider.setText("near pitch:"+String.format("%.2f", nearPitchSlider.getValue()));
@@ -470,21 +511,18 @@ public class TrackGui implements IScreen {
 					farHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("customOffset"));
 					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
 
-					lengthInput.setText(""+settings.length);
 					farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
-
-					//typeButton text should not be changd
-					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-
-					degreesSlider.setVisible(multiSwitchInfo.realShapeType.hasQuarters());
-					curvositySlider.setVisible(multiSwitchInfo.realShapeType.hasCurvosity());
-					smoothingButton.setVisible(multiSwitchInfo.realShapeType.hasSmoothing());
-					directionButton.setVisible(multiSwitchInfo.realShapeType.hasDirection());
 					farRadiusInput.setVisible(multiSwitchInfo.realShapeType.hasFarRadius());
 
-					transfertableEntryCountSlider.setVisible(false);
-					transfertableEntrySpacingSlider.setVisible(false);
+					toggleStraightAtP1.setText("isForward:"+settings.cubicParabolaTag.getBoolean("isForward"));
+					toggleStraightAtP1.setVisible(settings.type.hasFarRadius());
+
+					lengthInput.setText(""+settings.length);
+					//typeButton text should not be changd
+					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				}
+				transfertableEntryCountSlider.setVisible(false);
+				transfertableEntrySpacingSlider.setVisible(false);
 			}
 		};
 
@@ -602,7 +640,6 @@ public class TrackGui implements IScreen {
 		this.farRadiusInput.setFocused(true);
 		this.farRadiusInput.setVisible(selectedWay==0 ? (settings.type == TrackItems.CUBICPARABOLA) : (selectedWaySettings.type == TrackItems.CUBICPARABOLA));
 
-
 		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, selectedWay==0?settings.curvosity:selectedWaySettings.curvosity, true) {
 			@Override
 			public void onSlider() {
@@ -631,11 +668,11 @@ public class TrackGui implements IScreen {
 				if(selectedWay==0){
 					boolean wasForward = settings.cubicParabolaTag.getBoolean("isForward");
 					settings.cubicParabolaTag.setBoolean("isForward",!wasForward);
-					toggleStraightAtP1.setText("isForward"+settings.cubicParabolaTag.getBoolean("isForward"));
+					toggleStraightAtP1.setText("isForward:"+settings.cubicParabolaTag.getBoolean("isForward"));
 				}else {
 					boolean wasForward = selectedWaySettings.cubicParabolaTag.getBoolean("isForward");
 					selectedWaySettings.cubicParabolaTag.setBoolean("isForward",!wasForward);
-					toggleStraightAtP1.setText("isForward"+selectedWaySettings.cubicParabolaTag.getBoolean("isForward"));
+					toggleStraightAtP1.setText("isForward:"+selectedWaySettings.cubicParabolaTag.getBoolean("isForward"));
 					syncMultiSwitchInfo();
 				}
 			}
@@ -649,8 +686,6 @@ public class TrackGui implements IScreen {
 		smoothingButton.setVisible(selectedWay==0?settings.type.hasSmoothing():selectedWaySettings.type.hasSmoothing());
 		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE && selectedWay==0);
 		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE && selectedWay==0);
-
-
 
 		// Bottom Pane
 		//width = 200;
