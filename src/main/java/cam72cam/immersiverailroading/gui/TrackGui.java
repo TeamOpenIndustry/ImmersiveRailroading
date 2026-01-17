@@ -233,7 +233,7 @@ public class TrackGui implements IScreen {
 
 		farPitchText = new Button(screen ,GUIHelpers.getScreenWidth() / 2 - width, ytop, 80, height, GuiText.TRACK_FAR_PITCH.toString());
 		farPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + 80, ytop, width-81, height);
-		farPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("end")));
+		farPitchInput.setText(String.format("%.2f", selectedWay == 0 ? settings.pitchTag.getFloat("end"):selectedWaySettings.pitchTag.getFloat("end")));
 		farPitchInput.setValidator(s -> {
 			if (s == null || s.length() == 0) {
 				return true;
