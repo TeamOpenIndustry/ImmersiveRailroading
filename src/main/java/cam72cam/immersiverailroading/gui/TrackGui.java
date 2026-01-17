@@ -61,12 +61,12 @@ public class TrackGui implements IScreen {
 	private ListSelector<ItemStack> railBedFillSelector;
 
 	//multiWaySwitch
-	private ListSelector<TrackItems> subTypeSelector;
 	private MultiSwitchInfo.Mutable multiSwitchInfo;
+	private RailSettings.Mutable selectedWaySettings;
+	private int selectedWay = 0;//0=default,1=MID1,2=MID2,3=MID3,4=MID4,5=TURN
+	private ListSelector<TrackItems> subTypeSelector;
 	private Button showSubSelectorButton;
 	private Button wayCircleButton;
-	private int selectedWay = 0;//0=default,1=MID1,2=MID2,3=MID3,4=MID4,5=TURN
-	private RailSettings.Mutable selectedWaySettings;
 	private Button insertWayButton;
 	private Button addWayButton;
 	private Button delWayButton;
@@ -74,6 +74,7 @@ public class TrackGui implements IScreen {
 	// curves based on cubic-curve are limited in some case, we may need new types for more complex curve and function,
 	// like completely decoupling vertical and horizontal curve, more spiralCurve and real arc turn(this will looks better with big radius)?
 	private TextField farRadiusInput;
+	private Button farRadiusText;
 	private Button toggleStraightAtP1;
 
 	//micro judge
@@ -84,8 +85,9 @@ public class TrackGui implements IScreen {
 //	private Slider nearPitchSlider;
 //	private Slider farPitchSlider;
 	private TextField nearPitchInput;
+	private Button nearPitchText;//only used to show text
 	private TextField farPitchInput;
-
+	private Button farPitchText;//only used to show text
 
 	//zoom
 	private double zoom = 1;
@@ -118,7 +120,6 @@ public class TrackGui implements IScreen {
 	}
 
 	public void init(IScreenBuilder screen) {
-
 		// Left pane
 		int width = 200;
 		int height = 20;
@@ -186,7 +187,8 @@ public class TrackGui implements IScreen {
 //		};
 //		nearPitchSlider.onSlider();
 
-		nearPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width-1, height);
+		nearPitchText = new Button(screen ,GUIHelpers.getScreenWidth() / 2 - width, ytop, 80, height, GuiText.TRACK_NEAR_PITCH.toString());
+		nearPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + 80, ytop, width-81, height);
 		nearPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("start")));
 		nearPitchInput.setValidator(s -> {
 			if (s == null || s.length() == 0) {
@@ -210,6 +212,7 @@ public class TrackGui implements IScreen {
 		});
 		nearPitchInput.setFocused(true);
 		nearPitchInput.setVisible(settings.type.hasSmoothing());
+		nearPitchText.setVisible(settings.type.hasSmoothing());
 
 		ytop += height;
 //		farPitchSlider = new Slider(screen, xtop + width + 50, ytop, "far pitch:", -angleLimit, angleLimit, settings.pitchTag.getFloat("end"), true) {
@@ -228,7 +231,8 @@ public class TrackGui implements IScreen {
 //		};
 //		farPitchSlider.onSlider();
 
-		farPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width-1, height);
+		farPitchText = new Button(screen ,GUIHelpers.getScreenWidth() / 2 - width, ytop, 80, height, GuiText.TRACK_FAR_PITCH.toString());
+		farPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + 80, ytop, width-81, height);
 		farPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("end")));
 		farPitchInput.setValidator(s -> {
 			if (s == null || s.length() == 0) {
@@ -257,6 +261,7 @@ public class TrackGui implements IScreen {
 		});
 		farPitchInput.setFocused(true);
 		farPitchInput.setVisible(selectedWay==0 ? settings.type.hasSmoothing() : selectedWaySettings.type.hasSmoothing());
+		farPitchText.setVisible(selectedWay==0 ? settings.type.hasSmoothing() : selectedWaySettings.type.hasSmoothing());
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
 				Gauge.values().stream().collect(Collectors.toMap(Gauge::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
@@ -287,7 +292,7 @@ public class TrackGui implements IScreen {
 
 
 		//multiSwitch buttons (right panel)
-		wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 85, height, "selected way:"+selectedWay) {
+		wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 85, height, GuiText.TRACK_SELECTED_WAY.toString(selectedWay)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(hand == Player.Hand.SECONDARY){
@@ -303,7 +308,7 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		showSubSelectorButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 85, ytop, 115, height, GuiText.SELECTOR_TYPE.toString(selectedWay==0?multiSwitchInfo.realShapeType:selectedWaySettings.type)) {
+		showSubSelectorButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 85, ytop, 115, height, GuiText.SELECTOR_SUB_TYPE.toString(selectedWay==0?multiSwitchInfo.realShapeType:selectedWaySettings.type)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				showSelector(subTypeSelector);
@@ -311,7 +316,7 @@ public class TrackGui implements IScreen {
 		};
 
 		//go nextline
-		insertWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height, 50, height, "Insert") {
+		insertWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height, 50, height, GuiText.TRACK_INSERT_WAY.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(selectedWay-1>=0 && multiSwitchInfo.wayList.size()<6-1){
@@ -324,7 +329,7 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		addWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 + 50, ytop + height, 50, height, "Add") {
+		addWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 + 50, ytop + height, 50, height, GuiText.TRACK_ADD_WAY.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(multiSwitchInfo.wayList.size()<6-1){
@@ -342,7 +347,7 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		delWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 + 50*2, ytop + height, 50, height, "Del") {
+		delWayButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 + 50*2, ytop + height, 50, height, GuiText.TRACK_DELETE_WAY.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				//in common case waylist and multiSwitchInfo should not be null
@@ -409,22 +414,25 @@ public class TrackGui implements IScreen {
 
 				nearPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("start")));
 				nearPitchInput.setVisible(settings.type.hasSmoothing());
+				nearPitchText.setVisible(settings.type.hasSmoothing());
 
 				farPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("end")));
 				farPitchInput.setVisible(settings.type.hasSmoothing());
+				farPitchText.setVisible(settings.type.hasSmoothing());
 
 				nearHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("placementOffset"));
-				nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
+				nearHeightOffsetSlider.setText(GuiText.TRACK_NEAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset"))));
 				nearHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
 
 				farHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("customOffset"));
-				farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
+				farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("customOffset"))));
 				farHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
 
 				farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
 				farRadiusInput.setVisible(settings.type.hasFarRadius());
+				farRadiusText.setVisible(settings.type.hasFarRadius());
 
-				toggleStraightAtP1.setText("isForward:"+settings.cubicParabolaTag.getBoolean("isForward"));
+				toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.cubicParabolaTag.getBoolean("isForward")));
 				toggleStraightAtP1.setVisible(settings.type.hasFarRadius());
 
 				lengthInput.setText(""+settings.length);
@@ -456,7 +464,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		nearHeightOffsetSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height, "near y offset:", 0.0, 1.0, settings.posOffsetTag.getFloat("placementOffset"), true) {
+		nearHeightOffsetSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height, "", 0.0, 1.0, settings.posOffsetTag.getFloat("placementOffset"), true) {
 			@Override
 			public void onSlider() {
 				if(Math.abs(1-nearHeightOffsetSlider.getValue())<1e-6) {
@@ -464,12 +472,12 @@ public class TrackGui implements IScreen {
 				}
 
 				settings.posOffsetTag.setFloat("placementOffset",(float) this.getValue());
+				nearHeightOffsetSlider.setText(GuiText.TRACK_NEAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset"))));
 				updateListSetting(mutable -> mutable.posOffsetTag.setFloat("placementOffset",(float) this.getValue()));
-				nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
 			}
 		};
 		nearHeightOffsetSlider.onSlider();
-		farHeightOffsetSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height * 2, "far y offset:", 0.0, 1.0, selectedWay==0 ? settings.posOffsetTag.getFloat("customOffset") : selectedWaySettings.posOffsetTag.getFloat("customOffset"), true) {
+		farHeightOffsetSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height * 2, "", 0.0, 1.0, selectedWay==0 ? settings.posOffsetTag.getFloat("customOffset") : selectedWaySettings.posOffsetTag.getFloat("customOffset"), true) {
 			@Override
 			public void onSlider() {
 				if(Math.abs(1-farHeightOffsetSlider.getValue())<1e-6) {
@@ -478,10 +486,10 @@ public class TrackGui implements IScreen {
 
 				if(selectedWay==0) {
 					settings.posOffsetTag.setFloat("customOffset",(float) this.getValue());
-					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
+					farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("customOffset"))));
 				}else {
 					selectedWaySettings.posOffsetTag.setFloat("customOffset",(float) this.getValue());
-					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("customOffset")));
+					farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("customOffset"))));
 					syncMultiSwitchInfo();
 				}
 			}
@@ -529,26 +537,29 @@ public class TrackGui implements IScreen {
 
 					nearPitchInput.setText(String.format("%.2f", selectedWaySettings.pitchTag.getFloat("start")));
 					nearPitchInput.setVisible(selectedWaySettings.type.hasSmoothing());
+					nearPitchText.setVisible(selectedWaySettings.type.hasSmoothing());
 
 					farPitchInput.setText(String.format("%.2f", selectedWaySettings.pitchTag.getFloat("end")));
 					farPitchInput.setVisible(selectedWaySettings.type.hasSmoothing());
+					farPitchText.setVisible(selectedWaySettings.type.hasSmoothing());
 
 					nearHeightOffsetSlider.setValue(selectedWaySettings.posOffsetTag.getFloat("placementOffset"));
-					nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("placementOffset")));
+					nearHeightOffsetSlider.setText(GuiText.TRACK_NEAR_HEIGHT_OFFSET.toString(String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("placementOffset"))));
 
 					farHeightOffsetSlider.setValue(selectedWaySettings.posOffsetTag.getFloat("customOffset"));
-					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("customOffset")));
+					farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("customOffset"))));
 
 					farRadiusInput.setText(""+selectedWaySettings.cubicParabolaTag.getInteger("farRadius"));
 					farRadiusInput.setVisible(selectedWaySettings.type.hasFarRadius());
+					farRadiusText.setVisible(selectedWaySettings.type.hasFarRadius());
 
-					toggleStraightAtP1.setText("isForward:"+selectedWaySettings.cubicParabolaTag.getBoolean("isForward"));
+					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.cubicParabolaTag.getBoolean("isForward")));
 					toggleStraightAtP1.setVisible(selectedWaySettings.type.hasFarRadius());
 
 					lengthInput.setText(""+selectedWaySettings.length);
 					//typeButton text should not be changd
 					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-					showSubSelectorButton.setText(GuiText.SELECTOR_TYPE.toString(selectedWaySettings.type));
+					showSubSelectorButton.setText(GuiText.SELECTOR_SUB_TYPE.toString(selectedWaySettings.type));
 				}else {
 					multiSwitchInfo.realShapeType = option;
 					syncMultiSwitchInfo();
@@ -582,26 +593,29 @@ public class TrackGui implements IScreen {
 
 					nearPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("start")));
 					nearPitchInput.setVisible(settings.type.hasSmoothing());
+					nearPitchText.setVisible(settings.type.hasSmoothing());
 
 					farPitchInput.setText(String.format("%.2f", settings.pitchTag.getFloat("end")));
 					farPitchInput.setVisible(settings.type.hasSmoothing());
+					farPitchText.setVisible(settings.type.hasSmoothing());
 
 					nearHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("placementOffset"));
-					nearHeightOffsetSlider.setText("near y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset")));
+					nearHeightOffsetSlider.setText(GuiText.TRACK_NEAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("placementOffset"))));
 
 					farHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("customOffset"));
-					farHeightOffsetSlider.setText("far y offset:"+String.format("%.2f", settings.posOffsetTag.getFloat("customOffset")));
+					farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("customOffset"))));
 
 					farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
 					farRadiusInput.setVisible(multiSwitchInfo.realShapeType.hasFarRadius());
+					farRadiusText.setVisible(multiSwitchInfo.realShapeType.hasFarRadius());
 
-					toggleStraightAtP1.setText("isForward:"+settings.cubicParabolaTag.getBoolean("isForward"));
+					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.cubicParabolaTag.getBoolean("isForward")));
 					toggleStraightAtP1.setVisible(settings.type.hasFarRadius());
 
 					lengthInput.setText(""+settings.length);
 					//typeButton text should not be changd
 					typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-					showSubSelectorButton.setText(GuiText.SELECTOR_TYPE.toString(multiSwitchInfo.realShapeType));
+					showSubSelectorButton.setText(GuiText.SELECTOR_SUB_TYPE.toString(multiSwitchInfo.realShapeType));
 				}
 				transfertableEntryCountSlider.setVisible(false);
 				transfertableEntrySpacingSlider.setVisible(false);
@@ -690,9 +704,10 @@ public class TrackGui implements IScreen {
 		degreesSlider.onSlider();
 		ytop += height;
 
-		this.farRadiusInput = new TextField(screen, xtop, ytop, width-1, height);
-		this.farRadiusInput.setText("" + (selectedWay==0 ? settings.cubicParabolaTag.getInteger("farRadius") : selectedWaySettings.cubicParabolaTag.getInteger("farRadius")));
-		this.farRadiusInput.setValidator(s -> {
+		farRadiusText = new Button(screen, xtop, ytop, 80, height, GuiText.TRACK_FAR_RADIUS.toString());
+		farRadiusInput = new TextField(screen, xtop + 80, ytop, width-81, height);
+		farRadiusInput.setText("" + (selectedWay==0 ? settings.cubicParabolaTag.getInteger("farRadius") : selectedWaySettings.cubicParabolaTag.getInteger("farRadius")));
+		farRadiusInput.setValidator(s -> {
 			if (s == null || s.length() == 0) {
 				return true;
 			}
@@ -719,8 +734,9 @@ public class TrackGui implements IScreen {
 
 			return false;
 		});
-		this.farRadiusInput.setFocused(true);
-		this.farRadiusInput.setVisible(selectedWay==0 ? (settings.type == TrackItems.CUBICPARABOLA) : (selectedWaySettings.type == TrackItems.CUBICPARABOLA));
+		farRadiusInput.setFocused(true);
+		farRadiusInput.setVisible(selectedWay==0 ? (settings.type == TrackItems.CUBICPARABOLA) : (selectedWaySettings.type == TrackItems.CUBICPARABOLA));
+		farRadiusText.setVisible(selectedWay==0 ? (settings.type == TrackItems.CUBICPARABOLA) : (selectedWaySettings.type == TrackItems.CUBICPARABOLA));
 
 		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, selectedWay==0?settings.curvosity:selectedWaySettings.curvosity, true) {
 			@Override
@@ -740,9 +756,9 @@ public class TrackGui implements IScreen {
 
 		String toggleStraightAtP1Text;
 		if(selectedWay==0){
-			toggleStraightAtP1Text = "isForward"+settings.cubicParabolaTag.getBoolean("isForward");
+			toggleStraightAtP1Text = GuiText.TRACK_IS_FORWARD.toString(settings.cubicParabolaTag.getBoolean("isForward"));
 		}else {
-			toggleStraightAtP1Text = "isForward"+selectedWaySettings.cubicParabolaTag.getBoolean("isForward");
+			toggleStraightAtP1Text = GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.cubicParabolaTag.getBoolean("isForward"));
 		}
 		this.toggleStraightAtP1 = new Button(screen, xtop, ytop, width, height, toggleStraightAtP1Text) {
 			@Override
@@ -750,11 +766,11 @@ public class TrackGui implements IScreen {
 				if(selectedWay==0){
 					boolean wasForward = settings.cubicParabolaTag.getBoolean("isForward");
 					settings.cubicParabolaTag.setBoolean("isForward",!wasForward);
-					toggleStraightAtP1.setText("isForward:"+settings.cubicParabolaTag.getBoolean("isForward"));
+					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.cubicParabolaTag.getBoolean("isForward")));
 				}else {
 					boolean wasForward = selectedWaySettings.cubicParabolaTag.getBoolean("isForward");
 					selectedWaySettings.cubicParabolaTag.setBoolean("isForward",!wasForward);
-					toggleStraightAtP1.setText("isForward:"+selectedWaySettings.cubicParabolaTag.getBoolean("isForward"));
+					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.cubicParabolaTag.getBoolean("isForward")));
 					syncMultiSwitchInfo();
 				}
 			}
@@ -883,7 +899,7 @@ public class TrackGui implements IScreen {
 	private void updateSelectedWay(int i) {//haven't checked boundary here
 		selectedWay = i;
 		selectedWaySettings = selectedWay==0 ? settings : multiSwitchInfo.wayList.get(selectedWay-1).settings.mutable();
-		if(wayCircleButton!=null)wayCircleButton.setText("selected way:"+selectedWay);
+		if(wayCircleButton!=null)wayCircleButton.setText(GuiText.TRACK_SELECTED_WAY.toString(selectedWay));
 	}
 
 	private void syncMultiSwitchInfo() {
