@@ -47,18 +47,18 @@ public class CubicCurve {
     public static double cubicParabolaMaxAngle = 24.09484255211;//ease3Parabola will meet min R at this angle
 
     //what should we store? angle and radius so this will match existing nbt storage?
-    public static CubicCurve cubicParabola(double Radius, double Len, boolean straightAtP1) {
+    public static CubicCurve cubicParabola(double Radius, double Len, boolean straightAtP1) {//Len just means x-axis value of P2 here,real l ≈ (x₁ – x₀) + (9a²/10)(x₁⁵ – x₀⁵)
         double Len2 = Len * Len;
         Vec3d p1, ctrl1, ctrl2, p2;
-        if (straightAtP1) {          //直线→缓和→圆
+        if (straightAtP1) {          //straight to round
             p1 = new Vec3d(0, 0, 0);
             ctrl1 = new Vec3d(Len / 3.0, 0, 0);
             ctrl2 = new Vec3d(2 * Len / 3.0, 0, 0);
             p2 = new Vec3d(Len, 0, -Len2 / (6 * Radius));//these seems the best?
 
             return new CubicCurve(p1, ctrl1, ctrl2, p2);
-        } else {                     //圆→缓和→直线
-            p1 = new Vec3d(0, 0, 0);
+        } else {                     //round to straight
+                p1 = new Vec3d(0, 0, 0);
             ctrl1 = new Vec3d(Len / 3.0, 0, Len2 / (6 * Radius));
             ctrl2 = new Vec3d(2 * Len / 3.0, 0, Len2 / (6 * Radius));
             p2 = new Vec3d(Len, 0, Len2 / (6 * Radius));
@@ -119,7 +119,7 @@ public class CubicCurve {
 //    P1 = [k*L+piece k^3*L^2/(6*R)+piece*k^2*L/(2*R)];
 //    P2 = [k*L+piece*2  L^2/(6*R)-piece*L/(2*R)];
 //    P3 = [L      L^2/(6*R)];
-    public static CubicCurve cubicParabolaR1R2Len(double Radius, double nextRadius, double Len) {
+    public static CubicCurve cubicParabolaR1R2Len(double Radius, double nextRadius, double Len) {//Len just means x-axis value of P2 here,real l ≈ (x₁ – x₀) + (9a²/10)(x₁⁵ – x₀⁵)
         boolean shouldLocateAtP2 = nextRadius < Radius;
         if(nextRadius < Radius){
             double t = Radius;
