@@ -340,7 +340,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		return te;
 	}
-	public TileRail getChildWayTile(int order) {//TODO:对于普通道岔，父子两个就足够了，但是对于多开道岔需要获取该父级其他子级曲线的方法
+	public TileRail getChildWayTile(int order) {
 		//when this is called, getChild() shouldn't return null
 		if (this.getChild(order) == null) {
 			return null;

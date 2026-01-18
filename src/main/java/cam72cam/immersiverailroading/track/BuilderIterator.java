@@ -216,7 +216,6 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		renderScale *= 1.005f;//Avoid some gaps
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
-		//TODO:haven't solved multiSwitch rendering not fit state
 		if(info.multiSwitchInfo != null && info.multiSwitchInfo.isMultiSwitchWay){//assume that switch ways are ordered by curve shape and pos
 			try {
 				switch (info.multiSwitchInfo.orderAsChild) {
@@ -291,7 +290,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				VecYPR next = points.get(i+1);
 				angle = delta(prev.getYaw(), next.getYaw());
 			}
-			if (angle != 0) {//TODO: make both side of track movable?
+			if (angle != 0) {//TODO: make both side of track movable? and for monorail we need a defined number to determine how much to move (and move the whole rail?)
 				VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);
 				if (direction == TrackDirection.RIGHT) {
 					vec.addChild(new VecYPR(switchPos, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));

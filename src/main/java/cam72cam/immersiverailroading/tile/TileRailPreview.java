@@ -198,7 +198,6 @@ public class TileRailPreview extends BlockEntityTickable {
 		return IBoundingBox.INFINITE;
 	}
 
-	//TODO:known that in real game, newly added types are not rendered properly with tilePreview
 	public RailInfo getRailRenderInfo() {//not only for render, but also for build
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
 			PlacementInfo custom;

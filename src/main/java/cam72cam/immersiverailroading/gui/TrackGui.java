@@ -173,8 +173,6 @@ public class TrackGui implements IScreen {
 //        });
 
 		//pitch (right panel)
-		//TODO:change to TextField?
-
 		//we should read this from config file? tan(6) = 0.1051...
 //		float angleLimit = 6;
 //		nearPitchSlider = new Slider(screen, xtop + width + 50, ytop, "near pitch:", -angleLimit, angleLimit, settings.pitchTag.getFloat("start"), true) {
