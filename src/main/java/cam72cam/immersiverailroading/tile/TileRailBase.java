@@ -442,7 +442,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	private Collection<TileRail> tiles = null;
 	public Vec3d getNextPositionShort(Vec3d currentPosition, Vec3d motion) {
-		if (this.getReplaced() == null) {//case1
+		if (this.getReplaced() == null) {
 			// Simple common case, maybe this does not need to be optimized out of the for loop below?
 			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 			if (tile == null) {
@@ -485,7 +485,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				return potential;
 			}
 
-			System.out.println("case1,l="+tile.info.settings.length);
 			return currentPosition;
 		}
 		// Complex case with overlapping segments
@@ -504,7 +503,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 			tiles = tileMap.values();
 		}
-		System.out.println("case2");
+//		System.out.println("case2");
 
 		Vec3d nextPos = currentPosition;
 		Vec3d predictedPos = currentPosition.add(motion);
@@ -512,7 +511,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		for (TileRail tile : tiles) {
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
-			System.out.println("state:"+state);
+//			System.out.println("state:"+state);
 
 			int midState = -1;
 			switch (state){
@@ -545,7 +544,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			if (potential != null) {
 				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
 				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
-				if (state == SwitchState.TURN || state == SwitchState.MID1 || state == SwitchState.MID2 || state == SwitchState.MID3 || state == SwitchState.MID4) {//
+				if (state == SwitchState.TURN || state == SwitchState.MID1 || state == SwitchState.MID2 || state == SwitchState.MID3 || state == SwitchState.MID4) {//is MID1~4 needed here?
 					// This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
 					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
 					float rotationYaw = VecUtil.toWrongYaw(motion);
@@ -971,7 +970,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (cur instanceof TileRail) {
 			TileRail curTR = (TileRail) cur;
-			if (curTR.info.settings.type.equals(TrackItems.SWITCH)||curTR.info.settings.type.equals(TrackItems.MULTISWITCH)) {
+			if (curTR.info.settings.type.equals(TrackItems.SWITCH) || curTR.info.settings.type.equals(TrackItems.MULTISWITCH)) {
 				return curTR;
 			}
 		}

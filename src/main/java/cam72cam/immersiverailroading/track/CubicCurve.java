@@ -46,7 +46,6 @@ public class CubicCurve {
 //    public static double cubicParabolaMaxAngle = Math.toDegrees(Math.atan(1.0/Math.sqrt(5)));
     public static double cubicParabolaMaxAngle = 24.09484255211;//ease3Parabola will meet min R at this angle
 
-    //what should we store? angle and radius so this will match existing nbt storage?
     public static CubicCurve cubicParabola(double Radius, double Len, boolean straightAtP1) {//Len just means x-axis value of P2 here,real l ≈ (x₁ – x₀) + (9a²/10)(x₁⁵ – x₀⁵)
         double Len2 = Len * Len;
         Vec3d p1, ctrl1, ctrl2, p2;
@@ -105,6 +104,8 @@ public class CubicCurve {
         double delta = (1 - k2) * (1 - k2) - 4 * k2 * tanAngleDeg * tanAngleDeg;
         return delta >= 0;
     }
+
+//    (matlab script)
 //    R = 300;
 //    R2 = 1000;
 //    k = R/R2;
@@ -119,6 +120,7 @@ public class CubicCurve {
 //    P1 = [k*L+piece k^3*L^2/(6*R)+piece*k^2*L/(2*R)];
 //    P2 = [k*L+piece*2  L^2/(6*R)-piece*L/(2*R)];
 //    P3 = [L      L^2/(6*R)];
+
     public static CubicCurve cubicParabolaR1R2Len(double Radius, double nextRadius, double Len) {//Len just means x-axis value of P2 here,real l ≈ (x₁ – x₀) + (9a²/10)(x₁⁵ – x₀⁵)
         boolean shouldLocateAtP2 = nextRadius < Radius;
         if(nextRadius < Radius){
@@ -137,30 +139,30 @@ public class CubicCurve {
         Matrix4 quart = new Matrix4();
 
         if(!shouldLocateAtP2){
-            p1 = new Vec3d(k*Len, 0, k3*Len2/(6*Radius));
-            ctrl1 = new Vec3d(k*Len+piece, 0, k3*Len2/(6*Radius) + k2*PL/(2*Radius));
-            ctrl2 = new Vec3d(k*Len+piece*2, 0, Len2/(6*Radius) - PL/(2*Radius));
-            p2 = new Vec3d(Len, 0, Len2/(6*Radius));
+            p1 = new Vec3d(k * Len, 0, k3 * Len2 / (6 * Radius));
+            ctrl1 = new Vec3d(k * Len + piece, 0, k3 * Len2 / (6 * Radius) + k2 * PL / (2 * Radius));
+            ctrl2 = new Vec3d(k * Len + piece * 2, 0, Len2 / (6 * Radius) - PL / (2 * Radius));
+            p2 = new Vec3d(Len, 0, Len2 / (6 * Radius));
             //translate
             double dx = p1.x;
             double dz = p1.z;
-            p1 = p1.add(-dx,0,-dz);
-            p2 = p2.add(-dx,0,-dz);
-            ctrl1 = ctrl1.add(-dx,0,-dz);
-            ctrl2 = ctrl2.add(-dx,0,-dz);
+            p1 = p1.add(-dx, 0, -dz);
+            p2 = p2.add(-dx, 0, -dz);
+            ctrl1 = ctrl1.add(-dx, 0, -dz);
+            ctrl2 = ctrl2.add(-dx, 0, -dz);
             //mirror
-            p2 = p2.add(0,0,-p2.z*2);
-            ctrl1 = ctrl1.add(0,0,-ctrl1.z*2);
-            ctrl2 = ctrl2.add(0,0,-ctrl2.z*2);
+            p2 = p2.add(0, 0, -p2.z*2);
+            ctrl1 = ctrl1.add(0, 0, -ctrl1.z*2);
+            ctrl2 = ctrl2.add(0, 0, -ctrl2.z*2);
 
-            quart.rotate(-Math.atan(0.5*Len*k/nextRadius), 0, 1, 0);
+            quart.rotate(- Math.atan(0.5 * Len * k / nextRadius), 0, 1, 0);
         }else{
             p1 = new Vec3d(0,0,0);
-            ctrl1 = new Vec3d(piece, 0, PL/(2*Radius));
-            ctrl2 = new Vec3d(piece*2, 0, (1-k3)*Len2/(6*Radius)-k2*PL/(2*Radius));
-            p2 = new Vec3d(Len*(1-k), 0, (1-k3)*Len2/(6*Radius));
+            ctrl1 = new Vec3d(piece, 0, PL / (2 * Radius));
+            ctrl2 = new Vec3d(piece * 2, 0, (1 - k3) * Len2 / (6 * Radius)- k2 * PL / (2 * Radius));
+            p2 = new Vec3d(Len * (1 - k), 0, (1 - k3) * Len2 / (6 * Radius));
 
-            quart.rotate(Math.atan(0.5*Len/Radius), 0, 1, 0);
+            quart.rotate(Math.atan(0.5 * Len / Radius), 0, 1, 0);
         }
         return new CubicCurve(quart.apply(p1), quart.apply(ctrl1), quart.apply(ctrl2), quart.apply(p2));
     }
@@ -338,7 +340,7 @@ public class CubicCurve {
     }
 
 
-    public CubicCurve linearize(TrackSmoothing smoothing,float pitchStart,float pitchEnd) {
+    public CubicCurve linearize(TrackSmoothing smoothing, float pitchStart, float pitchEnd) {
         double start = p1.distanceTo(ctrl1);
         double middle = ctrl1.distanceTo(ctrl2);
         double end = ctrl2.distanceTo(p2);
@@ -379,8 +381,8 @@ public class CubicCurve {
             Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2,
             float pitchStart, float pitchEnd
     ) {
-        pitchStart = (float) Math.atan(pitchStart/1000f);
-        pitchEnd = (float) Math.atan(pitchEnd/1000f);
+        pitchStart = (float) Math.atan(pitchStart / 1000f);
+        pitchEnd = (float) Math.atan(pitchEnd / 1000f);
 
         Vec3d tanStart = ctrl1.subtract(p1);
         Vec3d tanEnd   = p2.subtract(ctrl2);

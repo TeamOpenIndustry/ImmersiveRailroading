@@ -38,7 +38,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 	
 	public void setup(ItemStack stack, PlacementInfo info) {
-		this.item = stack.copy();//multiSwitchInfo corrected here
+		this.item = stack.copy();
 		this.placementInfo = info;
 
 		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writePlacement(MultiSwitchInfo.from(item),placementInfo);
@@ -49,7 +49,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	public void setItem(ItemStack stack, Player player) {
-		this.item = stack.copy();//multiSwitchInfo corrected here
+		this.item = stack.copy();
 
 		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writePlacement(MultiSwitchInfo.from(item),placementInfo);
 		multiSwitchInfo.write(item);
@@ -84,7 +84,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 			boolean replaceType = false;
 			Integer selectedOrder = MultiSwitchInfo.getSelectedFrom(item);
-			if(selectedOrder==0){
+			if(selectedOrder == 0){
 				settings = RailSettings.from(item);
 				if(settings.type == TrackItems.MULTISWITCH) {
 					MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
@@ -93,8 +93,8 @@ public class TileRailPreview extends BlockEntityTickable {
 				}
 			}else {
 				MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
-				if(multiSwitchInfo!=null&&multiSwitchInfo.wayList!=null&&selectedOrder<=multiSwitchInfo.wayList.size()){
-					settings = multiSwitchInfo.wayList.get(selectedOrder-1).settings;
+				if(multiSwitchInfo != null && multiSwitchInfo.wayList != null&&selectedOrder <= multiSwitchInfo.wayList.size()){
+					settings = multiSwitchInfo.wayList.get(selectedOrder - 1).settings;
 				}else {
 					ImmersiveRailroading.warn("invalid multiSwitchInfo:"+multiSwitchInfo+",or selectedOrder:"+selectedOrder);
 					return;
@@ -147,11 +147,11 @@ public class TileRailPreview extends BlockEntityTickable {
 				settings.write(item);
 			}else {
 				MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
-				if(multiSwitchInfo!=null&&multiSwitchInfo.wayList!=null&&selectedOrder<=multiSwitchInfo.wayList.size()){
+				if(multiSwitchInfo != null&&multiSwitchInfo.wayList != null&&selectedOrder <= multiSwitchInfo.wayList.size()){
 					SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(selectedOrder-1);
 					RailSettings finalSettings = settings;
 					singleWayInfo = singleWayInfo.with(mutable -> mutable.settings = finalSettings);
-					multiSwitchInfo.wayList.set(selectedOrder-1,singleWayInfo);
+					multiSwitchInfo.wayList.set(selectedOrder - 1,singleWayInfo);
 					multiSwitchInfo.write(item);
 					isCustomDirty = true;
 				}
@@ -201,7 +201,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public RailInfo getRailRenderInfo() {//not only for render, but also for build
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
 			PlacementInfo custom;
-			if(RailSettings.from(item).type==TrackItems.MULTISWITCH) {
+			if(RailSettings.from(item).type == TrackItems.MULTISWITCH) {
 				PlacementInfo defaultCustom = MultiSwitchInfo.from(item).defaultCustom;
 				custom = defaultCustom == null ? null : defaultCustom.withFloorYoffset(RailSettings.from(item).customOffset);
 			}else {
@@ -219,8 +219,8 @@ public class TileRailPreview extends BlockEntityTickable {
 	//TODO:move custom of normal types in multiSwitchInfo/settings?
 	private void writePosOffset() {//write wayList placement & custom offset into info
 		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
-		if(multiSwitchInfo!=null && multiSwitchInfo.wayList!=null) {
-			for(int i=0; i<multiSwitchInfo.wayList.size(); i++) {
+		if(multiSwitchInfo != null && multiSwitchInfo.wayList != null) {
+			for(int i = 0; i < multiSwitchInfo.wayList.size(); i++) {
 				SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(i);
 				SingleWayInfo finalSingleWayInfo = singleWayInfo;
 
@@ -228,7 +228,7 @@ public class TileRailPreview extends BlockEntityTickable {
 					mutable.placementInfo = mutable.placementInfo.withFloorYoffset(RailSettings.from(item).placementOffset);
 					if(mutable.customInfo != null)mutable.customInfo = mutable.customInfo.withFloorYoffset(finalSingleWayInfo.settings.customOffset);
 				});
-				multiSwitchInfo.wayList.set(i,singleWayInfo);
+				multiSwitchInfo.wayList.set(i, singleWayInfo);
 			}
 		}
 		info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo);
@@ -247,18 +247,18 @@ public class TileRailPreview extends BlockEntityTickable {
         info = new RailInfo(item, placementInfo, customInfo, MultiSwitchInfo.from(item));
 
 		//update custom if it is multiSwitch
-		if(selectedOrder>0 && isCustomDirty) {
+		if(selectedOrder > 0 && isCustomDirty) {
 			MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writeCustom(MultiSwitchInfo.from(item),customInfo,selectedOrder);
             info = info.with(mutable -> {
 				mutable.multiSwitchInfo = multiSwitchInfo;
 			});
 			multiSwitchInfo.write(item);//both item and info are updated
 		}
-		if(info.settings.type==TrackItems.MULTISWITCH) {
+		if(info.settings.type == TrackItems.MULTISWITCH) {
 			MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
 
 			PlacementInfo custom = multiSwitchInfo.defaultCustom;
-			if(custom!=null)custom = custom.withFloorYoffset(RailSettings.from(item).customOffset);
+			if(custom != null)custom = custom.withFloorYoffset(RailSettings.from(item).customOffset);
 			PlacementInfo finalCustom = custom;
 
 			info = info.with(mutable -> {
@@ -268,7 +268,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		isCustomDirty = false;
 
 		//update custom offset from item <= packet <= Gui if selectedOrder>0
-		if(selectedOrder==0) {//if selectedOrder == 0
+		if(selectedOrder == 0) {//if selectedOrder == 0
 			customInfo = customInfo == null ? null : customInfo.withFloorYoffset(RailSettings.from(item).customOffset);
 			info = info.with(mutable -> mutable.customInfo = customInfo);
 		}

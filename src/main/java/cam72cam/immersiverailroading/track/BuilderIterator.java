@@ -151,7 +151,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		}
 	}
 
-	public void replaceTrackRail(Vec3i newPos,Vec3i oldPos) {
+	public void replaceTrackRail(Vec3i newPos, Vec3i oldPos) {
 		int newTrackRailIndex = -1;
 		int oldTrackRailIndex = -1;
 		boolean foundNewTrackRail = false;
@@ -159,7 +159,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		TrackRail trackAtNew = null;
 		TrackGag trackAtOld = null;
 
-		for(int i = 0; i<tracks.size(); i++) {
+		for(int i = 0; i < tracks.size(); i++) {
 			TrackBase track = tracks.get(i);
 
 			if(track instanceof TrackGag && track.getPos().equals(newPos)) {

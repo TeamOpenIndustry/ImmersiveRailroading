@@ -97,14 +97,14 @@ public class SwitchUtil {
 				TileRail currentRail = parent.getChildWayTile(i);
 				IIterableTrack currentBuilder = (IIterableTrack) currentRail.info.getBuilder(rail.getWorld());
 				double delta = currentBuilder.offsetFromTrack(currentRail.info, currentRail.getPos(), position);
-				if(delta<currentOffset){
-					currentStateInt = i+2;//STRAIGHT=1,MID1=2(i=0),MID2=3(i=1),...
+				if(delta < currentOffset){
+					currentStateInt = i + 2;//STRAIGHT=1,MID1=2(i=0),MID2=3(i=1),...
 					currentOffset = delta;
 				}
 			}
 			IIterableTrack straightBuilder = (IIterableTrack) parent.info.getBuilder(rail.getWorld());
 			double straightOffset = straightBuilder.offsetFromTrack(parent.info, parent.getPos(), position);
-			if(straightOffset<currentOffset){
+			if(straightOffset < currentOffset){
 				currentStateInt = 1;
 				currentOffset = straightOffset;
 			}

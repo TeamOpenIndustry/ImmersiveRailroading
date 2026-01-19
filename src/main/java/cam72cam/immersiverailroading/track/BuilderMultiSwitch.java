@@ -32,17 +32,17 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
         MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
 
         int wayAmount = multiSwitchInfo != null ? multiSwitchInfo.wayList.size() : 0;
-        TrackItems realShapeOfStraight = multiSwitchInfo != null ? multiSwitchInfo.realShapeType:null;//if multi-info is not null then variable in it won't be null
+        TrackItems realShapeOfStraight = multiSwitchInfo != null ? multiSwitchInfo.realShapeType : null;//if multi-info is not null then variable in it won't be null
 
-        straightBuilder = constructBuilder(info,realShapeOfStraight);//child level has the same info, as long as parent builder is build properly then child will be the same
-        realStraightBuilder = constructBuilder(info,realShapeOfStraight);
-        straightBuilderReal = constructBuilder(info.withSettings(mutable -> mutable.type = realShapeOfStraight),realShapeOfStraight);
+        straightBuilder = constructBuilder(info, realShapeOfStraight);//child level has the same info, as long as parent builder is build properly then child will be the same
+        realStraightBuilder = constructBuilder(info, realShapeOfStraight);
+        straightBuilderReal = constructBuilder(info.withSettings(mutable -> mutable.type = realShapeOfStraight), realShapeOfStraight);
 
         for (Pair<Integer, Integer> v : straightBuilder.positions) {
             freq.merge(v, 1, Integer::sum);
         }
 
-        for(int i = 0 ; i<wayAmount; i++) {
+        for(int i = 0 ; i < wayAmount; i++) {
             //Only STRAIGHT,SLOPE,TURN,CUBICPARABOLA,CUSTOM are valid
             RailInfo turnInfo = fromSingleWayInfo(multiSwitchInfo.wayList.get(i));
             turnInfo = turnInfo.with(mutable -> {
@@ -65,18 +65,18 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
 
         straightBuilder.positions.retainAll(uniquePositions);
 
-        for(int i = 0 ; i<wayAmount; i++) {
+        for(int i = 0 ; i < wayAmount; i++) {
             BuilderIterator turnBuilder = turnBuilders.get(i);
             turnBuilder.positions.retainAll(uniquePositions);
 
-            Pair<Integer, Integer> defaultRelParentPos = Pair.of(turnBuilder.getParentPos().x-turnBuilder.pos.x, turnBuilder.getParentPos().z-turnBuilder.pos.z);
+            Pair<Integer, Integer> defaultRelParentPos = Pair.of(turnBuilder.getParentPos().x - turnBuilder.pos.x, turnBuilder.getParentPos().z - turnBuilder.pos.z);
             if(!turnBuilder.positions.contains(defaultRelParentPos)) {//if parent is overlapped with straightBuilder
-                for(int j = turnBuilder.tracks.size()-1; j>=0; j--) {
+                for(int j = turnBuilder.tracks.size() - 1; j >= 0; j --) {
                     TrackBase turn = turnBuilder.tracks.get(j);
 
-                    Pair<Integer, Integer> turnPos = Pair.of(turn.rel.x,turn.rel.z);
+                    Pair<Integer, Integer> turnPos = Pair.of(turn.rel.x, turn.rel.z);
                     if (turn instanceof TrackGag && turnBuilder.positions.contains(turnPos)) {
-                        turnBuilder.replaceTrackRail(turn.getPos(),turnBuilder.getParentPos());
+                        turnBuilder.replaceTrackRail(turn.getPos(), turnBuilder.getParentPos());
                         break;
                     }
                 }
@@ -104,13 +104,15 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
             Vec3i pos1 = straight.getPos();
             Vec3i pos2 = straightBuilder.getParentPos();
             if(pos1.equals(pos2)){
-                straight.setChildList(childParentPosList);//需要检查pos对不对,不知道有没有用了相对位置的
+                straight.setChildList(childParentPosList);
             }
         }
     }
 
     private RailInfo fromSingleWayInfo(SingleWayInfo singleWayInfo) {
-        return new RailInfo(singleWayInfo.settings,singleWayInfo.placementInfo,singleWayInfo.customInfo,new MultiSwitchInfo(null,singleWayInfo.settings.type,singleWayInfo.wayOrder,true,null), SwitchState.NONE,SwitchState.NONE,0);
+        return new RailInfo(singleWayInfo.settings, singleWayInfo.placementInfo, singleWayInfo.customInfo,
+                new MultiSwitchInfo(null, singleWayInfo.settings.type, singleWayInfo.wayOrder, true, null),
+                SwitchState.NONE, SwitchState.NONE, 0);
     }
 
     private BuilderCubicCurve constructBuilder(RailInfo railInfo, TrackItems type) {

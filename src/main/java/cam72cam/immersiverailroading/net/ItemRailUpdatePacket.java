@@ -52,7 +52,7 @@ public class ItemRailUpdatePacket extends Packet {
 			ItemStack stack = player.getHeldItem(Player.Hand.PRIMARY);
 
 			settings.write(stack);
-			multiSwitchInfo.write(stack);//no need to sync placement and custom?
+			multiSwitchInfo.write(stack);
 			MultiSwitchInfo.writeSelected(stack,selectedOrder);
 
 			player.setHeldItem(Player.Hand.PRIMARY, stack);

@@ -157,7 +157,7 @@ public class PlacementInfo {
 	}
 
 	public PlacementInfo withFloorYoffset(float offset) {
-		Vec3d updated = new Vec3d(placementPosition.x,Math.floor(placementPosition.y)+offset,placementPosition.z);
+		Vec3d updated = new Vec3d(placementPosition.x, Math.floor(placementPosition.y) + offset, placementPosition.z);
 		return new PlacementInfo(updated, direction, yaw, control);
 	}
 

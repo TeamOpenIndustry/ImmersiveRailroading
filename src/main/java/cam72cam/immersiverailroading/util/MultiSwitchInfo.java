@@ -15,10 +15,9 @@ public class MultiSwitchInfo {
     public final TrackItems realShapeType;
     public final PlacementInfo defaultCustom;//cache custom when confining ways in wayList, only be written and read in TileRailPreview
     public final boolean isMultiSwitchWay;//this should only be written to true in BuilderMultiSwitch
+    public final int orderAsChild;
 
     //selectedWayOrder is stored in itemTrackBlueprint and can communicate with TrackGui
-//    public final int selectedWayOrder;//for itemBlueprint to tell goldenSpike which way to set
-    public final int orderAsChild;
 
     public MultiSwitchInfo(List<SingleWayInfo> wayList, TrackItems realShapeType, int orderAsChild, boolean isMultiSwitchWay, PlacementInfo defaultCustom) {
         this.wayList = wayList;
@@ -52,7 +51,7 @@ public class MultiSwitchInfo {
             // Defaults
             realShapeType = TrackItems.STRAIGHT;
             wayList = new ArrayList<>();
-            wayList.add(new SingleWayInfo(SingleWayInfo.defaultSettings,SingleWayInfo.defaultPos,null,0));
+            wayList.add(new SingleWayInfo(SingleWayInfo.defaultSettings, SingleWayInfo.defaultPos, null, 0));
             orderAsChild = 0;//0=straight(parent)as default;1=MID1,2=MID2,3=MID3,4=MID4,5=TURN
             isMultiSwitchWay = false;
             defaultCustom = null;
@@ -127,7 +126,7 @@ public class MultiSwitchInfo {
 
     public static MultiSwitchInfo writePlacement(MultiSwitchInfo multiSwitchInfo,PlacementInfo placementInfo) {
         if(multiSwitchInfo != null && multiSwitchInfo.wayList != null){
-            for(int i=0; i<multiSwitchInfo.wayList.size(); i++) {
+            for(int i = 0; i < multiSwitchInfo.wayList.size(); i++) {
                 SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(i);
                 SingleWayInfo finalSingleWayInfo = singleWayInfo;
 
@@ -138,12 +137,11 @@ public class MultiSwitchInfo {
         return multiSwitchInfo;
     }
 
-    public static MultiSwitchInfo writeCustom(MultiSwitchInfo multiSwitchInfo,PlacementInfo customInfo,int wayOrder) {//0=default,1=wayList[0],2=wayList[1],...
-        if(wayOrder<0)return multiSwitchInfo;
-        wayOrder--;
+    public static MultiSwitchInfo writeCustom(MultiSwitchInfo multiSwitchInfo, PlacementInfo customInfo, int wayOrder) {//0=default,1=wayList[0],2=wayList[1],...
+        if(wayOrder < 0)return multiSwitchInfo;
+        wayOrder --;
         if(multiSwitchInfo != null && multiSwitchInfo.wayList != null && wayOrder<multiSwitchInfo.wayList.size()){
             SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(wayOrder);
-            SingleWayInfo finalSingleWayInfo = singleWayInfo;
 
             if(customInfo==null) {
                 singleWayInfo = singleWayInfo.with(m ->
@@ -182,7 +180,7 @@ public class MultiSwitchInfo {
                             }
                             wayListTag.set(i + "", singleWayInfo);
                         }
-                        wayListTag.setInteger("amount",list.size());
+                        wayListTag.setInteger("amount", list.size());
                         nbt.set(fieldname,wayListTag);
                     },
                     nbt -> {
