@@ -112,7 +112,7 @@ public class SwitchUtil {
 
 			//compare
 			if(targetOffset > rail.info.settings.gauge.scale() / 16){
-				if(targetState == SwitchState.TURN) {//应该改成最后一个？
+				if(targetState == SwitchState.TURN) {
 					return currentState;
 				}else {
 					if(currentState == SwitchState.TURN){
