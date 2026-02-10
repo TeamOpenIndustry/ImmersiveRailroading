@@ -474,9 +474,13 @@ public class TrackGui implements IScreen {
 			}
 		};
 		nearHeightOffsetSlider.onSlider();
-		farHeightOffsetSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height * 2, "", -0.5, 0.5, selectedWay==0 ? settings.posOffsetTag.getFloat("customOffset") : selectedWaySettings.posOffsetTag.getFloat("customOffset"), true) {
+		farHeightOffsetSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop + height * 2, "", 0.0, 1.0, selectedWay==0 ? settings.posOffsetTag.getFloat("customOffset") : selectedWaySettings.posOffsetTag.getFloat("customOffset"), true) {
 			@Override
 			public void onSlider() {
+				if(Math.abs(farHeightOffsetSlider.getValue() - 1) < 1e-6) {
+					farHeightOffsetSlider.setValue(0.99);
+				}
+
 				if(selectedWay == 0) {
 					settings.posOffsetTag.setFloat("customOffset",(float) this.getValue());
 					farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("customOffset"))));
