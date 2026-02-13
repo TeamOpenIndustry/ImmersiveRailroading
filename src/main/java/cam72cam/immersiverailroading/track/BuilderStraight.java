@@ -22,7 +22,8 @@ public class BuilderStraight extends BuilderCubicCurve {
 				Vec3d.ZERO,
 				VecUtil.fromYaw(length*0.25, info.placementInfo.yaw),
                 VecUtil.fromYaw(length*0.75, info.placementInfo.yaw),
-                VecUtil.fromYaw(length, info.placementInfo.yaw)
+                VecUtil.fromYaw(length, info.placementInfo.yaw),
+				0,1
 		);
 		return curve;
 	}

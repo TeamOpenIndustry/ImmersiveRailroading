@@ -98,6 +98,20 @@ public class RailInfo {
 		if (settings.type.isTable()) {
 			id += this.itemHeld;
 		}
+        if(this.settings.rollAndOffsetInfo != null){//move to toSting? format?
+            id += "rollAndOffsetInfo:{";
+            if(this.settings.rollAndOffsetInfo.rolls != null) {
+                for(int i = 0; i < this.settings.rollAndOffsetInfo.xs.size(); i++){
+                    id += this.settings.rollAndOffsetInfo.xs.get(i);
+
+                    id += this.settings.rollAndOffsetInfo.rolls.get(i);
+                    id += this.settings.rollAndOffsetInfo.rollCtrls.get(i);
+                    id += this.settings.rollAndOffsetInfo.offsets.get(i);
+                    id += this.settings.rollAndOffsetInfo.offsetCtrls.get(i);
+                }
+            }
+            id += "}";
+        }
 		return id;
 	}
 
@@ -414,7 +428,7 @@ public class RailInfo {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , null, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
 			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}

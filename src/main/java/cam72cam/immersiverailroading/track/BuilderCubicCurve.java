@@ -2,9 +2,7 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.immersiverailroading.util.VecUtil;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -35,7 +33,11 @@ public class BuilderCubicCurve extends BuilderIterator {
 		List<CubicCurve> subCurves = curve.subsplit((int) (101 * 2 * 3.1415f / 4));
 		if (subCurves.size() > 1) {
 			subBuilders = new ArrayList<>();
-			for (CubicCurve subCurve : subCurves) {
+
+			List<RollAndOffsetInfo> subRollAndOffsetInfos = info.settings.rollAndOffsetInfo == null ? null : info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.curvesToTRange(subCurves), true);
+
+            for (int i = 0;i <subCurves.size(); i++) {
+				CubicCurve subCurve = subCurves.get(i);
 				// main pos -> subCurve's start pos
 				Vec3d relOff = info.placementInfo.placementPosition.add(subCurve.p1);
 				Vec3i relPos = new Vec3i(relOff);
@@ -45,7 +47,14 @@ public class BuilderCubicCurve extends BuilderIterator {
 				//delta = delta.subtract(new Vec3i(delta)); // Relative position within the block
 				PlacementInfo startPos = new PlacementInfo(subCurve.p1.add(delta), info.placementInfo.direction, subCurve.angleStart(), subCurve.ctrl1.add(delta));
 				PlacementInfo endPos   = new PlacementInfo(subCurve.p2.add(delta), info.placementInfo.direction, subCurve.angleStop(), subCurve.ctrl2.add(delta));
-				RailInfo subInfo = new RailInfo(info.settings.with(b -> b.type = TrackItems.CUSTOM), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
+
+				int finalI = i;
+				RailInfo subInfo = new RailInfo(info.settings.with(b -> {
+					b.type = TrackItems.CUSTOM;
+					if(subRollAndOffsetInfos != null) {
+						b.rollAndOffsetInfo = subRollAndOffsetInfos.get(finalI);
+					}
+				}), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
 
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, world, sPos);
 				if (!subBuilders.isEmpty()) {
@@ -95,7 +104,7 @@ public class BuilderCubicCurve extends BuilderIterator {
             ctrl2 = info.customInfo.control.subtract(info.placementInfo.placementPosition);
 		}
 
-		return new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos);
+		return new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos, 0, 1);
 	}
 
 	@Override
@@ -118,7 +127,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 		// HACK for super long curves
 		// Skip the super long calculation since it'll be overridden anyways
-		curve = curve.subsplit(200).get(0);
+		List<CubicCurve> curves =  curve.subsplit(200);
+		curve = curves.get(0);
+		RollAndOffsetInfo rollAndOffsetInfo;
+		rollAndOffsetInfo = info.settings.rollAndOffsetInfo == null ? null : info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.curvesToTRange(curves), true).get(0);
 
 		double length = curve.lengthWithCache(1000);
 		int count = (int) (length / targetStepSize);//Adapt the length
@@ -131,7 +143,11 @@ public class BuilderCubicCurve extends BuilderIterator {
 			curve.lengthWithCache(count * 3);
 		}
 
-		List<Vec3d> points = curve.toList(stepSize);
+		List<PosRollOffset> posRollOffsets = curve.toList(stepSize, rollAndOffsetInfo);
+		List<Vec3d> points = PosRollOffset.getPoints(posRollOffsets);
+		List<Double> rolls = PosRollOffset.getRolls(posRollOffsets);
+		List<Double> yOffsets = PosRollOffset.getYOffsets(posRollOffsets);
+
 		if(count == 0){//Meaning stepSize must be NaN, caused by curve length == 0
 			stepSize = targetStepSize;
 		}
@@ -156,7 +172,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, next.distanceTo(prev)));
 				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
-			res.add(new VecYPR(p, yaw, pitch));
+			res.add(new VecYPR(p.x, p.y + yOffsets.get(i), p.z, yaw, pitch, rolls.get(i).floatValue(), -1));
 		}
 		cache.put(targetStepSize, Pair.of(stepSize, res));
 		return cache.get(targetStepSize);

@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackSmoothing;
+import cam72cam.immersiverailroading.util.PosRollOffset;
+import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,6 +21,10 @@ public class CubicCurve {
     public double[] len;
     public int segment;
 
+    //used for subSplit rollAndOffsetInfo
+    public double xStart;
+    public double xEnd;
+
     //http://spencermortensen.com/articles/bezier-circle/
     public final static double c = 0.55191502449;
 
@@ -27,6 +33,12 @@ public class CubicCurve {
         this.ctrl1 = ctrl1;
         this.ctrl2 = ctrl2;
         this.p2 = p2;
+    }
+
+    public CubicCurve(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double tStart, double tEnd) {
+        this(p1, ctrl1, ctrl2, p2);
+        this.xStart = tStart;
+        this.xEnd = tEnd;
     }
 
     public static CubicCurve circle(int radius, float degrees) {
@@ -69,6 +81,52 @@ public class CubicCurve {
                 ctrl2,
                 midpoint
         );
+    }
+
+    public CubicCurve truncateByX(double newEnd) {
+        // 求解 localT，使得 position(localT).x = newEnd
+        double localT = solveForX(newEnd);
+
+        // 直接用 truncate，保留德卡斯特里奥的精确形状
+        CubicCurve truncated = truncate(localT);
+
+        // 强制修正 x 坐标为线性
+        double scale = (newEnd - p1.x) / (truncated.p2.x - p1.x);
+
+        Vec3d newCtrl1 = new Vec3d(
+                p1.x + (truncated.ctrl1.x - p1.x) * scale,
+                truncated.ctrl1.y,
+                truncated.ctrl1.z
+        );
+
+        Vec3d newCtrl2 = new Vec3d(
+                newEnd - (truncated.p2.x - truncated.ctrl2.x) * scale,
+                truncated.ctrl2.y,
+                truncated.ctrl2.z
+        );
+
+        Vec3d newP2 = new Vec3d(newEnd, truncated.p2.y, truncated.p2.z);
+
+        return new CubicCurve(p1, newCtrl1, newCtrl2, newP2);
+    }
+
+    private double solveForX(double targetX) {
+        double targetLocal = (targetX - p1.x) / (p2.x - p1.x);
+        double t = targetLocal;
+
+        for (int i = 0; i < 10; i++) {
+            Vec3d pos = position(t);
+            double error = pos.x - targetX;
+            if (Math.abs(error) < 1e-12) break;
+
+            Vec3d deriv = derivative(t);
+            if (Math.abs(deriv.x) < 1e-12) break;
+
+            t = t - error / deriv.x;
+            t = Math.max(0, Math.min(1, t));
+        }
+
+        return t;
     }
 
     public Pair<CubicCurve, CubicCurve> split(double t) {
@@ -149,9 +207,13 @@ public class CubicCurve {
         return length;
     }
 
-    public List<Vec3d> toList(double stepSize) {
-        List<Vec3d> result = new ArrayList<>();
-        result.add(p1);
+    public List<PosRollOffset> toList(double stepSize, RollAndOffsetInfo rollAndOffsetInfo) {//rollAndOffsetInfo could be null
+        List<PosRollOffset> result = new ArrayList<>();
+        result.add(new PosRollOffset(
+                p1,
+                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(0),
+                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getOffset(0))
+        );
         if(p1.equals(p2)){
             return result;
         }
@@ -183,13 +245,21 @@ public class CubicCurve {
                     }
                 }
 
-                result.add(position(mid));
+                result.add(new PosRollOffset(
+                        position(mid),
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(mid),
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getOffset(mid)
+                ));
                 lastLength = currentLen + lengthInBetween(low, mid, 10);
             }
         }
 
         if(len[segment] - lastLength >= 0.8 * stepSize){
-            result.add(p2);
+            result.add(new PosRollOffset(
+                    p2,
+                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getRoll(1),
+                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getOffset(1))
+            );
         }
 
         return result;

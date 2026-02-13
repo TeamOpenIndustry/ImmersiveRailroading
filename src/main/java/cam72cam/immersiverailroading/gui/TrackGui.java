@@ -53,6 +53,7 @@ public class TrackGui implements IScreen {
 	private Button directionButton;
 	private Button bedTypeButton;
 	private Button bedFillButton;
+    private Button rollAndOffsetPageButton;
 
 	private Slider transfertableEntryCountSlider;
 	private Slider transfertableEntrySpacingSlider;
@@ -196,6 +197,17 @@ public class TrackGui implements IScreen {
 			}
 		};
 		ytop += height;
+
+        rollAndOffsetPageButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, "Config Roll") {
+            @Override
+            public void onClick(Player.Hand hand) {
+                if (te != null) {
+//                    GuiTypes.ROLL_OFFSET_PREVIEW.open(MinecraftClient.getPlayer(),te.getPos());
+                } else {
+                    GuiTypes.ROLL_OFFSET.open(MinecraftClient.getPlayer());
+                }
+            }
+        };
 
 		//Transfer table doesn't have these property so we can have them overlapped
 		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {

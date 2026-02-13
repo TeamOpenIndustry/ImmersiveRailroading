@@ -191,6 +191,7 @@ public class TrackModel extends OBJModel{
         matrix.translate(piece.x, piece.y, piece.z);
         matrix.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
         matrix.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
+        matrix.rotate(Math.toRadians(piece.getRoll()), 0, 0, 1);
         matrix.rotate(Math.toRadians(-90), 0, 1, 0);
 
         double scale = info.settings.gauge.scale();

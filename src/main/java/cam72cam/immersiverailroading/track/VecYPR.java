@@ -35,11 +35,11 @@ public class VecYPR extends Vec3d {
 
     //Length
     public VecYPR(VecYPR other, float length, TrackModelPart... parts) {
-        this(other, other.yaw, other.pitch, length, parts);
+        this(other, other.yaw, other.pitch, other.roll, length, parts);
     }
 
-    public VecYPR(Vec3d orig, float yaw, float pitch, float length, TrackModelPart... parts) {
-        this(orig.x, orig.y, orig.z, yaw, pitch, length, parts);
+    public VecYPR(Vec3d orig, float yaw, float pitch, float roll, float length, TrackModelPart... parts) {
+        this(orig.x, orig.y, orig.z, yaw, pitch, roll, length, parts);
     }
 
     public VecYPR(double xIn, double yIn, double zIn, float yaw, float pitch, float length, TrackModelPart... parts) {

@@ -26,6 +26,8 @@ public class GuiTypes {
 
     public static final GUI RAIL = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "RAIL"), TrackGui::new);
     public static final BlockGUI RAIL_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, TrackGui::new);
+    public static final GUI ROLL_OFFSET = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "ROLL_OFFSET"), RollAndOffsetGui::new);
+//    public static final BlockGUI ROLL_OFFSET_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, RollAndOffsetGui::new);//todo 需要别的方式
     public static final BlockGUI RAIL_AUGMENT = GuiRegistry.registerBlock(TileRailBase.class, AugmentFilterGUI::new);
     public static final GUI TRACK_EXCHANGER = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "TRACK_EXCHANGER"), TrackExchangerGui::new);
     public static final GUI PAINT_BRUSH = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "PAINT_BRUSH"), PaintBrushPicker::new);

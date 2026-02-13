@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.items.nbt;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.*;
 
@@ -14,6 +15,7 @@ public class RailSettings {
     public final int length;
     public final float degrees;
     public final float curvosity;
+    public final RollAndOffsetInfo rollAndOffsetInfo;
     public final TrackPositionType posType;
     public final TrackSmoothing smoothing;
     public final TrackDirection direction;
@@ -25,7 +27,7 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -41,6 +43,7 @@ public class RailSettings {
         this.curvosity = curvosity;
         this.transfertableEntryCount = count;
         this.transfertableEntrySpacing = spacing;
+        this.rollAndOffsetInfo = rollAndOffsetInfo;
     }
 
     public void write(ItemStack stack) {
@@ -136,6 +139,9 @@ public class RailSettings {
         @TagField("track")
         public String track;
 
+        @TagField("rollAndOffsetInfo")
+        public RollAndOffsetInfo rollAndOffsetInfo;
+
         @TagField("transfertableEntryCount")
         public int transfertableEntryCount;
         @TagField("transfertableEntrySpacing")
@@ -164,6 +170,7 @@ public class RailSettings {
             gauge = Gauge.from(Gauge.STANDARD);
             type = TrackItems.STRAIGHT;
             track = "default";
+            rollAndOffsetInfo = null;
             length = 10;
             degrees = 90;
             posType = TrackPositionType.FIXED;
@@ -190,6 +197,7 @@ public class RailSettings {
                     curvosity,
                     posType,
                     smoothing,
+                    rollAndOffsetInfo,
                     direction,
                     railBed,
                     railBedFill,
