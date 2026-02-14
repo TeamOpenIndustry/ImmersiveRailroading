@@ -30,7 +30,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 	public BuilderCubicCurve(RailInfo info, World world, Vec3i pos, boolean endOfTrack) {
 		super(info, world, pos, endOfTrack);
 		CubicCurve curve = getCurve();
-		List<CubicCurve> subCurves = curve.subsplit((int) (101 * 2 * 3.1415f / 4));
+		List<CubicCurve> subCurves = curve.subsplit((int) (101 * 2 * 3.1415f / 4));//158.64575
 		if (subCurves.size() > 1) {
 			subBuilders = new ArrayList<>();
 

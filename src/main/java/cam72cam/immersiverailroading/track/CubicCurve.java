@@ -22,8 +22,8 @@ public class CubicCurve {
     public int segment;
 
     //used for subSplit rollAndOffsetInfo
-    public double xStart;
-    public double xEnd;
+    public double lStart;
+    public double lEnd;
 
     //http://spencermortensen.com/articles/bezier-circle/
     public final static double c = 0.55191502449;
@@ -37,8 +37,8 @@ public class CubicCurve {
 
     public CubicCurve(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double tStart, double tEnd) {
         this(p1, ctrl1, ctrl2, p2);
-        this.xStart = tStart;
-        this.xEnd = tEnd;
+        this.lStart = tStart;
+        this.lEnd = tEnd;
     }
 
     public static CubicCurve circle(int radius, float degrees) {
@@ -64,53 +64,56 @@ public class CubicCurve {
     }
 
     public CubicCurve reverse() {
-        return new CubicCurve(p2, ctrl2, ctrl1, p1);
+        return new CubicCurve(p2, ctrl2, ctrl1, p1, lEnd, lStart);
     }
 
-    public CubicCurve truncate(double t) {
-        Vec3d midpoint = this.ctrl1.add(this.ctrl2).scale(t);
-        Vec3d ctrl1 = p1.add(this.ctrl1).scale(t);
-        Vec3d ctrl2 = p2.add(this.ctrl2).scale(t);
+    /**
+     *  DeCasteljau algorithm,
+     *  return left part (0 ~ t) of CubicCurve
+     * */
+    public CubicCurve getLeft(double t) {
+        Vec3d q0 = lerp(p1, ctrl1, t);
+        Vec3d q1 = lerp(ctrl1, ctrl2, t);
+        Vec3d q2 = lerp(ctrl2, p2, t);
 
-        Vec3d temp = ctrl2.add(midpoint).scale(t);
-        ctrl2 = ctrl1.add(midpoint).scale(t);
-        midpoint = ctrl2.add(temp).scale(t);
-        return new CubicCurve(
-                p1,
-                ctrl1,
-                ctrl2,
-                midpoint
-        );
+        Vec3d r0 = lerp(q0, q1, t);
+        Vec3d r1 = lerp(q1, q2, t);
+
+        Vec3d s = lerp(r0, r1, t);
+
+        double localRatio = lengthInBetween(0, t, 10) / lengthInBetween(0, 1, 10);
+        double globalEnd = lStart + localRatio * (lEnd - lStart);
+        return new CubicCurve(p1, q0, r0, s, lStart, globalEnd);
     }
 
-    public CubicCurve truncateByX(double newEnd) {
-        // 求解 localT，使得 position(localT).x = newEnd
-        double localT = solveForX(newEnd);
+    private Vec3d lerp(Vec3d a, Vec3d b, double t) {
+        return a.scale(1 - t).add(b.scale(t));
+    }
 
-        // 直接用 truncate，保留德卡斯特里奥的精确形状
-        CubicCurve truncated = truncate(localT);
-
-        // 强制修正 x 坐标为线性
-        double scale = (newEnd - p1.x) / (truncated.p2.x - p1.x);
+    public CubicCurve getLeftByX(double x) {
+        double localT = getTByX(x);
+        CubicCurve truncated = getLeft(localT);
+        double scale = (x - p1.x) / (truncated.p2.x - p1.x);//这个应该约等于1,如果没有那就是问题
 
         Vec3d newCtrl1 = new Vec3d(
-                p1.x + (truncated.ctrl1.x - p1.x) * scale,
+                p1.x + (truncated.ctrl1.x - truncated.p1.x) * scale,
                 truncated.ctrl1.y,
                 truncated.ctrl1.z
         );
 
         Vec3d newCtrl2 = new Vec3d(
-                newEnd - (truncated.p2.x - truncated.ctrl2.x) * scale,
+                x - (truncated.p2.x - truncated.ctrl2.x) * scale,
                 truncated.ctrl2.y,
                 truncated.ctrl2.z
         );
 
-        Vec3d newP2 = new Vec3d(newEnd, truncated.p2.y, truncated.p2.z);
+        Vec3d newP2 = new Vec3d(x, truncated.p2.y, truncated.p2.z);
 
         return new CubicCurve(p1, newCtrl1, newCtrl2, newP2);
     }
 
-    private double solveForX(double targetX) {
+    public double getTByX(double targetX) {
+        if (Math.abs(p2.x - p1.x) < 1e-12)return 0.5;
         double targetLocal = (targetX - p1.x) / (p2.x - p1.x);
         double t = targetLocal;
 
@@ -130,7 +133,7 @@ public class CubicCurve {
     }
 
     public Pair<CubicCurve, CubicCurve> split(double t) {
-        return Pair.of(this.truncate(t), this.reverse().truncate(1-t));
+        return Pair.of(this.getLeft(t), this.reverse().getLeft(1-t));
     }
 
     public Vec3d position(double t) {
@@ -278,8 +281,8 @@ public class CubicCurve {
         if (p1.distanceTo(p2) <= maxSize) {
             res.add(this);
         } else {
-            res.addAll(this.truncate(0.5).subsplit(maxSize));
-            res.addAll(this.reverse().truncate(0.5).reverse().subsplit(maxSize));
+            res.addAll(this.getLeft(0.5).subsplit(maxSize));
+            res.addAll(this.reverse().getLeft(0.5).reverse().subsplit(maxSize));
         }
         return res;
     }

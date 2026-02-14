@@ -98,11 +98,11 @@ public class RailInfo {
 		if (settings.type.isTable()) {
 			id += this.itemHeld;
 		}
-        if(this.settings.rollAndOffsetInfo != null){//move to toSting? format?
-            id += "rollAndOffsetInfo:{";
-            if(this.settings.rollAndOffsetInfo.rolls != null) {
-                for(int i = 0; i < this.settings.rollAndOffsetInfo.xs.size(); i++){
-                    id += this.settings.rollAndOffsetInfo.xs.get(i);
+		if(this.settings.rollAndOffsetInfo != null){//move to toSting? format?
+			id += "rollAndOffsetInfo:{";
+			if(this.settings.rollAndOffsetInfo.rolls != null) {
+				for(int i = 0; i < this.settings.rollAndOffsetInfo.xs.size(); i++){
+					id += this.settings.rollAndOffsetInfo.xs.get(i);
 
                     id += this.settings.rollAndOffsetInfo.rolls.get(i);
                     id += this.settings.rollAndOffsetInfo.rollCtrls.get(i);
