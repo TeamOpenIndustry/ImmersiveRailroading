@@ -58,7 +58,7 @@ public class Simulation {
             for (SimulationState state : stock.states) {
                 state.dirty = false;
             }
-            stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
+            stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());//todo tickpos来源标记
             if (sendPackets && players.stream().anyMatch(player -> player.getPosition().distanceToSquared(stock.getPosition()) < syncDistanceSq)) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }

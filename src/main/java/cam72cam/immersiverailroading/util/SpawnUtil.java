@@ -48,20 +48,20 @@ public class SpawnUtil {
 		if (worldIn.isServer) {
 			EntityRollingStock stock = def.spawn(worldIn, new Vec3d(pos).add(0.5, 0.1, 0.5), yaw, gauge, data.texture);
 
-			Vec3d center = stock.getPosition();
+			PathingContext center = new PathingContext(stock.getPosition(), 0, 0);//only pos is needed
 			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(-0.1, yaw));
 			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(0.1, yaw));
 			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(offset, yaw));
-			stock.setPosition(center);
+			stock.setPosition(center.pos);
 
 			if (stock instanceof EntityMoveableRollingStock) {
 				EntityMoveableRollingStock moveable = (EntityMoveableRollingStock)stock;
-				ITrack centerte = ITrack.get(worldIn, center, true);
+				ITrack centerte = ITrack.get(worldIn, center.pos, true);
 				if (centerte != null) {
 					float frontDistance = moveable.getDefinition().getBogeyFront(gauge);
 					float rearDistance = moveable.getDefinition().getBogeyRear(gauge);
-					Vec3d front = centerte.getNextPosition(center, VecUtil.fromWrongYaw(frontDistance, yaw));
-					Vec3d rear = centerte.getNextPosition(center, VecUtil.fromWrongYaw(rearDistance, yaw));
+					Vec3d front = centerte.getNextPosition(center, VecUtil.fromWrongYaw(frontDistance, yaw)).pos;
+					Vec3d rear = centerte.getNextPosition(center, VecUtil.fromWrongYaw(rearDistance, yaw)).pos;
 
 					moveable.setRotationYaw(VecUtil.toWrongYaw(front.subtract(rear)));
 					float pitch = (-VecUtil.toPitch(front.subtract(rear)) - 90);
@@ -74,14 +74,16 @@ public class SpawnUtil {
 
 					ITrack frontte = ITrack.get(worldIn, front, true);
 					if (frontte != null) {
-						Vec3d frontNext = frontte.getNextPosition(front, VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));
-						moveable.setFrontYaw(VecUtil.toWrongYaw(frontNext.subtract(front)));
+						PathingContext frontNext = frontte.getNextPosition(new PathingContext(front, 0, 0), VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));//only pos is needed to provide
+						moveable.setFrontYaw(VecUtil.toWrongYaw(frontNext.pos.subtract(front)));
+						moveable.setFrontRoll((float) -frontNext.roll);
 					}
 
 					ITrack rearte = ITrack.get(worldIn, rear, true);
 					if (rearte != null) {
-						Vec3d rearNext = rearte.getNextPosition(rear, VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));
-						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.subtract(rear)));
+						PathingContext rearNext = rearte.getNextPosition(new PathingContext(rear, 0, 0), VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));
+						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.pos.subtract(rear)));
+						moveable.setRearRoll((float) -rearNext.roll);
 					}
 				}
 

@@ -402,10 +402,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	@Override
-	public Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion) {
+	public PathingContext getNextPosition(PathingContext currentPosition, Vec3d motion) {//todo 需要根据什么矫正roll的正负?
 		double distanceMetersSq = motion.lengthSquared();
 		double maxDistance = 0.25;
-		if (distanceMetersSq*0.9 > maxDistance * maxDistance) {
+		if (distanceMetersSq * 0.9 > maxDistance * maxDistance) {
 			// 0.9 forces at least one iteration + scaling
 			return MovementTrack.iterativePathing(getWorld(), currentPosition, this, getTrackGauge(), motion, maxDistance);
 		}
@@ -413,7 +413,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	private Collection<TileRail> tiles = null;
-	public Vec3d getNextPositionShort(Vec3d currentPosition, Vec3d motion) {
+	public PathingContext getNextPositionShort(PathingContext currentPosition, Vec3d motion) {
 		if (this.getReplaced() == null) {
 			// Simple common case, maybe this does not need to be optimized out of the for loop below?
 			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
@@ -423,13 +423,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			//tiles = Collections.singletonList(tile);
 			// Optimized version of the below looping when no overlapping occurs
 
-			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition.pos);
 
 			if (state == SwitchState.STRAIGHT) {
 				tile = tile.getParentTile();
 			}
 
-			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
+			PathingContext potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
 			if (potential != null) {
 				return potential;
 			}
@@ -454,8 +454,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 
-		Vec3d nextPos = currentPosition;
-		Vec3d predictedPos = currentPosition.add(motion);
+		PathingContext nextPos = currentPosition;
+		Vec3d predictedPos = currentPosition.pos.add(motion);
 		boolean hasSwitchSet = false;
 
 		for (TileRail tile : tiles) {
@@ -465,13 +465,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				tile = tile.getParentTile();
 			}
 
-			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
-			if (potential != null) {
+			PathingContext potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
+			if (potential != null) {//next lines will compare motion yaw and potential yaw
 				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
 				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
 				if (state == SwitchState.TURN) {
 					// This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
-					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
+					float other = VecUtil.toWrongYaw(potential.pos.subtract(currentPosition.pos));
 					float rotationYaw = VecUtil.toWrongYaw(motion);
 					double diff = MathUtil.trueModulus(other - rotationYaw, 360);
 					diff = Math.min(360-diff, diff);
@@ -482,7 +482,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 				// TODO should this be an else?
 				// If we are not on a switch curve and closer to our target (or are on the first iteration)
-				if (currentPosition == nextPos || !hasSwitchSet && potential.distanceToSquared(predictedPos) < nextPos.distanceToSquared(predictedPos)) {
+				if (currentPosition.pos.equals(nextPos.pos)  || !hasSwitchSet && potential.pos.distanceToSquared(predictedPos) < nextPos.pos.distanceToSquared(predictedPos)) {
 					nextPos = potential;
 				}
 			}
@@ -895,7 +895,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (cur instanceof TileRail) {
 			TileRail curTR = (TileRail) cur;
-			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
+			if (curTR.info.settings.type.equals(TrackItems.SWITCH) || curTR.info.settings.type.equals(TrackItems.MULTISWITCH)) {
 				return curTR;
 			}
 		}

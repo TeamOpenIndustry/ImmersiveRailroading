@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PosRollOffset {
-    Vec3d point;
-    double roll;
-    double yOffset;
+    public Vec3d point;
+    public double roll;
+    public double yOffset;
     public PosRollOffset(Vec3d point, double roll, double yOffset) {
         this.point = point;
         this.roll = roll;

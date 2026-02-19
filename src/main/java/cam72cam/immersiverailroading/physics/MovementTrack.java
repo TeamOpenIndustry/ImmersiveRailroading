@@ -7,6 +7,8 @@ import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
+import cam72cam.immersiverailroading.util.MathUtil;
+import cam72cam.immersiverailroading.util.PathingContext;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.math.Rotation;
@@ -52,24 +54,24 @@ public class MovementTrack {
 		return null;
 	}
 
-	public static Vec3d iterativePathing(World world, Vec3d currentPosition, ITrack te, double gauge, Vec3d motion, double maxDistance) {
-		Vec3d startPos = currentPosition;
-		Vec3d prevPosition = currentPosition;
+	public static PathingContext iterativePathing(World world, PathingContext startPosition, ITrack te, double gauge, Vec3d motion, double maxDistance) {
+		PathingContext iterationPosition = startPosition;
+		PathingContext prevPosition = startPosition;
 		double totalDistance = motion.length();
 		double maxDistanceSquared = maxDistance * maxDistance;
 		double motionLengthSquared = motion.lengthSquared();
 
-		Vec3i teBlockPosition = new Vec3i(currentPosition);
+		Vec3i teBlockPosition = new Vec3i(startPosition.pos);
 
-		for (double currentDistance = 0; currentDistance < totalDistance; currentDistance += maxDistance) {
-			Vec3i currentBlockPosition = new Vec3i(currentPosition);
-			if (!currentBlockPosition.equals(teBlockPosition)) {
-				teBlockPosition = currentBlockPosition;
+		for (double iterationDistance = 0; iterationDistance < totalDistance; iterationDistance += maxDistance) {
+			Vec3i iterationBlockPosition = new Vec3i(iterationPosition.pos);
+			if (!iterationBlockPosition.equals(teBlockPosition)) {
+				teBlockPosition = iterationBlockPosition;
 
-				te = findTrack(world, currentPosition, VecUtil.toWrongYaw(motion), gauge);
+				te = findTrack(world, iterationPosition.pos, VecUtil.toWrongYaw(motion), gauge);
 				if (te == null) {
 					// Stuck
-					return currentPosition;
+					return startPosition.toPosAndRoll(iterationPosition.pos, iterationPosition.roll);//its struck... so no need to change roll?
 				}
 			}
 
@@ -78,35 +80,37 @@ public class MovementTrack {
 				motion = motion.scale(maxDistance / Math.sqrt(motionLengthSquared));
 			}
 
-			prevPosition = currentPosition;
-			currentPosition = te instanceof TileRailBase ? ((TileRailBase) te).getNextPositionShort(currentPosition, motion) : te.getNextPosition(currentPosition, motion);
-			motion = currentPosition.subtract(prevPosition);
+			prevPosition = iterationPosition;
+			iterationPosition = te instanceof TileRailBase ? ((TileRailBase) te).getNextPositionShort(iterationPosition, motion) : te.getNextPosition(iterationPosition, motion);
+			motion = iterationPosition.pos.subtract(prevPosition.pos);
 			motionLengthSquared = motion.lengthSquared();
 
 			if (motionLengthSquared == 0) {
 				// Stuck
-				return prevPosition;
+				return startPosition.toPosAndRoll(prevPosition.pos, prevPosition.roll);
 			}
 		}
 
 		// prevPosition + motion scaled to remaining distance
 		//double scale = (totalDistance - startPos.distanceTo(prevPosition)) / motion.length();
 		//if (scale > 0.00001 && scale < 1.5) {
-		//	currentPosition = prevPosition.add(motion.scale(scale));
+		//	iterationPosition = prevPosition.add(motion.scale(scale));
 		//}
-		currentPosition = startPos.add(currentPosition.subtract(startPos).normalize().scale(totalDistance));
+		Vec3d iterationPosRescaled = startPosition.pos.add(iterationPosition.pos.subtract(startPosition.pos).normalize().scale(totalDistance));
+		iterationPosition = startPosition.toPosAndRoll(iterationPosRescaled, iterationPosition.roll);//we don't need to rescale the roll!
 
-		return currentPosition;
+		return iterationPosition;
 	}
 
-	public static Vec3d nextPositionDirect(World world, Vec3d currentPosition, TileRail rail, Vec3d delta) {
+	public static PathingContext nextPositionDirect(World world, PathingContext currentPosition, TileRail rail, Vec3d delta) {
 		if (rail == null) {
 			if (world.isServer) {
 				return null; // OFF TRACK
 			} else {
-				return currentPosition.add(delta);
+				return currentPosition.toPosAndRoll(currentPosition.pos.add(delta), currentPosition.roll);
 			}
 		}
+		int invertRollMultiplier = 1;
 
 		double railHeight = rail.info.getTrackHeight();
 		double distance = delta.length();
@@ -114,11 +118,11 @@ public class MovementTrack {
 
 		if (rail.info.settings.type == TrackItems.CROSSING) {
 			delta = VecUtil.fromWrongYaw(distance, Facing.fromAngle(VecUtil.toWrongYaw(delta)).getAngle());
-			return currentPosition.add(delta);
+			return currentPosition.toPosAndRoll(currentPosition.pos.add(delta), currentPosition.roll);
 		} else if (rail.info.settings.type.isTable()) {
 			double tablePos = rail.getParentTile().info.tablePos;
 
-			currentPosition = currentPosition.add(delta);
+			currentPosition = currentPosition.toPosAndRoll(currentPosition.pos.add(delta), currentPosition.roll);//todo 这里的修改合法吗？为了使得deltaMovement正确可能需要小修改，避免这个覆盖
 			Facing placementFacing = rail.info.placementInfo.facing();
 			Vec3d center, forward, backward;
 			double distanceToCenter;
@@ -126,7 +130,7 @@ public class MovementTrack {
 			if (rail.info.settings.type == TrackItems.TURNTABLE) {
 				angle = (float) tablePos + placementFacing.getAngle();
 				center = new Vec3d(rail.getParentTile().getPos()).add(0.5, 1 + heightOffset, 0.5);
-				distanceToCenter = currentPosition.distanceTo(center);
+				distanceToCenter = currentPosition.pos.distanceTo(center);
 			} else {
 				//Must be transfer table
 				int halfGauge = (int) Math.floor((rail.info.settings.gauge.value() * 1.1 + 0.5) / 2);
@@ -154,16 +158,16 @@ public class MovementTrack {
 				angle = -placementFacing.getAngle() + 180;
 				center = center.add(
 						new Vec3d(xValue, 2 + heightOffset, rail.info.settings.length / 2d).rotateYaw(angle));
-				distanceToCenter = currentPosition.distanceTo(center);
+				distanceToCenter = currentPosition.pos.distanceTo(center);
 			}
 
 			forward = center.add(VecUtil.fromWrongYaw(distanceToCenter, angle));
 			backward = center.add(VecUtil.fromWrongYaw(distanceToCenter, angle + 180));
 
-			if (forward.distanceToSquared(currentPosition) < backward.distanceToSquared(currentPosition)) {
-				return forward;
+			if (forward.distanceToSquared(currentPosition.pos) < backward.distanceToSquared(currentPosition.pos)) {
+				return currentPosition.toPosAndRoll(forward, currentPosition.roll);
 			} else {
-				return backward;
+				return currentPosition.toPosAndRoll(backward, currentPosition.roll);
 			}
 		} else if (rail.info.getBuilder(world) instanceof IIterableTrack) {
 			/*
@@ -174,23 +178,27 @@ public class MovementTrack {
 			 */
 			List<VecYPR> positions = ((IIterableTrack) rail.info.getBuilder(world)).getPath(0.25 * rail.info.settings.gauge.scale());
 			Vec3d center = rail.info.placementInfo.placementPosition.add(rail.getPos()).add(0, heightOffset, 0);
-			Vec3d target = currentPosition.add(delta);
+			Vec3d target = currentPosition.pos.add(delta);
 			Vec3d relative = target.subtract(center);
 
 			if (positions.isEmpty()) {
 				ImmersiveRailroading.error("Invalid track path %s", rail.info.uniqueID);
-				return currentPosition; // keep in same place for debugging
+				return currentPosition.toPosAndRoll(currentPosition.pos.add(delta), currentPosition.roll); // keep in same place for debugging
 			}
 			if (positions.size() == 1) {
 				// track with length == 1
 				VecYPR pos = positions.get(0);
 				Vec3d offset = VecUtil.fromYaw(delta.length(), pos.getYaw());
-				Vec3d result = currentPosition.add(offset);
-				Vec3d resultOpposite = currentPosition.subtract(offset);
+				Vec3d result = currentPosition.pos.add(offset);
+				Vec3d resultOpposite = currentPosition.pos.subtract(offset);
+
+				double roll = pos.getRoll();
+				if(Math.abs(MathUtil.trueModulus(pos.getYaw(), 360) - VecUtil.toWrongYaw(delta)) > 90) invertRollMultiplier = -1;
+
 				if (result.distanceToSquared(target) < resultOpposite.distanceToSquared(target)) {
-					return result;
+					return currentPosition.toPosAndRoll(result, roll * invertRollMultiplier);
 				} else {
-					return resultOpposite;
+					return currentPosition.toPosAndRoll(resultOpposite, roll * invertRollMultiplier);
 				}
 			}
 
@@ -230,24 +238,31 @@ public class MovementTrack {
 			VecYPR rightPos = positions.get(right);
 
 			if (leftDistance < 0.000001) {
-				return center.add(leftPos);
+				if(Math.abs(MathUtil.trueModulus(leftPos.getYaw(), 360) - VecUtil.toWrongYaw(delta)) > 90) invertRollMultiplier = -1;
+				return currentPosition.toPosAndRoll(center.add(leftPos), leftPos.getRoll() * invertRollMultiplier);
 			}
 			if (rightDistance < 0.000001) {
-				return center.add(rightPos);
+				if(Math.abs(MathUtil.trueModulus(rightPos.getYaw(), 360) - VecUtil.toWrongYaw(delta)) > 90) invertRollMultiplier = -1;
+				return currentPosition.toPosAndRoll(center.add(rightPos), rightPos.getRoll() * invertRollMultiplier);
 			}
 
 			Vec3d between = rightPos.subtract(leftPos);
-			Vec3d offset = between.scale(Math.sqrt(leftDistance) / between.length());
+			double t = Math.sqrt(leftDistance) / between.length();
+			Vec3d offset = between.scale(t);
 			// Weird edge case where we need to move in the opposite direction since we are given a position past the end of pathing
 			Vec3d point = center.add(leftPos);
 			Vec3d result = point.add(offset);
 			Vec3d resultOpposite = point.subtract(offset);
+			double resRoll = leftPos.getRoll() + (rightPos.getRoll() - leftPos.getRoll()) * t;
+			double resRollOpposite = leftPos.getRoll() - (rightPos.getRoll() - leftPos.getRoll()) * t;
+
+			if(Math.abs(MathUtil.trueModulus(leftPos.getYaw(), 360) - VecUtil.toWrongYaw(delta)) > 90) invertRollMultiplier = -1;//todo 不确定
 			if (result.distanceToSquared(target) < resultOpposite.distanceToSquared(target)) {
-				return result;
+				return currentPosition.toPosAndRoll(result, resRoll * invertRollMultiplier);
 			} else {
-				return resultOpposite;
+				return currentPosition.toPosAndRoll(resultOpposite, resRollOpposite * invertRollMultiplier);
 			}
 		}
-		return currentPosition.add(delta);
+		return currentPosition.toPosAndRoll(currentPosition.pos.add(delta), currentPosition.roll);
 	}
 }

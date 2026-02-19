@@ -102,10 +102,12 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     @Override
     protected void initStates() {
         super.initStates();
-        frontLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getFrontLocomotiveMatrix(s)));
-        frontLocomotiveRocking = addRoll(frontLocomotive);
-        rearLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getRearLocomotiveMatrix(s)));
-        rearLocomotiveRocking = addRoll(rearLocomotive);
+        frontLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getFrontLocomotiveMatrix(s)));//todo 抽风？
+//        frontLocomotiveRocking = addRoll(frontLocomotive);
+        frontLocomotiveRocking = frontLocomotive;//todo 可能影响已有功能？也许需要更好的办法
+        rearLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getRearLocomotiveMatrix(s)));//todo 抽风？
+//        rearLocomotiveRocking = addRoll(rearLocomotive);
+        rearLocomotiveRocking = rearLocomotive;
     }
 
     @Override
@@ -119,7 +121,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         frontLocomotiveRocking.include(shellFront);
 
         cargoFillFront = CargoFill.get(provider, frontLocomotiveRocking, showCurrentLoadOnly, ModelPosition.FRONT);
-        drivingWheelsFront = DrivingAssembly.get(type, provider, frontLocomotive, ModelPosition.FRONT, 0);
+        drivingWheelsFront = DrivingAssembly.get(type, provider, frontLocomotive, ModelPosition.FRONT, 0);//todo 抽风？
 
 
         frameRear = provider.parse(ModelComponentType.REAR_FRAME);
@@ -128,7 +130,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         rearLocomotiveRocking.include(shellRear);
 
         cargoFillRear = CargoFill.get(provider, rearLocomotiveRocking, showCurrentLoadOnly, ModelPosition.REAR);
-        drivingWheelsRear = DrivingAssembly.get(type, provider, rearLocomotive, ModelPosition.REAR, 45);
+        drivingWheelsRear = DrivingAssembly.get(type, provider, rearLocomotive, ModelPosition.REAR, 45);//todo 抽风？
 
         components = provider.parse(
                 new ModelComponentType[]{ModelComponentType.CAB}

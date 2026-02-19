@@ -94,10 +94,14 @@ public class SwaySimulator {
             swayMagnitude = Math.min(swayMagnitude, 3);
         }
 
-        public double getRollDegrees(float partialTicks) {
+        public double getRollDegrees(float partialTicks) {//todo 分离trackRoll
+            double trackRoll = stock.getRotationRoll();
+            double res = 0;
+
             if (Math.abs(stock.getCurrentSpeed().metric() * stock.gauge.scale()) < 4) {
                 // don't calculate it
-                return 0;
+                res = trackRoll;
+                return res;
             }
 
             double sway = Math.cos(Math.toRadians((stock.getTickCount() + partialTicks) * 13)) *
@@ -105,9 +109,11 @@ public class SwaySimulator {
                     stock.getDefinition().getSwayMultiplier() *
                     ConfigGraphics.StockSwayMultiplier;
 
-            double tilt = stock.getDefinition().getTiltMultiplier() * (stock.getPrevRotationYaw() - stock.getRotationYaw()) * (stock.getCurrentSpeed().minecraft() > 0 ? 1 : -1);
 
-            return sway + tilt;
+            double tilt = stock.getDefinition().getTiltMultiplier() * (stock.getPrevRotationYaw() - stock.getRotationYaw()) * (stock.getCurrentSpeed().minecraft() > 0 ? 1 : -1);//TODO:implement custom tilt algorithm
+
+            res = sway + Math.abs(tilt) > Math.abs(trackRoll) ? tilt : trackRoll;
+            return res;
         }
 
         public void removed() {
