@@ -12,6 +12,8 @@ import java.util.function.Consumer;
 public class RailSettings {
     public final Gauge gauge;
     public final TrackItems type;
+//    public final TrackItems pickType;
+//TODO: multiSwitch的主分路不能被subSplit，不然会分路会爆炸，有没有必要提前阻止build？
     public final int length;
     public final float degrees;
     public final float curvosity;

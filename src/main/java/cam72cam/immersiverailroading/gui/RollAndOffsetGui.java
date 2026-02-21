@@ -32,8 +32,13 @@ public class RollAndOffsetGui implements IScreen {
     private int selectedWay;
 
     //components
-    //TODO:先用普通滚动条，可能需要pair判断此处x是否有插入点，另外要实现一个可视化曲线
-    // 另外需要在曲线上实现点击选取的功能，现在的组件没办法显示点列表
+    //TODO:先用普通滚动条，另外要实现一个可视化曲线
+    // 另外需要在曲线上实现点击选取的功能？现在的组件没办法显示点列表
+
+    //TODO
+    // 对于roll和offset变化曲线设置为了方便控制，规定控制范围和方式如下：
+    // start和end可以设置pitch和value，中间点可设置value（pitch强制置0）
+    // 每条子曲线可以设置左右ctrl的x投影在本段曲线的占比，均不超过本段子曲线投影x的0.5倍
     private Button insertPoint;
     private Button deletePoint;
     private Slider lSlider;
@@ -58,8 +63,8 @@ public class RollAndOffsetGui implements IScreen {
             ls = rollAndOffsetInfo.ls;
             rolls = rollAndOffsetInfo.rolls;
             rollCtrls = rollAndOffsetInfo.rollCtrls;
-            offsets = rollAndOffsetInfo.offsets;
-            offsetCtrls = rollAndOffsetInfo.offsetCtrls;
+            offsets = rollAndOffsetInfo.yOffsets;
+            offsetCtrls = rollAndOffsetInfo.yOffsetCtrls;
         }
     }
     public RollAndOffsetGui(TileRailPreview te) {//BLOCK GUI
@@ -144,10 +149,10 @@ public class RollAndOffsetGui implements IScreen {
                     rolls.addAll(res.get(1).rolls);
                     rollCtrls = res.get(0).rollCtrls;
                     rollCtrls.addAll(res.get(1).rollCtrls);
-                    offsets = res.get(0).offsets;
-                    offsets.addAll(res.get(1).offsets);
-                    offsetCtrls = res.get(0).offsetCtrls;
-                    offsetCtrls.addAll(res.get(1).offsetCtrls);
+                    offsets = res.get(0).yOffsets;
+                    offsets.addAll(res.get(1).yOffsets);
+                    offsetCtrls = res.get(0).yOffsetCtrls;
+                    offsetCtrls.addAll(res.get(1).yOffsetCtrls);
 
 //                    insertPoint.setVisible(false);
 //                    deletePoint.setVisible(true);

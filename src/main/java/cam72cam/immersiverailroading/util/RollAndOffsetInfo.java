@@ -19,15 +19,15 @@ public class RollAndOffsetInfo {
     public final List<Vec3d> rolls;
     public final List<Vec3d> rollCtrls;
     //Y Offset
-    public final List<Vec3d> offsets;
-    public final List<Vec3d> offsetCtrls;
+    public final List<Vec3d> yOffsets;
+    public final List<Vec3d> yOffsetCtrls;
 
-    public RollAndOffsetInfo(List<Double> t, List<Vec3d> rolls, List<Vec3d> rollCtrls, List<Vec3d> offsets, List<Vec3d> offsetlCtrls) {
+    public RollAndOffsetInfo(List<Double> t, List<Vec3d> rolls, List<Vec3d> rollCtrls, List<Vec3d> yOffsets, List<Vec3d> yOffsetlCtrls) {
         this.ls = t;
         this.rolls = rolls;
         this.rollCtrls = rollCtrls;
-        this.offsets = offsets;
-        this.offsetCtrls = offsetlCtrls;
+        this.yOffsets = yOffsets;
+        this.yOffsetCtrls = yOffsetlCtrls;
     }
 
     public static class Mutable {
@@ -37,17 +37,17 @@ public class RollAndOffsetInfo {
         public List<Vec3d> rolls;
         @TagField(value = "rollCtrls", mapper = Vec3dListMapper.class)
         public List<Vec3d> rollCtrls;
-        @TagField(value = "offsets", mapper = Vec3dListMapper.class)
-        public List<Vec3d> offsets;
-        @TagField(value = "offsetCtrls", mapper = Vec3dListMapper.class)
-        public List<Vec3d> offsetCtrls;
+        @TagField(value = "yOffsets", mapper = Vec3dListMapper.class)
+        public List<Vec3d> yOffsets;
+        @TagField(value = "yOffsetCtrls", mapper = Vec3dListMapper.class)
+        public List<Vec3d> yOffsetCtrls;
 
         public Mutable(RollAndOffsetInfo rollAndOffsetInfo) {
             this.ls = rollAndOffsetInfo.ls;
             this.rolls = rollAndOffsetInfo.rolls;
             this.rollCtrls = rollAndOffsetInfo.rollCtrls;
-            this.offsets = rollAndOffsetInfo.offsets;
-            this.offsetCtrls = rollAndOffsetInfo.offsetCtrls;
+            this.yOffsets = rollAndOffsetInfo.yOffsets;
+            this.yOffsetCtrls = rollAndOffsetInfo.yOffsetCtrls;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -55,14 +55,14 @@ public class RollAndOffsetInfo {
             ls = new ArrayList<>();
             rolls = new ArrayList<>();
             rollCtrls = new ArrayList<>();
-            offsets = new ArrayList<>();
-            offsetCtrls = new ArrayList<>();
+            yOffsets = new ArrayList<>();
+            yOffsetCtrls = new ArrayList<>();
 
             ls.add(0d); ls.add(1d);
             rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
             rollCtrls.add(new Vec3d(0.25, 0, 0)); rollCtrls.add(new Vec3d(1.25, 0, 0));
-            offsets.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
-            offsetCtrls.add(new Vec3d(0.25, 0, 0)); offsetCtrls.add(new Vec3d(1.25, 0, 0));
+            yOffsets.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
+            yOffsetCtrls.add(new Vec3d(0.25, 0, 0)); yOffsetCtrls.add(new Vec3d(1.25, 0, 0));
 
             TagSerializer.deserialize(data, this);
         }
@@ -72,8 +72,8 @@ public class RollAndOffsetInfo {
                     ls,
                     rolls,
                     rollCtrls,
-                    offsets,
-                    offsetCtrls
+                    yOffsets,
+                    yOffsetCtrls
             );
         }
     }
@@ -239,10 +239,10 @@ public class RollAndOffsetInfo {
                 }
 
                 {//offset
-                    Vec3d p1 = offsets.get(logicIdxEnd * 2);
-                    Vec3d p2 = offsets.get(logicIdxStart * 2 - 1);
-                    Vec3d ctrl1 = offsetCtrls.get(logicIdxEnd * 2);
-                    Vec3d ctrl2 = offsets.get(logicIdxStart * 2 - 1).scale(2).subtract(offsetCtrls.get(logicIdxStart * 2 - 1));
+                    Vec3d p1 = yOffsets.get(logicIdxEnd * 2);
+                    Vec3d p2 = yOffsets.get(logicIdxStart * 2 - 1);
+                    Vec3d ctrl1 = yOffsetCtrls.get(logicIdxEnd * 2);
+                    Vec3d ctrl2 = yOffsets.get(logicIdxStart * 2 - 1).scale(2).subtract(yOffsetCtrls.get(logicIdxStart * 2 - 1));
 
                     CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                     CubicCurve startCurve = curve.getLeftByX(lStart);
@@ -316,12 +316,12 @@ public class RollAndOffsetInfo {
                 }
 
                 {//offset
-                    //起点段
+                    //start
                     if(lStart != ls.get(Physic(logicIdxStart))) {
-                        Vec3d p1 = offsets.get(Physic(logicIdxStart - 1));
-                        Vec3d p2 = offsets.get(Physic(logicIdxStart));
-                        Vec3d ctrl1 = offsetCtrls.get(Physic(logicIdxStart - 1));
-                        Vec3d ctrl2 = offsets.get(Physic(logicIdxStart)).scale(2).subtract(offsetCtrls.get(Physic(logicIdxStart)));//规定ctrl在右边，所以ctrl2都要取反一下
+                        Vec3d p1 = yOffsets.get(Physic(logicIdxStart - 1));
+                        Vec3d p2 = yOffsets.get(Physic(logicIdxStart));
+                        Vec3d ctrl1 = yOffsetCtrls.get(Physic(logicIdxStart - 1));
+                        Vec3d ctrl2 = yOffsets.get(Physic(logicIdxStart)).scale(2).subtract(yOffsetCtrls.get(Physic(logicIdxStart)));//规定ctrl在右边，所以ctrl2都要取反一下
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve startCurve = curve.reverse().getLeftByX(lStart).reverse();
@@ -334,19 +334,19 @@ public class RollAndOffsetInfo {
                         newOffsetCtrls.add(ctrl1);
                         newOffsetCtrls.add(ctrl2);
                     }
-                    //中间
+                    //mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
-                        newOffsets.add(offsets.get(Physic(i)));
-                        newOffsets.add(offsets.get(Physic(i + 1)));
-                        newOffsetCtrls.add(offsetCtrls.get(Physic(i)));
-                        newOffsetCtrls.add(offsetCtrls.get(Physic(i + 1)));
+                        newOffsets.add(yOffsets.get(Physic(i)));
+                        newOffsets.add(yOffsets.get(Physic(i + 1)));
+                        newOffsetCtrls.add(yOffsetCtrls.get(Physic(i)));
+                        newOffsetCtrls.add(yOffsetCtrls.get(Physic(i + 1)));
                     }
-                    //终点段
+                    //end
                     if(lEnd != ls.get(Physic(logicIdxEnd))) {
-                        Vec3d p1 = offsets.get(Physic(logicIdxEnd));
-                        Vec3d p2 = offsets.get(Physic(logicIdxEnd + 1));
-                        Vec3d ctrl1 = offsetCtrls.get(Physic(logicIdxEnd));
-                        Vec3d ctrl2 = offsets.get(Physic(logicIdxEnd + 1)).scale(2).subtract(offsetCtrls.get(Physic(logicIdxEnd + 1)));
+                        Vec3d p1 = yOffsets.get(Physic(logicIdxEnd));
+                        Vec3d p2 = yOffsets.get(Physic(logicIdxEnd + 1));
+                        Vec3d ctrl1 = yOffsetCtrls.get(Physic(logicIdxEnd));
+                        Vec3d ctrl2 = yOffsets.get(Physic(logicIdxEnd + 1)).scale(2).subtract(yOffsetCtrls.get(Physic(logicIdxEnd + 1)));
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve endCurve = curve.getLeftByX(lEnd);
@@ -431,7 +431,7 @@ public class RollAndOffsetInfo {
     }
 
     public double getOffset(double l) {
-        return interpolateValue(this.ls, l, offsets, offsetCtrls);
+        return interpolateValue(this.ls, l, yOffsets, yOffsetCtrls);
     }
 
     public static double interpolateValue(List<Double>ls, double targetL, List<Vec3d> points, List<Vec3d> ctrls) {

@@ -101,8 +101,8 @@ public class RailInfo {
 		if(this.settings.rollAndOffsetInfo != null){//move to toSting? format?
 			id += "rollAndOffsetInfo:{";
 			if(this.settings.rollAndOffsetInfo.rolls != null) {
-				for(int i = 0; i < this.settings.rollAndOffsetInfo.xs.size(); i++){
-					id += this.settings.rollAndOffsetInfo.xs.get(i);
+				for(int i = 0; i < this.settings.rollAndOffsetInfo.ls.size(); i++){
+					id += this.settings.rollAndOffsetInfo.ls.get(i);
 
                     id += this.settings.rollAndOffsetInfo.rolls.get(i);
                     id += this.settings.rollAndOffsetInfo.rollCtrls.get(i);
