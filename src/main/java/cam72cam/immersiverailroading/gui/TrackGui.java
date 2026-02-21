@@ -383,6 +383,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(TrackItems option) {
 				settings.type = option;
+				settings.pickType = option;
 
 				updateSelectedWay(0);
 
@@ -503,6 +504,7 @@ public class TrackGui implements IScreen {
 			public void onClick(TrackItems option) {
 				if(selectedWay != 0){
 					selectedWaySettings.type = option;
+					selectedWaySettings.pickType = option;
 					syncMultiSwitchInfo();
 
 					if(selectedWaySettings.type == TrackItems.CUBICPARABOLA && selectedWaySettings.degrees > CubicCurve.cubicParabolaMaxAngle) {

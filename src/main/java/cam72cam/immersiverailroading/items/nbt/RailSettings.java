@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 public class RailSettings {
     public final Gauge gauge;
     public final TrackItems type;
+    public final TrackItems pickType;//pickType stores origin type in subCurves
     public final int length;
     public final float degrees;
     public final float curvosity;
@@ -31,10 +32,11 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, float pitchStart, float pitchEnd, float placementOffset, float customOffset, boolean isForward, int farRadius, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, TrackItems pickType, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, float pitchStart, float pitchEnd, float placementOffset, float customOffset, boolean isForward, int farRadius, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
+        this.pickType = pickType;
         this.length = length;
         this.degrees = degrees;
         this.posType = posType;
@@ -142,6 +144,8 @@ public class RailSettings {
         public Gauge gauge;
         @TagField("type")
         public TrackItems type;
+        @TagField("pickType")
+        public TrackItems pickType;
         @TagField("length")
         public int length;
         @TagField(value = "degrees", mapper = DegreesMapper.class)
@@ -192,6 +196,7 @@ public class RailSettings {
             cubicParabolaTag.setInteger("farRadius", settings.farRadius);
 
             this.type = settings.type;
+            this.pickType = settings.pickType;
             this.length = settings.length;
             this.degrees = settings.degrees;
             this.curvosity = settings.curvosity;
@@ -210,6 +215,7 @@ public class RailSettings {
             // Defaults
             gauge = Gauge.from(Gauge.STANDARD);
             type = TrackItems.STRAIGHT;
+            pickType = type;
             track = "default";
 
             pitchTag = new TagCompound();
@@ -245,6 +251,7 @@ public class RailSettings {
                     gauge,
                     track,
                     type,
+                    pickType,
                     length,
                     degrees,
                     curvosity,

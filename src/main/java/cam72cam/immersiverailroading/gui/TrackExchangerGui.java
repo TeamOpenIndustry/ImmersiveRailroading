@@ -95,7 +95,7 @@ public class TrackExchangerGui implements IScreen {
 		// This could be more efficient...
 		RailSettings settings = new RailSettings(gauge,
 				track,
-				TrackItems.STRAIGHT,
+				TrackItems.STRAIGHT,TrackItems.STRAIGHT,
 				10,
 				0,
 				1, TrackPositionType.FIXED,

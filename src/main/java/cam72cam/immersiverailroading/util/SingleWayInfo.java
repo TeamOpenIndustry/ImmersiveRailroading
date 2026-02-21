@@ -34,7 +34,7 @@ public class SingleWayInfo {
     public static final RailSettings defaultSettings = new RailSettings(
             Gauge.standard(),
             "default",
-            TrackItems.TURN,
+            TrackItems.TURN,TrackItems.TURN,
             15,
             90,
             1f,
