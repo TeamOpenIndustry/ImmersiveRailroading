@@ -106,8 +106,8 @@ public class RailInfo {
 
                     id += this.settings.rollAndOffsetInfo.rolls.get(i);
                     id += this.settings.rollAndOffsetInfo.rollCtrls.get(i);
-                    id += this.settings.rollAndOffsetInfo.offsets.get(i);
-                    id += this.settings.rollAndOffsetInfo.offsetCtrls.get(i);
+                    id += this.settings.rollAndOffsetInfo.yOffsets.get(i);
+                    id += this.settings.rollAndOffsetInfo.yOffsetCtrls.get(i);
                 }
             }
             id += "}";

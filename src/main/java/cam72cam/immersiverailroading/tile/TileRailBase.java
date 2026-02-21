@@ -459,7 +459,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		boolean hasSwitchSet = false;
 
 		for (TileRail tile : tiles) {
-			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition.pos);
 
 			if (state == SwitchState.STRAIGHT) {
 				tile = tile.getParentTile();
@@ -895,7 +895,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (cur instanceof TileRail) {
 			TileRail curTR = (TileRail) cur;
-			if (curTR.info.settings.type.equals(TrackItems.SWITCH) || curTR.info.settings.type.equals(TrackItems.MULTISWITCH)) {
+			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
 				return curTR;
 			}
 		}
