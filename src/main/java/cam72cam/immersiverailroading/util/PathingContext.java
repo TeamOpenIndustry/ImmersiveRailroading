@@ -29,14 +29,6 @@ public class PathingContext {
         this.deltaMovement = deltaMovement;
     }
 
-    private PathingContext(PathingContext pathingContext) {
-        this (
-                pathingContext.pos,
-                pathingContext.deltaMovement,
-                pathingContext.roll
-        );
-    }
-
     public PathingContext(trackapi.lib.PathingContext pathingContext) {
         this (
                 new Vec3d(pathingContext.pos),
@@ -53,20 +45,27 @@ public class PathingContext {
         );
     }
 
-    public PathingContext copy() {
-        return new PathingContext(this);
-    }
-
-    public PathingContext withRoll (double newRoll) {
-        return new PathingContext(pos, deltaMovement, newRoll);
-    }
-
-    /**
-     * This simply return a PathingContext with only pos changed
-     */
-    public PathingContext withPos (Vec3d newPos) {
-        return new PathingContext(newPos, deltaMovement, roll);
-    }
+//    private PathingContext(PathingContext pathingContext) {
+//        this (
+//                pathingContext.pos,
+//                pathingContext.deltaMovement,
+//                pathingContext.roll
+//        );
+//    }
+//    public PathingContext copy() {
+//        return new PathingContext(this);
+//    }
+//
+//    public PathingContext withRoll (double newRoll) {
+//        return new PathingContext(pos, deltaMovement, newRoll);
+//    }
+//
+//    /**
+//     * This simply return a PathingContext with only pos changed
+//     */
+//    public PathingContext withPos (Vec3d newPos) {
+//        return new PathingContext(newPos, deltaMovement, roll);
+//    }
 
     /**
      * This return a PathingContext with newPos and moved distance

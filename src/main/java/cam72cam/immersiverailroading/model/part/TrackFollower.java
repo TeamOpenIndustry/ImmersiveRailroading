@@ -63,10 +63,9 @@ public class TrackFollower {
                 rollReadout = offsetRoll;//
                 matrix.setIdentity();
                 matrix.translate(-offset, 0, 0);
-                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);//TODO:correct track and entity rotation center
+                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
                 matrix.rotate(Math.toRadians(yawReadout), 0, 1, 0);
                 matrix.translate(offset, 0, 0);
-//                System.out.println("case1:front:" + front + rollReadout + "pos:" + pos);
             } else {
                 // Don't need to path to a point that's already on the track.  TODO This can also be used to improve accuracy of the offset rendering
                 Vec3d offsetPos = pos.add(VecUtil.fromWrongYawPitch(offset, stock.getRotationYaw(), stock.getRotationPitch()));
@@ -78,7 +77,7 @@ public class TrackFollower {
                 float toPointPitch = 0;
                 float atPointPitch = 0;
 
-                PathingContext pointPos = nextPosition(stock.getWorld(), stock.gauge, new PathingContext(offsetPos, 0, offsetRoll), stock.getRotationYaw(), offsetYaw, toMinPoint);//todo 是用offsetRoll吗
+                PathingContext pointPos = nextPosition(stock.getWorld(), stock.gauge, new PathingContext(offsetPos, 0, toMinPoint < 0 ? rollReadout : -rollReadout), stock.getRotationYaw(), offsetYaw, toMinPoint);
                 PathingContext pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, betweenPoints);
                 Vec3d delta = stock.getPosition().subtract(pointPos.pos).scale(max); // Scale copies sign
                 if (pointPos.pos.distanceTo(pointPosNext.pos) > 0.1 * stock.gauge.scale()) {
@@ -92,8 +91,9 @@ public class TrackFollower {
                 }
 
                 yawReadout = toPointYaw + atPointYaw;
-                rollReadout = (float) -pointPosNext.roll;
-//                System.out.println("case2:front:" + front + rollReadout + "pos:" + pos);
+                rollReadout = (float) -pointPos.roll;
+                if(toMinPoint < 0)rollReadout = -rollReadout;
+//                System.out.println("offsetYaw:"+offsetYaw +"roll:"+ rollReadout + "stock rotation:"+ stock.getRotationYaw());
 
                 float min = this.min;
                 // TODO This implies the code above is broken, but works around some of the weirder edge cases.
@@ -103,16 +103,14 @@ public class TrackFollower {
                 }
                 if (DegreeFuncs.delta(0, atPointYaw) > 90) {
                     atPointYaw -= 180;
-                    rollReadout = -rollReadout;
                     min = -min;
                 }
 
                 matrix.setIdentity();
-                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
                 matrix.rotate(Math.toRadians(toPointYaw), 0, 1, 0);
                 matrix.rotate(Math.toRadians(toPointPitch), 0, 0, 1);
+                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
                 matrix.translate(-min / stock.gauge.scale(), 0, 0);
-//                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
                 matrix.rotate(Math.toRadians(atPointYaw), 0, 1, 0);
                 matrix.rotate(Math.toRadians(atPointPitch), 0, 0, 1);
                 matrix.translate(min / stock.gauge.scale(), 0, 0);

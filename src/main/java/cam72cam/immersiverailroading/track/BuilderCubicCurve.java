@@ -151,6 +151,11 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if(count == 0){//Meaning stepSize must be NaN, caused by curve length == 0
 			stepSize = targetStepSize;
 		}
+		for(int i = 0; i < points.size(); i++) {//TODO: RAIL_LEFT/RIGHT单独叠加pitch,增加控制选项用于对齐一边的铁轨高度
+			Vec3d p = points.get(i);
+			Vec3d newP = new Vec3d(p.x, p.y+ yOffsets.get(i), p.z);
+			points.set(i, newP);
+		}
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			float yaw;
@@ -172,7 +177,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, next.distanceTo(prev)));
 				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
-			res.add(new VecYPR(p.x, p.y + yOffsets.get(i), p.z, yaw, pitch, rolls.get(i).floatValue(), -1));
+			res.add(new VecYPR(p.x, p.y, p.z, yaw, pitch, rolls.get(i).floatValue(), -1));
 		}
 		cache.put(targetStepSize, Pair.of(stepSize, res));
 		return cache.get(targetStepSize);

@@ -35,6 +35,7 @@ public class FreightModel<ENTITY extends Freight, DEFINITION extends FreightDefi
         super.postRender(stock, state, partialTicks);
 
         if (cargoItems != null) {
+            state.rotate(stock.getRotationRoll(), 1, 0, 0);
             cargoItems.postRender(stock, state);
         }
     }

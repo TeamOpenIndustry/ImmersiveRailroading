@@ -193,11 +193,20 @@ public class MovementTrack {
 				Vec3d resultOpposite = currentPosition.pos.subtract(offset);
 
 				double roll = pos.getRoll();
-				if(Math.abs(MathUtil.trueModulus(pos.getYaw(), 360) - VecUtil.toWrongYaw(delta)) > 90) invertRollMultiplier = -1;
 
 				if (result.distanceToSquared(target) < resultOpposite.distanceToSquared(target)) {
+					if(VecUtil.delta(
+							VecUtil.toWrongYaw(pos.getYaw()),
+							VecUtil.toWrongYaw(result.subtract(currentPosition.pos))
+					) > 90) invertRollMultiplier = -1;
+
 					return currentPosition.toPosAndRoll(result, roll * invertRollMultiplier);
 				} else {
+					if(VecUtil.delta(
+							VecUtil.toWrongYaw(pos.getYaw()),
+							VecUtil.toWrongYaw(resultOpposite.subtract(currentPosition.pos))
+					) > 90) invertRollMultiplier = -1;
+
 					return currentPosition.toPosAndRoll(resultOpposite, roll * invertRollMultiplier);
 				}
 			}
@@ -238,11 +247,18 @@ public class MovementTrack {
 			VecYPR rightPos = positions.get(right);
 
 			if (leftDistance < 0.000001) {
-				if(Math.abs(MathUtil.trueModulus(leftPos.getYaw(), 360) - VecUtil.toWrongYaw(delta)) > 90) invertRollMultiplier = -1;
+				if(VecUtil.delta(
+						VecUtil.toWrongYaw(leftPos.getYaw()),
+						VecUtil.toWrongYaw(center.add(leftPos).subtract(currentPosition.pos))
+				) > 90) invertRollMultiplier = -1;
+
 				return currentPosition.toPosAndRoll(center.add(leftPos), leftPos.getRoll() * invertRollMultiplier);
 			}
 			if (rightDistance < 0.000001) {
-				if(Math.abs(MathUtil.trueModulus(rightPos.getYaw(), 360) - VecUtil.toWrongYaw(delta)) > 90) invertRollMultiplier = -1;
+				if(VecUtil.delta(VecUtil.toWrongYaw(rightPos.getYaw()),
+						VecUtil.toWrongYaw(center.add(rightPos).subtract(currentPosition.pos))
+				) > 90) invertRollMultiplier = -1;
+
 				return currentPosition.toPosAndRoll(center.add(rightPos), rightPos.getRoll() * invertRollMultiplier);
 			}
 
@@ -258,8 +274,18 @@ public class MovementTrack {
 
 			if(Math.abs(MathUtil.trueModulus(leftPos.getYaw(), 360) - VecUtil.toWrongYaw(delta)) > 90) invertRollMultiplier = -1;//todo 不确定
 			if (result.distanceToSquared(target) < resultOpposite.distanceToSquared(target)) {
+				if(VecUtil.delta(
+						VecUtil.toWrongYaw(leftPos.getYaw()),
+						VecUtil.toWrongYaw(result.subtract(currentPosition.pos))
+				) > 90) invertRollMultiplier = -1;
+
 				return currentPosition.toPosAndRoll(result, resRoll * invertRollMultiplier);
 			} else {
+				if(VecUtil.delta(
+						VecUtil.toWrongYaw(leftPos.getYaw()),
+						VecUtil.toWrongYaw(resultOpposite.subtract(currentPosition.pos))
+				) > 90) invertRollMultiplier = -1;
+
 				return currentPosition.toPosAndRoll(resultOpposite, resRollOpposite * invertRollMultiplier);
 			}
 		}

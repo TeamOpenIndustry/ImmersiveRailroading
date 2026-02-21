@@ -11,9 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
 public class RollAndOffsetInfo {
-    //TODO:roll and offset
-    // 先完成存储和gui（可能是是零时的），再来完成此处的计算逻辑，(需要验证检查)
-    // 再接下来补充寻路逻辑（还没写）
+    //TODO:为了防止切分后无法复原，再存储一份原始的ls,rolls,rollCtrls,offsets,offsetCtrls并且修正onPick逻辑（对于普通轨道也需要）,此外gui逻辑需要优化
     public final List<Double> ls;
     //Roll
     public final List<Vec3d> rolls;
@@ -264,7 +262,7 @@ public class RollAndOffsetInfo {
 //                int midPointAmount = 0;
 //                int endPointAmount = 0;
                 {//roll
-                    //起点段
+                    //start
                     if(lStart != ls.get(Physic(logicIdxStart))) {
                         Vec3d p1 = rolls.get(Physic(logicIdxStart - 1));
                         Vec3d p2 = rolls.get(Physic(logicIdxStart));
@@ -284,7 +282,7 @@ public class RollAndOffsetInfo {
                         newRollCtrls.add(ctrl1);
                         newRollCtrls.add(ctrl2);
                     }
-                    //中间
+                    //mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
                         newT.add(ls.get(Physic(i)));
                         newT.add(ls.get(Physic(i + 1)));//当idxStart==idxEnd时不会进入循环，不会越界
@@ -293,7 +291,7 @@ public class RollAndOffsetInfo {
                         newRollCtrls.add(rollCtrls.get(Physic(i)));
                         newRollCtrls.add(rollCtrls.get(Physic(i + 1)));
                     }
-                    //终点段
+                    //end
                     if(lEnd != ls.get(Physic(logicIdxEnd))) {
                         Vec3d p1 = rolls.get(Physic(logicIdxEnd));
                         Vec3d p2 = rolls.get(Physic(logicIdxEnd + 1));
@@ -441,23 +439,19 @@ public class RollAndOffsetInfo {
         int maxSegment = ls.size() / 2 - 1;
         if (segmentIdx > maxSegment) segmentIdx = maxSegment;
 
-        // 每段两个点
         int p1Idx = segmentIdx * 2;
         int p2Idx = p1Idx + 1;
 
-        // 获取点和控制点
         Vec3d p1 = points.get(p1Idx);
         Vec3d p2 = points.get(p2Idx);
         Vec3d ctrl1 = ctrls.get(p1Idx);
         Vec3d ctrl2Forward = ctrls.get(p2Idx);
         Vec3d ctrl2 = p2.scale(2).subtract(ctrl2Forward);
 
-        // 计算局部参数
         double x0 = ls.get(p1Idx);
         double x1 = ls.get(p2Idx);
         double localT = (targetL - x0) / (x1 - x0);
 
-        // 插值
         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
         Vec3d pos = curve.position(localT);
 
@@ -465,7 +459,6 @@ public class RollAndOffsetInfo {
     }
 
     public static int findSegment(double targetL, List<Double> ls) {
-        // 遍历每段 [t[2*i], t[2*i+1]]
         for (int i = 0; i < ls.size() / 2; i++) {
             double segStart = ls.get(i * 2);
             double segEnd = ls.get(i * 2 + 1);
@@ -473,7 +466,7 @@ public class RollAndOffsetInfo {
                 return i;
             }
         }
-        // 边界
+
         if (targetL <= ls.get(0)) return 0;
         return ls.size() / 2 - 1;
     }

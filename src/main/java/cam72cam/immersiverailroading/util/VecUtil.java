@@ -45,6 +45,9 @@ public class VecUtil {
 		float yaw = (float) Math.toDegrees(FastMath.atan2(-delta.x, delta.z));
 		return (yaw + 360f) % 360f;
 	}
+	public static float toWrongYaw(float yaw) {
+		return (-yaw + 360f) % 360f;
+	}
 	public static float toPitch(Vec3d delta) {
 		float yaw = (float) Math.toDegrees(FastMath.atan2(Math.sqrt(delta.z * delta.z + delta.x * delta.x), delta.y));
 		return (yaw + 360f) % 360f;
@@ -60,5 +63,9 @@ public class VecUtil {
 	
 	public static Vec3d between(Vec3d front, Vec3d rear) {
 		return new Vec3d((front.x + rear.x) / 2, (front.y + rear.y) / 2, (front.z + rear.z) / 2);
+	}
+	public static float delta(float yaw1, float yaw2) {
+		float diff = Math.abs(yaw1 - yaw2) % 360;
+		return diff > 180 ? 360 - diff : diff;
 	}
 }

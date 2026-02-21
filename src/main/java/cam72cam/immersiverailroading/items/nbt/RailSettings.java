@@ -12,8 +12,6 @@ import java.util.function.Consumer;
 public class RailSettings {
     public final Gauge gauge;
     public final TrackItems type;
-//    public final TrackItems pickType;
-//TODO: multiSwitch的主分路不能被subSplit，不然会分路会爆炸，有没有必要提前阻止build？
     public final int length;
     public final float degrees;
     public final float curvosity;
@@ -152,6 +150,9 @@ public class RailSettings {
         private Mutable(RailSettings settings) {
             this.gauge = settings.gauge;
             this.track = settings.track;
+
+            rollAndOffsetInfo = settings.rollAndOffsetInfo;
+
             this.type = settings.type;
             this.length = settings.length;
             this.degrees = settings.degrees;
@@ -173,6 +174,7 @@ public class RailSettings {
             type = TrackItems.STRAIGHT;
             track = "default";
             rollAndOffsetInfo = null;
+
             length = 10;
             degrees = 90;
             posType = TrackPositionType.FIXED;

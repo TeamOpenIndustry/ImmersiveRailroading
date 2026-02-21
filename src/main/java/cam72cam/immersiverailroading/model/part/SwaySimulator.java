@@ -94,13 +94,11 @@ public class SwaySimulator {
             swayMagnitude = Math.min(swayMagnitude, 3);
         }
 
-        public double getRollDegrees(float partialTicks) {//todo 分离trackRoll
-            double trackRoll = stock.getRotationRoll();
+        public double getRollDegrees(float partialTicks, float offsetRoll) {
             double res = 0;
 
             if (Math.abs(stock.getCurrentSpeed().metric() * stock.gauge.scale()) < 4) {
                 // don't calculate it
-                res = trackRoll;
                 return res;
             }
 
@@ -112,7 +110,7 @@ public class SwaySimulator {
 
             double tilt = stock.getDefinition().getTiltMultiplier() * (stock.getPrevRotationYaw() - stock.getRotationYaw()) * (stock.getCurrentSpeed().minecraft() > 0 ? 1 : -1);//TODO:implement custom tilt algorithm
 
-            res = sway + Math.abs(tilt) > Math.abs(trackRoll) ? tilt : trackRoll;
+            res = sway + Math.abs(tilt) > Math.abs(offsetRoll) ? tilt - offsetRoll : 0;
             return res;
         }
 
@@ -129,8 +127,8 @@ public class SwaySimulator {
 
     private final Map<UUID, Effect> effects = new HashMap<>();
 
-    public double getRollDegrees(EntityMoveableRollingStock stock, float partialTicks) {
-        return effects.computeIfAbsent(stock.getUUID(), uuid -> new Effect(stock)).getRollDegrees(partialTicks);
+    public double getRollDegrees(EntityMoveableRollingStock stock, float partialTicks, float offsetRoll) {
+        return effects.computeIfAbsent(stock.getUUID(), uuid -> new Effect(stock)).getRollDegrees(partialTicks, offsetRoll);
     }
 
     public void effects(EntityMoveableRollingStock stock) {
