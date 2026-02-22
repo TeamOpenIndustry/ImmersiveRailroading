@@ -430,11 +430,11 @@ public class TrackGui implements IScreen {
 				farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("customOffset"))));
 				farHeightOffsetSlider.setVisible(settings.type.hasSmoothing());
 
-				farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
+				farRadiusInput.setText(""+settings.transitionCurvesTag.getInteger("farRadius"));
 				farRadiusInput.setVisible(settings.type.hasFarRadius());
 				farRadiusText.setVisible(settings.type.hasFarRadius());
 
-				toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.cubicParabolaTag.getBoolean("isForward")));
+				toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.transitionCurvesTag.getBoolean("isForward")));
 				toggleStraightAtP1.setVisible(settings.type.hasFarRadius());
 
 				lengthInput.setText(""+settings.length);
@@ -548,11 +548,11 @@ public class TrackGui implements IScreen {
 					farHeightOffsetSlider.setValue(selectedWaySettings.posOffsetTag.getFloat("customOffset"));
 					farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", selectedWaySettings.posOffsetTag.getFloat("customOffset"))));
 
-					farRadiusInput.setText(""+selectedWaySettings.cubicParabolaTag.getInteger("farRadius"));
+					farRadiusInput.setText(""+selectedWaySettings.transitionCurvesTag.getInteger("farRadius"));
 					farRadiusInput.setVisible(selectedWaySettings.type.hasFarRadius());
 					farRadiusText.setVisible(selectedWaySettings.type.hasFarRadius());
 
-					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.cubicParabolaTag.getBoolean("isForward")));
+					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.transitionCurvesTag.getBoolean("isForward")));
 					toggleStraightAtP1.setVisible(selectedWaySettings.type.hasFarRadius());
 
 					lengthInput.setText("" + selectedWaySettings.length);
@@ -604,11 +604,11 @@ public class TrackGui implements IScreen {
 					farHeightOffsetSlider.setValue(settings.posOffsetTag.getFloat("customOffset"));
 					farHeightOffsetSlider.setText(GuiText.TRACK_FAR_HEIGHT_OFFSET.toString(String.format("%.2f", settings.posOffsetTag.getFloat("customOffset"))));
 
-					farRadiusInput.setText(""+settings.cubicParabolaTag.getInteger("farRadius"));
+					farRadiusInput.setText(""+settings.transitionCurvesTag.getInteger("farRadius"));
 					farRadiusInput.setVisible(multiSwitchInfo.realShapeType.hasFarRadius());
 					farRadiusText.setVisible(multiSwitchInfo.realShapeType.hasFarRadius());
 
-					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.cubicParabolaTag.getBoolean("isForward")));
+					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.transitionCurvesTag.getBoolean("isForward")));
 					toggleStraightAtP1.setVisible(settings.type.hasFarRadius());
 
 					lengthInput.setText(""+settings.length);
@@ -681,7 +681,7 @@ public class TrackGui implements IScreen {
 				float degreeValue = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
 				if(selectedWay==0) {
 					if(settings.type == TrackItems.CUBICPARABOLA){
-						while (degreeValue >= CubicCurve.cubicParabolaMaxAngle || !CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,settings.cubicParabolaTag.getInteger("farRadius"))){
+						while (degreeValue >= CubicCurve.cubicParabolaMaxAngle || !CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,settings.transitionCurvesTag.getInteger("farRadius"))){
 							degreeValue -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
 							if(Math.abs(degreeValue) < 1e-6) break;
 						}
@@ -689,7 +689,7 @@ public class TrackGui implements IScreen {
 					settings.degrees = degreeValue;
 				}else {
 					if(selectedWaySettings.type == TrackItems.CUBICPARABOLA){
-						while (degreeValue >= CubicCurve.cubicParabolaMaxAngle || !CubicCurve.isCubicParabolaDeltaValid(selectedWaySettings.length,selectedWaySettings.degrees,selectedWaySettings.cubicParabolaTag.getInteger("farRadius"))){
+						while (degreeValue >= CubicCurve.cubicParabolaMaxAngle || !CubicCurve.isCubicParabolaDeltaValid(selectedWaySettings.length,selectedWaySettings.degrees,selectedWaySettings.transitionCurvesTag.getInteger("farRadius"))){
 							degreeValue -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
 							if(Math.abs(degreeValue) < 1e-6) break;
 						}
@@ -705,7 +705,7 @@ public class TrackGui implements IScreen {
 
 		farRadiusText = new Button(screen, xtop, ytop, 80, height, GuiText.TRACK_FAR_RADIUS.toString());
 		farRadiusInput = new TextField(screen, xtop + 80, ytop, width-81, height);
-		farRadiusInput.setText("" + (selectedWay==0 ? settings.cubicParabolaTag.getInteger("farRadius") : selectedWaySettings.cubicParabolaTag.getInteger("farRadius")));
+		farRadiusInput.setText("" + (selectedWay==0 ? settings.transitionCurvesTag.getInteger("farRadius") : selectedWaySettings.transitionCurvesTag.getInteger("farRadius")));
 		farRadiusInput.setValidator(s -> {
 			if (s == null || s.length() == 0) {
 				return true;
@@ -720,12 +720,12 @@ public class TrackGui implements IScreen {
 			int max = 0x3f3f3f3f;
 			if(selectedWay == 0) {
 				if (val >= -1 && val != 0 && val <= max && CubicCurve.isCubicParabolaDeltaValid(settings.length,settings.degrees,val)) {
-					settings.cubicParabolaTag.setInteger("farRadius", val);
+					settings.transitionCurvesTag.setInteger("farRadius", val);
 					return true;
 				}
 			}else {
 				if (val >= -1 && val != 0 && val <= max && CubicCurve.isCubicParabolaDeltaValid(selectedWaySettings.length,selectedWaySettings.degrees,val)) {
-					selectedWaySettings.cubicParabolaTag.setInteger("farRadius", val);
+					selectedWaySettings.transitionCurvesTag.setInteger("farRadius", val);
 					syncMultiSwitchInfo();
 					return true;
 				}
@@ -755,21 +755,21 @@ public class TrackGui implements IScreen {
 
 		String toggleStraightAtP1Text;
 		if(selectedWay==0){
-			toggleStraightAtP1Text = GuiText.TRACK_IS_FORWARD.toString(settings.cubicParabolaTag.getBoolean("isForward"));
+			toggleStraightAtP1Text = GuiText.TRACK_IS_FORWARD.toString(settings.transitionCurvesTag.getBoolean("isForward"));
 		}else {
-			toggleStraightAtP1Text = GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.cubicParabolaTag.getBoolean("isForward"));
+			toggleStraightAtP1Text = GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.transitionCurvesTag.getBoolean("isForward"));
 		}
 		this.toggleStraightAtP1 = new Button(screen, xtop, ytop, width, height, toggleStraightAtP1Text) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if(selectedWay == 0){
-					boolean wasForward = settings.cubicParabolaTag.getBoolean("isForward");
-					settings.cubicParabolaTag.setBoolean("isForward", !wasForward);
-					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.cubicParabolaTag.getBoolean("isForward")));
+					boolean wasForward = settings.transitionCurvesTag.getBoolean("isForward");
+					settings.transitionCurvesTag.setBoolean("isForward", !wasForward);
+					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(settings.transitionCurvesTag.getBoolean("isForward")));
 				}else {
-					boolean wasForward = selectedWaySettings.cubicParabolaTag.getBoolean("isForward");
-					selectedWaySettings.cubicParabolaTag.setBoolean("isForward", !wasForward);
-					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.cubicParabolaTag.getBoolean("isForward")));
+					boolean wasForward = selectedWaySettings.transitionCurvesTag.getBoolean("isForward");
+					selectedWaySettings.transitionCurvesTag.setBoolean("isForward", !wasForward);
+					toggleStraightAtP1.setText(GuiText.TRACK_IS_FORWARD.toString(selectedWaySettings.transitionCurvesTag.getBoolean("isForward")));
 					syncMultiSwitchInfo();
 				}
 			}

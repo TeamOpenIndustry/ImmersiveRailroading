@@ -172,8 +172,8 @@ public class RailSettings {
         public TagCompound pitchTag;
         @TagField(value = "posOffset")
         public TagCompound posOffsetTag;
-        @TagField(value = "cubicParabola")
-        public TagCompound cubicParabolaTag;
+        @TagField(value = "transitionCurves")
+        public TagCompound transitionCurvesTag;
         @TagField("transfertableEntryCount")
         public int transfertableEntryCount;
         @TagField("transfertableEntrySpacing")
@@ -191,9 +191,9 @@ public class RailSettings {
             posOffsetTag.setFloat("placementOffset", settings.placementOffset);
             posOffsetTag.setFloat("customOffset", settings.customOffset);
 
-            cubicParabolaTag = new TagCompound();
-            cubicParabolaTag.setBoolean("isForward", settings.isForward);
-            cubicParabolaTag.setInteger("farRadius", settings.farRadius);
+            transitionCurvesTag = new TagCompound();
+            transitionCurvesTag.setBoolean("isForward", settings.isForward);
+            transitionCurvesTag.setInteger("farRadius", settings.farRadius);
 
             this.type = settings.type;
             this.pickType = settings.pickType;
@@ -226,9 +226,9 @@ public class RailSettings {
             posOffsetTag.setFloat("placementOffset", 0.0f);
             posOffsetTag.setFloat("customOffset", 0.0f);
 
-            cubicParabolaTag = new TagCompound();
-            cubicParabolaTag.setBoolean("isForward", true);
-            cubicParabolaTag.setInteger("farRadius", -1);
+            transitionCurvesTag = new TagCompound();
+            transitionCurvesTag.setBoolean("isForward", true);
+            transitionCurvesTag.setInteger("farRadius", -1);
 
             length = 10;
             degrees = 90;
@@ -261,8 +261,8 @@ public class RailSettings {
                     pitchTag.getFloat("end"),
                     posOffsetTag.getFloat("placementOffset"),
                     posOffsetTag.getFloat("customOffset"),
-                    cubicParabolaTag.getBoolean("isForward"),
-                    cubicParabolaTag.getInteger("farRadius"),
+                    transitionCurvesTag.getBoolean("isForward"),
+                    transitionCurvesTag.getInteger("farRadius"),
                     direction,
                     railBed,
                     railBedFill,
