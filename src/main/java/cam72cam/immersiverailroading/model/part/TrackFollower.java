@@ -75,15 +75,15 @@ public class TrackFollower {
                 float toPointPitch = 0;
                 float atPointPitch = 0;
 
-                PathingData pointPos = nextPosition(stock.getWorld(), stock.gauge, new PathingData(offsetPos, 0, toMinPoint < 0 ? rollReadout : -rollReadout), stock.getRotationYaw(), offsetYaw, toMinPoint);
+                PathingData pointPos = nextPosition(stock.getWorld(), stock.gauge, new PathingData(offsetPos, toMinPoint < 0 ? rollReadout : -rollReadout), stock.getRotationYaw(), offsetYaw, toMinPoint);
                 PathingData pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, betweenPoints);
-                Vec3d delta = stock.getPosition().subtract(pointPos.pos).scale(max); // Scale copies sign
-                if (pointPos.pos.distanceTo(pointPosNext.pos) > 0.1 * stock.gauge.scale()) {
+                Vec3d delta = stock.getPosition().subtract(pointPos.getPos()).scale(max); // Scale copies sign
+                if (pointPos.getPos().distanceTo(pointPosNext.getPos()) > 0.1 * stock.gauge.scale()) {
                     toPointYaw = VecUtil.toYaw(delta) + stock.getRotationYaw() + 180;
-                    atPointYaw = VecUtil.toYaw(pointPos.pos.subtract(pointPosNext.pos)) + stock.getRotationYaw() + 180 - toPointYaw ;
+                    atPointYaw = VecUtil.toYaw(pointPos.getPos().subtract(pointPosNext.getPos())) + stock.getRotationYaw() + 180 - toPointYaw ;
 
                     toPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(delta, stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch();
-                    atPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(pointPos.pos.subtract(pointPosNext.pos), stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch() - toPointPitch;
+                    atPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(pointPos.getPos().subtract(pointPosNext.getPos()), stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch() - toPointPitch;
                 } else {
                     pos = null; // Force recompute
                 }
@@ -118,11 +118,11 @@ public class TrackFollower {
     }
 
     public PathingData nextPosition(World world, Gauge gauge, PathingData currentPosition, float rotationYaw, float bogeyYaw, double distance) {
-        ITrack rail = MovementTrack.findTrack(world, currentPosition.pos, rotationYaw, gauge.value());
+        ITrack rail = MovementTrack.findTrack(world, currentPosition.getPos(), rotationYaw, gauge.value());
         if (rail == null) {
             return currentPosition;
         }
-        PathingData result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw));
+        PathingData result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw), rail.getTrackGauge());
         if (result == null) {
             return currentPosition;
         }
