@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
+import cam72cam.immersiverailroading.thirdparty.trackapi.PathingData;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.IRedstoneProvider;
 import cam72cam.mod.entity.Player;
@@ -402,7 +403,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	@Override
-	public PathingContext getNextPosition(PathingContext currentPosition, Vec3d motion) {//todo 需要根据什么矫正roll的正负?
+	public PathingData getNextPosition(PathingData currentPosition, Vec3d motion) {//todo 需要根据什么矫正roll的正负?
 		double distanceMetersSq = motion.lengthSquared();
 		double maxDistance = 0.25;
 		if (distanceMetersSq * 0.9 > maxDistance * maxDistance) {
@@ -413,7 +414,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	private Collection<TileRail> tiles = null;
-	public PathingContext getNextPositionShort(PathingContext currentPosition, Vec3d motion) {
+	public PathingData getNextPositionShort(PathingData currentPosition, Vec3d motion) {
 		if (this.getReplaced() == null) {
 			// Simple common case, maybe this does not need to be optimized out of the for loop below?
 			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
@@ -429,7 +430,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				tile = tile.getParentTile();
 			}
 
-			PathingContext potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
+			PathingData potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
 			if (potential != null) {
 				return potential;
 			}
@@ -454,7 +455,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 
-		PathingContext nextPos = currentPosition;
+		PathingData nextPos = currentPosition;
 		Vec3d predictedPos = currentPosition.pos.add(motion);
 		boolean hasSwitchSet = false;
 
@@ -465,7 +466,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				tile = tile.getParentTile();
 			}
 
-			PathingContext potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
+			PathingData potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
 			if (potential != null) {//next lines will compare motion yaw and potential yaw
 				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
 				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case

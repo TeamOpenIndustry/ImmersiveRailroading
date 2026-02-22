@@ -6,15 +6,13 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
-import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.PathingContext;
+import cam72cam.immersiverailroading.thirdparty.trackapi.PathingData;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.DegreeFuncs;
 import cam72cam.mod.world.World;
 import util.Matrix4;
 
-import java.util.Scanner;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -77,8 +75,8 @@ public class TrackFollower {
                 float toPointPitch = 0;
                 float atPointPitch = 0;
 
-                PathingContext pointPos = nextPosition(stock.getWorld(), stock.gauge, new PathingContext(offsetPos, 0, toMinPoint < 0 ? rollReadout : -rollReadout), stock.getRotationYaw(), offsetYaw, toMinPoint);
-                PathingContext pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, betweenPoints);
+                PathingData pointPos = nextPosition(stock.getWorld(), stock.gauge, new PathingData(offsetPos, 0, toMinPoint < 0 ? rollReadout : -rollReadout), stock.getRotationYaw(), offsetYaw, toMinPoint);
+                PathingData pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, betweenPoints);
                 Vec3d delta = stock.getPosition().subtract(pointPos.pos).scale(max); // Scale copies sign
                 if (pointPos.pos.distanceTo(pointPosNext.pos) > 0.1 * stock.gauge.scale()) {
                     toPointYaw = VecUtil.toYaw(delta) + stock.getRotationYaw() + 180;
@@ -119,12 +117,12 @@ public class TrackFollower {
         return matrix;
     }
 
-    public PathingContext nextPosition(World world, Gauge gauge, PathingContext currentPosition, float rotationYaw, float bogeyYaw, double distance) {
+    public PathingData nextPosition(World world, Gauge gauge, PathingData currentPosition, float rotationYaw, float bogeyYaw, double distance) {
         ITrack rail = MovementTrack.findTrack(world, currentPosition.pos, rotationYaw, gauge.value());
         if (rail == null) {
             return currentPosition;
         }
-        PathingContext result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw));
+        PathingData result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw));
         if (result == null) {
             return currentPosition;
         }

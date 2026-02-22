@@ -1,13 +1,9 @@
 package cam72cam.immersiverailroading.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRollingStock;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -16,6 +12,7 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.thirdparty.trackapi.PathingData;
 import cam72cam.mod.entity.Player;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.util.DegreeFuncs;
@@ -48,7 +45,7 @@ public class SpawnUtil {
 		if (worldIn.isServer) {
 			EntityRollingStock stock = def.spawn(worldIn, new Vec3d(pos).add(0.5, 0.1, 0.5), yaw, gauge, data.texture);
 
-			PathingContext center = new PathingContext(stock.getPosition(), 0, 0);//only pos is needed
+			PathingData center = new PathingData(stock.getPosition(), 0, 0);//only pos is needed
 			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(-0.1, yaw));
 			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(0.1, yaw));
 			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(offset, yaw));
@@ -74,14 +71,14 @@ public class SpawnUtil {
 
 					ITrack frontte = ITrack.get(worldIn, front, true);
 					if (frontte != null) {
-						PathingContext frontNext = frontte.getNextPosition(new PathingContext(front, 0, 0), VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));//only pos is needed to provide
+						PathingData frontNext = frontte.getNextPosition(new PathingData(front, 0, 0), VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));//only pos is needed to provide
 						moveable.setFrontYaw(VecUtil.toWrongYaw(frontNext.pos.subtract(front)));
 						moveable.setFrontRoll((float) -frontNext.roll);
 					}
 
 					ITrack rearte = ITrack.get(worldIn, rear, true);
 					if (rearte != null) {
-						PathingContext rearNext = rearte.getNextPosition(new PathingContext(rear, 0, 0), VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));
+						PathingData rearNext = rearte.getNextPosition(new PathingData(rear, 0, 0), VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()));
 						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.pos.subtract(rear)));
 						moveable.setRearRoll((float) -rearNext.roll);
 					}

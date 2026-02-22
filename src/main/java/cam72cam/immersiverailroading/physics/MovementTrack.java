@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.immersiverailroading.util.PathingContext;
+import cam72cam.immersiverailroading.thirdparty.trackapi.PathingData;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.math.Rotation;
@@ -54,9 +54,9 @@ public class MovementTrack {
 		return null;
 	}
 
-	public static PathingContext iterativePathing(World world, PathingContext startPosition, ITrack te, double gauge, Vec3d motion, double maxDistance) {
-		PathingContext iterationPosition = startPosition;
-		PathingContext prevPosition = startPosition;
+	public static PathingData iterativePathing(World world, PathingData startPosition, ITrack te, double gauge, Vec3d motion, double maxDistance) {
+		PathingData iterationPosition = startPosition;
+		PathingData prevPosition = startPosition;
 		double totalDistance = motion.length();
 		double maxDistanceSquared = maxDistance * maxDistance;
 		double motionLengthSquared = motion.lengthSquared();
@@ -102,7 +102,7 @@ public class MovementTrack {
 		return iterationPosition;
 	}
 
-	public static PathingContext nextPositionDirect(World world, PathingContext currentPosition, TileRail rail, Vec3d delta) {
+	public static PathingData nextPositionDirect(World world, PathingData currentPosition, TileRail rail, Vec3d delta) {
 		if (rail == null) {
 			if (world.isServer) {
 				return null; // OFF TRACK

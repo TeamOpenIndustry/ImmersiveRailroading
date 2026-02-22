@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.PathingContext;
+import cam72cam.immersiverailroading.thirdparty.trackapi.PathingData;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -266,8 +266,8 @@ public class SimulationState {
             Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront - config.offsetFront, yawFront);
             Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear - config.offsetRear, yawRear);
 
-            couplerPositionFront = trackFront.getNextPosition(new PathingContext(positionFront,  0, 0), couplerVecFront).pos;
-            couplerPositionRear = trackRear.getNextPosition(new PathingContext(positionRear, 0, 0), couplerVecRear).pos;
+            couplerPositionFront = trackFront.getNextPosition(new PathingData(positionFront,  0, 0), couplerVecFront).pos;
+            couplerPositionRear = trackRear.getNextPosition(new PathingData(positionRear, 0, 0), couplerVecRear).pos;
             //couplerPositionFront = couplerPositionFront.subtract(position).normalize().scale(Math.abs(config.couplerDistanceFront)).add(position);
             //couplerPositionRear = couplerPositionRear.subtract(position).normalize().scale(Math.abs(config.couplerDistanceRear)).add(position);
         }
@@ -379,8 +379,8 @@ public class SimulationState {
             yawRear += 180;
         }
 
-        PathingContext nextFront = trackFront.getNextPosition(new PathingContext(positionFront, 0, rollFront), VecUtil.fromWrongYaw(distance, yawFront));
-        PathingContext nextRear = trackRear.getNextPosition(new PathingContext(positionRear, 0, rollRear), VecUtil.fromWrongYaw(distance, yawRear));
+        PathingData nextFront = trackFront.getNextPosition(new PathingData(positionFront, 0, rollFront), VecUtil.fromWrongYaw(distance, yawFront));
+        PathingData nextRear = trackRear.getNextPosition(new PathingData(positionRear, 0, rollRear), VecUtil.fromWrongYaw(distance, yawRear));
         rollFront = (float) nextFront.roll * invertRollMultiplier;
         rollRear = (float) nextRear.roll * invertRollMultiplier;
 
