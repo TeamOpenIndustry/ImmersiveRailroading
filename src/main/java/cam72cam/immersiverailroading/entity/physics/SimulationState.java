@@ -32,6 +32,7 @@ public class SimulationState {
     public double velocity;
     public float yaw;
     public float pitch;
+    public float roll;//this variable is not really used yet, but may be used in the future
     public IBoundingBox bounds;
 
     // Render purposes
@@ -187,8 +188,7 @@ public class SimulationState {
                 (DegreeFuncs.delta(VecUtil.toWrongYaw(stock.getVelocity()), stock.getRotationYaw()) < 90 ? 1 : -1);
         yaw = stock.getRotationYaw();
         pitch = stock.getRotationPitch();
-        rollFront = stock.getFrontRoll();
-        rollRear = stock.getRearRoll();
+        roll = stock.getRotationRoll();
 
         interactingFront = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.FRONT);
         interactingRear = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.BACK);
@@ -201,6 +201,8 @@ public class SimulationState {
 
         yawFront = stock.getFrontYaw();
         yawRear = stock.getRearYaw();
+        rollFront = stock.getFrontRoll();
+        rollRear = stock.getRearRoll();
 
         recalculatedAt = position;
 
@@ -221,8 +223,7 @@ public class SimulationState {
         this.velocity = prev.velocity;
         this.yaw = prev.yaw;
         this.pitch = prev.pitch;
-        this.rollFront = prev.rollFront;
-        this.rollRear = prev.rollRear;
+        this.roll = prev.roll;
 
         this.interactingFront = prev.interactingFront;
         this.interactingRear = prev.interactingRear;
@@ -235,6 +236,8 @@ public class SimulationState {
 
         this.yawFront = prev.yawFront;
         this.yawRear = prev.yawRear;
+        this.rollFront = prev.rollFront;
+        this.rollRear = prev.rollRear;
         couplerPositionFront = prev.couplerPositionFront;
         couplerPositionRear = prev.couplerPositionRear;
 
@@ -395,6 +398,8 @@ public class SimulationState {
 
             Vec3d bogeyDelta = nextFront.getPos().subtract(nextRear.getPos());
             yaw = VecUtil.toWrongYaw(bogeyDelta);
+            //TODO:do we need to fix roll value here?
+            //roll = ???
             pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRear.getPos().distanceTo(nextFront.getPos())));
             // TODO Rescale fixes issues with curves losing precision, but breaks when correcting stock positions
             position = position.add(deltaCenter/*.normalize().scale(distance)*/);

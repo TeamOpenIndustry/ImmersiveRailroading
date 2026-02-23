@@ -414,19 +414,25 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
 
     public float getFrontRoll() {//todo: getFront/RearRoll should be update if UMC entity implements roll value
-        return this.frontRoll;
+        if(this.frontRoll != null) {
+            return this.frontRoll;
+        }
+        return 0;//seems this will only happen in some case when spawning train on MinecraftRail?
     }
     public void setFrontRoll(float val) {
         this.frontRoll = val;
     }
     public float getRearRoll() {
-        return this.rearRoll;
+        if(this.rearRoll != null) {
+            return this.rearRoll;
+        }
+        return 0;//TODO:any other way like getRotationRoll() to fallback?
     }
     public void setRearRoll(float val) {
         this.rearRoll = val;
     }
     public float getRotationRoll() {//todo: consider weight of every bogey? and if we have more bogeys in future...
-        return (frontRoll + rearRoll) / 2;
+        return (getFrontRoll() + getRearRoll()) / 2;
     }
 
     public float getTickSkew() {
