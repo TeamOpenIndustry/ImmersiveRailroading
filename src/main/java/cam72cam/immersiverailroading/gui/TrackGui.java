@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
-import cam72cam.immersiverailroading.gui.components.NumberInputer;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -53,7 +52,7 @@ public class TrackGui implements IScreen {
 	private Button directionButton;
 	private Button bedTypeButton;
 	private Button bedFillButton;
-    private Button rollAndOffsetPageButton;
+    private Button TrackExtraGuiButton;
 
 	private Slider transfertableEntryCountSlider;
 	private Slider transfertableEntrySpacingSlider;
@@ -198,13 +197,14 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-        rollAndOffsetPageButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, "Config Roll") {
+        TrackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, "Config Roll") {
             @Override
             public void onClick(Player.Hand hand) {
                 if (te != null) {
-//                    GuiTypes.ROLL_OFFSET_PREVIEW.open(MinecraftClient.getPlayer(),te.getPos());
+					te.shouldTrackGuiActive = false;//todo:需要发包吗？
+                    GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(),te.getPos());
                 } else {
-                    GuiTypes.ROLL_OFFSET.open(MinecraftClient.getPlayer());
+                    GuiTypes.RAIL_EXTRA.open(MinecraftClient.getPlayer());
                 }
             }
         };

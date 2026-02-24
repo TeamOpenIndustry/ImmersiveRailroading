@@ -47,6 +47,7 @@ public enum GuiText {
 	TRACK_DIRECTION("track.direction"),
 	TRACK_PLACE_BLUEPRINT_TRUE("track.place_blueprint_true"),
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
+	TRACK_ROLL_OFFSET_TYPE("track.roll_offset_type"),
 	
 	LOCO_WORKS("loco.works"),
 //	LOCO_HORSE_POWER("loco.horse_power"),

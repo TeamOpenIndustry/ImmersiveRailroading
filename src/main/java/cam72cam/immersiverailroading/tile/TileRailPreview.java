@@ -22,6 +22,7 @@ import cam72cam.mod.util.Facing;
 public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
 	private RailInfo info;
+	public boolean shouldTrackGuiActive = true;//this doesn't sync on client and server
 
 	@TagField
 	private ItemStack item;

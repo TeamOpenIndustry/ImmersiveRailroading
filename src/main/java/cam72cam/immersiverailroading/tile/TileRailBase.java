@@ -1019,14 +1019,34 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	@Override
-	public ItemStack onPick() {
+	public ItemStack onPick() {//todo:返回父级的原始rollAndOffsetInfo
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 
 		TileRail parent = this.getParentTile();
 		if (parent == null) {
 			return stack;
 		}
-		parent.info.settings.write(stack);
+
+//		if(parent.info.settings.rollAndOffsetInfo != null) {//debug
+//			RollAndOffsetInfo rollAndOffsetInfo = parent.info.settings.rollAndOffsetInfo;
+//			for(int i = 0; i < rollAndOffsetInfo.ls.size(); i++) {
+//				System.out.println(
+//						"====================" +
+//						"index:" + i +
+//						", l:" + rollAndOffsetInfo.ls.get(i) +
+//						", roll:" + rollAndOffsetInfo.rolls.get(i) +
+//						", rollCtrl:" + rollAndOffsetInfo.rollCtrls.get(i)
+//						+ "===================="
+//				);
+//			}
+//		}
+
+		if(parent.info.settings.rollAndOffsetInfo != null) {
+			parent.info.settings.with(mutable -> mutable.rollAndOffsetInfo = mutable.pickRollAndOffsetInfo).write(stack);
+		}else {
+			parent.info.settings.write(stack);
+		}
+
 		return stack;
 	}
 

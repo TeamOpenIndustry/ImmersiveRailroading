@@ -25,9 +25,8 @@ public class GuiTypes {
     public static final EntityGUI<LocomotiveDiesel> DIESEL_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveDiesel.class, TankContainer::new);
 
     public static final GUI RAIL = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "RAIL"), TrackGui::new);
-    public static final BlockGUI RAIL_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, TrackGui::new);
-    public static final GUI ROLL_OFFSET = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "ROLL_OFFSET"), RollAndOffsetGui::new);
-//    public static final BlockGUI ROLL_OFFSET_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, RollAndOffsetGui::new);//todo 需要别的方式
+    public static final BlockGUI RAIL_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, GuiTypes::createTrackGuiScreen);
+    public static final GUI RAIL_EXTRA = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "ROLL_OFFSET"), TrackExtraGui::new);
     public static final BlockGUI RAIL_AUGMENT = GuiRegistry.registerBlock(TileRailBase.class, AugmentFilterGUI::new);
     public static final GUI TRACK_EXCHANGER = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "TRACK_EXCHANGER"), TrackExchangerGui::new);
     public static final GUI PAINT_BRUSH = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "PAINT_BRUSH"), PaintBrushPicker::new);
@@ -46,6 +45,14 @@ public class GuiTypes {
             return new PlateRollerGUI(mb);
         }
         return null;
+    }
+
+    private static IScreen createTrackGuiScreen(TileRailPreview te) {
+        if(te.shouldTrackGuiActive) {
+            return new TrackGui(te);
+        }else {
+            return new TrackExtraGui(te);
+        }
     }
 
     public static final GUI CONFIG = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "config"), () -> new ConfigGui(Config.class, ConfigGraphics.class, ConfigSound.class, ConfigPermissions.class));

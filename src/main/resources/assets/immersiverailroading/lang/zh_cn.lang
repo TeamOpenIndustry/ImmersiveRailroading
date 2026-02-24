@@ -114,6 +114,7 @@ gui.immersiverailroading:track.rail_bed=道床：%s
 gui.immersiverailroading:track.rail_bed_fill=道床填方：%s
 gui.immersiverailroading:track.place_blueprint_true=放置轨道蓝图
 gui.immersiverailroading:track.place_blueprint_false=直接放置轨道
+gui.immersiverailroading:track.roll_offset_type=超高垂直偏移方式：
 
 gui.immersiverailroading:loco.works=服务公司：%s
 gui.immersiverailroading:loco.power=功率：%s
@@ -165,6 +166,14 @@ track.immersiverailroading:smoothing.neither=无平滑
 track.immersiverailroading:direction.none=不锁定
 track.immersiverailroading:direction.left=锁定至右向
 track.immersiverailroading:direction.right=锁定至左向
+
+track.immersiverailroading:ExtraInfoType.roll=超高角度
+track.immersiverailroading:ExtraInfoType.y_offset=垂直偏移
+track.immersiverailroading:ExtraInfoType.z_offset=水平偏移
+
+track.immersiverailroading:rollYOffsetType.mid=对齐中间点
+track.immersiverailroading:rollYOffsetType.high=对齐最低点
+track.immersiverailroading:rollYOffsetType.low=对齐最高点
 
 part.immersiverailroading:component.frame=车架
 part.immersiverailroading:component.front_frame=前车架

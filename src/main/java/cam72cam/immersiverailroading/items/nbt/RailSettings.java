@@ -16,6 +16,7 @@ public class RailSettings {
     public final float degrees;
     public final float curvosity;
     public final RollAndOffsetInfo rollAndOffsetInfo;
+    public final RollAndOffsetInfo pickRollAndOffsetInfo;
     public final TrackPositionType posType;
     public final TrackSmoothing smoothing;
     public final TrackDirection direction;
@@ -27,7 +28,7 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -44,6 +45,7 @@ public class RailSettings {
         this.transfertableEntryCount = count;
         this.transfertableEntrySpacing = spacing;
         this.rollAndOffsetInfo = rollAndOffsetInfo;
+        this.pickRollAndOffsetInfo = pickRollAndOffsetInfo;
     }
 
     public void write(ItemStack stack) {
@@ -141,6 +143,8 @@ public class RailSettings {
 
         @TagField("rollAndOffsetInfo")
         public RollAndOffsetInfo rollAndOffsetInfo;
+        @TagField("pickRollAndOffsetInfo")
+        public RollAndOffsetInfo pickRollAndOffsetInfo;
 
         @TagField("transfertableEntryCount")
         public int transfertableEntryCount;
@@ -152,6 +156,7 @@ public class RailSettings {
             this.track = settings.track;
 
             rollAndOffsetInfo = settings.rollAndOffsetInfo;
+            pickRollAndOffsetInfo = settings.pickRollAndOffsetInfo;
 
             this.type = settings.type;
             this.length = settings.length;
@@ -174,6 +179,7 @@ public class RailSettings {
             type = TrackItems.STRAIGHT;
             track = "default";
             rollAndOffsetInfo = null;
+            pickRollAndOffsetInfo = rollAndOffsetInfo;
 
             length = 10;
             degrees = 90;
@@ -202,6 +208,7 @@ public class RailSettings {
                     posType,
                     smoothing,
                     rollAndOffsetInfo,
+                    pickRollAndOffsetInfo,
                     direction,
                     railBed,
                     railBedFill,

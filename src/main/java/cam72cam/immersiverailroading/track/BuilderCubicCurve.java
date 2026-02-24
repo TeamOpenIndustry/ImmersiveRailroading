@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.util.FastMath;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -34,7 +35,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subCurves.size() > 1) {
 			subBuilders = new ArrayList<>();
 
-			List<RollAndOffsetInfo> subRollAndOffsetInfos = info.settings.rollAndOffsetInfo == null ? null : info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.curvesToTRange(subCurves), true);
+			List<RollAndOffsetInfo> subRollAndOffsetInfos = info.settings.rollAndOffsetInfo == null ? null : info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.toRange(subCurves), true);
 
             for (int i = 0;i <subCurves.size(); i++) {
 				CubicCurve subCurve = subCurves.get(i);
@@ -130,7 +131,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 		List<CubicCurve> curves =  curve.subsplit(200);
 		curve = curves.get(0);
 		RollAndOffsetInfo rollAndOffsetInfo;
-		rollAndOffsetInfo = info.settings.rollAndOffsetInfo == null ? null : info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.curvesToTRange(curves), true).get(0);
+		rollAndOffsetInfo = info.settings.rollAndOffsetInfo == null ? null : info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.toRange(curves), true).get(0);
+		RollAndOffsetInfo.RollYOffsetType type = rollAndOffsetInfo == null ? RollAndOffsetInfo.RollYOffsetType.MID : rollAndOffsetInfo.offsetType;
 
 		double length = curve.lengthWithCache(1000);
 		int count = (int) (length / targetStepSize);//Adapt the length
@@ -147,13 +149,37 @@ public class BuilderCubicCurve extends BuilderIterator {
 		List<Vec3d> points = PosRollOffset.getPoints(posRollOffsets);
 		List<Double> rolls = PosRollOffset.getRolls(posRollOffsets);
 		List<Double> yOffsets = PosRollOffset.getYOffsets(posRollOffsets);
+		List<Double> zOffsets = PosRollOffset.getZOffsets(posRollOffsets);
 
 		if(count == 0){//Meaning stepSize must be NaN, caused by curve length == 0
 			stepSize = targetStepSize;
 		}
-		for(int i = 0; i < points.size(); i++) {//TODO: RAIL_LEFT/RIGHT单独叠加pitch,增加控制选项用于对齐一边的铁轨高度
+
+		double halfGauge = info.settings.gauge.value() / 2;
+		switch (type) {
+			case HIGH:
+				for(int i = 0; i < points.size(); i++) {
+					Vec3d p = points.get(i);
+					double tan = Math.tan(Math.toRadians(Math.abs(rolls.get(i))));
+					Vec3d newP = new Vec3d(p.x, p.y + tan * halfGauge, p.z);
+					points.set(i, newP);
+				}
+				break;
+			case LOW:
+				for(int i = 0; i < points.size(); i++) {
+					Vec3d p = points.get(i);
+					double tan = Math.tan(Math.toRadians(Math.abs(rolls.get(i))));
+					Vec3d newP = new Vec3d(p.x, p.y - tan * halfGauge, p.z);
+					points.set(i, newP);
+				}
+				break;
+			case MID:
+				break;
+		}
+
+		for(int i = 0; i < points.size(); i++) {//TODO: RAIL_LEFT/RIGHT单独叠加pitch
 			Vec3d p = points.get(i);
-			Vec3d newP = new Vec3d(p.x, p.y+ yOffsets.get(i), p.z);
+			Vec3d newP = new Vec3d(p.x, p.y + yOffsets.get(i), p.z);
 			points.set(i, newP);
 		}
 		for(int i = 0; i < points.size(); i++) {
@@ -177,7 +203,11 @@ public class BuilderCubicCurve extends BuilderIterator {
 				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, next.distanceTo(prev)));
 				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
-			res.add(new VecYPR(p.x, p.y, p.z, yaw, pitch, rolls.get(i).floatValue(), -1));
+			Vec3d horizontalOffset;
+			if(zOffsets.get(i) == 0) horizontalOffset = Vec3d.ZERO;
+			else horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90);
+
+			res.add(new VecYPR(p.x + horizontalOffset.x, p.y, p.z + horizontalOffset.z, yaw, pitch, rolls.get(i).floatValue(), -1));
 		}
 		cache.put(targetStepSize, Pair.of(stepSize, res));
 		return cache.get(targetStepSize);

@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackSmoothing;
-import cam72cam.immersiverailroading.util.PosRollOffset;
 import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
@@ -90,47 +89,9 @@ public class CubicCurve {
         return a.scale(1 - t).add(b.scale(t));
     }
 
-    public CubicCurve getLeftByX(double x) {
-        double localT = getTByX(x);
-        CubicCurve truncated = getLeft(localT);
-        double scale = (x - p1.x) / (truncated.p2.x - p1.x);//这个应该约等于1,如果没有那就是问题
 
-        Vec3d newCtrl1 = new Vec3d(
-                p1.x + (truncated.ctrl1.x - truncated.p1.x) * scale,
-                truncated.ctrl1.y,
-                truncated.ctrl1.z
-        );
 
-        Vec3d newCtrl2 = new Vec3d(
-                x - (truncated.p2.x - truncated.ctrl2.x) * scale,
-                truncated.ctrl2.y,
-                truncated.ctrl2.z
-        );
 
-        Vec3d newP2 = new Vec3d(x, truncated.p2.y, truncated.p2.z);
-
-        return new CubicCurve(p1, newCtrl1, newCtrl2, newP2);
-    }
-
-    public double getTByX(double targetX) {
-        if (Math.abs(p2.x - p1.x) < 1e-12)return 0.5;
-        double targetLocal = (targetX - p1.x) / (p2.x - p1.x);
-        double t = targetLocal;
-
-        for (int i = 0; i < 10; i++) {
-            Vec3d pos = position(t);
-            double error = pos.x - targetX;
-            if (Math.abs(error) < 1e-12) break;
-
-            Vec3d deriv = derivative(t);
-            if (Math.abs(deriv.x) < 1e-12) break;
-
-            t = t - error / deriv.x;
-            t = Math.max(0, Math.min(1, t));
-        }
-
-        return t;
-    }
 
     public Pair<CubicCurve, CubicCurve> split(double t) {
         return Pair.of(this.getLeft(t), this.reverse().getLeft(1-t));
@@ -215,8 +176,9 @@ public class CubicCurve {
         result.add(new PosRollOffset(
                 p1,
                 rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(0),
-                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getOffset(0))
-        );
+                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getYOffset(0),
+                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getZOffset(0)
+        ));
         if(p1.equals(p2)){
             return result;
         }
@@ -229,7 +191,7 @@ public class CubicCurve {
                 double low = t[i];
                 double high = t[i+1];
                 double currentLen = len[i];
-                double mid = (low + high) / 2;
+                double mid = (low + high) / 2;//this is a t value not length value!
 
                 for(int j = 1; j <= 7; j++){
                     mid = (low + high) / 2;
@@ -248,10 +210,15 @@ public class CubicCurve {
                     }
                 }
 
+                double scale = (mid - t[i]) / (t[i+1] - t[i]);
+                double arcLen = len[i] + (len[i+1] - len[i]) * scale;
+                double l = arcLen / len[segment];
+
                 result.add(new PosRollOffset(
                         position(mid),
-                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(mid),
-                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getOffset(mid)
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(l),
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getYOffset(l),
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getZOffset(l)
                 ));
                 lastLength = currentLen + lengthInBetween(low, mid, 10);
             }
@@ -261,8 +228,9 @@ public class CubicCurve {
             result.add(new PosRollOffset(
                     p2,
                     rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getRoll(1),
-                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getOffset(1))
-            );
+                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getYOffset(1),
+                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getZOffset(1)
+            ));
         }
 
         return result;

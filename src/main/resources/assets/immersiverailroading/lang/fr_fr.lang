@@ -114,6 +114,7 @@ gui.immersiverailroading:track.rail_bed=Ballast/Dalle: %s
 gui.immersiverailroading:track.rail_bed_fill=Remplissage:  %s
 gui.immersiverailroading:track.place_blueprint_true=Poser:         Aperçu
 gui.immersiverailroading:track.place_blueprint_false=Poser:         Voie
+gui.immersiverailroading:track.roll_offset_type=Désurélévation et décalage vertical:
 
 gui.immersiverailroading:loco.works=Constructeur: %s
 gui.immersiverailroading:loco.power=[Need translate]
@@ -165,6 +166,14 @@ track.immersiverailroading:smoothing.neither=Pas de lissage
 track.immersiverailroading:direction.none=Flexible
 track.immersiverailroading:direction.left=Verrouillée vers la droite
 track.immersiverailroading:direction.right=Verrouillée vers la gauche
+
+track.immersiverailroading:ExtraInfoType.roll=Désurélévation
+track.immersiverailroading:ExtraInfoType.y_offset=Décalage vertical
+track.immersiverailroading:ExtraInfoType.z_offset=Décalage horizontal
+
+track.immersiverailroading:rollYOffsetType.mid=Aligner au milieu
+track.immersiverailroading:rollYOffsetType.high=Aligner au point le plus haut
+track.immersiverailroading:rollYOffsetType.low=Aligner au point le plus bas
 
 part.immersiverailroading:component.frame=Châssis
 part.immersiverailroading:component.front_frame=Châssis avant
