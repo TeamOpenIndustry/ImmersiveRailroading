@@ -52,7 +52,7 @@ public class TrackGui implements IScreen {
 	private Button directionButton;
 	private Button bedTypeButton;
 	private Button bedFillButton;
-    private Button TrackExtraGuiButton;
+    private Button trackExtraGuiButton;
 
 	private Slider transfertableEntryCountSlider;
 	private Slider transfertableEntrySpacingSlider;
@@ -177,6 +177,7 @@ public class TrackGui implements IScreen {
 				degreesSlider.setVisible(settings.type.hasQuarters());
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
+				trackExtraGuiButton.setVisible(settings.type.hasRoll());
 				directionButton.setVisible(settings.type.hasDirection());
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -197,7 +198,7 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-        TrackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, "Config Roll") {
+        trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, "Config Roll") {
             @Override
             public void onClick(Player.Hand hand) {
                 if (te != null) {
@@ -208,6 +209,7 @@ public class TrackGui implements IScreen {
                 }
             }
         };
+		trackExtraGuiButton.setVisible(settings.type.hasRoll());
 
 		//Transfer table doesn't have these property so we can have them overlapped
 		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {

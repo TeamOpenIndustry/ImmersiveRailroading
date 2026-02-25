@@ -311,7 +311,7 @@ public class RollAndOffsetInfo {
     //其中边界条件:
     //1:tStart和点重合
     //2:tEnd和点重合
-    public List<RollAndOffsetInfo> subSplit(List<Pair<Double,Double>> subCurves, boolean normalize) {//只有分段发生才会进入此处
+    public List<RollAndOffsetInfo> subSplit(List<Pair<Double,Double>> subCurves, boolean normalize) {//只有分段发生才会进入此处,但是某些bug导致传入的subsplit范围不合法（start和end重合）会导致ls.size()==0
         List<RollAndOffsetInfo> results = new ArrayList<>();
 
         for (Pair<Double,Double> subCurve : subCurves) {

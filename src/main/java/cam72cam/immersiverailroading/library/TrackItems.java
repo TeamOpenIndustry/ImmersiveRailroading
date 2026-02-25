@@ -57,6 +57,18 @@ public enum TrackItems {
 		}
 	}
 
+	public boolean hasRoll() {
+		switch (this) {
+			case SLOPE:
+			case TURN:
+			case STRAIGHT:
+			case CUSTOM:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	public boolean hasDirection() {
 		switch (this) {
 			case TURN:

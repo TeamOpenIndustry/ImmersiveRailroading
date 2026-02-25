@@ -94,7 +94,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
 
-		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos).linearize(info.settings.smoothing);
+		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos, 0, 1).linearize(info.settings.smoothing);
 		ctrl1 = adjusted.ctrl1;
 		ctrl2 = adjusted.ctrl2;
 
@@ -161,7 +161,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
 					double tan = Math.tan(Math.toRadians(Math.abs(rolls.get(i))));
-					Vec3d newP = new Vec3d(p.x, p.y + tan * halfGauge, p.z);
+					Vec3d newP = new Vec3d(p.x, p.y - tan * halfGauge, p.z);
 					points.set(i, newP);
 				}
 				break;
@@ -169,7 +169,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
 					double tan = Math.tan(Math.toRadians(Math.abs(rolls.get(i))));
-					Vec3d newP = new Vec3d(p.x, p.y - tan * halfGauge, p.z);
+					Vec3d newP = new Vec3d(p.x, p.y + tan * halfGauge, p.z);
 					points.set(i, newP);
 				}
 				break;

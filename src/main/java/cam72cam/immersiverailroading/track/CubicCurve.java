@@ -34,13 +34,13 @@ public class CubicCurve {
         this.p2 = p2;
     }
 
-    public CubicCurve(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double tStart, double tEnd) {
+    public CubicCurve(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double lStart, double lEnd) {
         this(p1, ctrl1, ctrl2, p2);
-        this.lStart = tStart;
-        this.lEnd = tEnd;
+        this.lStart = lStart;
+        this.lEnd = lEnd;
     }
 
-    public static CubicCurve circle(int radius, float degrees) {
+    public static CubicCurve circle(int radius, float degrees, double lStrat, double lEnd) {
         float cRadScale = degrees / 90;
         Vec3d p1 = new Vec3d(0, 0, radius);
         Vec3d ctrl1 = new Vec3d(cRadScale * c * radius, 0, radius);
@@ -50,7 +50,7 @@ public class CubicCurve {
         Matrix4 quart = new Matrix4();
         quart.rotate(Math.toRadians(-90+degrees), 0, 1, 0);
 
-        return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2)).apply(new Matrix4().translate(0, 0, -radius));
+        return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2), lStrat, lEnd).apply(new Matrix4().translate(0, 0, -radius));
     }
 
     public CubicCurve apply(Matrix4 mat) {
@@ -58,7 +58,8 @@ public class CubicCurve {
                 mat.apply(p1),
                 mat.apply(ctrl1),
                 mat.apply(ctrl2),
-                mat.apply(p2)
+                mat.apply(p2),
+                lStart, lEnd
         );
     }
 
@@ -270,21 +271,24 @@ public class CubicCurve {
                         p1,
                         ctrl1.add(0, (start / lengthGuess) * height, 0),
                         ctrl2.add(0, -(end / lengthGuess) * height, 0),
-                        p2
+                        p2,
+                        lStart, lEnd
                 );
             case NEAR:
                 return new CubicCurve(
                         p1,
                         ctrl1,
                         ctrl2.add(0, -(end / (middle + end)) * height, 0),
-                        p2
+                        p2,
+                        lStart, lEnd
                 );
             case FAR:
                 return new CubicCurve(
                         p1,
                         ctrl1.add(0, (start / (start + middle)) * height, 0),
                         ctrl2,
-                        p2
+                        p2,
+                        lStart, lEnd
                 );
             case BOTH: default:
                 return this;

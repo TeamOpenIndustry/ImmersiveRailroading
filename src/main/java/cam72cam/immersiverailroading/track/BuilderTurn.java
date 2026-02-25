@@ -20,11 +20,11 @@ public class BuilderTurn extends BuilderCubicCurve {
         if (info.placementInfo.direction == TrackDirection.LEFT) {
             mat.scale(1, 1, -1);
         }
-        CubicCurve curve = CubicCurve.circle(radius, info.settings.degrees).apply(mat);
+        CubicCurve curve = CubicCurve.circle(radius, info.settings.degrees, 0, 1).apply(mat);
 
         double height = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
         if (height != 0) {
-            curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, height, 0), curve.p2.add(0, height, 0)).linearize(info.settings.smoothing);
+            curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, height, 0), curve.p2.add(0, height, 0), 0, 1).linearize(info.settings.smoothing);
         }
         return curve;
     }

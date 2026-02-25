@@ -4,8 +4,11 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
 import cam72cam.mod.MinecraftClient;
@@ -13,6 +16,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.*;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.opengl.RenderState;
 import net.minecraftforge.fml.client.config.GuiSlider;
 
@@ -23,7 +27,7 @@ public class TrackExtraGui implements IScreen {
     private RollAndOffsetInfo rollAndOffsetInfoCache;
     private boolean edited;
     private boolean editLeft;
-    private double length;
+    private final double length;//TODO: must prevent situation editing by more than one player! or there might cause sync problem
     private int currentLogicIndex = -1;
     private RailInfo referenceInfo;//only for calculating length and rendering
     //buttons to show state
@@ -55,6 +59,7 @@ public class TrackExtraGui implements IScreen {
     private Button resetAllButton;
     private Button offsetTypeButton;
     private Button railInfoLabel;
+    private Button wayCircleButton;//TODO:Switch and multiSwitch support
     private Button TrackGuiButton;
     public TrackExtraGui() {
         this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY));
@@ -68,17 +73,19 @@ public class TrackExtraGui implements IScreen {
         stack = stack.copy();
         settings = RailSettings.from(stack).mutable();
 
-        if(referenceInfo != null) {//todo:真正的计算长度
-            length = 1;
+        if(referenceInfo != null) {//TODO:Switch and multiSwitch support
+            BuilderBase builder = referenceInfo.getBuilder(MinecraftClient.getPlayer().getWorld());
+            length = builder.getRenderData().size() * referenceInfo.settings.gauge.scale() * referenceInfo.getTrackModel().spacing;//TODO this might not be precious
         }else {
-            length = 1;
+            RailInfo info = new RailInfo(stack, new PlacementInfo(Vec3d.ZERO, TrackDirection.LEFT, MinecraftClient.getPlayer().getRotationYawHead(), null), null);
+            BuilderBase builder = info.getBuilder(MinecraftClient.getPlayer().getWorld());
+            length = builder.getRenderData().size() * info.settings.gauge.scale() * info.getTrackModel().spacing;//TODO this might not be precious
         }
 
         if(settings.pickRollAndOffsetInfo != null) {
-            rollAndOffsetInfoCache = settings.rollAndOffsetInfo;//直接引用了，反正要发包，而且改了的话期待的结果也是改了
+            rollAndOffsetInfoCache = settings.rollAndOffsetInfo;
         } else {
             rollAndOffsetInfoCache = RollAndOffsetInfo.getDefault();
-
         }
 
         edited = false;
@@ -93,7 +100,7 @@ public class TrackExtraGui implements IScreen {
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
         //left panel
-        railInfoLabel = new Button(screen, xtop, ytop, width, height,  "") {};
+        railInfoLabel = new Button(screen, xtop, ytop, width, height,  "Rail Length:" + length) {};//todo
         ytop += height;
         ytop += 5;
         rollGraph = new Button(screen, xtop, ytop, width, height, "roll") {};//todo
@@ -241,7 +248,7 @@ public class TrackExtraGui implements IScreen {
                 return s.equals(".") || s.equals("-");
             }
             float max = 20f;
-            if (Math.abs(val) < max) {
+            if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.trySetSlope(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
@@ -296,7 +303,7 @@ public class TrackExtraGui implements IScreen {
                 return s.equals(".") || s.equals("-");
             }
             float max = (float) settings.gauge.scale();
-            if (Math.abs(val) < max) {
+            if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
@@ -378,7 +385,7 @@ public class TrackExtraGui implements IScreen {
                 return s.equals(".") || s.equals("-");
             }
             float max = (float) settings.gauge.scale();
-            if (Math.abs(val) < max) {
+            if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
