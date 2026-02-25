@@ -18,12 +18,21 @@ public class RollAndOffsetInfo {
     public final RollYOffsetType offsetType;
     public final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
     //Roll
+    /**
+     * This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
+     */
     public final List<Vec3d> rolls;
     public final List<Vec3d> rollCtrls;
     //Y Offset
+    /**
+     * This stores [Height Offset(UNIT: Meter) * Gauge Scale].
+     */
     public final List<Vec3d> yOffsets;
     public final List<Vec3d> yOffsetCtrls;
     //Z Offset
+    /**
+     * This stores [Width Offset(UNIT: Meter) * Gauge Scale].
+     */
     public final List<Vec3d> zOffsets;
     public final List<Vec3d> zOffsetCtrls;
 
@@ -672,23 +681,20 @@ public class RollAndOffsetInfo {
     }
 
     public double getRoll(double l) {
-        return interpolateValue(this.ls, l, rolls, rollCtrls);
+        return getValue(this.ls, l, rolls, rollCtrls);
     }
 
     public double getYOffset(double l) {
-        return interpolateValue(this.ls, l, yOffsets, yOffsetCtrls);
+        return getValue(this.ls, l, yOffsets, yOffsetCtrls);
     }
 
     public double getZOffset(double l) {
-        return interpolateValue(this.ls, l, zOffsets, zOffsetCtrls);
+        return getValue(this.ls, l, zOffsets, zOffsetCtrls);
     }
 
-    public static double interpolateValue(List<Double>ls, double targetX, List<Vec3d> points, List<Vec3d> ctrls) {
+    public static double getValue(List<Double>ls, double targetX, List<Vec3d> points, List<Vec3d> ctrls) {
         // notice that segmentIdx is not point index!
         int segmentIdx = findValidSegment(targetX, ls);
-//        if (segmentIdx < 0) segmentIdx = 0;
-//        int maxSegment = ls.size() / 2 - 1;
-//        if (segmentIdx > maxSegment) segmentIdx = maxSegment;
 
         int p1Idx = segmentIdx * 2;
         int p2Idx = p1Idx + 1;
@@ -699,12 +705,8 @@ public class RollAndOffsetInfo {
         Vec3d ctrl2Forward = ctrls.get(p2Idx);
         Vec3d ctrl2 = p2.scale(2).subtract(ctrl2Forward);
 
-        double x0 = ls.get(p1Idx);
-        double x1 = ls.get(p2Idx);
-        double localX = (targetX - x0) / (x1 - x0);
-
         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
-        double localT = getTByX(localX, curve);//todo getTByX靠谱吗？
+        double localT = getTByX(targetX, curve);
 
         Vec3d pos = curve.position(localT);
 
@@ -744,7 +746,7 @@ public class RollAndOffsetInfo {
     }
 
     public boolean tryInsertBySubSplit(double l) {
-        if(findPhysicalIndex(l) == -1) return false;
+        if(findPhysicalIndex(l) != -1) return false;
 
         List<Pair<Double, Double>> divider = new ArrayList<>();
         divider.add(Pair.of(0d, l));
@@ -901,6 +903,7 @@ public class RollAndOffsetInfo {
         if(idx == -1) return false;
         if(idx == 0 && editLeft) return false;
         if(idx == ls.size() - 1 && !editLeft) return false;
+        if(val < 1e-1) return false;
 
         double newHandlerXLen = val / length;
         List<Vec3d> points;
@@ -931,14 +934,14 @@ public class RollAndOffsetInfo {
         if(editLeft) {
             if(idx == ls.size() - 1) {
                 editIdx = idx;
-                segmentLen = ls.get(editIdx) - ls.get(editIdx - 1);
+                segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx - 1));
             }else {
                 editIdx = idx - 1;
-                segmentLen = ls.get(editIdx) - ls.get(editIdx - 1);
+                segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx - 1));
             }
         }else {
             editIdx = idx;
-            segmentLen = ls.get(editIdx) - ls.get(editIdx + 1);
+            segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx + 1));
         }
 
         if(newHandlerXLen < segmentLen * 0.5) {

@@ -155,33 +155,33 @@ public class BuilderCubicCurve extends BuilderIterator {
 			stepSize = targetStepSize;
 		}
 
-		double halfGauge = info.settings.gauge.value() / 2;
+		double gaugeScale = info.settings.gauge.scale();//TODO:add a config option to force it as 1 to disable scale
+		double gauge = info.settings.gauge.value();
 		switch (type) {
+			case MID:
+				break;
 			case HIGH:
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
-					double tan = Math.tan(Math.toRadians(Math.abs(rolls.get(i))));
-					Vec3d newP = new Vec3d(p.x, p.y - tan * halfGauge, p.z);
+					Vec3d newP = new Vec3d(p.x, p.y + Math.abs(rolls.get(i) / 2) * gaugeScale * 0.01, p.z);//superelevision scale
 					points.set(i, newP);
 				}
 				break;
 			case LOW:
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
-					double tan = Math.tan(Math.toRadians(Math.abs(rolls.get(i))));
-					Vec3d newP = new Vec3d(p.x, p.y + tan * halfGauge, p.z);
+					Vec3d newP = new Vec3d(p.x, p.y - Math.abs(rolls.get(i) / 2) * gaugeScale, p.z);//superelevision scale
 					points.set(i, newP);
 				}
 				break;
-			case MID:
-				break;
 		}
-
 		for(int i = 0; i < points.size(); i++) {//TODO: RAIL_LEFT/RIGHT单独叠加pitch
 			Vec3d p = points.get(i);
-			Vec3d newP = new Vec3d(p.x, p.y + yOffsets.get(i), p.z);
+			Vec3d newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//yOffset scale
 			points.set(i, newP);
 		}
+
+		boolean correctYaw = false;
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			float yaw;
@@ -203,12 +203,41 @@ public class BuilderCubicCurve extends BuilderIterator {
 				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, next.distanceTo(prev)));
 				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
-			Vec3d horizontalOffset;
-			if(zOffsets.get(i) == 0) horizontalOffset = Vec3d.ZERO;
-			else horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90);
 
-			res.add(new VecYPR(p.x + horizontalOffset.x, p.y, p.z + horizontalOffset.z, yaw, pitch, rolls.get(i).floatValue(), -1));
+			Vec3d horizontalOffset;//the side effect of too much offset is that some dot spacing becomes less uniform, and should we offset points in toList?
+			if(zOffsets.get(i) == 0) {
+				horizontalOffset = Vec3d.ZERO;
+			} else {
+				correctYaw = true;
+				horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90).scale(gaugeScale);//zOffset scale
+				points.set(i, points.get(i).add(horizontalOffset));
+			}
+			float roll = 0;
+			if(rolls.get(i) != 0) {
+				roll = (float) Math.toDegrees(FastMath.atan2(rolls.get(i) * 0.01, gauge));//superelevision scale
+			}
+
+			res.add(new VecYPR(p.x + horizontalOffset.x, p.y, p.z + horizontalOffset.z, yaw, pitch, roll, -1));
 		}
+		if(correctYaw){//correct yaw if horizontalOffsets are not Zero
+			for(int i = 0; i < points.size(); i++){
+				VecYPR ypr = res.get(i);
+				float yaw = ypr.getYaw();
+				if(zOffsets.get(i) != 0) {
+					if (points.size() == 1) {
+						yaw = info.placementInfo.yaw;
+					} else if (i == points.size()-1) {
+						yaw = VecUtil.toYaw(points.get(i).subtract(points.get(i - 1)));//roughly
+					} else if (i == 0) {
+						yaw = VecUtil.toYaw(points.get(i + 1).subtract(points.get(i)));//roughly
+					} else {
+						yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
+					}
+				}
+				res.set(i, new VecYPR(ypr.x, ypr.y, ypr.z, yaw, ypr.getPitch(), ypr.getRoll(), ypr.getLength()));
+			}
+		}
+
 		cache.put(targetStepSize, Pair.of(stepSize, res));
 		return cache.get(targetStepSize);
 	}

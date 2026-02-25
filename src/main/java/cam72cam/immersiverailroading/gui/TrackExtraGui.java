@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
@@ -20,6 +21,8 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.opengl.RenderState;
 import net.minecraftforge.fml.client.config.GuiSlider;
 
+import java.util.List;
+
 public class TrackExtraGui implements IScreen {
     long frame;
     private TileRailPreview te;
@@ -28,8 +31,8 @@ public class TrackExtraGui implements IScreen {
     private boolean edited;
     private boolean editLeft;
     private final double length;//TODO: must prevent situation editing by more than one player! or there might cause sync problem
-    private int currentLogicIndex = -1;
-    private RailInfo referenceInfo;//only for calculating length and rendering
+    private final RailInfo referenceInfo;//only for calculating length and rendering
+    private final List<VecYPR> referenceRenderData;
     //buttons to show state
     private Button rollValueLabel;
     private Button rollSlopeLabel;
@@ -53,8 +56,7 @@ public class TrackExtraGui implements IScreen {
     private Button yOffsetGraph;
     private Button zOffsetGraph;
     private Slider lSlider;
-    private Button insertPointButton;
-    private Button deletePointButton;
+    private Button insertOrDeletePointButton;
     private Button editLeftButton;
     private Button resetAllButton;
     private Button offsetTypeButton;
@@ -62,25 +64,24 @@ public class TrackExtraGui implements IScreen {
     private Button wayCircleButton;//TODO:Switch and multiSwitch support
     private Button TrackGuiButton;
     public TrackExtraGui() {
-        this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY));
+        this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY), null);
     }
     public TrackExtraGui(TileRailPreview te) {
-        this(te.getItem());
-        this.te = te;
-        this.referenceInfo = te.getRailRenderInfo();
+        this(te.getItem(), te);
     }
-    private TrackExtraGui(ItemStack stack) {
+    private TrackExtraGui(ItemStack stack, TileRailPreview te) {
         stack = stack.copy();
-        settings = RailSettings.from(stack).mutable();
+        this.settings = RailSettings.from(stack).mutable();
+        this.te = te;
 
-        if(referenceInfo != null) {//TODO:Switch and multiSwitch support
-            BuilderBase builder = referenceInfo.getBuilder(MinecraftClient.getPlayer().getWorld());
-            length = builder.getRenderData().size() * referenceInfo.settings.gauge.scale() * referenceInfo.getTrackModel().spacing;//TODO this might not be precious
+        if(this.te != null) {//TODO:Switch and multiSwitch support
+            referenceInfo = te.getRailRenderInfo();
         }else {
-            RailInfo info = new RailInfo(stack, new PlacementInfo(Vec3d.ZERO, TrackDirection.LEFT, MinecraftClient.getPlayer().getRotationYawHead(), null), null);
-            BuilderBase builder = info.getBuilder(MinecraftClient.getPlayer().getWorld());
-            length = builder.getRenderData().size() * info.settings.gauge.scale() * info.getTrackModel().spacing;//TODO this might not be precious
+            referenceInfo = new RailInfo(stack, new PlacementInfo(Vec3d.ZERO, TrackDirection.LEFT, MinecraftClient.getPlayer().getRotationYawHead(), null), null);
         }
+        BuilderBase referenceInfoBuilder = referenceInfo.getBuilder(MinecraftClient.getPlayer().getWorld());
+        referenceRenderData = referenceInfoBuilder.getRenderData();
+        length = referenceRenderData.size() * referenceInfo.settings.gauge.scale() * referenceInfo.getTrackModel().spacing;
 
         if(settings.pickRollAndOffsetInfo != null) {
             rollAndOffsetInfoCache = settings.rollAndOffsetInfo;
@@ -116,7 +117,6 @@ public class TrackExtraGui implements IScreen {
             @Override
             public void onSlider() {
                 lSlider.setText(String.format("%.2f", lSlider.getValue()));
-                currentLogicIndex = rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue());
                 updateSliderRelated();
             }
             @Override
@@ -131,23 +131,19 @@ public class TrackExtraGui implements IScreen {
         };
 
         //right panel
-        insertPointButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 50, height, "Insert Point") {
+        insertOrDeletePointButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 50, height, "") {
             @Override
             public void onClick(Player.Hand hand) {
-                edited = true;
-                rollAndOffsetInfoCache.tryInsertBySubSplit(lSlider.getValue());
-                currentLogicIndex = rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue());
-                updateSliderRelated();
-            }
-        };
-
-        deletePointButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 50, height, "Delete Point") {
-            @Override
-            public void onClick(Player.Hand hand) {
-                edited = true;
-                rollAndOffsetInfoCache.tryDeleteDirectly(lSlider.getValue());
-                currentLogicIndex = rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue());
-                updateSliderRelated();
+                if(rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue()) == -1) {//insert
+                    if(rollAndOffsetInfoCache.tryInsertBySubSplit(lSlider.getValue())) {
+                        edited = true;
+                        updateSliderRelated();
+                    }
+                } else {//delete
+                    edited = true;
+                    rollAndOffsetInfoCache.tryDeleteDirectly(lSlider.getValue());
+                    updateSliderRelated();
+                }
             }
         };
 
@@ -156,7 +152,6 @@ public class TrackExtraGui implements IScreen {
             public void onClick(Player.Hand hand) {
                 edited = true;
                 rollAndOffsetInfoCache.resetAll();
-                currentLogicIndex = rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue());
                 updateSliderRelated();
             }
         };
@@ -189,7 +184,9 @@ public class TrackExtraGui implements IScreen {
         //back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
 
-        offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width, height, GuiText.TRACK_ROLL_OFFSET_TYPE.toString() + rollAndOffsetInfoCache.offsetType) {//todo:guiText
+        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 70, height, "Selected Way: 0"){};//todo 等待multiSwitch分支合并后修改
+
+        offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - 130, ytop, 130, height, GuiText.TRACK_ROLL_OFFSET_TYPE.toString() + rollAndOffsetInfoCache.offsetType) {//todo:guiText
             @Override
             public void onClick(Player.Hand hand) {
                 edited = true;
@@ -220,7 +217,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 20f;
+            float max = 50f;
             if (Math.abs(val) < max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL);
                 if(feedback) {
@@ -247,7 +244,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 20f;
+            float max = 100f;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.trySetSlope(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL, length);
                 if(feedback) {
@@ -302,7 +299,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = (float) settings.gauge.scale();
+            float max = 1;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                 if(feedback) {
@@ -329,8 +326,8 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 20f;
-            if (Math.abs(val) < max) {
+            float max = 100f;
+            if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.trySetSlope(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
@@ -384,7 +381,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = (float) settings.gauge.scale();
+            float max = 1;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                 if(feedback) {
@@ -411,8 +408,8 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 20f;
-            if (Math.abs(val) < max) {
+            float max = 100f;
+            if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.trySetSlope(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
@@ -477,8 +474,13 @@ public class TrackExtraGui implements IScreen {
     }
 
     private void updateSliderRelated() {
-        if(insertPointButton != null)insertPointButton.setVisible(currentLogicIndex == -1);
-        if(deletePointButton != null)deletePointButton.setVisible(currentLogicIndex != -1);
+        if(insertOrDeletePointButton != null) {
+            if(rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue()) == -1) {
+                insertOrDeletePointButton.setText("Insert Point");
+            } else {
+                insertOrDeletePointButton.setText("Delete Point");
+            }
+        }
         if(rollValueInput != null)rollValueInput.setText("");
         if(rollSlopeInput != null)rollSlopeInput.setText("");
         if(rollHandlerXLenInput != null)rollHandlerXLenInput.setText("");
@@ -523,7 +525,7 @@ public class TrackExtraGui implements IScreen {
                 return;
         }
 
-        if(valueLabel != null)valueLabel.setText(type + " Value:" + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));
+        if(valueLabel != null)valueLabel.setText(type + " Value:" + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));//todo GuiText
         if(slopeLabel != null)slopeLabel.setText(type + " Slope:" + rollAndOffsetInfoCache.getSlopeDisplay(lSlider.getValue(), type, length));
         if(handlerXLenLabel != null)handlerXLenLabel.setText(type + " Handler X:" + rollAndOffsetInfoCache.getHandlerXDisplay(lSlider.getValue(), type, editLeft, length));
     }
