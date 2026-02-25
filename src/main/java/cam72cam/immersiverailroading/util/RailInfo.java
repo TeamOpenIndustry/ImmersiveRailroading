@@ -107,17 +107,7 @@ public class RailInfo {
 			id += this.itemHeld;
 		}
 		if(this.multiSwitchInfo != null){//move to toSting? format?
-			id += "multiSwitchInfo:{";
-			id += this.multiSwitchInfo.realShapeType;
-			id += this.multiSwitchInfo.orderAsChild;
-			id += this.multiSwitchInfo.isMultiSwitchWay;
-			id += this.multiSwitchInfo.defaultCustom;
-			if(this.multiSwitchInfo.wayList != null){//turnBuilder in MultiSwitchBuilder won't have wayList
-				for(int i = 0; i < this.multiSwitchInfo.wayList.size(); i++){
-					id += this.multiSwitchInfo.wayList.get(i);
-				}
-			}
-			id += "}";
+			id += this.multiSwitchInfo;
 		}
 		return id;
 	}

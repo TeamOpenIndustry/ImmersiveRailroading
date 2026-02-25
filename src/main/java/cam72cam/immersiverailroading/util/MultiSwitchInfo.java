@@ -233,4 +233,20 @@ public class MultiSwitchInfo {
             );
         }
     }
+
+    @Override
+    public String toString() {
+        String id = "multiSwitchInfo:{";
+        id += this.realShapeType;
+        id += this.orderAsChild;
+        id += this.isMultiSwitchWay;
+        id += this.defaultCustom;
+        if(this.wayList != null){//turnBuilder in MultiSwitchBuilder won't have wayList
+            for (SingleWayInfo singleWayInfo : this.wayList) {
+                id += singleWayInfo;
+            }
+        }
+        id += "}";
+        return id;
+    }
 }
