@@ -223,7 +223,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				angle = delta(prev.getYaw(), next.getYaw());
 			}
 			if (angle != 0) {
-				VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);
+				VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe called STILL_BASE)
 				if (direction == TrackDirection.RIGHT) {
 					vec.addChild(new VecYPR(switchPos, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
 					vec.addChild(new VecYPR(cur, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));

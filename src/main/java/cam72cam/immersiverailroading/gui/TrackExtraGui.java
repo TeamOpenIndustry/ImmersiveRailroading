@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.gui.util.BezierRenderer;
+import cam72cam.immersiverailroading.gui.util.Color;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -24,7 +26,13 @@ import net.minecraftforge.fml.client.config.GuiSlider;
 import java.util.List;
 
 public class TrackExtraGui implements IScreen {
-    long frame;
+    private double rollMax;
+    private double yOffsetMax;
+    private double zOffsetMax;
+    Color curveColor;
+    Color pointColor;
+    Color handlePointColor;
+    Color handleLineColor;
     private TileRailPreview te;
     private RailSettings.Mutable settings;
     private RollAndOffsetInfo rollAndOffsetInfoCache;
@@ -36,25 +44,22 @@ public class TrackExtraGui implements IScreen {
     //buttons to show state
     private Button rollValueLabel;
     private Button rollSlopeLabel;
-    private Button rollHandlerXLenLabel;
+    private Button rollHandleXLenLabel;
     private Button yOffsetValueLabel;
     private Button yOffsetSlopeLabel;
-    private Button yOffsetHandlerXLenLabel;
+    private Button yOffsetHandleXLenLabel;
     private Button zOffsetValueLabel;
     private Button zOffsetSlopeLabel;
-    private Button zOffsetHandlerXLenLabel;
+    private Button zOffsetHandleXLenLabel;
     private TextField rollValueInput;
     private TextField rollSlopeInput;
-    private TextField rollHandlerXLenInput;
+    private TextField rollHandleXLenInput;
     private TextField yOffsetValueInput;
     private TextField yOffsetSlopeInput;
-    private TextField yOffsetHandlerXLenInput;
+    private TextField yOffsetHandleXLenInput;
     private TextField zOffsetValueInput;
     private TextField zOffsetSlopeInput;
-    private TextField zOffsetHandlerXLenInput;
-    private Button rollGraph;
-    private Button yOffsetGraph;
-    private Button zOffsetGraph;
+    private TextField zOffsetHandleXLenInput;
     private Slider lSlider;
     private Button insertOrDeletePointButton;
     private Button editLeftButton;
@@ -89,28 +94,40 @@ public class TrackExtraGui implements IScreen {
             rollAndOffsetInfoCache = RollAndOffsetInfo.getDefault();
         }
 
+//        rollMax = 50 * settings.gauge.scale();
+//        yOffsetMax = settings.gauge.scale();
+//        zOffsetMax = settings.gauge.scale();
+        rollMax = 50;//todo:config scale
+        yOffsetMax = 1;
+        zOffsetMax = 1;
+
+        curveColor = Color.DEEP_GREEN;      // GREEN curve
+        pointColor = Color.RED;      // RED point
+        handlePointColor = Color.BLUE;     // BLUE handle point
+        handleLineColor = Color.MAGENTA;   // MAGENTA handle line
+
         edited = false;
         editLeft = true;
     }
 
 
-    public void init(IScreenBuilder screen) {
+    public void init(IScreenBuilder screen) {//TODO: we have to reduce some button text and and tooltip to show information
         int width = 200;
         int height = 20;
-        int xtop = -GUIHelpers.getScreenWidth() / 2;
+        int xtop = -GUIHelpers.getScreenWidth() / 2 + 5;
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
         //left panel
         railInfoLabel = new Button(screen, xtop, ytop, width, height,  "Rail Length:" + length) {};//todo
         ytop += height;
         ytop += 5;
-        rollGraph = new Button(screen, xtop, ytop, width, height, "roll") {};//todo
+        //rollGraph
         ytop += height * 3;
         ytop += 5;
-        yOffsetGraph = new Button(screen, xtop, ytop, width, height, "y-offset") {};//todo
+        //yOffsetGraph
         ytop += height * 3;
         ytop += 5;
-        zOffsetGraph = new Button(screen, xtop, ytop, width, height, "z-offset") {};//todo
+        //zOffsetGraph
         ytop += height * 3;
         ytop += 5;
         lSlider = new Slider(screen, xtop, ytop, width, height, "", 0.0, 1.0, 0.0, false, (slider) -> {}) {
@@ -217,7 +234,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 50f;
+            float max = (float) rollMax;
             if (Math.abs(val) < max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL);
                 if(feedback) {
@@ -259,9 +276,9 @@ public class TrackExtraGui implements IScreen {
 
         ytop += height;
 
-        rollHandlerXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
-        rollHandlerXLenInput.setText("");
-        rollHandlerXLenInput.setValidator(s -> {
+        rollHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        rollHandleXLenInput.setText("");
+        rollHandleXLenInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
             }
@@ -271,9 +288,9 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 20f;
+            float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandlerXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
                     edited = true;
@@ -282,7 +299,7 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        rollHandlerXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        rollHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
 
         ytop += height;
         ytop += 5;
@@ -299,7 +316,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 1;
+            float max = (float) yOffsetMax;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                 if(feedback) {
@@ -341,9 +358,9 @@ public class TrackExtraGui implements IScreen {
 
         ytop += height;
 
-        yOffsetHandlerXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
-        yOffsetHandlerXLenInput.setText("");
-        yOffsetHandlerXLenInput.setValidator(s -> {
+        yOffsetHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        yOffsetHandleXLenInput.setText("");
+        yOffsetHandleXLenInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
             }
@@ -353,9 +370,9 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 20f;
+            float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandlerXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                     edited = true;
@@ -364,7 +381,7 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        yOffsetHandlerXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        yOffsetHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
 
         ytop += height;
         ytop += 5;
@@ -381,7 +398,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 1;
+            float max = (float) zOffsetMax;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                 if(feedback) {
@@ -423,9 +440,9 @@ public class TrackExtraGui implements IScreen {
 
         ytop += height;
 
-        zOffsetHandlerXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
-        zOffsetHandlerXLenInput.setText("");
-        zOffsetHandlerXLenInput.setValidator(s -> {
+        zOffsetHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        zOffsetHandleXLenInput.setText("");
+        zOffsetHandleXLenInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
             }
@@ -435,9 +452,9 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 20f;
+            float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandlerXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                     edited = true;
@@ -446,7 +463,7 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        zOffsetHandlerXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        zOffsetHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
 
         //update after all components init
         lSlider.onSlider();
@@ -470,7 +487,30 @@ public class TrackExtraGui implements IScreen {
 
     @Override
     public void draw(IScreenBuilder builder, RenderState state) {
-        frame ++;
+
+
+
+        int height = 20;
+        double xScale = 200;
+        double rollYScale = height * 3 / rollMax;
+        double yOffsetYScale = height * 1.5 / yOffsetMax;
+        double zOffsetYScale = height * 1.5 / zOffsetMax;
+
+        //rollGraph
+        state.translate(5, height + 5 + height * 1.5, 0);
+        BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
+        rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, rollYScale);
+
+        //yOffsetGraph
+        state.translate(0, height * 3 + 5, 0);
+        BezierRenderer yOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
+        yOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, yOffsetYScale);
+
+        //zOffsetGraph
+        state.translate(0, height * 3 + 5, 0);
+        BezierRenderer zOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
+        zOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, zOffsetYScale);
+
     }
 
     private void updateSliderRelated() {
@@ -483,13 +523,13 @@ public class TrackExtraGui implements IScreen {
         }
         if(rollValueInput != null)rollValueInput.setText("");
         if(rollSlopeInput != null)rollSlopeInput.setText("");
-        if(rollHandlerXLenInput != null)rollHandlerXLenInput.setText("");
+        if(rollHandleXLenInput != null) rollHandleXLenInput.setText("");
         if(yOffsetValueInput != null)yOffsetValueInput.setText("");
         if(yOffsetSlopeInput != null)yOffsetSlopeInput.setText("");
-        if(yOffsetHandlerXLenInput != null)yOffsetHandlerXLenInput.setText("");
+        if(yOffsetHandleXLenInput != null) yOffsetHandleXLenInput.setText("");
         if(zOffsetValueInput != null)zOffsetValueInput.setText("");
         if(zOffsetSlopeInput != null)zOffsetSlopeInput.setText("");
-        if(zOffsetHandlerXLenInput != null)zOffsetHandlerXLenInput.setText("");
+        if(zOffsetHandleXLenInput != null) zOffsetHandleXLenInput.setText("");
         updateAllCurveInfoDisplay();
     }
 
@@ -502,23 +542,23 @@ public class TrackExtraGui implements IScreen {
     private void updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType type) {
         Button valueLabel;
         Button slopeLabel;
-        Button handlerXLenLabel;
+        Button handleXLenLabel;
 
         switch (type) {
             case ROLL:
                 valueLabel = rollValueLabel;
                 slopeLabel = rollSlopeLabel;
-                handlerXLenLabel = rollHandlerXLenLabel;
+                handleXLenLabel = rollHandleXLenLabel;
                 break;
             case Y_OFFSET:
                 valueLabel = yOffsetValueLabel;
                 slopeLabel = yOffsetSlopeLabel;
-                handlerXLenLabel = yOffsetHandlerXLenLabel;
+                handleXLenLabel = yOffsetHandleXLenLabel;
                 break;
             case Z_OFFSET:
                 valueLabel = zOffsetValueLabel;
                 slopeLabel = zOffsetSlopeLabel;
-                handlerXLenLabel = zOffsetHandlerXLenLabel;
+                handleXLenLabel = zOffsetHandleXLenLabel;
                 break;
             default:
                 ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
@@ -527,6 +567,6 @@ public class TrackExtraGui implements IScreen {
 
         if(valueLabel != null)valueLabel.setText(type + " Value:" + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));//todo GuiText
         if(slopeLabel != null)slopeLabel.setText(type + " Slope:" + rollAndOffsetInfoCache.getSlopeDisplay(lSlider.getValue(), type, length));
-        if(handlerXLenLabel != null)handlerXLenLabel.setText(type + " Handler X:" + rollAndOffsetInfoCache.getHandlerXDisplay(lSlider.getValue(), type, editLeft, length));
+        if(handleXLenLabel != null)handleXLenLabel.setText(type + " Handle X:" + rollAndOffsetInfoCache.getHandleXDisplay(lSlider.getValue(), type, editLeft, length));
     }
  }

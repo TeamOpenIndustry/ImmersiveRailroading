@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
+import cam72cam.immersiverailroading.library.TrackModelPart;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -175,7 +176,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				}
 				break;
 		}
-		for(int i = 0; i < points.size(); i++) {//TODO: RAIL_LEFT/RIGHT单独叠加pitch
+		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			Vec3d newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//yOffset scale
 			points.set(i, newP);
@@ -219,6 +220,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 			res.add(new VecYPR(p.x + horizontalOffset.x, p.y, p.z + horizontalOffset.z, yaw, pitch, roll, -1));
 		}
+
+		//TODO: RAIL_LEFT/RIGHT pitch correction?
 		if(correctYaw){//correct yaw if horizontalOffsets are not Zero
 			for(int i = 0; i < points.size(); i++){
 				VecYPR ypr = res.get(i);

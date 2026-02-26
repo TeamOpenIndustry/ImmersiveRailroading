@@ -67,11 +67,11 @@ public class RollAndOffsetInfo {
 
         ls.add(0d); ls.add(1d);
         rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
-        rollCtrls.add(new Vec3d(0.25, 0, 0)); rollCtrls.add(new Vec3d(1.25, 0, 0));
+        rollCtrls.add(new Vec3d(1d / 3, 0, 0)); rollCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
         yOffsets.add(new Vec3d(0, 0, 0)); yOffsets.add(new Vec3d(1, 0, 0));
-        yOffsetCtrls.add(new Vec3d(0.25, 0, 0)); yOffsetCtrls.add(new Vec3d(1.25, 0, 0));
+        yOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); yOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
         zOffsets.add(new Vec3d(0, 0, 0)); zOffsets.add(new Vec3d(1, 0, 0));
-        zOffsetCtrls.add(new Vec3d(0.25, 0, 0)); zOffsetCtrls.add(new Vec3d(1.25, 0, 0));
+        zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
     }
 
     public static class Mutable {
@@ -118,11 +118,11 @@ public class RollAndOffsetInfo {
 
             ls.add(0d); ls.add(1d);
             rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
-            rollCtrls.add(new Vec3d(0.25, 0, 0)); rollCtrls.add(new Vec3d(1.25, 0, 0));
+            rollCtrls.add(new Vec3d(1d / 3, 0, 0)); rollCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
             yOffsets.add(new Vec3d(0, 0, 0)); yOffsets.add(new Vec3d(1, 0, 0));
-            yOffsetCtrls.add(new Vec3d(0.25, 0, 0)); yOffsetCtrls.add(new Vec3d(1.25, 0, 0));
+            yOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); yOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
             zOffsets.add(new Vec3d(0, 0, 0)); zOffsets.add(new Vec3d(1, 0, 0));
-            zOffsetCtrls.add(new Vec3d(0.25, 0, 0)); zOffsetCtrls.add(new Vec3d(1.25, 0, 0));
+            zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
 
             TagSerializer.deserialize(data, this);
         }
@@ -262,6 +262,45 @@ public class RollAndOffsetInfo {
         }
         id += "}";
         return id;
+    }
+
+    public List<CubicCurve> toCurves(ExtraInfoType type, boolean swapYZ) {
+        List<Vec3d> points;
+        List<Vec3d> ctrls;
+        switch (type) {
+            case ROLL:
+                points = rolls;
+                ctrls = rollCtrls;
+                break;
+            case Y_OFFSET:
+                points = yOffsets;
+                ctrls = yOffsetCtrls;
+                break;
+            case Z_OFFSET:
+                points = zOffsets;
+                ctrls = zOffsetCtrls;
+                break;
+            default:
+                ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                return null;
+        }
+
+        List<CubicCurve> curves = new ArrayList<>();
+        for(int i = 0; i < ls.size(); i+=2) {
+            CubicCurve curve;
+            if(swapYZ) {//for screen rendering
+                Vec3d p1 = new Vec3d(points.get(i).x, points.get(i).z, points.get(i).y);
+                Vec3d ctrl1 = new Vec3d(ctrls.get(i).x, ctrls.get(i).z, ctrls.get(i).y);
+                Vec3d ctrl2Opposite = new Vec3d(ctrls.get(i + 1).x, ctrls.get(i + 1).z, ctrls.get(i + 1).y);
+                Vec3d p2 = new Vec3d(points.get(i + 1).x, points.get(i + 1).z, points.get(i + 1).y);
+                Vec3d ctrl2 = p2.scale(2).subtract(ctrl2Opposite);
+                curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
+            }else {
+                curve = new CubicCurve(points.get(i), ctrls.get(i), points.get(i + 1).scale(2).subtract(ctrls.get(i + 1)), points.get(i + 1));
+            }
+            curves.add(curve);
+        }
+        return curves;
     }
 
     public enum RollYOffsetType {
@@ -828,11 +867,11 @@ public class RollAndOffsetInfo {
 
         ls.add(0d); ls.add(1d);
         rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
-        rollCtrls.add(new Vec3d(0.25, 0, 0)); rollCtrls.add(new Vec3d(1.25, 0, 0));
+        rollCtrls.add(new Vec3d(1d / 3, 0, 0)); rollCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
         yOffsets.add(new Vec3d(0, 0, 0)); yOffsets.add(new Vec3d(1, 0, 0));
-        yOffsetCtrls.add(new Vec3d(0.25, 0, 0)); yOffsetCtrls.add(new Vec3d(1.25, 0, 0));
+        yOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); yOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
         zOffsets.add(new Vec3d(0, 0, 0)); zOffsets.add(new Vec3d(1, 0, 0));
-        zOffsetCtrls.add(new Vec3d(0.25, 0, 0)); zOffsetCtrls.add(new Vec3d(1.25, 0, 0));
+        zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
     }
 
     public boolean tryDeltaValue(double l, double val, ExtraInfoType type) {
@@ -898,14 +937,14 @@ public class RollAndOffsetInfo {
         return String.format("%.4f", points.get(idx).z);
     }
 
-    public boolean trySetHandlerXLen(double l, double val, ExtraInfoType type, boolean editLeft, double length) {
+    public boolean trySetHandleXLen(double l, double val, ExtraInfoType type, boolean editLeft, double length) {
         int idx = findPhysicalIndex(l);
         if(idx == -1) return false;
         if(idx == 0 && editLeft) return false;
         if(idx == ls.size() - 1 && !editLeft) return false;
         if(val < 1e-1) return false;
 
-        double newHandlerXLen = val / length;
+        double newHandleXLen = val / length;
         List<Vec3d> points;
         List<Vec3d> ctrls;
 
@@ -944,17 +983,17 @@ public class RollAndOffsetInfo {
             segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx + 1));
         }
 
-        if(newHandlerXLen < segmentLen * 0.5) {
-            Vec3d oldCtrlHandler = ctrls.get(editIdx).subtract(points.get(editIdx));
-            double scale = newHandlerXLen / Math.abs(oldCtrlHandler.x);
-            Vec3d newCtrlHandler = oldCtrlHandler.scale(scale);
-            ctrls.set(editIdx, points.get(editIdx).add(newCtrlHandler));
+        if(newHandleXLen < segmentLen * 0.5) {
+            Vec3d oldCtrlHandle = ctrls.get(editIdx).subtract(points.get(editIdx));
+            double scale = newHandleXLen / Math.abs(oldCtrlHandle.x);
+            Vec3d newCtrlHandle = oldCtrlHandle.scale(scale);
+            ctrls.set(editIdx, points.get(editIdx).add(newCtrlHandle));
             feedback = true;
         }
 
         return feedback;
     }
-    public String getHandlerXDisplay(double l, ExtraInfoType type, boolean editLeft, double length) {
+    public String getHandleXDisplay(double l, ExtraInfoType type, boolean editLeft, double length) {
         int idx = findPhysicalIndex(l);
         if(idx == -1) return "null";
         if(idx == 0 && editLeft) return "null";
