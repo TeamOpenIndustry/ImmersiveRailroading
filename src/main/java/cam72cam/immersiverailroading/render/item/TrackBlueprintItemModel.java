@@ -28,10 +28,9 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		RailInfo info = new RailInfo(stack, placementInfo, MultiSwitchInfo.from(stack).defaultCustom, MultiSwitchInfo.from(stack));
 		info = info.withSettings(b -> b.length = 10);
 
-		MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
-		multiSwitchInfo = MultiSwitchInfo.writePlacement(multiSwitchInfo,placementInfo);
-		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
-		info = info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
+		MultiSwitchInfo.Mutable multiSwitchInfo = info.multiSwitchInfo.mutable();
+		multiSwitchInfo.writePlacement(placementInfo);
+		info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo.immutable());
 
 		state.cull_face(false);
 		state.lighting(false);
@@ -80,10 +79,9 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(stack).placementOffset);
 		RailInfo info = new RailInfo(stack, placementInfo, MultiSwitchInfo.from(stack).defaultCustom,  MultiSwitchInfo.from(stack));
 
-		MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
-		multiSwitchInfo = MultiSwitchInfo.writePlacement(multiSwitchInfo,placementInfo);
-		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
-		info = info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
+		MultiSwitchInfo.Mutable multiSwitchInfo = info.multiSwitchInfo.mutable();
+		multiSwitchInfo.writePlacement(placementInfo);
+		info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo.immutable());
 
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);

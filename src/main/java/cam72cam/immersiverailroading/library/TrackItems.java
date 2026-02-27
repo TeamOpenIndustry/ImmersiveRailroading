@@ -103,6 +103,16 @@ public enum TrackItems {
 				return false;
 		}
 	}
+	public boolean isSwitchWay() {
+		switch (this) {
+			case CUBICPARABOLA:
+			case CUSTOM:
+			case TURN:
+				return true;
+			default:
+				return false;
+		}
+	}
 
 	public int getOrder() {
 		return this.order;

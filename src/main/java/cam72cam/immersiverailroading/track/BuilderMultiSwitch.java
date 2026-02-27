@@ -31,7 +31,7 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
         @Nullable
         MultiSwitchInfo multiSwitchInfo = info.multiSwitchInfo;
 
-        int wayAmount = multiSwitchInfo != null ? multiSwitchInfo.wayList.size() : 0;
+        int wayAmount = multiSwitchInfo != null ? multiSwitchInfo.getWayAmount() : 0;
         TrackItems realShapeOfStraight = multiSwitchInfo != null ? multiSwitchInfo.realShapeType : null;//if multi-info is not null then variable in it won't be null
 
         straightBuilder = constructBuilder(info, realShapeOfStraight);//child level has the same info, as long as parent builder is build properly then child will be the same
@@ -44,7 +44,7 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack{
 
         for(int i = 0 ; i < wayAmount; i++) {
             //Only STRAIGHT,SLOPE,TURN,CUBICPARABOLA,CUSTOM are valid
-            RailInfo turnInfo = fromSingleWayInfo(multiSwitchInfo.wayList.get(i));
+            RailInfo turnInfo = fromSingleWayInfo(multiSwitchInfo.getWayList().get(i));
             turnInfo = turnInfo.with(mutable -> {
                     mutable.multiSwitchInfo = mutable.multiSwitchInfo.with(mutable1 ->mutable1.isMultiSwitchWay = true);
             });

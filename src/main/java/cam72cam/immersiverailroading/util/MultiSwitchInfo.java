@@ -1,17 +1,24 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
 @TagMapped(MultiSwitchInfo.TagMapper.class)
 public class MultiSwitchInfo {
-    public final List<SingleWayInfo> wayList;
+    private final List<SingleWayInfo> wayList;//TODO: although it works now but List is not really cloned so there might be some potential safety problems
+    public List<SingleWayInfo> getWayList() {
+        return Collections.unmodifiableList(wayList);
+    }
+    public int getWayAmount() {
+        return wayList.size();
+    }
     public final TrackItems realShapeType;
     public final PlacementInfo defaultCustom;//cache custom when confining ways in wayList, only be written and read in TileRailPreview
     public final boolean isMultiSwitchWay;//this should only be written to true in BuilderMultiSwitch
@@ -68,6 +75,36 @@ public class MultiSwitchInfo {
                     defaultCustom
             );
         }
+
+        public void writePlacement(PlacementInfo placementInfo) {
+            if(wayList != null){
+                for(int i = 0; i < wayList.size(); i++) {
+                    SingleWayInfo singleWayInfo = wayList.get(i);
+                    SingleWayInfo finalSingleWayInfo = singleWayInfo;
+
+                    singleWayInfo = singleWayInfo.with(m -> m.placementInfo = placementInfo.withDirection(finalSingleWayInfo.settings.direction));
+                    wayList.set(i, singleWayInfo);
+                }
+            }
+        }
+
+        public void writeCustom(PlacementInfo customInfo, int wayOrder) {//0=default,1=wayList[0],2=wayList[1],...
+            if(wayOrder < 0)return;
+            wayOrder --;
+            if(wayList != null && wayOrder < wayList.size()){
+                SingleWayInfo singleWayInfo = wayList.get(wayOrder);
+
+                if(customInfo==null) {
+                    singleWayInfo = singleWayInfo.with(m ->
+                            m.customInfo = null);
+                }else {
+                    singleWayInfo = singleWayInfo.with(m ->
+                            m.customInfo = customInfo);
+                }
+
+                wayList.set(wayOrder, singleWayInfo);
+            }
+        }
     }
 
     public MultiSwitchInfo.Mutable mutable() {
@@ -122,38 +159,6 @@ public class MultiSwitchInfo {
         }
         root.setInteger("selectedWayOrder", selectedWayOrder);
         stack.setTagCompound(root);
-    }
-
-    public static MultiSwitchInfo writePlacement(MultiSwitchInfo multiSwitchInfo,PlacementInfo placementInfo) {
-        if(multiSwitchInfo != null && multiSwitchInfo.wayList != null){
-            for(int i = 0; i < multiSwitchInfo.wayList.size(); i++) {
-                SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(i);
-                SingleWayInfo finalSingleWayInfo = singleWayInfo;
-
-                singleWayInfo = singleWayInfo.with(m -> m.placementInfo = placementInfo.withDirection(finalSingleWayInfo.settings.direction));
-                multiSwitchInfo.wayList.set(i, singleWayInfo);
-            }
-        }
-        return multiSwitchInfo;
-    }
-
-    public static MultiSwitchInfo writeCustom(MultiSwitchInfo multiSwitchInfo, PlacementInfo customInfo, int wayOrder) {//0=default,1=wayList[0],2=wayList[1],...
-        if(wayOrder < 0)return multiSwitchInfo;
-        wayOrder --;
-        if(multiSwitchInfo != null && multiSwitchInfo.wayList != null && wayOrder<multiSwitchInfo.wayList.size()){
-            SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(wayOrder);
-
-            if(customInfo==null) {
-                singleWayInfo = singleWayInfo.with(m ->
-                        m.customInfo = null);
-            }else {
-                singleWayInfo = singleWayInfo.with(m ->
-                        m.customInfo = customInfo);
-            }
-
-            multiSwitchInfo.wayList.set(wayOrder, singleWayInfo);
-        }
-        return multiSwitchInfo;
     }
 
     public MultiSwitchInfo with(Consumer<MultiSwitchInfo.Mutable> mod) {

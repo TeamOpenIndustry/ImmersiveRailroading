@@ -476,7 +476,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					break;
 			}
 			if(midState!= -1 && midState != 4 && tile.getParentTile().info.settings.type == TrackItems.MULTISWITCH
-					&& tile.getParentTile().info.multiSwitchInfo.wayList.size()>midState){
+					&& tile.getParentTile().info.multiSwitchInfo.getWayAmount() > midState){
 				tile = tile.getParentTile().getChildWayTile(midState);
 			}
 
@@ -536,7 +536,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					break;
 			}
 			if(midState!= -1 && midState != 4 && tile.getParentTile().info.settings.type == TrackItems.MULTISWITCH
-					&& tile.getParentTile().info.multiSwitchInfo.wayList.size()>midState){
+					&& tile.getParentTile().info.multiSwitchInfo.getWayAmount() > midState){
 				tile = tile.getParentTile().getChildWayTile(midState);
 			}
 

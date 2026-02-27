@@ -358,12 +358,14 @@ public class TrackGui implements IScreen {
 						multiSwitchInfo.wayList.get(i).mutable().wayOrder--;
 					}
 					updateSelectedWay(1);
+					wayCircleButton.onClick(Player.Hand.SECONDARY);
 				}else if(selectedWay != 0) {
 					multiSwitchInfo.wayList.remove(selectedWay - 1);
 					for(int i = selectedWay - 1; i < multiSwitchInfo.wayList.size(); i++) {
 						multiSwitchInfo.wayList.get(i).mutable().wayOrder--;
 					}
 					updateSelectedWay(selectedWay - 1);
+					wayCircleButton.onClick(Player.Hand.SECONDARY);
 				}
 			}
 		};
@@ -496,10 +498,10 @@ public class TrackGui implements IScreen {
 
 		subTypeSelector = new ListSelector<TrackItems>(screen, width, 100, height, selectedWaySettings.type,
 				Arrays.stream(TrackItems.values())
-						.filter(i -> i != TrackItems.CROSSING && i != TrackItems.SWITCH && i != TrackItems.MULTISWITCH && i != TrackItems.TRANSFERTABLE && i != TrackItems.TURNTABLE )
+						.filter(TrackItems::isSwitchWay)
 						.sorted(Comparator.comparingInt(TrackItems::getOrder))
 						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
-		) {
+		) {//TODO: add check for duplicated curves
 			@Override
 			public void onClick(TrackItems option) {
 				if(selectedWay != 0){
@@ -1049,10 +1051,8 @@ public class TrackGui implements IScreen {
 
 		int length = info.settings.length;
 
-		MultiSwitchInfo infoWithPlacement = multiSwitchInfo.immutable();
-		infoWithPlacement = MultiSwitchInfo.writePlacement(infoWithPlacement,placementInfo);
-		MultiSwitchInfo finalMultiSwitchInfo = infoWithPlacement;
-		info = info.with(mutable -> mutable.multiSwitchInfo = finalMultiSwitchInfo);
+		multiSwitchInfo.writePlacement(placementInfo);//this is safe as placementInfo will be recalculated when placing or rendering
+		info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo.immutable());
 
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;
 		if (settings.type.isTable()) {

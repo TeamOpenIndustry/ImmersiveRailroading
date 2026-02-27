@@ -19,8 +19,12 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 
-		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM && rail.info.settings.type != TrackItems.CUBICPARABOLA && rail.info.settings.type != TrackItems.MULTISWITCH) {
-			return SwitchState.NONE;
+		if(rail.info.settings.type.isTable()) return SwitchState.NONE;
+		if(rail.info.settings.type == TrackItems.STRAIGHT || rail.info.settings.type == TrackItems.SLOPE) {
+			if(rail.info.multiSwitchInfo == null)return SwitchState.NONE;
+			if(!rail.info.multiSwitchInfo.isMultiSwitchWay) {
+				return SwitchState.NONE;
+			}
 		}
 
 		TileRail parent = rail.getParentTile();
@@ -77,12 +81,12 @@ public class SwitchUtil {
 					targetMidState = 4;
 					break;
 			}
-			if(targetMidState != -1 && targetMidState < parent.info.multiSwitchInfo.wayList.size()){
+			if(targetMidState != -1 && targetMidState < parent.info.multiSwitchInfo.getWayAmount()){
 				targetRail = parent.getChildWayTile(targetMidState);
 			}else if(targetMidState == -1 ){
 				targetRail = parent;//NONE and STRAIGHT
 			}else{
-				targetRail = parent.getChildWayTile(parent.info.multiSwitchInfo.wayList.size()-1);//convert to the biggest one
+				targetRail = parent.getChildWayTile(parent.info.multiSwitchInfo.getWayAmount() - 1);//convert to the biggest one
 			}
 			IIterableTrack targetBuilder = (IIterableTrack) targetRail.info.getBuilder(rail.getWorld());
 
@@ -93,7 +97,7 @@ public class SwitchUtil {
 			//find current
 			SwitchState currentState = SwitchState.NONE;
 			int currentStateInt = 0;//0,1,2,3,4,5,6=NONE,STRAIGHT,MID1,MID2,MID3,MID4,TURN
-			for(int i = 0; i<parent.info.multiSwitchInfo.wayList.size(); i++){
+			for(int i = 0; i < parent.info.multiSwitchInfo.getWayAmount(); i++){
 				TileRail currentRail = parent.getChildWayTile(i);
 				IIterableTrack currentBuilder = (IIterableTrack) currentRail.info.getBuilder(rail.getWorld());
 				double delta = currentBuilder.offsetFromTrack(currentRail.info, currentRail.getPos(), position);

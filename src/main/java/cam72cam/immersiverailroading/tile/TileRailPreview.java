@@ -41,8 +41,9 @@ public class TileRailPreview extends BlockEntityTickable {
 		this.item = stack.copy();
 		this.placementInfo = info;
 
-		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writePlacement(MultiSwitchInfo.from(item),placementInfo);
-		multiSwitchInfo.write(item);
+		MultiSwitchInfo.Mutable multiSwitchInfo = MultiSwitchInfo.from(item).mutable();
+		multiSwitchInfo.writePlacement(placementInfo);
+		multiSwitchInfo.immutable().write(item);
 
 		this.isAboveRails = BlockUtil.isIRRail(getWorld(), getPos().down()) && getWorld().getBlockEntity(getPos().down(), TileRailBase.class).getRailHeight() < 0.5;
 		this.markDirty();
@@ -51,8 +52,9 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setItem(ItemStack stack, Player player) {
 		this.item = stack.copy();
 
-		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writePlacement(MultiSwitchInfo.from(item),placementInfo);
-		multiSwitchInfo.write(item);
+		MultiSwitchInfo.Mutable multiSwitchInfo = MultiSwitchInfo.from(item).mutable();
+		multiSwitchInfo.writePlacement(placementInfo);
+		multiSwitchInfo.immutable().write(item);
 
 		RailSettings settings = RailSettings.from(item);
 
@@ -93,8 +95,8 @@ public class TileRailPreview extends BlockEntityTickable {
 				}
 			}else {
 				MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
-				if(multiSwitchInfo != null && multiSwitchInfo.wayList != null&&selectedOrder <= multiSwitchInfo.wayList.size()){
-					settings = multiSwitchInfo.wayList.get(selectedOrder - 1).settings;
+				if(multiSwitchInfo != null && multiSwitchInfo.getWayList() != null&&selectedOrder <= multiSwitchInfo.getWayAmount()){
+					settings = multiSwitchInfo.getWayList().get(selectedOrder - 1).settings;
 				}else {
 					ImmersiveRailroading.warn("invalid multiSwitchInfo:"+multiSwitchInfo+",or selectedOrder:"+selectedOrder);
 					return;
@@ -146,13 +148,13 @@ public class TileRailPreview extends BlockEntityTickable {
 				}
 				settings.write(item);
 			}else {
-				MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
-				if(multiSwitchInfo != null&&multiSwitchInfo.wayList != null&&selectedOrder <= multiSwitchInfo.wayList.size()){
+				MultiSwitchInfo.Mutable multiSwitchInfo = MultiSwitchInfo.from(item).mutable();
+				if(multiSwitchInfo != null && multiSwitchInfo.wayList != null && selectedOrder <= multiSwitchInfo.wayList.size()){
 					SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(selectedOrder-1);
 					RailSettings finalSettings = settings;
 					singleWayInfo = singleWayInfo.with(mutable -> mutable.settings = finalSettings);
 					multiSwitchInfo.wayList.set(selectedOrder - 1,singleWayInfo);
-					multiSwitchInfo.write(item);
+					multiSwitchInfo.immutable().write(item);
 					isCustomDirty = true;
 				}
 			}
@@ -218,7 +220,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	//TODO:move custom of normal types in multiSwitchInfo/settings?
 	private void writePosOffset() {//write wayList placement & custom offset into info
-		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+		MultiSwitchInfo.Mutable multiSwitchInfo = MultiSwitchInfo.from(item).mutable();
 		if(multiSwitchInfo != null && multiSwitchInfo.wayList != null) {
 			for(int i = 0; i < multiSwitchInfo.wayList.size(); i++) {
 				SingleWayInfo singleWayInfo = multiSwitchInfo.wayList.get(i);
@@ -230,8 +232,8 @@ public class TileRailPreview extends BlockEntityTickable {
 				});
 				multiSwitchInfo.wayList.set(i, singleWayInfo);
 			}
+			info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo.immutable());
 		}
-		info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo);
 	}
 
 	@Override
@@ -248,11 +250,10 @@ public class TileRailPreview extends BlockEntityTickable {
 
 		//update custom if it is multiSwitch
 		if(selectedOrder > 0 && isCustomDirty) {
-			MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.writeCustom(MultiSwitchInfo.from(item),customInfo,selectedOrder);
-            info = info.with(mutable -> {
-				mutable.multiSwitchInfo = multiSwitchInfo;
-			});
-			multiSwitchInfo.write(item);//both item and info are updated
+			MultiSwitchInfo.Mutable multiSwitchInfo = MultiSwitchInfo.from(item).mutable();
+			multiSwitchInfo.writeCustom(customInfo,selectedOrder);
+            info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo.immutable());
+			multiSwitchInfo.immutable().write(item);//both item and info are updated
 		}
 		if(info.settings.type == TrackItems.MULTISWITCH) {
 			MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);

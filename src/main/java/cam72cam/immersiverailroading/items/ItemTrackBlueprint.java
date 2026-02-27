@@ -53,7 +53,7 @@ public class ItemTrackBlueprint extends CustomItem {
     public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
 		RailSettings stackInfo = RailSettings.from(stack);
-		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(stack);
+		MultiSwitchInfo.Mutable multiSwitchInfo = MultiSwitchInfo.from(stack).mutable();
 
 		if (world.isServer && hand == Player.Hand.SECONDARY) {
 			ItemStack blockinfo = world.getItemStack(pos);
@@ -63,7 +63,7 @@ public class ItemTrackBlueprint extends CustomItem {
 				stackInfo = stackInfo.with(b -> b.railBed = blockinfo);
 			}
 			stackInfo.write(stack);
-			multiSwitchInfo.write(stack);
+			multiSwitchInfo.immutable().write(stack);
 			return ClickResult.ACCEPTED;
 		}
 
@@ -88,11 +88,10 @@ public class ItemTrackBlueprint extends CustomItem {
 			return ClickResult.ACCEPTED;
 		}
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
-		RailInfo info = new RailInfo(stack, placementInfo, null, multiSwitchInfo);
 
-		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
-		info = info.with(mutable -> mutable.multiSwitchInfo = MultiSwitchInfo.writePlacement(finalMultiSwitchInfo,placementInfo));
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
+		multiSwitchInfo.writePlacement(placementInfo);
+		RailInfo info = new RailInfo(stack, placementInfo, null, multiSwitchInfo.immutable());
 
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;
