@@ -114,7 +114,7 @@ gui.immersiverailroading:track.rail_bed=道床：%s
 gui.immersiverailroading:track.rail_bed_fill=道床填方：%s
 gui.immersiverailroading:track.place_blueprint_true=放置轨道蓝图
 gui.immersiverailroading:track.place_blueprint_false=直接放置轨道
-gui.immersiverailroading:track.roll_offset_type=超高垂直偏移方式：
+gui.immersiverailroading:track.roll_offset_type=超高垂直偏移方式
 
 gui.immersiverailroading:loco.works=服务公司：%s
 gui.immersiverailroading:loco.power=功率：%s

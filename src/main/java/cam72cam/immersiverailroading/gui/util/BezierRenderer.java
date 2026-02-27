@@ -3,7 +3,10 @@ package cam72cam.immersiverailroading.gui.util;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.render.opengl.*;
+import cam72cam.mod.render.opengl.BlendMode;
+import cam72cam.mod.render.opengl.DirectDraw;
+import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.render.opengl.Texture;
 import cam72cam.mod.resource.Identifier;
 
 import java.util.List;
@@ -20,12 +23,13 @@ public class BezierRenderer {
         this.curves = curves;
     }
 
-    public void drawLine(Vec3d start, Vec3d end, Color color, double xScale, double yScale) {
+    public void drawLine(Vec3d start, Vec3d end, Color color, double xScale, double yScale, double width) {
+        yScale = - yScale;
         start = new Vec3d(start.x * xScale, start.y * yScale, start.z);
         end = new Vec3d(end.x * xScale, end.y * yScale, end.z);
 
         Vec3d dir = end.subtract(start).normalize();
-        Vec3d normal = new Vec3d(-dir.y, dir.x, 0).normalize().scale(LINE_WIDTH / 2);
+        Vec3d normal = new Vec3d(-dir.y, dir.x, 0).normalize().scale(width / 2);
 
         Vec3d p4 = start.add(normal);
         Vec3d p3 = start.subtract(normal);
@@ -57,18 +61,19 @@ public class BezierRenderer {
         for (int i = 1; i <= iterations; i++) {
             double t = i / (double) iterations;
             Vec3d curr = curve.position(t);
-            drawLine(prev, curr, color, xScale, yScale);
+            drawLine(prev, curr, color, xScale, yScale, LINE_WIDTH);
             prev = curr;
         }
     }
 
     public void drawHandle(Vec3d point, Vec3d handlePoint, Color pointColor, Color handlePointColor, Color handleLineColor,  double xScale, double yScale) {
-        drawLine(point, handlePoint, handleLineColor, xScale, yScale);
+        drawLine(point, handlePoint, handleLineColor, xScale, yScale, LINE_WIDTH);
         drawPoint(point, handlePointColor, 4, xScale, yScale);
         drawPoint(handlePoint, pointColor, 4, xScale, yScale);
     }
 
     public void drawPoint(Vec3d pos, Color color, double size,  double xScale, double yScale) {
+        yScale = - yScale;
         pos = new Vec3d(pos.x * xScale, pos.y * yScale, pos.z);
 
         double half = size / 2;
@@ -83,5 +88,21 @@ public class BezierRenderer {
         draw.draw(state.clone().texture(Texture.wrap(pointImg))
                 .alpha_test(false)
                 .blend(new BlendMode(BlendMode.GL_SRC_ALPHA, BlendMode.GL_ONE_MINUS_SRC_ALPHA)));
+    }
+
+    public void drawArrow(Vec3d pos, Color color, double size,  double xScale, double yScale) {
+        pos = new Vec3d(pos.x * xScale, pos.y * yScale, pos.z);
+        double half = size / 2;
+        Vec3d corner1 = new Vec3d(-half, -half * 2, 0);
+        Vec3d corner2 = new Vec3d(-half, half * 2, 0);
+        Vec3d corner3 = new Vec3d(0, half * (2 + 1.732), 0);
+        Vec3d corner4 = new Vec3d(half, half * 2, 0);
+        Vec3d corner5 = new Vec3d(half, -half * 2, 0);
+
+        drawLine(pos.add(corner1), pos.add(corner2), color, 1, 1, LINE_WIDTH / 2);
+        drawLine(pos.add(corner2), pos.add(corner3), color, 1, 1, LINE_WIDTH / 2);
+        drawLine(pos.add(corner3), pos.add(corner4), color, 1, 1, LINE_WIDTH / 2);
+        drawLine(pos.add(corner4), pos.add(corner5), color, 1, 1, LINE_WIDTH / 2);
+        drawLine(pos.add(corner5), pos.add(corner1), color, 1, 1, LINE_WIDTH / 2);
     }
 }

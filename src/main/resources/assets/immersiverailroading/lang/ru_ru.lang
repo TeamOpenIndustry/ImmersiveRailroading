@@ -114,7 +114,7 @@ gui.immersiverailroading:track.rail_bed=Балласт: %s
 gui.immersiverailroading:track.rail_bed_fill=Насыпь: %s
 gui.immersiverailroading:track.place_blueprint_true=Предварительный режим
 gui.immersiverailroading:track.place_blueprint_false=Обычная установка пути
-gui.immersiverailroading:track.roll_offset_type=Уклон и вертикальное смещение:
+gui.immersiverailroading:track.roll_offset_type=Уклон и вертикальное смещение
 
 gui.immersiverailroading:loco.works=Эксплуатируется: %s
 gui.immersiverailroading:loco.power=Мощность: %s
@@ -172,8 +172,8 @@ track.immersiverailroading:ExtraInfoType.y_offset=Вертикальное см�
 track.immersiverailroading:ExtraInfoType.z_offset=Горизонтальное смещение
 
 track.immersiverailroading:rollYOffsetType.mid=По центру
-track.immersiverailroading:rollYOffsetType.high=По высшей точке
-track.immersiverailroading:rollYOffsetType.low=По низшей точке
+track.immersiverailroading:rollYOffsetType.high=По низшей точке
+track.immersiverailroading:rollYOffsetType.low=По высшей точке
 
 part.immersiverailroading:component.frame=Рама
 part.immersiverailroading:component.front_frame=Передняя рама

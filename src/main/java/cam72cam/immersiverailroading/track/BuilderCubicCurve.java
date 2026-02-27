@@ -2,12 +2,13 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackModelPart;
-import cam72cam.immersiverailroading.util.*;
+import cam72cam.immersiverailroading.util.PlacementInfo;
+import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
+import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.FastMath;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -156,7 +157,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 			stepSize = targetStepSize;
 		}
 
-		double gaugeScale = info.settings.gauge.scale();//TODO:add a config option to force it as 1 to disable scale
+		double gaugeScale = info.settings.gauge.scale();//rescale from Standard Gauge
 		double gauge = info.settings.gauge.value();
 		switch (type) {
 			case MID:
@@ -164,14 +165,14 @@ public class BuilderCubicCurve extends BuilderIterator {
 			case HIGH:
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
-					Vec3d newP = new Vec3d(p.x, p.y + Math.abs(rolls.get(i) / 2) * gaugeScale * 0.01, p.z);//superelevision scale
+					Vec3d newP = new Vec3d(p.x, p.y + Math.abs(rolls.get(i)) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
 					points.set(i, newP);
 				}
 				break;
 			case LOW:
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
-					Vec3d newP = new Vec3d(p.x, p.y - Math.abs(rolls.get(i) / 2) * gaugeScale, p.z);//superelevision scale
+					Vec3d newP = new Vec3d(p.x, p.y - Math.abs(rolls.get(i)) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
 					points.set(i, newP);
 				}
 				break;
@@ -215,7 +216,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 			}
 			float roll = 0;
 			if(rolls.get(i) != 0) {
-				roll = (float) Math.toDegrees(FastMath.atan2(rolls.get(i) * 0.01, gauge));//superelevision scale
+				double sin = rolls.get(i) * 0.01 / gauge;//superelevision scale
+				if(sin > 1)sin = 1;
+				if(sin < -1)sin = -1;
+				roll = (float) Math.toDegrees(Math.asin(sin));
 			}
 
 			res.add(new VecYPR(p.x + horizontalOffset.x, p.y, p.z + horizontalOffset.z, yaw, pitch, roll, -1));

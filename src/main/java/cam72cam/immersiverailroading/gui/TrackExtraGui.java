@@ -22,7 +22,9 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.opengl.RenderState;
 import net.minecraftforge.fml.client.config.GuiSlider;
+import util.Matrix4;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TrackExtraGui implements IScreen {
@@ -33,9 +35,10 @@ public class TrackExtraGui implements IScreen {
     Color pointColor;
     Color handlePointColor;
     Color handleLineColor;
+    Color arrowColor;
     private TileRailPreview te;
     private RailSettings.Mutable settings;
-    private RollAndOffsetInfo rollAndOffsetInfoCache;
+    private RollAndOffsetInfo.Mutable rollAndOffsetInfoCache;
     private boolean edited;
     private boolean editLeft;
     private final double length;//TODO: must prevent situation editing by more than one player! or there might cause sync problem
@@ -89,22 +92,21 @@ public class TrackExtraGui implements IScreen {
         length = referenceRenderData.size() * referenceInfo.settings.gauge.scale() * referenceInfo.getTrackModel().spacing;
 
         if(settings.pickRollAndOffsetInfo != null) {
-            rollAndOffsetInfoCache = settings.rollAndOffsetInfo;
+            rollAndOffsetInfoCache = settings.rollAndOffsetInfo.mutable();
         } else {
-            rollAndOffsetInfoCache = RollAndOffsetInfo.getDefault();
+            rollAndOffsetInfoCache = RollAndOffsetInfo.getDefault().mutable();
         }
 
-//        rollMax = 50 * settings.gauge.scale();
-//        yOffsetMax = settings.gauge.scale();
-//        zOffsetMax = settings.gauge.scale();
-        rollMax = 50;//todo:config scale
-        yOffsetMax = 1;
-        zOffsetMax = 1;
+        //basic Gauge: Standard Gauge. other gauge will scale from standard
+        rollMax = 40;//unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
+        yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
+        zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
         curveColor = Color.DEEP_GREEN;      // GREEN curve
         pointColor = Color.RED;      // RED point
-        handlePointColor = Color.BLUE;     // BLUE handle point
-        handleLineColor = Color.MAGENTA;   // MAGENTA handle line
+        handlePointColor = Color.BLUE;      // BLUE handle point
+        handleLineColor = Color.MAGENTA;      // MAGENTA handle line
+        arrowColor = Color.YELLOW;      //YELLOW arrow point
 
         edited = false;
         editLeft = true;
@@ -201,9 +203,9 @@ public class TrackExtraGui implements IScreen {
         //back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
 
-        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 70, height, "Selected Way: 0"){};//todo 等待multiSwitch分支合并后修改
+        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30, ytop, 85, height, "Selected Way: 0"){};//todo 等待multiSwitch分支合并后修改
 
-        offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - 130, ytop, 130, height, GuiText.TRACK_ROLL_OFFSET_TYPE.toString() + rollAndOffsetInfoCache.offsetType) {//todo:guiText
+        offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height, rollAndOffsetInfoCache.offsetType.toString()) {
             @Override
             public void onClick(Player.Hand hand) {
                 edited = true;
@@ -213,11 +215,14 @@ public class TrackExtraGui implements IScreen {
                 order = (order + (hand == Player.Hand.SECONDARY ? 1 : -1) + amount) % amount;
 
                 int finalOrder = order;
-                rollAndOffsetInfoCache = rollAndOffsetInfoCache.with(mutable -> mutable.offsetType = RollAndOffsetInfo.RollYOffsetType.byOrder(finalOrder));
+                rollAndOffsetInfoCache.offsetType = RollAndOffsetInfo.RollYOffsetType.byOrder(finalOrder);
 
-                this.setText(GuiText.TRACK_ROLL_OFFSET_TYPE.toString() + rollAndOffsetInfoCache.offsetType);
+                this.setText(rollAndOffsetInfoCache.offsetType.toString());
             }
         };
+        List<String> offsetTypeButtonText = new ArrayList<>();
+        offsetTypeButtonText.add(GuiText.TRACK_ROLL_OFFSET_TYPE.toString());
+        offsetTypeButton.setTooltip(offsetTypeButtonText);
 
         ytop += height;
         ytop += 5;
@@ -261,7 +266,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 100f;
+            float max = 100f / 2;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.trySetSlope(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL, length);
                 if(feedback) {
@@ -473,8 +478,8 @@ public class TrackExtraGui implements IScreen {
     public void onClose() {
         if(edited) {
             settings = settings.immutable().with(mutable -> {
-                mutable.rollAndOffsetInfo = rollAndOffsetInfoCache;
-                mutable.pickRollAndOffsetInfo = rollAndOffsetInfoCache;
+                mutable.rollAndOffsetInfo = rollAndOffsetInfoCache.immutable();
+                mutable.pickRollAndOffsetInfo = rollAndOffsetInfoCache.immutable();
             }).mutable();
         }
 
@@ -487,38 +492,49 @@ public class TrackExtraGui implements IScreen {
 
     @Override
     public void draw(IScreenBuilder builder, RenderState state) {
-
-
-
         int height = 20;
         double xScale = 200;
-        double rollYScale = height * 3 / rollMax;
+        double rollYScale = height * 1.5 / rollMax;
         double yOffsetYScale = height * 1.5 / yOffsetMax;
         double zOffsetYScale = height * 1.5 / zOffsetMax;
+        RollAndOffsetInfo immutable = rollAndOffsetInfoCache.immutable();
+
+        //Text
+        double textScale = 0.5;
+        GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.ROLL.toString(), (int) (105  / textScale) + 1, (int) ((height + 2) / textScale) + 1, 0x000000, new Matrix4().scale(textScale, textScale, textScale));
+        GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET.toString(), (int) (105  / textScale) + 1, (int) ((height + 2 + height * 3 + 5) / textScale) + 1, 0x000000, new Matrix4().scale(textScale, textScale, textScale));
+        GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET.toString(), (int) (105  / textScale) + 1, (int) ((height + 2 + height * 6 + 10) / textScale) + 1, 0x000000, new Matrix4().scale(textScale, textScale, textScale));
+
+        GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.ROLL.toString(), (int) (105  / textScale), (int) ((height + 2) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
+        GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 3 + 5) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
+        GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 6 + 10) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
         //rollGraph
         state.translate(5, height + 5 + height * 1.5, 0);
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, rollYScale);
+        rollGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getRoll(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
         //yOffsetGraph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer yOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
         yOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, yOffsetYScale);
+        yOffsetGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getYOffset(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
 
         //zOffsetGraph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer zOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
         zOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, zOffsetYScale);
+        zOffsetGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getZOffset(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, zOffsetYScale);
 
     }
 
     private void updateSliderRelated() {
         if(insertOrDeletePointButton != null) {
             if(rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue()) == -1) {
-                insertOrDeletePointButton.setText("Insert Point");
+                insertOrDeletePointButton.setText("Insert");
             } else {
-                insertOrDeletePointButton.setText("Delete Point");
+                insertOrDeletePointButton.setText("Delete");
             }
         }
         if(rollValueInput != null)rollValueInput.setText("");
@@ -565,8 +581,8 @@ public class TrackExtraGui implements IScreen {
                 return;
         }
 
-        if(valueLabel != null)valueLabel.setText(type + " Value:" + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));//todo GuiText
-        if(slopeLabel != null)slopeLabel.setText(type + " Slope:" + rollAndOffsetInfoCache.getSlopeDisplay(lSlider.getValue(), type, length));
-        if(handleXLenLabel != null)handleXLenLabel.setText(type + " Handle X:" + rollAndOffsetInfoCache.getHandleXDisplay(lSlider.getValue(), type, editLeft, length));
+        if(valueLabel != null)valueLabel.setText("Value:" + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));//todo GuiText
+        if(slopeLabel != null)slopeLabel.setText("Slope:" + rollAndOffsetInfoCache.getSlopeDisplay(lSlider.getValue(), type, length));
+        if(handleXLenLabel != null)handleXLenLabel.setText("Handle:" + rollAndOffsetInfoCache.getHandleXDisplay(lSlider.getValue(), type, editLeft, length));
     }
  }

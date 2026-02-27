@@ -68,7 +68,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if (rearYaw == null) {
             rearYaw = getRotationYaw();
         }
-        if (frontRoll == null) {//todo:待测试
+        if (frontRoll == null) {
             frontRoll = 0f;
         }
         if (rearRoll == null) {
@@ -285,7 +285,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.frontYaw = currentPos.frontYaw;
         this.rearYaw = currentPos.rearYaw;
 
-        //todo:should we implement setRotationRoll in UMC?
+        //todo:should we implement setRotationRoll in UMC? code about roll here should be update if so
         this.frontRoll = currentPos.frontRoll;
         this.rearRoll = currentPos.rearRoll;
 
@@ -413,7 +413,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.rearYaw = rearYaw;
     }
 
-    public float getFrontRoll() {//todo: getFront/RearRoll should be update if UMC entity implements roll value
+    public float getFrontRoll() {
         if(this.frontRoll != null) {
             return this.frontRoll;
         }
@@ -431,7 +431,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public void setRearRoll(float val) {
         this.rearRoll = val;
     }
-    public float getRotationRoll() {//todo: consider weight of every bogey? and if we have more bogeys in future...
+    public float getRotationRoll() {//TODO: consider weight of every bogey? and if we have more bogeys in future?
         return (getFrontRoll() + getRearRoll()) / 2;
     }
 

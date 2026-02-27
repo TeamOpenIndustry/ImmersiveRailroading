@@ -4,37 +4,39 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
+import cam72cam.mod.text.TextUtil;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import cam72cam.mod.text.TextUtil;
-import org.apache.commons.lang3.tuple.Pair;
-
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
-public class RollAndOffsetInfo {
+public class RollAndOffsetInfo {//TODO: although it works now but List is not really cloned so there might be some potential safety problems
     public final RollYOffsetType offsetType;
-    public final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
+    private final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
     //Roll
     /**
      * This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
+     * Based on Standard Gauge, if in gauge X mm, it will be scaled to rollMax * X / 1435 Centimeters.
      */
-    public final List<Vec3d> rolls;
-    public final List<Vec3d> rollCtrls;
+    private final List<Vec3d> rolls;
+    private final List<Vec3d> rollCtrls;
     //Y Offset
     /**
      * This stores [Height Offset(UNIT: Meter) * Gauge Scale].
+     * Based on Standard Gauge, if in Gauge X mm, it will be scaled to yOffset * X / 1435 Meters.
      */
-    public final List<Vec3d> yOffsets;
-    public final List<Vec3d> yOffsetCtrls;
+    private final List<Vec3d> yOffsets;
+    private final List<Vec3d> yOffsetCtrls;
     //Z Offset
     /**
      * This stores [Width Offset(UNIT: Meter) * Gauge Scale].
+     * Based on Standard Gauge, if in Gauge X mm, it will be scaled to zOffset * X / 1435 Meters.
      */
-    public final List<Vec3d> zOffsets;
-    public final List<Vec3d> zOffsetCtrls;
+    private final List<Vec3d> zOffsets;
+    private final List<Vec3d> zOffsetCtrls;
 
     public RollAndOffsetInfo(
             RollYOffsetType offsetType,
@@ -78,19 +80,19 @@ public class RollAndOffsetInfo {
         @TagField("offsetType")
         public RollYOffsetType offsetType;
         @TagField(value = "ls", mapper = DoubleListMapper.class)
-        public List<Double> ls;
+        private List<Double> ls;
         @TagField(value = "rolls", mapper = Vec3dListMapper.class)
-        public List<Vec3d> rolls;
+        private List<Vec3d> rolls;
         @TagField(value = "rollCtrls", mapper = Vec3dListMapper.class)
-        public List<Vec3d> rollCtrls;
+        private List<Vec3d> rollCtrls;
         @TagField(value = "yOffsets", mapper = Vec3dListMapper.class)
-        public List<Vec3d> yOffsets;
+        private List<Vec3d> yOffsets;
         @TagField(value = "yOffsetCtrls", mapper = Vec3dListMapper.class)
-        public List<Vec3d> yOffsetCtrls;
+        private List<Vec3d> yOffsetCtrls;
         @TagField(value = "zOffsets", mapper = Vec3dListMapper.class)
-        public List<Vec3d> zOffsets;
+        private List<Vec3d> zOffsets;
         @TagField(value = "zOffsetCtrls", mapper = Vec3dListMapper.class)
-        public List<Vec3d> zOffsetCtrls;
+        private List<Vec3d> zOffsetCtrls;
 
         public Mutable(RollAndOffsetInfo rollAndOffsetInfo) {
             this.offsetType = rollAndOffsetInfo.offsetType;
@@ -139,6 +141,396 @@ public class RollAndOffsetInfo {
                     zOffsets,
                     zOffsetCtrls
             );
+        }
+
+        //function for Gui config, notice that when using these, Lists CANT be NULL!
+        /**
+         * This will return -1 if L not in range
+         */
+        public int findPhysicalIndex(double l) {//return physical index
+            int res = -1;
+            for (int i = 0; i < ls.size(); i += 2) {
+                if(ls.get(i) == l) {
+                    res = i;
+                    break;
+                }
+            }
+            if(!ls.isEmpty() && ls.get(ls.size() - 1) == l) {
+                res = ls.size()-1;
+            }
+            return res;
+        }
+
+        public boolean tryInsertBySubSplit(double l) {
+            if(findPhysicalIndex(l) != -1) return false;
+
+            List<Pair<Double, Double>> divider = new ArrayList<>();
+            divider.add(Pair.of(0d, l));
+            divider.add(Pair.of(l, 1d));
+
+            RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
+                    offsetType,
+                    ls, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
+            );
+            List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);//will divide it manually here, should be faster
+
+            ls.clear();
+            ls.addAll(res.get(0).ls);
+            ls.addAll(res.get(1).ls);
+
+            rolls.clear();
+            rolls.addAll(res.get(0).rolls);
+            rolls.addAll(res.get(1).rolls);
+
+            rollCtrls.clear();
+            rollCtrls.addAll(res.get(0).rollCtrls);
+            rollCtrls.addAll(res.get(1).rollCtrls);
+
+            yOffsets.clear();
+            yOffsets.addAll(res.get(0).yOffsets);
+            yOffsets.addAll(res.get(1).yOffsets);
+
+            yOffsetCtrls.clear();
+            yOffsetCtrls.addAll(res.get(0).yOffsetCtrls);
+            yOffsetCtrls.addAll(res.get(1).yOffsetCtrls);
+
+            zOffsets.clear();
+            zOffsets.addAll(res.get(0).zOffsets);
+            zOffsets.addAll(res.get(1).zOffsets);
+
+            zOffsetCtrls.clear();
+            zOffsetCtrls.addAll(res.get(0).zOffsetCtrls);
+            zOffsetCtrls.addAll(res.get(1).zOffsetCtrls);
+
+            return true;
+        }
+
+        public boolean tryDeleteDirectly(double l) {
+            int idx = findPhysicalIndex(l);
+            if(idx == -1 || idx == 0 || idx == ls.size() - 1) return false;
+
+            ls.remove(idx - 1);
+            ls.remove(idx - 1);
+
+            rolls.remove(idx - 1);
+            rolls.remove(idx - 1);
+
+            rollCtrls.remove(idx - 1);
+            rollCtrls.remove(idx - 1);
+
+            yOffsets.remove(idx - 1);
+            yOffsets.remove(idx - 1);
+
+            yOffsetCtrls.remove(idx - 1);
+            yOffsetCtrls.remove(idx - 1);
+
+            zOffsets.remove(idx - 1);
+            zOffsets.remove(idx - 1);
+
+            zOffsetCtrls.remove(idx - 1);
+            zOffsetCtrls.remove(idx - 1);
+
+            return true;
+        }
+
+        public void resetAll() {
+            ls.clear();
+            rolls.clear();
+            rollCtrls.clear();
+            yOffsets.clear();
+            yOffsetCtrls.clear();
+            zOffsets.clear();
+            zOffsetCtrls.clear();
+
+            ls.add(0d); ls.add(1d);
+            rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
+            rollCtrls.add(new Vec3d(1d / 3, 0, 0)); rollCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
+            yOffsets.add(new Vec3d(0, 0, 0)); yOffsets.add(new Vec3d(1, 0, 0));
+            yOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); yOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
+            zOffsets.add(new Vec3d(0, 0, 0)); zOffsets.add(new Vec3d(1, 0, 0));
+            zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
+        }
+
+        public boolean tryDeltaValue(double l, double val, ExtraInfoType type) {
+            int idx = findPhysicalIndex(l);
+            if(idx == -1) return false;
+
+            List<Vec3d> points;
+            List<Vec3d> ctrls;
+
+            switch (type) {
+                case ROLL:
+                    points = rolls;
+                    ctrls = rollCtrls;
+                    break;
+                case Y_OFFSET:
+                    points = yOffsets;
+                    ctrls = yOffsetCtrls;
+                    break;
+                case Z_OFFSET:
+                    points = zOffsets;
+                    ctrls = zOffsetCtrls;
+                    break;
+                default:
+                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    return false;
+            }
+
+            Vec3d newValue = new Vec3d(points.get(idx).x, points.get(idx).y, val);
+            Vec3d oldValue = ctrls.get(idx);
+            double delta = val - points.get(idx).z;
+            points.set(idx, newValue);
+            ctrls.set(idx, new Vec3d(oldValue.x, oldValue.y, oldValue.z + delta));
+
+            if(idx > 0 && idx < ls.size() - 1) {
+                oldValue = ctrls.get(idx - 1);
+                points.set(idx - 1, newValue);
+                ctrls.set(idx - 1, new Vec3d(oldValue.x, oldValue.y, oldValue.z + delta));
+            }
+
+            return true;
+        }
+        public String getValueDisplay(double l, ExtraInfoType type) {
+            int idx = findPhysicalIndex(l);
+            if(idx == -1) return "null";
+
+            List<Vec3d> points;
+
+            switch (type) {
+                case ROLL:
+                    points = rolls;
+                    break;
+                case Y_OFFSET:
+                    points = yOffsets;
+                    break;
+                case Z_OFFSET:
+                    points = zOffsets;
+                    break;
+                default:
+                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    return "null";
+            }
+
+            return String.format("%.4f", points.get(idx).z);
+        }
+
+        public boolean trySetHandleXLen(double l, double val, ExtraInfoType type, boolean editLeft, double length) {
+            int idx = findPhysicalIndex(l);
+            if(idx == -1) return false;
+            if(idx == 0 && editLeft) return false;
+            if(idx == ls.size() - 1 && !editLeft) return false;
+            if(val < 1e-1) return false;
+
+            double newHandleXLen = val / length;
+            List<Vec3d> points;
+            List<Vec3d> ctrls;
+
+            switch (type) {
+                case ROLL:
+                    points = rolls;
+                    ctrls = rollCtrls;
+                    break;
+                case Y_OFFSET:
+                    points = yOffsets;
+                    ctrls = yOffsetCtrls;
+                    break;
+                case Z_OFFSET:
+                    points = zOffsets;
+                    ctrls = zOffsetCtrls;
+                    break;
+                default:
+                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    return false;
+            }
+
+            boolean feedback = false;
+
+            int editIdx;
+            double segmentLen;
+            if(editLeft) {
+                if(idx == ls.size() - 1) {
+                    editIdx = idx;
+                    segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx - 1));
+                }else {
+                    editIdx = idx - 1;
+                    segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx - 1));
+                }
+            }else {
+                editIdx = idx;
+                segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx + 1));
+            }
+
+            if(newHandleXLen < segmentLen * 0.5) {
+                Vec3d oldCtrlHandle = ctrls.get(editIdx).subtract(points.get(editIdx));
+                double scale = newHandleXLen / Math.abs(oldCtrlHandle.x);
+                Vec3d newCtrlHandle = oldCtrlHandle.scale(scale);
+                ctrls.set(editIdx, points.get(editIdx).add(newCtrlHandle));
+                feedback = true;
+            }
+
+            return feedback;
+        }
+        public String getHandleXDisplay(double l, ExtraInfoType type, boolean editLeft, double length) {
+            int idx = findPhysicalIndex(l);
+            if(idx == -1) return "null";
+            if(idx == 0 && editLeft) return "null";
+            if(idx == ls.size() - 1 && !editLeft) return "null";
+
+            List<Vec3d> points;
+            List<Vec3d> ctrls;
+
+            switch (type) {
+                case ROLL:
+                    points = rolls;
+                    ctrls = rollCtrls;
+                    break;
+                case Y_OFFSET:
+                    points = yOffsets;
+                    ctrls = yOffsetCtrls;
+                    break;
+                case Z_OFFSET:
+                    points = zOffsets;
+                    ctrls = zOffsetCtrls;
+                    break;
+                default:
+                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    return "null";
+            }
+
+            int displayIdx;
+            if(editLeft) {
+                if(idx == ls.size() - 1) {
+                    displayIdx = idx;
+                }else {
+                    displayIdx = idx - 1;
+                }
+            }else {
+                displayIdx = idx;
+            }
+
+            double res = Math.abs(ctrls.get(displayIdx).x - points.get(displayIdx).x);
+            return String.format("%.4f", res * length);
+        }
+
+        public boolean trySetSlope(double l, double val, ExtraInfoType type, double length) {
+            int idx = findPhysicalIndex(l);
+            if(idx == -1) return false;
+
+
+            List<Vec3d> points;
+            List<Vec3d> ctrls;
+            double slopeScale;
+
+            switch (type) {
+                case ROLL:
+                    points = rolls;
+                    ctrls = rollCtrls;
+                    slopeScale = 0.1;//centimeter/meter * 0.1 => 1/1000 slope
+                    break;
+                case Y_OFFSET:
+                    points = yOffsets;
+                    ctrls = yOffsetCtrls;
+                    slopeScale = 0.001;
+                    break;
+                case Z_OFFSET:
+                    points = zOffsets;
+                    ctrls = zOffsetCtrls;
+                    slopeScale = 0.001;
+                    break;
+                default:
+                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    return false;
+            }
+
+            double fullZWithLength = val * slopeScale * length;
+
+            Vec3d oldCtrl = ctrls.get(idx);
+            double newValueBase = points.get(idx).z;
+            double newValueDelta = (ctrls.get(idx).x - points.get(idx).x) * fullZWithLength;
+            double newValue = newValueBase + newValueDelta;
+            ctrls.set(idx, new Vec3d(oldCtrl.x, oldCtrl.y, newValue));
+
+            if(idx > 0 && idx < ls.size() - 1) {
+                oldCtrl = ctrls.get(idx - 1);
+                newValueBase = points.get(idx - 1).z;
+                newValueDelta = (ctrls.get(idx - 1).x - points.get(idx - 1).x) * fullZWithLength;
+                newValue = newValueBase + newValueDelta;
+                ctrls.set(idx - 1, new Vec3d(oldCtrl.x, oldCtrl.y, newValue));
+            }
+
+            return true;
+        }
+        public String getSlopeDisplay(double l, ExtraInfoType type, double length) {
+            int idx = findPhysicalIndex(l);
+            if(idx == -1) return "null";
+
+            List<Vec3d> points;
+            List<Vec3d> ctrls;
+            int slopeScale;
+
+            switch (type) {
+                case ROLL:
+                    points = rolls;
+                    ctrls = rollCtrls;
+                    slopeScale = 10;//centimeter/meter * 0.1 => 1/1000 slope
+                    break;
+                case Y_OFFSET:
+                    points = yOffsets;
+                    ctrls = yOffsetCtrls;
+                    slopeScale = 1000;
+                    break;
+                case Z_OFFSET:
+                    points = zOffsets;
+                    ctrls = zOffsetCtrls;
+                    slopeScale = 1000;
+                    break;
+                default:
+                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    return "null";
+            }
+
+            double tan = (ctrls.get(idx).z - points.get(idx).z) / (ctrls.get(idx).x - points.get(idx).x);
+            tan /= length;
+            tan *= slopeScale;
+            return String.format("%.4f", tan);
+        }
+        public List<CubicCurve> toCurves(ExtraInfoType type, boolean swapYZ) {
+            List<Vec3d> points;
+            List<Vec3d> ctrls;
+            switch (type) {
+                case ROLL:
+                    points = rolls;
+                    ctrls = rollCtrls;
+                    break;
+                case Y_OFFSET:
+                    points = yOffsets;
+                    ctrls = yOffsetCtrls;
+                    break;
+                case Z_OFFSET:
+                    points = zOffsets;
+                    ctrls = zOffsetCtrls;
+                    break;
+                default:
+                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    return null;
+            }
+
+            List<CubicCurve> curves = new ArrayList<>();
+            for(int i = 0; i < ls.size(); i+=2) {
+                CubicCurve curve;
+                if(swapYZ) {//for screen rendering
+                    Vec3d p1 = new Vec3d(points.get(i).x, points.get(i).z, points.get(i).y);
+                    Vec3d ctrl1 = new Vec3d(ctrls.get(i).x, ctrls.get(i).z, ctrls.get(i).y);
+                    Vec3d ctrl2Opposite = new Vec3d(ctrls.get(i + 1).x, ctrls.get(i + 1).z, ctrls.get(i + 1).y);
+                    Vec3d p2 = new Vec3d(points.get(i + 1).x, points.get(i + 1).z, points.get(i + 1).y);
+                    Vec3d ctrl2 = p2.scale(2).subtract(ctrl2Opposite);
+                    curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
+                }else {
+                    curve = new CubicCurve(points.get(i), ctrls.get(i), points.get(i + 1).scale(2).subtract(ctrls.get(i + 1)), points.get(i + 1));
+                }
+                curves.add(curve);
+            }
+            return curves;
         }
     }
 
@@ -263,46 +655,6 @@ public class RollAndOffsetInfo {
         id += "}";
         return id;
     }
-
-    public List<CubicCurve> toCurves(ExtraInfoType type, boolean swapYZ) {
-        List<Vec3d> points;
-        List<Vec3d> ctrls;
-        switch (type) {
-            case ROLL:
-                points = rolls;
-                ctrls = rollCtrls;
-                break;
-            case Y_OFFSET:
-                points = yOffsets;
-                ctrls = yOffsetCtrls;
-                break;
-            case Z_OFFSET:
-                points = zOffsets;
-                ctrls = zOffsetCtrls;
-                break;
-            default:
-                ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                return null;
-        }
-
-        List<CubicCurve> curves = new ArrayList<>();
-        for(int i = 0; i < ls.size(); i+=2) {
-            CubicCurve curve;
-            if(swapYZ) {//for screen rendering
-                Vec3d p1 = new Vec3d(points.get(i).x, points.get(i).z, points.get(i).y);
-                Vec3d ctrl1 = new Vec3d(ctrls.get(i).x, ctrls.get(i).z, ctrls.get(i).y);
-                Vec3d ctrl2Opposite = new Vec3d(ctrls.get(i + 1).x, ctrls.get(i + 1).z, ctrls.get(i + 1).y);
-                Vec3d p2 = new Vec3d(points.get(i + 1).x, points.get(i + 1).z, points.get(i + 1).y);
-                Vec3d ctrl2 = p2.scale(2).subtract(ctrl2Opposite);
-                curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
-            }else {
-                curve = new CubicCurve(points.get(i), ctrls.get(i), points.get(i + 1).scale(2).subtract(ctrls.get(i + 1)), points.get(i + 1));
-            }
-            curves.add(curve);
-        }
-        return curves;
-    }
-
     public enum RollYOffsetType {
         MID(0),
         HIGH(1),
@@ -356,9 +708,9 @@ public class RollAndOffsetInfo {
     //分类讨论:按照tStart到tEnd区间包含的t的点个数讨论
     //0个:new内存一段线即可，但是tStart和tEnd两端都需要计算，再参数化到01存储->ok
     //非0个:tStart和tEnd两端也都需要计算再参数化到01存储，中间的t就只要参数化到01
-    //其中边界条件:
-    //1:tStart和点重合
-    //2:tEnd和点重合
+    //boundary:
+    //1:tStart overlay with a point
+    //2:tEnd overlay with a point
     public List<RollAndOffsetInfo> subSplit(List<Pair<Double,Double>> subCurves, boolean normalize) {//只有分段发生才会进入此处,但是某些bug导致传入的subsplit范围不合法（start和end重合）会导致ls.size()==0
         List<RollAndOffsetInfo> results = new ArrayList<>();
 
@@ -763,348 +1115,5 @@ public class RollAndOffsetInfo {
 
         if (targetL <= ls.get(0)) return 0;
         return ls.size() / 2 - 1;
-    }
-
-//function for Gui config, notice that when using these, Lists CANT be NULL!
-
-    /**
-     * This will return -1 if l not in range
-     */
-    public int findPhysicalIndex(double l) {//return physical index
-        int res = -1;
-        for (int i = 0; i < ls.size(); i += 2) {
-            if(ls.get(i) == l) {
-                res = i;
-                break;
-            }
-        }
-        if(!ls.isEmpty() && ls.get(ls.size() - 1) == l) {
-            res = ls.size()-1;
-        }
-        return res;
-    }
-
-    public boolean tryInsertBySubSplit(double l) {
-        if(findPhysicalIndex(l) != -1) return false;
-
-        List<Pair<Double, Double>> divider = new ArrayList<>();
-        divider.add(Pair.of(0d, l));
-        divider.add(Pair.of(l, 1d));
-
-        RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
-                offsetType,
-                ls, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
-        );
-        List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);//will divide it manually here, should be faster
-
-        ls.clear();
-        ls.addAll(res.get(0).ls);
-        ls.addAll(res.get(1).ls);
-
-        rolls.clear();
-        rolls.addAll(res.get(0).rolls);
-        rolls.addAll(res.get(1).rolls);
-
-        rollCtrls.clear();
-        rollCtrls.addAll(res.get(0).rollCtrls);
-        rollCtrls.addAll(res.get(1).rollCtrls);
-
-        yOffsets.clear();
-        yOffsets.addAll(res.get(0).yOffsets);
-        yOffsets.addAll(res.get(1).yOffsets);
-
-        yOffsetCtrls.clear();
-        yOffsetCtrls.addAll(res.get(0).yOffsetCtrls);
-        yOffsetCtrls.addAll(res.get(1).yOffsetCtrls);
-
-        zOffsets.clear();
-        zOffsets.addAll(res.get(0).zOffsets);
-        zOffsets.addAll(res.get(1).zOffsets);
-
-        zOffsetCtrls.clear();
-        zOffsetCtrls.addAll(res.get(0).zOffsetCtrls);
-        zOffsetCtrls.addAll(res.get(1).zOffsetCtrls);
-
-        return true;
-    }
-
-    public boolean tryDeleteDirectly(double l) {
-        int idx = findPhysicalIndex(l);
-        if(idx == -1 || idx == 0 || idx == ls.size() - 1) return false;
-
-        ls.remove(idx - 1);
-        ls.remove(idx - 1);
-
-        rolls.remove(idx - 1);
-        rolls.remove(idx - 1);
-
-        rollCtrls.remove(idx - 1);
-        rollCtrls.remove(idx - 1);
-
-        yOffsets.remove(idx - 1);
-        yOffsets.remove(idx - 1);
-
-        yOffsetCtrls.remove(idx - 1);
-        yOffsetCtrls.remove(idx - 1);
-
-        zOffsets.remove(idx - 1);
-        zOffsets.remove(idx - 1);
-
-        zOffsetCtrls.remove(idx - 1);
-        zOffsetCtrls.remove(idx - 1);
-
-        return true;
-    }
-
-    public void resetAll() {
-        ls.clear();
-        rolls.clear();
-        rollCtrls.clear();
-        yOffsets.clear();
-        yOffsetCtrls.clear();
-        zOffsets.clear();
-        zOffsetCtrls.clear();
-
-        ls.add(0d); ls.add(1d);
-        rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
-        rollCtrls.add(new Vec3d(1d / 3, 0, 0)); rollCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
-        yOffsets.add(new Vec3d(0, 0, 0)); yOffsets.add(new Vec3d(1, 0, 0));
-        yOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); yOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
-        zOffsets.add(new Vec3d(0, 0, 0)); zOffsets.add(new Vec3d(1, 0, 0));
-        zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
-    }
-
-    public boolean tryDeltaValue(double l, double val, ExtraInfoType type) {
-        int idx = findPhysicalIndex(l);
-        if(idx == -1) return false;
-
-        List<Vec3d> points;
-        List<Vec3d> ctrls;
-
-        switch (type) {
-            case ROLL:
-                points = rolls;
-                ctrls = rollCtrls;
-                break;
-            case Y_OFFSET:
-                points = yOffsets;
-                ctrls = yOffsetCtrls;
-                break;
-            case Z_OFFSET:
-                points = zOffsets;
-                ctrls = zOffsetCtrls;
-                break;
-            default:
-                ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                return false;
-        }
-
-        Vec3d newValue = new Vec3d(points.get(idx).x, points.get(idx).y, val);
-        Vec3d oldValue = ctrls.get(idx);
-        double delta = val - points.get(idx).z;
-        points.set(idx, newValue);
-        ctrls.set(idx, new Vec3d(oldValue.x, oldValue.y, oldValue.z + delta));
-
-        if(idx > 0 && idx < ls.size() - 1) {
-            oldValue = ctrls.get(idx - 1);
-            points.set(idx - 1, newValue);
-            ctrls.set(idx - 1, new Vec3d(oldValue.x, oldValue.y, oldValue.z + delta));
-        }
-
-        return true;
-    }
-    public String getValueDisplay(double l, ExtraInfoType type) {
-        int idx = findPhysicalIndex(l);
-        if(idx == -1) return "null";
-
-        List<Vec3d> points;
-
-        switch (type) {
-            case ROLL:
-                points = rolls;
-                break;
-            case Y_OFFSET:
-                points = yOffsets;
-                break;
-            case Z_OFFSET:
-                points = zOffsets;
-                break;
-            default:
-                ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                return "null";
-        }
-
-        return String.format("%.4f", points.get(idx).z);
-    }
-
-    public boolean trySetHandleXLen(double l, double val, ExtraInfoType type, boolean editLeft, double length) {
-        int idx = findPhysicalIndex(l);
-        if(idx == -1) return false;
-        if(idx == 0 && editLeft) return false;
-        if(idx == ls.size() - 1 && !editLeft) return false;
-        if(val < 1e-1) return false;
-
-        double newHandleXLen = val / length;
-        List<Vec3d> points;
-        List<Vec3d> ctrls;
-
-        switch (type) {
-            case ROLL:
-                points = rolls;
-                ctrls = rollCtrls;
-                break;
-            case Y_OFFSET:
-                points = yOffsets;
-                ctrls = yOffsetCtrls;
-                break;
-            case Z_OFFSET:
-                points = zOffsets;
-                ctrls = zOffsetCtrls;
-                break;
-            default:
-                ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                return false;
-        }
-
-        boolean feedback = false;
-
-        int editIdx;
-        double segmentLen;
-        if(editLeft) {
-            if(idx == ls.size() - 1) {
-                editIdx = idx;
-                segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx - 1));
-            }else {
-                editIdx = idx - 1;
-                segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx - 1));
-            }
-        }else {
-            editIdx = idx;
-            segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx + 1));
-        }
-
-        if(newHandleXLen < segmentLen * 0.5) {
-            Vec3d oldCtrlHandle = ctrls.get(editIdx).subtract(points.get(editIdx));
-            double scale = newHandleXLen / Math.abs(oldCtrlHandle.x);
-            Vec3d newCtrlHandle = oldCtrlHandle.scale(scale);
-            ctrls.set(editIdx, points.get(editIdx).add(newCtrlHandle));
-            feedback = true;
-        }
-
-        return feedback;
-    }
-    public String getHandleXDisplay(double l, ExtraInfoType type, boolean editLeft, double length) {
-        int idx = findPhysicalIndex(l);
-        if(idx == -1) return "null";
-        if(idx == 0 && editLeft) return "null";
-        if(idx == ls.size() - 1 && !editLeft) return "null";
-
-        List<Vec3d> points;
-        List<Vec3d> ctrls;
-
-        switch (type) {
-            case ROLL:
-                points = rolls;
-                ctrls = rollCtrls;
-                break;
-            case Y_OFFSET:
-                points = yOffsets;
-                ctrls = yOffsetCtrls;
-                break;
-            case Z_OFFSET:
-                points = zOffsets;
-                ctrls = zOffsetCtrls;
-                break;
-            default:
-                ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                return "null";
-        }
-
-        int displayIdx;
-        if(editLeft) {
-            if(idx == ls.size() - 1) {
-                displayIdx = idx;
-            }else {
-                displayIdx = idx - 1;
-            }
-        }else {
-            displayIdx = idx;
-        }
-
-        double res = Math.abs(ctrls.get(displayIdx).x - points.get(displayIdx).x);
-        return String.format("%.4f", res * length);
-    }
-
-    public boolean trySetSlope(double l, double val, ExtraInfoType type, double length) {
-        int idx = findPhysicalIndex(l);
-        if(idx == -1) return false;
-
-        double fullZWithLength = val * 0.001 * length;
-        List<Vec3d> points;
-        List<Vec3d> ctrls;
-
-        switch (type) {
-            case ROLL:
-                points = rolls;
-                ctrls = rollCtrls;
-                break;
-            case Y_OFFSET:
-                points = yOffsets;
-                ctrls = yOffsetCtrls;
-                break;
-            case Z_OFFSET:
-                points = zOffsets;
-                ctrls = zOffsetCtrls;
-                break;
-            default:
-                ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                return false;
-        }
-
-        Vec3d oldCtrl = ctrls.get(idx);
-        double newValueBase = points.get(idx).z;
-        double newValueDelta = (ctrls.get(idx).x - points.get(idx).x) * fullZWithLength;
-        double newValue = newValueBase + newValueDelta;
-        ctrls.set(idx, new Vec3d(oldCtrl.x, oldCtrl.y, newValue));
-
-        if(idx > 0 && idx < ls.size() - 1) {
-            oldCtrl = ctrls.get(idx - 1);
-            newValueBase = points.get(idx - 1).z;
-            newValueDelta = (ctrls.get(idx - 1).x - points.get(idx - 1).x) * fullZWithLength;
-            newValue = newValueBase + newValueDelta;
-            ctrls.set(idx - 1, new Vec3d(oldCtrl.x, oldCtrl.y, newValue));
-        }
-
-        return true;
-    }
-    public String getSlopeDisplay(double l, ExtraInfoType type, double length) {
-        int idx = findPhysicalIndex(l);
-        if(idx == -1) return "null";
-
-        List<Vec3d> points;
-        List<Vec3d> ctrls;
-
-        switch (type) {
-            case ROLL:
-                points = rolls;
-                ctrls = rollCtrls;
-                break;
-            case Y_OFFSET:
-                points = yOffsets;
-                ctrls = yOffsetCtrls;
-                break;
-            case Z_OFFSET:
-                points = zOffsets;
-                ctrls = zOffsetCtrls;
-                break;
-            default:
-                ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                return "null";
-        }
-
-        double tan = (ctrls.get(idx).z - points.get(idx).z) / (ctrls.get(idx).x - points.get(idx).x);
-        tan /= length;
-        tan *= 1000;
-        return String.format("%.4f", tan);
     }
 }

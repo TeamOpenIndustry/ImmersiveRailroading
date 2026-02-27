@@ -202,7 +202,7 @@ public class TrackGui implements IScreen {
             @Override
             public void onClick(Player.Hand hand) {
                 if (te != null) {
-					te.shouldTrackGuiActive = false;//todo:需要发包吗？
+					te.shouldTrackGuiActive = false;//TODO: is it needed to send packet for updating?
                     GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(),te.getPos());
                 } else {
                     GuiTypes.RAIL_EXTRA.open(MinecraftClient.getPlayer());
