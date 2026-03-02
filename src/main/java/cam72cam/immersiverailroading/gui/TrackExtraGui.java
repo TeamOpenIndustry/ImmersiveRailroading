@@ -102,7 +102,7 @@ public class TrackExtraGui implements IScreen {
         yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
-        curveColor = Color.DEEP_GREEN;      // GREEN curve
+        curveColor = Color.FLUORESCENT_GREEN;      // GREEN curve
         pointColor = Color.RED;      // RED point
         handlePointColor = Color.BLUE;      // BLUE handle point
         handleLineColor = Color.MAGENTA;      // MAGENTA handle line
@@ -113,7 +113,7 @@ public class TrackExtraGui implements IScreen {
     }
 
 
-    public void init(IScreenBuilder screen) {//TODO: we have to reduce some button text and and tooltip to show information
+    public void init(IScreenBuilder screen) {
         int width = 200;
         int height = 20;
         int xtop = -GUIHelpers.getScreenWidth() / 2 + 5;
@@ -509,21 +509,25 @@ public class TrackExtraGui implements IScreen {
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 3 + 5) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 6 + 10) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
+        //TODO: if choose HIGH or LOW, half of the the roll graph will flip, need to express it?
         //rollGraph
         state.translate(5, height + 5 + height * 1.5, 0);
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
+        rollGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, rollYScale, 1, 0.05f, 0.05f, 0);
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, rollYScale);
         rollGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getRoll(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
         //yOffsetGraph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer yOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
+        yOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, yOffsetYScale, 1, 0.05f, 0.05f, 0);
         yOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, yOffsetYScale);
         yOffsetGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getYOffset(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
 
         //zOffsetGraph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer zOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
+        zOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, zOffsetYScale, 1, 0.05f, 0.05f, 0);
         zOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 50, xScale, zOffsetYScale);
         zOffsetGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getZOffset(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, zOffsetYScale);
 

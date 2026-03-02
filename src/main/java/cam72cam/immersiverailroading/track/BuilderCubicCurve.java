@@ -96,7 +96,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
 
-		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos, 0, 1).linearize(info.settings.smoothing);
+		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos, 0, 1).linearizeLegacy(info.settings.smoothing);
 		ctrl1 = adjusted.ctrl1;
 		ctrl2 = adjusted.ctrl2;
 
@@ -193,16 +193,16 @@ public class BuilderCubicCurve extends BuilderIterator {
 				pitch = 0;
 			} else if (i == points.size()-1) {
 				Vec3d next = points.get(i-1);
-				pitch = (float) Math.toDegrees(Math.atan2(next.y - p.y, next.distanceTo(p)));
+ 				pitch = (float) Math.toDegrees(Math.atan2(next.y - p.y, VecUtil.flatDistance(next, p)));
 				yaw = curve.angleStop();
 			} else if (i == 0) {
 				Vec3d next = points.get(i+1);
-				pitch = (float) -Math.toDegrees(Math.atan2(next.y - p.y, next.distanceTo(p)));
+				pitch = (float) -Math.toDegrees(Math.atan2(next.y - p.y, VecUtil.flatDistance(next, p)));
 				yaw = curve.angleStart();
 			} else {
 				Vec3d prev = points.get(i-1);
 				Vec3d next = points.get(i+1);
-				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, next.distanceTo(prev)));
+				pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, VecUtil.flatDistance(next, prev)));
 				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
 
@@ -227,19 +227,18 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 		//TODO: RAIL_LEFT/RIGHT pitch correction?
 		if(correctYaw){//correct yaw if horizontalOffsets are not Zero
+//			double length = points.size() * info.getTrackModel().spacing * info.settings.gauge.scale();
 			for(int i = 0; i < points.size(); i++){
 				VecYPR ypr = res.get(i);
 				float yaw = ypr.getYaw();
-				if(zOffsets.get(i) != 0) {
-					if (points.size() == 1) {
-						yaw = info.placementInfo.yaw;
-					} else if (i == points.size()-1) {
-						yaw = VecUtil.toYaw(points.get(i).subtract(points.get(i - 1)));//roughly
-					} else if (i == 0) {
-						yaw = VecUtil.toYaw(points.get(i + 1).subtract(points.get(i)));//roughly
-					} else {
-						yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
-					}
+				if (points.size() == 1) {
+					yaw = info.placementInfo.yaw;
+				} else if (i == points.size()-1) {
+					yaw = ypr.getYaw() + (float) rollAndOffsetInfo.getZOffsetSlopeEnd(length);
+				} else if (i == 0) {
+					yaw = ypr.getYaw() + (float) rollAndOffsetInfo.getZOffsetSlopeStart(length);
+				} else {
+					yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 				}
 				res.set(i, new VecYPR(ypr.x, ypr.y, ypr.z, yaw, ypr.getPitch(), ypr.getRoll(), ypr.getLength()));
 			}

@@ -17,6 +17,6 @@ public class BuilderSlope extends BuilderStraight {
 			delta = -info.placementInfo.placementPosition.subtract(info.customInfo.placementPosition).y;
 		}
 		curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, delta, 0), curve.p2.add(0, delta, 0), 0, 1);
-		return curve.linearize(info.settings.smoothing);
+		return curve.linearizeLegacy(info.settings.smoothing);
 	}
 }

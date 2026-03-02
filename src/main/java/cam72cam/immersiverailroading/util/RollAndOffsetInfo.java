@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+//TODO: this file includes too much duplicated code, may need to optimize and clean
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
 public class RollAndOffsetInfo {//TODO: although it works now but List is not really cloned so there might be some potential safety problems
     public final RollYOffsetType offsetType;
@@ -1074,6 +1075,126 @@ public class RollAndOffsetInfo {//TODO: although it works now but List is not re
     public double getRoll(double l) {
         return getValue(this.ls, l, rolls, rollCtrls);
     }
+    /**
+     * Used to correct Rail part pitch in BuilderIterator
+     */
+    public double getRelRollSlopeStart(double length, boolean isRight) {
+        int idx = 0;
+        double tan = (rollCtrls.get(idx).z - rolls.get(idx).z) / (rollCtrls.get(idx).x - rolls.get(idx).x);
+        double value = rolls.get(idx).z;
+        tan /= length;
+        tan *= 0.01;
+        tan *= 0.5;
+
+        switch (offsetType) {
+            case HIGH:
+                if(value > 0) {//right tilt
+                    tan = isRight ? -tan : tan;
+                }else if(value < 0){
+                    tan = !isRight ? -tan : tan;
+                    tan *= -1;
+                }else {
+                    if(tan > 0) {//right tilt
+                        tan = isRight ? -tan : tan;
+                    } else if(tan < 0) {
+                        tan = !isRight ? -tan : tan;
+                        tan *= -1;
+                    }
+                }
+                break;
+            case LOW:
+                if(value < 0) {//right tilt
+                    tan = isRight ? -tan : tan;
+                }else if(value > 0){
+                    tan = !isRight ? -tan : tan;
+                    tan *= -1;
+                }else {
+                    if(tan < 0) {//right tilt
+                        tan = isRight ? -tan : tan;
+                    } else if(tan > 0) {
+                        tan = !isRight ? -tan : tan;
+                        tan *= -1;
+                    }
+                }
+                break;
+            case MID:
+
+                if(value > 0) {//right tilt
+                    tan = !isRight ? tan : -tan;
+                }else if(value < 0) {
+                    tan = !isRight ? -tan : tan;
+                }else {
+                    if(tan > 0) {//right tilt
+                        tan = !isRight ? tan : -tan;
+                    }else if(tan < 0) {
+                        tan = !isRight ? -tan : tan;
+                    }
+                }
+                break;
+        }
+
+        return -Math.toDegrees(Math.atan(tan));
+    }
+    /**
+     * Used to correct Rail part pitch in BuilderIterator
+     */
+    public double getRelRollSlopeEnd(double length, boolean isRight) {
+        int idx = ls.size() - 1;
+        double tan = (rollCtrls.get(idx).z - rolls.get(idx).z) / (rollCtrls.get(idx).x - rolls.get(idx).x);
+        double value = rolls.get(idx).z;
+        tan /= length;
+        tan *= 0.01;
+        tan *= 0.5;
+
+        switch (offsetType) {
+            case HIGH:
+                if(value > 0) {//right tilt
+                    tan = isRight ? -tan : tan;
+                }else if(value < 0){
+                    tan = !isRight ? -tan : tan;
+                    tan *= -1;
+                }else {
+                    if(tan < 0) {//right tilt
+                        tan = isRight ? -tan : tan;
+                    } else if(tan > 0) {
+                        tan = !isRight ? -tan : tan;
+                        tan *= -1;
+                    }
+                }
+                break;
+            case LOW:
+                if(value < 0) {//right tilt
+                    tan = isRight ? -tan : tan;
+                }else if(value > 0){
+                    tan = !isRight ? -tan : tan;
+                    tan *= -1;
+                }else {
+                    if(tan < 0) {//right tilt
+                        tan = isRight ? -tan : tan;
+                    } else if(tan > 0) {
+                        tan = !isRight ? -tan : tan;
+                        tan *= -1;
+                    }
+                }
+                break;
+            case MID:
+
+                if(value > 0) {//right tilt
+                    tan = !isRight ? -tan : tan;
+                }else if(value < 0) {
+                    tan = !isRight ? tan : -tan;
+                }else {
+                    if(tan < 0) {//right tilt
+                        tan = !isRight ? -tan : tan;
+                    }else if(tan > 0) {
+                        tan = !isRight ? tan : -tan;
+                    }
+                }
+                break;
+        }
+
+        return -Math.toDegrees(Math.atan(tan));
+    }
 
     public double getYOffset(double l) {
         return getValue(this.ls, l, yOffsets, yOffsetCtrls);
@@ -1081,6 +1202,24 @@ public class RollAndOffsetInfo {//TODO: although it works now but List is not re
 
     public double getZOffset(double l) {
         return getValue(this.ls, l, zOffsets, zOffsetCtrls);
+    }
+    /**
+     * Used to correct Rail part pitch in BuilderIterator
+     */
+    public double getZOffsetSlopeStart(double length) {
+        int idx = 0;
+        double tan = (zOffsetCtrls.get(idx).z - zOffsets.get(idx).z) / (zOffsetCtrls.get(idx).x - zOffsets.get(idx).x);
+        tan /= length;
+        return -Math.toDegrees(Math.atan(tan));
+    }
+    /**
+     * Used to correct Rail part pitch in BuilderIterator
+     */
+    public double getZOffsetSlopeEnd(double length) {
+        int idx = ls.size() - 1;
+        double tan = (zOffsetCtrls.get(idx).z - zOffsets.get(idx).z) / (zOffsetCtrls.get(idx).x - zOffsets.get(idx).x);
+        tan /= length;
+        return -Math.toDegrees(Math.atan(tan));
     }
 
     public static double getValue(List<Double>ls, double targetX, List<Vec3d> points, List<Vec3d> ctrls) {

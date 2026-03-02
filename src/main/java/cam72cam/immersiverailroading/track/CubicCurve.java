@@ -257,7 +257,8 @@ public class CubicCurve {
     }
 
 
-    public CubicCurve linearize(TrackSmoothing smoothing) {
+    @Deprecated
+    public CubicCurve linearizeLegacy(TrackSmoothing smoothing) {
         double start = p1.distanceTo(ctrl1);
         double middle = ctrl1.distanceTo(ctrl2);
         double end = ctrl2.distanceTo(p2);
@@ -290,6 +291,48 @@ public class CubicCurve {
                         p2,
                         lStart, lEnd
                 );
+            case BOTH: default:
+                return this;
+        }
+    }
+
+    public CubicCurve linearize(TrackSmoothing smoothing) {//TODO: how should we handle old track data?
+        if (Math.abs(p2.y - p1.y) < 1e-4) {
+            return new CubicCurve(
+                    p1,
+                    new Vec3d(ctrl1.x, p1.y, ctrl1.z),
+                    new Vec3d(ctrl2.x, p1.y, ctrl2.z),
+                    p2,
+                    lStart, lEnd
+            );
+        }
+
+        Vec3d lineDir = p2.subtract(p1);
+
+        Vec3d toCtrl1 = ctrl1.subtract(p1);
+        double t1 = (toCtrl1.x * lineDir.x + toCtrl1.z * lineDir.z)
+                / (lineDir.x * lineDir.x + lineDir.z * lineDir.z);//check non-zero?
+
+        double y1 = p1.y + t1 * (p2.y - p1.y);
+
+        Vec3d toCtrl2 = ctrl2.subtract(p1);
+        double t2 = (toCtrl2.x * lineDir.x + toCtrl2.z * lineDir.z)
+                / (lineDir.x * lineDir.x + lineDir.z * lineDir.z);
+
+        double y2 = p1.y + t2 * (p2.y - p1.y);
+
+        //in new version we don't use Near and Far anymore, use pitch-locked instead
+        switch (smoothing) {
+            case NEITHER:
+                return new CubicCurve(
+                        p1,
+                        new Vec3d(ctrl1.x, y1, ctrl1.z),
+                        new Vec3d(ctrl2.x, y2, ctrl2.z),
+                        p2,
+                        lStart, lEnd
+                );
+            case NEAR:
+            case FAR:
             case BOTH: default:
                 return this;
         }

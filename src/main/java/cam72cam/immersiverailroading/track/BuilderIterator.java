@@ -190,6 +190,55 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 		}
 
+		boolean correctPartRailPitch = true;//TODO: make this an Graphic option?
+		List<Float> correctLeftPitch = new ArrayList<>();
+		List<Float> correctRightPitch = new ArrayList<>();
+
+		if (correctPartRailPitch) {
+			if (points.size() <= 2 || info.settings.rollAndOffsetInfo == null) {
+				correctPartRailPitch = false;
+			} else {
+				double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
+
+				Vec3d[] leftPos = new Vec3d[points.size()];
+				Vec3d[] rightPos = new Vec3d[points.size()];
+
+				// pre-calculate rail part pos
+				for (int i = 0; i < points.size(); i++) {
+					VecYPR cur = points.get(i);
+					Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
+					leftPos[i] = pos.add(VecUtil.fromYawRoll(
+							info.settings.gauge.value() / 2,
+							cur.getYaw() - 90,
+							cur.getRoll()
+					));
+					rightPos[i] = pos.add(VecUtil.fromYawRoll(
+							info.settings.gauge.value() / 2,
+							cur.getYaw() + 90,
+							-cur.getRoll()
+					));
+				}
+
+				float startLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, false) + points.get(0).getPitch();
+				float startRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, true) + points.get(0).getPitch();
+				correctLeftPitch.add(startLeftPitch);
+				correctRightPitch.add(startRightPitch);
+
+				for (int i = 1; i < points.size() - 1; i++) {
+					float leftPitch = calcPitch(leftPos[i - 1], leftPos[i + 1]);
+					float rightPitch = calcPitch(rightPos[i - 1], rightPos[i + 1]);
+
+					correctLeftPitch.add(leftPitch);
+					correctRightPitch.add(rightPitch);
+				}
+
+				float endLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, false) + points.get(points.size() - 1).getPitch();
+				float endRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, true) + points.get(points.size() - 1).getPitch();
+				correctLeftPitch.add(endLeftPitch);
+				correctRightPitch.add(endRightPitch);
+			}
+		}
+
 		for (int i = 0; i < points.size(); i++) {
 			VecYPR cur = points.get(i);
 			VecYPR switchPos = cur;
@@ -202,10 +251,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					if (direction == TrackDirection.RIGHT)  {
 						offsetAngle = -offsetAngle;
 					}
-					switchPos = new VecYPR(cur.add(offset), cur.getYaw() + (float)offsetAngle, cur.getPitch());
+					switchPos = new VecYPR(cur.add(offset), cur.getYaw() + (float)offsetAngle, cur.getRoll(), cur.getPitch());
 				}
 			}
-			
+
 			float angle;
 			if (points.size() == 1) {
 				angle = 0;
@@ -222,21 +271,33 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				VecYPR next = points.get(i+1);
 				angle = delta(prev.getYaw(), next.getYaw());
 			}
-			if (angle != 0) {
-				VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe called STILL_BASE)
-				if (direction == TrackDirection.RIGHT) {
-					vec.addChild(new VecYPR(switchPos, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
-					vec.addChild(new VecYPR(cur, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));
-				} else {
-					vec.addChild(new VecYPR(cur, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
-					vec.addChild(new VecYPR(switchPos, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));
-				}
-				data.add(vec);
-			} else {
-				data.add(new VecYPR(cur, renderScale));
-			}
-		}
-		
+
+			//merge situation when angle == 0
+            VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe called STILL_BASE)
+            if (direction == TrackDirection.RIGHT) {
+                if(correctPartRailPitch) {//correct rail pitch
+					cur = cur.withPitch(correctLeftPitch.get(i));//this looks wired but work... caused by how tracks work before
+					switchPos = switchPos.withPitch(correctRightPitch.get(i));
+                }
+                vec.addChild(new VecYPR(switchPos, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
+                vec.addChild(new VecYPR(cur, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));
+            } else {
+                if(correctPartRailPitch) {//correct rail pitch
+					switchPos = switchPos.withPitch(correctLeftPitch.get(i));
+					cur = cur.withPitch(correctRightPitch.get(i));
+                }
+                vec.addChild(new VecYPR(cur, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
+                vec.addChild(new VecYPR(switchPos, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));
+            }
+            data.add(vec);
+        }
+
 		return data;
+	}
+
+	private float calcPitch(Vec3d from, Vec3d to) {
+		double dy = to.y - from.y;
+		double dh = VecUtil.flatDistance(from, to);
+		return (float) -Math.toDegrees(Math.atan2(dy, dh));
 	}
 }

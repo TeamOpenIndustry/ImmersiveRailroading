@@ -16,21 +16,17 @@ public class VecYPR extends Vec3d {
     private final List<VecYPR> children;
 
     //Yaw
-    public VecYPR(Vec3d orig, float yaw, TrackModelPart... parts) {
+    public VecYPR(Vec3d orig, float yaw, TrackModelPart... parts) {//pitch roll length => default
         this(orig.x, orig.y, orig.z, yaw, parts);
     }
 
-    public VecYPR(double xIn, double yIn, double zIn, float yaw, TrackModelPart... parts) {
-        this(xIn, yIn, zIn, yaw, 0, parts);
+    public VecYPR(double xIn, double yIn, double zIn, float yaw, TrackModelPart... parts) {//pitch roll length => default
+        this(xIn, yIn, zIn, yaw, 0, 0, -1, parts);
     }
 
     //Pitch
-    public VecYPR(Vec3d orig, float yaw, float pitch, TrackModelPart... parts) {
-        this(orig.x, orig.y, orig.z, yaw, pitch, -1, parts);
-    }
-
-    public VecYPR(double xIn, double yIn, double zIn, float yaw, float pitch, TrackModelPart... parts) {
-        this(xIn, yIn, zIn, yaw, pitch, -1, parts);
+    public VecYPR(Vec3d orig, float yaw, float pitch, float roll, TrackModelPart... parts) {//length => default
+        this(orig.x, orig.y, orig.z, yaw, pitch, roll, -1, parts);
     }
 
     //Length
@@ -42,7 +38,7 @@ public class VecYPR extends Vec3d {
         this(orig.x, orig.y, orig.z, yaw, pitch, roll, length, parts);
     }
 
-    public VecYPR(double xIn, double yIn, double zIn, float yaw, float pitch, float length, TrackModelPart... parts) {
+    public VecYPR(double xIn, double yIn, double zIn, float yaw, float pitch, float length, TrackModelPart... parts) {//roll => default
         this(xIn, yIn, zIn, yaw, pitch, 0, length, parts);
     }
 
@@ -57,8 +53,16 @@ public class VecYPR extends Vec3d {
         this.children = new ArrayList<>();
     }
 
+    public VecYPR withPitch(float pitch) {//parts?
+        return new VecYPR(this.x, this.y, this.z, this.yaw, pitch, this.roll, this.length);
+    }
+
+    public VecYPR withRoll(float roll) {//parts?
+        return new VecYPR(this.x, this.y, this.z, this.yaw, this.pitch, roll, this.length);
+    }
+
     @Override
-    public VecYPR add(Vec3d other) {
+    public VecYPR add(Vec3d other) {//roll => default
         return new VecYPR(this.x + other.x, this.y + other.y, this.z + other.z, this.yaw, this.pitch, this.length);
     }
 

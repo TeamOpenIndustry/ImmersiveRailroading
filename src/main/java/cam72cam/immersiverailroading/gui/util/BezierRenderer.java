@@ -105,4 +105,44 @@ public class BezierRenderer {
         drawLine(pos.add(corner4), pos.add(corner5), color, 1, 1, LINE_WIDTH / 2);
         drawLine(pos.add(corner5), pos.add(corner1), color, 1, 1, LINE_WIDTH / 2);
     }
+
+    public void drawDashLine(Vec3d start, Vec3d end, Color color, double xScale, double yScale,
+                             double width, double dashLength, double gapLength, double phaseOffset) {
+        Vec3d worldStart = new Vec3d(start.x, start.y, start.z);
+        Vec3d worldEnd = new Vec3d(end.x, end.y, end.z);
+        double totalLength = worldStart.distanceTo(worldEnd);
+
+        if (totalLength < 0.001) return;
+
+        Vec3d dir = worldEnd.subtract(worldStart).normalize();
+        double cycleLength = dashLength + gapLength;
+
+        // apply offset
+        double currentDist = phaseOffset % cycleLength;
+        if (currentDist < 0) currentDist += cycleLength;
+
+        // firstSegment may get truncated
+        boolean firstSegment = true;
+
+        while (currentDist < totalLength) {
+            double segStartDist = currentDist;
+            double segEndDist;
+
+            if (firstSegment && phaseOffset != 0) {
+
+                segEndDist = Math.min(currentDist + dashLength - (phaseOffset % cycleLength), totalLength);
+                firstSegment = false;
+            } else {
+                segEndDist = Math.min(currentDist + dashLength, totalLength);
+            }
+
+            if (segEndDist > segStartDist && segStartDist < totalLength) {
+                Vec3d segStart = worldStart.add(dir.scale(segStartDist));
+                Vec3d segEnd = worldStart.add(dir.scale(Math.min(segEndDist, totalLength)));
+                drawLine(segStart, segEnd, color, xScale, yScale, width);
+            }
+
+            currentDist += cycleLength;
+        }
+    }
 }
