@@ -667,7 +667,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					break;
 				}
 				for (Facing side : Facing.values()) {
-					IInventory inventory = getWorld().getInventory(getPos().offset(side));
+					Vec3i pos = getPos().offset(side);
+					if (BlockUtil.isIRRail(getWorld(), pos)) {
+						// Can't transfer to another rail augment directly
+						continue;
+					}
+					IInventory inventory = getWorld().getInventory(pos);
 					if (inventory != null) {
 						inventory.transferAllTo(freight.cargoItems);
 					}
@@ -681,7 +686,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					break;
 				}
 				for (Facing side : Facing.values()) {
-					IInventory inventory = getWorld().getInventory(getPos().offset(side));
+					Vec3i pos = getPos().offset(side);
+					if (BlockUtil.isIRRail(getWorld(), pos)) {
+						// Can't transfer to another rail augment directly
+						continue;
+					}
+					IInventory inventory = getWorld().getInventory(pos);
 					if (inventory != null) {
 						inventory.transferAllFrom(freight.cargoItems);
 					}
@@ -695,7 +705,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					break;
 				}
                 for (Facing side : Facing.values()) {
-                	List<ITank> tanks = getWorld().getTank(getPos().offset(side));
+					Vec3i pos = getPos().offset(side);
+					if (BlockUtil.isIRRail(getWorld(), pos)) {
+						// Can't transfer to another rail augment directly
+						continue;
+					}
+                	List<ITank> tanks = getWorld().getTank(pos);
                 	if (tanks != null) {
                 		tanks.forEach(tank -> stock.theTank.drain(tank, 100, false));
 					}
@@ -709,7 +724,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					break;
 				}
                 for (Facing side : Facing.values()) {
-                    List<ITank> tanks = getWorld().getTank(getPos().offset(side));
+					Vec3i pos = getPos().offset(side);
+					if (BlockUtil.isIRRail(getWorld(), pos)) {
+						// Can't transfer to another rail augment directly
+						continue;
+					}
+                    List<ITank> tanks = getWorld().getTank(pos);
                     if (tanks != null) {
 						tanks.forEach(tank -> stock.theTank.fill(tank, 100, false));
 					}
