@@ -111,8 +111,10 @@ public class SwaySimulator {
             double tilt = stock.getDefinition().getTiltMultiplier() * (stock.getPrevRotationYaw() - stock.getRotationYaw()) * (stock.getCurrentSpeed().minecraft() > 0 ? 1 : -1);
             if(tilt * offsetRoll > 0) {
                 return Math.abs(tilt) > Math.abs(offsetRoll) ? tilt - offsetRoll : 0;
-            } else {
+            } else if(tilt != 0){
                 return -offsetRoll + tilt;
+            } else {
+                return 0;
             }
         }
 

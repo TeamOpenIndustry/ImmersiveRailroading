@@ -198,6 +198,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			if (points.size() <= 2 || info.settings.rollAndOffsetInfo == null) {
 				correctPartRailPitch = false;
 			} else {
+				renderScale *= 1.02f;
 				double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
 
 				Vec3d[] leftPos = new Vec3d[points.size()];
