@@ -19,6 +19,8 @@ import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.IRedstoneProvider;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.mod.fluid.Fluid;
+import cam72cam.mod.fluid.FluidStack;
 import cam72cam.mod.fluid.FluidTank;
 import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.*;
@@ -38,6 +40,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	@TagField("parent")
@@ -89,6 +92,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private EntityMoveableRollingStock overhead;
 	@TagField("pushPull")
 	private boolean pushPull = true;
+	private ITank tankCache;
 
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
@@ -568,14 +572,45 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			switch (this.getAugment()) {
 				case FLUID_LOADER:
 				case FLUID_UNLOADER:
-					if (canOperate()) {
-						FreightTank stock = getStockNearBy(FreightTank.class);
-						if (stock != null) {
-							return stock.theTank;
-						}
+					if (this.tankCache == null) {
+						Supplier<ITank> internalTankFn = () -> {
+							if (canOperate()) {
+								FreightTank stock = getStockNearBy(FreightTank.class);
+								if (stock != null) {
+									return stock.theTank;
+								}
+							}
+							// placeholder for connections
+							return this.emptyTank;
+						};
+						this.tankCache = new ITank() {
+							@Override
+							public FluidStack getContents() {
+								return internalTankFn.get().getContents();
+							}
+
+							@Override
+							public int getCapacity() {
+								return internalTankFn.get().getCapacity();
+							}
+
+							@Override
+							public boolean allows(Fluid fluid) {
+								return internalTankFn.get().allows(fluid);
+							}
+
+							@Override
+							public int fill(FluidStack fluidStack, boolean simulate) {
+								return internalTankFn.get().fill(fluidStack, simulate);
+							}
+
+							@Override
+							public FluidStack drain(FluidStack fluidStack, boolean simulate) {
+								return internalTankFn.get().drain(fluidStack, simulate);
+							}
+						};
 					}
-					// placeholder for connections
-                    return this.emptyTank;
+					return tankCache;
 			}
 		}
 		return null;
