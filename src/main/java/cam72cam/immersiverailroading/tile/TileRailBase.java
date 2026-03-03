@@ -15,7 +15,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
-import cam72cam.immersiverailroading.thirdparty.trackapi.PathingData;
+import cam72cam.immersiverailroading.thirdparty.trackapi.IRPathingData;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.IRedstoneProvider;
 import cam72cam.mod.entity.Player;
@@ -412,39 +412,36 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	@Override
-	public PathingData getNextPosition(PathingData currentPosition, Vec3d motion, double gauge) {//todo: replace getTrackGauge() and really using gauge
+	public void getNextPosition(IRPathingData inputData, Vec3d motion, double gauge) {//todo: replace getTrackGauge() and really using gauge
 		double distanceMetersSq = motion.lengthSquared();
 		double maxDistance = 0.25;
 		if (distanceMetersSq * 0.9 > maxDistance * maxDistance) {
 			// 0.9 forces at least one iteration + scaling
-			return MovementTrack.iterativePathing(getWorld(), currentPosition, this, getTrackGauge(), motion, maxDistance);//todo getTrackGauges()
+			MovementTrack.iterativePathing(getWorld(), inputData, this, getTrackGauge(), motion, maxDistance);//todo getTrackGauges()
+			return;
 		}
-		return getNextPositionShort(currentPosition, motion, gauge);
+		getNextPositionShort(inputData, motion, gauge);
 	}
 
 	private Collection<TileRail> tiles = null;
-	public PathingData getNextPositionShort(PathingData currentPosition, Vec3d motion, double gauge) {
+	public void getNextPositionShort(IRPathingData currentPosition, Vec3d motion, double gauge) {
 		if (this.getReplaced() == null) {
 			// Simple common case, maybe this does not need to be optimized out of the for loop below?
 			TileRail tile = this instanceof TileRail ? (TileRail) this : this.getParentTile();
 			if (tile == null) {
-				return currentPosition;
+				return;
 			}
 			//tiles = Collections.singletonList(tile);
 			// Optimized version of the below looping when no overlapping occurs
 
-			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition.getPos());
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition.getUMCPos());
 
 			if (state == SwitchState.STRAIGHT) {
 				tile = tile.getParentTile();
 			}
 
-			PathingData potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion, gauge);
-			if (potential != null) {
-				return potential;
-			}
-
-			return currentPosition;
+            MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion, gauge);//may edit currentPosition
+			return;
 		}
 		// Complex case with overlapping segments
 		if (tiles == null) {
@@ -464,41 +461,42 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 
-		PathingData nextPos = currentPosition;
-		Vec3d predictedPos = currentPosition.getPos().add(motion);
+		IRPathingData nextPos = currentPosition;
+		Vec3d predictedPos = currentPosition.getUMCPos().add(motion);
 		boolean hasSwitchSet = false;
 
 		for (TileRail tile : tiles) {
-			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition.getPos());
+			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition.getUMCPos());
 
 			if (state == SwitchState.STRAIGHT) {
 				tile = tile.getParentTile();
 			}
 
-			PathingData potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion, gauge);
-			if (potential != null) {//next lines will compare motion yaw and potential yaw
-				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
-				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
-				if (state == SwitchState.TURN) {
-					// This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
-					float other = VecUtil.toWrongYaw(potential.getPos().subtract(currentPosition.getPos()));
-					float rotationYaw = VecUtil.toWrongYaw(motion);
-					double diff = MathUtil.trueModulus(other - rotationYaw, 360);
-					diff = Math.min(360-diff, diff);
-					if (diff < 2.5) {
-						hasSwitchSet = true;
-						nextPos = potential;
-					}
-				}
-				// TODO should this be an else?
-				// If we are not on a switch curve and closer to our target (or are on the first iteration)
-				if (currentPosition.position.equals(nextPos.position)  || !hasSwitchSet && potential.getPos().distanceToSquared(predictedPos) < nextPos.getPos().distanceToSquared(predictedPos)) {
-					nextPos = potential;
-				}
-			}
-		}
-		return nextPos;
-	}
+			//todo:check
+			IRPathingData potential = currentPosition.copy();//this is in loop so use copy
+			MovementTrack.nextPositionDirect(getWorld(), potential, tile, motion, gauge);//not edit currentPosition
+            //next lines will compare motion yaw and potential yaw
+            // If the track veers onto the curved leg of a switch, try that (with angle limitation)
+            // If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
+            if (state == SwitchState.TURN) {
+                // This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
+                float other = VecUtil.toWrongYaw(potential.getUMCPos().subtract(currentPosition.getUMCPos()));
+                float rotationYaw = VecUtil.toWrongYaw(motion);
+                double diff = MathUtil.trueModulus(other - rotationYaw, 360);
+                diff = Math.min(360-diff, diff);
+                if (diff < 2.5) {
+                    hasSwitchSet = true;
+                    nextPos = potential;
+                }
+            }
+            // TODO should this be an else?
+            // If we are not on a switch curve and closer to our target (or are on the first iteration)
+            if (currentPosition.getUMCPos().equals(nextPos.getUMCPos())  || !hasSwitchSet && potential.getUMCPos().distanceToSquared(predictedPos) < nextPos.getUMCPos().distanceToSquared(predictedPos)) {
+                nextPos = potential;
+            }
+        }
+		currentPosition.setState(nextPos);
+    }
 	
 	/*
 	 * Capabilities tie ins
@@ -1019,27 +1017,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	@Override
-	public ItemStack onPick() {//todo:返回父级的原始rollAndOffsetInfo
+	public ItemStack onPick() {
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 
 		TileRail parent = this.getParentTile();
 		if (parent == null) {
 			return stack;
 		}
-
-//		if(parent.info.settings.rollAndOffsetInfo != null) {//debug
-//			RollAndOffsetInfo rollAndOffsetInfo = parent.info.settings.rollAndOffsetInfo;
-//			for(int i = 0; i < rollAndOffsetInfo.ls.size(); i++) {
-//				System.out.println(
-//						"====================" +
-//						"index:" + i +
-//						", l:" + rollAndOffsetInfo.ls.get(i) +
-//						", roll:" + rollAndOffsetInfo.rolls.get(i) +
-//						", rollCtrl:" + rollAndOffsetInfo.rollCtrls.get(i)
-//						+ "===================="
-//				);
-//			}
-//		}
 
 		if(parent.info.settings.rollAndOffsetInfo != null) {
 			parent.info.settings.with(mutable -> mutable.rollAndOffsetInfo = mutable.pickRollAndOffsetInfo).write(stack);

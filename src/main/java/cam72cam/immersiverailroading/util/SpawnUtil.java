@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.Config.ConfigDebug;
 import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.thirdparty.trackapi.PathingData;
+import cam72cam.immersiverailroading.thirdparty.trackapi.IRPathingData;
 import cam72cam.mod.entity.Player;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.util.DegreeFuncs;
@@ -47,20 +47,24 @@ public class SpawnUtil {
 			EntityRollingStock stock = def.spawn(worldIn, new Vec3d(pos).add(0.5, 0.1, 0.5), yaw, gauge, data.texture);
 
 
-			PathingData center = new PathingData(stock.getPosition(), 0);//only pos is needed
-			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(-0.1, yaw), spawnGauge);
-			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(0.1, yaw), spawnGauge);
-			center = initte.getNextPosition(center, VecUtil.fromWrongYaw(offset, yaw), spawnGauge);
-			stock.setPosition(center.getPos());
+			IRPathingData center = new IRPathingData(stock.getPosition(), 0, 0);//only pos is needed
+			initte.getNextPosition(center, VecUtil.fromWrongYaw(-0.1, yaw), spawnGauge);
+			initte.getNextPosition(center, VecUtil.fromWrongYaw(0.1, yaw), spawnGauge);
+			initte.getNextPosition(center, VecUtil.fromWrongYaw(offset, yaw), spawnGauge);
+			stock.setPosition(center.getUMCPos());
 
 			if (stock instanceof EntityMoveableRollingStock) {
 				EntityMoveableRollingStock moveable = (EntityMoveableRollingStock)stock;
-				ITrack centerte = ITrack.get(worldIn, center.getPos(), true);
+				ITrack centerte = ITrack.get(worldIn, center.getUMCPos(), true);
 				if (centerte != null) {
 					float frontDistance = moveable.getDefinition().getBogeyFront(gauge);
 					float rearDistance = moveable.getDefinition().getBogeyRear(gauge);
-					Vec3d front = centerte.getNextPosition(center, VecUtil.fromWrongYaw(frontDistance, yaw), spawnGauge).getPos();
-					Vec3d rear = centerte.getNextPosition(center, VecUtil.fromWrongYaw(rearDistance, yaw), spawnGauge).getPos();
+					IRPathingData frontTemp = center.copy();
+					IRPathingData rearTemp = center.copy();
+					centerte.getNextPosition(frontTemp, VecUtil.fromWrongYaw(frontDistance, yaw), spawnGauge);//center may be edited
+					centerte.getNextPosition(rearTemp, VecUtil.fromWrongYaw(rearDistance, yaw), spawnGauge);//center may be edited
+					Vec3d front = frontTemp.getUMCPos();
+					Vec3d rear = rearTemp.getUMCPos();
 
 					moveable.setRotationYaw(VecUtil.toWrongYaw(front.subtract(rear)));
 					float pitch = (-VecUtil.toPitch(front.subtract(rear)) - 90);
@@ -73,16 +77,18 @@ public class SpawnUtil {
 
 					ITrack frontte = ITrack.get(worldIn, front, true);
 					if (frontte != null) {
-						PathingData frontNext = frontte.getNextPosition(new PathingData(front, 0), VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()), spawnGauge);//only pos is needed to provide
-						moveable.setFrontYaw(VecUtil.toWrongYaw(frontNext.getPos().subtract(front)));
-						moveable.setFrontRoll((float) -frontNext.roll);
+						IRPathingData frontNext = new IRPathingData(front, 0, 0);
+						frontte.getNextPosition(frontNext, VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()), spawnGauge);//only pos is needed to provide
+						moveable.setFrontYaw(VecUtil.toWrongYaw(frontNext.getUMCPos().subtract(front)));
+						moveable.setFrontRoll((float) -frontNext.getRoll());
 					}
 
 					ITrack rearte = ITrack.get(worldIn, rear, true);
 					if (rearte != null) {
-						PathingData rearNext = rearte.getNextPosition(new PathingData(rear, 0), VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()), spawnGauge);
-						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.getPos().subtract(rear)));
-						moveable.setRearRoll((float) -rearNext.roll);
+						IRPathingData rearNext = new IRPathingData(rear, 0, 0);
+						rearte.getNextPosition(rearNext, VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()), spawnGauge);
+						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.getUMCPos().subtract(rear)));
+						moveable.setRearRoll((float) -rearNext.getRoll());
 					}
 				}
 

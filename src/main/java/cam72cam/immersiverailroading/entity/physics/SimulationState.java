@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.thirdparty.trackapi.PathingData;
+import cam72cam.immersiverailroading.thirdparty.trackapi.IRPathingData;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -269,8 +269,12 @@ public class SimulationState {
             Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront - config.offsetFront, yawFront);
             Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear - config.offsetRear, yawRear);
 
-            couplerPositionFront = trackFront.getNextPosition(new PathingData(positionFront,  0), couplerVecFront, config.gauge.value()).getPos();
-            couplerPositionRear = trackRear.getNextPosition(new PathingData(positionRear, 0), couplerVecRear, config.gauge.value()).getPos();
+            IRPathingData front = new IRPathingData(positionFront, 0, 0);
+            IRPathingData rear = new IRPathingData(positionRear, 0, 0);
+            trackFront.getNextPosition(front, couplerVecFront, config.gauge.value());
+            trackRear.getNextPosition(rear, couplerVecRear, config.gauge.value());
+            couplerPositionFront = front.getUMCPos();
+            couplerPositionRear = rear.getUMCPos();
             //couplerPositionFront = couplerPositionFront.subtract(position).normalize().scale(Math.abs(config.couplerDistanceFront)).add(position);
             //couplerPositionRear = couplerPositionRear.subtract(position).normalize().scale(Math.abs(config.couplerDistanceRear)).add(position);
         }
@@ -382,25 +386,29 @@ public class SimulationState {
             yawRear += 180;
         }
 
-        PathingData nextFront = trackFront.getNextPosition(new PathingData(positionFront, rollFront), VecUtil.fromWrongYaw(distance, yawFront), config.gauge.value());
-        PathingData nextRear = trackRear.getNextPosition(new PathingData(positionRear, rollRear), VecUtil.fromWrongYaw(distance, yawRear), config.gauge.value());
-        rollFront = (float) nextFront.roll * invertRollMultiplier;
-        rollRear = (float) nextRear.roll * invertRollMultiplier;
+        IRPathingData front = new IRPathingData(positionFront, rollFront, 0);
+        IRPathingData rear = new IRPathingData(positionRear, rollRear, 0);
+        trackFront.getNextPosition(front, VecUtil.fromWrongYaw(distance, yawFront), config.gauge.value());
+        trackRear.getNextPosition(rear, VecUtil.fromWrongYaw(distance, yawRear), config.gauge.value());
+        rollFront = (float) front.getRoll() * invertRollMultiplier;
+        rollRear = (float) rear.getRoll() * invertRollMultiplier;
+        Vec3d nextFront = front.getUMCPos();
+        Vec3d nextRear = rear.getUMCPos();
 
         if (!nextFront.equals(positionFront) && !nextRear.equals(positionRear)) {
-            yawFront = VecUtil.toWrongYaw(nextFront.getPos().subtract(positionFront));
-            yawRear = VecUtil.toWrongYaw(nextRear.getPos().subtract(positionRear));
+            yawFront = VecUtil.toWrongYaw(nextFront.subtract(positionFront));
+            yawRear = VecUtil.toWrongYaw(nextRear.subtract(positionRear));
 
             // TODO flatten this vector calculation
-            Vec3d deltaCenter = nextFront.getPos().subtract(position).scale(config.offsetRear)
-                    .subtract(nextRear.getPos().subtract(position).scale(config.offsetFront))
+            Vec3d deltaCenter = nextFront.subtract(position).scale(config.offsetRear)
+                    .subtract(nextRear.subtract(position).scale(config.offsetFront))
                     .scale(-1/(config.offsetFront-config.offsetRear));
 
-            Vec3d bogeyDelta = nextFront.getPos().subtract(nextRear.getPos());
+            Vec3d bogeyDelta = nextFront.subtract(nextRear);
             yaw = VecUtil.toWrongYaw(bogeyDelta);
             //TODO:do we need to fix roll value here?
             //roll = ???
-            pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRear.getPos().distanceTo(nextFront.getPos())));
+            pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
             // TODO Rescale fixes issues with curves losing precision, but breaks when correcting stock positions
             position = position.add(deltaCenter/*.normalize().scale(distance)*/);
         }
