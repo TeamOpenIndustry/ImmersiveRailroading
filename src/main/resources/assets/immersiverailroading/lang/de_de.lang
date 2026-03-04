@@ -115,6 +115,17 @@ gui.immersiverailroading:track.rail_bed_fill=Schienenbettfüllung:  %s
 gui.immersiverailroading:track.place_blueprint_true=Platziere:             Entwurf
 gui.immersiverailroading:track.place_blueprint_false=Platziere:            Schiene
 gui.immersiverailroading:track.roll_offset_type=Überhöhung und vertikale Verschiebung
+gui.immersiverailroading:track.extra_insert_point=Punkt einfügen
+gui.immersiverailroading:track.extra_delete_point=Punkt löschen
+gui.immersiverailroading:track.extra_point_value_m=Punkthöhe (Y, m):
+gui.immersiverailroading:track.extra_point_value_cm=Punkthöhe (Y, cm):
+gui.immersiverailroading:track.extra_point_slope=Punktneigung (Y/X, ‰):
+gui.immersiverailroading:track.extra_point_weight=Punktgewicht (X-Proj.):
+gui.immersiverailroading:track.extra_reset=Alles zurücksetzen
+gui.immersiverailroading:track.extra_edit_left=Links bearbeiten
+gui.immersiverailroading:track.extra_edit_right=Rechts bearbeiten
+gui.immersiverailroading:track.extra_trackgui=Gleis-Oberfläche
+gui.immersiverailroading:track.extragui=Zusätzliche Einstellungen
 
 gui.immersiverailroading:loco.works=Werke:  %s
 gui.immersiverailroading:loco.power=Leistung:  %s

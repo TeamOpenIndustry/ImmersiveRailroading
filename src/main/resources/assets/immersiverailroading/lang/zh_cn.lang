@@ -115,6 +115,17 @@ gui.immersiverailroading:track.rail_bed_fill=道床填方：%s
 gui.immersiverailroading:track.place_blueprint_true=放置轨道蓝图
 gui.immersiverailroading:track.place_blueprint_false=直接放置轨道
 gui.immersiverailroading:track.roll_offset_type=超高垂直偏移方式
+gui.immersiverailroading:track.extra_insert_point=插入控制点
+gui.immersiverailroading:track.extra_delete_point=删除控制点
+gui.immersiverailroading:track.extra_point_value_m=点高度（Y,米）：
+gui.immersiverailroading:track.extra_point_value_cm=点高度（Y,厘米）：
+gui.immersiverailroading:track.extra_point_slope=点坡度（Y/X，‰）：
+gui.immersiverailroading:track.extra_point_weight=点权重（X投影）：
+gui.immersiverailroading:track.extra_reset=重置全部
+gui.immersiverailroading:track.extra_edit_left=修改左边
+gui.immersiverailroading:track.extra_edit_right=修改右边
+gui.immersiverailroading:track.extra_trackgui=轨道主界面
+gui.immersiverailroading:track.extragui=附加设置界面
 
 gui.immersiverailroading:loco.works=服务公司：%s
 gui.immersiverailroading:loco.power=功率：%s

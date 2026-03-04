@@ -198,13 +198,15 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-        trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, "Config Roll") {
+        trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, GuiText.TRACK_EXTRAGUI.toString()) {
             @Override
             public void onClick(Player.Hand hand) {
                 if (te != null) {
+//					onClose();
 					te.shouldTrackGuiActive = false;//TODO: is it needed to send packet for updating?
                     GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(),te.getPos());
                 } else {
+//					onClose();
                     GuiTypes.RAIL_EXTRA.open(MinecraftClient.getPlayer());
                 }
             }

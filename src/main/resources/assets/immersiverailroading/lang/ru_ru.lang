@@ -115,6 +115,17 @@ gui.immersiverailroading:track.rail_bed_fill=Насыпь: %s
 gui.immersiverailroading:track.place_blueprint_true=Предварительный режим
 gui.immersiverailroading:track.place_blueprint_false=Обычная установка пути
 gui.immersiverailroading:track.roll_offset_type=Уклон и вертикальное смещение
+gui.immersiverailroading:track.extra_insert_point=Вставить точку
+gui.immersiverailroading:track.extra_delete_point=Удалить точку
+gui.immersiverailroading:track.extra_point_value_m=Высота точки (Y, м):
+gui.immersiverailroading:track.extra_point_value_cm=Высота точки (Y, см):
+gui.immersiverailroading:track.extra_point_slope=Уклон точки (Y/X, ‰):
+gui.immersiverailroading:track.extra_point_weight=Вес точки (проекция X):
+gui.immersiverailroading:track.extra_reset=Сбросить всё
+gui.immersiverailroading:track.extra_edit_left=Редактировать слева
+gui.immersiverailroading:track.extra_edit_right=Редактировать справа
+gui.immersiverailroading:track.extra_trackgui=Интерфейс пути
+gui.immersiverailroading:track.extragui=Дополнительные настройки
 
 gui.immersiverailroading:loco.works=Эксплуатируется: %s
 gui.immersiverailroading:loco.power=Мощность: %s

@@ -120,7 +120,7 @@ public class TrackExtraGui implements IScreen {
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
         //left panel
-        railInfoLabel = new Button(screen, xtop, ytop, width, height,  "Rail Length:" + length) {};//todo
+        railInfoLabel = new Button(screen, xtop, ytop, width, height,  "Rail Length:" + length) {};//TODO: what else need to be displayed here?
         ytop += height;
         ytop += 5;
         //rollGraph
@@ -141,9 +141,9 @@ public class TrackExtraGui implements IScreen {
             @Override
             public double getValue() {
                 try {
-                    return Double.parseDouble(String.format("%.2f",((GuiSlider) button).getValue()));
+                    return Double.parseDouble(String.format("%.2f",((GuiSlider) button).getValue()));//getValue is accurate index
                 } catch (NumberFormatException e) {
-                    ImmersiveRailroading.warn("invalid text");//所见即索引，max点数100
+                    ImmersiveRailroading.warn("invalid text");
                     return 0d;
                 }
             }
@@ -166,7 +166,7 @@ public class TrackExtraGui implements IScreen {
             }
         };
 
-        resetAllButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop, 50, height, "Reset All") {
+        resetAllButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop, 50, height, GuiText.TRACK_EXTRA_RESET.toString()) {
             @Override
             public void onClick(Player.Hand hand) {
                 edited = true;
@@ -175,26 +175,28 @@ public class TrackExtraGui implements IScreen {
             }
         };
 
-        editLeftButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 2, ytop, 50, height, "Edit Left") {
+        editLeftButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 2, ytop, 50, height, GuiText.TRACK_EXTRA_EDIT_LEFT.toString()) {
             @Override
             public void onClick(Player.Hand hand) {
                 editLeft = !editLeft;
                 if(editLeft) {
-                    this.setText("Edit Left");
+                    this.setText(GuiText.TRACK_EXTRA_EDIT_LEFT.toString());
                 }else {
-                    this.setText("Edit Right");
+                    this.setText(GuiText.TRACK_EXTRA_EDIT_RIGHT.toString());
                 }
                 updateAllCurveInfoDisplay();
             }
         };
 
-        TrackGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 3, ytop, 50, height, "Track Gui") {
+        TrackGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 3, ytop, 50, height, GuiText.TRACK_EXTRA_TRACKGUI.toString()) {
             @Override
-            public void onClick(Player.Hand hand) {
+            public void onClick(Player.Hand hand) {//TODO:若要用onclose，两个gui相互打开时可能由于onclose只向服务端发包，客户端的不能及时更新，最后打开的引入了脏数据，会覆盖，可能需要想办法更新客户端item
                 if (te != null) {
+//                    onClose();
                     te.shouldTrackGuiActive = true;
-                    GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(),te.getPos());
+                    GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
                 } else {
+//                    onClose();
                     GuiTypes.RAIL.open(MinecraftClient.getPlayer());
                 }
             }
@@ -203,7 +205,7 @@ public class TrackExtraGui implements IScreen {
         //back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
 
-        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30, ytop, 85, height, "Selected Way: 0"){};//todo 等待multiSwitch分支合并后修改
+        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30, ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 
         offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height, rollAndOffsetInfoCache.offsetType.toString()) {
             @Override
@@ -227,7 +229,7 @@ public class TrackExtraGui implements IScreen {
         ytop += height;
         ytop += 5;
 
-        rollValueInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        rollValueInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         rollValueInput.setText("");
         rollValueInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -250,11 +252,11 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        rollValueLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        rollValueLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         ytop += height;
 
-        rollSlopeInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        rollSlopeInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         rollSlopeInput.setText("");
         rollSlopeInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -277,11 +279,11 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        rollSlopeLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        rollSlopeLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         ytop += height;
 
-        rollHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        rollHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         rollHandleXLenInput.setText("");
         rollHandleXLenInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -304,12 +306,12 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        rollHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        rollHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         ytop += height;
         ytop += 5;
 
-        yOffsetValueInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        yOffsetValueInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         yOffsetValueInput.setText("");
         yOffsetValueInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -332,11 +334,11 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        yOffsetValueLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        yOffsetValueLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         ytop += height;
 
-        yOffsetSlopeInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        yOffsetSlopeInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         yOffsetSlopeInput.setText("");
         yOffsetSlopeInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -359,11 +361,11 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        yOffsetSlopeLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        yOffsetSlopeLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         ytop += height;
 
-        yOffsetHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        yOffsetHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         yOffsetHandleXLenInput.setText("");
         yOffsetHandleXLenInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -386,12 +388,12 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        yOffsetHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        yOffsetHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         ytop += height;
         ytop += 5;
 
-        zOffsetValueInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        zOffsetValueInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         zOffsetValueInput.setText("");
         zOffsetValueInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -414,11 +416,11 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        zOffsetValueLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        zOffsetValueLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         ytop += height;
 
-        zOffsetSlopeInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        zOffsetSlopeInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         zOffsetSlopeInput.setText("");
         zOffsetSlopeInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -441,11 +443,11 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        zOffsetSlopeLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        zOffsetSlopeLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         ytop += height;
 
-        zOffsetHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 2, ytop, width / 2, height);
+        zOffsetHandleXLenInput = new TextField(screen,GUIHelpers.getScreenWidth() / 2 - width / 4, ytop, width / 4, height);
         zOffsetHandleXLenInput.setText("");
         zOffsetHandleXLenInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -468,7 +470,7 @@ public class TrackExtraGui implements IScreen {
             }
             return false;
         });
-        zOffsetHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, "") {};
+        zOffsetHandleXLenLabel = new Button(screen,GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "") {};
 
         //update after all components init
         lSlider.onSlider();
@@ -509,7 +511,7 @@ public class TrackExtraGui implements IScreen {
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 3 + 5) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 6 + 10) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
-        //TODO: if choose HIGH or LOW, half of the the roll graph will flip, need to express it?
+        //TODO: if choose HIGH or LOW, half of the the roll graph will flip, need to flip it on graph?
         //rollGraph
         state.translate(5, height + 5 + height * 1.5, 0);
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
@@ -536,9 +538,9 @@ public class TrackExtraGui implements IScreen {
     private void updateSliderRelated() {
         if(insertOrDeletePointButton != null) {
             if(rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue()) == -1) {
-                insertOrDeletePointButton.setText("Insert");
+                insertOrDeletePointButton.setText(GuiText.TRACK_EXTRA_INSERT_POINT.toString());
             } else {
-                insertOrDeletePointButton.setText("Delete");
+                insertOrDeletePointButton.setText(GuiText.TRACK_EXTRA_DELETE_POINT.toString());
             }
         }
         if(rollValueInput != null)rollValueInput.setText("");
@@ -585,8 +587,12 @@ public class TrackExtraGui implements IScreen {
                 return;
         }
 
-        if(valueLabel != null)valueLabel.setText("Value:" + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));//todo GuiText
-        if(slopeLabel != null)slopeLabel.setText("Slope:" + rollAndOffsetInfoCache.getSlopeDisplay(lSlider.getValue(), type, length));
-        if(handleXLenLabel != null)handleXLenLabel.setText("Handle:" + rollAndOffsetInfoCache.getHandleXDisplay(lSlider.getValue(), type, editLeft, length));
+        if(type == RollAndOffsetInfo.ExtraInfoType.ROLL) {
+            if(valueLabel != null)valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_CM + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));
+        } else {
+            if(valueLabel != null)valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_M + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));
+        }
+        if(slopeLabel != null)slopeLabel.setText(GuiText.TRACK_EXTRA_POINT_SLOPE + rollAndOffsetInfoCache.getSlopeDisplay(lSlider.getValue(), type, length));
+        if(handleXLenLabel != null)handleXLenLabel.setText(GuiText.TRACK_EXTRA_POINT_WEIGHT + rollAndOffsetInfoCache.getHandleXDisplay(lSlider.getValue(), type, editLeft, length));
     }
  }

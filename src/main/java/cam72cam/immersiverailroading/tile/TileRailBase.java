@@ -472,7 +472,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				tile = tile.getParentTile();
 			}
 
-			//todo:check
 			IRPathingData potential = currentPosition.copy();//this is in loop so use copy
 			MovementTrack.nextPositionDirect(getWorld(), potential, tile, motion, gauge);//not edit currentPosition
             //next lines will compare motion yaw and potential yaw

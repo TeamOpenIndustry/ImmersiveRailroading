@@ -122,6 +122,17 @@ gui.immersiverailroading:track.rail_bed_fill=Bed Fill:    %s
 gui.immersiverailroading:track.place_blueprint_true=Place:      Blueprint
 gui.immersiverailroading:track.place_blueprint_false=Place:      Track
 gui.immersiverailroading:track.roll_offset_type=Roll Vertical Offset
+gui.immersiverailroading:track.extra_insert_point=Insert
+gui.immersiverailroading:track.extra_delete_point=Delete
+gui.immersiverailroading:track.extra_point_value_m=Point Height (Y,m):
+gui.immersiverailroading:track.extra_point_value_cm=Point Height (Y,cm):
+gui.immersiverailroading:track.extra_point_slope=Point Slope (Y/X,‰):
+gui.immersiverailroading:track.extra_point_weight=Point Weight (X Proj.):
+gui.immersiverailroading:track.extra_reset=Reset All
+gui.immersiverailroading:track.extra_edit_left=Edit Left
+gui.immersiverailroading:track.extra_edit_right=Edit Right
+gui.immersiverailroading:track.extra_trackgui=Track Gui
+gui.immersiverailroading:track.extragui=Track Extra Gui
 
 gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.power=Power:          %s

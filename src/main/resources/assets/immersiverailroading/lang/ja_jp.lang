@@ -115,6 +115,17 @@ gui.immersiverailroading:track.rail_bed_fill=線路下ブロック充填： %s
 gui.immersiverailroading:track.place_blueprint_true=設置： 設計図
 gui.immersiverailroading:track.place_blueprint_false=設置： 線路
 gui.immersiverailroading:track.roll_offset_type=カント角と垂直オフセット
+gui.immersiverailroading:track.extra_insert_point=制御点を挿入
+gui.immersiverailroading:track.extra_delete_point=制御点を削除
+gui.immersiverailroading:track.extra_point_value_m=点の高さ（Y，m）：
+gui.immersiverailroading:track.extra_point_value_cm=点の高さ（Y，cm）：
+gui.immersiverailroading:track.extra_point_slope=点の勾配（Y/X，‰）：
+gui.immersiverailroading:track.extra_point_weight=点の重み（X投影）：
+gui.immersiverailroading:track.extra_reset=全てリセット
+gui.immersiverailroading:track.extra_edit_left=左を編集
+gui.immersiverailroading:track.extra_edit_right=右を編集
+gui.immersiverailroading:track.extra_trackgui=軌道設定画面
+gui.immersiverailroading:track.extragui=追加設定画面
 
 gui.immersiverailroading:loco.works=製造： %s
 gui.immersiverailroading:loco.power=出力： %s

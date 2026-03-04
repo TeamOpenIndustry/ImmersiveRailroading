@@ -115,6 +115,17 @@ gui.immersiverailroading:track.rail_bed_fill=Remplissage:  %s
 gui.immersiverailroading:track.place_blueprint_true=Poser:         Aperçu
 gui.immersiverailroading:track.place_blueprint_false=Poser:         Voie
 gui.immersiverailroading:track.roll_offset_type=Désurélévation et décalage vertical
+gui.immersiverailroading:track.extra_insert_point=Insérer point
+gui.immersiverailroading:track.extra_delete_point=Supprimer point
+gui.immersiverailroading:track.extra_point_value_m=Hauteur du point (Y, m):
+gui.immersiverailroading:track.extra_point_value_cm=Hauteur du point (Y, cm):
+gui.immersiverailroading:track.extra_point_slope=Pente du point (Y/X, ‰):
+gui.immersiverailroading:track.extra_point_weight=Poids du point (proj. X):
+gui.immersiverailroading:track.extra_reset=Tout réinitialiser
+gui.immersiverailroading:track.extra_edit_left=Modifier gauche
+gui.immersiverailroading:track.extra_edit_right=Modifier droite
+gui.immersiverailroading:track.extra_trackgui=Interface voie
+gui.immersiverailroading:track.extragui=Paramètres supplémentaires
 
 gui.immersiverailroading:loco.works=Constructeur: %s
 gui.immersiverailroading:loco.power=[Need translate]

@@ -55,7 +55,7 @@ public class MovementTrack {
 
 	public static void iterativePathing(World world, IRPathingData startPosition, ITrack te, double gauge, Vec3d motion, double maxDistance) {
 		IRPathingData iterationPosition = startPosition.copy();
-		IRPathingData prevPosition = startPosition.copy();
+		IRPathingData prevPosition;
 		double totalDistance = motion.length();
 		double maxDistanceSquared = maxDistance * maxDistance;
 		double motionLengthSquared = motion.lengthSquared();
@@ -130,7 +130,7 @@ public class MovementTrack {
 		} else if (rail.info.settings.type.isTable()) {
 			double tablePos = rail.getParentTile().info.tablePos;
 
-			currentPosition.setState(currentPosition.getUMCPos().add(delta), currentPosition.getRoll());//todo 这里的修改合法吗？为了使得deltaMovement正确可能需要小修改，避免这个覆盖
+			currentPosition.setState(currentPosition.getUMCPos().add(delta), currentPosition.getRoll());
 
 			Facing placementFacing = rail.info.placementInfo.facing();
 			Vec3d center, forward, backward;
