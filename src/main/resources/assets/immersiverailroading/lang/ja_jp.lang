@@ -178,7 +178,7 @@ track.immersiverailroading:direction.none=両方向
 track.immersiverailroading:direction.left=左側に固定
 track.immersiverailroading:direction.right=右側に固定
 
-track.immersiverailroading:ExtraInfoType.roll=カント角
+track.immersiverailroading:ExtraInfoType.roll=外軌超高
 track.immersiverailroading:ExtraInfoType.y_offset=垂直オフセット
 track.immersiverailroading:ExtraInfoType.z_offset=水平オフセット
 

@@ -178,7 +178,7 @@ track.immersiverailroading:direction.none=Flexible
 track.immersiverailroading:direction.left=Verrouillée vers la droite
 track.immersiverailroading:direction.right=Verrouillée vers la gauche
 
-track.immersiverailroading:ExtraInfoType.roll=Désurélévation
+track.immersiverailroading:ExtraInfoType.roll=Surélévation
 track.immersiverailroading:ExtraInfoType.y_offset=Décalage vertical
 track.immersiverailroading:ExtraInfoType.z_offset=Décalage horizontal
 

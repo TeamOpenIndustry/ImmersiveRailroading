@@ -25,6 +25,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.serialization.TagCompound;
 import util.Matrix4;
 
 import java.util.*;
@@ -37,6 +38,7 @@ public class TrackGui implements IScreen {
 	long frame;
 
 	private TileRailPreview te;
+	private int guiOpenType;
 	private Button typeButton;
 	private TextField lengthInput;
     //TODO How do we handle dynamic range?
@@ -81,6 +83,12 @@ public class TrackGui implements IScreen {
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
 		settings = RailSettings.from(stack).mutable();
+		try{
+			this.guiOpenType = RailSettings.getExtraDataFrom(stack).getInteger("guiOpenType");
+		}catch (NullPointerException e) {
+			this.guiOpenType = 0;
+		}
+
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
 		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
@@ -201,13 +209,12 @@ public class TrackGui implements IScreen {
         trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, GuiText.TRACK_EXTRAGUI.toString()) {
             @Override
             public void onClick(Player.Hand hand) {
+				guiOpenType = 1;
+				onClose();
                 if (te != null) {
-//					onClose();
-					te.shouldTrackGuiActive = false;//TODO: is it needed to send packet for updating?
-                    GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(),te.getPos());
+                    GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
                 } else {
-//					onClose();
-                    GuiTypes.RAIL_EXTRA.open(MinecraftClient.getPlayer());
+                    GuiTypes.RAIL.open(MinecraftClient.getPlayer());
                 }
             }
         };
@@ -398,9 +405,22 @@ public class TrackGui implements IScreen {
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings.immutable()).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), guiOpenType).sendToServer();
+
+				//TODO: these code are duplicated with ItemRailUpdatePacket.handle(), can be moved into a function
+				//also update client Item to update Rail information
+				ItemStack clientStack = te.getItem();
+				settings.immutable().write(clientStack);
+				RailSettings.writeExtraData(clientStack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+				te.setItem(clientStack, MinecraftClient.getPlayer());
 			} else {
-				new ItemRailUpdatePacket(settings.immutable()).sendToServer();
+				new ItemRailUpdatePacket(settings.immutable(), guiOpenType).sendToServer();
+
+				//also update client Item to update Rail information
+				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
+				settings.immutable().write(clientStack);
+				RailSettings.writeExtraData(clientStack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+				MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
 			}
 		}
 	}

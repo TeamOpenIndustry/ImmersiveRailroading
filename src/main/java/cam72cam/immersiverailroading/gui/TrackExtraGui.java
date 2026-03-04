@@ -21,6 +21,7 @@ import cam72cam.mod.gui.screen.*;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.opengl.RenderState;
+import cam72cam.mod.serialization.TagCompound;
 import net.minecraftforge.fml.client.config.GuiSlider;
 import util.Matrix4;
 
@@ -39,9 +40,10 @@ public class TrackExtraGui implements IScreen {
     private TileRailPreview te;
     private RailSettings.Mutable settings;
     private RollAndOffsetInfo.Mutable rollAndOffsetInfoCache;
+    private int guiOpenType;
     private boolean edited;
     private boolean editLeft;
-    private final double length;//TODO: must prevent situation editing by more than one player! or there might cause sync problem
+    private final double length;
     private final RailInfo referenceInfo;//only for calculating length and rendering
     private final List<VecYPR> referenceRenderData;
     //buttons to show state
@@ -69,7 +71,7 @@ public class TrackExtraGui implements IScreen {
     private Button resetAllButton;
     private Button offsetTypeButton;
     private Button railInfoLabel;
-    private Button wayCircleButton;//TODO:Switch and multiSwitch support
+    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
         this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY), null);
@@ -80,6 +82,11 @@ public class TrackExtraGui implements IScreen {
     private TrackExtraGui(ItemStack stack, TileRailPreview te) {
         stack = stack.copy();
         this.settings = RailSettings.from(stack).mutable();
+        try{
+            this.guiOpenType = RailSettings.getExtraDataFrom(stack).getInteger("guiOpenType");
+        }catch (NullPointerException e) {
+            this.guiOpenType = 0;
+        }
         this.te = te;
 
         if(this.te != null) {//TODO:Switch and multiSwitch support
@@ -190,13 +197,12 @@ public class TrackExtraGui implements IScreen {
 
         TrackGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 3, ytop, 50, height, GuiText.TRACK_EXTRA_TRACKGUI.toString()) {
             @Override
-            public void onClick(Player.Hand hand) {//TODO:若要用onclose，两个gui相互打开时可能由于onclose只向服务端发包，客户端的不能及时更新，最后打开的引入了脏数据，会覆盖，可能需要想办法更新客户端item
+            public void onClick(Player.Hand hand) {
+                guiOpenType = 0;
+                onClose();
                 if (te != null) {
-//                    onClose();
-                    te.shouldTrackGuiActive = true;
                     GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
                 } else {
-//                    onClose();
                     GuiTypes.RAIL.open(MinecraftClient.getPlayer());
                 }
             }
@@ -486,9 +492,21 @@ public class TrackExtraGui implements IScreen {
         }
 
         if (this.te != null) {
-            new ItemRailUpdatePacket(te.getPos(), settings.immutable()).sendToServer();
+            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), guiOpenType).sendToServer();
+
+            //also update client Item to update Rail information
+            ItemStack clientStack = te.getItem();
+            settings.immutable().write(clientStack);
+            RailSettings.writeExtraData(clientStack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+            te.setItem(clientStack, MinecraftClient.getPlayer());
         } else {
-            new ItemRailUpdatePacket(settings.immutable()).sendToServer();
+            new ItemRailUpdatePacket(settings.immutable(), guiOpenType).sendToServer();
+
+            //also update client Item to update Rail information
+            ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
+            settings.immutable().write(clientStack);
+            RailSettings.writeExtraData(clientStack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+            MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
         }
     }
 

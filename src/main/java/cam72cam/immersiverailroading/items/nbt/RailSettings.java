@@ -49,21 +49,56 @@ public class RailSettings {
     }
 
     public void write(ItemStack stack) {
+        TagCompound root = stack.getTagCompound();
+        if (root == null) {
+            root = new TagCompound();
+        }
+
         TagCompound data = new TagCompound();
         try {
             TagSerializer.serialize(data, mutable());
         } catch (SerializationException e) {
             ImmersiveRailroading.catching(e);
         }
-        stack.setTagCompound(data);
+
+        root.set("settings", data);
+        stack.setTagCompound(root);
     }
 
     public static RailSettings from(ItemStack stack) {
+        TagCompound root = stack.getTagCompound();
+        if (root == null || !root.hasKey("settings")) {
+            //legacy data
+            try {
+                return new Mutable(stack.getTagCompound()).immutable();
+            } catch (SerializationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         try {
-            return new Mutable(stack.getTagCompound()).immutable();
+            TagCompound data = root.get("settings");
+            return new Mutable(data).immutable();
         } catch (SerializationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void writeExtraData(ItemStack stack, TagCompound data) {//this is not safe enough
+        TagCompound root = stack.getTagCompound();
+        if (root == null) {
+            root = new TagCompound();
+        }
+        root.set("extraRailData", data);
+        stack.setTagCompound(root);
+    }
+
+    public static TagCompound getExtraDataFrom(ItemStack stack) {
+        TagCompound root = stack.getTagCompound();
+        if (root == null || !root.hasKey("extraRailData")) {
+            return null;
+        }
+        return root.get("extraRailData");
     }
 
     public Mutable mutable() {

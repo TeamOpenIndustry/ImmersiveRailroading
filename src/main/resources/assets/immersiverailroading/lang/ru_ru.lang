@@ -178,7 +178,7 @@ track.immersiverailroading:direction.none=Нет
 track.immersiverailroading:direction.left=Только влево
 track.immersiverailroading:direction.right=Только вправо
 
-track.immersiverailroading:ExtraInfoType.roll=Уклон
+track.immersiverailroading:ExtraInfoType.roll=Возвышение наружного рельса
 track.immersiverailroading:ExtraInfoType.y_offset=Вертикальное смещение
 track.immersiverailroading:ExtraInfoType.z_offset=Горизонтальное смещение
 

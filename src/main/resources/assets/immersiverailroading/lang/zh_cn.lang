@@ -178,7 +178,7 @@ track.immersiverailroading:direction.none=不锁定
 track.immersiverailroading:direction.left=锁定至右向
 track.immersiverailroading:direction.right=锁定至左向
 
-track.immersiverailroading:ExtraInfoType.roll=超高角度
+track.immersiverailroading:ExtraInfoType.roll=超高高度
 track.immersiverailroading:ExtraInfoType.y_offset=垂直偏移
 track.immersiverailroading:ExtraInfoType.z_offset=水平偏移
 

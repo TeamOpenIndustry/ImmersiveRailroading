@@ -6,6 +6,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
+import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 
 public class ItemRailUpdatePacket extends Packet {
@@ -13,16 +14,20 @@ public class ItemRailUpdatePacket extends Packet {
 	private RailSettings settings;
 	@TagField
 	private Vec3i pos;
+	@TagField
+	private int guiOpenType;
 
 	public ItemRailUpdatePacket() { }
 
-	public ItemRailUpdatePacket(RailSettings settings) {
+	public ItemRailUpdatePacket(RailSettings settings, int guiOpenType) {
 		this.settings = settings;
+		this.guiOpenType = guiOpenType;
 	}
 
-	public ItemRailUpdatePacket(Vec3i tilePreviewPos, RailSettings settings) {
+	public ItemRailUpdatePacket(Vec3i tilePreviewPos, RailSettings settings, int guiOpenType) {
 		this.pos = tilePreviewPos;
 		this.settings = settings;
+		this.guiOpenType = guiOpenType;
 	}
 
 	@Override
@@ -32,12 +37,14 @@ public class ItemRailUpdatePacket extends Packet {
 			if (tile != null) {
 				ItemStack item = tile.getItem();
 				settings.write(item);
+				RailSettings.writeExtraData(item, new TagCompound().setInteger("guiOpenType", guiOpenType));
 				tile.setItem(item, getPlayer());
 			}
 		} else {
 			Player player = this.getPlayer();
 			ItemStack stack = player.getHeldItem(Player.Hand.PRIMARY);
 			settings.write(stack);
+			RailSettings.writeExtraData(stack, new TagCompound().setInteger("guiOpenType", guiOpenType));
 			player.setHeldItem(Player.Hand.PRIMARY, stack);
 		}
 	}

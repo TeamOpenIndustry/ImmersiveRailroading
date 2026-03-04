@@ -191,7 +191,7 @@ track.immersiverailroading:direction.none=Flexible
 track.immersiverailroading:direction.left=Lock Right
 track.immersiverailroading:direction.right=Lock Left
 
-track.immersiverailroading:ExtraInfoType.roll=Roll Angle
+track.immersiverailroading:ExtraInfoType.roll=Superelevation
 track.immersiverailroading:ExtraInfoType.y_offset=Vertical Offset
 track.immersiverailroading:ExtraInfoType.z_offset=Horizontal Offset
 

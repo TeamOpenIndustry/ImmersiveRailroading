@@ -4,17 +4,21 @@ import cam72cam.immersiverailroading.*;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.gui.container.*;
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.config.ConfigGui;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.GuiRegistry;
 import cam72cam.mod.gui.GuiRegistry.BlockGUI;
 import cam72cam.mod.gui.GuiRegistry.EntityGUI;
 import cam72cam.mod.gui.GuiRegistry.GUI;
 import cam72cam.mod.gui.screen.IScreen;
+import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.resource.Identifier;
 
 public class GuiTypes {
@@ -24,9 +28,8 @@ public class GuiTypes {
     public static final EntityGUI<LocomotiveSteam> STEAM_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveSteam.class, SteamLocomotiveContainer::new);
     public static final EntityGUI<LocomotiveDiesel> DIESEL_LOCOMOTIVE = GuiRegistry.registerEntityContainer(LocomotiveDiesel.class, TankContainer::new);
 
-    public static final GUI RAIL = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "RAIL"), TrackGui::new);
+    public static final GUI RAIL = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "RAIL"), GuiTypes::createTrackGuiScreen);
     public static final BlockGUI RAIL_PREVIEW = GuiRegistry.registerBlock(TileRailPreview.class, GuiTypes::createTrackGuiScreen);
-    public static final GUI RAIL_EXTRA = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "ROLL_OFFSET"), TrackExtraGui::new);
     public static final BlockGUI RAIL_AUGMENT = GuiRegistry.registerBlock(TileRailBase.class, AugmentFilterGUI::new);
     public static final GUI TRACK_EXCHANGER = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "TRACK_EXCHANGER"), TrackExchangerGui::new);
     public static final GUI PAINT_BRUSH = GuiRegistry.register(new Identifier(ImmersiveRailroading.MODID, "PAINT_BRUSH"), PaintBrushPicker::new);
@@ -48,10 +51,32 @@ public class GuiTypes {
     }
 
     private static IScreen createTrackGuiScreen(TileRailPreview te) {
-        if(te.shouldTrackGuiActive) {
+        int guiOpenType;
+        try{
+            guiOpenType = RailSettings.getExtraDataFrom(te.getItem()).getInteger("guiOpenType");
+        }catch (NullPointerException e) {
+            guiOpenType = 0;
+        }
+
+        if(guiOpenType == 0) {
             return new TrackGui(te);
         }else {
             return new TrackExtraGui(te);
+        }
+    }
+    private static IScreen createTrackGuiScreen() {
+        ItemStack stack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
+        int guiOpenType;
+        try{
+            guiOpenType = RailSettings.getExtraDataFrom(stack).getInteger("guiOpenType");
+        }catch (NullPointerException e) {
+            guiOpenType = 0;
+        }
+
+        if(guiOpenType == 0) {
+            return new TrackGui();
+        }else {
+            return new TrackExtraGui();
         }
     }
 
