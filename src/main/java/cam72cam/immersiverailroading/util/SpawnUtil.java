@@ -31,8 +31,8 @@ public class SpawnUtil {
 			return ClickResult.REJECTED;
 		}
 		double trackGauge = initte.getTrackGauges()[0];
-		Gauge gauge = Gauge.from(trackGauge);//TODO:these gauge isn't correct for double gauges!
-		double spawnGauge = gauge.value();//TODO:these gauge.value() isn't correct for double gauges!
+		Gauge gauge = Gauge.from(trackGauge);
+		double spawnGauge = gauge.value();
 		
 		
 		if (!player.isCreative() && gauge != data.gauge) {
@@ -61,8 +61,8 @@ public class SpawnUtil {
 					float rearDistance = moveable.getDefinition().getBogeyRear(gauge);
 					IRPathingData frontTemp = center.copy();
 					IRPathingData rearTemp = center.copy();
-					centerte.getNextPosition(frontTemp, VecUtil.fromWrongYaw(frontDistance, yaw), spawnGauge);//center may be edited
-					centerte.getNextPosition(rearTemp, VecUtil.fromWrongYaw(rearDistance, yaw), spawnGauge);//center may be edited
+					centerte.getNextPosition(frontTemp, VecUtil.fromWrongYaw(frontDistance, yaw), spawnGauge);
+					centerte.getNextPosition(rearTemp, VecUtil.fromWrongYaw(rearDistance, yaw), spawnGauge);
 					Vec3d front = frontTemp.getUMCPos();
 					Vec3d rear = rearTemp.getUMCPos();
 

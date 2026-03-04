@@ -413,11 +413,11 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.rearYaw = rearYaw;
     }
 
-    public float getFrontRoll() {
+    public float getFrontRoll() {//TODO:any other way like getRotationRoll() to fallback like getFront/RearYaw?
         if(this.frontRoll != null) {
             return this.frontRoll;
         }
-        return 0;//seems this will only happen in some case when spawning train on MinecraftRail?
+        return 0;//this seems will only happen in some case when spawning train on MinecraftRail?
     }
     public void setFrontRoll(float val) {
         this.frontRoll = val;
@@ -426,12 +426,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if(this.rearRoll != null) {
             return this.rearRoll;
         }
-        return 0;//TODO:any other way like getRotationRoll() to fallback?
+        return 0;
     }
     public void setRearRoll(float val) {
         this.rearRoll = val;
     }
-    public float getRotationRoll() {//TODO: consider weight of every bogey? and if we have more bogeys in future?
+    public float getRotationRoll() {//consider weight of every bogey? and what if we have more bogeys support in future?
         return (getFrontRoll() + getRearRoll()) / 2;
     }
 

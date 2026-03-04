@@ -13,8 +13,9 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 //TODO: this file includes too much duplicated code, may need to optimize and clean
+// although this works now but List is not really cloned so there might be some potential safety problems
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
-public class RollAndOffsetInfo {//TODO: although it works now but List is not really cloned so there might be some potential safety problems
+public class RollAndOffsetInfo {
     public final RollYOffsetType offsetType;
     private final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
     //Roll
@@ -173,7 +174,7 @@ public class RollAndOffsetInfo {//TODO: although it works now but List is not re
                     offsetType,
                     ls, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
             );
-            List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);//will divide it manually here, should be faster
+            List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);
 
             ls.clear();
             ls.addAll(res.get(0).ls);
@@ -706,13 +707,13 @@ public class RollAndOffsetInfo {//TODO: although it works now but List is not re
     }
 
     //subSplit
-    //分类讨论:按照tStart到tEnd区间包含的t的点个数讨论
-    //0个:new内存一段线即可，但是tStart和tEnd两端都需要计算，再参数化到01存储->ok
-    //非0个:tStart和tEnd两端也都需要计算再参数化到01存储，中间的t就只要参数化到01
+    //Classified Discussion: analyze based on the number of points contained within the interval from tStart to tEnd.
+    //0:Store a segment of line, but both tStart and tEnd require truncating, then normalize and store.
+    //more than 0:both tStart and tEnd truncate require truncating, and then normalize and store, points between tStart and tEnd need to be normalized and stored
     //boundary:
-    //1:tStart overlay with a point
-    //2:tEnd overlay with a point
-    public List<RollAndOffsetInfo> subSplit(List<Pair<Double,Double>> subCurves, boolean normalize) {//只有分段发生才会进入此处,但是某些bug导致传入的subsplit范围不合法（start和end重合）会导致ls.size()==0
+    //case1:tStart overlay with a point
+    //case2:tEnd overlay with a point
+    public List<RollAndOffsetInfo> subSplit(List<Pair<Double,Double>> subCurves, boolean normalize) {//only situation need truncating go into here, but some bug will case invalid tStart and tEnd(overlap), causing ls.size()==0
         List<RollAndOffsetInfo> results = new ArrayList<>();
 
         for (Pair<Double,Double> subCurve : subCurves) {
@@ -727,11 +728,11 @@ public class RollAndOffsetInfo {//TODO: although it works now but List is not re
             List<Vec3d> newZOffsets = new ArrayList<>();
             List<Vec3d> newZOffsetCtrls = new ArrayList<>();
 
-            int logicIdxStart = (findRight(ls,lStart) + 1) / 2;//这两个查找方法（最好二分？）等于时都满足
-            int logicIdxEnd = (findLeft(ls,lEnd) + 1) / 2;//搜到的是点对应的x是对的,处理成逻辑上的index
+            int logicIdxStart = (findRight(ls,lStart) + 1) / 2;//TODO: binary search
+            int logicIdxEnd = (findLeft(ls,lEnd) + 1) / 2;//physical index => logical index
 
             int count = logicIdxEnd - logicIdxStart + 1;
-            if(count == 0) {//由于查找是包含等于的，所以这里没找到的话说明严格为0，其实也侧面说明分段数超过2了
+            if(count == 0) {//findLeft/Right include situation of equaling, count == 0 is strictly satisfied, also this means results.size() >= 3
                 newT.add(0.0);
                 newT.add(1.0);
 
@@ -756,7 +757,7 @@ public class RollAndOffsetInfo {//TODO: although it works now but List is not re
                     newRollCtrls.add(ctrl2);
                 }
 
-                {//YOffset
+                {//yOffset
                     Vec3d p1 = yOffsets.get(logicIdxEnd * 2);
                     Vec3d p2 = yOffsets.get(logicIdxStart * 2 - 1);
                     Vec3d ctrl1 = yOffsetCtrls.get(logicIdxEnd * 2);
@@ -777,7 +778,7 @@ public class RollAndOffsetInfo {//TODO: although it works now but List is not re
                     newYOffsetCtrls.add(ctrl2);
                 }
 
-                {//ZOffset
+                {//zOffset
                     Vec3d p1 = zOffsets.get(logicIdxEnd * 2);
                     Vec3d p2 = zOffsets.get(logicIdxStart * 2 - 1);
                     Vec3d ctrl1 = zOffsetCtrls.get(logicIdxEnd * 2);
@@ -902,7 +903,7 @@ public class RollAndOffsetInfo {//TODO: although it works now but List is not re
                         Vec3d p1 = zOffsets.get(Physic(logicIdxStart - 1));
                         Vec3d p2 = zOffsets.get(Physic(logicIdxStart));
                         Vec3d ctrl1 = zOffsetCtrls.get(Physic(logicIdxStart - 1));
-                        Vec3d ctrl2 = zOffsets.get(Physic(logicIdxStart)).scale(2).subtract(zOffsetCtrls.get(Physic(logicIdxStart)));//规定ctrl在右边，所以ctrl2都要取反一下
+                        Vec3d ctrl2 = zOffsets.get(Physic(logicIdxStart)).scale(2).subtract(zOffsetCtrls.get(Physic(logicIdxStart)));//we specify that Ctrl is on the right side of Point, so Ctrl2 must store the reverse.
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve startCurve = getLeftByX(lStart, curve.reverse()).reverse();

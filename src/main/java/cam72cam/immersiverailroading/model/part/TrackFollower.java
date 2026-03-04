@@ -52,7 +52,7 @@ public class TrackFollower {
 
     public Matrix4 getMatrix() {
         double recomputeDist = 0.1 * stock.gauge.scale();
-        if (pos == null || stock.getPosition().distanceToSquared(pos) > recomputeDist * recomputeDist) {//要根据转向架方向判断旋转方向，handcar寻路roll结果很小，roll路启停结果差异（寻路上似乎没问题）
+        if (pos == null || stock.getPosition().distanceToSquared(pos) > recomputeDist * recomputeDist) {
             pos = stock.getPosition();
             float offsetYaw = (front ? stock.getFrontYaw() : stock.getRearYaw());
             float offsetRoll = (front ? stock.getFrontRoll() : stock.getRearRoll());
@@ -76,10 +76,10 @@ public class TrackFollower {
                 float atPointPitch = 0;
 
                 IRPathingData pointPos = new IRPathingData(offsetPos, toMinPoint < 0 ? rollReadout : -rollReadout, 0);
-                nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, toMinPoint);//pointPos updated
+                nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, toMinPoint);
 
                 IRPathingData pointPosNext = pointPos.copy();//pointPos need to be retained
-                nextPosition(stock.getWorld(), stock.gauge, pointPosNext, stock.getRotationYaw(), offsetYaw, betweenPoints);//pointPosNext updated
+                nextPosition(stock.getWorld(), stock.gauge, pointPosNext, stock.getRotationYaw(), offsetYaw, betweenPoints);
 
                 Vec3d delta = stock.getPosition().subtract(pointPos.getUMCPos()).scale(max); // Scale copies sign
                 if (pointPos.getUMCPos().distanceTo(pointPosNext.getUMCPos()) > 0.1 * stock.gauge.scale()) {

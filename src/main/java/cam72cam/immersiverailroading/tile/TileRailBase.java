@@ -407,12 +407,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	@Override
-	public void getNextPosition(IRPathingData inputData, Vec3d motion, double gauge) {//todo: replace getTrackGauge() and really using gauge
+	public void getNextPosition(IRPathingData inputData, Vec3d motion, double gauge) {
 		double distanceMetersSq = motion.lengthSquared();
 		double maxDistance = 0.25;
 		if (distanceMetersSq * 0.9 > maxDistance * maxDistance) {
 			// 0.9 forces at least one iteration + scaling
-			MovementTrack.iterativePathing(getWorld(), inputData, this, getTrackGauges()[0], motion, maxDistance);//todo getTrackGauges()
+			MovementTrack.iterativePathing(getWorld(), inputData, this, getTrackGauges()[0], motion, maxDistance);
 			return;
 		}
 		getNextPositionShort(inputData, motion, gauge);
