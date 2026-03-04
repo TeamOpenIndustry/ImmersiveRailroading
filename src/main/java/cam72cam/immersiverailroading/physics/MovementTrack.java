@@ -40,7 +40,7 @@ public class MovementTrack {
 		for (Vec3d pos : positions) {
 			for (double height : heightSkew) {
 				ITrack te = ITrack.get(world, pos.add(0, height + (currentPosition.y%1), 0), true);
-				if (te != null && Gauge.from(te.getTrackGauge()) == Gauge.from(gauge)) {
+				if (te != null && Gauge.from(te.getTrackGauges()[0]) == Gauge.from(gauge)) {
 					return te;
 				}
 				// HACK for cross gauge

@@ -126,7 +126,7 @@ public class TrackFollower {
         if (rail == null) {
             return;
         }
-        rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw), rail.getTrackGauge());
+        rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw), rail.getTrackGauges()[0]);
     }
 
     public float getYawReadout() {

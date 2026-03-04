@@ -30,7 +30,7 @@ public class SpawnUtil {
 		if (initte == null) {
 			return ClickResult.REJECTED;
 		}
-		double trackGauge = initte.getTrackGauge();
+		double trackGauge = initte.getTrackGauges()[0];
 		Gauge gauge = Gauge.from(trackGauge);//TODO:these gauge isn't correct for double gauges!
 		double spawnGauge = gauge.value();//TODO:these gauge.value() isn't correct for double gauges!
 		

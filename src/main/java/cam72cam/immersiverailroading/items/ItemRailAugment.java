@@ -46,7 +46,7 @@ public class ItemRailAugment extends CustomItem {
 			if (te != null) {
 				ItemStack stack = player.getHeldItem(hand);
 				Data data = new Data(stack);
-				if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauge()) == data.gauge)) {
+				if (te.getAugment() == null && (player.isCreative() || Gauge.from(te.getTrackGauges()[0]) == data.gauge)) {
 					TileRail parent = te.getParentTile();
 					if (parent == null) {
 						return ClickResult.REJECTED;

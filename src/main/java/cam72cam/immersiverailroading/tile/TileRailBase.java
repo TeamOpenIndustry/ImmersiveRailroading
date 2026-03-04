@@ -391,23 +391,18 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	protected Double cachedGauge = null;
-	@Deprecated
+
 	@Override
-	public double getTrackGauge() {
+	public double[] getTrackGauges() {//TODO:this is not really finished yet!
 		if (cachedGauge == null && getParent() != null) {
 			TileRail parent = this.getParentTile();
 			if (parent != null) {
 				cachedGauge = parent.info.settings.gauge.value();
 			}
 		}
-		return cachedGauge != null ? cachedGauge : 0;
-	}
 
-
-	@Override
-	public double[] getTrackGauges() {//TODO:this is not really finished yet!
 		double[] gauges = new double[1];
-		gauges[0] = getTrackGauge();
+		gauges[0] = cachedGauge != null ? cachedGauge : 0;
 		return  gauges;
 	}
 
@@ -417,7 +412,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		double maxDistance = 0.25;
 		if (distanceMetersSq * 0.9 > maxDistance * maxDistance) {
 			// 0.9 forces at least one iteration + scaling
-			MovementTrack.iterativePathing(getWorld(), inputData, this, getTrackGauge(), motion, maxDistance);//todo getTrackGauges()
+			MovementTrack.iterativePathing(getWorld(), inputData, this, getTrackGauges()[0], motion, maxDistance);//todo getTrackGauges()
 			return;
 		}
 		getNextPositionShort(inputData, motion, gauge);
@@ -925,7 +920,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			// Accessing TEs (parent) in chunks that are currently loading can cause problems
 			return boundingBox.get(getFullHeight() + 0.1);
 		}
-		return boundingBox.get(getFullHeight() + 0.1 * (getTrackGauge() / Gauge.STANDARD));
+		return boundingBox.get(getFullHeight() + 0.1 * (getTrackGauges()[0] / Gauge.STANDARD));
 	}
 
 	@Override
