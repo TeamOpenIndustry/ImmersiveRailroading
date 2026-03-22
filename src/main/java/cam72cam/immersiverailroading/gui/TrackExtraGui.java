@@ -71,6 +71,7 @@ public class TrackExtraGui implements IScreen {
     private Button resetAllButton;
     private Button offsetTypeButton;
     private Button railInfoLabel;
+    private Button rollEffectTileButton;
     private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
@@ -127,7 +128,7 @@ public class TrackExtraGui implements IScreen {
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
         //left panel
-        railInfoLabel = new Button(screen, xtop, ytop, width, height,  "Rail Length:" + length) {};//TODO: what else need to be displayed here?
+        railInfoLabel = new Button(screen, xtop, ytop, width / 2, height,  "Rail Length:" + length) {};//TODO: what else need to be displayed here?
         ytop += height;
         ytop += 5;
         //rollGraph
@@ -210,8 +211,21 @@ public class TrackExtraGui implements IScreen {
 
         //back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
+        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 
-        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30, ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
+        rollEffectTileButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30, ytop, 85, height,
+                rollAndOffsetInfoCache.rollEffectTile ? GuiText.TRACK_ROLL_EFFECT_TILE_TRUE.toString() : GuiText.TRACK_ROLL_EFFECT_TILE_FALSE.toString()
+        ){
+            @Override
+            public void onClick(Player.Hand hand) {
+                edited = true;
+
+                rollAndOffsetInfoCache.rollEffectTile = !rollAndOffsetInfoCache.rollEffectTile;
+                this.setText(
+                        rollAndOffsetInfoCache.rollEffectTile ? GuiText.TRACK_ROLL_EFFECT_TILE_TRUE.toString() : GuiText.TRACK_ROLL_EFFECT_TILE_FALSE.toString()
+                );
+            }
+        };
 
         offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height, rollAndOffsetInfoCache.offsetType.toString()) {
             @Override

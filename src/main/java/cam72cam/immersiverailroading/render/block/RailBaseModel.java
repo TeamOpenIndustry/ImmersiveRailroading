@@ -57,7 +57,7 @@ public class RailBaseModel {
 		}
 
 		if(te.isScaleModel()){
-			height = height + 0.1f * (float) gauge.scale();
+			height = height + 0.1f * (float) gauge.scale();//TODO: top face facing
 		}
 
 		if (snow != 0) {

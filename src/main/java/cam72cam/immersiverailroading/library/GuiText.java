@@ -48,6 +48,8 @@ public enum GuiText {
 	TRACK_PLACE_BLUEPRINT_TRUE("track.place_blueprint_true"),
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
 	TRACK_ROLL_OFFSET_TYPE("track.roll_offset_type"),
+	TRACK_ROLL_EFFECT_TILE_TRUE("track.roll_effect_tile_true"),
+	TRACK_ROLL_EFFECT_TILE_FALSE("track.roll_effect_tile_false"),
 	TRACK_EXTRA_INSERT_POINT("track.extra_insert_point"),
 	TRACK_EXTRA_DELETE_POINT("track.extra_delete_point"),
 	TRACK_EXTRA_POINT_VALUE_M("track.extra_point_value_m"),

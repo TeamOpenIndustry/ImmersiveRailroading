@@ -40,6 +40,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		
 		positions = new HashSet<>();
 		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<>();
+		HashMap<Pair<Integer, Integer>, Vec3d> topFacings = new HashMap<>();//TODO: waiting for normal support
 		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<>();
 		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<>();
@@ -63,9 +64,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				0,
                 Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
 		);
-		int mainX = (int) Math.floor(path.get(path.size()/2).x+placeOff.x);
-		int mainZ = (int) Math.floor(path.get(path.size()/2).z+placeOff.z);
-		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale()/2));
+		int mainX = (int) Math.floor(path.get(path.size() / 2).x + placeOff.x);
+		int mainZ = (int) Math.floor(path.get(path.size() / 2).z + placeOff.z);
+		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale() / 2));
 
 		for (VecYPR cur : path) {
 			Vec3d gagPos = cur;
@@ -74,36 +75,61 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			gagPos = gagPos.add(0, heightOffset, 0);
 
-			for (double q = -horiz; q <= horiz; q+=0.1) {
+			for (double q = -horiz; q <= horiz; q += 0.1) {
 				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.getYaw());
-				int posX = (int)Math.floor(gagPos.x+nextUp.x+placeOff.x);
-				int posZ = (int)Math.floor(gagPos.z+nextUp.z+placeOff.z);
+				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
+				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
+
+				double rollDelta;
+//				Vec3d topFacing = computeTopFacing(cur.getYaw(), cur.getPitch(), cur.getRoll());
+				boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile;
+
+				if(rollEffectTile && cur.getRoll() != 0) {
+					double sin = Math.sin(Math.toRadians(cur.getRoll()));
+					rollDelta = sin * q;
+				}else {
+					rollDelta = 0;
+				}
+
+				double deltaGapPos = gagPos.y + rollDelta;
 				double height = 0;
 				if (info.settings.isGradeCrossing) {
-					height = 0.306 - Math.abs(Math.round(q))/(3 * horiz);
+					height = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
 					height *= info.settings.gauge.scale();
 					height = Math.min(height, clamp);
 				}
 
-				double relHeight = gagPos.y % 1;
-				if (gagPos.y < 0) {
+				double relHeight = deltaGapPos % 1;
+				if (deltaGapPos < 0) {//TODO: need updating after tile facing done
 					relHeight += 1;
 				}
 
 				Pair<Integer, Integer> gag = Pair.of(posX, posZ);
 				if (!positions.contains(gag)) {
 					positions.add(gag);
-                    bedHeights.put(gag, (float)(height + Math.max(0, relHeight - 0.1)));
+
+					if(rollEffectTile) {
+						if(height + relHeight > 0.9) {//if bedHeight > 0.9 we need to correct yOffset
+							bedHeights.put(gag, (float) (height + relHeight - 1));
+							yOffset.put(gag, (int) (deltaGapPos - relHeight + 1));
+						}else {
+							bedHeights.put(gag, (float) (height + relHeight));
+							yOffset.put(gag, (int) (deltaGapPos - relHeight));
+						}
+					} else {
+						bedHeights.put(gag, (float) (height + Math.max(0, relHeight - 0.1)));
+						yOffset.put(gag, (int) (deltaGapPos - relHeight));
+					}
                     railHeights.put(gag, (float) relHeight);
-					yOffset.put(gag, (int) (gagPos.y - relHeight));
+//					topFacings.put(gag, topFacing);
 				}
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
 				}
 			}
 			if (!isFlex && endOfTrack) {
-				mainX = (int) Math.floor(gagPos.x+placeOff.x);
-				mainZ = (int) Math.floor(gagPos.z+placeOff.z);
+				mainX = (int) Math.floor(gagPos.x + placeOff.x);
+				mainZ = (int) Math.floor(gagPos.z + placeOff.z);
 			}
 		}
 
@@ -146,8 +172,37 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 			tg.setRailHeight(railHeights.get(pair));
 			tg.setBedHeight(bedHeights.get(pair));
+//			tg.setTopFacing(topFacings.get(pair));
 			tracks.add(tg);
 		}
+	}
+
+	private Vec3d computeTopFacing(double yawDeg, double pitchDeg, double rollDeg) {//TODO: check axis direction
+		double yawRad = Math.toRadians(yawDeg);
+		double pitchRad = Math.toRadians(pitchDeg);
+		double rollRad = Math.toRadians(rollDeg);
+
+		// direction
+		double cosYaw = Math.cos(yawRad);
+		double sinYaw = Math.sin(yawRad);
+		double cosPitch = Math.cos(pitchRad);
+		double sinPitch = Math.sin(pitchRad);
+		Vec3d tangent = new Vec3d(cosYaw * cosPitch, -sinPitch, sinYaw * cosPitch);
+
+		// no roll
+		Vec3d normalNoRoll = new Vec3d(sinYaw * sinPitch, cosPitch, cosYaw * sinPitch);
+
+		// roll is 0
+		if (Math.abs(rollRad) < 1e-6) return normalNoRoll;
+
+		// roll
+		double cosR = Math.cos(rollRad);
+		double sinR = Math.sin(rollRad);
+		double dot = normalNoRoll.dotProduct(tangent);
+		Vec3d cross = tangent.crossProduct(normalNoRoll);
+		return normalNoRoll.scale(cosR)
+				.add(cross.scale(sinR))
+				.add(tangent.scale(dot * (1 - cosR)));
 	}
 	
 	@Override

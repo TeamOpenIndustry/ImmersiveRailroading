@@ -176,6 +176,20 @@ public class BuilderCubicCurve extends BuilderIterator {
 					points.set(i, newP);
 				}
 				break;
+			case LEFT:
+				for(int i = 0; i < points.size(); i++) {
+					Vec3d p = points.get(i);
+					Vec3d newP = new Vec3d(p.x, p.y - rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
+					points.set(i, newP);
+				}
+				break;
+			case RIGHT:
+				for(int i = 0; i < points.size(); i++) {
+					Vec3d p = points.get(i);
+					Vec3d newP = new Vec3d(p.x, p.y + rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
+					points.set(i, newP);
+				}
+				break;
 		}
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);

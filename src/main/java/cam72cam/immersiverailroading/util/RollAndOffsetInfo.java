@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
 public class RollAndOffsetInfo {
     public final RollYOffsetType offsetType;
+    public final boolean rollEffectTile;//TODO: add option to turn this off/on in TrackExtraGui
     private final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
     //Roll
     /**
@@ -41,10 +42,11 @@ public class RollAndOffsetInfo {
     private final List<Vec3d> zOffsetCtrls;
 
     public RollAndOffsetInfo(
-            RollYOffsetType offsetType,
+            RollYOffsetType offsetType, boolean rollEffectTile,
             List<Double> ls, List<Vec3d> rolls, List<Vec3d> rollCtrls, List<Vec3d> yOffsets, List<Vec3d> yOffsetlCtrls, List<Vec3d> zOffsets, List<Vec3d> zOffsetCtrls
     ) {
         this.offsetType = offsetType;
+        this.rollEffectTile = rollEffectTile;
 
         this.ls = ls;
         this.rolls = rolls;
@@ -55,11 +57,10 @@ public class RollAndOffsetInfo {
         this.zOffsetCtrls = zOffsetCtrls;
     }
 
-    public static RollAndOffsetInfo getDefault() {
-        return new RollAndOffsetInfo();
-    }
+    public static RollAndOffsetInfo getDefault() { return new RollAndOffsetInfo(); }
     private RollAndOffsetInfo() {
         offsetType = RollYOffsetType.MID;
+        rollEffectTile = true;
 
         ls = new ArrayList<>();
         rolls = new ArrayList<>();
@@ -81,6 +82,8 @@ public class RollAndOffsetInfo {
     public static class Mutable {
         @TagField("offsetType")
         public RollYOffsetType offsetType;
+        @TagField("rollEffectTile")
+        public boolean rollEffectTile;
         @TagField(value = "ls", mapper = DoubleListMapper.class)
         private List<Double> ls;
         @TagField(value = "rolls", mapper = Vec3dListMapper.class)
@@ -98,6 +101,7 @@ public class RollAndOffsetInfo {
 
         public Mutable(RollAndOffsetInfo rollAndOffsetInfo) {
             this.offsetType = rollAndOffsetInfo.offsetType;
+            this.rollEffectTile = rollAndOffsetInfo.rollEffectTile;
 
             this.ls = rollAndOffsetInfo.ls;
             this.rolls = rollAndOffsetInfo.rolls;
@@ -110,23 +114,15 @@ public class RollAndOffsetInfo {
 
         public Mutable(TagCompound data) throws SerializationException {
             // Defaults
-            offsetType = RollYOffsetType.MID;
-
-            ls = new ArrayList<>();
-            rolls = new ArrayList<>();
-            rollCtrls = new ArrayList<>();
-            yOffsets = new ArrayList<>();
-            yOffsetCtrls = new ArrayList<>();
-            zOffsets = new ArrayList<>();
-            zOffsetCtrls = new ArrayList<>();
-
-            ls.add(0d); ls.add(1d);
-            rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
-            rollCtrls.add(new Vec3d(1d / 3, 0, 0)); rollCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
-            yOffsets.add(new Vec3d(0, 0, 0)); yOffsets.add(new Vec3d(1, 0, 0));
-            yOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); yOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
-            zOffsets.add(new Vec3d(0, 0, 0)); zOffsets.add(new Vec3d(1, 0, 0));
-            zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
+            RollAndOffsetInfo defaultInfo = getDefault();
+            offsetType = defaultInfo.offsetType;
+            ls = defaultInfo.ls;
+            rolls = defaultInfo.rolls;
+            rollCtrls = defaultInfo.rollCtrls;
+            yOffsets = defaultInfo.yOffsets;
+            yOffsetCtrls = defaultInfo.yOffsetCtrls;
+            zOffsets = defaultInfo.zOffsets;
+            zOffsetCtrls = defaultInfo.zOffsetCtrls;
 
             TagSerializer.deserialize(data, this);
         }
@@ -134,6 +130,7 @@ public class RollAndOffsetInfo {
         public RollAndOffsetInfo immutable() {
             return new RollAndOffsetInfo(
                     offsetType,
+                    rollEffectTile,
 
                     ls,
                     rolls,
@@ -171,7 +168,7 @@ public class RollAndOffsetInfo {
             divider.add(Pair.of(l, 1d));
 
             RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
-                    offsetType,
+                    offsetType, rollEffectTile,
                     ls, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
             );
             List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);
@@ -643,6 +640,7 @@ public class RollAndOffsetInfo {
     public String toString() {
         String id = "rollAndOffsetInfo:{";
         id += this.offsetType;
+        id += this.rollEffectTile;
         if(this.ls != null) {
             for(int i = 0; i < this.ls.size(); i++){
                 id += this.ls.get(i);
@@ -660,7 +658,9 @@ public class RollAndOffsetInfo {
     public enum RollYOffsetType {
         MID(0),
         HIGH(1),
-        LOW(2);
+        LOW(2),
+        LEFT(3),
+        RIGHT(4);
         private final int order;
         private static final RollYOffsetType[] BY_ORDER = values();
         RollYOffsetType(int order){
@@ -728,7 +728,7 @@ public class RollAndOffsetInfo {
             List<Vec3d> newZOffsets = new ArrayList<>();
             List<Vec3d> newZOffsetCtrls = new ArrayList<>();
 
-            int logicIdxStart = (findRight(ls,lStart) + 1) / 2;//TODO: binary search
+            int logicIdxStart = (findRight(ls,lStart) + 1) / 2;
             int logicIdxEnd = (findLeft(ls,lEnd) + 1) / 2;//physical index => logical index
 
             int count = logicIdxEnd - logicIdxStart + 1;
@@ -823,7 +823,7 @@ public class RollAndOffsetInfo {
                     //mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
                         newT.add(ls.get(Physic(i)));
-                        newT.add(ls.get(Physic(i + 1)));//当idxStart==idxEnd时不会进入循环，不会越界
+                        newT.add(ls.get(Physic(i + 1)));//will not go into this loop when idxStart == idxEnd
                         newRolls.add(rolls.get(Physic(i)));
                         newRolls.add(rolls.get(Physic(i + 1)));
                         newRollCtrls.add(rollCtrls.get(Physic(i)));
@@ -945,13 +945,13 @@ public class RollAndOffsetInfo {
             }
 
             if(normalize) results.add(normalize(
-                    offsetType,
+                    offsetType, rollEffectTile,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls,
                     lStart, lEnd
             ));
 
             else results.add(new RollAndOffsetInfo(
-                    offsetType,
+                    offsetType, rollEffectTile,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
             ));
         }
@@ -1007,7 +1007,7 @@ public class RollAndOffsetInfo {
     }
 
     private static RollAndOffsetInfo normalize(
-            RollYOffsetType offsetType,
+            RollYOffsetType offsetType, boolean rollEffectTile,
             List<Double> newT, List<Vec3d> newRolls, List<Vec3d> newRollCtrls, List<Vec3d> newYOffsets, List<Vec3d> newYOffsetCtrls, List<Vec3d> newZOffsets, List<Vec3d> newZOffsetCtrls,
             double tStart, double tEnd
     ) {
@@ -1042,7 +1042,7 @@ public class RollAndOffsetInfo {
             newZOffsetCtrls.set(i, new Vec3d(newZOffsetCtrlX, oldZOffsetCtrl.y, oldZOffsetCtrl.z));
         }
         return new RollAndOffsetInfo(
-                offsetType,
+                offsetType, rollEffectTile,
                 newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
         );
     }
@@ -1089,37 +1089,12 @@ public class RollAndOffsetInfo {
 
         switch (offsetType) {
             case HIGH:
-                if(value > 0) {//right tilt
-                    tan = isRight ? -tan : tan;
-                }else if(value < 0){
-                    tan = !isRight ? -tan : tan;
-                    tan *= -1;
-                }else {
-                    if(tan > 0) {//right tilt
-                        tan = isRight ? -tan : tan;
-                    } else if(tan < 0) {
-                        tan = !isRight ? -tan : tan;
-                        tan *= -1;
-                    }
-                }
-                break;
             case LOW:
-                if(value < 0) {//right tilt
-                    tan = isRight ? -tan : tan;
-                }else if(value > 0){
-                    tan = !isRight ? -tan : tan;
-                    tan *= -1;
-                }else {
-                    if(tan < 0) {//right tilt
-                        tan = isRight ? -tan : tan;
-                    } else if(tan > 0) {
-                        tan = !isRight ? -tan : tan;
-                        tan *= -1;
-                    }
-                }
+            case LEFT:
+            case RIGHT:
+                tan = isRight ? -tan : tan;
                 break;
             case MID:
-
                 if(value > 0) {//right tilt
                     tan = !isRight ? tan : -tan;
                 }else if(value < 0) {
@@ -1149,37 +1124,12 @@ public class RollAndOffsetInfo {
 
         switch (offsetType) {
             case HIGH:
-                if(value > 0) {//right tilt
-                    tan = isRight ? -tan : tan;
-                }else if(value < 0){
-                    tan = !isRight ? -tan : tan;
-                    tan *= -1;
-                }else {
-                    if(tan < 0) {//right tilt
-                        tan = isRight ? -tan : tan;
-                    } else if(tan > 0) {
-                        tan = !isRight ? -tan : tan;
-                        tan *= -1;
-                    }
-                }
-                break;
             case LOW:
-                if(value < 0) {//right tilt
-                    tan = isRight ? -tan : tan;
-                }else if(value > 0){
-                    tan = !isRight ? -tan : tan;
-                    tan *= -1;
-                }else {
-                    if(tan < 0) {//right tilt
-                        tan = isRight ? -tan : tan;
-                    } else if(tan > 0) {
-                        tan = !isRight ? -tan : tan;
-                        tan *= -1;
-                    }
-                }
+            case LEFT:
+            case RIGHT:
+                tan = isRight ? -tan : tan;
                 break;
             case MID:
-
                 if(value > 0) {//right tilt
                     tan = !isRight ? -tan : tan;
                 }else if(value < 0) {
@@ -1245,15 +1195,24 @@ public class RollAndOffsetInfo {
     }
 
     public static int findValidSegment(double targetL, List<Double> ls) {
-        for (int i = 0; i < ls.size() / 2; i++) {
-            double segStart = ls.get(i * 2);
-            double segEnd = ls.get(i * 2 + 1);
-            if (targetL >= segStart && targetL <= segEnd) {
-                return i;
-            }
-        }
+        int n = ls.size() / 2;
+        if (n == 0) return -1;
 
         if (targetL <= ls.get(0)) return 0;
-        return ls.size() / 2 - 1;
+        if (targetL >= ls.get(ls.size() - 1)) return n - 1;
+
+        int left = 0, right = n - 1;
+        int idx = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            double start = ls.get(mid * 2);
+            if (start <= targetL) {
+                idx = mid;
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return idx;
     }
 }

@@ -412,7 +412,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.rearYaw = rearYaw;
     }
 
-    public float getFrontRoll() {//TODO:any other way like getRotationRoll() to fallback like getFront/RearYaw?
+    public float getFrontRoll() {
         if(this.frontRoll != null) {
             return this.frontRoll;
         }

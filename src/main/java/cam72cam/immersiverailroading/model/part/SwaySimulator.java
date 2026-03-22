@@ -54,12 +54,12 @@ public class SwaySimulator {
                 rb = rb != null ? rb.getParentTile() : null;
                 if (rb != null && !rb.getPos().equals(clackFrontPos) && rb.clacks()) {
                     if (volume > 0 && clackFront != null) {
-                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {//TODO: this is damn wrong shit, after clack fit speed !clackRear will be removed
+                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {//TODO: this is a very bad idea
                             clackFront.setPitch(pitch);
                             clackFront.setVolume(volume);
-                            clackFront.play(new Vec3d(posFront));//TODO:setVelocity to fit speed, or use way below
-                        }//TODO: better way: only store clack sound of one wheel and combine them by bogey wheels amount and distance
-                    }    // 根据速度再对音量和音调调整,还有一个是根据玩家和车的相对速度？
+                            clackFront.play(new Vec3d(posFront));//TODO: only store clack sound of one wheel and combine them by bogey wheels amount and distance
+                        }
+                    }
                     clackFrontPos = rb.getPos();
                     if (stock.getWorld().getTicks() % ConfigGraphics.StockSwayChance == 0) {
                         swayImpulse += 7 * rb.getBumpiness();

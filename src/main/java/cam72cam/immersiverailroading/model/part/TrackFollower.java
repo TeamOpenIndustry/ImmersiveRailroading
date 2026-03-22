@@ -58,7 +58,7 @@ public class TrackFollower {
             float offsetRoll = (front ? stock.getFrontRoll() : stock.getRearRoll());
             if (offset >= min && offset <= max) {
                 yawReadout = stock.getRotationYaw() - offsetYaw;
-                rollReadout = offsetRoll;//
+                rollReadout = offsetRoll - stock.getRotationRoll();
                 matrix.setIdentity();
                 matrix.translate(-offset, 0, 0);
                 matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
@@ -93,7 +93,7 @@ public class TrackFollower {
                 }
 
                 yawReadout = toPointYaw + atPointYaw;
-                rollReadout = (float) -pointPos.getRoll();
+                rollReadout = (float) -pointPos.getRoll() - stock.getRotationRoll();
                 if(toMinPoint < 0)rollReadout = -rollReadout;
 //                System.out.println("offsetYaw:"+offsetYaw +"roll:"+ rollReadout + "stock rotation:"+ stock.getRotationYaw());
 
