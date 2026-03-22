@@ -32,7 +32,7 @@ public class SimulationState {
     public double velocity;
     public float yaw;
     public float pitch;
-    public float roll;//this variable is not really used yet, but may be used in the future
+//    public float roll;//this variable is not really used yet, but may be used in the future
     public IBoundingBox bounds;
 
     // Render purposes
@@ -188,7 +188,7 @@ public class SimulationState {
                 (DegreeFuncs.delta(VecUtil.toWrongYaw(stock.getVelocity()), stock.getRotationYaw()) < 90 ? 1 : -1);
         yaw = stock.getRotationYaw();
         pitch = stock.getRotationPitch();
-        roll = stock.getRotationRoll();
+//        roll = stock.getRotationRoll();
 
         interactingFront = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.FRONT);
         interactingRear = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.BACK);
@@ -223,7 +223,7 @@ public class SimulationState {
         this.velocity = prev.velocity;
         this.yaw = prev.yaw;
         this.pitch = prev.pitch;
-        this.roll = prev.roll;
+//        this.roll = prev.roll;
 
         this.interactingFront = prev.interactingFront;
         this.interactingRear = prev.interactingRear;

@@ -47,6 +47,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 			.translate(this.getPosition().x, this.getPosition().y, this.getPosition().z)
 			.rotate(Math.toRadians(180 - this.getRotationYaw()), 0, 1, 0)
 			.rotate(Math.toRadians(this.getRotationPitch()), 1, 0, 0)
+			.rotate(Math.toRadians(this.getRotationRoll()), 0, 0, 1)
 			.rotate(Math.toRadians(-90), 0, 1, 0)
 			.scale(this.gauge.scale(), this.gauge.scale(), this.gauge.scale())
 	);

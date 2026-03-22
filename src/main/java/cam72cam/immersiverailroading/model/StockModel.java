@@ -152,22 +152,17 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         sway = new SwaySimulator();
     }
 
-    public ModelState addExtraRoll(ModelState state) {
+    public ModelState addEffectRoll(ModelState state) {
         return state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) ->
-                new Matrix4().rotate(Math.toRadians(sway.getRollDegrees(stock, partialTicks, stock.getRotationRoll())), 1, 0, 0)));
-    }
-
-    public ModelState addTrackRoll(ModelState state) {
-        return state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) ->
-                new Matrix4().rotate(Math.toRadians(stock.getRotationRoll()), 1, 0, 0)));
+                new Matrix4().rotate(Math.toRadians(sway.getEffectRollDegrees(stock, partialTicks, stock.getRotationRoll())), 1, 0, 0)));
     }
 
     protected void initStates() {
-        this.rocking = addExtraRoll(addTrackRoll(this.base));
+        this.rocking = addEffectRoll(this.base);
         this.front = this.base.push(settings -> settings.add((EntityMoveableRollingStock stock, float partialTicks) -> getFrontBogeyMatrix(stock)));
-        this.frontRocking = addExtraRoll(addTrackRoll(this.front));
+        this.frontRocking = addEffectRoll(this.front);
         this.rear = this.base.push(settings -> settings.add((EntityMoveableRollingStock stock, float partialTicks) -> getRearBogeyMatrix(stock)));
-        this.rearRocking = addExtraRoll(addTrackRoll(this.rear));
+        this.rearRocking = addEffectRoll(this.rear);
     }
 
     protected void addGauge(ComponentProvider provider, ModelComponentType type, Readouts value) {
@@ -224,9 +219,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     }
 
     protected void parseComponents(ComponentProvider provider, DEFINITION def) {
-        this.frame = new Frame(provider, rocking, rocking, def.defID);
+        this.frame = new Frame(provider, base, rocking, def.defID);
 
-        drivingWheels = DrivingAssembly.get(def.getValveGear(), provider, rocking, 0,
+        drivingWheels = DrivingAssembly.get(def.getValveGear(), provider, base, 0,
                 frame != null ? frame.wheels : null,
                 bogeyFront != null ? bogeyFront.wheels : null,
                 bogeyRear != null ? bogeyRear.wheels : null
@@ -359,7 +354,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
         state.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
-        state.rotate(sway.getRollDegrees(stock, partialTicks, stock.getRotationRoll()), 1, 0, 0);
+        state.rotate(sway.getEffectRollDegrees(stock, partialTicks, stock.getRotationRoll()), 1, 0, 0);
         controls.forEach(c -> c.postRender(stock, state, partialTicks));
         doors.forEach(c -> c.postRender(stock, state, partialTicks));
         gauges.forEach(c -> c.postRender(stock, state, partialTicks));

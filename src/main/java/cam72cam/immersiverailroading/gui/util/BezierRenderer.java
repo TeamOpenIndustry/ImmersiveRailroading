@@ -49,8 +49,10 @@ public class BezierRenderer {
     }
 
     public void drawBeziers(Color curveColor, Color pointColor, Color handlePointColor, Color handleLineColor, int iterations,  double xScale, double yScale) {
+        double width = Math.abs(curves.get(curves.size() - 1).p2.x - curves.get(0).p1.x);
         for(CubicCurve curve : curves) {
-            drawBezier(curve, curveColor, iterations, xScale, yScale);
+            int localIteration = (int) Math.abs(iterations * (curve.p2.x - curve.p1.x) / width);
+            drawBezier(curve, curveColor, localIteration, xScale, yScale);
             drawHandle(curve.p1,curve.ctrl1, pointColor, handlePointColor, handleLineColor, xScale, yScale);
             drawHandle(curve.p2,curve.ctrl2, pointColor, handlePointColor, handleLineColor, xScale, yScale);
         }

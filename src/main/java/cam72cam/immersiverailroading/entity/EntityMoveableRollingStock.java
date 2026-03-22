@@ -69,10 +69,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             rearYaw = getRotationYaw();
         }
         if (frontRoll == null) {
-            frontRoll = 0f;
+            frontRoll = getRotationRoll();
         }
         if (rearRoll == null) {
-            rearRoll = 0f;
+            rearRoll = getRotationRoll();
         }
     }
 
@@ -284,10 +284,9 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         this.setRotationPitch(currentPos.rotationPitch);
         this.frontYaw = currentPos.frontYaw;
         this.rearYaw = currentPos.rearYaw;
-
-        //todo:should we implement setRotationRoll in UMC? code about roll here should be update if so
         this.frontRoll = currentPos.frontRoll;
         this.rearRoll = currentPos.rearRoll;
+        this.setRotationRoll((getFrontRoll() + getRearRoll()) / 2);
 
         this.currentSpeed = currentPos.speed;
 
@@ -417,7 +416,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if(this.frontRoll != null) {
             return this.frontRoll;
         }
-        return 0;//this seems will only happen in some case when spawning train on MinecraftRail?
+        return this.getRotationRoll();//this seems will only happen in some case when spawning train on MinecraftRail?
     }
     public void setFrontRoll(float val) {
         this.frontRoll = val;
@@ -426,13 +425,10 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if(this.rearRoll != null) {
             return this.rearRoll;
         }
-        return 0;
+        return this.getRotationRoll();
     }
     public void setRearRoll(float val) {
         this.rearRoll = val;
-    }
-    public float getRotationRoll() {//consider weight of every bogey? and what if we have more bogeys support in future?
-        return (getFrontRoll() + getRearRoll()) / 2;
     }
 
     public float getTickSkew() {
