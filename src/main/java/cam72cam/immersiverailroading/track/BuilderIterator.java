@@ -80,48 +80,58 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
 				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
 
-				double rollDelta;
-//				Vec3d topFacing = computeTopFacing(cur.getYaw(), cur.getPitch(), cur.getRoll());
-				boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile;
-
-				if(rollEffectTile && cur.getRoll() != 0) {
-					double sin = Math.sin(Math.toRadians(cur.getRoll()));
-					rollDelta = sin * q;
-				}else {
-					rollDelta = 0;
-				}
-
-				double deltaGapPos = gagPos.y + rollDelta;
-				double height = 0;
-				if (info.settings.isGradeCrossing) {
-					height = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
-					height *= info.settings.gauge.scale();
-					height = Math.min(height, clamp);
-				}
-
-				double relHeight = deltaGapPos % 1;
-				if (deltaGapPos < 0) {//TODO: need updating after tile facing done
-					relHeight += 1;
-				}
-
 				Pair<Integer, Integer> gag = Pair.of(posX, posZ);
 				if (!positions.contains(gag)) {
 					positions.add(gag);
 
+					Vec3d topFacing = computeTopFacing(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
+					double rollDelta;
+					boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile;
+
+					if(rollEffectTile) {//TODO: using cur face yet, need better pitch sample
+						double cx = posX;
+						double cz = posZ;
+						double dx = topFacing.x, dy = topFacing.y, dz = topFacing.z;
+						double px = gagPos.x, pz = gagPos.z;
+
+						if (Math.abs(dy) < 1e-5) {//this should not happen, use q res as fallback
+							double sin = Math.sin(Math.toRadians(cur.getRoll()));
+							rollDelta = sin * q;
+						}else {
+							rollDelta = ( dx * (px - cx) + dz * (pz - cz) ) / dy;
+						}
+					}else {//legacy
+						rollDelta = 0;
+					}
+
+					double deltaGapPos = gagPos.y + rollDelta;
+					double height = 0;
+					if (info.settings.isGradeCrossing) {//legacy: top facing not done for crossing
+						height = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
+						height *= info.settings.gauge.scale();
+						height = Math.min(height, clamp);
+					}
+
+					double relHeight = deltaGapPos % 1;
+					if (deltaGapPos < 0) {
+						relHeight += 1;
+					}
+
 					if(rollEffectTile) {
-						if(height + relHeight > 0.9) {//if bedHeight > 0.9 we need to correct yOffset
-							bedHeights.put(gag, (float) (height + relHeight - 1));
-							yOffset.put(gag, (int) (deltaGapPos - relHeight + 1));
+						if(height + relHeight > 0.9) {
+							int offsetInt = (int) Math.floor(height + relHeight + 0.1);
+							bedHeights.put(gag, (float) (height + relHeight - offsetInt));
+							yOffset.put(gag, (int) (deltaGapPos - relHeight + offsetInt));
 						}else {
 							bedHeights.put(gag, (float) (height + relHeight));
 							yOffset.put(gag, (int) (deltaGapPos - relHeight));
 						}
-					} else {
+					} else {//legacy
 						bedHeights.put(gag, (float) (height + Math.max(0, relHeight - 0.1)));
 						yOffset.put(gag, (int) (deltaGapPos - relHeight));
 					}
                     railHeights.put(gag, (float) relHeight);
-//					topFacings.put(gag, topFacing);
+					topFacings.put(gag, info.settings.tileTilt ? topFacing : null);
 				}
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
@@ -160,6 +170,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		tracks.add(main);
 		main.setRailHeight(railHeights.get(Pair.of(mainX, mainZ)));
 		main.setBedHeight(bedHeights.get(Pair.of(mainX, mainZ)));
+		main.setTopFacing(topFacings.get(Pair.of(mainX, mainZ)));
 
 		for (Pair<Integer, Integer> pair : positions) {
 			if (pair.getLeft() == mainX && pair.getRight() == mainZ) {
@@ -172,37 +183,52 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 			tg.setRailHeight(railHeights.get(pair));
 			tg.setBedHeight(bedHeights.get(pair));
-//			tg.setTopFacing(topFacings.get(pair));
+			tg.setTopFacing(topFacings.get(pair));
 			tracks.add(tg);
 		}
 	}
 
-	private Vec3d computeTopFacing(double yawDeg, double pitchDeg, double rollDeg) {//TODO: check axis direction
+	private Vec3d computeTopFacing(double yawDeg, double pitchDeg, double rollDeg) {
 		double yawRad = Math.toRadians(yawDeg);
 		double pitchRad = Math.toRadians(pitchDeg);
 		double rollRad = Math.toRadians(rollDeg);
 
-		// direction
+		// Compute forward direction vector
 		double cosYaw = Math.cos(yawRad);
 		double sinYaw = Math.sin(yawRad);
 		double cosPitch = Math.cos(pitchRad);
 		double sinPitch = Math.sin(pitchRad);
-		Vec3d tangent = new Vec3d(cosYaw * cosPitch, -sinPitch, sinYaw * cosPitch);
+		// pitch > 0 is downhill => forward.y is negative
+		Vec3d forward = new Vec3d(cosYaw * cosPitch, -sinPitch, sinYaw * cosPitch).normalize();
 
-		// no roll
-		Vec3d normalNoRoll = new Vec3d(sinYaw * sinPitch, cosPitch, cosYaw * sinPitch);
+		Vec3d upNoRoll;
+		if (Math.abs(pitchRad) < 1e-6) {
+			upNoRoll = new Vec3d(0, 1, 0);
+		} else {
+			// Calculate right vector (handle case where forward is nearly parallel to Y axis)
+			Vec3d worldUp = new Vec3d(0, 1, 0);
+			Vec3d right;
+			if (Math.abs(forward.dotProduct(worldUp)) > 0.9999) {
+				// forward almost vertical, use Z axis as temporary reference
+				right = new Vec3d(0, 0, 1).crossProduct(forward).normalize();
+			} else {
+				right = forward.crossProduct(worldUp).normalize();
+			}
+			upNoRoll = right.crossProduct(forward).normalize();
+		}
 
-		// roll is 0
-		if (Math.abs(rollRad) < 1e-6) return normalNoRoll;
+		if (Math.abs(rollRad) < 1e-6) {
+			return upNoRoll;
+		}
 
-		// roll
-		double cosR = Math.cos(rollRad);
-		double sinR = Math.sin(rollRad);
-		double dot = normalNoRoll.dotProduct(tangent);
-		Vec3d cross = tangent.crossProduct(normalNoRoll);
-		return normalNoRoll.scale(cosR)
-				.add(cross.scale(sinR))
-				.add(tangent.scale(dot * (1 - cosR)));
+		// roll > 0 means left higher than right → up direction should rotate around forward by -rollRad
+		double cosR = Math.cos(-rollRad);
+		double sinR = Math.sin(-rollRad);
+		// Rodrigues rotation formula
+		Vec3d rotated = upNoRoll.scale(cosR)
+				.add(forward.crossProduct(upNoRoll).scale(sinR))
+				.add(forward.scale(forward.dotProduct(upNoRoll) * (1 - cosR)));
+		return rotated.normalize();
 	}
 	
 	@Override

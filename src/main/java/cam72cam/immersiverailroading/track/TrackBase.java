@@ -74,6 +74,7 @@ public abstract class TrackBase {
 			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
+			tr.setTopFacing(getTopFacing());
 			tr.setScaleModel(isScaleModel());
 			return tr;
 		}
@@ -114,6 +115,7 @@ public abstract class TrackBase {
 			tr.setParent(builder.getParentPos());
 		}
 		tr.setRailHeight(getRailHeight());
+		tr.setTopFacing(getTopFacing());
 		tr.setBedHeight(getBedHeight());
 		tr.setScaleModel(isScaleModel());
 		for (int i = 0; i < hasSnow; i++) {

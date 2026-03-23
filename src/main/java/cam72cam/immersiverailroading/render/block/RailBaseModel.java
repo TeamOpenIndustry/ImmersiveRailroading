@@ -52,19 +52,19 @@ public class RailBaseModel {
 		if (augment != null) {
 			height = height + 0.1f * (float)gauge.scale() * 1.25f;
 
-			model.addColorBlock(augment.color(), new Matrix4().scale(1, height, 1));
+			model.addColorBlock(augment.color(), new Matrix4().scale(1, height, 1), te.getTopFacing());//TODO
 			return model;
 		}
 
 		if(te.isScaleModel()){
-			height = height + 0.1f * (float) gauge.scale();//TODO: top face facing
+			height = height + 0.1f * (float) gauge.scale();
 		}
 
 		if (snow != 0) {
-			model.addSnow(snow + (int)(height * 8), new Matrix4());
+			model.addSnow(snow + (int)(height * 8), new Matrix4(), te.getTopFacing());//TODO
 			return model;
 		} else if (!bed.isEmpty() && tileHeight != 0.000001f) {
-			model.addItemBlock(bed, new Matrix4().scale(1, height, 1));
+			model.addItemBlock(bed, new Matrix4().scale(1, height, 1), te.getTopFacing());//TODO
 			return model;
 		}
 

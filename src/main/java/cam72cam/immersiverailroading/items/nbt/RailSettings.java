@@ -22,13 +22,14 @@ public class RailSettings {
     public final TrackDirection direction;
     public final ItemStack railBed;
     public final ItemStack railBedFill;
+    public final boolean tileTilt;
     public final boolean isPreview;
     public final boolean isGradeCrossing;
     public final String track;
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean tileTilt, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
@@ -39,6 +40,7 @@ public class RailSettings {
         this.direction = direction;
         this.railBed = railBed;
         this.railBedFill = railBedFill;
+        this.tileTilt = tileTilt;
         this.isPreview = isPreview;
         this.isGradeCrossing = isGradeCrossing;
         this.curvosity = curvosity;
@@ -169,6 +171,8 @@ public class RailSettings {
         public ItemStack railBed;
         @TagField("bedFill")
         public ItemStack railBedFill;
+        @TagField("tileTilt")
+        public boolean tileTilt;
         @TagField("isPreview")
         public boolean isPreview;
         @TagField("isGradeCrossing")
@@ -202,6 +206,7 @@ public class RailSettings {
             this.direction = settings.direction;
             this.railBed = settings.railBed;
             this.railBedFill = settings.railBedFill;
+            this.tileTilt = settings.tileTilt;
             this.isPreview = settings.isPreview;
             this.isGradeCrossing = settings.isGradeCrossing;
             this.transfertableEntryCount = settings.transfertableEntryCount;
@@ -223,6 +228,7 @@ public class RailSettings {
             direction = TrackDirection.NONE;
             railBed = ItemStack.EMPTY;
             railBedFill = ItemStack.EMPTY;
+            tileTilt = false;
             isPreview = false;
             isGradeCrossing = false;
             curvosity = 1;
@@ -247,6 +253,7 @@ public class RailSettings {
                     direction,
                     railBed,
                     railBedFill,
+                    tileTilt,
                     isPreview,
                     isGradeCrossing,
                     transfertableEntryCount,

@@ -7,7 +7,7 @@ import cam72cam.mod.math.Vec3i;
 import java.util.List;
 
 public interface IIterableTrack {
-    List<VecYPR> getPath(double stepSize);//TODO:yOffset有没有必要影响 trackHeight?如果我们需要一个开关的话需要加个bool之类的参数，或者直接实现法向
+    List<VecYPR> getPath(double stepSize);
 
     List<BuilderBase> getSubBuilders();
 

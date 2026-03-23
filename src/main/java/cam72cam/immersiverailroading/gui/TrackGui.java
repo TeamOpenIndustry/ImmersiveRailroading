@@ -47,6 +47,7 @@ public class TrackGui implements IScreen {
 	private Slider curvositySlider;
 	private CheckBox isPreviewCB;
 	private CheckBox isGradeCrossingCB;
+	private CheckBox tileTiltCB;
 	private Button gaugeButton;
 	private Button trackButton;
 	private Button posTypeButton;
@@ -219,6 +220,13 @@ public class TrackGui implements IScreen {
             }
         };
 		trackExtraGuiButton.setVisible(settings.type.hasRoll());
+
+		tileTiltCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + 2, ytop + height * 4 + 2, GuiText.SELECTOR_TILE_TILT.toString(), settings.tileTilt) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.tileTilt = tileTiltCB.isChecked();
+			}
+		};
 
 		//Transfer table doesn't have these property so we can have them overlapped
 		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
@@ -505,8 +513,9 @@ public class TrackGui implements IScreen {
 				for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
 					Vec3i basePos = base.getPos();
 					model.addItemBlock(info.settings.railBedFill, new Matrix4()
-							.translate(basePos.x, basePos.y-1, basePos.z)
-					);
+							.translate(basePos.x, basePos.y-1, basePos.z),
+							null
+					);//TODO
 				}
 				model.render(state);
 			}
@@ -570,8 +579,9 @@ public class TrackGui implements IScreen {
 			for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
 				Vec3i basePos = base.getPos();
 				model.addItemBlock(info.settings.railBedFill, new Matrix4()
-						.translate(basePos.x, basePos.y-1, basePos.z)
-				);
+						.translate(basePos.x, basePos.y-1, basePos.z),
+						null
+				);//TODO
 			}
 			model.render(state);
 		}

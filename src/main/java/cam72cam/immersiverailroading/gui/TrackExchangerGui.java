@@ -106,6 +106,7 @@ public class TrackExchangerGui implements IScreen {
 				ItemStack.EMPTY,
 				false,
 				false,
+				false,
 				1,
 				1
 		);

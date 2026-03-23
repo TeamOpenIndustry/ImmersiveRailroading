@@ -22,8 +22,9 @@ public class RailBaseRender {
 				}
 				model.addItemBlock(info.settings.railBed, new Matrix4()
 						.translate(basePos.x, basePos.y, basePos.z)
-						.scale(1, height, 1)
-				);
+						.scale(1, height, 1),
+						base.getTopFacing()
+				);//TODO
 			}
 		}
 		return model;

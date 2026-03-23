@@ -71,7 +71,7 @@ public class TrackExtraGui implements IScreen {
     private Button resetAllButton;
     private Button offsetTypeButton;
     private Button railInfoLabel;
-    private Button rollEffectTileButton;
+    private CheckBox rollEffectTileCB;
     private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
@@ -211,21 +211,16 @@ public class TrackExtraGui implements IScreen {
 
         //back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
-        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 
-        rollEffectTileButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30, ytop, 85, height,
-                rollAndOffsetInfoCache.rollEffectTile ? GuiText.TRACK_ROLL_EFFECT_TILE_TRUE.toString() : GuiText.TRACK_ROLL_EFFECT_TILE_FALSE.toString()
-        ){
+        rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 2, GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.rollEffectTile){
             @Override
             public void onClick(Player.Hand hand) {
                 edited = true;
-
-                rollAndOffsetInfoCache.rollEffectTile = !rollAndOffsetInfoCache.rollEffectTile;
-                this.setText(
-                        rollAndOffsetInfoCache.rollEffectTile ? GuiText.TRACK_ROLL_EFFECT_TILE_TRUE.toString() : GuiText.TRACK_ROLL_EFFECT_TILE_FALSE.toString()
-                );
+                rollAndOffsetInfoCache.rollEffectTile = rollEffectTileCB.isChecked();
             }
         };
+
+        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 
         offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height, rollAndOffsetInfoCache.offsetType.toString()) {
             @Override
@@ -262,7 +257,7 @@ public class TrackExtraGui implements IScreen {
                 return s.equals(".") || s.equals("-");
             }
             float max = (float) rollMax;
-            if (Math.abs(val) < max) {
+            if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
