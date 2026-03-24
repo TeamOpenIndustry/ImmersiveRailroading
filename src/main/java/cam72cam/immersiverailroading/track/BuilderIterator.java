@@ -40,7 +40,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		
 		positions = new HashSet<>();
 		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<>();
-		HashMap<Pair<Integer, Integer>, Vec3d> topFacings = new HashMap<>();//TODO: waiting for normal support
+		HashMap<Pair<Integer, Integer>, Vec3d> topFacings = new HashMap<>();
 		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<>();
 		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<>();
 		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<>();

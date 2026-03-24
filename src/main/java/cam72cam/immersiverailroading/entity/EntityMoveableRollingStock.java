@@ -281,12 +281,12 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         double prevPosZ = prevPos.z;
 
         this.setRotationYaw(currentPos.rotationYaw);
+        this.setRotationRoll(currentPos.rotationRoll);
         this.setRotationPitch(currentPos.rotationPitch);
         this.frontYaw = currentPos.frontYaw;
         this.rearYaw = currentPos.rearYaw;
         this.frontRoll = currentPos.frontRoll;
         this.rearRoll = currentPos.rearRoll;
-        this.setRotationRoll((getFrontRoll() + getRearRoll()) / 2);
 
         this.currentSpeed = currentPos.speed;
 

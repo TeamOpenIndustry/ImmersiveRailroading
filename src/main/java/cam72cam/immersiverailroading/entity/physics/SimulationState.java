@@ -32,7 +32,7 @@ public class SimulationState {
     public double velocity;
     public float yaw;
     public float pitch;
-//    public float roll;//this variable is not really used yet, but may be used in the future
+    public float roll;
     public IBoundingBox bounds;
 
     // Render purposes
@@ -188,7 +188,7 @@ public class SimulationState {
                 (DegreeFuncs.delta(VecUtil.toWrongYaw(stock.getVelocity()), stock.getRotationYaw()) < 90 ? 1 : -1);
         yaw = stock.getRotationYaw();
         pitch = stock.getRotationPitch();
-//        roll = stock.getRotationRoll();
+        roll = stock.getRotationRoll();
 
         interactingFront = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.FRONT);
         interactingRear = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.BACK);
@@ -223,7 +223,7 @@ public class SimulationState {
         this.velocity = prev.velocity;
         this.yaw = prev.yaw;
         this.pitch = prev.pitch;
-//        this.roll = prev.roll;
+        this.roll = prev.roll;
 
         this.interactingFront = prev.interactingFront;
         this.interactingRear = prev.interactingRear;
@@ -269,7 +269,7 @@ public class SimulationState {
             Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront - config.offsetFront, yawFront);
             Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear - config.offsetRear, yawRear);
 
-            IRPathingData front = new IRPathingData(positionFront, 0, 0);
+            IRPathingData front = new IRPathingData(positionFront, 0, 0);//roll is meaningless for coupler
             IRPathingData rear = new IRPathingData(positionRear, 0, 0);
             trackFront.getNextPosition(front, couplerVecFront, config.gauge.value());
             trackRear.getNextPosition(rear, couplerVecRear, config.gauge.value());
@@ -378,37 +378,38 @@ public class SimulationState {
         }
 
         boolean isReversed = distance < 0;
-        int invertRollMultiplier = -1;
+
         if (isReversed) {
-            invertRollMultiplier = 1;
             distance = -distance;
             yawFront += 180;
             yawRear += 180;
+            rollFront = -rollFront;
+            rollRear = -rollRear;
+            roll = - roll;
         }
 
-        IRPathingData front = new IRPathingData(positionFront, rollFront, 0);
-        IRPathingData rear = new IRPathingData(positionRear, rollRear, 0);
-        trackFront.getNextPosition(front, VecUtil.fromWrongYaw(distance, yawFront), config.gauge.value());
-        trackRear.getNextPosition(rear, VecUtil.fromWrongYaw(distance, yawRear), config.gauge.value());
-        rollFront = (float) front.getRoll() * invertRollMultiplier;
-        rollRear = (float) rear.getRoll() * invertRollMultiplier;
-        Vec3d nextFront = front.getUMCPos();
-        Vec3d nextRear = rear.getUMCPos();
+        IRPathingData nextFront = new IRPathingData(positionFront, rollFront, 0);
+        IRPathingData nextRear = new IRPathingData(positionRear, rollRear, 0);
+        trackFront.getNextPosition(nextFront, VecUtil.fromWrongYaw(distance, yawFront), config.gauge.value());
+        trackRear.getNextPosition(nextRear, VecUtil.fromWrongYaw(distance, yawRear), config.gauge.value());
+        Vec3d nextFrontPos = nextFront.getUMCPos();
+        Vec3d nextRearPos = nextRear.getUMCPos();
 
-        if (!nextFront.equals(positionFront) && !nextRear.equals(positionRear)) {
-            yawFront = VecUtil.toWrongYaw(nextFront.subtract(positionFront));
-            yawRear = VecUtil.toWrongYaw(nextRear.subtract(positionRear));
+        if (!nextFrontPos.equals(positionFront) && !nextRearPos.equals(positionRear)) {
+            yawFront = VecUtil.toWrongYaw(nextFrontPos.subtract(positionFront));
+            yawRear = VecUtil.toWrongYaw(nextRearPos.subtract(positionRear));
+            rollFront = (float) -nextFront.getRoll();
+            rollRear = (float) -nextRear.getRoll();
 
             // TODO flatten this vector calculation
-            Vec3d deltaCenter = nextFront.subtract(position).scale(config.offsetRear)
-                    .subtract(nextRear.subtract(position).scale(config.offsetFront))
+            Vec3d deltaCenter = nextFrontPos.subtract(position).scale(config.offsetRear)
+                    .subtract(nextRearPos.subtract(position).scale(config.offsetFront))
                     .scale(-1/(config.offsetFront-config.offsetRear));
 
-            Vec3d bogeyDelta = nextFront.subtract(nextRear);
+            Vec3d bogeyDelta = nextFrontPos.subtract(nextRearPos);
             yaw = VecUtil.toWrongYaw(bogeyDelta);
-            //TODO:do we need to fix roll value here?
-            //roll = ???
-            pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRear.distanceTo(nextFront)));
+            roll = (float) Simulation.calculateRoll(rollFront, rollRear);
+            pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRearPos.distanceTo(nextFrontPos)));
             // TODO Rescale fixes issues with curves losing precision, but breaks when correcting stock positions
             position = position.add(deltaCenter/*.normalize().scale(distance)*/);
         }
@@ -416,20 +417,24 @@ public class SimulationState {
         if (isReversed) {
             yawFront += 180;
             yawRear += 180;
+            rollFront = -rollFront;
+            rollRear = -rollRear;
+            roll = - roll;
         }
 
         if (isTable) {
             yawFront = yaw;
             yawRear = yaw;
-
-            rollFront = 0;//TODO: maybe will add roll in table later
-            rollRear = 0;
+            rollFront = roll;
+            rollRear = roll;
         }
 
         // Fix bogeys pointing in opposite directions
         if (DegreeFuncs.delta(yawFront, yaw) > 90 || DegreeFuncs.delta(yawFront, yawRear) > 90) {
             yawFront = yaw;
             yawRear = yaw;
+            rollFront = roll;
+            rollRear = roll;
         }
     }
 

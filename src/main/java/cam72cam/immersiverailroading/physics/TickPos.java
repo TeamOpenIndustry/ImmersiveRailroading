@@ -59,6 +59,7 @@ public class TickPos {
 		this.rearYaw = state.yawRear;
 		this.frontRoll = state.rollFront;
 		this.rearRoll = state.rollRear;
+		this.rotationRoll = state.roll;
 		this.rotationPitch = state.pitch;
 	}
 
