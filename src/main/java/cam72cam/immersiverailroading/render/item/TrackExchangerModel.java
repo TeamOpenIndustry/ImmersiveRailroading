@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
@@ -68,12 +69,12 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 
 		state.translate(-15.15, 0.75, -8.75);
 		RailRender.get(info).renderRailBase(state);
-		RailRender.get(info).renderRailModel(state);
+		RailRender.get(info).renderRailModel(state, null, Vec3i.ZERO);
 
 		if (lookInfo != null) {
 			state.translate(-22.05, 0, 0);
 			RailRender.get(lookInfo).renderRailBase(state);
-			RailRender.get(lookInfo).renderRailModel(state);
+			RailRender.get(lookInfo).renderRailModel(state, null, Vec3i.ZERO);
 		}
 	}
 

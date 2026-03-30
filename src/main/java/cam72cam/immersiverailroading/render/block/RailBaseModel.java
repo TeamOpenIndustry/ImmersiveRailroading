@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import util.Matrix4;
 
@@ -45,7 +46,11 @@ public class RailBaseModel {
 
 				}
 
-				RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition));
+				RailRender.get(info).renderRailModel(
+						state.translate(info.placementInfo.placementPosition),
+						te.getWorld(),
+						te.getPos().add(new Vec3i(info.placementInfo.placementPosition))
+				);
 			});
 		}
 

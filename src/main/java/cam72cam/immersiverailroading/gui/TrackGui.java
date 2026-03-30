@@ -414,7 +414,7 @@ public class TrackGui implements IScreen {
 			state.rotate(90, 1, 0, 0);
 			state.scale(-scale, scale, scale);
 			state.translate(0, 0, 1);
-			RailRender.get(info).renderRailModel(state);
+			RailRender.get(info).renderRailModel(state, null, Vec3i.ZERO);
 			state.translate(-0.5, 0, -0.5);
 			RailRender.get(info).renderRailBase(state);
 			return;
@@ -460,7 +460,7 @@ public class TrackGui implements IScreen {
 			state.rotate(frame/2.0, 0, 1, 0);
 			state.translate(0, 0, -1);
 
-			RailRender.get(info).renderRailModel(state);
+			RailRender.get(info).renderRailModel(state, null, Vec3i.ZERO);
 			state.translate(-0.5, 0, -0.5);
 			RailRender.get(info).renderRailBase(state);
 
@@ -526,7 +526,7 @@ public class TrackGui implements IScreen {
 		if (settings.type == TrackItems.CUSTOM) {
 			state.translate(-length / 2.0, 0, 0);
 		}
-		RailRender.get(info).renderRailModel(state);
+		RailRender.get(info).renderRailModel(state, null, Vec3i.ZERO);
 		state.translate(-0.5, 0, -0.5);
 		RailRender.get(info).renderRailBase(state);
 		if (!info.settings.railBedFill.isEmpty()) {

@@ -48,7 +48,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 		state.translate(0.5, 0, 0.5);
 
-		RailRender.get(info).renderRailModel(state);
+		RailRender.get(info).renderRailModel(state, null, Vec3i.ZERO);
 		state.translate(-0.5, 0, -0.5);
 		RailRender.get(info).renderRailBase(state);
 	}

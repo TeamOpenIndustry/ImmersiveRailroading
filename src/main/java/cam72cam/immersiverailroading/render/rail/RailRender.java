@@ -55,7 +55,7 @@ public class RailRender {
 		isLoaded = true;
 		isLoading = false;
 	}
-	public void renderRailModel(RenderState state) {
+	public void renderRailModel(RenderState state, World world, Vec3i basePos) {
 		if (info.settings.type.isTable()) {
 			load();
 		}
@@ -63,7 +63,7 @@ public class RailRender {
 		if (!isLoaded) {
 			startLoad();
 		} else {
-			RailBuilderRender.renderRailBuilder(info, renderData, state);
+			RailBuilderRender.renderRailBuilder(info, renderData, state, world, basePos);
 		}
 	}
 
@@ -101,7 +101,7 @@ public class RailRender {
 		RailRender renderer = get(info);
 
 		MinecraftClient.startProfiler("rail");
-		renderer.renderRailModel(state);
+		renderer.renderRailModel(state, world, pos);
 		MinecraftClient.endProfiler();
 
 		if (renderOverlay) {

@@ -171,7 +171,7 @@ public class TrackModel extends OBJModel{
             renderPiece(info, data.get(i), builder, groups);
         }
 
-        return builder.build();
+        return builder.buildWithLight();
     }
 
     private VBO renderTable(RailInfo info, List<VecYPR> data) {
@@ -182,7 +182,7 @@ public class TrackModel extends OBJModel{
             renderPiece(info, piece, builder, groupNames);
         }
 
-        return builder.build();
+        return builder.buildWithLight();
     }
 
     private void renderPiece(RailInfo info, VecYPR piece,
