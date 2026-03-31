@@ -44,16 +44,16 @@ public class RailBuilderRender {
                 } else {
                     Matrix4 worldMatrix = new Matrix4();
                     worldMatrix.translate(
-                            basePos.x,
-                            basePos.y,
-                            basePos.z
+                            basePos.x + 0.5,
+                            basePos.y + 0.5,
+                            basePos.z + 0.5
                     );
 
                     for (OBJRender.PieceRange range : ranges) {
                         Vec3d center = Vec3d.ZERO;
                         Matrix4 combined = worldMatrix.copy().multiply(range.localMatrix);
                         center = combined.apply(center);
-                        Vec3i pos = new Vec3i((int)center.x, (int)center.y, (int)center.z);
+                        Vec3i pos = new Vec3i(center.x, center.y, center.z);
 
                         float sky = 1.0f;
                         float block = 1.0f;

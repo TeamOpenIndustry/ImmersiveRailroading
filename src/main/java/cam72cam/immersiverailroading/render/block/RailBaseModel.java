@@ -49,7 +49,7 @@ public class RailBaseModel {
 				RailRender.get(info).renderRailModel(
 						state.translate(info.placementInfo.placementPosition),
 						te.getWorld(),
-						te.getPos().add(new Vec3i(info.placementInfo.placementPosition))
+						new Vec3i(info.placementInfo.placementPosition.add(te.getPos()))
 				);
 			});
 		}
