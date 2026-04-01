@@ -49,7 +49,14 @@ public class RailBuilderRender {
                             basePos.z + 0.5
                     );
 
-                    for (OBJRender.PieceRange range : ranges) {
+                    int lastBlockInt = -1;
+                    int lastSkyInt = -1;
+                    int mergedStartVertex = -1;
+                    int mergedVertexCount = 0;
+
+                    for (int i = 0; i < ranges.size(); i++) {
+                        OBJRender.PieceRange range = ranges.get(i);
+
                         Vec3d center = Vec3d.ZERO;
                         Matrix4 combined = worldMatrix.copy().multiply(range.localMatrix);
                         center = combined.apply(center);
@@ -65,7 +72,34 @@ public class RailBuilderRender {
                             double simulateOfDynamicLightLevel = Light.getSimulateOfDynamicLightLevel(center);
                             block = (float) Math.min(1.0, Math.max(block ,simulateOfDynamicLightLevel));
                         }
-                        binding.drawPiece(range, block, sky);
+
+                        int blockInt = (int) (block * 15);
+                        int skyInt = (int) (sky * 15);
+                        if (i == 0) {
+                            lastBlockInt = blockInt;
+                            lastSkyInt = skyInt;
+                            mergedStartVertex = range.startVertex;
+                            mergedVertexCount = range.vertexCount;
+                            continue;
+                        }
+
+                        if (blockInt == lastBlockInt && skyInt == lastSkyInt) {
+                            mergedVertexCount += range.vertexCount;
+                        } else {
+                            // draw range merged with last piece
+                            OBJRender.PieceRange mergedRange = new OBJRender.PieceRange(mergedStartVertex, mergedVertexCount, null);
+                            binding.drawPiece(mergedRange, lastBlockInt / 15f, lastSkyInt / 15f);
+                            // next piece
+                            lastBlockInt = blockInt;
+                            lastSkyInt = skyInt;
+                            mergedStartVertex = range.startVertex;
+                            mergedVertexCount = range.vertexCount;
+                        }
+                    }
+
+                    if (mergedVertexCount > 0) {
+                        OBJRender.PieceRange mergedRange = new OBJRender.PieceRange(mergedStartVertex, mergedVertexCount, null);
+                        binding.drawPiece(mergedRange, lastBlockInt / 15f, lastSkyInt / 15f);
                     }
                 }
             }
