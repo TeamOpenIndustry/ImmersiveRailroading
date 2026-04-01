@@ -61,17 +61,9 @@ public class RailBuilderRender {
                             sky = world.getSkyLightLevel(pos);
                             block = world.getBlockLightLevel(pos);
 
-                            double extra = 0.0;
-                            List<Light.LightInfo> lights = Light.getLightsInRange(center, 8.0);
-                            for (Light.LightInfo light : lights) {
-                                double distSq = center.distanceToSquared(light.pos);
-                                if (distSq < 64.0) {
-                                    double dist = Math.sqrt(distSq);
-                                    double factor = 1.0 - dist / 8.0;
-                                    extra = Math.max(light.level * factor, extra);
-                                }
-                            }
-                            block = (float) Math.min(1.0, Math.max(block ,extra));
+                            //in some mc versions wee need to simulate stock headlight affection
+                            double simulateOfDynamicLightLevel = Light.getSimulateOfDynamicLightLevel(center);
+                            block = (float) Math.min(1.0, Math.max(block ,simulateOfDynamicLightLevel));
                         }
                         binding.drawPiece(range, block, sky);
                     }
