@@ -43,6 +43,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.text.Command;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 public class ImmersiveRailroading extends ModCore.Mod {
@@ -172,7 +173,14 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRenderer.register(HandCar.class, stockRender);
 
 
-				Function<KeyTypes, Runnable> onKeyPress = type -> () -> new KeyPressPacket(type).sendToServer();
+				Function<KeyTypes, Runnable> onKeyPress = type -> () -> {
+	                UUID target = WirelessRemotecontrolInputHandler.getTarget();
+	                if (target != null) {
+
+	                    new KeyPressPacket(type, target).sendToServer();
+	                }
+	                new KeyPressPacket(type).sendToServer();
+	                };
 				Keyboard.registerKey("ir_keys.increase_throttle", KeyCode.NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
 				Keyboard.registerKey("ir_keys.zero_throttle", KeyCode.NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
 				Keyboard.registerKey("ir_keys.decrease_throttle", KeyCode.NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
