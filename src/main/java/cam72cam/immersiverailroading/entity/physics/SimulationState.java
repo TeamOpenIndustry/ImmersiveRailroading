@@ -269,8 +269,8 @@ public class SimulationState {
             Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront - config.offsetFront, yawFront);
             Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear - config.offsetRear, yawRear);
 
-            IRPathingData front = new IRPathingData(positionFront, 0, 0);//roll is meaningless for coupler
-            IRPathingData rear = new IRPathingData(positionRear, 0, 0);
+            IRPathingData front = new IRPathingData(positionFront, 0);//roll is meaningless for coupler
+            IRPathingData rear = new IRPathingData(positionRear, 0);
             trackFront.getNextPosition(front, couplerVecFront, config.gauge.value());
             trackRear.getNextPosition(rear, couplerVecRear, config.gauge.value());
             couplerPositionFront = front.getUMCPos();
@@ -388,8 +388,8 @@ public class SimulationState {
             roll = - roll;
         }
 
-        IRPathingData nextFront = new IRPathingData(positionFront, rollFront, 0);
-        IRPathingData nextRear = new IRPathingData(positionRear, rollRear, 0);
+        IRPathingData nextFront = new IRPathingData(positionFront, rollFront);
+        IRPathingData nextRear = new IRPathingData(positionRear, rollRear);
         trackFront.getNextPosition(nextFront, VecUtil.fromWrongYaw(distance, yawFront), config.gauge.value());
         trackRear.getNextPosition(nextRear, VecUtil.fromWrongYaw(distance, yawRear), config.gauge.value());
         Vec3d nextFrontPos = nextFront.getUMCPos();

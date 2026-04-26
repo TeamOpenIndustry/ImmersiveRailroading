@@ -48,7 +48,7 @@ public class SpawnUtil {
 			EntityRollingStock stock = def.spawn(worldIn, new Vec3d(pos).add(0.5, 0.1, 0.5), yaw, gauge, data.texture);
 
 
-			IRPathingData center = new IRPathingData(stock.getPosition(), 0, 0);//only pos is needed
+			IRPathingData center = new IRPathingData(stock.getPosition(), 0);//only pos is needed
 			initte.getNextPosition(center, VecUtil.fromWrongYaw(-0.1, yaw), spawnGauge);
 			initte.getNextPosition(center, VecUtil.fromWrongYaw(0.1, yaw), spawnGauge);
 			initte.getNextPosition(center, VecUtil.fromWrongYaw(offset, yaw), spawnGauge);
@@ -60,8 +60,8 @@ public class SpawnUtil {
 				if (centerte != null) {
 					float frontDistance = moveable.getDefinition().getBogeyFront(gauge);
 					float rearDistance = moveable.getDefinition().getBogeyRear(gauge);
-					IRPathingData frontTemp = center.copy();
-					IRPathingData rearTemp = center.copy();
+					IRPathingData frontTemp = center.clone();
+					IRPathingData rearTemp = center.clone();
 					centerte.getNextPosition(frontTemp, VecUtil.fromWrongYaw(frontDistance, yaw), spawnGauge);
 					centerte.getNextPosition(rearTemp, VecUtil.fromWrongYaw(rearDistance, yaw), spawnGauge);
 					Vec3d front = frontTemp.getUMCPos();
@@ -78,7 +78,7 @@ public class SpawnUtil {
 
 					ITrack frontte = ITrack.get(worldIn, front, true);
 					if (frontte != null) {
-						IRPathingData frontNext = new IRPathingData(front, 0, 0);
+						IRPathingData frontNext = new IRPathingData(front, 0);
 						frontte.getNextPosition(frontNext, VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()), spawnGauge);//only pos is needed to provide
 						moveable.setFrontYaw(VecUtil.toWrongYaw(frontNext.getUMCPos().subtract(front)));
 						moveable.setFrontRoll((float) -frontNext.getRoll());
@@ -86,7 +86,7 @@ public class SpawnUtil {
 
 					ITrack rearte = ITrack.get(worldIn, rear, true);
 					if (rearte != null) {
-						IRPathingData rearNext = new IRPathingData(rear, 0, 0);
+						IRPathingData rearNext = new IRPathingData(rear, 0);
 						rearte.getNextPosition(rearNext, VecUtil.fromWrongYaw(0.1 * gauge.scale(), moveable.getRotationYaw()), spawnGauge);
 						moveable.setRearYaw(VecUtil.toWrongYaw(rearNext.getUMCPos().subtract(rear)));
 						moveable.setRearRoll((float) -rearNext.getRoll());

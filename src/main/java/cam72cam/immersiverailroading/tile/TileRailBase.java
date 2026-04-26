@@ -471,7 +471,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				tile = tile.getParentTile();
 			}
 
-			IRPathingData potential = currentPosition.copy();//this is in loop so use copy
+			IRPathingData potential = currentPosition.clone();//this is in loop so use copy
 			MovementTrack.nextPositionDirect(getWorld(), potential, tile, motion, gauge);//not edit currentPosition
             //next lines will compare motion yaw and potential yaw
             // If the track veers onto the curved leg of a switch, try that (with angle limitation)
@@ -493,7 +493,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
                 nextPos = potential;
             }
         }
-		currentPosition.setState(nextPos);
+		currentPosition.advanceTo(nextPos);
     }
 	
 	/*
