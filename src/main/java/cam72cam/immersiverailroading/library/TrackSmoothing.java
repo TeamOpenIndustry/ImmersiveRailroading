@@ -8,7 +8,8 @@ public enum TrackSmoothing {
 	BOTH,
 	NEAR,
 	FAR,
-	NEITHER;
+	NEITHER,
+	PITCH_LOCKED_CUBIC;
 
 	@Override
 	public String toString() {

@@ -26,6 +26,7 @@ import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapper;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.sound.StandardSound;
@@ -42,6 +43,8 @@ import java.util.function.Predicate;
 public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneProvider {
 	@TagField("parent")
 	private Vec3i parent;
+	@TagField(value = "childWay",mapper = Vec3iListMapper.class)//only used in parent of multiSwitch
+	private List<Vec3i> childWay = new ArrayList<>();
 	@TagField("height")
 	private float bedHeight = 0;
 	@TagField("railHeight")
@@ -238,6 +241,20 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void setParent(Vec3i pos) {
 		this.parent = pos.subtract(this.getPos());
 	}
+
+	public Vec3i getChild(int order) {
+		if(order < childWay.size()){
+			return childWay.get(order);
+		}else{
+			ImmersiveRailroading.warn("invalid TileRailBase:"+this);
+			return null;
+		}
+	}
+	public void setChildList(List<Vec3i> childWayParentPos) {
+		for(Vec3i pos:childWayParentPos){
+			childWay.add(pos.subtract(this.getPos()));
+		}
+	}
 	
 	public boolean isFlexible() {
 		return this.flexible || !(this instanceof TileRail);
@@ -339,6 +356,17 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return null;
 		}
 		TileRail te = getWorld().getBlockEntity(this.getParent(), TileRail.class);
+		if (te == null || te.info == null) {
+			return null;
+		}
+		return te;
+	}
+	public TileRail getChildWayTile(int order) {
+		//when this is called, getChild() shouldn't return null
+		if (this.getChild(order) == null) {
+			return null;
+		}
+		TileRail te = getWorld().getBlockEntity(this.getChild(order).add(this.getPos()), TileRail.class);
 		if (te == null || te.info == null) {
 			return null;
 		}
@@ -446,8 +474,31 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
 
-			if (state == SwitchState.STRAIGHT) {
-				tile = tile.getParentTile();
+			int midState = -1;
+			switch (state){
+				case STRAIGHT:
+					tile = tile.getParentTile();
+					break;
+				case MID1:
+					midState = 0;
+					break;
+				case MID2:
+					midState = 1;
+					break;
+				case MID3:
+					midState = 2;
+					break;
+				case MID4:
+					midState = 3;
+					break;
+				case TURN:
+				case NONE:
+					midState = 4;
+					break;
+			}
+			if(midState!= -1 && midState != 4 && tile.getParentTile().info.settings.type == TrackItems.MULTISWITCH
+					&& tile.getParentTile().info.multiSwitchInfo.getWayAmount() > midState){
+				tile = tile.getParentTile().getChildWayTile(midState);
 			}
 
 			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
@@ -473,7 +524,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 			tiles = tileMap.values();
 		}
-
+//		System.out.println("case2");
 
 		Vec3d nextPos = currentPosition;
 		Vec3d predictedPos = currentPosition.add(motion);
@@ -481,16 +532,40 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		for (TileRail tile : tiles) {
 			SwitchState state = SwitchUtil.getSwitchState(tile, currentPosition);
+//			System.out.println("state:"+state);
 
-			if (state == SwitchState.STRAIGHT) {
-				tile = tile.getParentTile();
+			int midState = -1;
+			switch (state){
+				case STRAIGHT:
+					tile = tile.getParentTile();
+					break;
+				case MID1:
+					midState = 0;
+					break;
+				case MID2:
+					midState = 1;
+					break;
+				case MID3:
+					midState = 2;
+					break;
+				case MID4:
+					midState = 3;
+					break;
+				case TURN:
+				case NONE:
+					midState = 4;
+					break;
+			}
+			if(midState!= -1 && midState != 4 && tile.getParentTile().info.settings.type == TrackItems.MULTISWITCH
+					&& tile.getParentTile().info.multiSwitchInfo.getWayAmount() > midState){
+				tile = tile.getParentTile().getChildWayTile(midState);
 			}
 
 			Vec3d potential = MovementTrack.nextPositionDirect(getWorld(), currentPosition, tile, motion);
 			if (potential != null) {
 				// If the track veers onto the curved leg of a switch, try that (with angle limitation)
 				// If two overlapped switches are both set, we could have a weird situation, but it's a incredibly unlikely edge case
-				if (state == SwitchState.TURN) {
+				if (state == SwitchState.TURN || state == SwitchState.MID1 || state == SwitchState.MID2 || state == SwitchState.MID3 || state == SwitchState.MID4) {//is MID1~4 needed here?
 					// This code is *fundamentally* broken and most of the time no-longer matters due to the complex parent position logic above
 					float other = VecUtil.toWrongYaw(potential.subtract(currentPosition));
 					float rotationYaw = VecUtil.toWrongYaw(motion);
@@ -936,7 +1011,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (cur instanceof TileRail) {
 			TileRail curTR = (TileRail) cur;
-			if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
+			if (curTR.info.settings.type.equals(TrackItems.SWITCH) || curTR.info.settings.type.equals(TrackItems.MULTISWITCH)) {
 				return curTR;
 			}
 		}
@@ -1057,7 +1132,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (parent == null) {
 			return stack;
 		}
-		parent.info.settings.write(stack);
+		parent.info.settings.with(mutable -> mutable.type = mutable.pickType).write(stack);
+		if(parent.info.multiSwitchInfo != null){
+			if(parent.info.settings.type == TrackItems.MULTISWITCH){
+				parent.info.multiSwitchInfo.write(stack);
+			}else {
+				parent.info.multiSwitchInfo.with(mutable -> mutable.isMultiSwitchWay = false).write(stack);
+			}
+		}
 		return stack;
 	}
 
@@ -1166,4 +1248,15 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
     public void stockOverhead(EntityMoveableRollingStock stock) {
 		this.overhead = stock;
     }
+
+	static class Vec3iListMapper implements TagMapper<List<Vec3i>> {
+		public TagAccessor<List<Vec3i>> apply(Class<List<Vec3i>> t, String f, TagField tag) {
+			return new TagAccessor<>(
+					(nbt, list) -> nbt.setList(f, list,
+							v -> new TagCompound().setVec3i("v", v)),
+					nbt -> nbt.getList(f,
+							tc -> tc.getVec3i("v"))
+			);
+		}
+	}
 }

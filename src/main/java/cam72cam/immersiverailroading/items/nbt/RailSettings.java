@@ -11,9 +11,16 @@ import java.util.function.Consumer;
 public class RailSettings {
     public final Gauge gauge;
     public final TrackItems type;
+    public final TrackItems pickType;//pickType stores origin type in subCurves
     public final int length;
     public final float degrees;
     public final float curvosity;
+    public final float pitchStart;
+    public final float pitchEnd;
+    public final float placementOffset;
+    public final float customOffset;
+    public final boolean isForward;
+    public final int farRadius;
     public final TrackPositionType posType;
     public final TrackSmoothing smoothing;
     public final TrackDirection direction;
@@ -25,10 +32,11 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, TrackItems pickType, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, float pitchStart, float pitchEnd, float placementOffset, float customOffset, boolean isForward, int farRadius, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
+        this.pickType = pickType;
         this.length = length;
         this.degrees = degrees;
         this.posType = posType;
@@ -41,21 +49,44 @@ public class RailSettings {
         this.curvosity = curvosity;
         this.transfertableEntryCount = count;
         this.transfertableEntrySpacing = spacing;
+        this.pitchStart = pitchStart;
+        this.pitchEnd = pitchEnd;
+        this.placementOffset = placementOffset;
+        this.customOffset = customOffset;
+        this.isForward = isForward;
+        this.farRadius = farRadius;
     }
-
     public void write(ItemStack stack) {
+        TagCompound root = stack.getTagCompound();
+        if (root == null) {
+            root = new TagCompound();
+        }
+
         TagCompound data = new TagCompound();
         try {
             TagSerializer.serialize(data, mutable());
         } catch (SerializationException e) {
             ImmersiveRailroading.catching(e);
         }
-        stack.setTagCompound(data);
+
+        root.set("settings", data);
+        stack.setTagCompound(root);
     }
 
     public static RailSettings from(ItemStack stack) {
+        TagCompound root = stack.getTagCompound();
+        if (root == null || !root.hasKey("settings")) {
+            //legacy data
+            try {
+                return new Mutable(stack.getTagCompound()).immutable();
+            } catch (SerializationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         try {
-            return new Mutable(stack.getTagCompound()).immutable();
+            TagCompound data = root.get("settings");
+            return new Mutable(data).immutable();
         } catch (SerializationException e) {
             throw new RuntimeException(e);
         }
@@ -113,6 +144,8 @@ public class RailSettings {
         public Gauge gauge;
         @TagField("type")
         public TrackItems type;
+        @TagField("pickType")
+        public TrackItems pickType;
         @TagField("length")
         public int length;
         @TagField(value = "degrees", mapper = DegreesMapper.class)
@@ -135,7 +168,12 @@ public class RailSettings {
         public boolean isGradeCrossing;
         @TagField("track")
         public String track;
-
+        @TagField(value = "pitch")
+        public TagCompound pitchTag;
+        @TagField(value = "posOffset")
+        public TagCompound posOffsetTag;
+        @TagField(value = "transitionCurves")
+        public TagCompound transitionCurvesTag;
         @TagField("transfertableEntryCount")
         public int transfertableEntryCount;
         @TagField("transfertableEntrySpacing")
@@ -144,7 +182,21 @@ public class RailSettings {
         private Mutable(RailSettings settings) {
             this.gauge = settings.gauge;
             this.track = settings.track;
+
+            pitchTag = new TagCompound();
+            pitchTag.setFloat("start", settings.pitchStart);
+            pitchTag.setFloat("end",  settings.pitchEnd);
+
+            posOffsetTag = new TagCompound();
+            posOffsetTag.setFloat("placementOffset", settings.placementOffset);
+            posOffsetTag.setFloat("customOffset", settings.customOffset);
+
+            transitionCurvesTag = new TagCompound();
+            transitionCurvesTag.setBoolean("isForward", settings.isForward);
+            transitionCurvesTag.setInteger("farRadius", settings.farRadius);
+
             this.type = settings.type;
+            this.pickType = settings.pickType;
             this.length = settings.length;
             this.degrees = settings.degrees;
             this.curvosity = settings.curvosity;
@@ -163,7 +215,21 @@ public class RailSettings {
             // Defaults
             gauge = Gauge.from(Gauge.STANDARD);
             type = TrackItems.STRAIGHT;
+            pickType = type;
             track = "default";
+
+            pitchTag = new TagCompound();
+            pitchTag.setFloat("start", 0.0f);
+            pitchTag.setFloat("end", 0.0f);
+
+            posOffsetTag = new TagCompound();
+            posOffsetTag.setFloat("placementOffset", 0.0f);
+            posOffsetTag.setFloat("customOffset", 0.0f);
+
+            transitionCurvesTag = new TagCompound();
+            transitionCurvesTag.setBoolean("isForward", true);
+            transitionCurvesTag.setInteger("farRadius", -1);
+
             length = 10;
             degrees = 90;
             posType = TrackPositionType.FIXED;
@@ -185,11 +251,18 @@ public class RailSettings {
                     gauge,
                     track,
                     type,
+                    pickType,
                     length,
                     degrees,
                     curvosity,
                     posType,
                     smoothing,
+                    pitchTag.getFloat("start"),
+                    pitchTag.getFloat("end"),
+                    posOffsetTag.getFloat("placementOffset"),
+                    posOffsetTag.getFloat("customOffset"),
+                    transitionCurvesTag.getBoolean("isForward"),
+                    transitionCurvesTag.getInteger("farRadius"),
                     direction,
                     railBed,
                     railBedFill,

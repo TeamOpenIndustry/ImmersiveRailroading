@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackModelPart;
@@ -149,6 +150,44 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			tracks.add(tg);
 		}
 	}
+
+	public void replaceTrackRail(Vec3i newPos, Vec3i oldPos) {
+		int newTrackRailIndex = -1;
+		int oldTrackRailIndex = -1;
+		boolean foundNewTrackRail = false;
+		boolean foundOldTrackRail = false;
+		TrackRail trackAtNew = null;
+		TrackGag trackAtOld = null;
+
+		for(int i = 0; i < tracks.size(); i++) {
+			TrackBase track = tracks.get(i);
+
+			if(track instanceof TrackGag && track.getPos().equals(newPos)) {
+				trackAtNew = new TrackRail(this, track.rel);
+
+				trackAtNew.setRailHeight(track.getRailHeight());
+				trackAtNew.setBedHeight(track.getBedHeight());
+				foundNewTrackRail = true;
+				newTrackRailIndex = i;
+			}
+			if(track instanceof TrackRail && track.getPos().equals(oldPos)){
+				trackAtOld = new TrackGag(this, track.rel);
+
+				trackAtOld.setRailHeight(track.getRailHeight());
+				trackAtOld.setBedHeight(track.getBedHeight());
+				foundOldTrackRail = true;
+				oldTrackRailIndex = i;
+			}
+
+			if(foundOldTrackRail && foundNewTrackRail) {//do we need to set flex here?
+				tracks.set(newTrackRailIndex,trackAtNew);
+				tracks.set(oldTrackRailIndex,trackAtOld);
+				this.setParentPos(newPos.subtract(this.pos));
+//				System.out.println("replaced "+oldPos+" with "+newPos);
+				break;
+			}
+		}
+	}
 	
 	@Override
 	public List<TrackBase> getTracksForRender() {
@@ -177,8 +216,37 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		renderScale *= 1.005f;//Avoid some gaps
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
+		if(info.multiSwitchInfo != null && info.multiSwitchInfo.isMultiSwitchWay){//assume that switch ways are ordered by curve shape and pos
+			try {
+				switch (info.multiSwitchInfo.orderAsChild) {
+					case 0:
+						switchStraight = !(info.switchState == SwitchState.STRAIGHT);
+						break;
+					case 1:
+						switchStraight = !(info.switchState == SwitchState.MID1);
+						break;
+					case 2:
+						switchStraight = !(info.switchState == SwitchState.MID2);
+						break;
+					case 3:
+						switchStraight = !(info.switchState == SwitchState.MID3);
+						break;
+					case 4:
+						switchStraight = !(info.switchState == SwitchState.MID4);
+						break;
+					case 5:
+						switchStraight = !(info.switchState == SwitchState.TURN);
+						break;
+				}
+			}catch (Exception e) {
+				ImmersiveRailroading.warn("invalid multiSwitchInfo from info:"+info);
+			}
+		}
 		int switchSize = 0;
 		TrackDirection direction = info.placementInfo.direction;
+
+//		if(info.multiSwitchInfo != null && info.multiSwitchInfo.isMultiSwitchWay)direction = info.settings.direction;
+
 		if (switchStraight ) {
 			for (int i = 0; i < points.size(); i++) {
 				VecYPR cur = points.get(i);
@@ -222,7 +290,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				VecYPR next = points.get(i+1);
 				angle = delta(prev.getYaw(), next.getYaw());
 			}
-			if (angle != 0) {
+			if (angle != 0) {//TODO: make both side of track movable? and for monorail we need a defined number to determine how much to move (and move the whole rail?)
 				VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);
 				if (direction == TrackDirection.RIGHT) {
 					vec.addChild(new VecYPR(switchPos, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));

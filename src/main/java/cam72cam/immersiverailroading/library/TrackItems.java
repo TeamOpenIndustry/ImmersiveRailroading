@@ -12,7 +12,9 @@ public enum TrackItems {
 	SWITCH(4),
 	TURNTABLE(5),
 	CUSTOM(7),
-	TRANSFERTABLE(6);
+	TRANSFERTABLE(6),
+	CUBICPARABOLA(8),
+	MULTISWITCH(9);
 
 	private final int order;
 
@@ -29,6 +31,8 @@ public enum TrackItems {
 		switch (this) {
 			case TURN:
 			case SWITCH:
+			case CUBICPARABOLA:
+			case MULTISWITCH:
 				return true;
 			default:
 				return false;
@@ -39,6 +43,7 @@ public enum TrackItems {
 		switch (this) {
 			case SWITCH:
 			case CUSTOM:
+			case MULTISWITCH:
 				return true;
 			default:
 				return false;
@@ -49,7 +54,9 @@ public enum TrackItems {
 		switch (this) {
 			case SLOPE:
 			case TURN:
+			case CUBICPARABOLA:
 			case SWITCH:
+			case MULTISWITCH:
 			case CUSTOM:
 				return true;
 			default:
@@ -60,7 +67,9 @@ public enum TrackItems {
 	public boolean hasDirection() {
 		switch (this) {
 			case TURN:
+			case CUBICPARABOLA:
 			case SWITCH:
+			case MULTISWITCH:
 				return true;
 			default:
 				return false;
@@ -71,6 +80,34 @@ public enum TrackItems {
 		switch (this){
 			case TURNTABLE:
 			case TRANSFERTABLE:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean isMulti() {
+		switch (this) {
+			case MULTISWITCH:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean hasFarRadius() {
+		switch (this) {
+			case CUBICPARABOLA:
+				return true;
+			default:
+				return false;
+		}
+	}
+	public boolean isSwitchWay() {
+		switch (this) {
+			case CUBICPARABOLA:
+			case CUSTOM:
+			case TURN:
 				return true;
 			default:
 				return false;

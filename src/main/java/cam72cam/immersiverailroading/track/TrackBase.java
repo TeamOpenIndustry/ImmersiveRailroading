@@ -11,6 +11,8 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.util.SingleCache;
 
+import java.util.List;
+
 public abstract class TrackBase {
 	public BuilderBase builder;
 
@@ -25,6 +27,7 @@ public abstract class TrackBase {
 	private boolean flexible = false;
 
 	private Vec3i parent;
+	private List<Vec3i> childList;
 
 	public boolean solidNotRequired;
 
@@ -70,6 +73,10 @@ public abstract class TrackBase {
 			} else {
 				tr.setParent(builder.getParentPos());
 			}
+
+			if (childList != null) {
+				tr.setChildList(childList);
+			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
 			tr.setScaleModel(isScaleModel());
@@ -110,6 +117,10 @@ public abstract class TrackBase {
 			tr.setParent(parent);
 		} else {
 			tr.setParent(builder.getParentPos());
+		}
+
+		if (childList != null) {
+			tr.setChildList(childList);
 		}
 		tr.setRailHeight(getRailHeight());
 		tr.setBedHeight(getBedHeight());
@@ -158,5 +169,8 @@ public abstract class TrackBase {
 
 	public void overrideParent(Vec3i blockPos) {
 		this.parent = blockPos;
+	}
+	public void setChildList(List<Vec3i> posList) {
+		this.childList = posList;
 	}
 }

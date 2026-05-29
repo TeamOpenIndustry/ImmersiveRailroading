@@ -214,10 +214,23 @@ public class TileRail extends TileRailBase {
 		}
 
 		if (tracks == null) {
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			if(info.settings.type == TrackItems.SWITCH) {
+				tracks = info.withSettings(b -> b.type = TrackItems.STRAIGHT).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			}else if(info.settings.type == TrackItems.MULTISWITCH){
+				tracks = info.withSettings(b -> b.type = info.multiSwitchInfo.realShapeType).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			}else {
+				tracks = info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			}
 			// This is just terrible
 			Vec3i offset = getPos().subtract(tracks.get(0).getPos());
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+
+			if(info.settings.type == TrackItems.SWITCH) {
+				tracks = info.withSettings(b -> b.type = TrackItems.STRAIGHT).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			}else if(info.settings.type == TrackItems.MULTISWITCH){
+				tracks = info.withSettings(b -> b.type = info.multiSwitchInfo.realShapeType).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			}else {
+				tracks = info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			}
 		}
 
 

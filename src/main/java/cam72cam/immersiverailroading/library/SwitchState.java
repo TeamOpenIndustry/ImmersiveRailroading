@@ -7,7 +7,8 @@ import java.util.Locale;
 public enum SwitchState {
 	NONE,
 	STRAIGHT,
-	TURN;
+	TURN,
+	MID1,MID2,MID3,MID4;//multi-way(max=6) turnout:from left to right:straight->mid->turn?
 
 	@Override
 	public String toString() {

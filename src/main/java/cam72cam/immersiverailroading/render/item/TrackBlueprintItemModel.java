@@ -1,13 +1,12 @@
 package cam72cam.immersiverailroading.render.item;
 
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.render.*;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -21,9 +20,17 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	public StandardModel getModel(World world, ItemStack stack) {
 		return new StandardModel().addCustom((state, pt) -> TrackBlueprintItemModel.render(stack, world, state));
 	}
+
+	//render the model of inventory
 	public static void render(ItemStack stack, World world, RenderState state) {
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null);
+		PlacementInfo placementInfo = new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5));
+		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(stack).placementOffset);
+		RailInfo info = new RailInfo(stack, placementInfo, MultiSwitchInfo.from(stack).defaultCustom, MultiSwitchInfo.from(stack));
 		info = info.withSettings(b -> b.length = 10);
+
+		MultiSwitchInfo.Mutable multiSwitchInfo = info.multiSwitchInfo.mutable();
+		multiSwitchInfo.writePlacement(placementInfo);
+		info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo.immutable());
 
 		state.cull_face(false);
 		state.lighting(false);
@@ -54,6 +61,8 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	}
 
 	private static ExpireableMap<String, RailInfo> infoCache = new ExpireableMap<>();
+
+	//render the preview when mouse target at a block
 	public static void renderMouseover(Player player, ItemStack stack, Vec3i pos, Vec3d vec, RenderState state, float partialTicks) {
 		Vec3d hit = vec.subtract(pos);
 		World world = player.getWorld();
@@ -66,7 +75,14 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			}
 		}
 
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null);
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0));
+		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(stack).placementOffset);
+		RailInfo info = new RailInfo(stack, placementInfo, MultiSwitchInfo.from(stack).defaultCustom,  MultiSwitchInfo.from(stack));
+
+		MultiSwitchInfo.Mutable multiSwitchInfo = info.multiSwitchInfo.mutable();
+		multiSwitchInfo.writePlacement(placementInfo);
+		info = info.with(mutable -> mutable.multiSwitchInfo = multiSwitchInfo.immutable());
+
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {

@@ -156,6 +156,11 @@ public class PlacementInfo {
 		return new PlacementInfo(placementPosition, direction, yaw, control);
 	}
 
+	public PlacementInfo withFloorYoffset(float offset) {
+		Vec3d updated = new Vec3d(placementPosition.x, Math.floor(placementPosition.y) + offset, placementPosition.z);
+		return new PlacementInfo(updated, direction, yaw, control);
+	}
+
 	static class TagMapper implements cam72cam.mod.serialization.TagMapper<PlacementInfo> {
 		@Override
 		public TagAccessor<PlacementInfo> apply(Class<PlacementInfo> type, String fieldName, TagField tag) {

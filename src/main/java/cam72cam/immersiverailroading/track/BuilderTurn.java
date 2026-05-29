@@ -23,9 +23,7 @@ public class BuilderTurn extends BuilderCubicCurve {
         CubicCurve curve = CubicCurve.circle(radius, info.settings.degrees).apply(mat);
 
         double height = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
-        if (height != 0) {
-            curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, height, 0), curve.p2.add(0, height, 0)).linearize(info.settings.smoothing);
-        }
+        curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, height, 0), curve.p2.add(0, height, 0)).linearize(info.settings.smoothing, info.settings.pitchStart, info.settings.pitchEnd);
         return curve;
     }
 }
