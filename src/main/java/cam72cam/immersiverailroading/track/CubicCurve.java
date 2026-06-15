@@ -296,7 +296,7 @@ public class CubicCurve {
         }
     }
 
-    public CubicCurve linearize(TrackSmoothing smoothing) {//TODO: how should we handle old track data?
+    public CubicCurve linearize(TrackSmoothing smoothing) {//TODO: we are going to remove track smoothing and change this            
         if (Math.abs(p2.y - p1.y) < 1e-4) {
             return new CubicCurve(
                     p1,

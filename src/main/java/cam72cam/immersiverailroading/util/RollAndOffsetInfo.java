@@ -657,8 +657,8 @@ public class RollAndOffsetInfo {
     }
     public enum RollYOffsetType {
         MID(0),
-        HIGH(1),
-        LOW(2),
+//        HIGH(1),
+//        LOW(2),
         LEFT(3),
         RIGHT(4);
         private final int order;
@@ -1088,8 +1088,8 @@ public class RollAndOffsetInfo {
         tan *= 0.5;
 
         switch (offsetType) {
-            case HIGH:
-            case LOW:
+//            case HIGH:
+//            case LOW:
             case LEFT:
             case RIGHT:
                 tan = isRight ? -tan : tan;
@@ -1123,8 +1123,8 @@ public class RollAndOffsetInfo {
         tan *= 0.5;
 
         switch (offsetType) {
-            case HIGH:
-            case LOW:
+//            case HIGH:
+//            case LOW:
             case LEFT:
             case RIGHT:
                 tan = isRight ? -tan : tan;

@@ -162,20 +162,20 @@ public class BuilderCubicCurve extends BuilderIterator {
 		switch (type) {
 			case MID:
 				break;
-			case HIGH:
-				for(int i = 0; i < points.size(); i++) {
-					Vec3d p = points.get(i);
-					Vec3d newP = new Vec3d(p.x, p.y + Math.abs(rolls.get(i)) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
-					points.set(i, newP);
-				}
-				break;
-			case LOW:
-				for(int i = 0; i < points.size(); i++) {
-					Vec3d p = points.get(i);
-					Vec3d newP = new Vec3d(p.x, p.y - Math.abs(rolls.get(i)) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
-					points.set(i, newP);
-				}
-				break;
+//			case HIGH:
+//				for(int i = 0; i < points.size(); i++) {
+//					Vec3d p = points.get(i);
+//					Vec3d newP = new Vec3d(p.x, p.y + Math.abs(rolls.get(i)) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
+//					points.set(i, newP);
+//				}
+//				break;
+//			case LOW:
+//				for(int i = 0; i < points.size(); i++) {
+//					Vec3d p = points.get(i);
+//					Vec3d newP = new Vec3d(p.x, p.y - Math.abs(rolls.get(i)) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
+//					points.set(i, newP);
+//				}
+//				break;
 			case LEFT:
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
