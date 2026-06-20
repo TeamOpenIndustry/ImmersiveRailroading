@@ -34,6 +34,7 @@ UniversalModCore/
 
 ## Generated
 build.gradle
+settings.gradle
 UMC.md
 gradle/wrapper/gradle-wrapper.properties
 src/main/java/cam72cam/immersiverailroading/Mod.java
