@@ -66,7 +66,6 @@ public class RailInfo {
 				this.settings.degrees,
 				this.settings.curvosity,
 				this.settings.railBed,
-				this.settings.tileTilt,
 				this.settings.gauge,
 				this.settings.track,
 				this.settings.smoothing,
@@ -421,7 +420,7 @@ public class RailInfo {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , null, null, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, false, 1,  1);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , null, null, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
 			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}

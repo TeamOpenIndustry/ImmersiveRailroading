@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 public class RollAndOffsetInfo {
     public final RollYOffsetType offsetType;
     public final boolean rollEffectTile;//TODO: add option to turn this off/on in TrackExtraGui
+    public final boolean tileTilt;
     private final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
     //Roll
     /**
@@ -42,11 +43,12 @@ public class RollAndOffsetInfo {
     private final List<Vec3d> zOffsetCtrls;
 
     public RollAndOffsetInfo(
-            RollYOffsetType offsetType, boolean rollEffectTile,
+            RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt,
             List<Double> ls, List<Vec3d> rolls, List<Vec3d> rollCtrls, List<Vec3d> yOffsets, List<Vec3d> yOffsetlCtrls, List<Vec3d> zOffsets, List<Vec3d> zOffsetCtrls
     ) {
         this.offsetType = offsetType;
         this.rollEffectTile = rollEffectTile;
+        this.tileTilt = tileTilt;
 
         this.ls = ls;
         this.rolls = rolls;
@@ -61,6 +63,7 @@ public class RollAndOffsetInfo {
     private RollAndOffsetInfo() {
         offsetType = RollYOffsetType.MID;
         rollEffectTile = true;
+        tileTilt = true;
 
         ls = new ArrayList<>();
         rolls = new ArrayList<>();
@@ -84,6 +87,8 @@ public class RollAndOffsetInfo {
         public RollYOffsetType offsetType;
         @TagField("rollEffectTile")
         public boolean rollEffectTile;
+        @TagField("tileTilt")
+        public boolean tileTilt;
         @TagField(value = "ls", mapper = DoubleListMapper.class)
         private List<Double> ls;
         @TagField(value = "rolls", mapper = Vec3dListMapper.class)
@@ -102,6 +107,7 @@ public class RollAndOffsetInfo {
         public Mutable(RollAndOffsetInfo rollAndOffsetInfo) {
             this.offsetType = rollAndOffsetInfo.offsetType;
             this.rollEffectTile = rollAndOffsetInfo.rollEffectTile;
+            this.tileTilt = rollAndOffsetInfo.tileTilt;
 
             this.ls = rollAndOffsetInfo.ls;
             this.rolls = rollAndOffsetInfo.rolls;
@@ -116,6 +122,9 @@ public class RollAndOffsetInfo {
             // Defaults
             RollAndOffsetInfo defaultInfo = getDefault();
             offsetType = defaultInfo.offsetType;
+            rollEffectTile = defaultInfo.rollEffectTile;
+            tileTilt = defaultInfo.tileTilt;
+
             ls = defaultInfo.ls;
             rolls = defaultInfo.rolls;
             rollCtrls = defaultInfo.rollCtrls;
@@ -131,6 +140,7 @@ public class RollAndOffsetInfo {
             return new RollAndOffsetInfo(
                     offsetType,
                     rollEffectTile,
+                    tileTilt,
 
                     ls,
                     rolls,
@@ -168,7 +178,7 @@ public class RollAndOffsetInfo {
             divider.add(Pair.of(l, 1d));
 
             RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
-                    offsetType, rollEffectTile,
+                    offsetType, rollEffectTile, tileTilt,
                     ls, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
             );
             List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);
@@ -641,6 +651,7 @@ public class RollAndOffsetInfo {
         String id = "rollAndOffsetInfo:{";
         id += this.offsetType;
         id += this.rollEffectTile;
+        id += this.tileTilt;
         if(this.ls != null) {
             for(int i = 0; i < this.ls.size(); i++){
                 id += this.ls.get(i);
@@ -945,13 +956,13 @@ public class RollAndOffsetInfo {
             }
 
             if(normalize) results.add(normalize(
-                    offsetType, rollEffectTile,
+                    offsetType, rollEffectTile, tileTilt,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls,
                     lStart, lEnd
             ));
 
             else results.add(new RollAndOffsetInfo(
-                    offsetType, rollEffectTile,
+                    offsetType, rollEffectTile, tileTilt,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
             ));
         }
@@ -1007,7 +1018,7 @@ public class RollAndOffsetInfo {
     }
 
     private static RollAndOffsetInfo normalize(
-            RollYOffsetType offsetType, boolean rollEffectTile,
+            RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt,
             List<Double> newT, List<Vec3d> newRolls, List<Vec3d> newRollCtrls, List<Vec3d> newYOffsets, List<Vec3d> newYOffsetCtrls, List<Vec3d> newZOffsets, List<Vec3d> newZOffsetCtrls,
             double tStart, double tEnd
     ) {
@@ -1042,7 +1053,7 @@ public class RollAndOffsetInfo {
             newZOffsetCtrls.set(i, new Vec3d(newZOffsetCtrlX, oldZOffsetCtrl.y, oldZOffsetCtrl.z));
         }
         return new RollAndOffsetInfo(
-                offsetType, rollEffectTile,
+                offsetType, rollEffectTile, tileTilt,
                 newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
         );
     }

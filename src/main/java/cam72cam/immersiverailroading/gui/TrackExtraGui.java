@@ -72,6 +72,7 @@ public class TrackExtraGui implements IScreen {
     private Button offsetTypeButton;
     private Button railInfoLabel;
     private CheckBox rollEffectTileCB;
+    private CheckBox tileTiltCB;
 //    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
@@ -212,11 +213,31 @@ public class TrackExtraGui implements IScreen {
         //back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
 
-        rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 2, GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.rollEffectTile){
+        rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 60, ytop + 2, GuiText.SELECTOR_ROLL_EFFECT_TILE.toString(), rollAndOffsetInfoCache.rollEffectTile){
             @Override
             public void onClick(Player.Hand hand) {
                 edited = true;
                 rollAndOffsetInfoCache.rollEffectTile = rollEffectTileCB.isChecked();
+                if(!rollAndOffsetInfoCache.rollEffectTile) {
+                    rollAndOffsetInfoCache.tileTilt = false;
+                    tileTiltCB.setChecked(false);
+                }
+            }
+        };
+
+        tileTiltCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 2, GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.tileTilt) {
+            @Override
+            public void onClick(Player.Hand hand) {
+                if(rollAndOffsetInfoCache.rollEffectTile) {
+                    edited = true;
+                    rollAndOffsetInfoCache.tileTilt = tileTiltCB.isChecked();
+                } else if(rollAndOffsetInfoCache.tileTilt){
+                    edited = true;
+                    rollAndOffsetInfoCache.tileTilt = false;
+                    tileTiltCB.setChecked(false);
+                } else {
+                    tileTiltCB.setChecked(false);
+                }
             }
         };
 

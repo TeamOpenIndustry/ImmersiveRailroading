@@ -87,6 +87,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					Vec3d topFacing = computeTopFacing(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
 					double rollDelta;
 					boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile;
+					boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.tileTilt;
+					if(!rollEffectTile) tileTilt = false;
 
 					if(rollEffectTile) {//TODO: using cur face yet, need better pitch sample
 						double cx = posX;
@@ -131,7 +133,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						yOffset.put(gag, (int) (deltaGapPos - relHeight));
 					}
                     railHeights.put(gag, (float) relHeight);
-					topFacings.put(gag, info.settings.tileTilt ? topFacing : null);
+					topFacings.put(gag, tileTilt ? topFacing : null);
 				}
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
