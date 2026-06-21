@@ -657,10 +657,10 @@ public class RollAndOffsetInfo {
     }
     public enum RollYOffsetType {
         MID(0),
-//        HIGH(1),
-//        LOW(2),
-        LEFT(3),
-        RIGHT(4);
+//        HIGH(3),
+//        LOW(4),
+        LEFT(1),
+        RIGHT(2);
         private final int order;
         private static final RollYOffsetType[] BY_ORDER = values();
         RollYOffsetType(int order){

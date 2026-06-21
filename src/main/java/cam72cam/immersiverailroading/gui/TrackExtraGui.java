@@ -72,7 +72,7 @@ public class TrackExtraGui implements IScreen {
     private Button offsetTypeButton;
     private Button railInfoLabel;
     private CheckBox rollEffectTileCB;
-    private Button wayCircleButton;
+//    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
         this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY), null);
@@ -107,8 +107,8 @@ public class TrackExtraGui implements IScreen {
 
         //basic Gauge: Standard Gauge. other gauge will scale from standard
         rollMax = 40;//unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
-        yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
-        zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
+        yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
+        zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
 
         curveColor = Color.FLUORESCENT_GREEN;      // GREEN curve
         pointColor = Color.RED;      // RED point
@@ -220,7 +220,7 @@ public class TrackExtraGui implements IScreen {
             }
         };
 
-        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
+//        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 
         offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height, rollAndOffsetInfoCache.offsetType.toString()) {
             @Override
