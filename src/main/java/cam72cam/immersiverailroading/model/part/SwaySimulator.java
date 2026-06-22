@@ -54,7 +54,7 @@ public class SwaySimulator {
                 rb = rb != null ? rb.getParentTile() : null;
                 if (rb != null && !rb.getPos().equals(clackFrontPos) && rb.clacks()) {
                     if (volume > 0 && clackFront != null) {
-                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
+                        if (!clackFront.isPlaying()) {
                             clackFront.setPitch(pitch);
                             clackFront.setVolume(volume);
                             clackFront.play(new Vec3d(posFront));
@@ -73,7 +73,7 @@ public class SwaySimulator {
                 rb = rb != null ? rb.getParentTile() : null;
                 if (rb != null && !rb.getPos().equals(clackRearPos) && rb.clacks()) {
                     if (volume > 0 && clackRear != null) {
-                        if (!clackFront.isPlaying() && !clackRear.isPlaying()) {
+                        if (!clackRear.isPlaying()) {
                             clackRear.setPitch(pitch);
                             clackRear.setVolume(volume);
                             clackRear.play(new Vec3d(posRear));

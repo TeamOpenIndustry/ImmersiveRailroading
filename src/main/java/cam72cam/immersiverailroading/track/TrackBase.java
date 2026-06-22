@@ -13,6 +13,9 @@ import cam72cam.mod.util.SingleCache;
 
 public abstract class TrackBase {
 	public BuilderBase builder;
+	//In overlays we have to use the re-defined origin, overwrite here
+	//TODO Find a better workaround
+	protected Vec3i correctedOverlayBuilder;
 
 	protected Vec3i rel;
 	private float bedHeight;
@@ -32,6 +35,7 @@ public abstract class TrackBase {
 		this.builder = builder;
 		this.rel = rel;
 		this.block = block;
+		this.correctedOverlayBuilder = builder.pos;
 	}
 
 	private final SingleCache<Vec3i, Vec3i> downCache = new SingleCache<>(Vec3i::down);
@@ -122,7 +126,7 @@ public abstract class TrackBase {
 
 	private final SingleCache<Vec3i, Vec3i> posCache = new SingleCache<>(pos -> pos.add(rel));
 	public Vec3i getPos() {
-		return posCache.get(builder.pos);
+		return posCache.get(correctedOverlayBuilder);
 	}
 
 	public void setHeight(float height) {
@@ -154,6 +158,10 @@ public abstract class TrackBase {
 
 	public boolean isFlexible() {
 		return this.flexible;
+	}
+
+	public void overrideBuilderPos(Vec3i pos) {
+		this.correctedOverlayBuilder = pos;
 	}
 
 	public void overrideParent(Vec3i blockPos) {

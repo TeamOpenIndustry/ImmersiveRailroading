@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.model.part.Interactable;
 import cam72cam.immersiverailroading.model.part.Seat;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.event.ClientEvents;
@@ -32,7 +33,6 @@ public class ClientPartDragging {
         Mouse.registerDragHandler(dragger::capture);
         ClientEvents.TICK.subscribe(dragger::tick);
         ClientEvents.SCROLL.subscribe(dragger::scroll);
-        Packet.register(DragPacket::new, PacketDirection.ClientToServer);
     }
 
     private boolean scroll(double scroll) {
@@ -103,7 +103,11 @@ public class ClientPartDragging {
         @Override
         protected void handle() {
             EntityRollingStock stock = getWorld().getEntity(stockUUID, EntityRollingStock.class);
-            Control<?> control = stock.getDefinition().getModel().getDraggable().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get();
+            Control<?> control = stock.getDefinition().getModel().getDraggable().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().orElse(null);
+            if (control == null) {
+                ModCore.warn("Unable to find controller %s in stock %s server-side. Do you have mismatched packs?", this.typeKey, stock.defID);
+                return;
+            }
             if (!stock.playerCanDrag(getPlayer(), control)) {
                 return;
             }

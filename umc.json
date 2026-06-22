@@ -4,7 +4,7 @@
         "cls": "ImmersiveRailroading",
         "name": "Immersive Railroading",
         "id": "immersiverailroading",
-        "version": "1.10.0",
+        "version": "1.11.0",
         "dependencies": {
             "trackapi": {
                 "versions": "[1.1,)"
