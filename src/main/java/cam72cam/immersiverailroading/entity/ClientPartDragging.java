@@ -33,7 +33,6 @@ public class ClientPartDragging {
         Mouse.registerDragHandler(dragger::capture);
         ClientEvents.TICK.subscribe(dragger::tick);
         ClientEvents.SCROLL.subscribe(dragger::scroll);
-        Packet.register(DragPacket::new, PacketDirection.ClientToServer);
     }
 
     private boolean scroll(double scroll) {
