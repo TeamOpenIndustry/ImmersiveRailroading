@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.mod.item.*;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.umc.api.item.*;
+import cam72cam.umc.api.serialization.TagField;
 
 import java.util.Collections;
 import java.util.List;

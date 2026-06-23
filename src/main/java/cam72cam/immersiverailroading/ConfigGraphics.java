@@ -2,14 +2,14 @@ package cam72cam.immersiverailroading;
 
 import cam72cam.immersiverailroading.library.ScrollMode;
 import cam72cam.immersiverailroading.library.unit.*;
-import cam72cam.mod.config.ConfigFile.Comment;
-import cam72cam.mod.config.ConfigFile.Name;
-import cam72cam.mod.render.OptiFine;
+import cam72cam.umc.api.config.ConfigFile.Comment;
+import cam72cam.umc.api.config.ConfigFile.Name;
+import cam72cam.umc.api.render.OptiFine;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static cam72cam.mod.config.ConfigFile.*;
+import static cam72cam.umc.api.config.ConfigFile.*;
 
 @Comment("Configuration File")
 @Name("general")

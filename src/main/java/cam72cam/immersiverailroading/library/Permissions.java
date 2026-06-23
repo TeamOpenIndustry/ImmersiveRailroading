@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.library;
 
 import cam72cam.immersiverailroading.ConfigPermissions;
-import cam72cam.mod.entity.Player;
+import cam72cam.umc.api.entity.Player;
 
 public class Permissions {
     public static Player.PermissionAction LOCOMOTIVE_CONTROL = Player.registerAction(

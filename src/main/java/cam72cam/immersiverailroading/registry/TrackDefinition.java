@@ -7,8 +7,8 @@ import cam72cam.immersiverailroading.items.ItemRail;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackComponent;
 import cam72cam.immersiverailroading.model.TrackModel;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.item.ItemStack;
 import trackapi.lib.Gauges;
 
 import java.util.*;

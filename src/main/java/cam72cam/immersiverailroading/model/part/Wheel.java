@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.model.part;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.math.Vec3d;
-import util.Matrix4;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.util.Matrix4;
 
 import java.util.function.Function;
 

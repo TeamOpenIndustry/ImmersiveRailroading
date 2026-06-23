@@ -6,12 +6,12 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.GlobalRender;
-import cam72cam.mod.render.opengl.BlendMode;
-import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.render.GlobalRender;
+import cam72cam.umc.api.render.opengl.BlendMode;
+import cam72cam.umc.api.render.opengl.RenderState;
+import cam72cam.umc.api.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class MultiPreviewRender {

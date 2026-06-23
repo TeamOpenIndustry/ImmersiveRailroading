@@ -11,11 +11,11 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.*;
-import cam72cam.mod.serialization.*;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.serialization.*;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.world.World;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -366,7 +366,7 @@ public class RailInfo {
 		return trackHeight;
 	}
 
-	public static class TagMapper implements cam72cam.mod.serialization.TagMapper<RailInfo> {
+	public static class TagMapper implements cam72cam.umc.api.serialization.TagMapper<RailInfo> {
 		@Override
 		public TagAccessor<RailInfo> apply(Class<RailInfo> type, String fieldName, TagField tag) {
 			return new TagAccessor<>(
@@ -414,7 +414,7 @@ public class RailInfo {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , TrackDirection.NONE, railBed, cam72cam.umc.api.item.ItemStack.EMPTY, false, false, 1,  1);
 			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}

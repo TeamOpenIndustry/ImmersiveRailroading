@@ -12,12 +12,13 @@
         }
     },
     "integration": {
-        "repo": "git@github.com:TeamOpenIndustry/ImmersiveRailroadingIntegration.git",
-        "branch": "%s",
+        "repo": "https://github.com/TeamOpenIndustry/ImmersiveRailroadingIntegration.git",
+        "branch": "1.12.2-forge",
         "path": "ImmersiveRailroadingIntegration"
     },
     "umc": {
-        "version": "latest"
+        "version": "latest",
+        "path": "UniversalModCore"
     }
 }
 

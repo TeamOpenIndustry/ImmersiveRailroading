@@ -7,14 +7,14 @@ import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.entity.boundingbox.IBoundingBox;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.obj.OBJRender;
-import cam72cam.mod.render.opengl.RenderState;
-import util.Matrix4;
+import cam72cam.umc.api.entity.boundingbox.IBoundingBox;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.render.StandardModel;
+import cam72cam.umc.api.render.obj.OBJRender;
+import cam72cam.umc.api.render.opengl.RenderState;
+import cam72cam.umc.api.util.Matrix4;
 
 import java.util.*;
 

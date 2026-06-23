@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.gui.container;
 
 import cam72cam.immersiverailroading.entity.Freight;
-import cam72cam.mod.gui.container.IContainerBuilder;
+import cam72cam.umc.api.gui.container.IContainerBuilder;
 
 public class FreightContainer extends BaseContainer {
     public Freight stock;

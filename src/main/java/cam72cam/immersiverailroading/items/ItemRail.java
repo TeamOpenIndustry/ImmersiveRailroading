@@ -5,12 +5,11 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.mod.item.CreativeTab;
-import cam72cam.mod.item.CustomItem;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.text.TextUtil;
+import cam72cam.umc.api.item.CreativeTab;
+import cam72cam.umc.api.item.CustomItem;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.text.TextUtil;
 
 public class ItemRail extends CustomItem {
 	public ItemRail() {

@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.world.World;
 
 public class BuilderSlope extends BuilderStraight {
 	public BuilderSlope(RailInfo info, World world, Vec3i pos) {

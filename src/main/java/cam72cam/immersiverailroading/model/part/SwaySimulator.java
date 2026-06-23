@@ -6,9 +6,9 @@ import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.sound.ISound;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.sound.ISound;
 
 import java.util.HashMap;
 import java.util.Map;

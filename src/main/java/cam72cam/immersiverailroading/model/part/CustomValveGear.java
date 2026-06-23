@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.animation.AnimatrixSet;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.math.Vec3d;
+import cam72cam.umc.api.math.Vec3d;
 
 import java.io.IOException;
 import java.util.ArrayList;

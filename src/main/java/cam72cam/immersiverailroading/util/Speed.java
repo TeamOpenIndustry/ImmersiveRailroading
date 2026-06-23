@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapped;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.serialization.TagMapped;
 
 @TagMapped(Speed.TagMapper.class)
 public class Speed {
@@ -47,7 +47,7 @@ public class Speed {
 		return internalSpeed == 0;
 	}
 
-	public static class TagMapper implements cam72cam.mod.serialization.TagMapper<Speed> {
+	public static class TagMapper implements cam72cam.umc.api.serialization.TagMapper<Speed> {
 		@Override
 		public TagAccessor<Speed> apply(Class<Speed> type, String fieldName, TagField tag) {
 			return new TagAccessor<>(

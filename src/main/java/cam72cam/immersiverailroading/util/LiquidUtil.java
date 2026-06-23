@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cam72cam.immersiverailroading.Config;
-import cam72cam.mod.fluid.Fluid;
+import cam72cam.umc.api.fluid.Fluid;
 
 public class LiquidUtil {
 	public static List<Fluid> getWater() {

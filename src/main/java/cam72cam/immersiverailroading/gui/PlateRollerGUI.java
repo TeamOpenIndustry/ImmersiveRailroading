@@ -11,11 +11,11 @@ import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.gui.screen.Button;
-import cam72cam.mod.gui.screen.IScreen;
-import cam72cam.mod.gui.screen.IScreenBuilder;
-import cam72cam.mod.item.ItemStack;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.gui.screen.Button;
+import cam72cam.umc.api.gui.screen.IScreen;
+import cam72cam.umc.api.gui.screen.IScreenBuilder;
+import cam72cam.umc.api.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;

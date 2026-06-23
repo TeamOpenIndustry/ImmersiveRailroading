@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.entity.physics.chrono;
 
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.world.World;
 
 public interface ChronoState {
     static ChronoState getState(World world) {

@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.util;
 
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.util.FastMath;
-import util.Matrix4;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.util.FastMath;
+import cam72cam.umc.api.util.Matrix4;
 
 public class VecUtil {
 	private VecUtil() {

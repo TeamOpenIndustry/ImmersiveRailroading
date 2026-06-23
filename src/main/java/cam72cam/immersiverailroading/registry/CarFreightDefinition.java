@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.entity.CarFreight;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.resource.Identifier;
 
 import java.util.List;
 import java.util.stream.Collectors;

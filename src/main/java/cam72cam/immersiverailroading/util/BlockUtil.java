@@ -3,10 +3,10 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.world.World;
 
 import java.util.ArrayList;
 import java.util.Arrays;

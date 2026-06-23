@@ -1,11 +1,11 @@
 package cam72cam.immersiverailroading.render.item;
 
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJModel;
-import cam72cam.mod.render.ItemRender;
-import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.obj.OBJRender;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.model.obj.OBJModel;
+import cam72cam.umc.api.render.ItemRender;
+import cam72cam.umc.api.render.StandardModel;
+import cam72cam.umc.api.render.obj.OBJRender;
+import cam72cam.umc.api.resource.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;

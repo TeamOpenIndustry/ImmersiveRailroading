@@ -1,11 +1,11 @@
 package cam72cam.immersiverailroading.library;
 
-import cam72cam.mod.render.Color;
-import cam72cam.mod.serialization.SerializationException;
-import cam72cam.mod.serialization.TagCompound;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapped;
-import cam72cam.mod.text.TextUtil;
+import cam72cam.umc.api.render.Color;
+import cam72cam.umc.api.serialization.SerializationException;
+import cam72cam.umc.api.serialization.TagCompound;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.serialization.TagMapped;
+import cam72cam.umc.api.text.TextUtil;
 
 public enum Augment {
 	SPEED_RETARDER,
@@ -111,7 +111,7 @@ public enum Augment {
 		}
 	}
 
-	public static class PropertyMapper implements cam72cam.mod.serialization.TagMapper<Properties> {
+	public static class PropertyMapper implements cam72cam.umc.api.serialization.TagMapper<Properties> {
 		@Override
 		public TagAccessor<Properties> apply(Class<Properties> type, String fieldName, TagField tag) throws SerializationException {
 			return new TagAccessor<>(

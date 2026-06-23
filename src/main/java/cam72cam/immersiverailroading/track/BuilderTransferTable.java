@@ -5,10 +5,10 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackModelPart;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.math.Rotation;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.math.Rotation;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.world.World;
 
 import java.util.ArrayList;
 import java.util.List;

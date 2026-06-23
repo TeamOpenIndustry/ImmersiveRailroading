@@ -4,8 +4,7 @@ import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.ItemCastRail;
 import cam72cam.immersiverailroading.items.ItemRailAugment;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
+import cam72cam.umc.api.item.ItemStack;
 
 public class ItemCastingCost {
 	public static final int BAD_CAST_COST = -999;

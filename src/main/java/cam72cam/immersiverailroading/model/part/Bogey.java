@@ -5,10 +5,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.math.Vec3d;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import cam72cam.umc.api.math.Vec3d;
 
 public class Bogey {
     public final ModelComponent bogey;

@@ -7,8 +7,8 @@ import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.registry.TenderDefinition;
 import cam72cam.immersiverailroading.util.LiquidUtil;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.fluid.Fluid;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.fluid.Fluid;
 
 public class Tender extends CarTank {
 	@Override

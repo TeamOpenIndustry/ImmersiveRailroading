@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.items.nbt;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.*;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.serialization.*;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.serialization.*;
 
 import java.util.function.Consumer;
 

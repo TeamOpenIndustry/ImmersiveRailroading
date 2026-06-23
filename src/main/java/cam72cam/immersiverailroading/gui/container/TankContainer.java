@@ -1,9 +1,9 @@
 package cam72cam.immersiverailroading.gui.container;
 
 import cam72cam.immersiverailroading.entity.FreightTank;
-import cam72cam.mod.gui.container.IContainerBuilder;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
+import cam72cam.umc.api.gui.container.IContainerBuilder;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.item.ItemStack;
 
 public class TankContainer extends BaseContainer {
     public final FreightTank stock;

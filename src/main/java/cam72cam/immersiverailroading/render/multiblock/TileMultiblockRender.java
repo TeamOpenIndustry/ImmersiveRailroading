@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.render.multiblock;
 
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.opengl.BlendMode;
+import cam72cam.umc.api.render.StandardModel;
+import cam72cam.umc.api.render.opengl.BlendMode;
 
 import java.util.HashMap;
 import java.util.Map;

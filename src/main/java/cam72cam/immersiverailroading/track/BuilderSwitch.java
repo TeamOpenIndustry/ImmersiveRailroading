@@ -2,10 +2,10 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;

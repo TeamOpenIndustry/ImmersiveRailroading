@@ -4,10 +4,10 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Permissions;
-import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.umc.api.MinecraftClient;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.net.Packet;
+import cam72cam.umc.api.serialization.TagField;
 
 public class KeyPressPacket extends Packet {
     @TagField

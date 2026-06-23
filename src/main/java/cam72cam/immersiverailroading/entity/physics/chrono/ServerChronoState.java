@@ -1,9 +1,9 @@
 package cam72cam.immersiverailroading.entity.physics.chrono;
 
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.net.PacketDirection;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.net.Packet;
+import cam72cam.umc.api.net.PacketDirection;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.world.World;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -15,12 +15,12 @@ import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
-import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.model.obj.OBJModel;
-import cam72cam.mod.render.OptiFine;
-import cam72cam.mod.render.obj.OBJRender;
-import cam72cam.mod.render.opengl.RenderState;
-import util.Matrix4;
+import cam72cam.umc.api.MinecraftClient;
+import cam72cam.umc.api.model.obj.OBJModel;
+import cam72cam.umc.api.render.OptiFine;
+import cam72cam.umc.api.render.obj.OBJRender;
+import cam72cam.umc.api.render.opengl.RenderState;
+import cam72cam.umc.api.util.Matrix4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -309,7 +309,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             } else if (playerDistanceSq > ConfigGraphics.StockLODDistance * ConfigGraphics.StockLODDistance) {
                 lod_level = LOD_LARGE;
             } else {
-                lod_level = cam72cam.mod.Config.MaxTextureSize;
+                lod_level = cam72cam.umc.api.Config.MaxTextureSize;
             }
         }
 

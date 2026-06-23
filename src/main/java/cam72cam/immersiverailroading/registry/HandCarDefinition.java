@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.HandCar;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.resource.Identifier;
 
 import java.io.IOException;
 

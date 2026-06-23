@@ -11,11 +11,11 @@ import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.PlateType;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.mod.item.CreativeTab;
-import cam72cam.mod.item.CustomItem;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.text.TextColor;
+import cam72cam.umc.api.item.CreativeTab;
+import cam72cam.umc.api.item.CustomItem;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.text.TextColor;
 
 public class ItemPlate extends CustomItem {
 	public ItemPlate() {

@@ -6,13 +6,13 @@ import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.SpawnUtil;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.CustomItem;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.item.ClickResult;
+import cam72cam.umc.api.item.CustomItem;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.world.World;
 
 import java.util.List;
 

@@ -4,10 +4,10 @@ import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.VecYPR;
-import cam72cam.mod.MinecraftClient;
+import cam72cam.umc.api.MinecraftClient;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.render.opengl.VBO;
+import cam72cam.umc.api.render.opengl.RenderState;
+import cam72cam.umc.api.render.opengl.VBO;
 
 import java.util.List;
 

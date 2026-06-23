@@ -14,12 +14,12 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.entity.boundingbox.IBoundingBox;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.DegreeFuncs;
-import cam72cam.mod.util.FastMath;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.entity.boundingbox.IBoundingBox;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.util.DegreeFuncs;
+import cam72cam.umc.api.util.FastMath;
+import cam72cam.umc.api.world.World;
 
 import java.util.*;
 import java.util.function.Function;

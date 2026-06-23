@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.tile.TileRailGag;
-import cam72cam.mod.block.BlockEntity;
+import cam72cam.umc.api.block.BlockEntity;
 
 public class BlockRailGag extends BlockRailBase {
 	public BlockRailGag() {

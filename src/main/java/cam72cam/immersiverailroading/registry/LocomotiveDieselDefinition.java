@@ -10,8 +10,8 @@ import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.DieselLocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.fluid.Fluid;
+import cam72cam.umc.api.resource.Identifier;
 
 import java.io.IOException;
 import java.util.*;

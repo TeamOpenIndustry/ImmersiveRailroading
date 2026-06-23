@@ -9,8 +9,8 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.util.JSON;
 import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.mod.gui.Progress;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.gui.Progress;
+import cam72cam.umc.api.resource.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;

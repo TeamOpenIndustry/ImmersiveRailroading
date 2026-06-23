@@ -10,11 +10,11 @@ import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.fluid.FluidStack;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.entity.sync.TagSync;
+import cam72cam.umc.api.fluid.Fluid;
+import cam72cam.umc.api.fluid.FluidStack;
+import cam72cam.umc.api.serialization.TagField;
 
 import java.util.*;
 

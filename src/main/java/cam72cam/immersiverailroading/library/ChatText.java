@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.library;
 
-import cam72cam.mod.text.TextUtil;
-import cam72cam.mod.text.PlayerMessage;
+import cam72cam.umc.api.text.TextUtil;
+import cam72cam.umc.api.text.PlayerMessage;
 
 public enum ChatText {
 	STOCK_BUILT("stock.built"), 

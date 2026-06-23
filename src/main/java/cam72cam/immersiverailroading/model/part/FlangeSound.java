@@ -2,9 +2,9 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.sound.ISound;
-import cam72cam.mod.util.DegreeFuncs;
+import cam72cam.umc.api.resource.Identifier;
+import cam72cam.umc.api.sound.ISound;
+import cam72cam.umc.api.util.DegreeFuncs;
 
 import java.util.HashMap;
 import java.util.Map;

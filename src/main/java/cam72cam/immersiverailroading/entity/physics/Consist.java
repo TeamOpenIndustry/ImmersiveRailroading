@@ -3,10 +3,10 @@ package cam72cam.immersiverailroading.entity.physics;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.serialization.TagCompound;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.serialization.TagCompound;
+import cam72cam.umc.api.serialization.TagField;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -633,7 +633,7 @@ public class Consist {
         this.positions = consistPositions;
     }
 
-    public static class TagMapper implements cam72cam.mod.serialization.TagMapper<Consist> {
+    public static class TagMapper implements cam72cam.umc.api.serialization.TagMapper<Consist> {
         @Override
         public TagAccessor<Consist> apply(Class<Consist> type, String fieldName, TagField tag) {
             return new TagAccessor<Consist>(

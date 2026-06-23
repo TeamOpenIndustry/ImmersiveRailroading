@@ -3,10 +3,10 @@ package cam72cam.immersiverailroading.render.rail;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.opengl.DirectDraw;
-import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.render.opengl.Texture;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.render.opengl.DirectDraw;
+import cam72cam.umc.api.render.opengl.RenderState;
+import cam72cam.umc.api.render.opengl.Texture;
 
 import java.util.List;
 
