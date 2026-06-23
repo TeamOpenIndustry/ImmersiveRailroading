@@ -22,7 +22,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.serialization.TagCompound;
-import net.minecraftforge.fml.client.config.GuiSlider;
 import util.Matrix4;
 
 import java.util.ArrayList;
@@ -144,17 +143,8 @@ public class TrackExtraGui implements IScreen {
         lSlider = new Slider(screen, xtop, ytop, width, height, "", 0.0, 1.0, 0.0, false, (slider) -> {}) {
             @Override
             public void onSlider() {
-                lSlider.setText(String.format("%.2f", lSlider.getValue()));
+                lSlider.setText(String.format("%.2f", format(lSlider.getValue())));
                 updateSliderRelated();
-            }
-            @Override
-            public double getValue() {
-                try {
-                    return Double.parseDouble(String.format("%.2f",((GuiSlider) button).getValue()));//getValue is accurate index
-                } catch (NumberFormatException e) {
-                    ImmersiveRailroading.warn("invalid text");
-                    return 0d;
-                }
             }
         };
 
@@ -162,14 +152,14 @@ public class TrackExtraGui implements IScreen {
         insertOrDeletePointButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 50, height, "") {
             @Override
             public void onClick(Player.Hand hand) {
-                if(rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue()) == -1) {//insert
-                    if(rollAndOffsetInfoCache.tryInsertBySubSplit(lSlider.getValue())) {
+                if(rollAndOffsetInfoCache.findPhysicalIndex(format(lSlider.getValue())) == -1) {//insert
+                    if(rollAndOffsetInfoCache.tryInsertBySubSplit(format(lSlider.getValue()))) {
                         edited = true;
                         updateSliderRelated();
                     }
                 } else {//delete
                     edited = true;
-                    rollAndOffsetInfoCache.tryDeleteDirectly(lSlider.getValue());
+                    rollAndOffsetInfoCache.tryDeleteDirectly(format(lSlider.getValue()));
                     updateSliderRelated();
                 }
             }
@@ -279,7 +269,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) rollMax;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL);
+                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
                     edited = true;
@@ -306,7 +296,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = 100f / 2;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetSlope(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
                     edited = true;
@@ -333,7 +323,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.ROLL, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
                     edited = true;
@@ -361,7 +351,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) yOffsetMax;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
+                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                     edited = true;
@@ -388,7 +378,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = 100f;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetSlope(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                     edited = true;
@@ -415,7 +405,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                     edited = true;
@@ -443,7 +433,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) zOffsetMax;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
+                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                     edited = true;
@@ -470,7 +460,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = 100f;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetSlope(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                     edited = true;
@@ -497,7 +487,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(lSlider.getValue(), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                     edited = true;
@@ -565,27 +555,27 @@ public class TrackExtraGui implements IScreen {
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
         rollGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, rollYScale, 1, 0.05f, 0.05f, 0);
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, rollYScale);
-        rollGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getRoll(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, rollYScale);
+        rollGraph.drawArrow(new Vec3d(format(lSlider.getValue()), immutable.getRoll(format(lSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
         //yOffsetGraph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer yOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
         yOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, yOffsetYScale, 1, 0.05f, 0.05f, 0);
         yOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, yOffsetYScale);
-        yOffsetGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getYOffset(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
+        yOffsetGraph.drawArrow(new Vec3d(format(lSlider.getValue()), immutable.getYOffset(format(lSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
 
         //zOffsetGraph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer zOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
         zOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, zOffsetYScale, 1, 0.05f, 0.05f, 0);
         zOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, zOffsetYScale);
-        zOffsetGraph.drawArrow(new Vec3d(lSlider.getValue(), immutable.getZOffset(lSlider.getValue()), 0), Color.YELLOW, 2.4, xScale, zOffsetYScale);
+        zOffsetGraph.drawArrow(new Vec3d(format(lSlider.getValue()), immutable.getZOffset(format(lSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, zOffsetYScale);
 
     }
 
     private void updateSliderRelated() {
         if(insertOrDeletePointButton != null) {
-            if(rollAndOffsetInfoCache.findPhysicalIndex(lSlider.getValue()) == -1) {
+            if(rollAndOffsetInfoCache.findPhysicalIndex(format(lSlider.getValue())) == -1) {
                 insertOrDeletePointButton.setText(GuiText.TRACK_EXTRA_INSERT_POINT.toString());
             } else {
                 insertOrDeletePointButton.setText(GuiText.TRACK_EXTRA_DELETE_POINT.toString());
@@ -636,11 +626,15 @@ public class TrackExtraGui implements IScreen {
         }
 
         if(type == RollAndOffsetInfo.ExtraInfoType.ROLL) {
-            if(valueLabel != null)valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_CM + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));
+            if(valueLabel != null)valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_CM + rollAndOffsetInfoCache.getValueDisplay(format(lSlider.getValue()), type));
         } else {
-            if(valueLabel != null)valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_M + rollAndOffsetInfoCache.getValueDisplay(lSlider.getValue(), type));
+            if(valueLabel != null)valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_M + rollAndOffsetInfoCache.getValueDisplay(format(lSlider.getValue()), type));
         }
-        if(slopeLabel != null)slopeLabel.setText(GuiText.TRACK_EXTRA_POINT_SLOPE + rollAndOffsetInfoCache.getSlopeDisplay(lSlider.getValue(), type, length));
-        if(handleXLenLabel != null)handleXLenLabel.setText(GuiText.TRACK_EXTRA_POINT_WEIGHT + rollAndOffsetInfoCache.getHandleXDisplay(lSlider.getValue(), type, editLeft, length));
+        if(slopeLabel != null)slopeLabel.setText(GuiText.TRACK_EXTRA_POINT_SLOPE + rollAndOffsetInfoCache.getSlopeDisplay(format(lSlider.getValue()), type, length));
+        if(handleXLenLabel != null)handleXLenLabel.setText(GuiText.TRACK_EXTRA_POINT_WEIGHT + rollAndOffsetInfoCache.getHandleXDisplay(format(lSlider.getValue()), type, editLeft, length));
+    }
+
+    private static double format(double value) {
+        return Double.parseDouble(String.format("%.2f", value));
     }
  }
