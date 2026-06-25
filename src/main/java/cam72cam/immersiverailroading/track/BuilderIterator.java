@@ -119,7 +119,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						relHeight += 1;
 					}
 
-					if(rollEffectTile) {//TODO: for tilted tiles, need to solve side face culling problem
+					if(rollEffectTile) {//TODO: for tiles higher than 1 block, need to solve side face culling problem
 						if(height + relHeight > 0.9) {
 							int offsetInt = (int) Math.floor(height + relHeight + 0.1);
 							bedHeights.put(gag, (float) (height + relHeight - offsetInt));

@@ -84,21 +84,29 @@ public class RailSettings {
         }
     }
 
-    public static void writeExtraData(ItemStack stack, TagCompound data) {//this is not safe enough
+    public static void writeExtraData(ItemStack stack, TagCompound data) {
+        writeData(stack, data, "extraRailData");
+    }
+
+    public static TagCompound getExtraDataFrom(ItemStack stack) {
+        return getDataFrom(stack, "extraRailData");
+    }
+
+    public static void writeData(ItemStack stack, TagCompound data, String key) {
         TagCompound root = stack.getTagCompound();
         if (root == null) {
             root = new TagCompound();
         }
-        root.set("extraRailData", data);
+        root.set(key, data);
         stack.setTagCompound(root);
     }
 
-    public static TagCompound getExtraDataFrom(ItemStack stack) {
+    public static TagCompound getDataFrom(ItemStack stack, String key) {
         TagCompound root = stack.getTagCompound();
-        if (root == null || !root.hasKey("extraRailData")) {
+        if (root == null || !root.hasKey(key)) {
             return null;
         }
-        return root.get("extraRailData");
+        return root.get(key);
     }
 
     public Mutable mutable() {

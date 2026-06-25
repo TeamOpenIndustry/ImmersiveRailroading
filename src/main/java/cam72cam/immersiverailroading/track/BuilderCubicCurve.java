@@ -239,7 +239,6 @@ public class BuilderCubicCurve extends BuilderIterator {
 			res.add(new VecYPR(p.x + horizontalOffset.x, p.y, p.z + horizontalOffset.z, yaw, pitch, roll, -1));
 		}
 
-		//TODO: RAIL_LEFT/RIGHT pitch correction?
 		if(correctYaw){//correct yaw if horizontalOffsets are not Zero
 //			double length = points.size() * info.getTrackModel().spacing * info.settings.gauge.scale();
 			for(int i = 0; i < points.size(); i++){
