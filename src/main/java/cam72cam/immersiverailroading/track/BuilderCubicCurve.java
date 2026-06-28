@@ -230,7 +230,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 			}
 			float roll = 0;
 			if(rolls.get(i) != 0) {
-				double sin = rolls.get(i) * 0.01 / gauge;//superelevision scale
+				double sin = rolls.get(i) * 0.01 * gaugeScale / gauge;//superelevision scale
 				if(sin > 1)sin = 1;
 				if(sin < -1)sin = -1;
 				roll = (float) Math.toDegrees(Math.asin(sin));

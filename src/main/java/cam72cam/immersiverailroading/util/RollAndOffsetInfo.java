@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-//TODO: this file includes too much duplicated code, may need to optimize and clean
+//TODO: this file may include much duplicated code, may need to optimize and clean
 // although this works now but List is not really cloned so there might be some potential safety problems
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
 public class RollAndOffsetInfo {
     public final RollYOffsetType offsetType;
-    public final boolean rollEffectTile;//TODO: add option to turn this off/on in TrackExtraGui
+    public final boolean rollEffectTile;
     public final boolean tileTilt;
     private final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
     //Roll
