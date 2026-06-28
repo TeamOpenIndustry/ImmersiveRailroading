@@ -230,6 +230,7 @@ public class TrackExtraGui implements IScreen {
                 }
             }
         };
+        tileTiltCB.setVisible(false);//TODO: wait for topFace modifiable
 
 //        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 

@@ -53,8 +53,8 @@ public class RailBaseModel {
 		if (augment != null) {
 			height = height + 0.1f * (float)gauge.scale() * 1.25f;
 
-//			model.addColorBlock(augment.color(), new Matrix4().scale(1, height, 1));
-			model.addColorBlock(augment.color(), height, Vec3i.ZERO, te.getTopFacing());
+			model.addColorBlock(augment.color(), new Matrix4().scale(1, height, 1));
+//			model.addColorBlock(augment.color(), height, Vec3i.ZERO, te.getTopFacing());//TODO: wait for topFace modifiable
 			return model;
 		}
 
@@ -67,8 +67,8 @@ public class RailBaseModel {
 			model.addSnow(snow + (int)(Math.max(height, 0.1) * 8), new Matrix4());
 			return model;
 		} else if (!bed.isEmpty() && tileHeight != 0.000001f) {
-//			model.addItemBlock(bed, new Matrix4().scale(1, height, 1));
-			model.addItemBlock(bed, height, Vec3i.ZERO, te.getTopFacing());
+			model.addItemBlock(bed, new Matrix4().scale(1, height, 1));
+//			model.addItemBlock(bed, height, Vec3i.ZERO, te.getTopFacing());//TODO: wait for topFace modifiable
 			return model;
 		}
 
