@@ -128,7 +128,7 @@ public class TrackExtraGui implements IScreen {
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
         //left panel
-        railInfoLabel = new Button(screen, xtop, ytop, width / 2, height,  "Rail Length:" + length) {};//TODO: what else need to be displayed here?
+        railInfoLabel = new Button(screen, xtop, ytop, 90, height,  GuiText.TRACK_LENGTH.toString(length)) {};//TODO: what else need to be displayed here?
         ytop += height;
         ytop += 5;
         //rollGraph
@@ -203,7 +203,7 @@ public class TrackExtraGui implements IScreen {
         //back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
 
-        rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 60, ytop + 2, GuiText.SELECTOR_ROLL_EFFECT_TILE.toString(), rollAndOffsetInfoCache.rollEffectTile){
+        rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 2, GuiText.SELECTOR_ROLL_EFFECT_TILE.toString(), rollAndOffsetInfoCache.rollEffectTile){
             @Override
             public void onClick(Player.Hand hand) {
                 edited = true;
