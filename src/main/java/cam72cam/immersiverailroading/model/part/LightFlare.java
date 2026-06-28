@@ -92,7 +92,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         this.direction = checker.test("FORWARD")
                          ? Rotation.NONE
                          : checker.test("REVERSE")
-                           ? Rotation.COUNTERCLOCKWISE_90
+                           ? Rotation.CLOCKWISE_180
                            : null;
         // This is bad...
         LightDefinition config = def.getLight(component.type.toString()
@@ -102,7 +102,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
 
         if (config != null) {
             this.forward = config.revertDirection
-                           ? !(component.center.x < 0)
+                           ? component.center.x >= 0
                            : component.center.x < 0;
             this.lightTex = config.lightTex;
             this.blinkIntervalTicks = (int)(config.blinkIntervalSeconds * 20);

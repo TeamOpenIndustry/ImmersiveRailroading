@@ -258,11 +258,11 @@ public class TrackModel extends OBJModel{
             if(length < near.size() + far.size()){
                 int n = 0, f = 0;
                 while (n + f < length){
-                    if(n <= near.size()){
+                    if(n < near.size()){
                         n++;
                     }
 
-                    if(n + f < length && f <= far.size()){
+                    if(n + f < length && f < far.size()){
                         f++;
                     }
                 }

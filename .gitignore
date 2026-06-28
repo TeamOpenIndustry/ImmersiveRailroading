@@ -34,8 +34,12 @@ UniversalModCore/
 
 ## Generated
 build.gradle
+settings.gradle
 UMC.md
 gradle/wrapper/gradle-wrapper.properties
 src/main/java/cam72cam/immersiverailroading/Mod.java
 src/main/resources/mcmod.info
+src/main/resources/META-INF/neoforge.mods.toml
+src/main/resources/META-INF/mods.toml
+src/main/resources/pack.mcmeta
 /bin/

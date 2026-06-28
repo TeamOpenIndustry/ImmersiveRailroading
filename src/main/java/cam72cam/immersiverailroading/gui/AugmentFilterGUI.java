@@ -32,7 +32,7 @@ public class AugmentFilterGUI implements IScreen {
         this.pos = tileRailBase.getPos();
         this.augment = tileRailBase.getAugment();
         this.properties = tileRailBase.getAugmentProperties() == null
-                          ? Augment.Properties.EMPTY
+                          ? Augment.Properties.empty()
                           : tileRailBase.getAugmentProperties();
     }
 

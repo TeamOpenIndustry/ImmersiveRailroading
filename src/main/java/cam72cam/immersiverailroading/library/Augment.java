@@ -53,13 +53,6 @@ public enum Augment {
 
 	@TagMapped(PropertyMapper.class)
 	public static class Properties {
-		public static final Properties EMPTY = new Properties("", "", "",
-															  CouplerAugmentMode.ENGAGED,
-															  LocoControlMode.THROTTLE,
-															  RedstoneMode.ENABLED,
-															  true,
-															  StockDetectorMode.SIMPLE);
-
 		public String positiveFilter;
 		public String negativeFilter;
 		public String doorActuatorFilter;
@@ -69,14 +62,11 @@ public enum Augment {
 		public boolean pushpull;
 		public StockDetectorMode stockDetectorMode;
 
-		public Properties() {
-		}
-
 		public Properties(String positiveFilter, String negativeFilter, String doorActuatorFilter, CouplerAugmentMode couplerAugmentMode,
 						  LocoControlMode locoControlMode, RedstoneMode redstoneMode, boolean pushpull, StockDetectorMode stockDetectorMode) {
-			this.positiveFilter = positiveFilter;
-			this.negativeFilter = negativeFilter;
-			this.doorActuatorFilter = doorActuatorFilter;
+			this.positiveFilter = positiveFilter != null ? positiveFilter : "";
+			this.negativeFilter = negativeFilter != null ? negativeFilter : "";
+			this.doorActuatorFilter = doorActuatorFilter != null ? doorActuatorFilter : "";
 			this.couplerAugmentMode = couplerAugmentMode;
 			this.locoControlMode = locoControlMode;
 			this.redstoneMode = redstoneMode;
@@ -95,6 +85,16 @@ public enum Augment {
 			compound.setBoolean("pushpull", pushpull);
 			compound.setString("detector", stockDetectorMode.name());
 			return compound;
+		}
+
+		public static Properties empty() {
+			//As this class is mutable we should create a new "empty" instance for each call
+			return new Properties("", "", "",
+								  CouplerAugmentMode.ENGAGED,
+								  LocoControlMode.THROTTLE,
+								  RedstoneMode.ENABLED,
+								  true,
+								  StockDetectorMode.SIMPLE);
 		}
 
 		public static Properties fromNBT(TagCompound compound) {
@@ -122,7 +122,7 @@ public enum Augment {
 							t.set(fieldName, p.toNBT());
 						}
 					},
-					t -> t.hasKey(fieldName) ? Properties.fromNBT(t.get(fieldName)) : Properties.EMPTY
+					t -> t.hasKey(fieldName) ? Properties.fromNBT(t.get(fieldName)) : Properties.empty()
 			);
 		}
 	}
