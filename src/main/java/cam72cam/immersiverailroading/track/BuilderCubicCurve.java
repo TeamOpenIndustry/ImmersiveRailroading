@@ -152,6 +152,10 @@ public class BuilderCubicCurve extends BuilderIterator {
 		List<Double> rolls = PosRollOffset.getRolls(posRollOffsets);
 		List<Double> yOffsets = PosRollOffset.getYOffsets(posRollOffsets);
 		List<Double> zOffsets = PosRollOffset.getZOffsets(posRollOffsets);
+		List<Vec3d> originPoints = new ArrayList<>();
+		for (Vec3d p : points) {
+			originPoints.add(new Vec3d(p.x, p.y, p.z));
+		}
 
 		if(count == 0){//Meaning stepSize must be NaN, caused by curve length == 0
 			stepSize = targetStepSize;
@@ -191,13 +195,35 @@ public class BuilderCubicCurve extends BuilderIterator {
 				}
 				break;
 		}
+
+		//vertical offset
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			Vec3d newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//yOffset scale
 			points.set(i, newP);
 		}
 
+		//horizontal offset
 		boolean correctYaw = false;
+		for(int i = 0; i < points.size(); i++) {
+			float yaw;
+			if (points.size() == 1) {
+				yaw = info.placementInfo.yaw;
+			} else if (i == points.size()-1) {
+				yaw = curve.angleStop();
+			} else if (i == 0) {
+				yaw = curve.angleStart();
+			} else {
+				yaw = VecUtil.toYaw(originPoints.get(i+1).subtract(originPoints.get(i-1)));
+			}
+
+			if(zOffsets.get(i) != 0) {//the side effect of too much offset is that some dot spacing becomes less uniform, and should we offset points in toList?
+				correctYaw = true;
+				Vec3d horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90).scale(gaugeScale / gauge);//zOffset scale
+				points.set(i, points.get(i).add(horizontalOffset));
+			}
+		}
+
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			float yaw;
@@ -209,10 +235,12 @@ public class BuilderCubicCurve extends BuilderIterator {
 				Vec3d next = points.get(i-1);
  				pitch = (float) Math.toDegrees(Math.atan2(next.y - p.y, VecUtil.flatDistance(next, p)));
 				yaw = curve.angleStop();
+				if(correctYaw) yaw += (float) rollAndOffsetInfo.getZOffsetSlopeEnd(length);
 			} else if (i == 0) {
 				Vec3d next = points.get(i+1);
 				pitch = (float) -Math.toDegrees(Math.atan2(next.y - p.y, VecUtil.flatDistance(next, p)));
-				yaw = curve.angleStart();
+				yaw = curve.angleStart() ;
+				if(correctYaw) yaw += (float) rollAndOffsetInfo.getZOffsetSlopeStart(length);
 			} else {
 				Vec3d prev = points.get(i-1);
 				Vec3d next = points.get(i+1);
@@ -220,14 +248,6 @@ public class BuilderCubicCurve extends BuilderIterator {
 				yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 			}
 
-			Vec3d horizontalOffset;//the side effect of too much offset is that some dot spacing becomes less uniform, and should we offset points in toList?
-			if(zOffsets.get(i) == 0) {
-				horizontalOffset = Vec3d.ZERO;
-			} else {
-				correctYaw = true;
-				horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90).scale(gaugeScale);//zOffset scale
-				points.set(i, points.get(i).add(horizontalOffset));
-			}
 			float roll = 0;
 			if(rolls.get(i) != 0) {
 				double sin = rolls.get(i) * 0.01 * gaugeScale / gauge;//superelevision scale
@@ -236,25 +256,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				roll = (float) Math.toDegrees(Math.asin(sin));
 			}
 
-			res.add(new VecYPR(p.x + horizontalOffset.x, p.y, p.z + horizontalOffset.z, yaw, pitch, roll, -1));
-		}
-
-		if(correctYaw){//correct yaw if horizontalOffsets are not Zero
-//			double length = points.size() * info.getTrackModel().spacing * info.settings.gauge.scale();
-			for(int i = 0; i < points.size(); i++){
-				VecYPR ypr = res.get(i);
-				float yaw = ypr.getYaw();
-				if (points.size() == 1) {
-					yaw = info.placementInfo.yaw;
-				} else if (i == points.size()-1) {
-					yaw = ypr.getYaw() + (float) rollAndOffsetInfo.getZOffsetSlopeEnd(length);
-				} else if (i == 0) {
-					yaw = ypr.getYaw() + (float) rollAndOffsetInfo.getZOffsetSlopeStart(length);
-				} else {
-					yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
-				}
-				res.set(i, new VecYPR(ypr.x, ypr.y, ypr.z, yaw, ypr.getPitch(), ypr.getRoll(), ypr.getLength()));
-			}
+			res.add(new VecYPR(p.x, p.y, p.z, yaw, pitch, roll, -1));
 		}
 
 		cache.put(targetStepSize, Pair.of(stepSize, res));
