@@ -166,6 +166,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			throw new RuntimeException("Invalid track builder " + debug);
 		}
 
+		//TODO: rollerCoaster support
 		Vec3i mainPos = new Vec3i(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
 		this.setParentPos(mainPos);
 		TrackRail main = new TrackRail(this, mainPos	);

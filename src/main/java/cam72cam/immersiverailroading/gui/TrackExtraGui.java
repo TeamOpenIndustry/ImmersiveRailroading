@@ -72,6 +72,7 @@ public class TrackExtraGui implements IScreen {
     private Button railInfoLabel;
     private CheckBox rollEffectTileCB;
     private CheckBox tileTiltCB;
+    private CheckBox rollerCoasterModeCB;
 //    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
@@ -106,9 +107,10 @@ public class TrackExtraGui implements IScreen {
         }
 
         //basic Gauge: Standard Gauge. other gauge will scale from standard
+//        rollMax = 180;
         rollMax = 40;//unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
-        yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
-        zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
+        yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
+        zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
         curveColor = Color.FLUORESCENT_GREEN;      // GREEN curve
         pointColor = Color.RED;      // RED point
@@ -231,6 +233,15 @@ public class TrackExtraGui implements IScreen {
             }
         };
         tileTiltCB.setVisible(false);//TODO: wait for topFace modifiable
+
+        rollerCoasterModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 2, GuiText.SELECTOR_ROLLER_COASTER_MODE.toString(), rollAndOffsetInfoCache.rollerCoasterMode) {
+            @Override
+            public void onClick(Player.Hand hand) {
+                edited = true;
+                rollAndOffsetInfoCache.rollerCoasterMode = rollerCoasterModeCB.isChecked();
+            }
+        };
+        rollerCoasterModeCB.setVisible(false);//TODO: correct tile placing
 
 //        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 

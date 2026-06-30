@@ -250,10 +250,14 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 			float roll = 0;
 			if(rolls.get(i) != 0) {
-				double sin = rolls.get(i) * 0.01 * gaugeScale / gauge;//superelevision scale
-				if(sin > 1)sin = 1;
-				if(sin < -1)sin = -1;
-				roll = (float) Math.toDegrees(Math.asin(sin));
+				if(!info.settings.rollAndOffsetInfo.rollerCoasterMode) {
+					double sin = rolls.get(i) * 0.01 * gaugeScale / gauge;//superelevision scale
+					if(sin > 1) sin = 1;
+					if(sin < -1) sin = -1;
+					roll = (float) Math.toDegrees(Math.asin(sin));
+				} else {
+					roll = rolls.get(i).floatValue();
+				}
 			}
 
 			res.add(new VecYPR(p.x, p.y, p.z, yaw, pitch, roll, -1));

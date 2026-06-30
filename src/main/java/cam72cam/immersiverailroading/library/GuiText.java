@@ -20,6 +20,7 @@ public enum GuiText {
 	SELECTOR_GRADE_CROSSING("selector.grade_crossing"),
 	SELECTOR_TILE_TILT("selector.tile_tilt"),
 	SELECTOR_ROLL_EFFECT_TILE("selector.roll_effect_tile"),
+	SELECTOR_ROLLER_COASTER_MODE("selector.roller_coaster_mode"),
 	SELECTOR_GAUGE("selector.gauge"),
 	SELECTOR_TRACK("selector.track"),
 	SELECTOR_TRANSFER_TABLE_ENTRY_COUNT("selector.transfer_table_entry_count"),

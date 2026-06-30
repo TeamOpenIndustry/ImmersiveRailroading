@@ -19,6 +19,8 @@ public class RollAndOffsetInfo {
     public final RollYOffsetType offsetType;
     public final boolean rollEffectTile;
     public final boolean tileTilt;
+
+    public final boolean rollerCoasterMode;
     private final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
     //Roll
     /**
@@ -43,12 +45,13 @@ public class RollAndOffsetInfo {
     private final List<Vec3d> zOffsetCtrls;
 
     public RollAndOffsetInfo(
-            RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt,
+            RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt, boolean rollerCoasterMode,
             List<Double> ls, List<Vec3d> rolls, List<Vec3d> rollCtrls, List<Vec3d> yOffsets, List<Vec3d> yOffsetlCtrls, List<Vec3d> zOffsets, List<Vec3d> zOffsetCtrls
     ) {
         this.offsetType = offsetType;
         this.rollEffectTile = rollEffectTile;
         this.tileTilt = tileTilt;
+        this.rollerCoasterMode = rollerCoasterMode;
 
         this.ls = ls;
         this.rolls = rolls;
@@ -64,6 +67,7 @@ public class RollAndOffsetInfo {
         offsetType = RollYOffsetType.MID;
         rollEffectTile = true;
         tileTilt = true;
+        rollerCoasterMode = false;
 
         ls = new ArrayList<>();
         rolls = new ArrayList<>();
@@ -89,6 +93,9 @@ public class RollAndOffsetInfo {
         public boolean rollEffectTile;
         @TagField("tileTilt")
         public boolean tileTilt;
+
+        @TagField("rollerCoasterMode")
+        public boolean rollerCoasterMode;
         @TagField(value = "ls", mapper = DoubleListMapper.class)
         private List<Double> ls;
         @TagField(value = "rolls", mapper = Vec3dListMapper.class)
@@ -108,6 +115,7 @@ public class RollAndOffsetInfo {
             this.offsetType = rollAndOffsetInfo.offsetType;
             this.rollEffectTile = rollAndOffsetInfo.rollEffectTile;
             this.tileTilt = rollAndOffsetInfo.tileTilt;
+            this.rollerCoasterMode = rollAndOffsetInfo.rollerCoasterMode;
 
             this.ls = rollAndOffsetInfo.ls;
             this.rolls = rollAndOffsetInfo.rolls;
@@ -124,6 +132,7 @@ public class RollAndOffsetInfo {
             offsetType = defaultInfo.offsetType;
             rollEffectTile = defaultInfo.rollEffectTile;
             tileTilt = defaultInfo.tileTilt;
+            rollerCoasterMode = defaultInfo.rollerCoasterMode;
 
             ls = defaultInfo.ls;
             rolls = defaultInfo.rolls;
@@ -141,6 +150,7 @@ public class RollAndOffsetInfo {
                     offsetType,
                     rollEffectTile,
                     tileTilt,
+                    rollerCoasterMode,
 
                     ls,
                     rolls,
@@ -178,7 +188,7 @@ public class RollAndOffsetInfo {
             divider.add(Pair.of(l, 1d));
 
             RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
-                    offsetType, rollEffectTile, tileTilt,
+                    offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
                     ls, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
             );
             List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);
@@ -868,7 +878,7 @@ public class RollAndOffsetInfo {
                         Vec3d p1 = yOffsets.get(Physic(logicIdxStart - 1));
                         Vec3d p2 = yOffsets.get(Physic(logicIdxStart));
                         Vec3d ctrl1 = yOffsetCtrls.get(Physic(logicIdxStart - 1));
-                        Vec3d ctrl2 = yOffsets.get(Physic(logicIdxStart)).scale(2).subtract(yOffsetCtrls.get(Physic(logicIdxStart)));//规定ctrl在右边，所以ctrl2都要取反一下
+                        Vec3d ctrl2 = yOffsets.get(Physic(logicIdxStart)).scale(2).subtract(yOffsetCtrls.get(Physic(logicIdxStart)));//The Ctrl is on the right, so Ctrl2 needs to be inverted
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve startCurve = getLeftByX(lStart, curve.reverse()).reverse();
@@ -956,13 +966,13 @@ public class RollAndOffsetInfo {
             }
 
             if(normalize) results.add(normalize(
-                    offsetType, rollEffectTile, tileTilt,
+                    offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls,
                     lStart, lEnd
             ));
 
             else results.add(new RollAndOffsetInfo(
-                    offsetType, rollEffectTile, tileTilt,
+                    offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
             ));
         }
@@ -1018,7 +1028,7 @@ public class RollAndOffsetInfo {
     }
 
     private static RollAndOffsetInfo normalize(
-            RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt,
+            RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt, boolean rollerCoasterMode,
             List<Double> newT, List<Vec3d> newRolls, List<Vec3d> newRollCtrls, List<Vec3d> newYOffsets, List<Vec3d> newYOffsetCtrls, List<Vec3d> newZOffsets, List<Vec3d> newZOffsetCtrls,
             double tStart, double tEnd
     ) {
@@ -1053,7 +1063,7 @@ public class RollAndOffsetInfo {
             newZOffsetCtrls.set(i, new Vec3d(newZOffsetCtrlX, oldZOffsetCtrl.y, oldZOffsetCtrl.z));
         }
         return new RollAndOffsetInfo(
-                offsetType, rollEffectTile, tileTilt,
+                offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
                 newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
         );
     }
