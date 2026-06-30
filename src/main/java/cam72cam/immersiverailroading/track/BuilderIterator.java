@@ -23,7 +23,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 
 public abstract class BuilderIterator extends BuilderBase implements IIterableTrack {
-	protected HashSet<Pair<Integer, Integer>> positions;
+	protected HashSet<Vec3i> positions;
 	
 	public BuilderIterator(RailInfo info, World world, Vec3i pos) {
 		this(info, world, pos, false);
@@ -39,11 +39,11 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		super(info, world, pos);
 		
 		positions = new HashSet<>();
-		HashMap<Pair<Integer, Integer>, Float> bedHeights = new HashMap<>();
-		HashMap<Pair<Integer, Integer>, Vec3d> topFacings = new HashMap<>();
-		HashMap<Pair<Integer, Integer>, Float> railHeights = new HashMap<>();
-		HashMap<Pair<Integer, Integer>, Integer> yOffset = new HashMap<>();
-		HashSet<Pair<Integer, Integer>> flexPositions = new HashSet<>();
+		HashMap<Vec3i, Float> bedHeights = new HashMap<>();
+		HashMap<Vec3i, Vec3d> topFacings = new HashMap<>();
+		HashMap<Vec3i, Float> railHeights = new HashMap<>();
+		HashMap<Vec3i, Integer> yOffset = new HashMap<>();
+		HashSet<Vec3i> flexPositions = new HashSet<>();
 		
 		double horiz = info.settings.gauge.scale() * 1.1;
 		if (Config.ConfigDebug.oldNarrowWidth && info.settings.gauge.value() < 1) {
@@ -61,11 +61,12 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 		Vec3d placeOff = new Vec3d(
 				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.x, 1)),
-				0,
+				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.y, 1)),
                 Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
 		);
 		int mainX = (int) Math.floor(path.get(path.size() / 2).x + placeOff.x);
 		int mainZ = (int) Math.floor(path.get(path.size() / 2).z + placeOff.z);
+		int mainY = (int) Math.floor(path.get(path.size() / 2).y + placeOff.y);
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale() / 2));
 
 		for (VecYPR cur : path) {
@@ -76,11 +77,12 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			gagPos = gagPos.add(0, heightOffset, 0);
 
 			for (double q = -horiz; q <= horiz; q += 0.1) {
-				Vec3d nextUp = VecUtil.fromYaw(q, 90 + cur.getYaw());
+				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());//TODO：还不知道正反
 				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
 				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
+				int posY = (int) Math.floor(gagPos.y + nextUp.y + placeOff.y);
 
-				Pair<Integer, Integer> gag = Pair.of(posX, posZ);
+				Vec3i gag = new Vec3i(posX, posY, posZ);
 				if (!positions.contains(gag)) {
 					positions.add(gag);
 
@@ -145,17 +147,18 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 		}
 
-		if (!yOffset.containsKey(Pair.of(mainX, mainZ))) {
+		if (!yOffset.containsKey(new Vec3i(mainX, mainY, mainZ))) {
 			// Try a few different offsets
 			for (Facing value : Facing.values()) {
-				if (yOffset.containsKey(Pair.of(mainX + value.getXMultiplier(), mainZ + value.getZMultiplier()))) {
+				if (yOffset.containsKey(new Vec3i(mainX + value.getXMultiplier(), mainY + value.getYMultiplier(), mainZ + value.getZMultiplier()))) {
 					mainX += value.getXMultiplier();
-					mainZ += value .getZMultiplier();
+					mainY += value.getYMultiplier();
+					mainZ += value.getZMultiplier();
 					break;
 				}
 			}
 		}
-		if (!yOffset.containsKey(Pair.of(mainX, mainZ))) {
+		if (!yOffset.containsKey(new Vec3i(mainX, mainY, mainZ))) {
 			// No luck, code is really borked now.  Throw an exception to help track this.
 			TagCompound debug = new TagCompound();
 			try {
@@ -167,26 +170,26 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		}
 
 		//TODO: rollerCoaster support
-		Vec3i mainPos = new Vec3i(mainX, yOffset.get(Pair.of(mainX, mainZ)), mainZ);
+		Vec3i mainPos = new Vec3i(mainX, yOffset.get(new Vec3i(mainX, mainY, mainZ)), mainZ);
 		this.setParentPos(mainPos);
 		TrackRail main = new TrackRail(this, mainPos	);
 		tracks.add(main);
-		main.setRailHeight(railHeights.get(Pair.of(mainX, mainZ)));
-		main.setBedHeight(bedHeights.get(Pair.of(mainX, mainZ)));
-		main.setTopFacing(topFacings.get(Pair.of(mainX, mainZ)));
+		main.setRailHeight(railHeights.get(new Vec3i(mainX, mainY, mainZ)));
+		main.setBedHeight(bedHeights.get(new Vec3i(mainX, mainY, mainZ)));
+		main.setTopFacing(topFacings.get(new Vec3i(mainX, mainY, mainZ)));
 
-		for (Pair<Integer, Integer> pair : positions) {
-			if (pair.getLeft() == mainX && pair.getRight() == mainZ) {
+		for (Vec3i tilePos : positions) {
+			if (tilePos.x == mainX && tilePos.z == mainZ && tilePos.y == mainY) {
 				// Skip parent block
 				continue;
 			}
-			TrackBase tg = new TrackGag(this, new Vec3i(pair.getLeft(), yOffset.get(pair), pair.getRight()));
-			if (flexPositions.contains(pair)) {
+			TrackBase tg = new TrackGag(this, new Vec3i(tilePos.x, yOffset.get(tilePos), tilePos.z));
+			if (flexPositions.contains(tilePos)) {
 				tg.setFlexible();
 			}
-			tg.setRailHeight(railHeights.get(pair));
-			tg.setBedHeight(bedHeights.get(pair));
-			tg.setTopFacing(topFacings.get(pair));
+			tg.setRailHeight(railHeights.get(tilePos));
+			tg.setBedHeight(bedHeights.get(tilePos));
+			tg.setTopFacing(topFacings.get(tilePos));
 			tracks.add(tg);
 		}
 	}
