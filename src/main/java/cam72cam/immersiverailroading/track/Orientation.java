@@ -16,9 +16,17 @@ public class Orientation {
     }
 
     public Orientation(Vec3d forward, Vec3d right) {
-        this.forward = forward.normalize();
-        this.right = right.normalize();
-        this.up = this.forward.crossProduct(this.right).normalize();
+        Vec3d f = forward.normalize();
+
+        Vec3d r = right.subtract(
+                f.scale(right.dotProduct(f))
+        ).normalize();
+
+        Vec3d u = f.crossProduct(r).normalize();
+
+        this.forward = f;
+        this.right = r;
+        this.up = u;
     }
 
 
