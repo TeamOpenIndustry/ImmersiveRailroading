@@ -297,16 +297,13 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				for (int i = 0; i < points.size(); i++) {
 					VecYPR cur = points.get(i);
 					Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
-					leftPos[i] = pos.add(VecUtil.fromYawRoll(
-							info.settings.gauge.value() / 2,
-							cur.getYaw() - 90,
-							-cur.getRoll()
-					));
-					rightPos[i] = pos.add(VecUtil.fromYawRoll(
-							info.settings.gauge.value() / 2,
-							cur.getYaw() + 90,
-							cur.getRoll()
-					));
+					Orientation o = Orientation.fromYPR(cur);
+
+					leftPos[i] =
+							pos.subtract(o.right.scale(info.settings.gauge.value() * 0.5));
+
+					rightPos[i] =
+							pos.add(o.right.scale(info.settings.gauge.value() * 0.5));
 				}
 
 				//start

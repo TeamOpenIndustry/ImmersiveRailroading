@@ -107,8 +107,8 @@ public class TrackExtraGui implements IScreen {
         }
 
         //basic Gauge: Standard Gauge. other gauge will scale from standard
-//        rollMax = 180;
-        rollMax = 40;//unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
+        rollMax = 180;
+//        rollMax = 40;//unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
         yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
@@ -239,9 +239,10 @@ public class TrackExtraGui implements IScreen {
             public void onClick(Player.Hand hand) {
                 edited = true;
                 rollAndOffsetInfoCache.rollerCoasterMode = rollerCoasterModeCB.isChecked();
+                rollMax = rollAndOffsetInfoCache.rollerCoasterMode ? 180 : 40;
             }
         };
-        rollerCoasterModeCB.setVisible(false);//TODO: correct tile placing
+//        rollerCoasterModeCB.setVisible(false);//TODO: correct tile placing
 
 //        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 
@@ -306,7 +307,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 100f / 2;
+            float max = 500f;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL, length);
                 if(feedback) {
@@ -388,7 +389,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 100f;
+            float max = 500f;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, length);
                 if(feedback) {
@@ -470,7 +471,7 @@ public class TrackExtraGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = 100f;
+            float max = 500f;
             if (Math.abs(val) <= max) {
                 boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, length);
                 if(feedback) {
