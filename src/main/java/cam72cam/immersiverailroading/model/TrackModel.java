@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.library.TrackModelPart;
+import cam72cam.immersiverailroading.track.Orientation;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.util.MathUtil;
@@ -189,12 +190,22 @@ public class TrackModel extends OBJModel{
                              OBJRender.Builder builder, Map<TrackModelPart, List<String>> groupNames) {
         Matrix4 matrix = new Matrix4();
         matrix.translate(piece.x, piece.y, piece.z);
-        matrix.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
-        matrix.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
 
-        matrix.translate(0, getHeight(), 0);
-        matrix.rotate(Math.toRadians(piece.getRoll()), 0, 0, 1);
-        matrix.translate(0, -getHeight(), 0);
+        if (piece.getOrientation() != null) {//this is a more intuitive method
+
+            matrix.translate(0, getHeight(), 0);
+            matrix.multiply(piece.getOrientation().toMatrix());
+            matrix.translate(0, -getHeight(), 0);
+
+        } else {
+
+            matrix.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
+
+            matrix.translate(0, getHeight(), 0);
+            matrix.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
+            matrix.rotate(Math.toRadians(piece.getRoll()), 0, 0, 1);
+            matrix.translate(0, -getHeight(), 0);
+        }
 
         matrix.rotate(Math.toRadians(-90), 0, 1, 0);
 

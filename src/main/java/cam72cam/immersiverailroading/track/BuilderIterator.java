@@ -77,7 +77,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			gagPos = gagPos.add(0, heightOffset, 0);
 
 			for (double q = -horiz; q <= horiz; q += 0.1) {
-				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());//TODO：还不知道正反
+				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());
 				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
 				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
 				int posY = (int) Math.floor(gagPos.y + nextUp.y + placeOff.y);
@@ -100,7 +100,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 						if (Math.abs(dy) < 1e-5) {//this should not happen, use q res as fallback
 							double sin = Math.sin(Math.toRadians(cur.getRoll()));
-							rollDelta = sin * q;
+							rollDelta = 0;
 						}else {
 							rollDelta = ( dx * (px - cx) + dz * (pz - cz) ) / dy;
 						}
@@ -277,13 +277,13 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 		}
 
-		boolean correctPartRailPitch = true;//TODO: make this an Graphic option?
-		List<Float> correctLeftPitch = new ArrayList<>();
-		List<Float> correctRightPitch = new ArrayList<>();
+		boolean correctPartRailOrientatio = true;//TODO: make this an Graphic option?
+		List<Orientation> correctLeftOrientation = new ArrayList<>();
+		List<Orientation> correctRightOrientation = new ArrayList<>();
 
-		if (correctPartRailPitch) {
+		if (correctPartRailOrientatio) {
 			if (points.size() <= 2 || info.settings.rollAndOffsetInfo == null) {
-				correctPartRailPitch = false;
+				correctPartRailOrientatio = false;
 			} else {
 				renderScale *= 1.02f;
 				double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
@@ -298,32 +298,32 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					leftPos[i] = pos.add(VecUtil.fromYawRoll(
 							info.settings.gauge.value() / 2,
 							cur.getYaw() - 90,
-							cur.getRoll()
+							-cur.getRoll()
 					));
 					rightPos[i] = pos.add(VecUtil.fromYawRoll(
 							info.settings.gauge.value() / 2,
 							cur.getYaw() + 90,
-							-cur.getRoll()
+							cur.getRoll()
 					));
 				}
 
-				float startLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, false) + points.get(0).getPitch();
-				float startRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, true) + points.get(0).getPitch();
-				correctLeftPitch.add(startLeftPitch);
-				correctRightPitch.add(startRightPitch);
+				float startLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, false) + points.getFirst().getPitch();
+				float startRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, true) + points.getFirst().getPitch();
+				correctLeftOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startLeftPitch, points.getFirst().getRoll()));
+				correctRightOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startRightPitch, points.getFirst().getRoll()));
 
 				for (int i = 1; i < points.size() - 1; i++) {
-					float leftPitch = calcPitch(leftPos[i - 1], leftPos[i + 1]);
-					float rightPitch = calcPitch(rightPos[i - 1], rightPos[i + 1]);
+					Orientation leftOrientation = new Orientation(leftPos[i+1].subtract(leftPos[i-1]).scale(-1), points.get(i).subtract(leftPos[i]).scale(-1));
+					Orientation rightOrientation = new Orientation(rightPos[i+1].subtract(rightPos[i-1]).scale(-1), rightPos[i].subtract(points.get(i)).scale(-1));
 
-					correctLeftPitch.add(leftPitch);
-					correctRightPitch.add(rightPitch);
+					correctLeftOrientation.add(leftOrientation);
+					correctRightOrientation.add(rightOrientation);
 				}
 
-				float endLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, false) + points.get(points.size() - 1).getPitch();
-				float endRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, true) + points.get(points.size() - 1).getPitch();
-				correctLeftPitch.add(endLeftPitch);
-				correctRightPitch.add(endRightPitch);
+				float endLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, false) + points.getLast().getPitch();
+				float endRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, true) + points.getLast().getPitch();
+				correctLeftOrientation.add(Orientation.fromYPR(points.getLast().getYaw(), endLeftPitch, points.getLast().getRoll()));
+				correctRightOrientation.add(Orientation.fromYPR(points.getLast().getYaw(), endRightPitch, points.getLast().getRoll()));
 			}
 		}
 
@@ -363,16 +363,16 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			//merge situation when angle == 0
             VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe called STILL_BASE)
             if (direction == TrackDirection.RIGHT) {
-                if(correctPartRailPitch) {//correct rail pitch
-					cur = cur.withPitch(correctLeftPitch.get(i));//this looks wired but work... caused by how tracks work before
-					switchPos = switchPos.withPitch(correctRightPitch.get(i));
+                if(correctPartRailOrientatio) {//correct rail part
+					cur = cur.withOrientation(correctLeftOrientation.get(i));//this looks wired but work... caused by how tracks work before
+					switchPos = switchPos.withOrientation(correctRightOrientation.get(i));
                 }
                 vec.addChild(new VecYPR(switchPos, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
                 vec.addChild(new VecYPR(cur, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));
             } else {
-                if(correctPartRailPitch) {//correct rail pitch
-					switchPos = switchPos.withPitch(correctLeftPitch.get(i));
-					cur = cur.withPitch(correctRightPitch.get(i));
+                if(correctPartRailOrientatio) {//correct rail part
+					switchPos = switchPos.withOrientation(correctLeftOrientation.get(i));
+					cur = cur.withOrientation(correctRightOrientation.get(i));
                 }
                 vec.addChild(new VecYPR(cur, (1 - angle / 180) * renderScale, TrackModelPart.RAIL_LEFT));
                 vec.addChild(new VecYPR(switchPos, (1 + angle / 180) * renderScale, TrackModelPart.RAIL_RIGHT));
@@ -381,11 +381,5 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
         }
 
 		return data;
-	}
-
-	private float calcPitch(Vec3d from, Vec3d to) {
-		double dy = to.y - from.y;
-		double dh = VecUtil.flatDistance(from, to);
-		return (float) -Math.toDegrees(Math.atan2(dy, dh));
 	}
 }
