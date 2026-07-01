@@ -1097,76 +1097,79 @@ public class RollAndOffsetInfo {
     public double getRoll(double l) {
         return getValue(this.ls, l, rolls, rollCtrls);
     }
-    /**
-     * Used to correct Rail part pitch in BuilderIterator
-     */
-    public double getRelRollSlopeStart(double length, boolean isRight) {
-        int idx = 0;
-        double tan = (rollCtrls.get(idx).z - rolls.get(idx).z) / (rollCtrls.get(idx).x - rolls.get(idx).x);
-        double value = rolls.get(idx).z;
-        tan /= length;
-        tan *= 0.01;
-        tan *= 0.5;
 
-        switch (offsetType) {
-//            case HIGH:
-//            case LOW:
-            case LEFT:
-            case RIGHT:
-                tan = isRight ? -tan : tan;
-                break;
-            case MID:
-                if(value > 0) {//right tilt
-                    tan = !isRight ? tan : -tan;
-                }else if(value < 0) {
-                    tan = !isRight ? -tan : tan;
-                }else {
-                    if(tan > 0) {//right tilt
-                        tan = !isRight ? tan : -tan;
-                    }else if(tan < 0) {
-                        tan = !isRight ? -tan : tan;
-                    }
-                }
-                break;
-        }
-
-        return -Math.toDegrees(Math.atan(tan));
-    }
-    /**
-     * Used to correct Rail part pitch in BuilderIterator
-     */
-    public double getRelRollSlopeEnd(double length, boolean isRight) {
-        int idx = ls.size() - 1;
-        double tan = (rollCtrls.get(idx).z - rolls.get(idx).z) / (rollCtrls.get(idx).x - rolls.get(idx).x);
-        double value = rolls.get(idx).z;
-        tan /= length;
-        tan *= 0.01;
-        tan *= 0.5;
-
-        switch (offsetType) {
-//            case HIGH:
-//            case LOW:
-            case LEFT:
-            case RIGHT:
-                tan = isRight ? -tan : tan;
-                break;
-            case MID:
-                if(value > 0) {//right tilt
-                    tan = !isRight ? -tan : tan;
-                }else if(value < 0) {
-                    tan = !isRight ? tan : -tan;
-                }else {
-                    if(tan < 0) {//right tilt
-                        tan = !isRight ? -tan : tan;
-                    }else if(tan > 0) {
-                        tan = !isRight ? tan : -tan;
-                    }
-                }
-                break;
-        }
-
-        return -Math.toDegrees(Math.atan(tan));
-    }
+//    /**
+//     * Used to correct Rail part pitch in BuilderIterator
+//     */
+//    public double getRelRollSlopeStart(double length, boolean isRight) {
+//        int idx = 0;
+//        double tan = (rollCtrls.get(idx).z - rolls.get(idx).z) / (rollCtrls.get(idx).x - rolls.get(idx).x);
+//        double value = rolls.get(idx).z;
+//        tan /= length;
+//        tan *= 0.01;
+//        tan *= 0.5;
+//
+//        switch (offsetType) {
+////            case HIGH:
+////            case LOW:
+//            case LEFT:
+//            case RIGHT:
+//                tan = isRight ? -tan : tan;
+//                break;
+//            case MID:
+//                if(value > 0) {//right tilt
+//                    tan = !isRight ? tan : -tan;
+//                }else if(value < 0) {
+//                    tan = !isRight ? -tan : tan;
+//                }else {
+//                    if(tan > 0) {//right tilt
+//                        tan = !isRight ? tan : -tan;
+//                    }else if(tan < 0) {
+//                        tan = !isRight ? -tan : tan;
+//                    }
+//                }
+//                break;
+//        }
+//
+//        if(rollerCoasterMode) return ;
+//        else return -Math.toDegrees(Math.atan(tan));
+//    }
+//    /**
+//     * Used to correct Rail part pitch in BuilderIterator
+//     */
+//    public double getRelRollSlopeEnd(double length, boolean isRight) {
+//        int idx = ls.size() - 1;
+//        double tan = (rollCtrls.get(idx).z - rolls.get(idx).z) / (rollCtrls.get(idx).x - rolls.get(idx).x);
+//        double value = rolls.get(idx).z;
+//        tan /= length;
+//        tan *= 0.01;
+//        tan *= 0.5;
+//
+//        switch (offsetType) {
+////            case HIGH:
+////            case LOW:
+//            case LEFT:
+//            case RIGHT:
+//                tan = isRight ? -tan : tan;
+//                break;
+//            case MID:
+//                if(value > 0) {//right tilt
+//                    tan = !isRight ? -tan : tan;
+//                }else if(value < 0) {
+//                    tan = !isRight ? tan : -tan;
+//                }else {
+//                    if(tan < 0) {//right tilt
+//                        tan = !isRight ? -tan : tan;
+//                    }else if(tan > 0) {
+//                        tan = !isRight ? tan : -tan;
+//                    }
+//                }
+//                break;
+//        }
+//
+//        if(rollerCoasterMode) return ;
+//        return -Math.toDegrees(Math.atan(tan));
+//    }
 
     public double getYOffset(double l) {
         return getValue(this.ls, l, yOffsets, yOffsetCtrls);

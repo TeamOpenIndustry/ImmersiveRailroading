@@ -277,16 +277,16 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 		}
 
-		boolean correctPartRailOrientatio = true;//TODO: make this an Graphic option?
+		boolean correctPartRailOrientatio = true;
 		List<Orientation> correctLeftOrientation = new ArrayList<>();
 		List<Orientation> correctRightOrientation = new ArrayList<>();
 
 		if (correctPartRailOrientatio) {
-			if (points.size() <= 2 || info.settings.rollAndOffsetInfo == null) {
+			if (points.size() < 2 || info.settings.rollAndOffsetInfo == null) {
 				correctPartRailOrientatio = false;
 			} else {
 				renderScale *= 1.02f;
-				double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
+//				double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
 
 				Vec3d[] leftPos = new Vec3d[points.size()];
 				Vec3d[] rightPos = new Vec3d[points.size()];
@@ -307,11 +307,21 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					));
 				}
 
-				float startLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, false) + points.getFirst().getPitch();
-				float startRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, true) + points.getFirst().getPitch();
-				correctLeftOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startLeftPitch, points.getFirst().getRoll()));
-				correctRightOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startRightPitch, points.getFirst().getRoll()));
+				//Start Left
+				Orientation startLeftOrientation = new Orientation(
+						leftPos[1].subtract(leftPos[0]).scale(-1),
+						points.get(0).subtract(leftPos[0]).scale(-1)
+				);
+				correctLeftOrientation.add(startLeftOrientation);
 
+				//Start Right
+				Orientation startRightOrientation = new Orientation(
+						rightPos[1].subtract(rightPos[0]).scale(-1),
+						rightPos[0].subtract(points.get(0)).scale(-1)
+				);
+				correctRightOrientation.add(startRightOrientation);
+
+				//Mid
 				for (int i = 1; i < points.size() - 1; i++) {
 					Orientation leftOrientation = new Orientation(leftPos[i+1].subtract(leftPos[i-1]).scale(-1), points.get(i).subtract(leftPos[i]).scale(-1));
 					Orientation rightOrientation = new Orientation(rightPos[i+1].subtract(rightPos[i-1]).scale(-1), rightPos[i].subtract(points.get(i)).scale(-1));
@@ -320,10 +330,20 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					correctRightOrientation.add(rightOrientation);
 				}
 
-				float endLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, false) + points.getLast().getPitch();
-				float endRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, true) + points.getLast().getPitch();
-				correctLeftOrientation.add(Orientation.fromYPR(points.getLast().getYaw(), endLeftPitch, points.getLast().getRoll()));
-				correctRightOrientation.add(Orientation.fromYPR(points.getLast().getYaw(), endRightPitch, points.getLast().getRoll()));
+				int last = leftPos.length - 1;
+				//End Left
+				Orientation endLeftOrientation = new Orientation(
+						leftPos[last].subtract(leftPos[last - 1]).scale(-1),
+						points.getLast().subtract(leftPos[last]).scale(-1)
+				);
+				correctLeftOrientation.add(endLeftOrientation);
+
+				//End Right
+				Orientation endRightOrientation = new Orientation(
+						rightPos[last].subtract(rightPos[last - 1]).scale(-1),
+						rightPos[last].subtract(points.getLast()).scale(-1)
+				);
+				correctRightOrientation.add(endRightOrientation);
 			}
 		}
 
