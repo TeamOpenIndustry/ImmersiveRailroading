@@ -175,7 +175,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		tracks.add(main);
 		main.setRailHeight(railHeights.get(new Vec3i(mainX, mainY, mainZ)));
 		main.setBedHeight(bedHeights.get(new Vec3i(mainX, mainY, mainZ)));
-		main.setTopFacing(topFacings.get(new Vec3i(mainX, mainY, mainZ)));
+//		main.setTopFacing(topFacings.get(new Vec3i(mainX, mainY, mainZ)));
 
 		for (Vec3i tilePos : positions) {
 			if (tilePos.x == mainX && tilePos.z == mainZ && tilePos.y == mainY) {
@@ -188,7 +188,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 			tg.setRailHeight(railHeights.get(tilePos));
 			tg.setBedHeight(bedHeights.get(tilePos));
-			tg.setTopFacing(topFacings.get(tilePos));
+//			tg.setTopFacing(topFacings.get(tilePos));
 			tracks.add(tg);
 		}
 	}

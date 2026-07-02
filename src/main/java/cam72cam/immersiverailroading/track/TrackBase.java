@@ -20,7 +20,7 @@ public abstract class TrackBase {
 
 	protected Vec3i rel;
 	private float bedHeight;
-	private Vec3d topFacing;
+//	private Vec3d topFacing;
 	private float railHeight;
 	//Override default value
 	private boolean scaleModel = true;
@@ -78,7 +78,7 @@ public abstract class TrackBase {
 			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
-			tr.setTopFacing(getTopFacing());
+//			tr.setTopFacing(getTopFacing());
 			tr.setScaleModel(isScaleModel());
 			return tr;
 		}
@@ -119,7 +119,7 @@ public abstract class TrackBase {
 			tr.setParent(builder.getParentPos());
 		}
 		tr.setRailHeight(getRailHeight());
-		tr.setTopFacing(getTopFacing());
+//		tr.setTopFacing(getTopFacing());
 		tr.setBedHeight(getBedHeight());
 		tr.setScaleModel(isScaleModel());
 		for (int i = 0; i < hasSnow; i++) {
@@ -140,15 +140,11 @@ public abstract class TrackBase {
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
 	}
-	public void setTopFacing(Vec3d topFacing) {
-		this.topFacing = topFacing;
-	}
+//	public void setTopFacing(Vec3d topFacing) { this.topFacing = topFacing; }
 	public float getBedHeight() {
 		return bedHeight;
 	}
-	public Vec3d getTopFacing() {
-		return topFacing;
-	}
+//	public Vec3d getTopFacing() { return topFacing; }
 	public void setRailHeight(float height) {
 		this.railHeight = height;
 	}

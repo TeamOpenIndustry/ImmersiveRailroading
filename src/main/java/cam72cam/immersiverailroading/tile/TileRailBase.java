@@ -45,8 +45,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private Vec3i parent;
 	@TagField("height")
 	private float bedHeight = 0;
-	@TagField("topFacing")
-	private Vec3d topFacing = Vec3d.ZERO;//TODO:check
+//	@TagField("topFacing")
+//	private Vec3d topFacing = Vec3d.ZERO;//TODO:check
 	@TagField("railHeight")
 	private float railHeight = 0;
 	@TagField("scaleBedFill")
@@ -125,11 +125,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void setRailHeight(float height) {
 		this.railHeight = height;
 	}
-	public void setTopFacing(Vec3d topFacing) { this.topFacing = topFacing; }
+//	public void setTopFacing(Vec3d topFacing) { this.topFacing = topFacing; }
 	public float getRailHeight() {
 		return this.railHeight;
 	}
-	public Vec3d getTopFacing() { return this.topFacing; }
+//	public Vec3d getTopFacing() { return this.topFacing; }
 
 	public void setScaleModel(boolean scaleModel) {
 		this.scaleModel = scaleModel;
