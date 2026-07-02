@@ -92,14 +92,13 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.tileTilt;
 					if(!rollEffectTile) tileTilt = false;
 
-					if(rollEffectTile) {//TODO: using cur face yet, need better pitch sample
+					if(rollEffectTile) {//TODO: need rework
 						double cx = posX;
 						double cz = posZ;
 						double dx = topFacing.x, dy = topFacing.y, dz = topFacing.z;
 						double px = gagPos.x, pz = gagPos.z;
 
-						if (Math.abs(dy) < 1e-5) {//this should not happen, use q res as fallback
-							double sin = Math.sin(Math.toRadians(cur.getRoll()));
+						if (Math.abs(dy) < 1e-5) {
 							rollDelta = 0;
 						}else {
 							rollDelta = ( dx * (px - cx) + dz * (pz - cz) ) / dy;

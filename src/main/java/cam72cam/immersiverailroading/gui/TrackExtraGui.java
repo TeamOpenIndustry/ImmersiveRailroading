@@ -242,7 +242,7 @@ public class TrackExtraGui implements IScreen {
                 rollMax = rollAndOffsetInfoCache.rollerCoasterMode ? 180 : 40;
             }
         };
-//        rollerCoasterModeCB.setVisible(false);//TODO: correct tile placing
+        rollerCoasterModeCB.setVisible(false);//TODO: correct tile placing
 
 //        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
 
