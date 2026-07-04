@@ -234,7 +234,7 @@ public class TrackExtraGui implements IScreen {
                 }
             }
         };
-        tileTiltCB.setVisible(false);//TODO: wait for topFace modifiable
+        tileTiltCB.setVisible(false);//need topFace modifiable later
 
         rollerCoasterModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 2, GuiText.SELECTOR_ROLLER_COASTER_MODE.toString(), rollAndOffsetInfoCache.rollerCoasterMode) {
             @Override
@@ -244,9 +244,9 @@ public class TrackExtraGui implements IScreen {
                 rollMax = rollAndOffsetInfoCache.rollerCoasterMode ? 45 : 60;//180 for rollerCoaster mode later
             }
         };
-//        rollerCoasterModeCB.setVisible(false);//TODO: correct tile placing
+//        rollerCoasterModeCB.setVisible(false);
 
-//        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//TODO: waiting for multiSwitch branch merging
+//        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//need multiSwitch branch merging
 
         offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height, rollAndOffsetInfoCache.offsetType.toString()) {
             @Override
