@@ -20,7 +20,6 @@ public class RailBaseRender {
 				if (base.isScaleModel()) {
 					height += 0.1f * (float) info.settings.gauge.scale();
 				}
-//				model.addItemBlock(info.settings.railBed, height, basePos, base.getTopFacing());//TODO: wait for topFace modifiable
 				model.addItemBlock(info.settings.railBed, new Matrix4()
 						.translate(basePos.x, basePos.y, basePos.z)
 						.scale(1, height, 1)

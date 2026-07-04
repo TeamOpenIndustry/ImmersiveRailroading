@@ -26,6 +26,7 @@ public class RollAndOffsetInfo {
     /**
      * This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
      * Based on Standard Gauge, if in gauge X mm, it will be scaled to rollMax * X / 1435 Centimeters.
+     * For RollerCoasterNode this simply stores angle in degree
      */
     private final List<Vec3d> rolls;
     private final List<Vec3d> rollCtrls;

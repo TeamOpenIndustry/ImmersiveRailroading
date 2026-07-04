@@ -74,15 +74,15 @@ public class VecYPR extends Vec3d {
         this.children = new ArrayList<>();
     }
 
-    public VecYPR withYaw(float yaw) {//parts?
+    public VecYPR withYaw(float yaw) {
         return new VecYPR(this.x, this.y, this.z, yaw, this.pitch, this.roll, this.orientation, this.length);
     }
 
-    public VecYPR withPitch(float pitch) {//parts?
+    public VecYPR withPitch(float pitch) {
         return new VecYPR(this.x, this.y, this.z, this.yaw, pitch, this.roll, this.orientation, this.length);
     }
 
-    public VecYPR withRoll(float roll) {//parts?
+    public VecYPR withRoll(float roll) {
         return new VecYPR(this.x, this.y, this.z, this.yaw, this.pitch, roll, this.orientation, this.length);
     }
 

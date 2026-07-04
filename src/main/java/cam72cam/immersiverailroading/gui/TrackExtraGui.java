@@ -107,8 +107,10 @@ public class TrackExtraGui implements IScreen {
         }
 
         //basic Gauge: Standard Gauge. other gauge will scale from standard
+
+        //common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
+        //roller coaster mode:degree
         rollMax = 180;
-//        rollMax = 40;//unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
         yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
@@ -239,7 +241,7 @@ public class TrackExtraGui implements IScreen {
             public void onClick(Player.Hand hand) {
                 edited = true;
                 rollAndOffsetInfoCache.rollerCoasterMode = rollerCoasterModeCB.isChecked();
-                rollMax = rollAndOffsetInfoCache.rollerCoasterMode ? 180 : 40;
+                rollMax = rollAndOffsetInfoCache.rollerCoasterMode ? 45 : 60;//180 for rollerCoaster mode later
             }
         };
 //        rollerCoasterModeCB.setVisible(false);//TODO: correct tile placing

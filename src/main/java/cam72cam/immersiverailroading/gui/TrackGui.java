@@ -491,12 +491,6 @@ public class TrackGui implements IScreen {
 					model.addItemBlock(info.settings.railBedFill, new Matrix4()
 							.translate(basePos.x, basePos.y-1, basePos.z)
 					);
-					//TODO: wait for topFace modifiable
-//					model.addItemBlock(
-//							info.settings.railBedFill, 1,
-//							new Vec3i(basePos.x, basePos.y - 1, basePos.z),
-//							base.getTopFacing()
-//					);
 				}
 				model.render(state);
 			}
@@ -562,12 +556,6 @@ public class TrackGui implements IScreen {
 				model.addItemBlock(info.settings.railBedFill, new Matrix4()
 						.translate(basePos.x, basePos.y-1, basePos.z)
 				);
-				//TODO: wait for topFace modifiable
-//				model.addItemBlock(
-//						info.settings.railBedFill, 1,
-//						new Vec3i(basePos.x, basePos.y - 1, basePos.z),
-//						base.getTopFacing()
-//				);
 			}
 			model.render(state);
 		}
