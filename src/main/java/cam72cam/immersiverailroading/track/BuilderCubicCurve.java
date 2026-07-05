@@ -184,7 +184,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
 					Vec3d newP;
-					if(!info.settings.rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
+					if(!rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
 						newP = new Vec3d(p.x, p.y - rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
 						newP = new Vec3d(p.x, p.y - Math.sin(Math.toRadians(rolls.get(i))) * gauge, p.z);
@@ -196,7 +196,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
 					Vec3d newP;
-					if(!info.settings.rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
+					if(!rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
 						newP = new Vec3d(p.x, p.y + rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
 						newP = new Vec3d(p.x, p.y + Math.sin(Math.toRadians(rolls.get(i))) * gauge, p.z);
@@ -207,15 +207,17 @@ public class BuilderCubicCurve extends BuilderIterator {
 		}
 
 		//vertical offset
-		for(int i = 0; i < points.size(); i++) {
-			Vec3d p = points.get(i);
-			Vec3d newP;
-			if(info.settings.rollAndOffsetInfo.rollerCoasterMode) {//yOffset scale
-				newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);
-			} else {
-				newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//we may need another method depends on Orientation
+		if(rollAndOffsetInfo != null) {
+			for(int i = 0; i < points.size(); i++) {
+				Vec3d p = points.get(i);
+				Vec3d newP;
+				if(!rollAndOffsetInfo.rollerCoasterMode) {//yOffset scale
+					newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);
+				} else {
+					newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//we may need another method depends on Orientation
+				}
+				points.set(i, newP);
 			}
-			points.set(i, newP);
 		}
 
 		//horizontal offset
