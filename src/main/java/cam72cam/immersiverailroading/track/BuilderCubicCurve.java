@@ -183,14 +183,24 @@ public class BuilderCubicCurve extends BuilderIterator {
 			case LEFT:
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
-					Vec3d newP = new Vec3d(p.x, p.y - rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
+					Vec3d newP;
+					if(!info.settings.rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
+						newP = new Vec3d(p.x, p.y - rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
+					} else {
+						newP = new Vec3d(p.x, p.y - Math.sin(Math.toRadians(rolls.get(i))) * gauge, p.z);
+					}
 					points.set(i, newP);
 				}
 				break;
 			case RIGHT:
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
-					Vec3d newP = new Vec3d(p.x, p.y + rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
+					Vec3d newP;
+					if(!info.settings.rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
+						newP = new Vec3d(p.x, p.y + rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
+					} else {
+						newP = new Vec3d(p.x, p.y + Math.sin(Math.toRadians(rolls.get(i))) * gauge, p.z);
+					}
 					points.set(i, newP);
 				}
 				break;
@@ -199,7 +209,12 @@ public class BuilderCubicCurve extends BuilderIterator {
 		//vertical offset
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
-			Vec3d newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//yOffset scale
+			Vec3d newP;
+			if(info.settings.rollAndOffsetInfo.rollerCoasterMode) {//yOffset scale
+				newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);
+			} else {
+				newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//we may need another method depends on Orientation
+			}
 			points.set(i, newP);
 		}
 
@@ -219,6 +234,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 			if(zOffsets.get(i) != 0) {//the side effect of too much offset is that some dot spacing becomes less uniform, and should we offset points in toList?
 				correctYaw = true;
+				//well can we still calculate this if pitch is 90?
 				Vec3d horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90).scale(gaugeScale / gauge);//zOffset scale
 				points.set(i, points.get(i).add(horizontalOffset));
 			}

@@ -76,7 +76,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			gagPos = gagPos.add(0, heightOffset, 0);
 
-			for (double q = -horiz; q <= horiz; q += 0.1) {
+			for (double q = -horiz; q <= horiz; q += 0.1) {//TODO: need rework
 				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());
 				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
 				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
@@ -92,7 +92,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.tileTilt;
 					if(!rollEffectTile) tileTilt = false;
 
-					if(rollEffectTile) {//TODO: need rework
+					if(rollEffectTile) {
 						double cx = posX;
 						double cz = posZ;
 						double dx = topFacing.x, dy = topFacing.y, dz = topFacing.z;
@@ -109,7 +109,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 					double deltaGapPos = gagPos.y + rollDelta;
 					double height = 0;
-					if (info.settings.isGradeCrossing) {//legacy: top facing not done for crossing
+					if (info.settings.isGradeCrossing) {//legacy, a rough gradeCrossing...
 						height = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
 						height *= info.settings.gauge.scale();
 						height = Math.min(height, clamp);
@@ -129,7 +129,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 							bedHeights.put(gag, (float) (height + relHeight));
 							yOffset.put(gag, (int) (deltaGapPos - relHeight));
 						}
-					} else {//legacy
+					} else {//legacy, will be dropped
 						bedHeights.put(gag, (float) (height + Math.max(0, relHeight - 0.1)));
 						yOffset.put(gag, (int) (deltaGapPos - relHeight));
 					}
@@ -174,7 +174,6 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		tracks.add(main);
 		main.setRailHeight(railHeights.get(new Vec3i(mainX, mainY, mainZ)));
 		main.setBedHeight(bedHeights.get(new Vec3i(mainX, mainY, mainZ)));
-//		main.setTopFacing(topFacings.get(new Vec3i(mainX, mainY, mainZ)));
 
 		for (Vec3i tilePos : positions) {
 			if (tilePos.x == mainX && tilePos.z == mainZ && tilePos.y == mainY) {
@@ -187,7 +186,6 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 			tg.setRailHeight(railHeights.get(tilePos));
 			tg.setBedHeight(bedHeights.get(tilePos));
-//			tg.setTopFacing(topFacings.get(tilePos));
 			tracks.add(tg);
 		}
 	}

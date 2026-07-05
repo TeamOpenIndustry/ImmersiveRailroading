@@ -69,6 +69,48 @@ public class Orientation {
         return new Orientation(forward, right, up);
     }
 
+    public VecYPR toYPR() {//need test!!!
+
+        Matrix4 m = toMatrix();
+
+        double pitch = -Math.asin(m.m12);
+        double cp = Math.cos(pitch);
+
+        double yaw;
+        double roll;
+
+        if (Math.abs(cp) > 1E-6) {
+
+            yaw = Math.atan2(
+                    m.m02,
+                    m.m22
+            );
+
+            roll = Math.atan2(
+                    m.m10,
+                    m.m11
+            );
+
+        } else {
+
+            roll = 0;
+
+            yaw = Math.atan2(
+                    -m.m20,
+                    m.m00
+            );
+        }
+
+        return new VecYPR(
+                0,
+                0,
+                0,
+                (float) Math.toDegrees(yaw),
+                (float) Math.toDegrees(pitch),
+                (float) Math.toDegrees(roll)
+        );
+    }
+
     /**
      * Converts to a rotation-only Matrix4.
      */
