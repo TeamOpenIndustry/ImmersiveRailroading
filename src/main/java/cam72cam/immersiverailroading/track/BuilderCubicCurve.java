@@ -187,7 +187,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 					if(!rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
 						newP = new Vec3d(p.x, p.y - rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
-						newP = new Vec3d(p.x, p.y - Math.sin(Math.toRadians(rolls.get(i))) * gauge, p.z);
+						newP = new Vec3d(p.x, p.y - Math.sin(Math.toRadians(rolls.get(i))) * gauge * 0.5, p.z);
 					}
 					points.set(i, newP);
 				}
@@ -199,7 +199,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 					if(!rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
 						newP = new Vec3d(p.x, p.y + rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
-						newP = new Vec3d(p.x, p.y + Math.sin(Math.toRadians(rolls.get(i))) * gauge, p.z);
+						newP = new Vec3d(p.x, p.y + Math.sin(Math.toRadians(rolls.get(i))) * gauge * 0.5, p.z);
 					}
 					points.set(i, newP);
 				}
