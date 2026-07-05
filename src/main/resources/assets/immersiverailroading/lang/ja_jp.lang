@@ -86,6 +86,7 @@ gui.immersiverailroading:selector.place_blueprint=設計図設置
 gui.immersiverailroading:selector.grade_crossing=踏切
 gui.immersiverailroading:selector.tile_tilt=タイル傾斜
 gui.immersiverailroading:selector.roll_effect_tile=超高影響タイル
+gui.immersiverailroading:selector.roller_coaster_mode=度モード
 gui.immersiverailroading:selector.plate_type=プレートの種類：%s
 gui.immersiverailroading:selector.plate_boiler=ボイラープレート：%s
 gui.immersiverailroading:selector.cast_single=1回のみ鋳造

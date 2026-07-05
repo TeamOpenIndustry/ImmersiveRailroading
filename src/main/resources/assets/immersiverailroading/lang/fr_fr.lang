@@ -88,6 +88,7 @@ gui.immersiverailroading:selector.plate_type=Type de plaque : %s
 gui.immersiverailroading:selector.plate_boiler=Plaque de chaudière : %s
 gui.immersiverailroading:selector.tile_tilt=Inclinaison de la case
 gui.immersiverailroading:selector.roll_effect_tile=Case à effet de dévers
+gui.immersiverailroading:selector.roller_coaster_mode=Mode degré
 gui.immersiverailroading:selector.plate_type=Type de plaque: %s
 gui.immersiverailroading:selector.plate_boiler=Plaque de chaudière: %s
 gui.immersiverailroading:selector.cast_single=Coulage unique

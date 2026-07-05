@@ -86,6 +86,7 @@ gui.immersiverailroading:selector.place_blueprint=放置蓝图
 gui.immersiverailroading:selector.grade_crossing=设置为平交道口
 gui.immersiverailroading:selector.tile_tilt=tile倾斜
 gui.immersiverailroading:selector.roll_effect_tile=超高影响tile
+gui.immersiverailroading:selector.roller_coaster_mode=角度模式
 gui.immersiverailroading:selector.plate_type=板材类型：%s
 gui.immersiverailroading:selector.plate_boiler=锅炉板材：%s
 gui.immersiverailroading:selector.cast_single=单次铸造

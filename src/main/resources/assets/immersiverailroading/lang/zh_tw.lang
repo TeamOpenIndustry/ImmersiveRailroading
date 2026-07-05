@@ -84,6 +84,9 @@ gui.immersiverailroading:selector.transfer_table_entry_count=移車台軌道數�
 gui.immersiverailroading:selector.transfer_table_entry_spacing=鄰近軌道間距：%s公尺
 gui.immersiverailroading:selector.place_blueprint=地點藍圖
 gui.immersiverailroading:selector.grade_crossing=平交道口
+gui.immersiverailroading:selector.tile_tilt=tile傾斜
+gui.immersiverailroading:selector.roll_effect_tile=超高影響tile
+gui.immersiverailroading:selector.roller_coaster_mode=度數模式
 gui.immersiverailroading:selector.plate_type=板材類型：%s
 gui.immersiverailroading:selector.plate_boiler=鍋爐板材：%s
 gui.immersiverailroading:selector.cast_single=單次鑄造
@@ -121,6 +124,18 @@ gui.immersiverailroading:track.rail_bed=道碴：%s
 gui.immersiverailroading:track.rail_bed_fill=道碴壓載物：%s
 gui.immersiverailroading:track.place_blueprint_true=放置：藍圖
 gui.immersiverailroading:track.place_blueprint_false=放置：軌道
+gui.immersiverailroading:track.roll_offset_type=超高垂直偏移方式
+gui.immersiverailroading:track.extra_insert_point=插入控制點
+gui.immersiverailroading:track.extra_delete_point=刪除控制點
+gui.immersiverailroading:track.extra_point_value_m=點高度（Y,公尺）：
+gui.immersiverailroading:track.extra_point_value_cm=點高度（Y,公分）：
+gui.immersiverailroading:track.extra_point_slope=點坡度（Y/X，‰）：
+gui.immersiverailroading:track.extra_point_weight=點權重（X投影）：
+gui.immersiverailroading:track.extra_reset=重置全部
+gui.immersiverailroading:track.extra_edit_left=修改左邊
+gui.immersiverailroading:track.extra_edit_right=修改右邊
+gui.immersiverailroading:track.extra_trackgui=軌道主介面
+gui.immersiverailroading:track.extragui=附加設定介面
 
 gui.immersiverailroading:loco.works=製造公司：%s
 gui.immersiverailroading:loco.power=功率：%s
@@ -179,6 +194,16 @@ track.immersiverailroading:direction.none=無鎖定
 # Intended
 track.immersiverailroading:direction.left=鎖定右側
 track.immersiverailroading:direction.right=鎖定左側
+
+track.immersiverailroading:ExtraInfoType.roll=超高高度
+track.immersiverailroading:ExtraInfoType.y_offset=垂直偏移
+track.immersiverailroading:ExtraInfoType.z_offset=水平偏移
+
+track.immersiverailroading:rollYOffsetType.mid=對齊中間點
+track.immersiverailroading:rollYOffsetType.high=對齊最低點
+track.immersiverailroading:rollYOffsetType.low=對齊最高點
+track.immersiverailroading:rollYOffsetType.left=對齊左邊
+track.immersiverailroading:rollYOffsetType.right=對齊右邊
 
 part.immersiverailroading:component.frame=車架
 part.immersiverailroading:component.front_frame=前車架

@@ -86,6 +86,7 @@ gui.immersiverailroading:selector.place_blueprint=Entwurf platzieren
 gui.immersiverailroading:selector.grade_crossing=Bahnübergang
 gui.immersiverailroading:selector.tile_tilt=Kachelneigung
 gui.immersiverailroading:selector.roll_effect_tile=Überhöhungs-Kachel
+gui.immersiverailroading:selector.roller_coaster_mode=Gradmodus
 gui.immersiverailroading:selector.plate_type=Plattentyp: %s
 gui.immersiverailroading:selector.plate_boiler=Kesselplatte: %s
 gui.immersiverailroading:selector.cast_single=Einmalige Fertigung
