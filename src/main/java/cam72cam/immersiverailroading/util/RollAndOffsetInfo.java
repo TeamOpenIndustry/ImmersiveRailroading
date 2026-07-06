@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-//TODO: this file may include much duplicated code, may need to optimize and clean
+//TODO: this file may include much duplicated code, may need to optimize and clean, also notes are still not completed
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
 public record RollAndOffsetInfo(
         RollYOffsetType offsetType,
@@ -147,6 +147,9 @@ public record RollAndOffsetInfo(
             );
         }
 
+        //as we stored every point of a curve(2 base points, 2 control points), we will get duplicated arcLenFactor, so we have physical and logical index
+        //physical index: range->[0,point size)
+        //logical index: range->[0,point size/2)
         //function for Gui config, notice that when using these, Lists CANT be NULL!
         /**
          * This will return -1 if L not in range
@@ -165,6 +168,9 @@ public record RollAndOffsetInfo(
             return res;
         }
 
+        /**
+         * SubSplit the curve surrounded the arcLenFactor if arcLenFactor is in range and not overlapped with existing points
+         * */
         public boolean tryInsertBySubSplit(double arcLenFactor) {
             if(findPhysicalIndex(arcLenFactor) != -1) return false;
 
@@ -209,6 +215,9 @@ public record RollAndOffsetInfo(
             return true;
         }
 
+        /**
+         * Merge curves by removing points at arcLenFactor directly
+         * */
         public boolean tryDeleteDirectly(double arcLenFactor) {
             int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1 || idx == 0 || idx == arcLenFactors.size() - 1) return false;
@@ -237,6 +246,9 @@ public record RollAndOffsetInfo(
             return true;
         }
 
+        /**
+         * Remove all points and only set default points
+         * */
         public void resetAll() {
             arcLenFactors.clear();
             rolls.clear();
@@ -255,6 +267,9 @@ public record RollAndOffsetInfo(
             zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
         }
 
+        /**
+         * Move points at arcLenFactor in vertical direction
+         * */
         public boolean tryDeltaValue(double arcLenFactor, double val, ExtraInfoType type) {
             int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return false;
@@ -294,6 +309,10 @@ public record RollAndOffsetInfo(
 
             return true;
         }
+
+        /**
+         * Get vertical value at arcLenFactor
+         * */
         public String getValueDisplay(double arcLenFactor, ExtraInfoType type) {
             int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return "null";
@@ -318,6 +337,9 @@ public record RollAndOffsetInfo(
             return String.format("%.4f", points.get(idx).z);
         }
 
+        /**
+         * Change control point weight
+         * */
         public boolean trySetHandleXLen(double arcLenFactor, double val, ExtraInfoType type, boolean editLeft, double length) {
             int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return false;
@@ -374,6 +396,10 @@ public record RollAndOffsetInfo(
 
             return feedback;
         }
+
+        /**
+         * Get control point weight value for displaying
+         * */
         public String getHandleXDisplay(double arcLenFactor, ExtraInfoType type, boolean editLeft, double length) {
             int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return "null";
@@ -686,6 +712,9 @@ public record RollAndOffsetInfo(
         }
     }
 
+    /**
+     * Get pair list (arcLenFactorStart and arcLenFactorEnd) from cubic curve list
+     * */
     public static List<Pair<Double,Double>> toRange(List<CubicCurve> subCurves) {
         List<Pair<Double,Double>> res = new ArrayList<>();
         for(CubicCurve subCurve : subCurves) {
@@ -959,6 +988,9 @@ public record RollAndOffsetInfo(
         return Math.min(logic * 2, arcLenFactors.size() - 1);
     }
 
+    /**
+     * Split the curve at X (horizonal value) and return the left part of the curve
+     * */
     public static CubicCurve getLeftByX(double x, CubicCurve curve) {//x is X-axis value not Length value!
         double localT = getTByX(x, curve);
         CubicCurve truncated = curve.getLeft(localT);
@@ -981,6 +1013,9 @@ public record RollAndOffsetInfo(
         return new CubicCurve(curve.p1, newCtrl1, newCtrl2, newP2);
     }
 
+    /**
+     * Get bezier factor t at target X (horizonal value)
+     * */
     public static double getTByX(double targetX, CubicCurve curve) {//targetX is X-axis value not Length value!
         if (Math.abs(curve.p2.x - curve.p1.x) < 1e-12) return 0.5;
         double t = (targetX - curve.p1.x) / (curve.p2.x - curve.p1.x);
@@ -1118,6 +1153,7 @@ public record RollAndOffsetInfo(
 
         return -Math.toDegrees(Math.atan(tan));
     }
+
     /**
      * Used to correct Rail part pitch in BuilderIterator
      */
@@ -1173,6 +1209,7 @@ public record RollAndOffsetInfo(
     public double getZOffset(double l) {
         return getValue(this.arcLenFactors, l, zOffsets, zOffsetCtrls);
     }
+
     /**
      * Used to correct Rail part pitch in BuilderIterator
      */
@@ -1182,6 +1219,7 @@ public record RollAndOffsetInfo(
         tan /= length;
         return -Math.toDegrees(Math.atan(tan));
     }
+
     /**
      * Used to correct Rail part pitch in BuilderIterator
      */
@@ -1192,6 +1230,9 @@ public record RollAndOffsetInfo(
         return -Math.toDegrees(Math.atan(tan));
     }
 
+    /**
+     * Get vertical value at target X (horizonal value)
+     * */
     public static double getValue(List<Double>arcLenFactors, double targetX, List<Vec3d> points, List<Vec3d> ctrls) {
         // notice that segmentIdx is not point index!
         int segmentIdx = findValidSegment(targetX, arcLenFactors);
@@ -1213,6 +1254,9 @@ public record RollAndOffsetInfo(
         return pos.z;
     }
 
+    /**
+     * Find the left point index of curve segment surrounding arcLenFactors
+     * */
     public static int findValidSegment(double targetArcLenFactor, List<Double> arcLenFactors) {
         int n = arcLenFactors.size() / 2;
         if (n == 0) return -1;
