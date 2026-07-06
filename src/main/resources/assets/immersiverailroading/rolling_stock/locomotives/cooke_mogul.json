@@ -6,9 +6,9 @@
 	"darken_model": "-0.05",
 	"model_gauge_m": 1,
 	"properties": {
-		"max_psi": 150,
+		"max_pressure_psi": 150,
 		"water_capacity_l": 10000, 
-		"horsepower": 400,
+		"power_hp": 400,
 		"tractive_effort_lbf": 13770,
 		"max_speed_kmh": 48,
 		"valve_gear": "stephenson",

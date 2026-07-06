@@ -5,9 +5,9 @@
 	"model": "immersiverailroading:models/rolling_stock/locomotives/br01/br01.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"max_psi": 232,
+		"max_pressure_psi": 232,
 		"water_capacity_l": 34000, 
-		"horsepower": 2300,
+		"power_hp": 2300,
 		"tractive_effort_lbf": 45484,
 		"max_speed_kmh": 120,
 		"valve_gear": "walschaerts",

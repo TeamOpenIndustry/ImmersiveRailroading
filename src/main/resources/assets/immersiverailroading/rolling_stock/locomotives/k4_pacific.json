@@ -4,9 +4,9 @@
 	"works": "Baldwin Locomotive Works",
 	"model": "immersiverailroading:models/rolling_stock/locomotives/k4_pacific/k4_pacific.obj",
 	"properties": {
-		"max_psi": 205,
+		"max_pressure_psi": 205,
 		"water_capacity_l": 27000, 
-		"horsepower": 4200,
+		"power_hp": 4200,
 		"tractive_effort_lbf": 44460,
 		"max_speed_kmh": 152,
 		"valve_gear": "walschaerts",
