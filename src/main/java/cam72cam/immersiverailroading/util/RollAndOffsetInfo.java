@@ -19,7 +19,7 @@ public record RollAndOffsetInfo(
         boolean rollEffectTile,
         boolean tileTilt,
         boolean rollerCoasterMode,
-        //it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
+        //it is l(arcLenFactor) and x and the same time, l is for outer curve it effects, x is for curves this stores
         List<Double> arcLenFactors,
         //Roll
         //This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
@@ -151,26 +151,26 @@ public record RollAndOffsetInfo(
         /**
          * This will return -1 if L not in range
          */
-        public int findPhysicalIndex(double l) {//return physical index
+        public int findPhysicalIndex(double arcLenFactor) {//return physical index
             int res = -1;
             for (int i = 0; i < arcLenFactors.size(); i += 2) {
-                if(arcLenFactors.get(i) == l) {
+                if(Math.abs(arcLenFactors.get(i) - arcLenFactor) < 1e-6) {//this is a place related to control point number limit
                     res = i;
                     break;
                 }
             }
-            if(!arcLenFactors.isEmpty() && arcLenFactors.getLast() == l) {
+            if(!arcLenFactors.isEmpty() && arcLenFactors.getLast() == arcLenFactor) {
                 res = arcLenFactors.size()-1;
             }
             return res;
         }
 
-        public boolean tryInsertBySubSplit(double l) {
-            if(findPhysicalIndex(l) != -1) return false;
+        public boolean tryInsertBySubSplit(double arcLenFactor) {
+            if(findPhysicalIndex(arcLenFactor) != -1) return false;
 
             List<Pair<Double, Double>> divider = new ArrayList<>();
-            divider.add(Pair.of(0d, l));
-            divider.add(Pair.of(l, 1d));
+            divider.add(Pair.of(0d, arcLenFactor));
+            divider.add(Pair.of(arcLenFactor, 1d));
 
             RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
                     offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
@@ -209,8 +209,8 @@ public record RollAndOffsetInfo(
             return true;
         }
 
-        public boolean tryDeleteDirectly(double l) {
-            int idx = findPhysicalIndex(l);
+        public boolean tryDeleteDirectly(double arcLenFactor) {
+            int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1 || idx == 0 || idx == arcLenFactors.size() - 1) return false;
 
             arcLenFactors.remove(idx - 1);
@@ -255,8 +255,8 @@ public record RollAndOffsetInfo(
             zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
         }
 
-        public boolean tryDeltaValue(double l, double val, ExtraInfoType type) {
-            int idx = findPhysicalIndex(l);
+        public boolean tryDeltaValue(double arcLenFactor, double val, ExtraInfoType type) {
+            int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return false;
 
             List<Vec3d> points;
@@ -294,8 +294,8 @@ public record RollAndOffsetInfo(
 
             return true;
         }
-        public String getValueDisplay(double l, ExtraInfoType type) {
-            int idx = findPhysicalIndex(l);
+        public String getValueDisplay(double arcLenFactor, ExtraInfoType type) {
+            int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return "null";
 
             List<Vec3d> points;
@@ -318,8 +318,8 @@ public record RollAndOffsetInfo(
             return String.format("%.4f", points.get(idx).z);
         }
 
-        public boolean trySetHandleXLen(double l, double val, ExtraInfoType type, boolean editLeft, double length) {
-            int idx = findPhysicalIndex(l);
+        public boolean trySetHandleXLen(double arcLenFactor, double val, ExtraInfoType type, boolean editLeft, double length) {
+            int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return false;
             if(idx == 0 && editLeft) return false;
             if(idx == arcLenFactors.size() - 1 && !editLeft) return false;
@@ -374,8 +374,8 @@ public record RollAndOffsetInfo(
 
             return feedback;
         }
-        public String getHandleXDisplay(double l, ExtraInfoType type, boolean editLeft, double length) {
-            int idx = findPhysicalIndex(l);
+        public String getHandleXDisplay(double arcLenFactor, ExtraInfoType type, boolean editLeft, double length) {
+            int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return "null";
             if(idx == 0 && editLeft) return "null";
             if(idx == arcLenFactors.size() - 1 && !editLeft) return "null";
@@ -416,8 +416,8 @@ public record RollAndOffsetInfo(
             return String.format("%.4f", res * length);
         }
 
-        public boolean trySetSlope(double l, double val, ExtraInfoType type, double length) {
-            int idx = findPhysicalIndex(l);
+        public boolean trySetSlope(double arcLenFactor, double val, ExtraInfoType type, double length) {
+            int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return false;
 
 
@@ -464,8 +464,8 @@ public record RollAndOffsetInfo(
 
             return true;
         }
-        public String getSlopeDisplay(double l, ExtraInfoType type, double length) {
-            int idx = findPhysicalIndex(l);
+        public String getSlopeDisplay(double arcLenFactor, ExtraInfoType type, double length) {
+            int idx = findPhysicalIndex(arcLenFactor);
             if(idx == -1) return "null";
 
             List<Vec3d> points;

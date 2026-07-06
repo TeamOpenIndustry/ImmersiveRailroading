@@ -131,7 +131,7 @@ public class TrackExtraGui implements IScreen {
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
         //left panel
-        //TODO: what else are needed to be displayed here?
+        //what else are needed to be displayed here?
         railInfoLabel = new Button(screen, xtop, ytop, 90, height,  GuiText.TRACK_LENGTH.toString(length), (_, _) -> {});
         ytop += height;
         ytop += 5;
@@ -153,7 +153,7 @@ public class TrackExtraGui implements IScreen {
         insertOrDeletePointButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 50, height, "",
                                                (_, _) -> {
                                                    if(rollAndOffsetInfoCache.findPhysicalIndex(format(lSlider.getValue())) == -1) {//insert
-                                                       if(rollAndOffsetInfoCache.tryInsertBySubSplit(format(lSlider.getValue()))) {
+                                                       if(rollAndOffsetInfoCache.tryInsertBySubSplit(format(lSlider.getValue()))) {//TODO: this is the reason why control point number is limited to 101, should we improve this?
                                                            edited = true;
                                                            updateSliderRelated();
                                                        }
@@ -221,8 +221,7 @@ public class TrackExtraGui implements IScreen {
                                           self.setChecked(false);
                                       }
                                   });
-        //TODO modifiable vanilla block model later
-        tileTiltCB.setVisible(false);
+        tileTiltCB.setVisible(false);//modifiable vanilla block model later
 
         rollerCoasterModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 2,
                                            GuiText.SELECTOR_ROLLER_COASTER_MODE.toString(), rollAndOffsetInfoCache.rollerCoasterMode,
@@ -543,7 +542,7 @@ public class TrackExtraGui implements IScreen {
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 3 + 5) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 6 + 10) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
-        //TODO: if choose HIGH or LOW, half of the the roll graph will flip, need to flip it on graph?
+        //if choose HIGH or LOW, half of the the roll graph will flip, need to flip it on graph?
         //rollGraph
         state.translate(5, height + 5 + height * 1.5, 0);
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));

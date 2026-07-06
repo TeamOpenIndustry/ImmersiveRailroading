@@ -391,7 +391,7 @@ public class TrackGui implements IScreen {
 			if (this.te != null) {
 				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), guiOpenType).sendToServer();
 
-				//TODO: these code are duplicated with ItemRailUpdatePacket.handle(), can be moved into a function
+				//TODO: these code are duplicated with ItemRailUpdatePacket.handle(), should we move them into a function?
 				//also update client Item to update Rail information
 				ItemStack clientStack = te.getItem();
 				settings.immutable().write(clientStack);
