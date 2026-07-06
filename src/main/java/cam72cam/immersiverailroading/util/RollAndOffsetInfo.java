@@ -13,78 +13,62 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 //TODO: this file may include much duplicated code, may need to optimize and clean
-// although this works now but List is not really cloned so there might be some potential safety problems
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
-public class RollAndOffsetInfo {
-    public final RollYOffsetType offsetType;
-    public final boolean rollEffectTile;
-    public final boolean tileTilt;
-
-    public final boolean rollerCoasterMode;
-    private final List<Double> ls;//it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
-    //Roll
-    /**
-     * This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
-     * Based on Standard Gauge, if in gauge X mm, it will be scaled to rollMax * X / 1435 Centimeters.
-     * For RollerCoasterNode this simply stores angle in degree
-     */
-    private final List<Vec3d> rolls;
-    private final List<Vec3d> rollCtrls;
-    //Y Offset
-    /**
-     * This stores [Height Offset(UNIT: Meter) * Gauge Scale].
-     * Based on Standard Gauge, if in Gauge X mm, it will be scaled to yOffset * X / 1435 Meters.
-     */
-    private final List<Vec3d> yOffsets;
-    private final List<Vec3d> yOffsetCtrls;
-    //Z Offset
-    /**
-     * This stores [Width Offset(UNIT: Meter) * Gauge Scale].
-     * Based on Standard Gauge, if in Gauge X mm, it will be scaled to zOffset * X / 1435 Meters.
-     */
-    private final List<Vec3d> zOffsets;
-    private final List<Vec3d> zOffsetCtrls;
-
-    public RollAndOffsetInfo(
-            RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt, boolean rollerCoasterMode,
-            List<Double> ls, List<Vec3d> rolls, List<Vec3d> rollCtrls, List<Vec3d> yOffsets, List<Vec3d> yOffsetlCtrls, List<Vec3d> zOffsets, List<Vec3d> zOffsetCtrls
-    ) {
+public record RollAndOffsetInfo(
+        RollYOffsetType offsetType,
+        boolean rollEffectTile,
+        boolean tileTilt,
+        boolean rollerCoasterMode,
+        //it is l and x and the same time, l is for outer curve it effects, x is for curves this stores
+        List<Double> arcLenFactors,
+        //Roll
+        //This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
+        //Based on Standard Gauge, if in gauge X (mm), it will be scaled to rollMax * X / Gauge.STANDARD.
+        //For RollerCoasterNode this simply stores angle in degree
+        List<Vec3d> rolls,
+        List<Vec3d> rollCtrls,
+        //Y Offset
+        //This stores [Height Offset(UNIT: Meter) * Gauge Scale].
+        //Based on Standard Gauge, if in Gauge X (mm), it will be scaled to yOffset * X / Gauge.STANDARD.
+        List<Vec3d> yOffsets,
+        List<Vec3d> yOffsetCtrls,
+        //Z Offset
+        //This stores [Width Offset(UNIT: Meter) * Gauge Scale].
+        //Based on Standard Gauge, if in Gauge X (mm), it will be scaled to zOffset * X / Gauge.STANDARD.
+        List<Vec3d> zOffsets,
+        List<Vec3d> zOffsetCtrls) {
+    public RollAndOffsetInfo(RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt, boolean rollerCoasterMode,
+                             List<Double> arcLenFactors, List<Vec3d> rolls, List<Vec3d> rollCtrls,
+                             List<Vec3d> yOffsets, List<Vec3d> yOffsetCtrls, List<Vec3d> zOffsets, List<Vec3d> zOffsetCtrls) {
         this.offsetType = offsetType;
         this.rollEffectTile = rollEffectTile;
         this.tileTilt = tileTilt;
         this.rollerCoasterMode = rollerCoasterMode;
-
-        this.ls = ls;
-        this.rolls = rolls;
-        this.rollCtrls = rollCtrls;
-        this.yOffsets = yOffsets;
-        this.yOffsetCtrls = yOffsetlCtrls;
-        this.zOffsets = zOffsets;
-        this.zOffsetCtrls = zOffsetCtrls;
+        //Create unmodifiable view
+        this.arcLenFactors = List.copyOf(arcLenFactors);
+        this.rolls = List.copyOf(rolls);
+        this.rollCtrls = List.copyOf(rollCtrls);
+        this.yOffsets = List.copyOf(yOffsets);
+        this.yOffsetCtrls = List.copyOf(yOffsetCtrls);
+        this.zOffsets = List.copyOf(zOffsets);
+        this.zOffsetCtrls = List.copyOf(zOffsetCtrls);
     }
 
-    public static RollAndOffsetInfo getDefault() { return new RollAndOffsetInfo(); }
     private RollAndOffsetInfo() {
-        offsetType = RollYOffsetType.MID;
-        rollEffectTile = true;
-        tileTilt = true;
-        rollerCoasterMode = false;
+        var arcLenFactors = List.of(0d, 1d);
+        var rolls = List.of(new Vec3d(0, 0, 0), new Vec3d(1, 0, 0));
+        var rollCtrls = List.of(new Vec3d(1d / 3, 0, 0), new Vec3d(1 + 1d / 3, 0, 0));
+        var yOffsets = List.of(new Vec3d(0, 0, 0), new Vec3d(1, 0, 0));
+        var yOffsetCtrls = List.of(new Vec3d(1d / 3, 0, 0), new Vec3d(1 + 1d / 3, 0, 0));
+        var zOffsets = List.of(new Vec3d(0, 0, 0), new Vec3d(1, 0, 0));
+        var zOffsetCtrls = List.of(new Vec3d(1d / 3, 0, 0), new Vec3d(1 + 1d / 3, 0, 0));
 
-        ls = new ArrayList<>();
-        rolls = new ArrayList<>();
-        rollCtrls = new ArrayList<>();
-        yOffsets = new ArrayList<>();
-        yOffsetCtrls = new ArrayList<>();
-        zOffsets = new ArrayList<>();
-        zOffsetCtrls = new ArrayList<>();
+        this(RollYOffsetType.MID, true, true, false, arcLenFactors,
+             rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls);
+    }
 
-        ls.add(0d); ls.add(1d);
-        rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
-        rollCtrls.add(new Vec3d(1d / 3, 0, 0)); rollCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
-        yOffsets.add(new Vec3d(0, 0, 0)); yOffsets.add(new Vec3d(1, 0, 0));
-        yOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); yOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
-        zOffsets.add(new Vec3d(0, 0, 0)); zOffsets.add(new Vec3d(1, 0, 0));
-        zOffsetCtrls.add(new Vec3d(1d / 3, 0, 0)); zOffsetCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
+    public static RollAndOffsetInfo getDefault() {
+        return new RollAndOffsetInfo();
     }
 
     public static class Mutable {
@@ -97,8 +81,8 @@ public class RollAndOffsetInfo {
 
         @TagField("rollerCoasterMode")
         public boolean rollerCoasterMode;
-        @TagField(value = "ls", mapper = DoubleListMapper.class)
-        private List<Double> ls;
+        @TagField(value = "arcLenFactors", mapper = DoubleListMapper.class)
+        private List<Double> arcLenFactors;
         @TagField(value = "rolls", mapper = Vec3dListMapper.class)
         private List<Vec3d> rolls;
         @TagField(value = "rollCtrls", mapper = Vec3dListMapper.class)
@@ -118,13 +102,13 @@ public class RollAndOffsetInfo {
             this.tileTilt = rollAndOffsetInfo.tileTilt;
             this.rollerCoasterMode = rollAndOffsetInfo.rollerCoasterMode;
 
-            this.ls = rollAndOffsetInfo.ls;
-            this.rolls = rollAndOffsetInfo.rolls;
-            this.rollCtrls = rollAndOffsetInfo.rollCtrls;
-            this.yOffsets = rollAndOffsetInfo.yOffsets;
-            this.yOffsetCtrls = rollAndOffsetInfo.yOffsetCtrls;
-            this.zOffsets = rollAndOffsetInfo.zOffsets;
-            this.zOffsetCtrls = rollAndOffsetInfo.zOffsetCtrls;
+            this.arcLenFactors = new ArrayList<>(rollAndOffsetInfo.arcLenFactors);
+            this.rolls = new ArrayList<>(rollAndOffsetInfo.rolls);
+            this.rollCtrls = new ArrayList<>(rollAndOffsetInfo.rollCtrls);
+            this.yOffsets = new ArrayList<>(rollAndOffsetInfo.yOffsets);
+            this.yOffsetCtrls = new ArrayList<>(rollAndOffsetInfo.yOffsetCtrls);
+            this.zOffsets = new ArrayList<>(rollAndOffsetInfo.zOffsets);
+            this.zOffsetCtrls = new ArrayList<>(rollAndOffsetInfo.zOffsetCtrls);
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -135,7 +119,7 @@ public class RollAndOffsetInfo {
             tileTilt = defaultInfo.tileTilt;
             rollerCoasterMode = defaultInfo.rollerCoasterMode;
 
-            ls = defaultInfo.ls;
+            arcLenFactors = defaultInfo.arcLenFactors;
             rolls = defaultInfo.rolls;
             rollCtrls = defaultInfo.rollCtrls;
             yOffsets = defaultInfo.yOffsets;
@@ -153,7 +137,7 @@ public class RollAndOffsetInfo {
                     tileTilt,
                     rollerCoasterMode,
 
-                    ls,
+                    arcLenFactors,
                     rolls,
                     rollCtrls,
                     yOffsets,
@@ -169,14 +153,14 @@ public class RollAndOffsetInfo {
          */
         public int findPhysicalIndex(double l) {//return physical index
             int res = -1;
-            for (int i = 0; i < ls.size(); i += 2) {
-                if(ls.get(i) == l) {
+            for (int i = 0; i < arcLenFactors.size(); i += 2) {
+                if(arcLenFactors.get(i) == l) {
                     res = i;
                     break;
                 }
             }
-            if(!ls.isEmpty() && ls.get(ls.size() - 1) == l) {
-                res = ls.size()-1;
+            if(!arcLenFactors.isEmpty() && arcLenFactors.getLast() == l) {
+                res = arcLenFactors.size()-1;
             }
             return res;
         }
@@ -190,13 +174,13 @@ public class RollAndOffsetInfo {
 
             RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
                     offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
-                    ls, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
+                    arcLenFactors, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
             );
             List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);
 
-            ls.clear();
-            ls.addAll(res.get(0).ls);
-            ls.addAll(res.get(1).ls);
+            arcLenFactors.clear();
+            arcLenFactors.addAll(res.get(0).arcLenFactors);
+            arcLenFactors.addAll(res.get(1).arcLenFactors);
 
             rolls.clear();
             rolls.addAll(res.get(0).rolls);
@@ -227,10 +211,10 @@ public class RollAndOffsetInfo {
 
         public boolean tryDeleteDirectly(double l) {
             int idx = findPhysicalIndex(l);
-            if(idx == -1 || idx == 0 || idx == ls.size() - 1) return false;
+            if(idx == -1 || idx == 0 || idx == arcLenFactors.size() - 1) return false;
 
-            ls.remove(idx - 1);
-            ls.remove(idx - 1);
+            arcLenFactors.remove(idx - 1);
+            arcLenFactors.remove(idx - 1);
 
             rolls.remove(idx - 1);
             rolls.remove(idx - 1);
@@ -254,7 +238,7 @@ public class RollAndOffsetInfo {
         }
 
         public void resetAll() {
-            ls.clear();
+            arcLenFactors.clear();
             rolls.clear();
             rollCtrls.clear();
             yOffsets.clear();
@@ -262,7 +246,7 @@ public class RollAndOffsetInfo {
             zOffsets.clear();
             zOffsetCtrls.clear();
 
-            ls.add(0d); ls.add(1d);
+            arcLenFactors.add(0d); arcLenFactors.add(1d);
             rolls.add(new Vec3d(0, 0, 0)); rolls.add(new Vec3d(1, 0, 0));
             rollCtrls.add(new Vec3d(1d / 3, 0, 0)); rollCtrls.add(new Vec3d(1 + 1d / 3, 0, 0));
             yOffsets.add(new Vec3d(0, 0, 0)); yOffsets.add(new Vec3d(1, 0, 0));
@@ -302,7 +286,7 @@ public class RollAndOffsetInfo {
             points.set(idx, newValue);
             ctrls.set(idx, new Vec3d(oldValue.x, oldValue.y, oldValue.z + delta));
 
-            if(idx > 0 && idx < ls.size() - 1) {
+            if(idx > 0 && idx < arcLenFactors.size() - 1) {
                 oldValue = ctrls.get(idx - 1);
                 points.set(idx - 1, newValue);
                 ctrls.set(idx - 1, new Vec3d(oldValue.x, oldValue.y, oldValue.z + delta));
@@ -338,7 +322,7 @@ public class RollAndOffsetInfo {
             int idx = findPhysicalIndex(l);
             if(idx == -1) return false;
             if(idx == 0 && editLeft) return false;
-            if(idx == ls.size() - 1 && !editLeft) return false;
+            if(idx == arcLenFactors.size() - 1 && !editLeft) return false;
             if(val < 1e-1) return false;
 
             double newHandleXLen = val / length;
@@ -368,16 +352,16 @@ public class RollAndOffsetInfo {
             int editIdx;
             double segmentLen;
             if(editLeft) {
-                if(idx == ls.size() - 1) {
+                if(idx == arcLenFactors.size() - 1) {
                     editIdx = idx;
-                    segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx - 1));
+                    segmentLen = Math.abs(arcLenFactors.get(editIdx) - arcLenFactors.get(editIdx - 1));
                 }else {
                     editIdx = idx - 1;
-                    segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx - 1));
+                    segmentLen = Math.abs(arcLenFactors.get(editIdx) - arcLenFactors.get(editIdx - 1));
                 }
             }else {
                 editIdx = idx;
-                segmentLen = Math.abs(ls.get(editIdx) - ls.get(editIdx + 1));
+                segmentLen = Math.abs(arcLenFactors.get(editIdx) - arcLenFactors.get(editIdx + 1));
             }
 
             if(newHandleXLen < segmentLen * 0.5) {
@@ -394,7 +378,7 @@ public class RollAndOffsetInfo {
             int idx = findPhysicalIndex(l);
             if(idx == -1) return "null";
             if(idx == 0 && editLeft) return "null";
-            if(idx == ls.size() - 1 && !editLeft) return "null";
+            if(idx == arcLenFactors.size() - 1 && !editLeft) return "null";
 
             List<Vec3d> points;
             List<Vec3d> ctrls;
@@ -419,7 +403,7 @@ public class RollAndOffsetInfo {
 
             int displayIdx;
             if(editLeft) {
-                if(idx == ls.size() - 1) {
+                if(idx == arcLenFactors.size() - 1) {
                     displayIdx = idx;
                 }else {
                     displayIdx = idx - 1;
@@ -470,7 +454,7 @@ public class RollAndOffsetInfo {
             double newValue = newValueBase + newValueDelta;
             ctrls.set(idx, new Vec3d(oldCtrl.x, oldCtrl.y, newValue));
 
-            if(idx > 0 && idx < ls.size() - 1) {
+            if(idx > 0 && idx < arcLenFactors.size() - 1) {
                 oldCtrl = ctrls.get(idx - 1);
                 newValueBase = points.get(idx - 1).z;
                 newValueDelta = (ctrls.get(idx - 1).x - points.get(idx - 1).x) * fullZWithLength;
@@ -536,7 +520,7 @@ public class RollAndOffsetInfo {
             }
 
             List<CubicCurve> curves = new ArrayList<>();
-            for(int i = 0; i < ls.size(); i+=2) {
+            for(int i = 0; i < arcLenFactors.size(); i+=2) {
                 CubicCurve curve;
                 if(swapYZ) {//for screen rendering
                     Vec3d p1 = new Vec3d(points.get(i).x, points.get(i).z, points.get(i).y);
@@ -657,35 +641,16 @@ public class RollAndOffsetInfo {
         }
     }
 
-    @Override
-    public String toString() {
-        String id = "rollAndOffsetInfo:{";
-        id += this.offsetType;
-        id += this.rollEffectTile;
-        id += this.tileTilt;
-        id += this.rollerCoasterMode;
-        if(this.ls != null) {
-            for(int i = 0; i < this.ls.size(); i++){
-                id += this.ls.get(i);
-                id += this.rolls.get(i);
-                id += this.rollCtrls.get(i);
-                id += this.yOffsets.get(i);
-                id += this.yOffsetCtrls.get(i);
-                id += this.zOffsets.get(i);
-                id += this.zOffsetCtrls.get(i);
-            }
-        }
-        id += "}";
-        return id;
-    }
     public enum RollYOffsetType {
         MID(0),
 //        HIGH(3),
 //        LOW(4),
         LEFT(1),
         RIGHT(2);
-        private final int order;
+
         private static final RollYOffsetType[] BY_ORDER = values();
+
+        private final int order;
         RollYOffsetType(int order){
             this.order = order;
         }
@@ -736,7 +701,7 @@ public class RollAndOffsetInfo {
     //boundary:
     //case1:tStart overlay with a point
     //case2:tEnd overlay with a point
-    public List<RollAndOffsetInfo> subSplit(List<Pair<Double,Double>> subCurves, boolean normalize) {//only situation need truncating go into here, but some bug will case invalid tStart and tEnd(overlap), causing ls.size()==0
+    public List<RollAndOffsetInfo> subSplit(List<Pair<Double,Double>> subCurves, boolean normalize) {//only situation need truncating go into here, but some bug will case invalid tStart and tEnd(overlap), causing arcLenFactors.size()==0
         List<RollAndOffsetInfo> results = new ArrayList<>();
 
         for (Pair<Double,Double> subCurve : subCurves) {
@@ -751,8 +716,8 @@ public class RollAndOffsetInfo {
             List<Vec3d> newZOffsets = new ArrayList<>();
             List<Vec3d> newZOffsetCtrls = new ArrayList<>();
 
-            int logicIdxStart = (findRight(ls,lStart) + 1) / 2;
-            int logicIdxEnd = (findLeft(ls,lEnd) + 1) / 2;//physical index => logical index
+            int logicIdxStart = (findRight(arcLenFactors,lStart) + 1) / 2;
+            int logicIdxEnd = (findLeft(arcLenFactors,lEnd) + 1) / 2;//physical index => logical index
 
             int count = logicIdxEnd - logicIdxStart + 1;
             if(count == 0) {//findLeft/Right include situation of equaling, count == 0 is strictly satisfied, also this means results.size() >= 3
@@ -824,11 +789,12 @@ public class RollAndOffsetInfo {
             }else {
                 {//roll
                     //start
-                    if(lStart != ls.get(Physic(logicIdxStart))) {
-                        Vec3d p1 = rolls.get(Physic(logicIdxStart - 1));
-                        Vec3d p2 = rolls.get(Physic(logicIdxStart));
-                        Vec3d ctrl1 = rollCtrls.get(Physic(logicIdxStart - 1));
-                        Vec3d ctrl2 = rolls.get(Physic(logicIdxStart)).scale(2).subtract(rollCtrls.get(Physic(logicIdxStart)));//规定ctrl在右边，所以ctrl2都要取反一下
+                    if(lStart != arcLenFactors.get(physic(logicIdxStart))) {
+                        Vec3d p1 = rolls.get(physic(logicIdxStart - 1));
+                        Vec3d p2 = rolls.get(physic(logicIdxStart));
+                        Vec3d ctrl1 = rollCtrls.get(physic(logicIdxStart - 1));
+                        Vec3d ctrl2 = rolls.get(physic(logicIdxStart)).scale(2).subtract(rollCtrls.get(
+                                physic(logicIdxStart)));//The Ctrl is on the right, so Ctrl2 needs to be inverted
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve startCurve = getLeftByX(lStart, curve.reverse()).reverse();
@@ -845,19 +811,20 @@ public class RollAndOffsetInfo {
                     }
                     //mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
-                        newT.add(ls.get(Physic(i)));
-                        newT.add(ls.get(Physic(i + 1)));//will not go into this loop when idxStart == idxEnd
-                        newRolls.add(rolls.get(Physic(i)));
-                        newRolls.add(rolls.get(Physic(i + 1)));
-                        newRollCtrls.add(rollCtrls.get(Physic(i)));
-                        newRollCtrls.add(rollCtrls.get(Physic(i + 1)));
+                        newT.add(arcLenFactors.get(physic(i)));
+                        newT.add(arcLenFactors.get(physic(i + 1)));//will not go into this loop when idxStart == idxEnd
+                        newRolls.add(rolls.get(physic(i)));
+                        newRolls.add(rolls.get(physic(i + 1)));
+                        newRollCtrls.add(rollCtrls.get(physic(i)));
+                        newRollCtrls.add(rollCtrls.get(physic(i + 1)));
                     }
                     //end
-                    if(lEnd != ls.get(Physic(logicIdxEnd))) {
-                        Vec3d p1 = rolls.get(Physic(logicIdxEnd));
-                        Vec3d p2 = rolls.get(Physic(logicIdxEnd + 1));
-                        Vec3d ctrl1 = rollCtrls.get(Physic(logicIdxEnd));
-                        Vec3d ctrl2 = rolls.get(Physic(logicIdxEnd + 1)).scale(2).subtract(rollCtrls.get(Physic(logicIdxEnd + 1)));
+                    if(lEnd != arcLenFactors.get(physic(logicIdxEnd))) {
+                        Vec3d p1 = rolls.get(physic(logicIdxEnd));
+                        Vec3d p2 = rolls.get(physic(logicIdxEnd + 1));
+                        Vec3d ctrl1 = rollCtrls.get(physic(logicIdxEnd));
+                        Vec3d ctrl2 = rolls.get(physic(logicIdxEnd + 1)).scale(2).subtract(rollCtrls.get(
+                                physic(logicIdxEnd + 1)));
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve endCurve = getLeftByX(lEnd, curve);
@@ -876,11 +843,12 @@ public class RollAndOffsetInfo {
 
                 {//yOffset
                     //start
-                    if(lStart != ls.get(Physic(logicIdxStart))) {
-                        Vec3d p1 = yOffsets.get(Physic(logicIdxStart - 1));
-                        Vec3d p2 = yOffsets.get(Physic(logicIdxStart));
-                        Vec3d ctrl1 = yOffsetCtrls.get(Physic(logicIdxStart - 1));
-                        Vec3d ctrl2 = yOffsets.get(Physic(logicIdxStart)).scale(2).subtract(yOffsetCtrls.get(Physic(logicIdxStart)));//The Ctrl is on the right, so Ctrl2 needs to be inverted
+                    if(lStart != arcLenFactors.get(physic(logicIdxStart))) {
+                        Vec3d p1 = yOffsets.get(physic(logicIdxStart - 1));
+                        Vec3d p2 = yOffsets.get(physic(logicIdxStart));
+                        Vec3d ctrl1 = yOffsetCtrls.get(physic(logicIdxStart - 1));
+                        Vec3d ctrl2 = yOffsets.get(physic(logicIdxStart)).scale(2).subtract(yOffsetCtrls.get(
+                                physic(logicIdxStart)));//The Ctrl is on the right, so Ctrl2 needs to be inverted
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve startCurve = getLeftByX(lStart, curve.reverse()).reverse();
@@ -895,17 +863,18 @@ public class RollAndOffsetInfo {
                     }
                     //mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
-                        newYOffsets.add(yOffsets.get(Physic(i)));
-                        newYOffsets.add(yOffsets.get(Physic(i + 1)));
-                        newYOffsetCtrls.add(yOffsetCtrls.get(Physic(i)));
-                        newYOffsetCtrls.add(yOffsetCtrls.get(Physic(i + 1)));
+                        newYOffsets.add(yOffsets.get(physic(i)));
+                        newYOffsets.add(yOffsets.get(physic(i + 1)));
+                        newYOffsetCtrls.add(yOffsetCtrls.get(physic(i)));
+                        newYOffsetCtrls.add(yOffsetCtrls.get(physic(i + 1)));
                     }
                     //end
-                    if(lEnd != ls.get(Physic(logicIdxEnd))) {
-                        Vec3d p1 = yOffsets.get(Physic(logicIdxEnd));
-                        Vec3d p2 = yOffsets.get(Physic(logicIdxEnd + 1));
-                        Vec3d ctrl1 = yOffsetCtrls.get(Physic(logicIdxEnd));
-                        Vec3d ctrl2 = yOffsets.get(Physic(logicIdxEnd + 1)).scale(2).subtract(yOffsetCtrls.get(Physic(logicIdxEnd + 1)));
+                    if(lEnd != arcLenFactors.get(physic(logicIdxEnd))) {
+                        Vec3d p1 = yOffsets.get(physic(logicIdxEnd));
+                        Vec3d p2 = yOffsets.get(physic(logicIdxEnd + 1));
+                        Vec3d ctrl1 = yOffsetCtrls.get(physic(logicIdxEnd));
+                        Vec3d ctrl2 = yOffsets.get(physic(logicIdxEnd + 1)).scale(2).subtract(yOffsetCtrls.get(
+                                physic(logicIdxEnd + 1)));
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve endCurve = getLeftByX(lEnd, curve);
@@ -922,11 +891,12 @@ public class RollAndOffsetInfo {
 
                 {//zOffset
                     //start
-                    if(lStart != ls.get(Physic(logicIdxStart))) {
-                        Vec3d p1 = zOffsets.get(Physic(logicIdxStart - 1));
-                        Vec3d p2 = zOffsets.get(Physic(logicIdxStart));
-                        Vec3d ctrl1 = zOffsetCtrls.get(Physic(logicIdxStart - 1));
-                        Vec3d ctrl2 = zOffsets.get(Physic(logicIdxStart)).scale(2).subtract(zOffsetCtrls.get(Physic(logicIdxStart)));//we specify that Ctrl is on the right side of Point, so Ctrl2 must store the reverse.
+                    if(lStart != arcLenFactors.get(physic(logicIdxStart))) {
+                        Vec3d p1 = zOffsets.get(physic(logicIdxStart - 1));
+                        Vec3d p2 = zOffsets.get(physic(logicIdxStart));
+                        Vec3d ctrl1 = zOffsetCtrls.get(physic(logicIdxStart - 1));
+                        Vec3d ctrl2 = zOffsets.get(physic(logicIdxStart)).scale(2).subtract(zOffsetCtrls.get(
+                                physic(logicIdxStart)));//we specify that Ctrl is on the right side of Point, so Ctrl2 must store the reverse.
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve startCurve = getLeftByX(lStart, curve.reverse()).reverse();
@@ -941,17 +911,18 @@ public class RollAndOffsetInfo {
                     }
                     //mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
-                        newZOffsets.add(zOffsets.get(Physic(i)));
-                        newZOffsets.add(zOffsets.get(Physic(i + 1)));
-                        newZOffsetCtrls.add(zOffsetCtrls.get(Physic(i)));
-                        newZOffsetCtrls.add(zOffsetCtrls.get(Physic(i + 1)));
+                        newZOffsets.add(zOffsets.get(physic(i)));
+                        newZOffsets.add(zOffsets.get(physic(i + 1)));
+                        newZOffsetCtrls.add(zOffsetCtrls.get(physic(i)));
+                        newZOffsetCtrls.add(zOffsetCtrls.get(physic(i + 1)));
                     }
                     //end
-                    if(lEnd != ls.get(Physic(logicIdxEnd))) {
-                        Vec3d p1 = zOffsets.get(Physic(logicIdxEnd));
-                        Vec3d p2 = zOffsets.get(Physic(logicIdxEnd + 1));
-                        Vec3d ctrl1 = zOffsetCtrls.get(Physic(logicIdxEnd));
-                        Vec3d ctrl2 = zOffsets.get(Physic(logicIdxEnd + 1)).scale(2).subtract(zOffsetCtrls.get(Physic(logicIdxEnd + 1)));
+                    if(lEnd != arcLenFactors.get(physic(logicIdxEnd))) {
+                        Vec3d p1 = zOffsets.get(physic(logicIdxEnd));
+                        Vec3d p2 = zOffsets.get(physic(logicIdxEnd + 1));
+                        Vec3d ctrl1 = zOffsetCtrls.get(physic(logicIdxEnd));
+                        Vec3d ctrl2 = zOffsets.get(physic(logicIdxEnd + 1)).scale(2).subtract(zOffsetCtrls.get(
+                                physic(logicIdxEnd + 1)));
 
                         CubicCurve curve = new CubicCurve(p1, ctrl1, ctrl2, p2);
                         CubicCurve endCurve = getLeftByX(lEnd, curve);
@@ -981,10 +952,11 @@ public class RollAndOffsetInfo {
         return results;
     }
 
-    private int Physic(int logic) {
-        if(logic == 0) return 0;
-        if(logic * 2 > ls.size() - 1) return ls.size() - 1;
-        return logic * 2;
+    private int physic(int logic) {
+        if(logic == 0) {
+            return 0;
+        }
+        return Math.min(logic * 2, arcLenFactors.size() - 1);
     }
 
     public static CubicCurve getLeftByX(double x, CubicCurve curve) {//x is X-axis value not Length value!
@@ -1011,8 +983,7 @@ public class RollAndOffsetInfo {
 
     public static double getTByX(double targetX, CubicCurve curve) {//targetX is X-axis value not Length value!
         if (Math.abs(curve.p2.x - curve.p1.x) < 1e-12) return 0.5;
-        double targetLocal = (targetX - curve.p1.x) / (curve.p2.x - curve.p1.x);
-        double t = targetLocal;
+        double t = (targetX - curve.p1.x) / (curve.p2.x - curve.p1.x);
 
         for (int i = 0; i < 10; i++) {
             Vec3d pos = curve.position(t);
@@ -1023,7 +994,7 @@ public class RollAndOffsetInfo {
             if (Math.abs(deriv.x) < 1e-12) break;
 
             t = t - error / deriv.x;
-            t = Math.max(0, Math.min(1, t));
+            t = Math.clamp(t, 0, 1);
         }
 
         return t;
@@ -1097,7 +1068,7 @@ public class RollAndOffsetInfo {
     }
 
     public double getRoll(double l) {
-        return getValue(this.ls, l, rolls, rollCtrls);
+        return getValue(this.arcLenFactors, l, rolls, rollCtrls);
     }
 
     /**
@@ -1151,7 +1122,7 @@ public class RollAndOffsetInfo {
      * Used to correct Rail part pitch in BuilderIterator
      */
     public double getRelRollSlopeEnd(double length, boolean isRight, double gauge) {
-        int idx = ls.size() - 1;
+        int idx = arcLenFactors.size() - 1;
 
         double tan;
         double value;
@@ -1196,11 +1167,11 @@ public class RollAndOffsetInfo {
     }
 
     public double getYOffset(double l) {
-        return getValue(this.ls, l, yOffsets, yOffsetCtrls);
+        return getValue(this.arcLenFactors, l, yOffsets, yOffsetCtrls);
     }
 
     public double getZOffset(double l) {
-        return getValue(this.ls, l, zOffsets, zOffsetCtrls);
+        return getValue(this.arcLenFactors, l, zOffsets, zOffsetCtrls);
     }
     /**
      * Used to correct Rail part pitch in BuilderIterator
@@ -1215,15 +1186,15 @@ public class RollAndOffsetInfo {
      * Used to correct Rail part pitch in BuilderIterator
      */
     public double getZOffsetSlopeEnd(double length) {
-        int idx = ls.size() - 1;
+        int idx = arcLenFactors.size() - 1;
         double tan = (zOffsetCtrls.get(idx).z - zOffsets.get(idx).z) / (zOffsetCtrls.get(idx).x - zOffsets.get(idx).x);
         tan /= length;
         return -Math.toDegrees(Math.atan(tan));
     }
 
-    public static double getValue(List<Double>ls, double targetX, List<Vec3d> points, List<Vec3d> ctrls) {
+    public static double getValue(List<Double>arcLenFactors, double targetX, List<Vec3d> points, List<Vec3d> ctrls) {
         // notice that segmentIdx is not point index!
-        int segmentIdx = findValidSegment(targetX, ls);
+        int segmentIdx = findValidSegment(targetX, arcLenFactors);
 
         int p1Idx = segmentIdx * 2;
         int p2Idx = p1Idx + 1;
@@ -1242,19 +1213,19 @@ public class RollAndOffsetInfo {
         return pos.z;
     }
 
-    public static int findValidSegment(double targetL, List<Double> ls) {
-        int n = ls.size() / 2;
+    public static int findValidSegment(double targetArcLenFactor, List<Double> arcLenFactors) {
+        int n = arcLenFactors.size() / 2;
         if (n == 0) return -1;
 
-        if (targetL <= ls.get(0)) return 0;
-        if (targetL >= ls.get(ls.size() - 1)) return n - 1;
+        if (targetArcLenFactor <= arcLenFactors.getFirst()) return 0;
+        if (targetArcLenFactor >= arcLenFactors.getLast()) return n - 1;
 
         int left = 0, right = n - 1;
         int idx = -1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
-            double start = ls.get(mid * 2);
-            if (start <= targetL) {
+            double start = arcLenFactors.get(mid * 2);
+            if (start <= targetArcLenFactor) {
                 idx = mid;
                 left = mid + 1;
             } else {

@@ -63,7 +63,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				if (!subBuilders.isEmpty()) {
 					for (TrackBase track : subBuilder.tracks) {
 						if (track instanceof TrackRail) {
-							track.overrideParent(subBuilders.get(0).getParentPos());
+							track.overrideParent(subBuilders.getFirst().getParentPos());
 						}
 					}
 				} else {
@@ -131,10 +131,14 @@ public class BuilderCubicCurve extends BuilderIterator {
 		// HACK for super long curves
 		// Skip the super long calculation since it'll be overridden anyways
 		List<CubicCurve> curves =  curve.subsplit(200);
-		curve = curves.get(0);
+		curve = curves.getFirst();
 		RollAndOffsetInfo rollAndOffsetInfo;
-		rollAndOffsetInfo = info.settings.rollAndOffsetInfo == null ? null : info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.toRange(curves), true).get(0);
-		RollAndOffsetInfo.RollYOffsetType type = rollAndOffsetInfo == null ? RollAndOffsetInfo.RollYOffsetType.MID : rollAndOffsetInfo.offsetType;
+		rollAndOffsetInfo = info.settings.rollAndOffsetInfo == null
+							? null
+							: info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.toRange(curves), true).getFirst();
+		RollAndOffsetInfo.RollYOffsetType type = rollAndOffsetInfo == null
+												 ? RollAndOffsetInfo.RollYOffsetType.MID
+												 : rollAndOffsetInfo.offsetType();
 
 		double length = curve.lengthWithCache(1000);
 		int count = (int) (length / targetStepSize);//Adapt the length
@@ -184,7 +188,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
 					Vec3d newP;
-					if(!rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
+					if(!rollAndOffsetInfo.rollerCoasterMode()) {//superelevision scale
 						newP = new Vec3d(p.x, p.y - rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
 						newP = new Vec3d(p.x, p.y - Math.sin(Math.toRadians(rolls.get(i))) * gauge * 0.5, p.z);
@@ -196,7 +200,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
 					Vec3d newP;
-					if(!rollAndOffsetInfo.rollerCoasterMode) {//superelevision scale
+					if(!rollAndOffsetInfo.rollerCoasterMode()) {//superelevision scale
 						newP = new Vec3d(p.x, p.y + rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
 						newP = new Vec3d(p.x, p.y + Math.sin(Math.toRadians(rolls.get(i))) * gauge * 0.5, p.z);
@@ -211,7 +215,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 			for(int i = 0; i < points.size(); i++) {
 				Vec3d p = points.get(i);
 				Vec3d newP;
-				if(!rollAndOffsetInfo.rollerCoasterMode) {//yOffset scale
+				if (!rollAndOffsetInfo.rollerCoasterMode()) {//yOffset scale
 					newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);
 				} else {
 					newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//we may need another method depends on Orientation
@@ -268,7 +272,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 			float roll = 0;
 			if(rolls.get(i) != 0) {
-				if(!info.settings.rollAndOffsetInfo.rollerCoasterMode) {
+				if(!info.settings.rollAndOffsetInfo.rollerCoasterMode()) {
 					double sin = rolls.get(i) * 0.01 * gaugeScale / gauge;//superelevision scale
 					if(sin > 1) sin = 1;
 					if(sin < -1) sin = -1;
@@ -328,7 +332,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subBuilders == null) {
 			super.setDrops(drops);
 		} else {
-			subBuilders.get(0).setDrops(drops);
+			subBuilders.getFirst().setDrops(drops);
 		}
 	}
 
