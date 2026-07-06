@@ -21,8 +21,8 @@ public class CubicCurve {
     public int segment;
 
     //used for subSplit rollAndOffsetInfo
-    public double lStart;
-    public double lEnd;
+    public double arcLenFactorStart;
+    public double arcLenFactorEnd;
 
     //http://spencermortensen.com/articles/bezier-circle/
     public final static double c = 0.55191502449;
@@ -34,10 +34,10 @@ public class CubicCurve {
         this.p2 = p2;
     }
 
-    public CubicCurve(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double lStart, double lEnd) {
+    public CubicCurve(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double arcLenFactorStart, double arcLenFactorEnd) {
         this(p1, ctrl1, ctrl2, p2);
-        this.lStart = lStart;
-        this.lEnd = lEnd;
+        this.arcLenFactorStart = arcLenFactorStart;
+        this.arcLenFactorEnd = arcLenFactorEnd;
     }
 
     public static CubicCurve circle(int radius, float degrees, double lStrat, double lEnd) {
@@ -59,12 +59,12 @@ public class CubicCurve {
                 mat.apply(ctrl1),
                 mat.apply(ctrl2),
                 mat.apply(p2),
-                lStart, lEnd
+                arcLenFactorStart, arcLenFactorEnd
         );
     }
 
     public CubicCurve reverse() {
-        return new CubicCurve(p2, ctrl2, ctrl1, p1, lEnd, lStart);
+        return new CubicCurve(p2, ctrl2, ctrl1, p1, arcLenFactorEnd, arcLenFactorStart);
     }
 
     /**
@@ -82,8 +82,8 @@ public class CubicCurve {
         Vec3d s = lerp(r0, r1, t);
 
         double localRatio = lengthInBetween(0, t, 10) / lengthInBetween(0, 1, 10);
-        double globalEnd = lStart + localRatio * (lEnd - lStart);
-        return new CubicCurve(p1, q0, r0, s, lStart, globalEnd);
+        double globalEnd = arcLenFactorStart + localRatio * (arcLenFactorEnd - arcLenFactorStart);
+        return new CubicCurve(p1, q0, r0, s, arcLenFactorStart, globalEnd);
     }
 
     private Vec3d lerp(Vec3d a, Vec3d b, double t) {
@@ -273,7 +273,7 @@ public class CubicCurve {
                         ctrl1.add(0, (start / lengthGuess) * height, 0),
                         ctrl2.add(0, -(end / lengthGuess) * height, 0),
                         p2,
-                        lStart, lEnd
+                        arcLenFactorStart, arcLenFactorEnd
                 );
             case NEAR:
                 return new CubicCurve(
@@ -281,7 +281,7 @@ public class CubicCurve {
                         ctrl1,
                         ctrl2.add(0, -(end / (middle + end)) * height, 0),
                         p2,
-                        lStart, lEnd
+                        arcLenFactorStart, arcLenFactorEnd
                 );
             case FAR:
                 return new CubicCurve(
@@ -289,7 +289,7 @@ public class CubicCurve {
                         ctrl1.add(0, (start / (start + middle)) * height, 0),
                         ctrl2,
                         p2,
-                        lStart, lEnd
+                        arcLenFactorStart, arcLenFactorEnd
                 );
             case BOTH: default:
                 return this;

@@ -385,7 +385,7 @@ public class SimulationState {
             yawRear += 180;
             rollFront = -rollFront;
             rollRear = -rollRear;
-            roll = - roll;
+            roll = -roll;
         }
 
         IRPathingData nextFront = new IRPathingData(positionFront, rollFront);

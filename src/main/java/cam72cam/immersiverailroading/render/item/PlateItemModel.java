@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.render.item;
 
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.Color;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;

@@ -689,7 +689,7 @@ public record RollAndOffsetInfo(
     public static List<Pair<Double,Double>> toRange(List<CubicCurve> subCurves) {
         List<Pair<Double,Double>> res = new ArrayList<>();
         for(CubicCurve subCurve : subCurves) {
-            res.add(Pair.of(subCurve.lStart, subCurve.lEnd));
+            res.add(Pair.of(subCurve.arcLenFactorStart, subCurve.arcLenFactorEnd));
         }
         return res;
     }
