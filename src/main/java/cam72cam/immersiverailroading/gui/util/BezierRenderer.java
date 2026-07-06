@@ -38,10 +38,10 @@ public class BezierRenderer {
 
         DirectDraw draw = new DirectDraw();
 
-        draw.vertex(p1).color(color.r, color.g, color.b, color.a).uv(0,0);
-        draw.vertex(p2).color(color.r, color.g, color.b, color.a).uv(0,1);
-        draw.vertex(p3).color(color.r, color.g, color.b, color.a).uv(1,1);
-        draw.vertex(p4).color(color.r, color.g, color.b, color.a).uv(1,0);
+        draw.vertex(p1).color(color.r(), color.g(), color.b(), color.a()).uv(0, 0);
+        draw.vertex(p2).color(color.r(), color.g(), color.b(), color.a()).uv(0, 1);
+        draw.vertex(p3).color(color.r(), color.g(), color.b(), color.a()).uv(1, 1);
+        draw.vertex(p4).color(color.r(), color.g(), color.b(), color.a()).uv(1, 0);
 
         draw.draw(state.clone().texture(Texture.wrap(lineImg))
                 .alpha_test(false)
@@ -82,10 +82,10 @@ public class BezierRenderer {
 
         DirectDraw draw = new DirectDraw();
 
-        draw.vertex(pos.x - half, pos.y - half, pos.z).color(color.r, color.g, color.b, color.a).uv(0,0);
-        draw.vertex(pos.x - half, pos.y + half, pos.z).color(color.r, color.g, color.b, color.a).uv(0,1);
-        draw.vertex(pos.x + half, pos.y + half, pos.z).color(color.r, color.g, color.b, color.a).uv(1,1);
-        draw.vertex(pos.x + half, pos.y - half, pos.z).color(color.r, color.g, color.b, color.a).uv(1,0);
+        draw.vertex(pos.x - half, pos.y - half, pos.z).color(color.r(), color.g(), color.b(), color.a()).uv(0, 0);
+        draw.vertex(pos.x - half, pos.y + half, pos.z).color(color.r(), color.g(), color.b(), color.a()).uv(0, 1);
+        draw.vertex(pos.x + half, pos.y + half, pos.z).color(color.r(), color.g(), color.b(), color.a()).uv(1, 1);
+        draw.vertex(pos.x + half, pos.y - half, pos.z).color(color.r(), color.g(), color.b(), color.a()).uv(1, 0);
 
         draw.draw(state.clone().texture(Texture.wrap(pointImg))
                 .alpha_test(false)

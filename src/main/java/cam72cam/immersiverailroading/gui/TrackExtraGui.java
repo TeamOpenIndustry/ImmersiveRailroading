@@ -114,7 +114,7 @@ public class TrackExtraGui implements IScreen {
         yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
-        curveColor = Color.FLUORESCENT_GREEN;      // GREEN curve
+        curveColor = Color.CHARTREUSE;      // GREEN curve
         pointColor = Color.RED;      // RED point
         handlePointColor = Color.BLUE;      // BLUE handle point
         handleLineColor = Color.MAGENTA;      // MAGENTA handle line

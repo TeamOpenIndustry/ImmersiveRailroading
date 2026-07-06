@@ -1,13 +1,9 @@
 package cam72cam.immersiverailroading.gui.util;
 
-public class Color {
-    public final double r, g, b, a;
+public record Color(double r, double g, double b, double a) {
 
     public Color(int r, int g, int b, int a) {
-        this.r = r / 255.0;
-        this.g = g / 255.0;
-        this.b = b / 255.0;
-        this.a = a / 255.0;
+        this(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
     }
 
     public Color(int rgb) {
@@ -15,12 +11,13 @@ public class Color {
     }
 
     public static final Color RED = new Color(255, 0, 0, 255);
-    public static final Color GREEN = new Color(0, 255, 0, 255);
-    public static final Color FLUORESCENT_GREEN = new Color(85, 255, 0, 255);
+    public static final Color LIME = new Color(0, 255, 0, 255);
+    public static final Color CHARTREUSE = new Color(127, 255, 0, 255);
     public static final Color BLUE = new Color(0, 0, 255, 255);
     public static final Color YELLOW = new Color(255, 255, 0, 255);
     public static final Color GRAY = new Color(128, 128, 128, 255);
     public static final Color WHITE = new Color(255, 255, 255, 255);
     public static final Color MAGENTA = new Color(255, 0, 255, 255);
-    public static final Color DEEP_GREEN = new Color(0, 100, 0, 255);
+    public static final Color DARKGREEN = new Color(0, 100, 0, 255);
+
 }
