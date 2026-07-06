@@ -41,42 +41,34 @@ public class GuiTypes {
         if (!mb.isLoaded()) {
             return null;
         }
-        if (mb.getName().equals(CastingMultiblock.NAME)) {
-            return new CastingGUI(mb);
-        }
-        if (mb.getName().equals(PlateRollerMultiblock.NAME)) {
-            return new PlateRollerGUI(mb);
-        }
-        return null;
+        return switch (mb.getName()) {
+            case CastingMultiblock.NAME -> new CastingGUI(mb);
+            case PlateRollerMultiblock.NAME -> new PlateRollerGUI(mb);
+            case null, default -> null;
+        };
     }
 
     private static IScreen createTrackGuiScreen(TileRailPreview te) {
-        int guiOpenType;
-        try{
-            guiOpenType = RailSettings.getExtraDataFrom(te.getItem()).getInteger("guiOpenType");
-        }catch (NullPointerException e) {
-            guiOpenType = 0;
-        }
-
-        if(guiOpenType == 0) {
+        try {
+            if (RailSettings.getExtraDataFrom(te.getItem()).getInteger("guiOpenType") == 0) {
+                return new TrackGui(te);
+            } else {
+                return new TrackExtraGui(te);
+            }
+        } catch (NullPointerException e) {
             return new TrackGui(te);
-        }else {
-            return new TrackExtraGui(te);
         }
     }
     private static IScreen createTrackGuiScreen() {
         ItemStack stack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
-        int guiOpenType;
-        try{
-            guiOpenType = RailSettings.getExtraDataFrom(stack).getInteger("guiOpenType");
-        }catch (NullPointerException e) {
-            guiOpenType = 0;
-        }
-
-        if(guiOpenType == 0) {
+        try {
+            if (RailSettings.getExtraDataFrom(stack).getInteger("guiOpenType") == 0) {
+                return new TrackGui();
+            } else {
+                return new TrackExtraGui();
+            }
+        } catch (NullPointerException e) {
             return new TrackGui();
-        }else {
-            return new TrackExtraGui();
         }
     }
 
