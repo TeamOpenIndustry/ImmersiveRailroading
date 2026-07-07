@@ -49,35 +49,19 @@ public class RailSettings {
     }
 
     public void write(ItemStack stack) {
-        TagCompound root = stack.getTagCompound();
-        if (root == null) {
-            root = new TagCompound();
-        }
-
         TagCompound data = new TagCompound();
         try {
             TagSerializer.serialize(data, mutable());
         } catch (SerializationException e) {
             ImmersiveRailroading.catching(e);
         }
-
-        root.set("settings", data);
-        stack.setTagCompound(root);
+        writeData(stack, data, "settings");
     }
 
     public static RailSettings from(ItemStack stack) {
-        TagCompound root = stack.getTagCompound();
-        if (root == null || !root.hasKey("settings")) {
-            //legacy data
-            try {
-                return new Mutable(stack.getTagCompound()).immutable();
-            } catch (SerializationException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         try {
-            TagCompound data = root.get("settings");
+            TagCompound data = getDataFrom(stack, "settings");
+            if(data == null)return new Mutable(stack.getTagCompound()).immutable();
             return new Mutable(data).immutable();
         } catch (SerializationException e) {
             throw new RuntimeException(e);
