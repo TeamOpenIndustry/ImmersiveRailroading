@@ -305,11 +305,11 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				//start
 				float startLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, false, info.settings.gauge.value()) + points.getFirst().getPitch();
 				float startRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, true, info.settings.gauge.value()) + points.getFirst().getPitch();
-				correctLeftOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startLeftPitch, points.getFirst().getRoll()));//TODO: we can still do this better
+				correctLeftOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startLeftPitch, points.getFirst().getRoll()));//TODO: we can still do this better: also correct its yaw
 				correctRightOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startRightPitch, points.getFirst().getRoll()));
 
 				//Mid
-				for (int i = 1; i < points.size() - 1; i++) {//TODO: however for bit roll range and bit pitch, the rail part will not follow rail base well, looks awful
+				for (int i = 1; i < points.size() - 1; i++) {
 					Orientation leftOrientation = new Orientation(leftPos[i+1].subtract(leftPos[i-1]), points.get(i).subtract(leftPos[i]));
 					Orientation rightOrientation = new Orientation(rightPos[i+1].subtract(rightPos[i-1]), rightPos[i].subtract(points.get(i)));
 
@@ -337,7 +337,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					if (direction == TrackDirection.RIGHT)  {
 						offsetAngle = -offsetAngle;
 					}
-					switchPos = new VecYPR(cur.add(offset), cur.getYaw() + (float)offsetAngle, cur.getRoll(), cur.getPitch());
+					switchPos = new VecYPR(cur.add(offset), cur.getYaw() + (float)offsetAngle, cur.getPitch(), cur.getRoll());
 				}
 			}
 
@@ -359,7 +359,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 
 			//merge situation when angle == 0
-            VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe called STILL_BASE)
+            VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
             if (direction == TrackDirection.RIGHT) {
 				float leftLen = (1 - angle / 180);
 				float rightLen = (1 + angle / 180);

@@ -69,7 +69,7 @@ public class Orientation {
         return new Orientation(forward, right, up);
     }
 
-    public VecYPR toYPR() {//need test!!!
+    public VecYPR toYPR() {
 
         Matrix4 m = toMatrix();
 
@@ -107,7 +107,8 @@ public class Orientation {
                 0,
                 (float) Math.toDegrees(yaw),
                 (float) Math.toDegrees(pitch),
-                (float) Math.toDegrees(roll)
+                (float) Math.toDegrees(roll),
+                1
         );
     }
 

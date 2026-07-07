@@ -1120,36 +1120,13 @@ public record RollAndOffsetInfo(
             double ds = (rollCtrls.get(idx).x - rolls.get(idx).x) * length;
 
             tan = dRoll * (gauge * 0.5) / ds;
-            value = rolls.get(idx).z;
         } else {
             tan = (rollCtrls.get(idx).z - rolls.get(idx).z) / (rollCtrls.get(idx).x - rolls.get(idx).x);
-            value = rolls.get(idx).z;
             tan /= length;
             tan *= 0.01;
             tan *= 0.5;
         }
-
-        switch (offsetType) {
-//            case HIGH:
-//            case LOW:
-            case LEFT:
-            case RIGHT:
-                tan = isRight ? -tan : tan;
-                break;
-            case MID:
-                if (value > 0) {//right tilt
-                    tan = !isRight ? tan : -tan;
-                } else if (value < 0) {
-                    tan = !isRight ? -tan : tan;
-                } else {
-                    if (tan > 0) {//right tilt
-                        tan = !isRight ? tan : -tan;
-                    } else if (tan < 0) {
-                        tan = !isRight ? -tan : tan;
-                    }
-                }
-                break;
-        }
+        tan = isRight ? -tan : tan;
 
         return -Math.toDegrees(Math.atan(tan));
     }
@@ -1168,36 +1145,13 @@ public record RollAndOffsetInfo(
             double ds = (rollCtrls.get(idx).x - rolls.get(idx).x) * length;
 
             tan = dRoll * (gauge * 0.5) / ds;
-            value = rolls.get(idx).z;
         } else {
             tan = (rollCtrls.get(idx).z - rolls.get(idx).z) / (rollCtrls.get(idx).x - rolls.get(idx).x);
-            value = rolls.get(idx).z;
             tan /= length;
             tan *= 0.01;
             tan *= 0.5;
         }
-
-        switch (offsetType) {
-//            case HIGH:
-//            case LOW:
-            case LEFT:
-            case RIGHT:
-                tan = isRight ? -tan : tan;
-                break;
-            case MID:
-                if (value > 0) {//right tilt
-                    tan = !isRight ? -tan : tan;
-                } else if (value < 0) {
-                    tan = !isRight ? tan : -tan;
-                } else {
-                    if (tan < 0) {//right tilt
-                        tan = !isRight ? -tan : tan;
-                    } else if (tan > 0) {
-                        tan = !isRight ? tan : -tan;
-                    }
-                }
-                break;
-        }
+        tan = isRight ? -tan : tan;
 
         return -Math.toDegrees(Math.atan(tan));
     }
