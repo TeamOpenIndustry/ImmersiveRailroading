@@ -30,11 +30,11 @@ public class VecYPR extends Vec3d {
     }
 
     //Length
-    public VecYPR(VecYPR other, float length, TrackModelPart... parts) {
+    public VecYPR(VecYPR other, float length, TrackModelPart... parts) {// all
         this(other, other.yaw, other.pitch, other.roll, length, parts);
     }
 
-    public VecYPR(Vec3d orig, float yaw, float pitch, float roll, float length, TrackModelPart... parts) {
+    public VecYPR(Vec3d orig, float yaw, float pitch, float roll, float length, TrackModelPart... parts) {//all
         this(orig.x, orig.y, orig.z, yaw, pitch, roll, length, parts);
     }
 
@@ -42,8 +42,8 @@ public class VecYPR extends Vec3d {
         this(xIn, yIn, zIn, yaw, pitch, 0, length, parts);
     }
 
-    //all, roll
-    public VecYPR(double xIn, double yIn, double zIn, float yaw, float pitch, float roll, float length, TrackModelPart... parts) {
+    //Roll
+    public VecYPR(double xIn, double yIn, double zIn, float yaw, float pitch, float roll, float length, TrackModelPart... parts) {//all
         super(xIn, yIn, zIn);
         this.yaw = yaw;
         this.pitch = pitch;
@@ -52,18 +52,6 @@ public class VecYPR extends Vec3d {
         this.parts = Arrays.asList(parts);
         this.length = length;
         this.children = new ArrayList<>();
-    }
-
-    public VecYPR withYaw(float yaw) {
-        return new VecYPR(this.x, this.y, this.z, yaw, this.pitch, this.roll, this.length);
-    }
-
-    public VecYPR withPitch(float pitch) {
-        return new VecYPR(this.x, this.y, this.z, this.yaw, pitch, this.roll, this.length);
-    }
-
-    public VecYPR withRoll(float roll) {
-        return new VecYPR(this.x, this.y, this.z, this.yaw, this.pitch, roll, this.length);
     }
 
     public VecYPR withOrientation(Orientation orientation) {
