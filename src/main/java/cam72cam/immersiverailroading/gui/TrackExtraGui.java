@@ -105,7 +105,7 @@ public class TrackExtraGui implements IScreen {
 
         //Common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
         //Roller coaster mode:degree
-        rollMax = 45;
+        rollMax = rollAndOffsetInfoCache.rollerCoasterMode ? 45 : 60;//180 for rollerCoaster mode later
         yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
