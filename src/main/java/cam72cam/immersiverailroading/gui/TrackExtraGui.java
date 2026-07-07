@@ -42,7 +42,7 @@ public class TrackExtraGui implements IScreen {
     private boolean edited;
     private boolean editLeft;
     private final double length;
-    private final RailInfo referenceInfo;//only for calculating length and rendering
+    private final RailInfo referenceInfo;//Only for calculating length and rendering
     private final List<VecYPR> referenceRenderData;
     //buttons to show state
     private Button rollValueLabel;
@@ -101,13 +101,13 @@ public class TrackExtraGui implements IScreen {
             rollAndOffsetInfoCache = RollAndOffsetInfo.getDefault().mutable();
         }
 
-        //basic Gauge: Standard Gauge. other gauge will scale from standard
+        //Basic Gauge: Standard Gauge. other gauge will scale from standard
 
-        //common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
-        //roller coaster mode:degree
+        //Common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
+        //Roller coaster mode:degree
         rollMax = 180;
-        yOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
-        zOffsetMax = 1;//unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
+        yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
+        zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
         curveColor = Color.CHARTREUSE;      // GREEN curve
         pointColor = Color.RED;      // RED point
@@ -126,18 +126,18 @@ public class TrackExtraGui implements IScreen {
         int xtop = -GUIHelpers.getScreenWidth() / 2 + 5;
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
-        //left panel
-        //what else are needed to be displayed here?
+        //Left panel
+        //What else are needed to be displayed here?
         railInfoLabel = new Button(screen, xtop, ytop, 90, height,  GuiText.TRACK_LENGTH.toString(length), (_, _) -> {});
         ytop += height;
         ytop += 5;
-        //rollGraph
+        //roll Graph
         ytop += height * 3;
         ytop += 5;
-        //yOffsetGraph
+        //yOffset Graph
         ytop += height * 3;
         ytop += 5;
-        //zOffsetGraph
+        //zOffset Graph
         ytop += height * 3;
         ytop += 5;
         lSlider = new Slider(screen, xtop, ytop, width, height, "", 0.0, 1.0, 0.0, false, (self) -> {
@@ -145,7 +145,7 @@ public class TrackExtraGui implements IScreen {
             updateSliderRelated();
         });
 
-        //right panel
+        //Right panel
         insertOrDeletePointButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 50, height, "",
                                                (_, _) -> {
                                                    if(rollAndOffsetInfoCache.findPhysicalIndex(format(lSlider.getValue())) == -1) {//insert
@@ -189,7 +189,7 @@ public class TrackExtraGui implements IScreen {
             }
         });
 
-        //back to top
+        //Back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
 
         rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 2,
@@ -491,7 +491,7 @@ public class TrackExtraGui implements IScreen {
         });
         zOffsetHandleXLenLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
 
-        //update after all components init
+        //Update after all components init
         lSlider.onSlider();
     }
 
@@ -507,7 +507,7 @@ public class TrackExtraGui implements IScreen {
         if (this.te != null) {
             new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
 
-            //also update client Item to update Rail information
+            //Also update client Item to update Rail information
             ItemStack clientStack = te.getItem();
             settings.immutable().write(clientStack);
             ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
@@ -517,7 +517,7 @@ public class TrackExtraGui implements IScreen {
         } else {
             new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
 
-            //also update client Item to update Rail information
+            //Also update client Item to update Rail information
             ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
             settings.immutable().write(clientStack);
             ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
@@ -542,22 +542,22 @@ public class TrackExtraGui implements IScreen {
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 3 + 5) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 6 + 10) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
 
-        //if choose HIGH or LOW, half of the the roll graph will flip, need to flip it on graph?
-        //rollGraph
+        //If choose HIGH or LOW, half of the the roll graph will flip, need to flip it on graph?
+        //roll Graph
         state.translate(5, height + 5 + height * 1.5, 0);
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
         rollGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, rollYScale, 1, 0.05f, 0.05f, 0);
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, rollYScale);
         rollGraph.drawArrow(new Vec3d(format(lSlider.getValue()), immutable.getRoll(format(lSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
-        //yOffsetGraph
+        //yOffset Graph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer yOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
         yOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, yOffsetYScale, 1, 0.05f, 0.05f, 0);
         yOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, yOffsetYScale);
         yOffsetGraph.drawArrow(new Vec3d(format(lSlider.getValue()), immutable.getYOffset(format(lSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
 
-        //zOffsetGraph
+        //zOffset Graph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer zOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
         zOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, zOffsetYScale, 1, 0.05f, 0.05f, 0);

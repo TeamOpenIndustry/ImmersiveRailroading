@@ -19,7 +19,7 @@ public record RollAndOffsetInfo(
         boolean rollEffectTile,
         boolean tileTilt,
         boolean rollerCoasterMode,
-        //it is l(arcLenFactor) and x and the same time, l is for outer curve it effects, x is for curves this stores
+        //This is l(arcLenFactor) and x(horizonal axis value) and the same time, l is for outer curve it effects, x is for curves this stores
         List<Double> arcLenFactors,
         //Roll
         //This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
@@ -147,10 +147,10 @@ public record RollAndOffsetInfo(
             );
         }
 
-        //as we stored every point of a curve(2 base points, 2 control points), we will get duplicated arcLenFactor, so we have physical and logical index
-        //physical index: range->[0,point size)
-        //logical index: range->[0,point size/2)
-        //function for Gui config, notice that when using these, Lists CANT be NULL!
+        //As we stored every point of a curve(2 base points, 2 control points), we will get duplicated arcLenFactor, so we have physical and logical index
+        //Physical index: range->[0,point size)
+        //Logical index: range->[0,point size/2)
+        //Function for Gui config, notice that when using these, Lists CANT be NULL!
         /**
          * This will return -1 if L not in range
          */
@@ -723,13 +723,15 @@ public record RollAndOffsetInfo(
         return res;
     }
 
-    //subSplit
+    //SubSplit
+    //
     //Classified Discussion: analyze based on the number of points contained within the interval from tStart to tEnd.
     //0:Store a segment of line, but both tStart and tEnd require truncating, then normalize and store.
-    //more than 0:both tStart and tEnd truncate require truncating, and then normalize and store, points between tStart and tEnd need to be normalized and stored
-    //boundary:
-    //case1:tStart overlay with a point
-    //case2:tEnd overlay with a point
+    //More than 0:both tStart and tEnd truncate require truncating, and then normalize and store, points between tStart and tEnd need to be normalized and stored
+    //
+    //Boundary:
+    //Case1:tStart overlay with a point
+    //Case2:tEnd overlay with a point
     public List<RollAndOffsetInfo> subSplit(List<Pair<Double,Double>> subCurves, boolean normalize) {//only situation need truncating go into here, but some bug will case invalid tStart and tEnd(overlap), causing arcLenFactors.size()==0
         List<RollAndOffsetInfo> results = new ArrayList<>();
 
@@ -817,7 +819,7 @@ public record RollAndOffsetInfo(
                 }
             }else {
                 {//roll
-                    //start
+                    //Start
                     if(lStart != arcLenFactors.get(physic(logicIdxStart))) {
                         Vec3d p1 = rolls.get(physic(logicIdxStart - 1));
                         Vec3d p2 = rolls.get(physic(logicIdxStart));
@@ -838,7 +840,7 @@ public record RollAndOffsetInfo(
                         newRollCtrls.add(ctrl1);
                         newRollCtrls.add(ctrl2);
                     }
-                    //mid
+                    //Mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
                         newT.add(arcLenFactors.get(physic(i)));
                         newT.add(arcLenFactors.get(physic(i + 1)));//will not go into this loop when idxStart == idxEnd
@@ -847,7 +849,7 @@ public record RollAndOffsetInfo(
                         newRollCtrls.add(rollCtrls.get(physic(i)));
                         newRollCtrls.add(rollCtrls.get(physic(i + 1)));
                     }
-                    //end
+                    //End
                     if(lEnd != arcLenFactors.get(physic(logicIdxEnd))) {
                         Vec3d p1 = rolls.get(physic(logicIdxEnd));
                         Vec3d p2 = rolls.get(physic(logicIdxEnd + 1));
@@ -871,7 +873,7 @@ public record RollAndOffsetInfo(
                 }
 
                 {//yOffset
-                    //start
+                    //Start
                     if(lStart != arcLenFactors.get(physic(logicIdxStart))) {
                         Vec3d p1 = yOffsets.get(physic(logicIdxStart - 1));
                         Vec3d p2 = yOffsets.get(physic(logicIdxStart));
@@ -890,14 +892,14 @@ public record RollAndOffsetInfo(
                         newYOffsetCtrls.add(ctrl1);
                         newYOffsetCtrls.add(ctrl2);
                     }
-                    //mid
+                    //Mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
                         newYOffsets.add(yOffsets.get(physic(i)));
                         newYOffsets.add(yOffsets.get(physic(i + 1)));
                         newYOffsetCtrls.add(yOffsetCtrls.get(physic(i)));
                         newYOffsetCtrls.add(yOffsetCtrls.get(physic(i + 1)));
                     }
-                    //end
+                    //End
                     if(lEnd != arcLenFactors.get(physic(logicIdxEnd))) {
                         Vec3d p1 = yOffsets.get(physic(logicIdxEnd));
                         Vec3d p2 = yOffsets.get(physic(logicIdxEnd + 1));
@@ -919,7 +921,7 @@ public record RollAndOffsetInfo(
                 }
 
                 {//zOffset
-                    //start
+                    //Start
                     if(lStart != arcLenFactors.get(physic(logicIdxStart))) {
                         Vec3d p1 = zOffsets.get(physic(logicIdxStart - 1));
                         Vec3d p2 = zOffsets.get(physic(logicIdxStart));
@@ -938,14 +940,14 @@ public record RollAndOffsetInfo(
                         newZOffsetCtrls.add(ctrl1);
                         newZOffsetCtrls.add(ctrl2);
                     }
-                    //mid
+                    //Mid
                     for(int i = logicIdxStart; i < logicIdxEnd; i ++) {
                         newZOffsets.add(zOffsets.get(physic(i)));
                         newZOffsets.add(zOffsets.get(physic(i + 1)));
                         newZOffsetCtrls.add(zOffsetCtrls.get(physic(i)));
                         newZOffsetCtrls.add(zOffsetCtrls.get(physic(i + 1)));
                     }
-                    //end
+                    //End
                     if(lEnd != arcLenFactors.get(physic(logicIdxEnd))) {
                         Vec3d p1 = zOffsets.get(physic(logicIdxEnd));
                         Vec3d p2 = zOffsets.get(physic(logicIdxEnd + 1));

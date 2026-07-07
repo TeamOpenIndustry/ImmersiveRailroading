@@ -3,11 +3,32 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.mod.math.Vec3d;
 import util.Matrix4;
 
+/**
+ * Represents an orthonormal local coordinate system.
+ *
+ * The orientation is stored directly as three perpendicular basis vectors:
+ *
+ *     forward - local forward direction
+ *     right   - local right direction
+ *     up      - local up direction
+ *
+ * Unlike Euler angles, this representation avoids gimbal lock during most
+ * geometric operations and is better suited for track generation where local
+ * axes are frequently reconstructed from geometry.
+ *
+ * Yaw/Pitch/Roll are only used when converting to or from rendering data.
+ */
 public class Orientation {
 
+    /** Local forward direction (track direction). */
     public final Vec3d forward;
+
+    /** Local right direction. */
     public final Vec3d right;
+
+    /** Local up direction (track normal). */
     public final Vec3d up;
+
 
     private Orientation(Vec3d forward, Vec3d right, Vec3d up) {
         this.forward = forward.normalize();
@@ -15,6 +36,15 @@ public class Orientation {
         this.up = up.normalize();
     }
 
+    /**
+     * Constructs an orientation from forward and right vectors.
+     *
+     * The supplied vectors do not need to be perfectly orthogonal.
+     * The right vector is projected onto the plane perpendicular to forward,
+     * then the up vector is reconstructed using a cross product.
+     *
+     * This guarantees an orthonormal basis.
+     */
     public Orientation(Vec3d forward, Vec3d right) {
         Vec3d f = forward.normalize();
 
@@ -33,12 +63,20 @@ public class Orientation {
     public static Orientation fromYPR(VecYPR cur) {
         return fromYPR(cur.getYaw(), cur.getPitch(), cur.getRoll());
     }
+
     /**
-     * Matches the rotation order used in renderPiece:
-     * translate
-     * yaw (Y)
-     * pitch (X)
-     * roll (Z)
+     * Constructs an orientation from Euler angles.
+     *
+     * IMPORTANT:
+     * The rotation order must exactly match the render pipeline:
+     *
+     *     Yaw   (around local/world Y)
+     *     Pitch (around local X)
+     *     Roll  (around local Z)
+     *
+     * This order is intentionally kept identical to renderPiece() so that
+     * converting between Orientation and VecYPR is lossless under normal
+     * operating ranges.
      */
     public static Orientation fromYPR(float yaw, float pitch, float roll) {
 
@@ -69,6 +107,23 @@ public class Orientation {
         return new Orientation(forward, right, up);
     }
 
+    /*
+     * This method is intended for serialization and rendering only.
+     * For geometric editing, prefer operating directly on Orientation
+     * instead of repeatedly converting through Euler angles.
+     */
+    /**
+     * Extracts Euler angles from the current orientation.
+     *
+     * The extracted angles assume the same Yaw-Pitch-Roll order used by
+     * fromYPR().
+     *
+     * Since Euler angles are not unique, multiple angle combinations may
+     * represent the same orientation. This method returns one valid solution.
+     *
+     * Near pitch = +/-90 degrees the representation becomes singular
+     * (gimbal lock), in which case roll is set to zero.
+     */
     public VecYPR toYPR() {
 
         Matrix4 m = toMatrix();
@@ -144,7 +199,11 @@ public class Orientation {
     }
 
     /**
-     * Rotates around a world-space axis.
+     * Rotates the entire local basis around a world-space axis.
+     *
+     * The supplied axis is interpreted in global coordinates.
+     * Every basis vector is rotated by the same amount, preserving
+     * orthogonality.
      */
     public Orientation rotateWorld(Vec3d axis, double angle) {
 
@@ -158,12 +217,16 @@ public class Orientation {
     }
 
     /**
-     * Rotates around a local-space axis.
+     * Rotates around one of the local axes.
      *
-     * localAxis:
-     * (1,0,0) = right
-     * (0,1,0) = up
-     * (0,0,1) = forward
+     * The local axis is expressed in orientation space:
+     *
+     * (1,0,0) -> local right
+     * (0,1,0) -> local up
+     * (0,0,1) -> local forward
+     *
+     * The corresponding world-space axis is first reconstructed, then
+     * rotateWorld() is used internally.
      */
     public Orientation rotateLocal(Vec3d localAxis, double angle) {
 
@@ -193,7 +256,10 @@ public class Orientation {
     }
 
     /**
-     * Rodrigues Rotation Formula
+     * Rotates a vector around an arbitrary axis using Rodrigues'
+     * rotation formula.
+     *
+     * The axis does not need to be normalized.
      */
     private static Vec3d rotateAroundAxis(Vec3d vec, Vec3d axis, double angle) {
 
@@ -216,14 +282,23 @@ public class Orientation {
                 '}';
     }
 
+    /**
+     * Rotates around the current local right axis.
+     */
     public Orientation rotatePitch(double degree) {
         return rotateLocal(new Vec3d(1, 0, 0), Math.toRadians(degree));
     }
 
+    /**
+     * Rotates around the current local up axis.
+     */
     public Orientation rotateYaw(double degree) {
         return rotateLocal(new Vec3d(0, 1, 0), Math.toRadians(degree));
     }
 
+    /**
+     * Rotates around the current local forward axis.
+     */
     public Orientation rotateRoll(double degree) {
         return rotateLocal(new Vec3d(0, 0, 1), Math.toRadians(degree));
     }

@@ -388,7 +388,7 @@ public class TrackGui implements IScreen {
 				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
 
 				//TODO: these code are duplicated with ItemRailUpdatePacket.handle(), should we move them into a function?
-				//also update client Item to update Rail information
+				//Also update client Item to update Rail information
 				ItemStack clientStack = te.getItem();
 				settings.immutable().write(clientStack);
 				ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
@@ -398,7 +398,7 @@ public class TrackGui implements IScreen {
 			} else {
 				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
 
-				//also update client Item to update Rail information
+				//Also update client Item to update Rail information
 				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
 				settings.immutable().write(clientStack);
 				ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);

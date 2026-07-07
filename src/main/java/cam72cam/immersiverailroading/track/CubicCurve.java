@@ -20,7 +20,7 @@ public class CubicCurve {
     public double[] len;
     public int segment;
 
-    //used for subSplit rollAndOffsetInfo
+    //Used for subSplit rollAndOffsetInfo
     public double arcLenFactorStart;
     public double arcLenFactorEnd;
 

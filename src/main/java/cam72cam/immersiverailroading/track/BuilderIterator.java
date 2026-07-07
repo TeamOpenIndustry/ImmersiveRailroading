@@ -211,7 +211,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			Vec3d worldUp = new Vec3d(0, 1, 0);
 			Vec3d right;
 			if (Math.abs(forward.dotProduct(worldUp)) > 0.9999) {
-				// forward almost vertical, use Z axis as temporary reference
+				// Forward almost vertical, use Z axis as temporary reference
 				right = new Vec3d(0, 0, 1).crossProduct(forward).normalize();
 			} else {
 				right = forward.crossProduct(worldUp).normalize();
@@ -289,7 +289,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				leftPos = new Vec3d[points.size()];
 				rightPos = new Vec3d[points.size()];
 
-				// pre-calculate rail part pos
+				// Pre-calculate rail part pos
 				for (int i = 0; i < points.size(); i++) {
 					VecYPR cur = points.get(i);
 					Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
@@ -302,7 +302,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 							pos.add(o.right.scale(info.settings.gauge.value() * 0.5));
 				}
 
-				//start
+				//Start
 				Orientation startBase = Orientation.fromYPR(points.getFirst());
 
 				float startLeftPitch =
@@ -325,7 +325,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					correctRightOrientation.add(leftOrientation);
 				}
 
-				//end
+				//End
 				Orientation endBase = Orientation.fromYPR(points.getLast());
 
 				float endLeftPitch =
@@ -374,7 +374,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				angle = delta(prev.getYaw(), next.getYaw());
 			}
 
-			//merge situation when angle == 0
+			//Merge situation when angle == 0
             VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
             if (direction == TrackDirection.RIGHT) {
 				float leftLen = (1 - angle / 180);

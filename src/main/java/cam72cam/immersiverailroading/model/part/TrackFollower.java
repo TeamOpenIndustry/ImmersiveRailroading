@@ -27,7 +27,7 @@ public class TrackFollower {
     private final boolean front;
     private Vec3d pos;
     private float yawReadout;
-    private float rollReadout;//bogey from the whole body
+    private float rollReadout;//Bogey from the whole body
     private final Matrix4 matrix;
 
     public TrackFollower(EntityMoveableRollingStock stock, ModelComponent frame, WheelSet wheels, boolean front) {
@@ -96,7 +96,6 @@ public class TrackFollower {
                 yawReadout = toPointYaw + atPointYaw;
                 rollReadout = (float) -pointPos.getRoll() - stock.getRotationRoll();
                 if(toMinPoint < 0)rollReadout = -rollReadout;
-//                System.out.println("offsetYaw:"+offsetYaw +"roll:"+ rollReadout + "stock rotation:"+ stock.getRotationYaw());
 
                 float min = this.min;
                 // TODO This implies the code above is broken, but works around some of the weirder edge cases.

@@ -416,7 +416,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         if(this.frontRoll != null) {
             return this.frontRoll;
         }
-        return this.getRotationRoll();//this seems will only happen in some case when spawning train on MinecraftRail?
+        return this.getRotationRoll();//This seems will only happen in some case when spawning train on MinecraftRail?
     }
     public void setFrontRoll(float val) {
         this.frontRoll = val;

@@ -119,7 +119,7 @@ public class BezierRenderer {
         Vec3d dir = worldEnd.subtract(worldStart).normalize();
         double cycleLength = dashLength + gapLength;
 
-        // apply offset
+        // Apply offset
         double currentDist = phaseOffset % cycleLength;
         if (currentDist < 0) currentDist += cycleLength;
 
