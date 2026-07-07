@@ -17,6 +17,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 
@@ -149,6 +150,16 @@ public class ItemTrackBlueprint extends CustomItem {
 
         /*return Arrays.asList(
 		);*/
+	}
+
+	public static class Data extends ItemDataSerializer {
+		// 0 for original gui, 1 for TrackExtraGui
+		@TagField("railExtraData")
+		public int guiOpenType;
+
+		public Data(ItemStack stack) {
+			super(stack);
+		}
 	}
 
 }

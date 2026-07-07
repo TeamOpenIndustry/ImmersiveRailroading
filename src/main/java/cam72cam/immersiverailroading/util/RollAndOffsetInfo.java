@@ -1113,7 +1113,6 @@ public record RollAndOffsetInfo(
         int idx = 0;
 
         double tan;
-        double value;
 
         if (rollerCoasterMode) {
             double dRoll = Math.toRadians(rollCtrls.get(idx).z - rolls.get(idx).z);
@@ -1138,7 +1137,6 @@ public record RollAndOffsetInfo(
         int idx = arcLenFactors.size() - 1;
 
         double tan;
-        double value;
 
         if (rollerCoasterMode) {
             double dRoll = Math.toRadians(rollCtrls.get(idx).z - rolls.get(idx).z);

@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -25,7 +26,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.serialization.TagCompound;
 import util.Matrix4;
 
 import java.util.*;
@@ -38,7 +38,7 @@ public class TrackGui implements IScreen {
 	long frame;
 
 	private TileRailPreview te;
-	private int guiOpenType;
+	private int targetGuiOpenType;
 	private Button typeButton;
 	private TextField lengthInput;
 	private Slider degreesSlider;
@@ -81,11 +81,7 @@ public class TrackGui implements IScreen {
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
 		settings = RailSettings.from(stack).mutable();
-		try{
-			this.guiOpenType = RailSettings.getExtraDataFrom(stack).getInteger("guiOpenType");
-		}catch (NullPointerException e) {
-			this.guiOpenType = 0;
-		}
+		targetGuiOpenType = new ItemTrackBlueprint.Data(stack).guiOpenType;
 
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
@@ -193,7 +189,7 @@ public class TrackGui implements IScreen {
         trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, GuiText.TRACK_EXTRAGUI.toString()) {
             @Override
             public void onClick(Player.Hand hand) {
-				guiOpenType = 1;
+				targetGuiOpenType = 1;
 				onClose();
                 if (te != null) {
                     GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
@@ -389,21 +385,25 @@ public class TrackGui implements IScreen {
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), guiOpenType).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
 
 				//TODO: these code are duplicated with ItemRailUpdatePacket.handle(), should we move them into a function?
 				//also update client Item to update Rail information
 				ItemStack clientStack = te.getItem();
 				settings.immutable().write(clientStack);
-				RailSettings.writeExtraData(clientStack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+				ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
+				data.guiOpenType = targetGuiOpenType;
+				data.write();
 				te.setItem(clientStack, MinecraftClient.getPlayer());
 			} else {
-				new ItemRailUpdatePacket(settings.immutable(), guiOpenType).sendToServer();
+				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
 
 				//also update client Item to update Rail information
 				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
 				settings.immutable().write(clientStack);
-				RailSettings.writeExtraData(clientStack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+				ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
+				data.guiOpenType = targetGuiOpenType;
+				data.write();
 				MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
 			}
 		}

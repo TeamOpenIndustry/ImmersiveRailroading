@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.gui;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.gui.util.BezierRenderer;
 import cam72cam.immersiverailroading.gui.util.Color;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -21,7 +22,6 @@ import cam72cam.mod.gui.screen.*;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.serialization.TagCompound;
 import util.Matrix4;
 
 import java.util.List;
@@ -38,7 +38,7 @@ public class TrackExtraGui implements IScreen {
     private TileRailPreview te;
     private RailSettings.Mutable settings;
     private RollAndOffsetInfo.Mutable rollAndOffsetInfoCache;
-    private int guiOpenType;
+    private int targetGuiOpenType;
     private boolean edited;
     private boolean editLeft;
     private final double length;
@@ -83,11 +83,7 @@ public class TrackExtraGui implements IScreen {
     private TrackExtraGui(ItemStack stack, TileRailPreview te) {
         stack = stack.copy();
         this.settings = RailSettings.from(stack).mutable();
-        try{
-            this.guiOpenType = RailSettings.getExtraDataFrom(stack).getInteger("guiOpenType");
-        }catch (NullPointerException e) {
-            this.guiOpenType = 0;
-        }
+        this.targetGuiOpenType = new ItemTrackBlueprint.Data(stack).guiOpenType;
         this.te = te;
 
         if(this.te != null) {//TODO:Switch and multiSwitch support
@@ -184,7 +180,7 @@ public class TrackExtraGui implements IScreen {
 
         TrackGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 3, ytop, 50, height,
                                     GuiText.TRACK_EXTRA_TRACKGUI.toString(), (_, _) -> {
-            guiOpenType = 0;
+            targetGuiOpenType = 0;
             onClose();
             if (te != null) {
                 GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
@@ -509,20 +505,24 @@ public class TrackExtraGui implements IScreen {
         }
 
         if (this.te != null) {
-            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), guiOpenType).sendToServer();
+            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
 
             //also update client Item to update Rail information
             ItemStack clientStack = te.getItem();
             settings.immutable().write(clientStack);
-            RailSettings.writeExtraData(clientStack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+            ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
+            data.guiOpenType = targetGuiOpenType;
+            data.write();
             te.setItem(clientStack, MinecraftClient.getPlayer());
         } else {
-            new ItemRailUpdatePacket(settings.immutable(), guiOpenType).sendToServer();
+            new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
 
             //also update client Item to update Rail information
             ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
             settings.immutable().write(clientStack);
-            RailSettings.writeExtraData(clientStack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+            ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
+            data.guiOpenType = targetGuiOpenType;
+            data.write();
             MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
         }
     }

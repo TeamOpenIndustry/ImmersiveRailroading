@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.*;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.*;
 import cam72cam.immersiverailroading.gui.container.*;
-import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.multiblock.CastingMultiblock;
 import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
@@ -50,7 +50,7 @@ public class GuiTypes {
 
     private static IScreen createTrackGuiScreen(TileRailPreview te) {
         try {
-            if (RailSettings.getExtraDataFrom(te.getItem()).getInteger("guiOpenType") == 0) {
+            if (new ItemTrackBlueprint.Data(te.getItem()).guiOpenType == 0) {
                 return new TrackGui(te);
             } else {
                 return new TrackExtraGui(te);
@@ -62,7 +62,7 @@ public class GuiTypes {
     private static IScreen createTrackGuiScreen() {
         ItemStack stack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
         try {
-            if (RailSettings.getExtraDataFrom(stack).getInteger("guiOpenType") == 0) {
+            if (new ItemTrackBlueprint.Data(stack).guiOpenType == 0) {
                 return new TrackGui();
             } else {
                 return new TrackExtraGui();

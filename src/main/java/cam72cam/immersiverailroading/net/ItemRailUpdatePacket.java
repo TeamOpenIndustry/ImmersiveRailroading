@@ -1,12 +1,12 @@
 package cam72cam.immersiverailroading.net;
 
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.net.Packet;
-import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 
 public class ItemRailUpdatePacket extends Packet {
@@ -35,16 +35,20 @@ public class ItemRailUpdatePacket extends Packet {
 		if (pos != null) {
 			TileRailPreview tile = this.getWorld().getBlockEntity(pos, TileRailPreview.class);
 			if (tile != null) {
-				ItemStack item = tile.getItem();
-				settings.write(item);
-				RailSettings.writeExtraData(item, new TagCompound().setInteger("guiOpenType", guiOpenType));
-				tile.setItem(item, getPlayer());
+				ItemStack stack = tile.getItem();
+				settings.write(stack);
+				ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
+				data.guiOpenType = guiOpenType;
+				data.write();
+				tile.setItem(stack, getPlayer());
 			}
 		} else {
 			Player player = this.getPlayer();
 			ItemStack stack = player.getHeldItem(Player.Hand.PRIMARY);
 			settings.write(stack);
-			RailSettings.writeExtraData(stack, new TagCompound().setInteger("guiOpenType", guiOpenType));
+			ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
+			data.guiOpenType = guiOpenType;
+			data.write();
 			player.setHeldItem(Player.Hand.PRIMARY, stack);
 		}
 	}

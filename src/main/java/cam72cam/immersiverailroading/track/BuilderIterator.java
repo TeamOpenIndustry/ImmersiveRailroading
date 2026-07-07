@@ -303,10 +303,18 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 
 				//start
-				float startLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, false, info.settings.gauge.value()) + points.getFirst().getPitch();
-				float startRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(length, true, info.settings.gauge.value()) + points.getFirst().getPitch();
-				correctLeftOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startLeftPitch, points.getFirst().getRoll()));//TODO: we can still do this better: also correct its yaw
-				correctRightOrientation.add(Orientation.fromYPR(points.getFirst().getYaw(), startRightPitch, points.getFirst().getRoll()));
+				Orientation startBase = Orientation.fromYPR(points.getFirst());
+
+				float startLeftPitch =
+						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
+								length, false, info.settings.gauge.value());
+
+				float startRightPitch =
+						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
+								length, true, info.settings.gauge.value());
+
+				correctLeftOrientation.add(startBase.rotatePitch(startLeftPitch));
+				correctRightOrientation.add(startBase.rotatePitch(startRightPitch));
 
 				//Mid
 				for (int i = 1; i < points.size() - 1; i++) {
@@ -318,10 +326,18 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 
 				//end
-				float endLeftPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, false, info.settings.gauge.value()) + points.getLast().getPitch();
-				float endRightPitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(length, true, info.settings.gauge.value()) + points.getLast().getPitch();
-				correctLeftOrientation.add(Orientation.fromYPR(points.getLast().getYaw(), endLeftPitch, points.getLast().getRoll()));
-				correctRightOrientation.add(Orientation.fromYPR(points.getLast().getYaw(), endRightPitch, points.getLast().getRoll()));
+				Orientation endBase = Orientation.fromYPR(points.getLast());
+
+				float endLeftPitch =
+						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
+								length, false, info.settings.gauge.value());
+
+				float endRightPitch =
+						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
+								length, true, info.settings.gauge.value());
+
+				correctLeftOrientation.add(endBase.rotatePitch(endLeftPitch));
+				correctRightOrientation.add(endBase.rotatePitch(endRightPitch));
 			}
 		}
 

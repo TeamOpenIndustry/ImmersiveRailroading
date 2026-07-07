@@ -55,42 +55,15 @@ public class RailSettings {
         } catch (SerializationException e) {
             ImmersiveRailroading.catching(e);
         }
-        writeData(stack, data, "settings");
+        stack.setTagCompound(data);
     }
 
     public static RailSettings from(ItemStack stack) {
         try {
-            TagCompound data = getDataFrom(stack, "settings");
-            if(data == null)return new Mutable(stack.getTagCompound()).immutable();
-            return new Mutable(data).immutable();
+            return new Mutable(stack.getTagCompound()).immutable();
         } catch (SerializationException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void writeExtraData(ItemStack stack, TagCompound data) {
-        writeData(stack, data, "extraRailData");
-    }
-
-    public static TagCompound getExtraDataFrom(ItemStack stack) {
-        return getDataFrom(stack, "extraRailData");
-    }
-
-    public static void writeData(ItemStack stack, TagCompound data, String key) {
-        TagCompound root = stack.getTagCompound();
-        if (root == null) {
-            root = new TagCompound();
-        }
-        root.set(key, data);
-        stack.setTagCompound(root);
-    }
-
-    public static TagCompound getDataFrom(ItemStack stack, String key) {
-        TagCompound root = stack.getTagCompound();
-        if (root == null || !root.hasKey(key)) {
-            return null;
-        }
-        return root.get(key);
     }
 
     public Mutable mutable() {
