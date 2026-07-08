@@ -1,28 +1,28 @@
 item.immersiverailroading:item_large_wrench.name=Großer Schraubenschlüssel
 item.immersiverailroading:item_hook.name=Kupplungshaken
 item.immersiverailroading:item_paint_brush.name=Farbpinsel
-item.immersiverailroading:item_augment.SPEED_RETARDER.name=Retarder
+item.immersiverailroading:item_augment.SPEED_RETARDER.name=Geschwindigkeitsbegrenzer
 item.immersiverailroading:item_augment.WATER_TROUGH.name=Wasserbelader
 item.immersiverailroading:item_augment.LOCO_CONTROL.name=Fahrschalter
 item.immersiverailroading:item_augment.ITEM_LOADER.name=Gegenstandsbelader
 item.immersiverailroading:item_augment.ITEM_UNLOADER.name=Gegenstandsentlader
 item.immersiverailroading:item_augment.FLUID_LOADER.name=Flüssigkeitsbelader
 item.immersiverailroading:item_augment.FLUID_UNLOADER.name=Flüssigkeitsentlader
-item.immersiverailroading:item_augment.DETECTOR.name=Sensor
+item.immersiverailroading:item_augment.DETECTOR.name=Detektor
 item.immersiverailroading:item_augment.COUPLER.name=Koppler
-item.immersiverailroading:item_augment.ACTUATOR.name=Tür Steuerer
+item.immersiverailroading:item_augment.ACTUATOR.name=Aktuator
 item.immersiverailroading:item_rail_part.name=Schienensegment
 item.immersiverailroading:item_cast_rail.name=Schienenguss
 item.immersiverailroading:item_manual.name=Immersive Railroading Handbuch
 item.immersiverailroading:item_rail.name=Schienenplan
-item.immersiverailroading:item_conductor_whistle.name=Pfeife
-item.immersiverailroading:item_golden_spike.name=Golden Spike
+item.immersiverailroading:item_conductor_whistle.name=Schaffnerpfeife
+item.immersiverailroading:item_golden_spike.name=Goldener Schienennagel
 item.immersiverailroading:item_radio_control_card.name=Zug-Funksteuerungs-Chip
 item.immersiverailroading:item_switch_key.name=Weichenschlüssel
 item.immersiverailroading:item_track_exchanger.name=Schienenaustausch Werkzeug
 
 tile.immersiverailroading:block_rail.name=Schiene
-tile.immersiverailroading:block_rail_gag.name=Schiene (Gag)
+tile.immersiverailroading:block_rail_gag.name=Schienenstück
 tile.immersiverailroading:block_rail_preview.name=Schienenentwurf
 tile.immersiverailroading:block_steam_hammer.name=Dampfhammer
 
@@ -32,18 +32,19 @@ chat.immersiverailroading:stock.missing=Fehlende Teile: %s
 chat.immersiverailroading:stock.invalid=Fehler: Es existieren auf diesem Server keine Fahrzeuge. Kann nicht platziert werden.
 chat.immersiverailroading:stock.wrong_gauge=Falsche Spurweite!
 chat.immersiverailroading:stock.placement=Fahrzeuge müssen auf einer geraden Schiene platziert werden!
-chat.immersiverailroading:stock.deadmans_switch_enabled=Sicherheitsfahrschalter aktiviert
-chat.immersiverailroading:stock.deadmans_switch_disabled=Sicherheitsfahrschalter deaktiviert
+chat.immersiverailroading:stock.deadmans_switch_enabled=Todmannschalter aktiviert
+chat.immersiverailroading:stock.deadmans_switch_disabled=Todmannschalter deaktiviert
 chat.immersiverailroading:coupler.front=vordere
 chat.immersiverailroading:coupler.back=hintere
 chat.immersiverailroading:coupler.engaged=Die %s Kupplung wurde in den normalen Modus gesetzt
 chat.immersiverailroading:coupler.disengaged=Die %s Kupplung wurde in den Rangiermodus gesetzt
+chat.immersiverailroading:augment.filter_fail=Fehlgeschlagen den Filter für Sensor bei (%s, %s, %s) zu setzen, überprüfe die Konfiguration.
 chat.immersiverailroading:coupler.status.coupled=Die %s Kupplung ist an %s gekuppelt (%s, %s, %s)
 chat.immersiverailroading:coupler.status.decoupled.engaged=Die %s Kupplung ist im normalen Modus entkuppelt
 chat.immersiverailroading:coupler.status.decoupled.disengaged=Die %s Kupplung ist im Rangiermodus entkuppelt
 chat.immersiverailroading:build.missing=Es fehlt: %s %s
-chat.immersiverailroading:augment.set=Erweitung reagiert nun nur noch auf %s
-chat.immersiverailroading:augment.reset=Erweiterung reagiert nun auf alle Fahrzeuge
+chat.immersiverailroading:augment.set=Sensor reagiert nun nur noch auf %s
+chat.immersiverailroading:augment.reset=Sensor reagiert nun auf alle Fahrzeuge
 chat.immersiverailroading:misc.wood_planks=Holzbretter
 chat.immersiverailroading:build.invalid_block=Ungültiger Block: x=%s y=%s z=%s
 chat.immersiverailroading:radio.link=Lokomotive mit Chip verbunden
@@ -90,6 +91,12 @@ gui.immersiverailroading:selector.cast_repeat=Mehrfache Fertigung
 gui.immersiverailroading:selector.paintbrush_random=Wende zufällige Lackierungsvariante an
 gui.immersiverailroading:selector.paintbrush_apply_to_stock=Wende auf das Fahrzeug an
 gui.immersiverailroading:selector.paintbrush_apply_to_train=Wende auf den ganzen Zug an
+# Migrated from old detector translations which already contain "Detecting", don't need for this
+gui.immersiverailroading:selector.augment.detect=Aktuell:
+gui.immersiverailroading:selector.augment.redstone=Redstone Modus:
+gui.immersiverailroading:selector.augment.pushpull=Drücken/Ziehen
+gui.immersiverailroading:selector.augment.coupler=Kupplungsmodus:
+gui.immersiverailroading:selector.augment.control=Lokomotivsteuerungsmodus:
 
 gui.immersiverailroading:item.switch_key=Rechtsklick um zwischen [Geradeaus gesperrt, Abzweigend gesperrt, nicht gesperrt] zu wechseln. Redstone wird ignoriert!
 gui.immersiverailroading:item.switch_key.data=Zuletzt gesperrte Weiche: %s in %s
@@ -110,15 +117,15 @@ gui.immersiverailroading:track.curvosity=%s Kurvenkrümmung
 gui.immersiverailroading:track.position=Platzierung:              %s
 gui.immersiverailroading:track.smoothing=Vertikale Glättung: %s
 gui.immersiverailroading:track.direction=Richtung:  %s
-gui.immersiverailroading:track.rail_bed=Bett:                  %s
-gui.immersiverailroading:track.rail_bed_fill=Schienenbettfüllung:  %s
+gui.immersiverailroading:track.rail_bed=Gleisbett:                  %s
+gui.immersiverailroading:track.rail_bed_fill=Gleisbettfüllung:  %s
 gui.immersiverailroading:track.place_blueprint_true=Platziere:             Entwurf
 gui.immersiverailroading:track.place_blueprint_false=Platziere:            Schiene
 
 gui.immersiverailroading:loco.works=Werke:  %s
 gui.immersiverailroading:loco.power=Leistung:  %s
 gui.immersiverailroading:loco.tractive_effort=Anfahrzugkraft:  %s
-gui.immersiverailroading:loco.max_speed=Maximale Geschwindigkeit:  %s
+gui.immersiverailroading:loco.max_speed=Höchstgeschwindigkeit:  %s
 gui.immersiverailroading:stock.gauge=Spurweite:  %s
 gui.immersiverailroading:stock.texture=Texturvariante:  %s
 gui.immersiverailroading:cast.raw=Muss vor Nutzung erst in einem Dampfhammer weiterverarbeitet werden!
@@ -127,6 +134,12 @@ gui.immersiverailroading:stock.freight_capacity=Kapazität:      %s Stapel
 gui.immersiverailroading:stock.weight=Gewicht:        %s kg
 gui.immersiverailroading:stock.modeler=Modellierer:  %s
 gui.immersiverailroading:stock.pack=Pack:  %s
+gui.immersiverailroading:stock.tag=Tags:            %s
+
+gui.immersiverailroading:label.current_augment=Aktueller Sensor:
+gui.immersiverailroading:label.actuator_filter=Filter für Aktuator:
+gui.immersiverailroading:label.included_tag=Einbezogene Tags:
+gui.immersiverailroading:label.excluded_tag=Ausgeschlossene Tags:
 
 gui.immersiverailroading:overlay.on=An
 gui.immersiverailroading:overlay.off=Aus
@@ -163,19 +176,20 @@ track.immersiverailroading:smoothing.far=Fern
 track.immersiverailroading:smoothing.neither=Nichts
 
 track.immersiverailroading:direction.none=Flexibel
+# Intended
 track.immersiverailroading:direction.left=Sperre rechts
 track.immersiverailroading:direction.right=Sperre links
 
 part.immersiverailroading:component.frame=Rahmen
 part.immersiverailroading:component.front_frame=Vorderer Rahmen
 part.immersiverailroading:component.rear_frame=Hinterer Rahmen
-part.immersiverailroading:component.bogey_wheel=Drehgestellrad
+part.immersiverailroading:component.bogey_wheel=Drehgestellachse
 part.immersiverailroading:component.bogey=Drehgestell
-part.immersiverailroading:component.bogey_front_wheel=Vorderes Drehgestellrad 
+part.immersiverailroading:component.bogey_front_wheel=Vordere Drehgestellachse
 part.immersiverailroading:component.bogey_front=Vorderes Drehgestell
-part.immersiverailroading:component.bogey_rear_wheel=Hinteres Drehgestellrad
+part.immersiverailroading:component.bogey_rear_wheel=Hintere Drehgestellachse
 part.immersiverailroading:component.bogey_rear=Hinteres Drehgestell
-part.immersiverailroading:component.frame_wheel=Rahmen Rad
+part.immersiverailroading:component.frame_wheel=Feste Achse
 part.immersiverailroading:component.shell=Hülle
 part.immersiverailroading:component.cab=Führerstand
 part.immersiverailroading:component.bell=Glocke
@@ -234,12 +248,12 @@ multiblock.immersiverailroading:plate_machine=Plattenwalze
 multiblock.immersiverailroading:rail_machine=Schienenwalze
 multiblock.immersiverailroading:steam_hammer=Dampfhammer
 
-immersiverailroading:crafting_type.casting=Gießen
-immersiverailroading:crafting_type.casting_hammer=Gießen, Dampfhammer
-immersiverailroading:crafting_type.plate_small=Plattenwalze
-immersiverailroading:crafting_type.plate_medium=Plattenwalze
-immersiverailroading:crafting_type.plate_large=Plattenwalze
-immersiverailroading:crafting_type.plate_boiler=Plattenwalze, Kesselwalze
+immersiverailroading:crafting_type.casting=Gießen im Gußbecken
+immersiverailroading:crafting_type.casting_hammer=Gießen im Gußbecken, Schmieden unter dem Dampfhammer
+immersiverailroading:crafting_type.plate_small=Walzen einer kleine Platte in der Plattenwalze
+immersiverailroading:crafting_type.plate_medium=Walzen einer mittlere Platte in der Plattenwalze
+immersiverailroading:crafting_type.plate_large=Walzen einer große Platte in der Plattenwalze
+immersiverailroading:crafting_type.plate_boiler=Walzen einer Kesselplatte in der Plattenwalze, danach Bearbeiten in der Kessel Maschine
 
 itemGroup.immersiverailroading.main=Immersive Railroading
 itemGroup.immersiverailroading.locomotive=Immersive Railroading Lokomotiven

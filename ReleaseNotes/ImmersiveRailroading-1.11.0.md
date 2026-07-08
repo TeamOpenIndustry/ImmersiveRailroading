@@ -111,16 +111,20 @@ With the Custom User Interfaces, modelers could refer stock data in text compone
 For example, `state.speed` gives a 2-digit decimal (default for speed), `state.speed.5` gives a 5-digit decimal, `state.speed.0` results in an integer.
 
 ## Bugfixes and Improvements
-  - Track segments spanning has been rewritten to get rid of weird overlapping in the middle.
+  - Rewrote track segments spanning logic to get rid of weird overlapping in the middle.
   - Updated `clearArea` exception logic to avoid manual cleaning when placing tracks in snow.
   - Adjusted grade crossing math to ensure symmetrical heights on both sides of the track.
-  - Fixed that widgets on unfinished stocks can be dragged.
+  - Prevented augments push or pull item/fluid from other neighbor augments.
+  - Made front/rear bogie clack sound not conflicting.
   - Corrected smoke particle emitter offsets, especially notable during high-speed movement.
+  - Fixed that widgets on unfinished stocks can be dragged.
   - Fixed element overlapping in the track blueprint GUI.
   - Fixed incorrect Boiler Roller model offsets.
   - Fixed Boiler Roller's animation not playing.
   - Fixed diesel throttle glitches when setting non-notched values via dragging or augments.
   - Fixed stock being persisted even with packs unloaded.
+  - Fixed red "obstacle" block being rendered at world origin instead of track's position.
+  - Fixed bogies of non-standard track being offset weirdly on curves.
   - Expanded paintbrush GUI button width to fit new translations.
   - Fixed Z-fighting on newly placed Turntables and Transfer tables.
     - Existing ones will need to be re-placed.

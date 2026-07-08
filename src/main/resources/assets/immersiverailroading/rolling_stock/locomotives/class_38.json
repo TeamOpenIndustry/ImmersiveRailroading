@@ -5,9 +5,9 @@
 	"model": "immersiverailroading:models/rolling_stock/locomotives/class_38/class_38.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"max_psi": 245,
+		"max_pressure_psi": 245,
 		"water_capacity_l": 37000, 
-		"horsepower": 4300,
+		"power_hp": 4300,
 		"tractive_effort_lbf": 36273,
 		"max_speed_kmh": 120,
 		"valve_gear": "walschaerts",

@@ -5,9 +5,9 @@
 	"model": "immersiverailroading:models/rolling_stock/locomotives/rodgers_460/rodgers_460.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"max_psi": 180,
+		"max_pressure_psi": 180,
 		"water_capacity_l": 15000, 
-		"horsepower": 2800,
+		"power_hp": 2800,
 		"tractive_effort_lbf": 21922,
 		"max_speed_kmh": 130,
 		"valve_gear": "stephenson",
