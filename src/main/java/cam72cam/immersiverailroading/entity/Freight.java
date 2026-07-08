@@ -1,13 +1,17 @@
 package cam72cam.immersiverailroading.entity;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.FilteredStackHandler;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.model.FreightModel;
 import cam72cam.immersiverailroading.registry.FreightDefinition;
 import cam72cam.mod.entity.Entity;
+import cam72cam.mod.entity.ItemEntity;
 import cam72cam.mod.entity.Living;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.Fuzzy;
@@ -15,6 +19,7 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.TagField;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class Freight extends EntityCoupleableRollingStock {
 	@TagField("items")
@@ -130,6 +135,51 @@ public abstract class Freight extends EntityCoupleableRollingStock {
 		}
 		return true;
 	}
+
+    @Override
+    public void onTick() {
+        super.onTick();
+
+        if (this.getWorld().isClient || !Config.ImmersionConfig.allowCargoLoadDroppedItem || this.getWorld().getTicks() % 5 != 0) {
+            return;
+        }
+
+        int tankOffset;
+        int inventorySize = this.getInventorySize();
+        if (this instanceof FreightTank) {
+            if (inventorySize == 2) {
+                return;
+            } else {
+                tankOffset = 2;
+            }
+        } else {
+            tankOffset = 0;
+        }
+
+        Set<ItemEntity> nearby = this.getNearbyItems();
+        nearby.forEach(entity -> {
+                  ItemStack stack = entity.getContent();
+                  ItemStack remaining = stack;
+                  for (int i = tankOffset; i < inventorySize; i++) {
+                      if ((remaining = cargoItems.insert(i, remaining, false)).getCount() == 0) {
+                          //All items are gone, goodbye
+                          entity.kill();
+                          return;
+                      }
+                  }
+                  if(stack != remaining){
+                      entity.setContent(remaining);
+                  }
+              });
+    }
+
+    public Set<ItemEntity> getNearbyItems() {
+        //Bypass RealBB's grow
+        IBoundingBox grow = this.getBounds();
+        List<ItemEntity> itemEntities = getWorld().getEntitiesWithinBB(grow, ItemEntity.class);
+        FreightModel<?, ?> model = (FreightModel<?, ?>) this.getDefinition().getModel();
+        return model.filterItems(this, itemEntities);
+    }
 
 	/**
 	 * Handle mass depending on item count

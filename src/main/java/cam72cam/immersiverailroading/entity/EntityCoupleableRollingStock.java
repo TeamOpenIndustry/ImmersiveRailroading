@@ -100,6 +100,9 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagSync
 	@TagField("hasElectricalPower")
 	private boolean hasElectricalPower;
+
+	@TagSync
+	@TagField("linkedToLocomotive")
 	private boolean linkedToLocomotive;
 	private boolean hadElectricalPower = false;
 	private int gotElectricalPowerTick = -1;

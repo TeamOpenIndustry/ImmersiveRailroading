@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.library.Particles;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.render.SmokeParticle;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
@@ -39,12 +40,12 @@ public class SteamChimney {
             if (darken == 0 && Config.isFuelRequired(stock.gauge)) {
                 return;
             }
-            darken /= stock.getInventorySize() - 2.0;
-            darken *= 0.75;
+            darken /= (stock.getInventorySize() - 2.0f);
+            darken *= 0.75f;
             for (ModelComponent smoke : emitter) {
                 Vec3d particlePos = stock.getPosition().add(VecUtil.rotateWrongYaw(smoke.center.scale(stock.gauge.scale()), stock.getRotationYaw() + 180));
 
-                double smokeMod = Math.min(1, Math.max(0.2, Math.abs(stock.getCurrentSpeed().minecraft())*2));
+                double smokeMod = MathUtil.clamp(Math.abs(stock.getCurrentSpeed().minecraft())*2, 0.2, 1);
 
                 int lifespan = (int) (200 * (1 + exhaust) * smokeMod * stock.gauge.scale());
 

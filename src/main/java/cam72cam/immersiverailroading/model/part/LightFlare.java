@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.LightDefinition;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.math.Rotation;
@@ -91,7 +92,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
         this.direction = checker.test("FORWARD")
                          ? Rotation.NONE
                          : checker.test("REVERSE")
-                           ? Rotation.COUNTERCLOCKWISE_90
+                           ? Rotation.CLOCKWISE_180
                            : null;
         // This is bad...
         LightDefinition config = def.getLight(component.type.toString()
@@ -101,7 +102,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
 
         if (config != null) {
             this.forward = config.revertDirection
-                           ? !(component.center.x < 0)
+                           ? component.center.x >= 0
                            : component.center.x < 0;
             this.lightTex = config.lightTex;
             this.blinkIntervalTicks = (int)(config.blinkIntervalSeconds * 20);
@@ -178,7 +179,7 @@ public class LightFlare<T extends EntityMoveableRollingStock> {
                 subtract(flareOffset).scale(forward ? 1 : -1);
 
         int viewAngle = 45;
-        float intensity = 1 - Math.abs(Math.max(-viewAngle, Math.min(viewAngle, VecUtil.toWrongYaw(playerOffset) - 90))) / viewAngle;
+        float intensity = 1 - Math.abs(MathUtil.clamp(VecUtil.toWrongYaw(playerOffset) - 90, -viewAngle, viewAngle)) / viewAngle;
         intensity *= Math.abs(playerOffset.x/(50 * stock.gauge.scale()));
         intensity = Math.min(intensity, 1.5f);
 

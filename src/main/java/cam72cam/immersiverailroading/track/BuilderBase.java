@@ -3,20 +3,17 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.TrackItems;
-import cam72cam.immersiverailroading.library.TrackModelPart;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.util.Facing;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 //TODO @cam72cam use Vec3i and Vec3i
@@ -42,46 +39,7 @@ public abstract class BuilderBase {
 		parent_pos = pos;
 	}
 
-	public static class VecYawPitch extends Vec3d {
-		public final float yaw;
-		public final float pitch;
-		public final float length;
-		public final List<TrackModelPart> parts;
-		public final List<VecYawPitch> children = new ArrayList<>();
-		
-		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, TrackModelPart... parts) {
-			this(xIn, yIn, zIn, yaw, 0, parts);
-		}
-		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, TrackModelPart... parts) {
-			this(xIn, yIn, zIn, yaw, pitch, -1, parts);
-		}
-		public VecYawPitch(double xIn, double yIn, double zIn, float yaw, float pitch, float length, TrackModelPart... parts) {
-			super(xIn, yIn, zIn);
-			this.yaw = yaw;
-			this.parts = Arrays.asList(parts);
-			this.pitch = pitch;
-			this.length = length;
-		}
-
-		public void addChild(VecYawPitch another){
-			this.children.add(another);
-		}
-
-		public float getYaw() {
-			return this.yaw;
-		}
-		public float getPitch() {
-			return this.pitch;
-		}
-		public float getLength() {
-			return this.length;
-		}
-		public List<TrackModelPart> getParts() {
-			return this.parts;
-		}
-	}
-	
-	public abstract List<VecYawPitch> getRenderData();
+	public abstract List<VecYPR> getRenderData();
 
 	public boolean canBuild() {
 		for(TrackBase track : tracks) {

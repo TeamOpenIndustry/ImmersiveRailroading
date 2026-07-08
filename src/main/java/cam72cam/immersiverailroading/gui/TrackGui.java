@@ -13,6 +13,7 @@ import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
@@ -96,32 +97,31 @@ public class TrackGui implements IScreen {
 		int height = 20;
 		int xtop = -GUIHelpers.getScreenWidth() / 2;
 		int ytop = -GUIHelpers.getScreenHeight() / 4;
-
-		this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
-		this.lengthInput.setText("" + settings.length);
-		this.lengthInput.setValidator(s -> {
-			if (s == null || s.length() == 0) {
-				return true;
-			}
-			int val;
-			try {
-				val = Integer.parseInt(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			int max = 1000;
-			if (settings.type.isTable()) {
-				max = settings.type == TrackItems.TURNTABLE
-					  ? BuilderTurnTable.maxLength(settings.gauge)
-					  : BuilderTransferTable.maxLength(settings.gauge);
-			}
-			if (val > 0 && val <= max) {
-				settings.length = val;
-				return true;
-			}
-			return false;
-		});
-		this.lengthInput.setFocused(true);
+        this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
+        this.lengthInput.setText("" + settings.length);
+        this.lengthInput.setValidator(s -> {
+            if (s == null || s.isEmpty()) {
+                return true;
+            }
+            int val;
+            try {
+                val = Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+            int max = 1000;
+            if (settings.type.isTable()) {
+                max = settings.type == TrackItems.TURNTABLE
+                      ? BuilderTurnTable.maxLength(settings.gauge)
+                      : BuilderTransferTable.maxLength(settings.gauge);
+            }
+            if (val > 0 && val <= max) {
+                settings.length = val;
+                return true;
+            }
+            return false;
+        });
+        this.lengthInput.setFocused(true);
 		ytop += height;
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
@@ -135,7 +135,8 @@ public class TrackGui implements IScreen {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
 							  : BuilderTransferTable.maxLength(settings.gauge);
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+
+                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
 				}
 			}
 		};
@@ -165,7 +166,7 @@ public class TrackGui implements IScreen {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
 							  : BuilderTransferTable.maxLength(settings.gauge);
-					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
 				}
 				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
@@ -477,7 +478,7 @@ public class TrackGui implements IScreen {
 						length = 5;
 					}
 					if (settings.type == TrackItems.TURNTABLE) {
-						length = Math.min(25, Math.max(10, length));
+						length = MathUtil.clamp(length, 10, 25);
 					}
 					b.length = length;
 				}),

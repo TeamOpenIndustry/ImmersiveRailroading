@@ -4,14 +4,12 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
-import cam72cam.immersiverailroading.library.Augment;
-import cam72cam.immersiverailroading.library.KeyTypes;
-import cam72cam.immersiverailroading.library.ModelComponentType;
-import cam72cam.immersiverailroading.library.Permissions;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.net.SoundPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.RealBB;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.entity.Entity;
@@ -28,10 +26,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class EntityMoveableRollingStock extends EntityRidableRollingStock implements ICollision {
-
-    public static final String DAMAGE_SOURCE_HIT = "immersiverailroading:hitByTrain";
-    public static final String DAMAGE_SOURCE_HIT_IN_DARKNESS = "immersiverailroading:hitByTrainInDarkness";
-
     @TagField("frontYaw")
     private Float frontYaw;
     @TagField("rearYaw")
@@ -229,7 +223,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             if (getDefinition().hasIndependentBrake()) {
                 for (Control<?> control : getDefinition().getModel().getControls()) {
                     if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.INDEPENDENT_BRAKE_X) {
-                        setIndependentBrake(Math.max(0, Math.min(1, getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8)));
+                        setIndependentBrake(MathUtil.clamp(getIndependentBrake() + (getControlPosition(control) - 0.5f) / 8, 0, 1));
                     }
                 }
             }
@@ -337,7 +331,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				    boolean isBlockDark = getWorld().getBlockLightLevel(entity.getBlockPosition()) < 0.5;
 				    boolean isNightime = getWorld().getTime() > 13000 && getWorld().getTime() < 23000;
 				    boolean isDark = isBlockDark && isNightime;
-				    entity.directDamage(isDark ? DAMAGE_SOURCE_HIT_IN_DARKNESS : DAMAGE_SOURCE_HIT, speedDamage);
+				    entity.directDamage(isDark ? DamageTypes.HIT_IN_DARKNESS : DamageTypes.HIT, speedDamage);
 				}
 			}
 	
@@ -446,7 +440,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         return getDefinition().hasIndependentBrake() ? independentBrake : 0;
     }
     public void setIndependentBrake(float newIndependentBrake) {
-        newIndependentBrake = Math.min(1, Math.max(0, newIndependentBrake));
+        newIndependentBrake = MathUtil.clamp(newIndependentBrake, 0, 1);
         if (this.getIndependentBrake() != newIndependentBrake && getDefinition().hasIndependentBrake()) {
             if (getDefinition().isLinearBrakeControl()) {
                 setControlPositions(ModelComponentType.INDEPENDENT_BRAKE_X, newIndependentBrake);
@@ -483,7 +477,7 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
         for (Vec3i bp : track) {
             TileRailBase te = getWorld().getBlockEntity(bp, TileRailBase.class);
             if (te != null) {
-                if (te.getAugment() == Augment.SPEED_RETARDER) {
+                if (te.getAugment() == Augment.SPEED_RETARDER && te.canInteractWith(this)) {
                     double red = getWorld().getRedstone(bp);
                     retardedNewtons += red / 15f / track.size() * newtons;
                 }

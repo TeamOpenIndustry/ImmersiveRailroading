@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.model.part.PartSound;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition.AnimationMode;
 import cam72cam.immersiverailroading.render.ExpireableMap;
+import cam72cam.immersiverailroading.util.MathUtil;
 import util.Matrix4;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class StockAnimation {
 
     public float getValue(EntityRollingStock stock) {
         float value = def.control_group != null ? stock.getControlPosition(def.control_group) : def.readout.getValue(stock);
-        value = Math.min(1, Math.max(0, (value - def.rangeMin) / (def.rangeMax - def.rangeMin)));
+        value = MathUtil.clamp((value - def.rangeMin) / (def.rangeMax - def.rangeMin), 0, 1);
         value += def.offset;
         return def.invert ? 1 - value : value;
     }

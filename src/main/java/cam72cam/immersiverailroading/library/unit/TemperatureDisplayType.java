@@ -2,18 +2,18 @@ package cam72cam.immersiverailroading.library.unit;
 
 public enum TemperatureDisplayType {
     celcius,
-    farenheit,
-    kelvin,;
+    kelvin,
+    farenheit;
 
     public float convertFromCelcius(float value) {
         switch (this) {
             default:
             case celcius:
                 return value;
-            case farenheit:
-                return (value * 9f/5f) + 32f;
             case kelvin:
                 return value + 273.15f;
+            case farenheit:
+                return (value * 9f/5f) + 32f;
         }
     }
 
@@ -21,11 +21,11 @@ public enum TemperatureDisplayType {
         switch (this) {
             default:
             case celcius:
-                return "C";
-            case farenheit:
-                return "F";
+                return "°C";
             case kelvin:
                 return "K";
+            case farenheit:
+                return "°F";
         }
     }
 }

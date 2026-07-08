@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.registry.LocomotiveDieselDefinition;
+import cam72cam.immersiverailroading.util.MathUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +87,7 @@ public class DieselLocomotiveModel extends LocomotiveModel<LocomotiveDiesel, Loc
                     boolean isThrottledUp = stock.getRelativeRPM() > 0.01;
                     float fade = runningFade.getOrDefault(stock.getUUID(), 0f);
                     fade += 0.05f * (isThrottledUp ? 1 : -1);
-                    fade = Math.min(Math.max(fade, 0), 1);
+                    fade = MathUtil.clamp(fade, 0, 1);
                     runningFade.put(stock.getUUID(), fade);
 
                     idle.effects(stock, 1 - fade + 0.01f, 1);

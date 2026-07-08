@@ -6,11 +6,15 @@ import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class CargoFill {
+    public final List<IBoundingBox> boxes;
+
     public static CargoFill get(ComponentProvider provider, ModelState state, boolean showCurrentLoadOnly, ModelPosition pos) {
         List<ModelComponent> cargoLoads = pos == null ? provider.parseAll(ModelComponentType.CARGO_FILL_X) : provider.parseAll(ModelComponentType.CARGO_FILL_POS_X, pos);
         // Make sure that cargo loads are in order for showCurrentLoadOnly (if enabled)
@@ -19,6 +23,9 @@ public class CargoFill {
     }
 
     public CargoFill(List<ModelComponent> cargoLoads, ModelState state, boolean showCurrentLoadOnly) {
+        this.boxes = new ArrayList<>();
+        cargoLoads.forEach(component -> boxes.add(IBoundingBox.from(component.min, component.max)));
+
         state.push(settings -> settings.add((ModelState.GroupVisibility) (stock, group) -> {
             int percentFull = stock instanceof Freight ? ((Freight) stock).getPercentCargoFull() : 100;
             for (ModelComponent cargoLoad : cargoLoads) {

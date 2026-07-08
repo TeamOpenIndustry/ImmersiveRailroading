@@ -2,10 +2,12 @@ package cam72cam.immersiverailroading.entity;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.library.ModelComponentType;
+import cam72cam.immersiverailroading.library.ScrollMode;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.model.part.Interactable;
 import cam72cam.immersiverailroading.model.part.Seat;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.event.ClientEvents;
@@ -31,14 +33,21 @@ public class ClientPartDragging {
         Mouse.registerDragHandler(dragger::capture);
         ClientEvents.TICK.subscribe(dragger::tick);
         ClientEvents.SCROLL.subscribe(dragger::scroll);
-        Packet.register(DragPacket::new, PacketDirection.ClientToServer);
     }
 
     private boolean scroll(double scroll) {
         if (MinecraftClient.isReady() && targetInteractable != null) {
             if (targetInteractable instanceof Control) {
+                if (ConfigGraphics.scrollMode.equals(ScrollMode.NONE)) {
+                    return true;
+                }
                 float value = targetStock.getControlPosition((Control<?>) targetInteractable);
                 // Same as GuiBuilder
+                if (ConfigGraphics.scrollMode.equals(ScrollMode.ALL)) {
+                    //Continue
+                } else if (!(ConfigGraphics.scrollMode.equals(ScrollMode.ONLY_ROT_TRANSLATION) && (((Control<?>) targetInteractable).rotation || ((Control<?>) targetInteractable).translation))) {
+                    return true;
+                }
                 if (targetStock instanceof LocomotiveDiesel && targetInteractable.part.type == ModelComponentType.REVERSER_X) {
                     value += scroll > 0 ? 0.5 : -0.5;
                 } else {
@@ -94,7 +103,11 @@ public class ClientPartDragging {
         @Override
         protected void handle() {
             EntityRollingStock stock = getWorld().getEntity(stockUUID, EntityRollingStock.class);
-            Control<?> control = stock.getDefinition().getModel().getDraggable().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().get();
+            Control<?> control = stock.getDefinition().getModel().getDraggable().stream().filter(x -> x.part.key.equals(typeKey)).findFirst().orElse(null);
+            if (control == null) {
+                ModCore.warn("Unable to find controller %s in stock %s server-side. Do you have mismatched packs?", this.typeKey, stock.defID);
+                return;
+            }
             if (!stock.playerCanDrag(getPlayer(), control)) {
                 return;
             }

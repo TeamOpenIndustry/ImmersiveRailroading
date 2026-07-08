@@ -28,7 +28,7 @@ public enum Stat {
     UNITS_CARGO_FILL,
     ;
 
-    private static final String[] formats = {"%.0f", "%.1f", "%.2f", "%.3f", "%。4f", "%.5f"};
+    private static final String[] formats = {"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f"};
 
     public String getValue(EntityRollingStock stock) {
         return this.getValue(stock, getDefaultDecimal());
@@ -85,7 +85,7 @@ public enum Stat {
                         String.format(format, ConfigGraphics.pressureUnit.convertFromPSI(((LocomotiveSteam) stock).getBoilerPressure())) : "";
             case MAX_BOILER_PRESSURE:
                 return stock instanceof LocomotiveSteam ?
-                        String.format(format, ConfigGraphics.pressureUnit.convertFromPSI((float)((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge)))
+                        String.format(format, ConfigGraphics.pressureUnit.convertFromPSI(((LocomotiveSteam) stock).getDefinition().getMaxPSI(stock.gauge)))
                         : "";
             case UNITS_BOILER_PRESSURE:
                 return ConfigGraphics.pressureUnit.toUnitString();

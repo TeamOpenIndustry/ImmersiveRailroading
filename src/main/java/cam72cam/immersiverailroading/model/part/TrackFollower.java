@@ -38,8 +38,8 @@ public class TrackFollower {
             this.max = -(float) (wheels.wheels.stream().mapToDouble(w -> w.wheel.center.x).min().getAsDouble() * stock.gauge.scale());
             this.min = -(float) (wheels.wheels.stream().mapToDouble(w -> w.wheel.center.x).max().getAsDouble() * stock.gauge.scale());
         } else if (wheels != null && wheels.wheels.size() == 1) {
-            this.max = -(float) (wheels.wheels.get(0).wheel.min.x * stock.gauge.scale());
-            this.min = -(float) (wheels.wheels.get(0).wheel.max.x * stock.gauge.scale());
+            this.max = -(float) (wheels.wheels.getFirst().wheel.min.x * stock.gauge.scale());
+            this.min = -(float) (wheels.wheels.getFirst().wheel.max.x * stock.gauge.scale());
         } else if (frame != null) {
             this.max = -(float) (frame.min.x * stock.gauge.scale());
             this.min = -(float) (frame.max.x * stock.gauge.scale());
@@ -49,6 +49,7 @@ public class TrackFollower {
     }
 
     public Matrix4 getMatrix() {
+        //Outer matrix is scaled
         double recomputeDist = 0.1 * stock.gauge.scale();
         if (pos == null || stock.getPosition().distanceToSquared(pos) > recomputeDist * recomputeDist) {
             pos = stock.getPosition();
@@ -56,9 +57,9 @@ public class TrackFollower {
             if (offset >= min && offset <= max) {
                 yawReadout = stock.getRotationYaw() - offsetYaw;
                 matrix.setIdentity();
-                matrix.translate(-offset, 0, 0);
+                matrix.translate(-offset / stock.gauge.scale(), 0, 0);
                 matrix.rotate(Math.toRadians(yawReadout), 0, 1, 0);
-                matrix.translate(offset, 0, 0);
+                matrix.translate(offset / stock.gauge.scale(), 0, 0);
             } else {
                 // Don't need to path to a point that's already on the track.  TODO This can also be used to improve accuracy of the offset rendering
                 Vec3d offsetPos = pos.add(VecUtil.fromWrongYawPitch(offset, stock.getRotationYaw(), stock.getRotationPitch()));

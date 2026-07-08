@@ -13,10 +13,15 @@ import cam72cam.mod.util.SingleCache;
 
 public abstract class TrackBase {
 	public BuilderBase builder;
+	//In overlays we have to use the re-defined origin, overwrite here
+	//TODO Find a better workaround
+	protected Vec3i correctedOverlayBuilder;
 
 	protected Vec3i rel;
 	private float bedHeight;
 	private float railHeight;
+	//Override default value
+	private boolean scaleModel = true;
 
 	protected BlockRailBase block;
 
@@ -30,6 +35,7 @@ public abstract class TrackBase {
 		this.builder = builder;
 		this.rel = rel;
 		this.block = block;
+		this.correctedOverlayBuilder = builder.pos;
 	}
 
 	private final SingleCache<Vec3i, Vec3i> downCache = new SingleCache<>(Vec3i::down);
@@ -52,7 +58,6 @@ public abstract class TrackBase {
 		return builder.world.getBlockEntity(getPos(), TileRail.class) != null && this instanceof TrackGag;
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean canPlaceTrack() {
 		Vec3i pos = getPos();
 
@@ -71,6 +76,7 @@ public abstract class TrackBase {
 			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
+			tr.setScaleModel(isScaleModel());
 			return tr;
 		}
 
@@ -111,6 +117,7 @@ public abstract class TrackBase {
 		}
 		tr.setRailHeight(getRailHeight());
 		tr.setBedHeight(getBedHeight());
+		tr.setScaleModel(isScaleModel());
 		for (int i = 0; i < hasSnow; i++) {
 			tr.handleSnowTick();
 		}
@@ -119,7 +126,7 @@ public abstract class TrackBase {
 
 	private final SingleCache<Vec3i, Vec3i> posCache = new SingleCache<>(pos -> pos.add(rel));
 	public Vec3i getPos() {
-		return posCache.get(builder.pos);
+		return posCache.get(correctedOverlayBuilder);
 	}
 
 	public void setHeight(float height) {
@@ -138,6 +145,12 @@ public abstract class TrackBase {
 	public float getRailHeight() {
 		return railHeight;
 	}
+	public void setScaleModel(boolean scaleModel) {
+		this.scaleModel = scaleModel;
+	}
+	public boolean isScaleModel() {
+		return scaleModel;
+	}
 
 	public void setFlexible() {
 		this.flexible  = true;
@@ -145,6 +158,10 @@ public abstract class TrackBase {
 
 	public boolean isFlexible() {
 		return this.flexible;
+	}
+
+	public void overrideBuilderPos(Vec3i pos) {
+		this.correctedOverlayBuilder = pos;
 	}
 
 	public void overrideParent(Vec3i blockPos) {

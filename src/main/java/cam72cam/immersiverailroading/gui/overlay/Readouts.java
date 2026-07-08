@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.model.LocomotiveModel;
 import cam72cam.immersiverailroading.model.StockModel;
+import cam72cam.immersiverailroading.util.MathUtil;
 
 public enum Readouts {
     LIQUID,
@@ -146,7 +147,7 @@ public enum Readouts {
                 } else {
                     if (stock instanceof Locomotive) {
                         // Logic duplicated in Locomotive#onTick
-                        ((Locomotive) stock).setTrainBrake(Math.max(0, Math.min(1, ((Locomotive) stock).getTrainBrake() + (value - 0.5f) / 80)));
+                        ((Locomotive) stock).setTrainBrake(MathUtil.clamp(((Locomotive) stock).getTrainBrake() + (value - 0.5f) / 80, 0, 1));
                     }
                 }
                 break;

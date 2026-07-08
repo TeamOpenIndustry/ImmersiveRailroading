@@ -117,7 +117,7 @@ public class SimulationState {
             height = stock.getDefinition().getHeight(gauge);
             double pitchOffset = (Math.abs(Math.sin(Math.toRadians(stock.getRotationPitch())) * length));
             bounds = s -> stock.getDefinition().getBounds(s.yaw, gauge)
-                    .offset(s.position.add(0, -(s.position.y % 1) - pitchOffset, 0))
+                    .offset(s.position.add(0, -(s.position.y - Math.floor(s.position.y)) - pitchOffset, 0))
                     .contract(new Vec3d(0, 0, 0.5 * gauge.scale()));
                     //.contract(new Vec3d(0, 0.5 * this.gauge.scale(), 0))
                     //.offset(new Vec3d(0, 0.5 * this.gauge.scale(), 0));

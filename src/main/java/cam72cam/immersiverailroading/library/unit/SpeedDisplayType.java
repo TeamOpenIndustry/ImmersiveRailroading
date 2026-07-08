@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.library.unit;
 
 public enum SpeedDisplayType {
 	kmh,
-	mph,
-	ms;
+	ms,
+	mph;
 
 	public double convertFromKmh(double value) {
 		switch (this) {
@@ -22,10 +22,10 @@ public enum SpeedDisplayType {
 			default:
 			case kmh:
 				return "km/h";
-			case mph:
-				return "mph";
 			case ms:
 				return "m/s";
+			case mph:
+				return "mph";
 		}
 	}
 }

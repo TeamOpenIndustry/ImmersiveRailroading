@@ -26,7 +26,7 @@ public class PlacementInfo {
 	}
 
 	public static int segmentation() {
-		return Math.min(90, Math.max(1, Config.ConfigBalance.AnglePlacementSegmentation));
+		return MathUtil.clamp(Config.ConfigBalance.AnglePlacementSegmentation, 1, 90);
 	}
 	
 	public PlacementInfo(ItemStack stack, float yawHead, Vec3d hit) {

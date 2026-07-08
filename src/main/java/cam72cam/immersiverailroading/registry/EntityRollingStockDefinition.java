@@ -59,9 +59,10 @@ public abstract class EntityRollingStockDefinition {
     public Identifier collision_sound;
     public double flange_min_yaw;
     double internal_inv_scale;
-    private String name;
-    private String modelerName;
-    private String packName;
+    public String name;
+    public String modelerName;
+    public String packName;
+    protected Set<String> tags;
     private ValveGearConfig valveGear;
     public float darken;
     public Identifier modelLoc;
@@ -399,6 +400,12 @@ public abstract class EntityRollingStockDefinition {
         name = data.getValue("name").asString();
         modelerName = data.getValue("modeler").asString();
         packName = data.getValue("pack").asString();
+        tags = new HashSet<>();
+        List<DataBlock.Value> tagValues = data.getValues("tags");
+        if (tagValues != null) {
+            tagValues.forEach(v -> tags.add(v.asString()));
+        }
+
         darken = data.getValue("darken_model").asFloat();
         internal_model_scale = 1;
         internal_inv_scale = 1;
@@ -814,6 +821,10 @@ public abstract class EntityRollingStockDefinition {
         tips.add(GuiText.WEIGHT_TOOLTIP.toString(this.getWeight(gauge)));
         tips.add(GuiText.MODELER_TOOLTIP.toString(modelerName));
         tips.add(GuiText.PACK_TOOLTIP.toString(packName));
+        if (!tags.isEmpty()) {
+            String tag = String.join(",", tags);
+            tips.add(GuiText.TAG_TOOLTIP.toString(tag));
+        }
         return tips;
     }
 

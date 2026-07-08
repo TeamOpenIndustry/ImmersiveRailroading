@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.immersiverailroading.util.MathUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +60,7 @@ public class Readout<T extends EntityMoveableRollingStock> extends Control<T> {
     @Override
     public float getValue(EntityMoveableRollingStock stock) {
         float pos = positions.getOrDefault(stock.getUUID(), 0f);
-        pos = Math.min(1, Math.max(0, (pos - rangeMin) / (rangeMax - rangeMin)));
+        pos = MathUtil.clamp((pos - rangeMin) / (rangeMax - rangeMin), 0, 1);
         pos = pos + offset;
         return invert ? 1 - pos : pos;
     }
