@@ -38,6 +38,7 @@ chat.immersiverailroading:coupler.front=前部
 chat.immersiverailroading:coupler.back=後部
 chat.immersiverailroading:coupler.engaged=%s 連結器を通常モードに設定しました
 chat.immersiverailroading:coupler.disengaged=%s 連結器を入換モードに設定しました
+chat.immersiverailroading:augment.filter_fail=(%s, %s, %s)にあるAugmentフィルターの編集に失敗しました、フォーマットが正しいか確認してください！
 chat.immersiverailroading:coupler.status.coupled=%s 連結器は %s （%s，%s，%s）に連結されました
 chat.immersiverailroading:coupler.status.decoupled.engaged=%s 連結器が通常モードで切り離されました
 chat.immersiverailroading:coupler.status.decoupled.disengaged=%s 連結器が入換モードで切り離されました
@@ -90,6 +91,12 @@ gui.immersiverailroading:selector.cast_repeat=繰り返し鋳造
 gui.immersiverailroading:selector.paintbrush_random=ランダム塗装
 gui.immersiverailroading:selector.paintbrush_apply_to_stock=選択車両をランダム塗装
 gui.immersiverailroading:selector.paintbrush_apply_to_train=列車をランダム塗装
+# Migrated from old detector translations which already contain "Detecting", don't need for this
+gui.immersiverailroading:selector.augment.detect=現在:
+gui.immersiverailroading:selector.augment.redstone=レッドストーンモード:
+gui.immersiverailroading:selector.augment.pushpull=物体/液体搬送可能
+gui.immersiverailroading:selector.augment.coupler=連結器モード
+gui.immersiverailroading:selector.augment.control=機関車コントロールモード:
 
 gui.immersiverailroading:item.switch_key=右クリックで分岐器は以下のポジションで循環します：[直進ロック、分岐ロック、ロック解除]。 ロック中の分岐器はレッドストーン信号を無視します！
 gui.immersiverailroading:item.switch_key.data=最後にロックした分岐器： %s は %s ポジションです
@@ -127,6 +134,12 @@ gui.immersiverailroading:stock.freight_capacity=積載量： %s スタック
 gui.immersiverailroading:stock.weight=重量： %s kg
 gui.immersiverailroading:stock.modeler=モデラー： %s
 gui.immersiverailroading:stock.pack=パック： %s
+gui.immersiverailroading:stock.tag=タグ: %s
+
+gui.immersiverailroading:label.current_augment=現在のAugment:
+gui.immersiverailroading:label.actuator_filter=ドア操作部CGフィルター
+gui.immersiverailroading:label.included_tag=含むタグ:
+gui.immersiverailroading:label.excluded_tag=除外するタグ:
 
 gui.immersiverailroading:overlay.on=オン
 gui.immersiverailroading:overlay.off=オフ
@@ -163,8 +176,9 @@ track.immersiverailroading:smoothing.far=遠い
 track.immersiverailroading:smoothing.neither=どちらでもない
 
 track.immersiverailroading:direction.none=両方向
-track.immersiverailroading:direction.left=左側に固定
-track.immersiverailroading:direction.right=右側に固定
+# Intended
+track.immersiverailroading:direction.left=右側に固定
+track.immersiverailroading:direction.right=左側に固定
 
 part.immersiverailroading:component.frame=台枠
 part.immersiverailroading:component.front_frame=前側台枠
@@ -234,12 +248,12 @@ multiblock.immersiverailroading:plate_machine=プレート鍛造機
 multiblock.immersiverailroading:rail_machine=レール鍛造機
 multiblock.immersiverailroading:steam_hammer=蒸気ハンマー
 
-immersiverailroading:crafting_type.casting=鋳造機
-immersiverailroading:crafting_type.casting_hammer=鋳造、鋳造ハンマー
-immersiverailroading:crafting_type.plate_small=プレートローラー 小
-immersiverailroading:crafting_type.plate_medium=プレートローラー 中
-immersiverailroading:crafting_type.plate_large=プレートローラー 大
-immersiverailroading:crafting_type.plate_boiler=プレートローラー、ボイラーローラー
+immersiverailroading:crafting_type.casting=鋳造機で鋳造
+immersiverailroading:crafting_type.casting_hammer=鋳造機で鋳造し、蒸気ハンマーで鍛造
+immersiverailroading:crafting_type.plate_small=プレート鍛造機で小さいプレートとして製造
+immersiverailroading:crafting_type.plate_medium=プレート鍛造機で中くらいのプレートとして製造
+immersiverailroading:crafting_type.plate_large=プレート鍛造機で大きいプレートとして製造
+immersiverailroading:crafting_type.plate_boiler=プレート鍛造機でボイラープレートとして製造し、ボイラーマシーンで処理
 
 itemGroup.immersiverailroading.main=Immersive Railroading
 itemGroup.immersiverailroading.locomotive=IR 機関車
@@ -298,7 +312,7 @@ immersiverailroading:entity.locomotives.a1_peppercorn=A1 Peppercorn
 immersiverailroading:entity.locomotives.a5_switcher=A5 Switcher
 immersiverailroading:entity.locomotives.alco_rs1=RS-1
 immersiverailroading:entity.locomotives.big_boy=Big Boy (4000 class)
-immersiverailroading:entity.locomotives.br01=br01
+immersiverailroading:entity.locomotives.br01=DRG BR 01
 immersiverailroading:entity.locomotives.class_38=Class 38
 immersiverailroading:entity.locomotives.cooke_mogul=DSP&P Mogul
 immersiverailroading:entity.locomotives.e6_atlantic=E6 Atlantic
@@ -317,7 +331,7 @@ immersiverailroading:entity.locomotives.skookum=Skookum 2-4-4-2
 immersiverailroading:entity.tender.a1_peppercorn_tender=A1 Peppercorn Tender
 immersiverailroading:entity.tender.a5_tender=A5 Slope Tender
 immersiverailroading:entity.tender.big_boy_tender=Big Boy (4000 class) Tender
-immersiverailroading:entity.tender.br01_tender=drg class 01 tender
+immersiverailroading:entity.tender.br01_tender=DRG BR 01 tender
 immersiverailroading:entity.tender.class_38_tender=Class 38 Tender
 immersiverailroading:entity.tender.cooke_tender=Cooke Tender
 immersiverailroading:entity.tender.e6_tender=E6 Atlantic Tender

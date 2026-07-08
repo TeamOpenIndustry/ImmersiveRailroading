@@ -7,7 +7,7 @@
 	"properties": {
 		"fuel_efficiency_%": 72,
 		"fuel_capacity_l": 4163,
-		"horsepower": 1500,
+		"power_hp": 1500,
 		"tractive_effort_lbf": 62000,
 		"max_speed_kmh": 105,
 		"weight_kg": 112491,
