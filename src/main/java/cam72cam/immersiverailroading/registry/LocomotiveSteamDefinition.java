@@ -26,7 +26,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private double maxPSI;
     private double numSlots;
     private double width;
-    public boolean tender_auto_feed;
     public boolean cab_forward;
 
     public LocomotiveSteamDefinition(String defID, DataBlock data) throws Exception {
@@ -47,7 +46,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
             maxPSI = 0;
             numSlots = 0;
             width = 0;
-            tender_auto_feed = false;
         } else {
             DataBlock firebox = data.getBlock("firebox");
 
@@ -63,7 +61,6 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
             }
             numSlots = Math.ceil(firebox.getValue("slots").asInteger() * internal_inv_scale);
             width = Math.ceil(firebox.getValue("width").asInteger() * internal_inv_scale);
-            tender_auto_feed = properties.getValue("tender_auto_feed").asBoolean(true);
         }
         cab_forward = properties.getValue("cab_forward").asBoolean(false);
 

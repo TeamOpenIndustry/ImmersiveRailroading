@@ -193,7 +193,7 @@ public class LocomotiveSteam extends Locomotive {
 				theTank.drain(tender.theTank, desiredDrain, false);
 			}
 
-			if (this.getTickCount() % 20 == 0 && this.getDefinition().tender_auto_feed) {
+			if (this.getTickCount() % 20 == 0 && this.canRefuelFromTenders()) {
 				// Top off stacks
 				for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
 					if (BurnUtil.getBurnTime(this.cargoItems.get(slot)) != 0) {
@@ -446,6 +446,28 @@ public class LocomotiveSteam extends Locomotive {
 
 		for (Control<?> drain : drains) {
 			setControlPosition(drain, enabled ? 1 : 0);
+		}
+	}
+
+	public boolean canRefuelFromTenders() {
+		// This could be optimized to once-per-tick, but I'm not sure that is necessary
+		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
+												 .stream()
+												 .filter(x -> x.part.type == ModelComponentType.TENDER_AUTO_REFUEL_CONTROL_X)
+												 .collect(Collectors.toList());
+
+		return autoRefuel.stream().anyMatch(c -> getControlPosition(c) == 1);
+	}
+
+	public void setAutoRefuelFromTenders(boolean enabled) {
+		// This could be optimized to once-per-tick, but I'm not sure that is necessary
+		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
+												 .stream()
+												 .filter(x -> x.part.type == ModelComponentType.TENDER_AUTO_REFUEL_CONTROL_X)
+												 .collect(Collectors.toList());
+
+		for (Control<?> ctrl : autoRefuel) {
+			setControlPosition(ctrl, enabled ? 1 : 0);
 		}
 	}
 }

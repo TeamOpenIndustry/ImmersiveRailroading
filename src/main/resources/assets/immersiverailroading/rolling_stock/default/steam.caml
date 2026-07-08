@@ -12,7 +12,6 @@ properties =
     firebox =                 # Firebox Properties
         slots = null          # Required: Number of slots in this container
         width = null          # Required: Width of the container, recommended to be a numeric factor of the width ex: 32 and 8
-    tender_auto_feed = True   # Optional: Should this locomotive auto pull fuel from tenders?
 
     cab_forward = False       # Optional: Flip the locomotion direction to more accurately simulate a cab forward type locomotive
 
