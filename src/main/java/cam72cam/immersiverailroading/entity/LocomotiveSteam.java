@@ -123,7 +123,7 @@ public class LocomotiveSteam extends Locomotive {
 		this.setBoilerTemperature(ambientTemperature());
 		this.setBoilerPressure(0);
 
-        burnTime.replaceAll((s, v) -> 0);
+        burnTime.replaceAll((_, _) -> 0);
 	}
 
 	@Override
@@ -464,8 +464,11 @@ public class LocomotiveSteam extends Locomotive {
 												 .stream()
 												 .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
 												 .collect(Collectors.toList());
-
-		return autoRefuel.stream().anyMatch(c -> getControlPosition(c) == 1);
+		if (!autoRefuel.isEmpty()) {
+			return autoRefuel.stream().anyMatch(c -> getControlPosition(c) == 1);
+		} else {
+			return getDefinition().defaultTenderFeed;
+		}
 	}
 
 	public void setAutoRefuelFromTenders(boolean enabled) {
