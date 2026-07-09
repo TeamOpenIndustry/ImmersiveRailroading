@@ -63,7 +63,6 @@ public enum GuiText {
 	TRACK_EXTRA_RESET("track.extra_reset"),
 	TRACK_EXTRA_EDIT_LEFT("track.extra_edit_left"),
 	TRACK_EXTRA_EDIT_RIGHT("track.extra_edit_right"),
-	TRACK_EXTRA_VERTICAL_OFFSET_ALIGN_TYPE("track.immersiverailroading:roll_y_offset_alignment"),
 
 	TRACK_EXTRA_TO_MAIN("track.extra_trackgui"),
 	TRACK_MAIN_TO_EXTRA("track.extragui"),

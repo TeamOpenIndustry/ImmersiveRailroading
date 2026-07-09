@@ -203,10 +203,8 @@ track.immersiverailroading:extra_info_type.y_offset=垂直偏移
 track.immersiverailroading:extra_info_type.z_offset=水平偏移
 
 track.immersiverailroading:roll_vert_offset_align_type.mid=对齐中间点
-track.immersiverailroading:roll_vert_offset_align_type.high=对齐最低点
-track.immersiverailroading:roll_vert_offset_align_type.low=对齐最高点
-track.immersiverailroading:roll_vert_offset_align_type.left=对齐左边
-track.immersiverailroading:roll_vert_offset_align_type.right=对齐右边
+track.immersiverailroading:roll_vert_offset_align_type.left=左侧轨道对齐
+track.immersiverailroading:roll_vert_offset_align_type.right=右侧轨道对齐
 
 part.immersiverailroading:component.frame=车架
 part.immersiverailroading:component.front_frame=前车架

@@ -202,11 +202,9 @@ track.immersiverailroading:extra_info_type.roll=Superelevation
 track.immersiverailroading:extra_info_type.y_offset=Vertical Offset
 track.immersiverailroading:extra_info_type.z_offset=Horizontal Offset
 
-track.immersiverailroading:roll_vert_offset_align_type.mid=Align to mid
-track.immersiverailroading:roll_vert_offset_align_type.high=Align to lowest
-track.immersiverailroading:roll_vert_offset_align_type.low=Align to highest
-track.immersiverailroading:roll_vert_offset_align_type.left=Align to left
-track.immersiverailroading:roll_vert_offset_align_type.right=Align to right
+track.immersiverailroading:roll_vert_offset_align_type.mid=Align To Mid
+track.immersiverailroading:roll_vert_offset_align_type.left=Align Left Track
+track.immersiverailroading:roll_vert_offset_align_type.right=Align Right Track
 
 part.immersiverailroading:component.frame=Frame
 part.immersiverailroading:component.front_frame=Front Frame
