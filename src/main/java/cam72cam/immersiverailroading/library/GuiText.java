@@ -25,6 +25,7 @@ public enum GuiText {
 	SELECTOR_TILE_TILT("selector.tile_tilt"),
 	SELECTOR_ROLL_EFFECT_TILE("selector.roll_effect_tile"),
 	SELECTOR_DEGREE_MODE("selector.degree_mode"),
+	SELECTOR_OFFSET_VERT_BY_NORMAL_MODE("selector.offset_vert_by_normal_mode"),
 	SELECTOR_AUGMENT_DETECT("selector.augment.detect"),
 	SELECTOR_AUGMENT_REDSTONE("selector.augment.redstone"),
 	SELECTOR_AUGMENT_PUSHPULL("selector.augment.pushpull"),

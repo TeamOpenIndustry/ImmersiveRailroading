@@ -20,6 +20,7 @@ public record RollAndOffsetInfo(
         boolean rollEffectTile,
         boolean tileTilt,
         boolean degreeMode,
+        boolean offsetVertByNormal,
         //This is l(arcLenFactor) and x(horizonal axis value) and the same time, l is for outer curve it effects, x is for curves this stores
         List<Double> arcLenFactors,
         //Roll
@@ -38,13 +39,14 @@ public record RollAndOffsetInfo(
         //Based on Standard Gauge, if in Gauge X (mm), it will be scaled to zOffset * X / Gauge.STANDARD.
         List<Vec3d> zOffsets,
         List<Vec3d> zOffsetCtrls) {
-    public RollAndOffsetInfo(RollAndVertOffsetAlignType offsetType, boolean rollEffectTile, boolean tileTilt, boolean degreeMode,
+    public RollAndOffsetInfo(RollAndVertOffsetAlignType offsetType, boolean rollEffectTile, boolean tileTilt, boolean degreeMode, boolean offsetVertByNormal,
                              List<Double> arcLenFactors, List<Vec3d> rolls, List<Vec3d> rollCtrls,
                              List<Vec3d> yOffsets, List<Vec3d> yOffsetCtrls, List<Vec3d> zOffsets, List<Vec3d> zOffsetCtrls) {
         this.offsetType = offsetType;
         this.rollEffectTile = rollEffectTile;
         this.tileTilt = tileTilt;
         this.degreeMode = degreeMode;
+        this.offsetVertByNormal = offsetVertByNormal;
         //Create unmodifiable view
         this.arcLenFactors = List.copyOf(arcLenFactors);
         this.rolls = List.copyOf(rolls);
@@ -64,8 +66,8 @@ public record RollAndOffsetInfo(
         var zOffsets = List.of(new Vec3d(0, 0, 0), new Vec3d(1, 0, 0));
         var zOffsetCtrls = List.of(new Vec3d(1d / 3, 0, 0), new Vec3d(1 + 1d / 3, 0, 0));
 
-        this(RollAndVertOffsetAlignType.MID, true, true, false, arcLenFactors,
-             rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls);
+        this(RollAndVertOffsetAlignType.MID, true, true, false, false,
+            arcLenFactors, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls);
     }
 
     public static RollAndOffsetInfo getDefault() {
@@ -79,6 +81,8 @@ public record RollAndOffsetInfo(
         public boolean rollEffectTile;
         @TagField("tileTilt")
         public boolean tileTilt;
+        @TagField("offsetVertByNormal")
+        public boolean offsetVertByNormal;
 
         @TagField("degreeMode")
         public boolean degreeMode;
@@ -102,6 +106,7 @@ public record RollAndOffsetInfo(
             this.rollEffectTile = rollAndOffsetInfo.rollEffectTile;
             this.tileTilt = rollAndOffsetInfo.tileTilt;
             this.degreeMode = rollAndOffsetInfo.degreeMode;
+            this.offsetVertByNormal = rollAndOffsetInfo.offsetVertByNormal;
 
             this.arcLenFactors = new ArrayList<>(rollAndOffsetInfo.arcLenFactors);
             this.rolls = new ArrayList<>(rollAndOffsetInfo.rolls);
@@ -119,6 +124,7 @@ public record RollAndOffsetInfo(
             rollEffectTile = defaultInfo.rollEffectTile;
             tileTilt = defaultInfo.tileTilt;
             degreeMode = defaultInfo.degreeMode;
+            offsetVertByNormal = defaultInfo.offsetVertByNormal;
 
             arcLenFactors = defaultInfo.arcLenFactors;
             rolls = defaultInfo.rolls;
@@ -137,6 +143,7 @@ public record RollAndOffsetInfo(
                     rollEffectTile,
                     tileTilt,
                     degreeMode,
+                    offsetVertByNormal,
 
                     arcLenFactors,
                     rolls,
@@ -180,7 +187,7 @@ public record RollAndOffsetInfo(
             divider.add(Pair.of(arcLenFactor, 1d));
 
             RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
-                    offsetType, rollEffectTile, tileTilt, degreeMode,
+                    offsetType, rollEffectTile, tileTilt, degreeMode, offsetVertByNormal,
                     arcLenFactors, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
             );
             List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);
@@ -970,13 +977,13 @@ public record RollAndOffsetInfo(
             }
 
             if(normalize) results.add(normalize(
-                    offsetType, rollEffectTile, tileTilt, degreeMode,
+                    offsetType, rollEffectTile, tileTilt, degreeMode, offsetVertByNormal,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls,
                     lStart, lEnd
             ));
 
             else results.add(new RollAndOffsetInfo(
-                    offsetType, rollEffectTile, tileTilt, degreeMode,
+                    offsetType, rollEffectTile, tileTilt, degreeMode, offsetVertByNormal,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
             ));
         }
@@ -1038,7 +1045,7 @@ public record RollAndOffsetInfo(
     }
 
     private static RollAndOffsetInfo normalize(
-            RollAndVertOffsetAlignType offsetType, boolean rollEffectTile, boolean tileTilt, boolean degreeMode,
+            RollAndVertOffsetAlignType offsetType, boolean rollEffectTile, boolean tileTilt, boolean degreeMode, boolean offsetVertByNormal,
             List<Double> newT, List<Vec3d> newRolls, List<Vec3d> newRollCtrls, List<Vec3d> newYOffsets, List<Vec3d> newYOffsetCtrls, List<Vec3d> newZOffsets, List<Vec3d> newZOffsetCtrls,
             double tStart, double tEnd
     ) {
@@ -1073,7 +1080,7 @@ public record RollAndOffsetInfo(
             newZOffsetCtrls.set(i, new Vec3d(newZOffsetCtrlX, oldZOffsetCtrl.y, oldZOffsetCtrl.z));
         }
         return new RollAndOffsetInfo(
-                offsetType, rollEffectTile, tileTilt, degreeMode,
+                offsetType, rollEffectTile, tileTilt, degreeMode, offsetVertByNormal,
                 newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
         );
     }

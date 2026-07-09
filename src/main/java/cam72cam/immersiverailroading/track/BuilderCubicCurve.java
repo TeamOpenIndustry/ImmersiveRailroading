@@ -170,6 +170,75 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 		double gaugeScale = info.settings.gauge.scale();//rescale from Standard Gauge
 		double gauge = info.settings.gauge.value();
+
+		// Vertical offset mode 1
+		if(rollAndOffsetInfo != null && !rollAndOffsetInfo.offsetVertByNormal()) {
+			for(int i = 0; i < points.size(); i++) {
+				Vec3d p = points.get(i);
+				Vec3d newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);
+				points.set(i, newP);
+			}
+		}
+
+		// Horizontal offset
+		boolean correctYaw = false;
+		for(int i = 0; i < points.size(); i++) {
+			float yaw;
+			if (points.size() == 1) {
+				yaw = info.placementInfo.yaw;
+			} else if (i == points.size()-1) {
+				yaw = curve.angleStop();
+			} else if (i == 0) {
+				yaw = curve.angleStart();
+			} else {
+				yaw = VecUtil.toYaw(originPoints.get(i+1).subtract(originPoints.get(i-1)));
+			}
+
+			if(zOffsets.get(i) != 0) {// The side effect of too much offset is that some dot spacing becomes less uniform, and should we offset points in toList?
+				correctYaw = true;
+				// Can we still calculate this if pitch is 90?
+				Vec3d horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90).scale(gaugeScale / gauge);//zOffset scale
+				points.set(i, points.get(i).add(horizontalOffset));
+			}
+		}
+
+		// Vertical offset mode 2, we have to do this before final ypr calculating and after horizontal offset done
+		if(rollAndOffsetInfo != null && rollAndOffsetInfo.offsetVertByNormal()) {
+			List<Vec3d> newPosList = new ArrayList<>();
+			for(int i = 0; i < points.size(); i++) {
+				Vec3d p = points.get(i);
+				float yaw;
+				float pitch;
+				float roll = rolls.get(i).floatValue();
+				if (points.size() == 1) {
+					yaw = info.placementInfo.yaw;
+					pitch = 0;
+				} else if (i == points.size()-1) {
+					Vec3d next = points.get(i-1);
+					pitch = (float) Math.toDegrees(Math.atan2(next.y - p.y, VecUtil.flatDistance(next, p)));
+					yaw = curve.angleStop();
+					if(correctYaw) yaw += (float) rollAndOffsetInfo.getZOffsetSlopeEnd(length);
+				} else if (i == 0) {
+					Vec3d next = points.get(i+1);
+					pitch = (float) -Math.toDegrees(Math.atan2(next.y - p.y, VecUtil.flatDistance(next, p)));
+					yaw = curve.angleStart() ;
+					if(correctYaw) yaw += (float) rollAndOffsetInfo.getZOffsetSlopeStart(length);
+				} else {
+					Vec3d prev = points.get(i-1);
+					Vec3d next = points.get(i+1);
+					pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, VecUtil.flatDistance(next, prev)));
+					yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
+				}
+				Orientation orientation = Orientation.fromYPR(yaw, pitch, roll);
+				Vec3d newP = p.add(orientation.up.scale(yOffsets.get(i) * gaugeScale));
+				newPosList.add(newP);
+			}
+			for(int i = 0; i < points.size(); i++) {
+				points.set(i, newPosList.get(i));
+			}
+		}
+
+		// RollAndVertOffsetAlignType offset override
 		switch (type) {
 			case MID:
 				break;
@@ -199,42 +268,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				break;
 		}
 
-		//vertical offset
-		if(rollAndOffsetInfo != null) {
-			for(int i = 0; i < points.size(); i++) {
-				Vec3d p = points.get(i);
-				Vec3d newP;
-				if (!rollAndOffsetInfo.degreeMode()) {//yOffset scale
-					newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);
-				} else {
-					newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//we may need another method depends on Orientation
-				}
-				points.set(i, newP);
-			}
-		}
-
-		//horizontal offset
-		boolean correctYaw = false;
-		for(int i = 0; i < points.size(); i++) {
-			float yaw;
-			if (points.size() == 1) {
-				yaw = info.placementInfo.yaw;
-			} else if (i == points.size()-1) {
-				yaw = curve.angleStop();
-			} else if (i == 0) {
-				yaw = curve.angleStart();
-			} else {
-				yaw = VecUtil.toYaw(originPoints.get(i+1).subtract(originPoints.get(i-1)));
-			}
-
-			if(zOffsets.get(i) != 0) {//the side effect of too much offset is that some dot spacing becomes less uniform, and should we offset points in toList?
-				correctYaw = true;
-				//well can we still calculate this if pitch is 90?
-				Vec3d horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90).scale(gaugeScale / gauge);//zOffset scale
-				points.set(i, points.get(i).add(horizontalOffset));
-			}
-		}
-
+		// Calculate final YPR
 		for(int i = 0; i < points.size(); i++) {
 			Vec3d p = points.get(i);
 			float yaw;

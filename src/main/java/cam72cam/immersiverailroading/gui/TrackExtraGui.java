@@ -73,6 +73,7 @@ public class TrackExtraGui implements IScreen {
     private CheckBox rollEffectTileCB;
     private CheckBox tileTiltCB;
     private CheckBox degreeModeCB;
+    private CheckBox offsetVertByNormalCB;
 //    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
@@ -193,7 +194,7 @@ public class TrackExtraGui implements IScreen {
         //Back to top
         ytop = -GUIHelpers.getScreenHeight() / 4;
 
-        rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 2,
+        rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 1,
                                         GuiText.SELECTOR_ROLL_EFFECT_TILE.toString(), rollAndOffsetInfoCache.rollEffectTile,
                                         (_, self) -> {
                                             edited = true;
@@ -204,7 +205,7 @@ public class TrackExtraGui implements IScreen {
                                             }
                                         });
 
-        tileTiltCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 2,
+        tileTiltCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 1,
                                   GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.tileTilt,
                                   (_, self) -> {
                                       if(rollAndOffsetInfoCache.rollEffectTile) {
@@ -220,13 +221,20 @@ public class TrackExtraGui implements IScreen {
                                   });
         tileTiltCB.setVisible(false);//modifiable vanilla block model later
 
-        degreeModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2, ytop + 2,
+        degreeModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2, ytop + 1,
                                            GuiText.SELECTOR_DEGREE_MODE.toString(), rollAndOffsetInfoCache.degreeMode,
                                            (_, self) -> {
                                                edited = true;
                                                rollAndOffsetInfoCache.degreeMode = self.isChecked();
                                                rollMax = rollAndOffsetInfoCache.degreeMode ? 45 : 60;//180 for degree mode later
                                            });
+
+        offsetVertByNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 12,
+                GuiText.SELECTOR_OFFSET_VERT_BY_NORMAL_MODE.toString(), rollAndOffsetInfoCache.offsetVertByNormal,
+                (_, self) -> {
+                    edited = true;
+                    rollAndOffsetInfoCache.offsetVertByNormal = self.isChecked();
+                });
 
 //        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 , ytop, 85, height, "Selected Way: 0"){};//need multiSwitch branch merging
 
@@ -537,7 +545,7 @@ public class TrackExtraGui implements IScreen {
         RollAndOffsetInfo immutable = rollAndOffsetInfoCache.immutable();
 
         //Text
-        double textScale = 0.5;
+        double textScale = 1;
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.ROLL.toString(), (int) (105  / textScale), (int) ((height + 2) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 3 + 5) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
         GUIHelpers.drawCenteredString(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET.toString(), (int) (105  / textScale), (int) ((height + 2 + height * 6 + 10) / textScale), 0xFFFFFF, new Matrix4().scale(textScale, textScale, textScale));
