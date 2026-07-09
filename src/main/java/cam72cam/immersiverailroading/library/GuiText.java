@@ -57,7 +57,7 @@ public enum GuiText {
 	TRACK_EXTRA_INSERT_POINT("track.extra_insert_point"),
 	TRACK_EXTRA_DELETE_POINT("track.extra_delete_point"),
 	TRACK_EXTRA_POINT_VALUE_M("track.extra_point_value_m"),
-	TRACK_EXTRA_POINT_VALUE_CM("track.extra_point_value_cm"),
+	TRACK_EXTRA_POINT_VALUE_CM_DEGREE("track.extra_point_value_cm_degree"),
 	TRACK_EXTRA_POINT_SLOPE("track.extra_point_slope"),
 	TRACK_EXTRA_POINT_WEIGHT("track.extra_point_weight"),
 	TRACK_EXTRA_RESET("track.extra_reset"),

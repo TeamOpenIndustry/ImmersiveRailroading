@@ -623,7 +623,7 @@ public class TrackExtraGui implements IScreen {
         }
 
         if(type == RollAndOffsetInfo.ExtraInfoType.ROLL) {
-            if (valueLabel != null) valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_CM + rollAndOffsetInfoCache.getValueDisplay(format(ArcLenFactorSlider.getValue()), type));
+            if (valueLabel != null) valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_CM_DEGREE + rollAndOffsetInfoCache.getValueDisplay(format(ArcLenFactorSlider.getValue()), type));
         } else {
             if (valueLabel != null) valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_M + rollAndOffsetInfoCache.getValueDisplay(format(ArcLenFactorSlider.getValue()), type));
         }
