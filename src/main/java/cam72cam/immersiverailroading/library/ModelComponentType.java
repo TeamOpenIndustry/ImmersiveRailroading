@@ -147,6 +147,7 @@ public enum ModelComponentType {
 			case BELL_CONTROL_X:
 			case WHISTLE_CONTROL_X:
 			case HORN_CONTROL_X:
+			case TENDER_FEED_CONTROL_X:
 				//Remove _CONTROL
 				primary = primary.substring(0, primary.length() - 8);
 				//Fallthrough

@@ -241,6 +241,7 @@ part.immersiverailroading:controls.throttle=Throttle
 part.immersiverailroading:controls.reverser=Reverser
 part.immersiverailroading:controls.throttle_brake=Throttle Brake
 part.immersiverailroading:controls.engine_start=Engine Start
+part.immersiverailroading:controls.tender_feed=Tender Auto-Feed
 
 multiblock.immersiverailroading:boiler_machine=Boiler Machine
 multiblock.immersiverailroading:casting=Casting Basin

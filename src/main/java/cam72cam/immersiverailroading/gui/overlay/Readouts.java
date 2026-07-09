@@ -33,7 +33,7 @@ public enum Readouts {
     CYLINDER_DRAIN,
     CARGO_FILL,
     ENGINE_RPM,
-    TENDER_AUTO_REFUEL,
+    TENDER_FEED,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -114,7 +114,7 @@ public enum Readouts {
                 stock instanceof Freight freight ? freight.getPercentCargoFull() / 100f : 0;
             case ENGINE_RPM ->
                 stock instanceof LocomotiveDiesel diesel ? diesel.getRelativeRPM() : 0;
-            case TENDER_AUTO_REFUEL ->
+            case TENDER_FEED ->
                 stock instanceof LocomotiveSteam steam && steam.canRefuelFromTenders() ? 1 : 0;
         };
     }
@@ -195,7 +195,7 @@ public enum Readouts {
                     steam.setCylinderDrains(value > 0.9);
                 }
             }
-            case TENDER_AUTO_REFUEL -> {
+            case TENDER_FEED -> {
                 if (stock instanceof LocomotiveSteam steam) {
                     steam.setAutoRefuelFromTenders(value > 0.9);
                 }
