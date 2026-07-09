@@ -410,10 +410,11 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 	}
 
+	// Support single gauge only for now
 	protected Double cachedGauge = null;
 
 	@Override
-	public double[] getTrackGauges() {//TODO:this is not really finished yet!
+	public double[] getTrackGauges() {//TODO Not really finished yet!
 		if (cachedGauge == null && getParent() != null) {
 			TileRail parent = this.getParentTile();
 			if (parent != null) {
@@ -421,9 +422,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			}
 		}
 
-		double[] gauges = new double[1];
-		gauges[0] = cachedGauge != null ? cachedGauge : 0;
-		return  gauges;
+		return new double[]{cachedGauge != null ? cachedGauge : 0};
 	}
 
 	@Override

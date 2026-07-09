@@ -258,7 +258,7 @@ public class CubicCurve {
 
 
     @Deprecated
-    public CubicCurve linearizeLegacy(TrackSmoothing smoothing) {//TODO: we are going to remove track smoothing and only use pitch-locked
+    public CubicCurve linearize(TrackSmoothing smoothing) {//TODO: Remove track smoothing and only use pitch-locked
         double start = p1.distanceTo(ctrl1);
         double middle = ctrl1.distanceTo(ctrl2);
         double end = ctrl2.distanceTo(p2);
@@ -266,33 +266,29 @@ public class CubicCurve {
         double lengthGuess = start + middle + end;
         double height = p2.y - p1.y;
 
-        switch (smoothing) {
-            case NEITHER:
-                return new CubicCurve(
-                        p1,
-                        ctrl1.add(0, (start / lengthGuess) * height, 0),
-                        ctrl2.add(0, -(end / lengthGuess) * height, 0),
-                        p2,
-                        arcLenFactorStart, arcLenFactorEnd
-                );
-            case NEAR:
-                return new CubicCurve(
-                        p1,
-                        ctrl1,
-                        ctrl2.add(0, -(end / (middle + end)) * height, 0),
-                        p2,
-                        arcLenFactorStart, arcLenFactorEnd
-                );
-            case FAR:
-                return new CubicCurve(
-                        p1,
-                        ctrl1.add(0, (start / (start + middle)) * height, 0),
-                        ctrl2,
-                        p2,
-                        arcLenFactorStart, arcLenFactorEnd
-                );
-            case BOTH: default:
-                return this;
-        }
+        return switch (smoothing) {
+            case NEITHER -> new CubicCurve(
+                    p1,
+                    ctrl1.add(0, (start / lengthGuess) * height, 0),
+                    ctrl2.add(0, -(end / lengthGuess) * height, 0),
+                    p2,
+                    arcLenFactorStart, arcLenFactorEnd
+            );
+            case NEAR -> new CubicCurve(
+                    p1,
+                    ctrl1,
+                    ctrl2.add(0, -(end / (middle + end)) * height, 0),
+                    p2,
+                    arcLenFactorStart, arcLenFactorEnd
+            );
+            case FAR -> new CubicCurve(
+                    p1,
+                    ctrl1.add(0, (start / (start + middle)) * height, 0),
+                    ctrl2,
+                    p2,
+                    arcLenFactorStart, arcLenFactorEnd
+            );
+            default -> this;
+        };
     }
 }

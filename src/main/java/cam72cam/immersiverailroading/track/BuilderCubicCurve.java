@@ -37,9 +37,11 @@ public class BuilderCubicCurve extends BuilderIterator {
 		if (subCurves.size() > 1) {
 			subBuilders = new ArrayList<>();
 
-			List<RollAndOffsetInfo> subRollAndOffsetInfos = info.settings.rollAndOffsetInfo == null ? null : info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.toRange(subCurves), true);
+			List<RollAndOffsetInfo> subRollAndOffsetInfos = info.settings.rollAndOffsetInfo == null
+															? null
+															: info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.toRange(subCurves), true);
 
-            for (int i = 0;i <subCurves.size(); i++) {
+            for (int i = 0; i < subCurves.size(); i++) {
 				CubicCurve subCurve = subCurves.get(i);
 				// main pos -> subCurve's start pos
 				Vec3d relOff = info.placementInfo.placementPosition.add(subCurve.p1);
@@ -96,7 +98,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 		Vec3d ctrl1 = VecUtil.fromYaw(ctrlGuess, angle);
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
 
-		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos, 0, 1).linearizeLegacy(info.settings.smoothing);
+		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos, 0, 1)
+				                      .linearize(info.settings.smoothing);
 		ctrl1 = adjusted.ctrl1;
 		ctrl2 = adjusted.ctrl2;
 
@@ -170,20 +173,6 @@ public class BuilderCubicCurve extends BuilderIterator {
 		switch (type) {
 			case MID:
 				break;
-//			case HIGH:
-//				for(int i = 0; i < points.size(); i++) {
-//					Vec3d p = points.get(i);
-//					Vec3d newP = new Vec3d(p.x, p.y + Math.abs(rolls.get(i)) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
-//					points.set(i, newP);
-//				}
-//				break;
-//			case LOW:
-//				for(int i = 0; i < points.size(); i++) {
-//					Vec3d p = points.get(i);
-//					Vec3d newP = new Vec3d(p.x, p.y - Math.abs(rolls.get(i)) * gaugeScale * 0.01 * 0.5, p.z);//superelevision scale
-//					points.set(i, newP);
-//				}
-//				break;
 			case LEFT:
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);

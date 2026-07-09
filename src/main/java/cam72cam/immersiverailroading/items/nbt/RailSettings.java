@@ -15,7 +15,9 @@ public class RailSettings {
     public final int length;
     public final float degrees;
     public final float curvosity;
+    // Info of this segment
     public final RollAndOffsetInfo rollAndOffsetInfo;
+    // Full info when picking items
     public final RollAndOffsetInfo pickRollAndOffsetInfo;
     public final TrackPositionType posType;
     public final TrackSmoothing smoothing;
@@ -36,6 +38,8 @@ public class RailSettings {
         this.degrees = degrees;
         this.posType = posType;
         this.smoothing = smoothing;
+        this.rollAndOffsetInfo = rollAndOffsetInfo;
+        this.pickRollAndOffsetInfo = pickRollAndOffsetInfo;
         this.direction = direction;
         this.railBed = railBed;
         this.railBedFill = railBedFill;
@@ -44,8 +48,6 @@ public class RailSettings {
         this.curvosity = curvosity;
         this.transfertableEntryCount = count;
         this.transfertableEntrySpacing = spacing;
-        this.rollAndOffsetInfo = rollAndOffsetInfo;
-        this.pickRollAndOffsetInfo = pickRollAndOffsetInfo;
     }
 
     public void write(ItemStack stack) {

@@ -154,11 +154,17 @@ public class ItemTrackBlueprint extends CustomItem {
 
 	public static class Data extends ItemDataSerializer {
 		// 0 for original gui, 1 for TrackExtraGui
-		@TagField("railExtraData")
+		@TagField
 		public int guiOpenType;
 
 		public Data(ItemStack stack) {
 			super(stack);
+		}
+
+		public static void writeTo(ItemStack stack, int targetGuiOpenType) {
+			ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
+			data.guiOpenType = targetGuiOpenType;
+			data.write();
 		}
 	}
 

@@ -62,7 +62,6 @@ public class RailBaseModel {
 		}
 
 		if (snow != 0) {
-//			model.addSnow(snow + (int)(height * 8), new Matrix4());
 			model.addSnow(snow + (int)(Math.max(height, 0.1) * 8), new Matrix4());
 			return model;
 		} else if (!bed.isEmpty() && tileHeight != 0.000001f) {

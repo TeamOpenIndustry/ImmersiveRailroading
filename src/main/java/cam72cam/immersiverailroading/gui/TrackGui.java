@@ -166,7 +166,7 @@ public class TrackGui implements IScreen {
 				degreesSlider.setVisible(settings.type.hasQuarters());
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
-				trackExtraGuiButton.setVisible(settings.type.hasRoll());
+				trackExtraGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -198,7 +198,7 @@ public class TrackGui implements IScreen {
                 }
             }
         };
-		trackExtraGuiButton.setVisible(settings.type.hasRoll());
+		trackExtraGuiButton.setVisible(settings.type.canRoll());
 
 		//Transfer table doesn't have these property so we can have them overlapped
 		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
@@ -387,23 +387,17 @@ public class TrackGui implements IScreen {
 			if (this.te != null) {
 				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
 
-				//TODO: these code are duplicated with ItemRailUpdatePacket.handle(), should we move them into a function?
-				//Also update client Item to update Rail information
+				// Update client data here in order to avoid networking lag
 				ItemStack clientStack = te.getItem();
 				settings.immutable().write(clientStack);
-				ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
-				data.guiOpenType = targetGuiOpenType;
-				data.write();
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType);
 				te.setItem(clientStack, MinecraftClient.getPlayer());
 			} else {
 				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
 
-				//Also update client Item to update Rail information
 				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
 				settings.immutable().write(clientStack);
-				ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
-				data.guiOpenType = targetGuiOpenType;
-				data.write();
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType);
 				MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
 			}
 		}

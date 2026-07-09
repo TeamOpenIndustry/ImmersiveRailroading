@@ -62,7 +62,7 @@ public class MovementTrack {
 
 		Vec3i teBlockPosition = new Vec3i(startPosition.getUMCPos());
 
-		for (double iterationDistance = 0; iterationDistance < totalDistance; iterationDistance += maxDistance) {
+		for (double iteratedDistance = 0; iteratedDistance < totalDistance; iteratedDistance += maxDistance) {
 			Vec3i iterationBlockPosition = new Vec3i(iterationPosition.getUMCPos());
 			if (!iterationBlockPosition.equals(teBlockPosition)) {
 				teBlockPosition = iterationBlockPosition;
@@ -70,7 +70,7 @@ public class MovementTrack {
 				te = findTrack(world, iterationPosition.getUMCPos(), VecUtil.toWrongYaw(motion), gauge);
 				if (te == null) {
 					// Stuck
-					startPosition.advanceTo(iterationPosition);//its struck... seems not need to change roll
+					startPosition.advanceTo(iterationPosition);// It's sticking... seems not need to change roll
 					return;
 				}
 			}

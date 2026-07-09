@@ -40,8 +40,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 		positions = new HashSet<>();
 		HashMap<Vec3i, Float> bedHeights = new HashMap<>();
-		HashMap<Vec3i, Vec3d> topFacings = new HashMap<>();
 		HashMap<Vec3i, Float> railHeights = new HashMap<>();
+		// Pre-calculated rail bed top face normal dir for further use
+		HashMap<Vec3i, Vec3d> topNormals = new HashMap<>();
 		HashMap<Vec3i, Integer> yOffset = new HashMap<>();
 		HashSet<Vec3i> flexPositions = new HashSet<>();
 
@@ -86,7 +87,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				if (!positions.contains(gag)) {
 					positions.add(gag);
 
-					Vec3d topFacing = computeTopFacing(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
+					Vec3d topFacing = computeTopFaceNormal(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
 					double rollDelta;
 					boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
 					boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.tileTilt();
@@ -134,7 +135,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						yOffset.put(gag, (int) (deltaGapPos - relHeight));
 					}
                     railHeights.put(gag, (float) relHeight);
-					topFacings.put(gag, tileTilt ? topFacing : null);
+					topNormals.put(gag, tileTilt ? topFacing : null);
 				}
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
@@ -190,7 +191,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		}
 	}
 
-	private Vec3d computeTopFacing(double yawDeg, double pitchDeg, double rollDeg) {
+	private Vec3d computeTopFaceNormal(double yawDeg, double pitchDeg, double rollDeg) {
 		double yawRad = Math.toRadians(yawDeg);
 		double pitchRad = Math.toRadians(pitchDeg);
 		double rollRad = Math.toRadians(rollDeg);

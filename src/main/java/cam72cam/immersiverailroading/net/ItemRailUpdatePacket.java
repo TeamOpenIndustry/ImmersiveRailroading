@@ -37,18 +37,14 @@ public class ItemRailUpdatePacket extends Packet {
 			if (tile != null) {
 				ItemStack stack = tile.getItem();
 				settings.write(stack);
-				ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
-				data.guiOpenType = guiOpenType;
-				data.write();
+				ItemTrackBlueprint.Data.writeTo(stack, guiOpenType);
 				tile.setItem(stack, getPlayer());
 			}
 		} else {
 			Player player = this.getPlayer();
 			ItemStack stack = player.getHeldItem(Player.Hand.PRIMARY);
 			settings.write(stack);
-			ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
-			data.guiOpenType = guiOpenType;
-			data.write();
+			ItemTrackBlueprint.Data.writeTo(stack, guiOpenType);
 			player.setHeldItem(Player.Hand.PRIMARY, stack);
 		}
 	}

@@ -8,6 +8,7 @@ import cam72cam.mod.text.TextUtil;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -669,32 +670,33 @@ public record RollAndOffsetInfo(
 
     public enum RollYOffsetType {
         MID(0),
-//        HIGH(3),
-//        LOW(4),
+//      HIGH(3),
+//      LOW(4),
         LEFT(1),
-        RIGHT(2);
-
-        private static final RollYOffsetType[] BY_ORDER = values();
+        RIGHT(2),
+        ;
 
         private final int order;
+
         RollYOffsetType(int order){
             this.order = order;
         }
+
         public int getOrder() {
             return this.order;
         }
         public static RollYOffsetType byOrder(int order) {
-            if (order < 0 || order >= BY_ORDER.length) {
+            if (order < 0 || order >= values().length) {
                 return MID;
             }
-            for (RollYOffsetType type : BY_ORDER) {
+            for (RollYOffsetType type : values()) {
                 if (type.order == order) {
                     return type;
                 }
             }
             return MID;
         }
-        public static final int amount = values().length;
+
         @Override
         public String toString() {
             return TextUtil.translate("track.immersiverailroading:rollYOffsetType." + super.toString().toLowerCase(Locale.ROOT));

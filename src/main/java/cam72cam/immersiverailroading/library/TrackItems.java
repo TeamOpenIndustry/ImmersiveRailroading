@@ -57,7 +57,7 @@ public enum TrackItems {
 		}
 	}
 
-	public boolean hasRoll() {
+	public boolean canRoll() {
 		switch (this) {
 			case SLOPE:
 			case TURN:

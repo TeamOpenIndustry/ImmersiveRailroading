@@ -235,8 +235,8 @@ public class TrackExtraGui implements IScreen {
             edited = true;
 
             int order = rollAndOffsetInfoCache.offsetType.getOrder();
-            int amount = RollAndOffsetInfo.RollYOffsetType.amount;
-            order = (order + (hand == Player.Hand.SECONDARY ? 1 : -1) + amount) % amount;
+            int count = RollAndOffsetInfo.RollYOffsetType.values().length;
+            order = (order + (hand == Player.Hand.SECONDARY ? 1 : -1) + count) % count;
 
             int finalOrder = order;
             rollAndOffsetInfoCache.offsetType = RollAndOffsetInfo.RollYOffsetType.byOrder(finalOrder);
