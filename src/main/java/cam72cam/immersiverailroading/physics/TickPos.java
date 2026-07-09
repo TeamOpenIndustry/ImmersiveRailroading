@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.physics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.serialization.*;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.serialization.*;
 
 import java.util.List;
 

@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.CarPassenger;
 import cam72cam.immersiverailroading.util.DataBlock;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.resource.Identifier;
 
 public class CarPassengerDefinition extends CarFreightDefinition {
 

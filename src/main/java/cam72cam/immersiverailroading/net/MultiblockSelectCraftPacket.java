@@ -3,10 +3,10 @@ package cam72cam.immersiverailroading.net;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.CraftingMachineMode;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.net.Packet;
+import cam72cam.umc.api.serialization.TagField;
 
 public class MultiblockSelectCraftPacket extends Packet {
 	@TagField

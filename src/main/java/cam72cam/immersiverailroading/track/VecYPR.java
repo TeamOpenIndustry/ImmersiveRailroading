@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackModelPart;
-import cam72cam.mod.math.Vec3d;
+import cam72cam.umc.api.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.Arrays;

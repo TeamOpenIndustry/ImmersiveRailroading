@@ -6,9 +6,9 @@ import java.util.List;
 import cam72cam.immersiverailroading.library.TrackModelPart;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.world.World;
 
 public class BuilderCrossing extends BuilderBase {
 	/*

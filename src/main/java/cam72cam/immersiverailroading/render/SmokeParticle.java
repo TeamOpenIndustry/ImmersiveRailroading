@@ -1,13 +1,13 @@
 package cam72cam.immersiverailroading.render;
 
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.render.Particle;
-import cam72cam.mod.render.opengl.DirectDraw;
-import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.render.opengl.Texture;
-import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.world.World;
-import util.Matrix4;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.render.Particle;
+import cam72cam.umc.api.render.opengl.DirectDraw;
+import cam72cam.umc.api.render.opengl.RenderState;
+import cam72cam.umc.api.render.opengl.Texture;
+import cam72cam.umc.api.resource.Identifier;
+import cam72cam.umc.api.world.World;
+import cam72cam.umc.api.util.Matrix4;
 
 import java.util.List;
 import java.util.Map;

@@ -15,16 +15,16 @@ import cam72cam.immersiverailroading.library.ItemComponentType;
 import cam72cam.immersiverailroading.library.ChatText;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.net.BuildableStockSyncPacket;
-import cam72cam.mod.entity.DamageType;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.entity.custom.IWorldData;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.serialization.TagCompound;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.text.PlayerMessage;
+import cam72cam.umc.api.entity.DamageType;
+import cam72cam.umc.api.entity.Entity;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.entity.custom.IWorldData;
+import cam72cam.umc.api.item.ClickResult;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.serialization.TagCompound;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.text.PlayerMessage;
 
 public class EntityBuildableRollingStock extends EntityRollingStock implements IWorldData {
 	@TagField("isBuilt")

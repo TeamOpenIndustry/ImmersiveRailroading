@@ -3,12 +3,12 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 import java.util.List;
 
-import cam72cam.mod.render.obj.OBJRender;
-import cam72cam.mod.render.opengl.RenderState;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.render.obj.OBJRender;
+import cam72cam.umc.api.render.opengl.RenderState;
+import cam72cam.umc.api.resource.Identifier;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.umc.api.model.obj.OBJModel;
 import cam72cam.immersiverailroading.multiblock.RailRollerMultiblock.RailRollerInstance;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 

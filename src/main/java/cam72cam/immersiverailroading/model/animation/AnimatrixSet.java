@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.model.animation;
 
-import cam72cam.mod.resource.Identifier;
-import util.Matrix4;
+import cam72cam.umc.api.resource.Identifier;
+import cam72cam.umc.api.util.Matrix4;
 
 import java.io.IOException;
 import java.util.HashMap;

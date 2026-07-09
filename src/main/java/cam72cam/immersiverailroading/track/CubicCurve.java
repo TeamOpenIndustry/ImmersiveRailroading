@@ -2,9 +2,9 @@ package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackSmoothing;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.math.Vec3d;
+import cam72cam.umc.api.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
-import util.Matrix4;
+import cam72cam.umc.api.util.Matrix4;
 
 import java.util.ArrayList;
 import java.util.List;

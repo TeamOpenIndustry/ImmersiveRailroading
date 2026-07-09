@@ -1,9 +1,8 @@
 package cam72cam.immersiverailroading.blocks;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.mod.block.*;
-
-import java.util.function.Supplier;
+import cam72cam.umc.api.block.BlockTypeEntity;
+import cam72cam.umc.api.block.Material;
 
 public abstract class BlockRailBase extends BlockTypeEntity {
 	public BlockRailBase(String name) {

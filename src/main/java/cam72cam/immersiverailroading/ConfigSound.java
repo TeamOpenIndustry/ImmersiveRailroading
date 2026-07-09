@@ -1,9 +1,9 @@
 package cam72cam.immersiverailroading;
 
-import cam72cam.mod.config.ConfigFile.Comment;
-import cam72cam.mod.config.ConfigFile.Name;
-import cam72cam.mod.config.ConfigFile.File;
-import cam72cam.mod.config.ConfigFile.Range;
+import cam72cam.umc.api.config.ConfigFile.Comment;
+import cam72cam.umc.api.config.ConfigFile.Name;
+import cam72cam.umc.api.config.ConfigFile.File;
+import cam72cam.umc.api.config.ConfigFile.Range;
 
 @Comment("Configuration File")
 @Name("general")

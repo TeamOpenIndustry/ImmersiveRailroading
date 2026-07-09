@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading;
 
-import cam72cam.mod.config.ConfigFile.*;
+import cam72cam.umc.api.config.ConfigFile.*;
 
 @Comment("Configuration File")
 @Name("Permissions")

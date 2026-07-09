@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
-import cam72cam.mod.entity.Player;
+import cam72cam.umc.api.entity.Player;
 
 import java.util.List;
 

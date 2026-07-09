@@ -7,7 +7,7 @@ import java.util.Locale;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.ItemCastingCost;
-import cam72cam.mod.text.TextUtil;
+import cam72cam.umc.api.text.TextUtil;
 
 public enum ItemComponentType {
 	FRAME(AssemblyStep.FRAME, CraftingType.CASTING, ModelComponentType.FRAME),

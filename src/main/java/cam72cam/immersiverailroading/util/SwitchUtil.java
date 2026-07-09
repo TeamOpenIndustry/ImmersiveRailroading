@@ -6,8 +6,8 @@ import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.IIterableTrack;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
 
 public class SwitchUtil {
 	public static SwitchState getSwitchState(TileRail rail) {

@@ -1,12 +1,12 @@
 package cam72cam.immersiverailroading.gui.components;
 
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.gui.helpers.GUIHelpers;
-import cam72cam.mod.gui.screen.Button;
-import cam72cam.mod.gui.screen.IScreenBuilder;
-import cam72cam.mod.gui.screen.TextField;
-import cam72cam.mod.text.TextColor;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.gui.helpers.GUIHelpers;
+import cam72cam.umc.api.gui.screen.Button;
+import cam72cam.umc.api.gui.screen.IScreenBuilder;
+import cam72cam.umc.api.gui.screen.TextField;
+import cam72cam.umc.api.text.TextColor;
 
 import java.util.*;
 import java.util.stream.Collectors;

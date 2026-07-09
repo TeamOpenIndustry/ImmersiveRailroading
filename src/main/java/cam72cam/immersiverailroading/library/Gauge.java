@@ -5,9 +5,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapped;
-import cam72cam.mod.text.TextUtil;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.serialization.TagMapped;
+import cam72cam.umc.api.text.TextUtil;
 import trackapi.lib.Gauges;
 
 @TagMapped(Gauge.TagMapper.class)
@@ -102,7 +102,7 @@ public class Gauge {
 		return this.gauge <= Gauges.MINECRAFT;
 	}
 
-	static class TagMapper implements cam72cam.mod.serialization.TagMapper<Gauge> {
+	static class TagMapper implements cam72cam.umc.api.serialization.TagMapper<Gauge> {
 		@Override
 		public TagAccessor<Gauge> apply(Class<Gauge> type, String fieldName, TagField tag) {
 			return new TagAccessor<>(

@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.physics.TickPos;
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.umc.api.net.Packet;
+import cam72cam.umc.api.serialization.TagField;
 
 import java.util.List;
 

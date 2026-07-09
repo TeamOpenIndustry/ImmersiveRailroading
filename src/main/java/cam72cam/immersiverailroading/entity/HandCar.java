@@ -5,9 +5,9 @@ import java.util.List;
 
 import cam72cam.immersiverailroading.util.FluidQuantity;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.fluid.Fluid;
+import cam72cam.umc.api.entity.Entity;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.fluid.Fluid;
 
 public class HandCar extends Locomotive {
 

@@ -12,12 +12,12 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.*;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.util.Facing;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.item.*;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.util.Facing;
+import cam72cam.umc.api.world.World;
 
 import java.util.Collections;
 import java.util.List;

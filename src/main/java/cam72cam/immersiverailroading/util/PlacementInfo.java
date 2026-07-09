@@ -3,13 +3,13 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapped;
-import cam72cam.mod.util.Facing;
-import cam72cam.mod.serialization.TagCompound;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.serialization.TagMapped;
+import cam72cam.umc.api.util.Facing;
+import cam72cam.umc.api.serialization.TagCompound;
 
 @TagMapped(PlacementInfo.TagMapper.class)
 public class PlacementInfo {
@@ -156,7 +156,7 @@ public class PlacementInfo {
 		return new PlacementInfo(placementPosition, direction, yaw, control);
 	}
 
-	static class TagMapper implements cam72cam.mod.serialization.TagMapper<PlacementInfo> {
+	static class TagMapper implements cam72cam.umc.api.serialization.TagMapper<PlacementInfo> {
 		@Override
 		public TagAccessor<PlacementInfo> apply(Class<PlacementInfo> type, String fieldName, TagField tag) {
 			return new TagAccessor<>(

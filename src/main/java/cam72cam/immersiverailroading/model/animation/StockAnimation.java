@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.Anima
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition.AnimationMode;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.util.MathUtil;
-import util.Matrix4;
+import cam72cam.umc.api.util.Matrix4;
 
 import java.io.IOException;
 import java.util.UUID;

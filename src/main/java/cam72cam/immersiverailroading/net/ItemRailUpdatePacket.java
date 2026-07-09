@@ -2,11 +2,11 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.net.Packet;
+import cam72cam.umc.api.serialization.TagField;
 
 public class ItemRailUpdatePacket extends Packet {
 	@TagField

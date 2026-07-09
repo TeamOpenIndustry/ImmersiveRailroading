@@ -2,10 +2,10 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.render.tile.MultiPreviewRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.net.Packet;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.world.World;
 
 public class PreviewRenderPacket extends Packet {
 	@TagField

@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.gui.overlay;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.util.Speed;
-import cam72cam.mod.fluid.Fluid;
+import cam72cam.umc.api.fluid.Fluid;
 
 import java.util.Locale;
 

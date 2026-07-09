@@ -9,8 +9,8 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.model.FreightTankModel;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.FluidQuantity;
-import cam72cam.mod.fluid.Fluid;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.fluid.Fluid;
+import cam72cam.umc.api.resource.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;

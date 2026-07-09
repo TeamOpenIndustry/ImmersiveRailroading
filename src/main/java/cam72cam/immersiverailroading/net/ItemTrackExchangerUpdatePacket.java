@@ -2,10 +2,10 @@ package cam72cam.immersiverailroading.net;
 
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.serialization.TagField;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.net.Packet;
+import cam72cam.umc.api.serialization.TagField;
 
 public class ItemTrackExchangerUpdatePacket extends Packet {
 	@TagField

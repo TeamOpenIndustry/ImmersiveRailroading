@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.track;
 import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.mod.math.Vec3i;
+import cam72cam.umc.api.math.Vec3i;
 
 public class TrackRail extends TrackBase {
 

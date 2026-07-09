@@ -6,17 +6,16 @@ import cam72cam.immersiverailroading.library.ScrollMode;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.model.part.Interactable;
 import cam72cam.immersiverailroading.model.part.Seat;
-import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.ModCore;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.entity.boundingbox.IBoundingBox;
-import cam72cam.mod.event.ClientEvents;
-import cam72cam.mod.input.Mouse;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.net.Packet;
-import cam72cam.mod.net.PacketDirection;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.MinecraftClient;
+import cam72cam.umc.api.ModCore;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.entity.boundingbox.IBoundingBox;
+import cam72cam.umc.api.event.ClientEvents;
+import cam72cam.umc.api.input.Mouse;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.net.Packet;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.world.World;
 
 import java.util.UUID;
 

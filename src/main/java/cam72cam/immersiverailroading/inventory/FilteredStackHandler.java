@@ -3,9 +3,9 @@ package cam72cam.immersiverailroading.inventory;
 import java.util.HashMap;
 import java.util.Map;
 
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.item.ItemStackHandler;
-import cam72cam.mod.serialization.TagMapped;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.item.ItemStackHandler;
+import cam72cam.umc.api.serialization.TagMapped;
 
 @TagMapped(ItemStackHandler.TagMapper.class)
 public class FilteredStackHandler extends ItemStackHandler {

@@ -13,8 +13,8 @@ import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.sound.ISound;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.sound.ISound;
 
 import java.util.ArrayList;
 import java.util.List;

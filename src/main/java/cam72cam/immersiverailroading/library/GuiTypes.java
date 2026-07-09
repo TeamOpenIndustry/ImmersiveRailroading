@@ -9,13 +9,13 @@ import cam72cam.immersiverailroading.multiblock.PlateRollerMultiblock;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.mod.config.ConfigGui;
-import cam72cam.mod.gui.GuiRegistry;
-import cam72cam.mod.gui.GuiRegistry.BlockGUI;
-import cam72cam.mod.gui.GuiRegistry.EntityGUI;
-import cam72cam.mod.gui.GuiRegistry.GUI;
-import cam72cam.mod.gui.screen.IScreen;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.config.ConfigGui;
+import cam72cam.umc.api.gui.GuiRegistry;
+import cam72cam.umc.api.gui.GuiRegistry.BlockGUI;
+import cam72cam.umc.api.gui.GuiRegistry.EntityGUI;
+import cam72cam.umc.api.gui.GuiRegistry.GUI;
+import cam72cam.umc.api.gui.screen.IScreen;
+import cam72cam.umc.api.resource.Identifier;
 
 public class GuiTypes {
     public static final EntityGUI<Freight> FREIGHT = GuiRegistry.registerEntityContainer(Freight.class, FreightContainer::new);

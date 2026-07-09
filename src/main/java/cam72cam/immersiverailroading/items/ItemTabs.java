@@ -2,8 +2,8 @@ package cam72cam.immersiverailroading.items;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.mod.item.CreativeTab;
-import cam72cam.mod.item.ItemStack;
+import cam72cam.umc.api.item.CreativeTab;
+import cam72cam.umc.api.item.ItemStack;
 
 import java.util.List;
 

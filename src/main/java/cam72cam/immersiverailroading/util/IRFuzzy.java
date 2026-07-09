@@ -1,9 +1,9 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.IRItems;
-import cam72cam.mod.item.CustomItem;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.Recipes;
+import cam72cam.umc.api.item.CustomItem;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.item.Recipes;
 
 public class IRFuzzy {
     public static final Fuzzy IR_CASTING_CASING = Fuzzy.get("irCastingCasing");

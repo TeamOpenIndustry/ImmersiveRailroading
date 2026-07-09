@@ -13,19 +13,19 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.entity.EntityRegistry;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJGroup;
-import cam72cam.mod.model.obj.VertexBuffer;
-import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.serialization.*;
-import cam72cam.mod.serialization.ResourceCache.GenericByteBuffer;
-import cam72cam.mod.serialization.TagCompound;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapped;
-import cam72cam.mod.sound.ISound;
-import cam72cam.mod.text.TextUtil;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.entity.EntityRegistry;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.model.obj.OBJGroup;
+import cam72cam.umc.api.model.obj.VertexBuffer;
+import cam72cam.umc.api.resource.Identifier;
+import cam72cam.umc.api.serialization.*;
+import cam72cam.umc.api.serialization.ResourceCache.GenericByteBuffer;
+import cam72cam.umc.api.serialization.TagCompound;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.serialization.TagMapped;
+import cam72cam.umc.api.sound.ISound;
+import cam72cam.umc.api.text.TextUtil;
+import cam72cam.umc.api.world.World;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -866,7 +866,7 @@ public abstract class EntityRollingStockDefinition {
         return false;
     }
 
-    static class TagMapper implements cam72cam.mod.serialization.TagMapper<EntityRollingStockDefinition> {
+    static class TagMapper implements cam72cam.umc.api.serialization.TagMapper<EntityRollingStockDefinition> {
         @Override
         public TagAccessor<EntityRollingStockDefinition> apply(Class<EntityRollingStockDefinition> type, String fieldName, TagField tag) {
             return new TagAccessor<>(

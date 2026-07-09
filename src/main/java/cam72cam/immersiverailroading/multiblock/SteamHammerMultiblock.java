@@ -5,16 +5,16 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.items.ItemRollingStockComponent;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.tile.TileMultiblock;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.item.ItemStackHandler;
-import cam72cam.mod.math.Rotation;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.sound.Audio;
-import cam72cam.mod.sound.SoundCategory;
-import cam72cam.mod.sound.StandardSound;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.item.ItemStackHandler;
+import cam72cam.umc.api.math.Rotation;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.sound.Audio;
+import cam72cam.umc.api.sound.SoundCategory;
+import cam72cam.umc.api.sound.StandardSound;
+import cam72cam.umc.api.world.World;
 
 public class SteamHammerMultiblock extends Multiblock {
 	private static FuzzyProvider piston = () -> Fuzzy.PISTON;

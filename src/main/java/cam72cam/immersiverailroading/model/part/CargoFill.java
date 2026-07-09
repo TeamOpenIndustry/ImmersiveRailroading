@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.entity.boundingbox.IBoundingBox;
+import cam72cam.umc.api.entity.boundingbox.IBoundingBox;
 
 import java.util.ArrayList;
 import java.util.Comparator;

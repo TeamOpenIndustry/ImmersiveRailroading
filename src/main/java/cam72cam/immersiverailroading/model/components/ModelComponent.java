@@ -3,9 +3,9 @@ package cam72cam.immersiverailroading.model.components;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJGroup;
-import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.model.obj.OBJGroup;
+import cam72cam.umc.api.model.obj.OBJModel;
 
 import java.util.*;
 import java.util.regex.Matcher;

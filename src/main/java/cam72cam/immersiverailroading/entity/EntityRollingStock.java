@@ -10,21 +10,26 @@ import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.mod.entity.*;
-import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.entity.custom.*;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.resource.Identifier;
-import cam72cam.mod.serialization.*;
-import cam72cam.mod.sound.Audio;
-import cam72cam.mod.sound.ISound;
-import cam72cam.mod.sound.SoundCategory;
-import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.util.SingleCache;
+import cam72cam.umc.api.entity.CustomEntity;
+import cam72cam.umc.api.entity.DamageType;
+import cam72cam.umc.api.entity.Entity;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.entity.custom.IClickable;
+import cam72cam.umc.api.entity.custom.IKillable;
+import cam72cam.umc.api.entity.custom.ITickable;
+import cam72cam.umc.api.entity.sync.TagSync;
+import cam72cam.umc.api.item.ClickResult;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.resource.Identifier;
+import cam72cam.umc.api.serialization.*;
+import cam72cam.umc.api.sound.Audio;
+import cam72cam.umc.api.sound.ISound;
+import cam72cam.umc.api.sound.SoundCategory;
+import cam72cam.umc.api.text.PlayerMessage;
+import cam72cam.umc.api.util.SingleCache;
 import org.apache.commons.lang3.tuple.Pair;
-import util.Matrix4;
+import cam72cam.umc.api.util.Matrix4;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -347,7 +352,7 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 
 	private static class ControlPositionMapper implements TagMapper<Map<String, Pair<Boolean, Float>>> {
 		@Override
-		public TagAccessor<Map<String, Pair<Boolean, Float>>> apply(
+		public TagMapper.TagAccessor<Map<String, Pair<Boolean, Float>>> apply(
 				Class<Map<String, Pair<Boolean, Float>>> type,
 				String fieldName,
 				TagField tag) throws SerializationException {

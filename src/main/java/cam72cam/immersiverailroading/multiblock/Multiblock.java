@@ -10,18 +10,18 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.ClickResult;
-import cam72cam.mod.item.Fuzzy;
-import cam72cam.mod.item.IInventory;
-import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Rotation;
-import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.text.TextUtil;
-import cam72cam.mod.world.BlockInfo;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.item.ClickResult;
+import cam72cam.umc.api.item.Fuzzy;
+import cam72cam.umc.api.item.IInventory;
+import cam72cam.umc.api.item.ItemStack;
+import cam72cam.umc.api.math.Rotation;
+import cam72cam.umc.api.math.Vec3d;
+import cam72cam.umc.api.math.Vec3i;
+import cam72cam.umc.api.text.PlayerMessage;
+import cam72cam.umc.api.text.TextUtil;
+import cam72cam.umc.api.world.BlockInfo;
+import cam72cam.umc.api.world.World;
 
 public abstract class Multiblock {
 	// z y x

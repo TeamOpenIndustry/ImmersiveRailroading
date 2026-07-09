@@ -1,12 +1,11 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.mod.resource.Identifier;
+import cam72cam.umc.api.resource.Identifier;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;

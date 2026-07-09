@@ -6,10 +6,10 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.item.*;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.world.World;
+import cam72cam.umc.api.entity.Player;
+import cam72cam.umc.api.item.*;
+import cam72cam.umc.api.serialization.TagField;
+import cam72cam.umc.api.world.World;
 
 import java.util.Collections;
 import java.util.List;
