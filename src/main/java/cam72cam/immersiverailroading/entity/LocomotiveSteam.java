@@ -122,10 +122,8 @@ public class LocomotiveSteam extends Locomotive {
 		super.onDissassemble();
 		this.setBoilerTemperature(ambientTemperature());
 		this.setBoilerPressure(0);
-		
-		for (Integer slot : burnTime.keySet()) {
-			burnTime.put(slot, 0);
-		}
+
+        burnTime.replaceAll((s, v) -> 0);
 	}
 
 	@Override
@@ -196,10 +194,9 @@ public class LocomotiveSteam extends Locomotive {
 
 		EntityCoupleableRollingStock stock = this;
 		CouplerType coupler = getDefinition().cab_forward ? CouplerType.FRONT : CouplerType.BACK;
-		while (coupler != null && stock.getCoupled(coupler) instanceof Tender) {
-			Tender tender = (Tender) stock.getCoupled(coupler);
+		while (coupler != null && stock.getCoupled(coupler) instanceof Tender tender) {
 
-			// Only drain 10mb at a time from the tender
+            // Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
 				theTank.drain(tender.theTank, desiredDrain, false);
@@ -318,7 +315,7 @@ public class LocomotiveSteam extends Locomotive {
 		if (throttle != 0 && boilerPressure > 0) {
 			double burnableSlots = this.cargoItems.getSlotCount()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
-			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
+			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000.0);
 			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss
 			
 			float delta = (float) (throttle * maxPressureTick);

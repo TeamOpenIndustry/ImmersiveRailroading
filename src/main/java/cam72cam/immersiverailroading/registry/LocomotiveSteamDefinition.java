@@ -91,7 +91,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 
     @Override
     public StockModel<?, ?> getModel() {
-        return (SteamLocomotiveModel) super.getModel();
+        return super.getModel();
     }
 
     @Override
