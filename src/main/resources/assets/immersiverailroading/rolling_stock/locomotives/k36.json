@@ -6,9 +6,9 @@
 	"darken_model": "-0.05",
 	"model_gauge_m": 1,
 	"properties": {
-		"max_psi": 195,
+		"max_pressure_psi": 195,
 		"water_capacity_l": 11356, 
-		"horsepower": 1600,
+		"power_hp": 1600,
 		"tractive_effort_lbf": 36164,
 		"max_speed_kmh": 88,
 		"valve_gear": "walschaerts",

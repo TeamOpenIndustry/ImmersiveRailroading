@@ -94,7 +94,7 @@ gui.immersiverailroading:selector.paintbrush_apply_to_train=Apply to whole train
 # Migrated from old detector translations which already contain "Detecting", don't need for this
 gui.immersiverailroading:selector.augment.detect=Current:
 gui.immersiverailroading:selector.augment.redstone=Redstone Mode:
-gui.immersiverailroading:selector.augment.pushpull=Pushpull
+gui.immersiverailroading:selector.augment.pushpull=Push/Pull
 gui.immersiverailroading:selector.augment.coupler=Coupler Mode:
 gui.immersiverailroading:selector.augment.control=Locomotive Control Mode:
 
@@ -106,7 +106,7 @@ gui.immersiverailroading:item.radio_card.not_linked=Not linked to any locomotive
 
 gui.immersiverailroading:item.track_exchanger=Right-Click in air to open the selection gui. Right-Click on a track to change it's track type to the one defined in the gui
 gui.immersiverailroading:item.paint_brush.mode=Current mode: %s
-gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click cycle modes
+gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click to cycle modes
 gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s
@@ -176,6 +176,7 @@ track.immersiverailroading:smoothing.far=Far
 track.immersiverailroading:smoothing.neither=Neither
 
 track.immersiverailroading:direction.none=Flexible
+# Intended
 track.immersiverailroading:direction.left=Lock Right
 track.immersiverailroading:direction.right=Lock Left
 
@@ -247,12 +248,12 @@ multiblock.immersiverailroading:plate_machine=Plate Machine
 multiblock.immersiverailroading:rail_machine=Rail Machine
 multiblock.immersiverailroading:steam_hammer=Steam Hammer
 
-immersiverailroading:crafting_type.casting=Casting
-immersiverailroading:crafting_type.casting_hammer=Casting,Power Hammer
-immersiverailroading:crafting_type.plate_small=Plate Roller
-immersiverailroading:crafting_type.plate_medium=Plate Roller
-immersiverailroading:crafting_type.plate_large=Plate Roller
-immersiverailroading:crafting_type.plate_boiler=Plate Roller, Boiler Roller
+immersiverailroading:crafting_type.casting=Casting in Casting Basin
+immersiverailroading:crafting_type.casting_hammer=Casting in Casting Basin, forging with Steam Hammer
+immersiverailroading:crafting_type.plate_small=Rolling as Small Plate in Plate Machine
+immersiverailroading:crafting_type.plate_medium=Rolling as Medium Plate in Plate Machine
+immersiverailroading:crafting_type.plate_large=Rolling as Large Plate in Plate Machine
+immersiverailroading:crafting_type.plate_boiler=Rolling as Boiler Plate in Plate Machine, then processing in Boiler Machine
 
 itemGroup.immersiverailroading.main=Immersive Railroading
 itemGroup.immersiverailroading.locomotive=Immersive Railroading Locomotives
@@ -291,9 +292,9 @@ key.categories.immersiverailroading=Immersive Railroading
 ir_keys.increase_throttle=Increase Throttle
 ir_keys.zero_throttle=Zero Throttle
 ir_keys.decrease_throttle=Decrease Throttle
-ir_keys.increase_reverser=Increase Reverser
-ir_keys.zero_reverser=Zero Reverser
-ir_keys.decrease_reverser=Decrease Reverser
+ir_keys.increase_reverser=Advance Reverser
+ir_keys.zero_reverser=Center Reverser
+ir_keys.decrease_reverser=Reverse Reverser
 ir_keys.increase_brake=Increase Air Brake
 ir_keys.zero_brake=Zero Air Brake
 ir_keys.decrease_brake=Decrease Air Brake
@@ -311,7 +312,7 @@ immersiverailroading:entity.locomotives.a1_peppercorn=A1 Peppercorn
 immersiverailroading:entity.locomotives.a5_switcher=A5 Switcher
 immersiverailroading:entity.locomotives.alco_rs1=RS-1
 immersiverailroading:entity.locomotives.big_boy=Big Boy (4000 class)
-immersiverailroading:entity.locomotives.br01=br01
+immersiverailroading:entity.locomotives.br01=DRG BR 01
 immersiverailroading:entity.locomotives.class_38=Class 38
 immersiverailroading:entity.locomotives.cooke_mogul=DSP&P Mogul
 immersiverailroading:entity.locomotives.e6_atlantic=E6 Atlantic
@@ -330,7 +331,7 @@ immersiverailroading:entity.locomotives.skookum=Skookum 2-4-4-2
 immersiverailroading:entity.tender.a1_peppercorn_tender=A1 Peppercorn Tender
 immersiverailroading:entity.tender.a5_tender=A5 Slope Tender
 immersiverailroading:entity.tender.big_boy_tender=Big Boy (4000 class) Tender
-immersiverailroading:entity.tender.br01_tender=drg class 01 tender
+immersiverailroading:entity.tender.br01_tender=DRG BR 01 Tender
 immersiverailroading:entity.tender.class_38_tender=Class 38 Tender
 immersiverailroading:entity.tender.cooke_tender=Cooke Tender
 immersiverailroading:entity.tender.e6_tender=E6 Atlantic Tender

@@ -6,9 +6,9 @@
 	"darken_model": "-0.05",
 	"model_gauge_m": 2.17,
 	"properties": {
-		"max_psi": 100,
+		"max_pressure_psi": 100,
 		"water_capacity_l": 10000, 
-		"horsepower": 200,
+		"power_hp": 200,
 		"tractive_effort_lbf": 5000,
 		"max_speed_kmh": 130,
 		"valve_gear": "hidden",

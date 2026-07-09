@@ -6,7 +6,7 @@
 	"darken_model": "-0.05",
 	"properties": {
 		"weight_kg": 1000,
-		"horsepower": 1,
+		"power_hp": 1,
 		"tractive_effort_lbf": 1000,
 		"max_speed_kmh": 20
 	},

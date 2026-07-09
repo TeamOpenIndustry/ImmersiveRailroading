@@ -5,9 +5,9 @@
 	"model": "immersiverailroading:models/rolling_stock/locomotives/skookum/skookum.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"max_psi": 200,
+		"max_pressure_psi": 200,
 		"water_capacity_l": 15141, 
-		"horsepower": 3800,
+		"power_hp": 3800,
 		"tractive_effort_lbf":  27430,
 		"max_speed_kmh": 51,
 		"valve_gear": "mallet_walschaerts",

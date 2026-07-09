@@ -6,15 +6,21 @@
     <br>
 </h1>
 <h4 align="center">
-    Immersive Railroading is a Minecraft mod for 1.16, 1.15, 1.14, 1.12, 1.11, 1.10, and 1.7.  It adds a new transport system (item and players) to the game.  It is based in real world physics (where possible) and uses life size models to convey the true scale and grandeur of Railroading.
+    Immersive Railroading is a Minecraft mod for 1.7 ~ 1.21.  It adds a new transport system (item and players) to the game.  It is based in real world physics (where possible) and uses life size models to convey the true scale and grandeur of Railroading.
 </h4>
 
 <p align="center">
   <a href="https://minecraft.curseforge.com/projects/immersive-railroading">
-    <img src="http://cf.way2muchnoise.eu/full_277736_downloads.svg">
+    <img src="https://cf.way2muchnoise.eu/full_277736_downloads.svg">
   </a>
   <a href="">
-     <img src="http://cf.way2muchnoise.eu/versions/For%20MC_277736_all.svg">
+     <img src="https://cf.way2muchnoise.eu/versions/For%20MC_277736_all.svg">
+  </a>
+  <a href="https://modrinth.com/mod/immersive-railroading">
+     <img src="https://modrinth.roughness.technology/full_PVCiYbMM_downloads.svg">
+  </a>
+  <a href="">
+    <img src="https://modrinth.roughness.technology/versions/For%20MC_PVCiYbMM_all.svg">
   </a>
   <a href="">
     <img src="https://github.com/TeamOpenIndustry/ImmersiveRailroading/workflows/Immersive%20Railroading%20Build%20Pipeline/badge.svg">
@@ -40,15 +46,15 @@
 ![screenshot](https://i.imgur.com/1gnRu0K.png)
 
 ## Installation
-You can download the latest version of Immersive Railroading on [Curseforge](https://minecraft.curseforge.com/projects/immersive-railroading/files).
+You can download the latest version of Immersive Railroading on [Curseforge](https://minecraft.curseforge.com/projects/immersive-railroading/files) and [Modrinth](https://modrinth.com/mod/immersive-railroading).
 ### Dependencies
 To get the mod to work you need to add the dependencies to your Mod Folder:
- - [Track API](https://minecraft.curseforge.com/projects/track-api)
- - [Universal Mod Core](https://www.curseforge.com/minecraft/mc-mods/universal-mod-core)
+ - Track API ([Curseforge](https://minecraft.curseforge.com/projects/track-api)/[Modrinth](https://modrinth.com/mod/track-api))
+ - Universal Mod Core ([Curseforge](https://www.curseforge.com/minecraft/mc-mods/universal-mod-core)/[Modrinth](https://modrinth.com/mod/universal-mod-core))
  
 We also recommend to add these mods for full functionality of Immersive Railroading:
  - [Immersive Engineering](https://minecraft.curseforge.com/projects/immersive-engineering)
- - [Open Computers](https://minecraft.curseforge.com/projects/opencomputers)
+ - [Open Computers](https://minecraft.curseforge.com/projects/opencomputers) or [CC:Tweaked](https://modrinth.com/mod/cc-tweaked)
  - [In-Game-Wiki Mod](https://minecraft.curseforge.com/projects/in-game-wiki-mod)
   
 ## Rolling stock
@@ -79,6 +85,7 @@ The Models are licensed under the [MODEL_LICENSE](https://github.com/cam72cam/Im
 
 ## Links
  - Curseforge: https://minecraft.curseforge.com/projects/immersive-railroading
+ - Modrinth: https://modrinth.com/mod/immersive-railroading
  - Wiki: https://github.com/cam72cam/ImmersiveRailroading/wiki
  - Discord: https://discord.gg/CS2RTGq
  - Subreddit: https://www.reddit.com/r/ImmersiveRailroading

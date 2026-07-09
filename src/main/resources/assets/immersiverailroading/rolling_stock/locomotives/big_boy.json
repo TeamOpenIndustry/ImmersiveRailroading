@@ -5,9 +5,9 @@
 	"model": "immersiverailroading:models/rolling_stock/locomotives/big_boy/big_boy.obj",
 	"darken_model": "-0.05",
 	"properties": {
-		"max_psi": 300,
+		"max_pressure_psi": 300,
 		"water_capacity_l": 95000, 
-		"horsepower": 6290,
+		"power_hp": 6290,
 		"tractive_effort_lbf": 135375,
 		"max_speed_kmh": 130,
 		"valve_gear": "mallet_walschaerts",
