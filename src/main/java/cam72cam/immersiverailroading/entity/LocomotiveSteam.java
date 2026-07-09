@@ -202,7 +202,7 @@ public class LocomotiveSteam extends Locomotive {
 				theTank.drain(tender.theTank, desiredDrain, false);
 			}
 
-			if (this.getTickCount() % 20 == 0 && this.canRefuelFromTenders()) {
+			if (this.getTickCount() % 20 == 0 && this.isAutoFeedEnabled()) {
 				// Top off stacks
 				for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
 					if (BurnUtil.getBurnTime(this.cargoItems.get(slot)) != 0) {
@@ -458,7 +458,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 	}
 
-	public boolean canRefuelFromTenders() {
+	public boolean isAutoFeedEnabled() {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
 		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
 												 .stream()
@@ -471,7 +471,7 @@ public class LocomotiveSteam extends Locomotive {
 		}
 	}
 
-	public void setAutoRefuelFromTenders(boolean enabled) {
+	public void setAutoFeed(boolean enabled) {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
 		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
 												 .stream()

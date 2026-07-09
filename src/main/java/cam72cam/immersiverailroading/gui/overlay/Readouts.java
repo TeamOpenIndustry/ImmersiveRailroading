@@ -115,7 +115,7 @@ public enum Readouts {
             case ENGINE_RPM ->
                 stock instanceof LocomotiveDiesel diesel ? diesel.getRelativeRPM() : 0;
             case TENDER_FEED ->
-                stock instanceof LocomotiveSteam steam && steam.canRefuelFromTenders() ? 1 : 0;
+                    stock instanceof LocomotiveSteam steam && steam.isAutoFeedEnabled() ? 1 : 0;
         };
     }
 
@@ -197,7 +197,7 @@ public enum Readouts {
             }
             case TENDER_FEED -> {
                 if (stock instanceof LocomotiveSteam steam) {
-                    steam.setAutoRefuelFromTenders(value > 0.9);
+                    steam.setAutoFeed(value > 0.9);
                 }
             }
         }
