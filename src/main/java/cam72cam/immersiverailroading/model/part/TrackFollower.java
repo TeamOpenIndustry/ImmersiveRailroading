@@ -62,8 +62,8 @@ public class TrackFollower {
                 rollReadout = offsetRoll - stock.getRotationRoll();
                 matrix.setIdentity();
                 matrix.translate(-offset / stock.gauge.scale(), 0, 0);
-                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
                 matrix.rotate(Math.toRadians(yawReadout), 0, 1, 0);
+                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
                 matrix.translate(offset / stock.gauge.scale(), 0, 0);
             } else {
                 // Don't need to path to a point that's already on the track.  TODO This can also be used to improve accuracy of the offset rendering
@@ -95,7 +95,9 @@ public class TrackFollower {
 
                 yawReadout = toPointYaw + atPointYaw;
                 rollReadout = (float) -pointPos.getRoll() - stock.getRotationRoll();
-                if(toMinPoint < 0)rollReadout = -rollReadout;
+                if(toMinPoint < 0) {
+                    rollReadout = -rollReadout;
+                }
 
                 float min = this.min;
                 // TODO This implies the code above is broken, but works around some of the weirder edge cases.
@@ -132,6 +134,7 @@ public class TrackFollower {
     public float getYawReadout() {
         return yawReadout;
     }
+    //TODO Do we need delta roll readout?
     public float getRollReadout() {
         return rollReadout;
     }

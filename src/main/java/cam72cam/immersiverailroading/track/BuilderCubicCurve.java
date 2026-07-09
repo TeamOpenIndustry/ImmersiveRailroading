@@ -141,7 +141,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 							: info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.toRange(curves), true).getFirst();
 		RollAndOffsetInfo.RollAndVertOffsetAlignType type = rollAndOffsetInfo == null
 												 ? RollAndOffsetInfo.RollAndVertOffsetAlignType.MID
-												 : rollAndOffsetInfo.offsetType();
+												 : rollAndOffsetInfo.rollOffsetType();
 
 		double length = curve.lengthWithCache(1000);
 		int count = (int) (length / targetStepSize);//Adapt the length

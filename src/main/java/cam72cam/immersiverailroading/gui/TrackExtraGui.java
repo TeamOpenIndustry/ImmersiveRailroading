@@ -68,10 +68,10 @@ public class TrackExtraGui implements IScreen {
     private Button insertOrDeletePointButton;
     private Button editLeftButton;
     private Button resetAllButton;
-    private Button offsetTypeButton;
+    private Button rollOffsetTypeButton;
     private Button railInfoLabel;
     private CheckBox rollEffectTileCB;
-    private CheckBox tileTiltCB;
+    private CheckBox railBlockNormalCB;
     private CheckBox degreeModeCB;
     private CheckBox offsetVertByNormalCB;
 //    private Button wayCircleButton;
@@ -200,26 +200,26 @@ public class TrackExtraGui implements IScreen {
                                             edited = true;
                                             rollAndOffsetInfoCache.rollEffectTile = self.isChecked();
                                             if(!rollAndOffsetInfoCache.rollEffectTile) {
-                                                rollAndOffsetInfoCache.tileTilt = false;
-                                                tileTiltCB.setChecked(false);
+                                                rollAndOffsetInfoCache.railBlockNormal = false;
+                                                railBlockNormalCB.setChecked(false);
                                             }
                                         });
 
-        tileTiltCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 1,
-                                  GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.tileTilt,
+        railBlockNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 1,
+                                  GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.railBlockNormal,
                                   (_, self) -> {
                                       if(rollAndOffsetInfoCache.rollEffectTile) {
                                           edited = true;
-                                          rollAndOffsetInfoCache.tileTilt = self.isChecked();
-                                      } else if(rollAndOffsetInfoCache.tileTilt){
+                                          rollAndOffsetInfoCache.railBlockNormal = self.isChecked();
+                                      } else if(rollAndOffsetInfoCache.railBlockNormal){
                                           edited = true;
-                                          rollAndOffsetInfoCache.tileTilt = false;
+                                          rollAndOffsetInfoCache.railBlockNormal = false;
                                           self.setChecked(false);
                                       } else {
                                           self.setChecked(false);
                                       }
                                   });
-        tileTiltCB.setVisible(false);//modifiable vanilla block model later
+        railBlockNormalCB.setVisible(false);//modifiable vanilla block model later
 
         degreeModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2, ytop + 1,
                                            GuiText.SELECTOR_DEGREE_MODE.toString(), rollAndOffsetInfoCache.degreeMode,
@@ -238,20 +238,20 @@ public class TrackExtraGui implements IScreen {
 
 //        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 , ytop, 85, height, "Selected Way: 0"){};//need multiSwitch branch merging
 
-        offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height,
-                                      rollAndOffsetInfoCache.offsetType.toString(), (hand, self) -> {
+        rollOffsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height,
+                                      rollAndOffsetInfoCache.rollOffsetType.toString(), (hand, self) -> {
             edited = true;
 
-            int order = rollAndOffsetInfoCache.offsetType.getOrder();
+            int order = rollAndOffsetInfoCache.rollOffsetType.getOrder();
             int count = RollAndOffsetInfo.RollAndVertOffsetAlignType.values().length;
             order = (order + (hand == Player.Hand.SECONDARY ? 1 : -1) + count) % count;
 
             int finalOrder = order;
-            rollAndOffsetInfoCache.offsetType = RollAndOffsetInfo.RollAndVertOffsetAlignType.byOrder(finalOrder);
+            rollAndOffsetInfoCache.rollOffsetType = RollAndOffsetInfo.RollAndVertOffsetAlignType.byOrder(finalOrder);
 
-            self.setText(rollAndOffsetInfoCache.offsetType.toString());
+            self.setText(rollAndOffsetInfoCache.rollOffsetType.toString());
         });
-        offsetTypeButton.setTooltip(List.of(GuiText.TRACK_EXTRA_VERTICAL_OFFSET_TYPE.toString()));
+        rollOffsetTypeButton.setTooltip(List.of(GuiText.TRACK_EXTRA_ROLL_OFFSET_TYPE.toString()));
 
         ytop += height;
         ytop += 5;

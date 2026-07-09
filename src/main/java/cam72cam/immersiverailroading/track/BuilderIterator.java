@@ -90,7 +90,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					Vec3d topFacing = computeTopFaceNormal(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
 					double rollDelta;
 					boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
-					boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.tileTilt();
+					boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
 					if(!rollEffectTile) tileTilt = false;
 
 					if(rollEffectTile) {

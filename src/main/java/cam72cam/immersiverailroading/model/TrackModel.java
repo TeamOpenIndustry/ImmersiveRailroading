@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.model;
 
 import cam72cam.immersiverailroading.library.TrackModelPart;
-import cam72cam.immersiverailroading.track.Orientation;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.util.MathUtil;

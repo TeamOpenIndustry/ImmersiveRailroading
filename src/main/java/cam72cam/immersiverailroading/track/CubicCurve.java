@@ -40,7 +40,7 @@ public class CubicCurve {
         this.arcLenFactorEnd = arcLenFactorEnd;
     }
 
-    public static CubicCurve circle(int radius, float degrees, double lStrat, double lEnd) {
+    public static CubicCurve circle(int radius, float degrees, double arcLenFactorStart, double arcLenFactorEnd) {
         float cRadScale = degrees / 90;
         Vec3d p1 = new Vec3d(0, 0, radius);
         Vec3d ctrl1 = new Vec3d(cRadScale * c * radius, 0, radius);
@@ -50,7 +50,7 @@ public class CubicCurve {
         Matrix4 quart = new Matrix4();
         quart.rotate(Math.toRadians(-90+degrees), 0, 1, 0);
 
-        return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2), lStrat, lEnd).apply(new Matrix4().translate(0, 0, -radius));
+        return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2), arcLenFactorStart, arcLenFactorEnd).apply(new Matrix4().translate(0, 0, -radius));
     }
 
     public CubicCurve apply(Matrix4 mat) {
@@ -89,8 +89,6 @@ public class CubicCurve {
     private Vec3d lerp(Vec3d a, Vec3d b, double t) {
         return a.scale(1 - t).add(b.scale(t));
     }
-
-
 
 
 
@@ -172,7 +170,7 @@ public class CubicCurve {
         return length;
     }
 
-    public List<PosRollOffset> toList(double stepSize, RollAndOffsetInfo rollAndOffsetInfo) {//rollAndOffsetInfo could be null
+    public List<PosRollOffset> toList(double stepSize, RollAndOffsetInfo rollAndOffsetInfo) {//rollAndOffsetInfo is nullable
         List<PosRollOffset> result = new ArrayList<>();
         result.add(new PosRollOffset(
                 p1,

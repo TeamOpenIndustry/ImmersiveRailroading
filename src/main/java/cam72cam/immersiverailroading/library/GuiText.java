@@ -53,7 +53,7 @@ public enum GuiText {
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
 
 	TRACK_EXTRA_ARC_LEN_FACTOR("track.arc_len_factor"),
-	TRACK_EXTRA_VERTICAL_OFFSET_TYPE("track.roll_offset_type"),
+	TRACK_EXTRA_ROLL_OFFSET_TYPE("track.roll_offset_type"),
 	TRACK_EXTRA_INSERT_POINT("track.extra_insert_point"),
 	TRACK_EXTRA_DELETE_POINT("track.extra_delete_point"),
 	TRACK_EXTRA_POINT_VALUE_M("track.extra_point_value_m"),

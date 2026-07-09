@@ -13,38 +13,84 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-//TODO: this file may include much duplicated code, may need to optimize and clean, also notes are still not completed
+//TODO: Cleanup and docs
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
 public record RollAndOffsetInfo(
-        RollAndVertOffsetAlignType offsetType,
+        // Determines how roll compensation is applied to the generated track.
+        // LEFT  : Keep the left rail at a constant world height.
+        // RIGHT : Keep the right rail at a constant world height.
+        // MID   : Rotate around the track centerline.
+        RollAndVertOffsetAlignType rollOffsetType,
+
+        // Whether roll should affect generated track blocks.
+        // If false, only rendered rail models are rolled.
         boolean rollEffectTile,
-        boolean tileTilt,
+
+        // Whether generated track tiles should also tilt with the track surface.
+        boolean railBlockNormal,
+
+        // Roll storage mode.
+        // false = Superelevation (rail height difference, centimeter)
+        // true  = Roll angle (degree)
         boolean degreeMode,
+
+        // Vertical offset mode.
+        // false = Offset along world Y axis.
+        // true  = Offset along the local track normal.
         boolean offsetVertByNormal,
-        //This is l(arcLenFactor) and x(horizonal axis value) and the same time, l is for outer curve it effects, x is for curves this stores
+
+        // Curve parameterization
+        //
+        // Stores the normalized arc-length factor (0~1) of every control point.
+        //
+        // Note that this list is NOT a unique control point list.
+        // Since each Bézier segment stores both its start and end control point,
+        // adjacent segments intentionally duplicate their shared endpoint.
+        //
+        // Example:
+        //
+        //   Segment 0: P0 ----- P1
+        //   Segment 1:          P1 ----- P2
+        //
+        // arcLenFactors:
+        //   [P0, P1, P1, P2]
+        //
+        // This duplicated representation matches the storage layout of
+        // rolls / yOffsets / zOffsets and their control handles, making each
+        // Bézier segment completely self-contained.
+        //
+        // Only C1 continuity is enforced between adjacent segments.
+        // The duplicated endpoint allows the two neighboring handle lengths
+        // to be edited independently while constraining their tangents to remain collinear.
         List<Double> arcLenFactors,
+
         //Roll
-        //This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
-        //Based on Standard Gauge, if in gauge X (mm), it will be scaled to rollMax * X / Gauge.STANDARD.
-        //For DegreeMode this simply stores angle in degree
+        // Superelevation Mode:
+        //     value = rail height difference (cm) scaled by gauge.
+        // Degree Mode:
+        //     value = roll angle in degrees.
+        // This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
+        // Based on Standard Gauge, if in gauge X (mm), it will be scaled to rollMax * X / Gauge.STANDARD.
         List<Vec3d> rolls,
         List<Vec3d> rollCtrls,
-        //Y Offset
-        //This stores [Height Offset(UNIT: Meter) * Gauge Scale].
-        //Based on Standard Gauge, if in Gauge X (mm), it will be scaled to yOffset * X / Gauge.STANDARD.
+
+        // Y Offset
+        // This stores [Height Offset(UNIT: Meter) * Gauge Scale].
+        // Based on Standard Gauge, if in Gauge X (mm), it will be scaled to yOffset * X / Gauge.STANDARD.
         List<Vec3d> yOffsets,
         List<Vec3d> yOffsetCtrls,
-        //Z Offset
-        //This stores [Width Offset(UNIT: Meter) * Gauge Scale].
-        //Based on Standard Gauge, if in Gauge X (mm), it will be scaled to zOffset * X / Gauge.STANDARD.
+
+        // Z Offset
+        // This stores [Width Offset(UNIT: Meter) * Gauge Scale].
+        // Based on Standard Gauge, if in Gauge X (mm), it will be scaled to zOffset * X / Gauge.STANDARD.
         List<Vec3d> zOffsets,
         List<Vec3d> zOffsetCtrls) {
-    public RollAndOffsetInfo(RollAndVertOffsetAlignType offsetType, boolean rollEffectTile, boolean tileTilt, boolean degreeMode, boolean offsetVertByNormal,
+    public RollAndOffsetInfo(RollAndVertOffsetAlignType rollOffsetType, boolean rollEffectTile, boolean railBlockNormal, boolean degreeMode, boolean offsetVertByNormal,
                              List<Double> arcLenFactors, List<Vec3d> rolls, List<Vec3d> rollCtrls,
                              List<Vec3d> yOffsets, List<Vec3d> yOffsetCtrls, List<Vec3d> zOffsets, List<Vec3d> zOffsetCtrls) {
-        this.offsetType = offsetType;
+        this.rollOffsetType = rollOffsetType;
         this.rollEffectTile = rollEffectTile;
-        this.tileTilt = tileTilt;
+        this.railBlockNormal = railBlockNormal;
         this.degreeMode = degreeMode;
         this.offsetVertByNormal = offsetVertByNormal;
         //Create unmodifiable view
@@ -75,12 +121,12 @@ public record RollAndOffsetInfo(
     }
 
     public static class Mutable {
-        @TagField("offsetType")
-        public RollAndVertOffsetAlignType offsetType;
+        @TagField("rollOffsetType")
+        public RollAndVertOffsetAlignType rollOffsetType;
         @TagField("rollEffectTile")
         public boolean rollEffectTile;
-        @TagField("tileTilt")
-        public boolean tileTilt;
+        @TagField("railBlockNormal")
+        public boolean railBlockNormal;
         @TagField("offsetVertByNormal")
         public boolean offsetVertByNormal;
 
@@ -102,9 +148,9 @@ public record RollAndOffsetInfo(
         private List<Vec3d> zOffsetCtrls;
 
         public Mutable(RollAndOffsetInfo rollAndOffsetInfo) {
-            this.offsetType = rollAndOffsetInfo.offsetType;
+            this.rollOffsetType = rollAndOffsetInfo.rollOffsetType;
             this.rollEffectTile = rollAndOffsetInfo.rollEffectTile;
-            this.tileTilt = rollAndOffsetInfo.tileTilt;
+            this.railBlockNormal = rollAndOffsetInfo.railBlockNormal;
             this.degreeMode = rollAndOffsetInfo.degreeMode;
             this.offsetVertByNormal = rollAndOffsetInfo.offsetVertByNormal;
 
@@ -120,9 +166,9 @@ public record RollAndOffsetInfo(
         public Mutable(TagCompound data) throws SerializationException {
             // Defaults
             RollAndOffsetInfo defaultInfo = getDefault();
-            offsetType = defaultInfo.offsetType;
+            rollOffsetType = defaultInfo.rollOffsetType;
             rollEffectTile = defaultInfo.rollEffectTile;
-            tileTilt = defaultInfo.tileTilt;
+            railBlockNormal = defaultInfo.railBlockNormal;
             degreeMode = defaultInfo.degreeMode;
             offsetVertByNormal = defaultInfo.offsetVertByNormal;
 
@@ -139,9 +185,9 @@ public record RollAndOffsetInfo(
 
         public RollAndOffsetInfo immutable() {
             return new RollAndOffsetInfo(
-                    offsetType,
+                    rollOffsetType,
                     rollEffectTile,
-                    tileTilt,
+                    railBlockNormal,
                     degreeMode,
                     offsetVertByNormal,
 
@@ -187,7 +233,7 @@ public record RollAndOffsetInfo(
             divider.add(Pair.of(arcLenFactor, 1d));
 
             RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
-                    offsetType, rollEffectTile, tileTilt, degreeMode, offsetVertByNormal,
+                    rollOffsetType, rollEffectTile, railBlockNormal, degreeMode, offsetVertByNormal,
                     arcLenFactors, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
             );
             List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);
@@ -977,13 +1023,13 @@ public record RollAndOffsetInfo(
             }
 
             if(normalize) results.add(normalize(
-                    offsetType, rollEffectTile, tileTilt, degreeMode, offsetVertByNormal,
+                    rollOffsetType, rollEffectTile, railBlockNormal, degreeMode, offsetVertByNormal,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls,
                     lStart, lEnd
             ));
 
             else results.add(new RollAndOffsetInfo(
-                    offsetType, rollEffectTile, tileTilt, degreeMode, offsetVertByNormal,
+                    rollOffsetType, rollEffectTile, railBlockNormal, degreeMode, offsetVertByNormal,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
             ));
         }
@@ -1045,7 +1091,7 @@ public record RollAndOffsetInfo(
     }
 
     private static RollAndOffsetInfo normalize(
-            RollAndVertOffsetAlignType offsetType, boolean rollEffectTile, boolean tileTilt, boolean degreeMode, boolean offsetVertByNormal,
+            RollAndVertOffsetAlignType rollOffsetType, boolean rollEffectTile, boolean railBlockNormal, boolean degreeMode, boolean offsetVertByNormal,
             List<Double> newT, List<Vec3d> newRolls, List<Vec3d> newRollCtrls, List<Vec3d> newYOffsets, List<Vec3d> newYOffsetCtrls, List<Vec3d> newZOffsets, List<Vec3d> newZOffsetCtrls,
             double tStart, double tEnd
     ) {
@@ -1080,7 +1126,7 @@ public record RollAndOffsetInfo(
             newZOffsetCtrls.set(i, new Vec3d(newZOffsetCtrlX, oldZOffsetCtrl.y, oldZOffsetCtrl.z));
         }
         return new RollAndOffsetInfo(
-                offsetType, rollEffectTile, tileTilt, degreeMode, offsetVertByNormal,
+                rollOffsetType, rollEffectTile, railBlockNormal, degreeMode, offsetVertByNormal,
                 newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
         );
     }

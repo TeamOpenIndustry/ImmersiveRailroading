@@ -82,8 +82,8 @@ public class MovementTrack {
 
 			prevPosition = iterationPosition.clone();
 
-            if (te instanceof TileRailBase) {
-                ((TileRailBase) te).getNextPositionShort(iterationPosition, motion, gauge);
+            if (te instanceof TileRailBase base) {
+                base.getNextPositionShort(iterationPosition, motion, gauge);
             } else {
                 te.getNextPosition(iterationPosition, motion, gauge);
             }
@@ -200,7 +200,7 @@ public class MovementTrack {
 			}
 			if (positions.size() == 1) {
 				// track with length == 1
-				VecYPR pos = positions.get(0);
+				VecYPR pos = positions.getFirst();
 				Vec3d offset = VecUtil.fromYaw(delta.length(), pos.getYaw());
 				Vec3d result = currentPosition.getUMCPos().add(offset);
 				Vec3d resultOpposite = currentPosition.getUMCPos().subtract(offset);
@@ -214,17 +214,16 @@ public class MovementTrack {
 					) > 90) invertRollMultiplier = -1;
 
 					currentPosition.advanceTo(result, roll * invertRollMultiplier);
-					return ;
-				} else {
+                } else {
 					if(VecUtil.delta(
 							VecUtil.toWrongYaw(pos.getYaw()),
 							VecUtil.toWrongYaw(resultOpposite.subtract(currentPosition.getUMCPos()))
 					) > 90) invertRollMultiplier = -1;
 
 					currentPosition.advanceTo(resultOpposite, roll * invertRollMultiplier);
-					return ;
-				}
-			}
+                }
+                return;
+            }
 
 			/* Simple ordered binary search ***
 			l    c      r
