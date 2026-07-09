@@ -84,9 +84,6 @@ gui.immersiverailroading:selector.transfer_table_entry_count=トラバーサー�
 gui.immersiverailroading:selector.transfer_table_entry_spacing=隣接する線路との間隔：%s
 gui.immersiverailroading:selector.place_blueprint=設計図設置
 gui.immersiverailroading:selector.grade_crossing=踏切
-gui.immersiverailroading:selector.tile_tilt=タイル傾斜
-gui.immersiverailroading:selector.roll_effect_tile=超高影響タイル
-gui.immersiverailroading:selector.roller_coaster_mode=度モード
 gui.immersiverailroading:selector.plate_type=プレートの種類：%s
 gui.immersiverailroading:selector.plate_boiler=ボイラープレート：%s
 gui.immersiverailroading:selector.cast_single=1回のみ鋳造
@@ -124,18 +121,6 @@ gui.immersiverailroading:track.rail_bed=バラスト： %s
 gui.immersiverailroading:track.rail_bed_fill=線路下ブロック充填： %s
 gui.immersiverailroading:track.place_blueprint_true=設置： 設計図
 gui.immersiverailroading:track.place_blueprint_false=設置： 線路
-gui.immersiverailroading:track.roll_offset_type=カント角と垂直オフセット
-gui.immersiverailroading:track.extra_insert_point=制御点を挿入
-gui.immersiverailroading:track.extra_delete_point=制御点を削除
-gui.immersiverailroading:track.extra_point_value_m=点の高さ（Y，m）：
-gui.immersiverailroading:track.extra_point_value_cm=点の高さ（Y，cm）：
-gui.immersiverailroading:track.extra_point_slope=点の勾配（Y/X，‰）：
-gui.immersiverailroading:track.extra_point_weight=点の重み（X投影）：
-gui.immersiverailroading:track.extra_reset=全てリセット
-gui.immersiverailroading:track.extra_edit_left=左を編集
-gui.immersiverailroading:track.extra_edit_right=右を編集
-gui.immersiverailroading:track.extra_trackgui=軌道設定画面
-gui.immersiverailroading:track.extragui=追加設定画面
 
 gui.immersiverailroading:loco.works=製造： %s
 gui.immersiverailroading:loco.power=出力： %s
@@ -194,16 +179,6 @@ track.immersiverailroading:direction.none=両方向
 # Intended
 track.immersiverailroading:direction.left=右側に固定
 track.immersiverailroading:direction.right=左側に固定
-
-track.immersiverailroading:ExtraInfoType.roll=外軌超高
-track.immersiverailroading:ExtraInfoType.y_offset=垂直オフセット
-track.immersiverailroading:ExtraInfoType.z_offset=水平オフセット
-
-track.immersiverailroading:rollYOffsetType.mid=中央に合わせる
-track.immersiverailroading:rollYOffsetType.high=最低点に合わせる
-track.immersiverailroading:rollYOffsetType.low=最高点に合わせる
-track.immersiverailroading:rollYOffsetType.left=左に揃える
-track.immersiverailroading:rollYOffsetType.right=右に揃える
 
 part.immersiverailroading:component.frame=台枠
 part.immersiverailroading:component.front_frame=前側台枠

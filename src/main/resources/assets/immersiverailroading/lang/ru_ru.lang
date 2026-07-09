@@ -84,10 +84,6 @@ gui.immersiverailroading:selector.transfer_table_entry_count=Число путе
 gui.immersiverailroading:selector.transfer_table_entry_spacing=Расстояние между путями: %s
 gui.immersiverailroading:selector.place_blueprint=Включить предварительный режим
 gui.immersiverailroading:selector.grade_crossing=Железнодорожный переезд
-gui.immersiverailroading:selector.grade_crossing=Включить встраивание (для переездов)
-gui.immersiverailroading:selector.tile_tilt=Наклон плитки
-gui.immersiverailroading:selector.roll_effect_tile=Плитка эффекта кантования
-gui.immersiverailroading:selector.roller_coaster_mode=Режим градусов
 gui.immersiverailroading:selector.plate_type=Тип пластины: %s
 gui.immersiverailroading:selector.plate_boiler=Тип пластины (котловой): %s
 gui.immersiverailroading:selector.cast_single=Произвести единично
@@ -125,18 +121,6 @@ gui.immersiverailroading:track.rail_bed=Балласт: %s
 gui.immersiverailroading:track.rail_bed_fill=Насыпь: %s
 gui.immersiverailroading:track.place_blueprint_true=Предварительный режим
 gui.immersiverailroading:track.place_blueprint_false=Обычная установка пути
-gui.immersiverailroading:track.roll_offset_type=Уклон и вертикальное смещение
-gui.immersiverailroading:track.extra_insert_point=Вставить точку
-gui.immersiverailroading:track.extra_delete_point=Удалить точку
-gui.immersiverailroading:track.extra_point_value_m=Высота точки (Y, м):
-gui.immersiverailroading:track.extra_point_value_cm=Высота точки (Y, см):
-gui.immersiverailroading:track.extra_point_slope=Уклон точки (Y/X, ‰):
-gui.immersiverailroading:track.extra_point_weight=Вес точки (проекция X):
-gui.immersiverailroading:track.extra_reset=Сбросить всё
-gui.immersiverailroading:track.extra_edit_left=Редактировать слева
-gui.immersiverailroading:track.extra_edit_right=Редактировать справа
-gui.immersiverailroading:track.extra_trackgui=Интерфейс пути
-gui.immersiverailroading:track.extragui=Дополнительные настройки
 
 gui.immersiverailroading:loco.works=Эксплуатируется: %s
 gui.immersiverailroading:loco.power=Мощность: %s
@@ -195,16 +179,6 @@ track.immersiverailroading:direction.none=Нет
 # Intended
 track.immersiverailroading:direction.left=Заблокировано вправо
 track.immersiverailroading:direction.right=Заблокировано влево
-
-track.immersiverailroading:ExtraInfoType.roll=Возвышение наружного рельса
-track.immersiverailroading:ExtraInfoType.y_offset=Вертикальное смещение
-track.immersiverailroading:ExtraInfoType.z_offset=Горизонтальное смещение
-
-track.immersiverailroading:rollYOffsetType.mid=По центру
-track.immersiverailroading:rollYOffsetType.high=По низшей точке
-track.immersiverailroading:rollYOffsetType.low=По высшей точке
-track.immersiverailroading:rollYOffsetType.left=Выровнять по левому краю
-track.immersiverailroading:rollYOffsetType.right=Выровнять по правому краю
 
 part.immersiverailroading:component.frame=Рама
 part.immersiverailroading:component.front_frame=Передняя рама

@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
@@ -8,7 +9,6 @@ import cam72cam.mod.text.TextUtil;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -16,16 +16,16 @@ import java.util.function.Consumer;
 //TODO: this file may include much duplicated code, may need to optimize and clean, also notes are still not completed
 @TagMapped(RollAndOffsetInfo.TagMapper.class)
 public record RollAndOffsetInfo(
-        RollYOffsetType offsetType,
+        RollAndVertOffsetAlignType offsetType,
         boolean rollEffectTile,
         boolean tileTilt,
-        boolean rollerCoasterMode,
+        boolean degreeMode,
         //This is l(arcLenFactor) and x(horizonal axis value) and the same time, l is for outer curve it effects, x is for curves this stores
         List<Double> arcLenFactors,
         //Roll
         //This stores [Superelevation(UNIT: Centimeter) * Gauge Scale] instead of roll angle.
         //Based on Standard Gauge, if in gauge X (mm), it will be scaled to rollMax * X / Gauge.STANDARD.
-        //For RollerCoasterNode this simply stores angle in degree
+        //For DegreeMode this simply stores angle in degree
         List<Vec3d> rolls,
         List<Vec3d> rollCtrls,
         //Y Offset
@@ -38,13 +38,13 @@ public record RollAndOffsetInfo(
         //Based on Standard Gauge, if in Gauge X (mm), it will be scaled to zOffset * X / Gauge.STANDARD.
         List<Vec3d> zOffsets,
         List<Vec3d> zOffsetCtrls) {
-    public RollAndOffsetInfo(RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt, boolean rollerCoasterMode,
+    public RollAndOffsetInfo(RollAndVertOffsetAlignType offsetType, boolean rollEffectTile, boolean tileTilt, boolean degreeMode,
                              List<Double> arcLenFactors, List<Vec3d> rolls, List<Vec3d> rollCtrls,
                              List<Vec3d> yOffsets, List<Vec3d> yOffsetCtrls, List<Vec3d> zOffsets, List<Vec3d> zOffsetCtrls) {
         this.offsetType = offsetType;
         this.rollEffectTile = rollEffectTile;
         this.tileTilt = tileTilt;
-        this.rollerCoasterMode = rollerCoasterMode;
+        this.degreeMode = degreeMode;
         //Create unmodifiable view
         this.arcLenFactors = List.copyOf(arcLenFactors);
         this.rolls = List.copyOf(rolls);
@@ -64,7 +64,7 @@ public record RollAndOffsetInfo(
         var zOffsets = List.of(new Vec3d(0, 0, 0), new Vec3d(1, 0, 0));
         var zOffsetCtrls = List.of(new Vec3d(1d / 3, 0, 0), new Vec3d(1 + 1d / 3, 0, 0));
 
-        this(RollYOffsetType.MID, true, true, false, arcLenFactors,
+        this(RollAndVertOffsetAlignType.MID, true, true, false, arcLenFactors,
              rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls);
     }
 
@@ -74,14 +74,14 @@ public record RollAndOffsetInfo(
 
     public static class Mutable {
         @TagField("offsetType")
-        public RollYOffsetType offsetType;
+        public RollAndVertOffsetAlignType offsetType;
         @TagField("rollEffectTile")
         public boolean rollEffectTile;
         @TagField("tileTilt")
         public boolean tileTilt;
 
-        @TagField("rollerCoasterMode")
-        public boolean rollerCoasterMode;
+        @TagField("degreeMode")
+        public boolean degreeMode;
         @TagField(value = "arcLenFactors", mapper = DoubleListMapper.class)
         private List<Double> arcLenFactors;
         @TagField(value = "rolls", mapper = Vec3dListMapper.class)
@@ -101,7 +101,7 @@ public record RollAndOffsetInfo(
             this.offsetType = rollAndOffsetInfo.offsetType;
             this.rollEffectTile = rollAndOffsetInfo.rollEffectTile;
             this.tileTilt = rollAndOffsetInfo.tileTilt;
-            this.rollerCoasterMode = rollAndOffsetInfo.rollerCoasterMode;
+            this.degreeMode = rollAndOffsetInfo.degreeMode;
 
             this.arcLenFactors = new ArrayList<>(rollAndOffsetInfo.arcLenFactors);
             this.rolls = new ArrayList<>(rollAndOffsetInfo.rolls);
@@ -118,7 +118,7 @@ public record RollAndOffsetInfo(
             offsetType = defaultInfo.offsetType;
             rollEffectTile = defaultInfo.rollEffectTile;
             tileTilt = defaultInfo.tileTilt;
-            rollerCoasterMode = defaultInfo.rollerCoasterMode;
+            degreeMode = defaultInfo.degreeMode;
 
             arcLenFactors = defaultInfo.arcLenFactors;
             rolls = defaultInfo.rolls;
@@ -136,7 +136,7 @@ public record RollAndOffsetInfo(
                     offsetType,
                     rollEffectTile,
                     tileTilt,
-                    rollerCoasterMode,
+                    degreeMode,
 
                     arcLenFactors,
                     rolls,
@@ -180,7 +180,7 @@ public record RollAndOffsetInfo(
             divider.add(Pair.of(arcLenFactor, 1d));
 
             RollAndOffsetInfo rollAndOffsetInfo = new RollAndOffsetInfo(
-                    offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
+                    offsetType, rollEffectTile, tileTilt, degreeMode,
                     arcLenFactors, rolls, rollCtrls, yOffsets, yOffsetCtrls, zOffsets, zOffsetCtrls
             );
             List<RollAndOffsetInfo> res = rollAndOffsetInfo.subSplit(divider, false);
@@ -292,7 +292,7 @@ public record RollAndOffsetInfo(
                     ctrls = zOffsetCtrls;
                     break;
                 default:
-                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    ImmersiveRailroading.error("Invalid ExtraInfoType:" + type);
                     return false;
             }
 
@@ -316,7 +316,7 @@ public record RollAndOffsetInfo(
          * */
         public String getValueDisplay(double arcLenFactor, ExtraInfoType type) {
             int idx = findPhysicalIndex(arcLenFactor);
-            if(idx == -1) return "null";
+            if(idx == -1) return GuiText.NONE.toString();
 
             List<Vec3d> points;
 
@@ -331,8 +331,8 @@ public record RollAndOffsetInfo(
                     points = zOffsets;
                     break;
                 default:
-                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                    return "null";
+                    ImmersiveRailroading.error("Invalid ExtraInfoType:" + type);
+                    return GuiText.NONE.toString();
             }
 
             return String.format("%.4f", points.get(idx).z);
@@ -366,7 +366,7 @@ public record RollAndOffsetInfo(
                     ctrls = zOffsetCtrls;
                     break;
                 default:
-                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    ImmersiveRailroading.error("Invalid ExtraInfoType:" + type);
                     return false;
             }
 
@@ -403,9 +403,9 @@ public record RollAndOffsetInfo(
          * */
         public String getHandleXDisplay(double arcLenFactor, ExtraInfoType type, boolean editLeft, double length) {
             int idx = findPhysicalIndex(arcLenFactor);
-            if(idx == -1) return "null";
-            if(idx == 0 && editLeft) return "null";
-            if(idx == arcLenFactors.size() - 1 && !editLeft) return "null";
+            if(idx == -1) return GuiText.NONE.toString();
+            if(idx == 0 && editLeft) return GuiText.NONE.toString();
+            if(idx == arcLenFactors.size() - 1 && !editLeft) return GuiText.NONE.toString();
 
             List<Vec3d> points;
             List<Vec3d> ctrls;
@@ -424,8 +424,8 @@ public record RollAndOffsetInfo(
                     ctrls = zOffsetCtrls;
                     break;
                 default:
-                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                    return "null";
+                    ImmersiveRailroading.error("Invalid ExtraInfoType:" + type);
+                    return GuiText.NONE.toString();
             }
 
             int displayIdx;
@@ -469,7 +469,7 @@ public record RollAndOffsetInfo(
                     slopeScale = 0.001;
                     break;
                 default:
-                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    ImmersiveRailroading.error("Invalid ExtraInfoType:" + type);
                     return false;
             }
 
@@ -493,7 +493,7 @@ public record RollAndOffsetInfo(
         }
         public String getSlopeDisplay(double arcLenFactor, ExtraInfoType type, double length) {
             int idx = findPhysicalIndex(arcLenFactor);
-            if(idx == -1) return "null";
+            if(idx == -1) return GuiText.NONE.toString();
 
             List<Vec3d> points;
             List<Vec3d> ctrls;
@@ -516,8 +516,8 @@ public record RollAndOffsetInfo(
                     slopeScale = 1000;
                     break;
                 default:
-                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
-                    return "null";
+                    ImmersiveRailroading.error("Invalid ExtraInfoType:" + type);
+                    return GuiText.NONE.toString();
             }
 
             double tan = (ctrls.get(idx).z - points.get(idx).z) / (ctrls.get(idx).x - points.get(idx).x);
@@ -542,7 +542,7 @@ public record RollAndOffsetInfo(
                     ctrls = zOffsetCtrls;
                     break;
                 default:
-                    ImmersiveRailroading.warn("invalid ExtraInfoType:" + type);
+                    ImmersiveRailroading.error("Invalid ExtraInfoType:" + type);
                     return null;
             }
 
@@ -668,28 +668,26 @@ public record RollAndOffsetInfo(
         }
     }
 
-    public enum RollYOffsetType {
+    public enum RollAndVertOffsetAlignType {
         MID(0),
-//      HIGH(3),
-//      LOW(4),
+//      HIGHEST(3),
+//      LOWEST(4),
         LEFT(1),
         RIGHT(2),
         ;
 
         private final int order;
 
-        RollYOffsetType(int order){
+        RollAndVertOffsetAlignType(int order){
             this.order = order;
         }
 
         public int getOrder() {
-            return this.order;
+            return order;
         }
-        public static RollYOffsetType byOrder(int order) {
-            if (order < 0 || order >= values().length) {
-                return MID;
-            }
-            for (RollYOffsetType type : values()) {
+
+        public static RollAndVertOffsetAlignType byOrder(int order) {
+            for (RollAndVertOffsetAlignType type : values()) {
                 if (type.order == order) {
                     return type;
                 }
@@ -699,7 +697,7 @@ public record RollAndOffsetInfo(
 
         @Override
         public String toString() {
-            return TextUtil.translate("track.immersiverailroading:rollYOffsetType." + super.toString().toLowerCase(Locale.ROOT));
+            return TextUtil.translate("track.immersiverailroading:roll_vert_offset_align_type." + name().toLowerCase(Locale.ROOT));
         }
     }
 
@@ -710,7 +708,7 @@ public record RollAndOffsetInfo(
 
         @Override
         public String toString() {
-            return TextUtil.translate("track.immersiverailroading:ExtraInfoType." + super.toString().toLowerCase(Locale.ROOT));
+            return TextUtil.translate("track.immersiverailroading:extra_info_type." + super.toString().toLowerCase(Locale.ROOT));
         }
     }
 
@@ -972,13 +970,13 @@ public record RollAndOffsetInfo(
             }
 
             if(normalize) results.add(normalize(
-                    offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
+                    offsetType, rollEffectTile, tileTilt, degreeMode,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls,
                     lStart, lEnd
             ));
 
             else results.add(new RollAndOffsetInfo(
-                    offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
+                    offsetType, rollEffectTile, tileTilt, degreeMode,
                     newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
             ));
         }
@@ -1040,7 +1038,7 @@ public record RollAndOffsetInfo(
     }
 
     private static RollAndOffsetInfo normalize(
-            RollYOffsetType offsetType, boolean rollEffectTile, boolean tileTilt, boolean rollerCoasterMode,
+            RollAndVertOffsetAlignType offsetType, boolean rollEffectTile, boolean tileTilt, boolean degreeMode,
             List<Double> newT, List<Vec3d> newRolls, List<Vec3d> newRollCtrls, List<Vec3d> newYOffsets, List<Vec3d> newYOffsetCtrls, List<Vec3d> newZOffsets, List<Vec3d> newZOffsetCtrls,
             double tStart, double tEnd
     ) {
@@ -1075,7 +1073,7 @@ public record RollAndOffsetInfo(
             newZOffsetCtrls.set(i, new Vec3d(newZOffsetCtrlX, oldZOffsetCtrl.y, oldZOffsetCtrl.z));
         }
         return new RollAndOffsetInfo(
-                offsetType, rollEffectTile, tileTilt, rollerCoasterMode,
+                offsetType, rollEffectTile, tileTilt, degreeMode,
                 newT, newRolls, newRollCtrls, newYOffsets, newYOffsetCtrls, newZOffsets, newZOffsetCtrls
         );
     }
@@ -1118,7 +1116,7 @@ public record RollAndOffsetInfo(
 
         double tan;
 
-        if (rollerCoasterMode) {
+        if (degreeMode) {
             double dRoll = Math.toRadians(rollCtrls.get(idx).z - rolls.get(idx).z);
             double ds = (rollCtrls.get(idx).x - rolls.get(idx).x) * length;
 
@@ -1142,7 +1140,7 @@ public record RollAndOffsetInfo(
 
         double tan;
 
-        if (rollerCoasterMode) {
+        if (degreeMode) {
             double dRoll = Math.toRadians(rollCtrls.get(idx).z - rolls.get(idx).z);
             double ds = (rollCtrls.get(idx).x - rolls.get(idx).x) * length;
 

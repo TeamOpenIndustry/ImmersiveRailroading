@@ -26,6 +26,7 @@ import util.Matrix4;
 
 import java.util.List;
 
+//Advanced settings for the track
 public class TrackExtraGui implements IScreen {
     private double rollMax;
     private double yOffsetMax;
@@ -63,7 +64,7 @@ public class TrackExtraGui implements IScreen {
     private TextField zOffsetValueInput;
     private TextField zOffsetSlopeInput;
     private TextField zOffsetHandleXLenInput;
-    private Slider lSlider;
+    private Slider ArcLenFactorSlider;
     private Button insertOrDeletePointButton;
     private Button editLeftButton;
     private Button resetAllButton;
@@ -71,7 +72,7 @@ public class TrackExtraGui implements IScreen {
     private Button railInfoLabel;
     private CheckBox rollEffectTileCB;
     private CheckBox tileTiltCB;
-    private CheckBox rollerCoasterModeCB;
+    private CheckBox degreeModeCB;
 //    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
@@ -104,8 +105,8 @@ public class TrackExtraGui implements IScreen {
         //Basic Gauge: Standard Gauge. other gauge will scale from standard
 
         //Common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
-        //Roller coaster mode:degree
-        rollMax = rollAndOffsetInfoCache.rollerCoasterMode ? 45 : 60;//180 for rollerCoaster mode later
+        //Degree mode:degree
+        rollMax = rollAndOffsetInfoCache.degreeMode ? 45 : 60;//180 for Degree mode later
         yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
@@ -140,22 +141,22 @@ public class TrackExtraGui implements IScreen {
         //zOffset Graph
         ytop += height * 3;
         ytop += 5;
-        lSlider = new Slider(screen, xtop, ytop, width, height, "", 0.0, 1.0, 0.0, false, (self) -> {
-            self.setText(String.format("%.2f", format(self.getValue())));
+        ArcLenFactorSlider = new Slider(screen, xtop, ytop, width, height, "", 0.0, 1.0, 0.0, false, (self) -> {
+            self.setText(GuiText.TRACK_EXTRA_ARC_LEN_FACTOR.toString(String.format("%.2f", format(self.getValue()))));
             updateSliderRelated();
         });
 
         //Right panel
         insertOrDeletePointButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 50, height, "",
                                                (_, _) -> {
-                                                   if(rollAndOffsetInfoCache.findPhysicalIndex(format(lSlider.getValue())) == -1) {//insert
-                                                       if(rollAndOffsetInfoCache.tryInsertBySubSplit(format(lSlider.getValue()))) {//TODO: this is the reason why control point number is limited to 101, should we improve this?
+                                                   if(rollAndOffsetInfoCache.findPhysicalIndex(format(ArcLenFactorSlider.getValue())) == -1) {//insert
+                                                       if(rollAndOffsetInfoCache.tryInsertBySubSplit(format(ArcLenFactorSlider.getValue()))) {//TODO: this is the reason why control point number is limited to 101, should we improve this?
                                                            edited = true;
                                                            updateSliderRelated();
                                                        }
                                                    } else {//delete
                                                        edited = true;
-                                                       rollAndOffsetInfoCache.tryDeleteDirectly(format(lSlider.getValue()));
+                                                       rollAndOffsetInfoCache.tryDeleteDirectly(format(ArcLenFactorSlider.getValue()));
                                                        updateSliderRelated();
                                                    }
                                                });
@@ -179,7 +180,7 @@ public class TrackExtraGui implements IScreen {
         });
 
         TrackGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 3, ytop, 50, height,
-                                    GuiText.TRACK_EXTRA_TRACKGUI.toString(), (_, _) -> {
+                                    GuiText.TRACK_EXTRA_TO_MAIN.toString(), (_, _) -> {
             targetGuiOpenType = 0;
             onClose();
             if (te != null) {
@@ -219,31 +220,30 @@ public class TrackExtraGui implements IScreen {
                                   });
         tileTiltCB.setVisible(false);//modifiable vanilla block model later
 
-        rollerCoasterModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 2,
-                                           GuiText.SELECTOR_ROLLER_COASTER_MODE.toString(), rollAndOffsetInfoCache.rollerCoasterMode,
+        degreeModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2, ytop + 2,
+                                           GuiText.SELECTOR_DEGREE_MODE.toString(), rollAndOffsetInfoCache.degreeMode,
                                            (_, self) -> {
                                                edited = true;
-                                               rollAndOffsetInfoCache.rollerCoasterMode = self.isChecked();
-                                               rollMax = rollAndOffsetInfoCache.rollerCoasterMode ? 45 : 60;//180 for rollerCoaster mode later
+                                               rollAndOffsetInfoCache.degreeMode = self.isChecked();
+                                               rollMax = rollAndOffsetInfoCache.degreeMode ? 45 : 60;//180 for degree mode later
                                            });
-//        rollerCoasterModeCB.setVisible(false);
 
-//        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2 , ytop, 85, height, "Selected Way: 0"){};//need multiSwitch branch merging
+//        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 , ytop, 85, height, "Selected Way: 0"){};//need multiSwitch branch merging
 
         offsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height,
                                       rollAndOffsetInfoCache.offsetType.toString(), (hand, self) -> {
             edited = true;
 
             int order = rollAndOffsetInfoCache.offsetType.getOrder();
-            int count = RollAndOffsetInfo.RollYOffsetType.values().length;
+            int count = RollAndOffsetInfo.RollAndVertOffsetAlignType.values().length;
             order = (order + (hand == Player.Hand.SECONDARY ? 1 : -1) + count) % count;
 
             int finalOrder = order;
-            rollAndOffsetInfoCache.offsetType = RollAndOffsetInfo.RollYOffsetType.byOrder(finalOrder);
+            rollAndOffsetInfoCache.offsetType = RollAndOffsetInfo.RollAndVertOffsetAlignType.byOrder(finalOrder);
 
             self.setText(rollAndOffsetInfoCache.offsetType.toString());
         });
-        offsetTypeButton.setTooltip(List.of(GuiText.TRACK_ROLL_OFFSET_TYPE.toString()));
+        offsetTypeButton.setTooltip(List.of(GuiText.TRACK_EXTRA_VERTICAL_OFFSET_TYPE.toString()));
 
         ytop += height;
         ytop += 5;
@@ -262,7 +262,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) rollMax;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL);
+                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
                     edited = true;
@@ -289,7 +289,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = 500f;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
                     edited = true;
@@ -316,7 +316,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.ROLL, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.ROLL);
                     edited = true;
@@ -344,7 +344,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) yOffsetMax;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
+                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                     edited = true;
@@ -371,7 +371,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = 500f;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                     edited = true;
@@ -398,7 +398,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET);
                     edited = true;
@@ -426,7 +426,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) zOffsetMax;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
+                boolean feedback = rollAndOffsetInfoCache.tryDeltaValue(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                     edited = true;
@@ -453,7 +453,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = 500f;
             if (Math.abs(val) <= max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetSlope(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                     edited = true;
@@ -480,7 +480,7 @@ public class TrackExtraGui implements IScreen {
             }
             float max = (float) length * 0.5f;
             if (Math.abs(val) < max) {
-                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(lSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, editLeft, length);
+                boolean feedback = rollAndOffsetInfoCache.trySetHandleXLen(format(ArcLenFactorSlider.getValue()), val, RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, editLeft, length);
                 if(feedback) {
                     updateCurveInfoDisplay(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET);
                     edited = true;
@@ -492,7 +492,7 @@ public class TrackExtraGui implements IScreen {
         zOffsetHandleXLenLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
 
         //Update after all components init
-        lSlider.onSlider();
+        ArcLenFactorSlider.onSlider();
     }
 
     @Override
@@ -548,27 +548,27 @@ public class TrackExtraGui implements IScreen {
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
         rollGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, rollYScale, 1, 0.05f, 0.05f, 0);
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, rollYScale);
-        rollGraph.drawArrow(new Vec3d(format(lSlider.getValue()), immutable.getRoll(format(lSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
+        rollGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getRoll(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
         //yOffset Graph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer yOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
         yOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, yOffsetYScale, 1, 0.05f, 0.05f, 0);
         yOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, yOffsetYScale);
-        yOffsetGraph.drawArrow(new Vec3d(format(lSlider.getValue()), immutable.getYOffset(format(lSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
+        yOffsetGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getYOffset(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
 
         //zOffset Graph
         state.translate(0, height * 3 + 5, 0);
         BezierRenderer zOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
         zOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, zOffsetYScale, 1, 0.05f, 0.05f, 0);
         zOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, zOffsetYScale);
-        zOffsetGraph.drawArrow(new Vec3d(format(lSlider.getValue()), immutable.getZOffset(format(lSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, zOffsetYScale);
+        zOffsetGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getZOffset(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, zOffsetYScale);
 
     }
 
     private void updateSliderRelated() {
         if (insertOrDeletePointButton != null) {
-            if (rollAndOffsetInfoCache.findPhysicalIndex(format(lSlider.getValue())) == -1) {
+            if (rollAndOffsetInfoCache.findPhysicalIndex(format(ArcLenFactorSlider.getValue())) == -1) {
                 insertOrDeletePointButton.setText(GuiText.TRACK_EXTRA_INSERT_POINT.toString());
             } else {
                 insertOrDeletePointButton.setText(GuiText.TRACK_EXTRA_DELETE_POINT.toString());
@@ -615,12 +615,12 @@ public class TrackExtraGui implements IScreen {
         }
 
         if(type == RollAndOffsetInfo.ExtraInfoType.ROLL) {
-            if (valueLabel != null) valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_CM + rollAndOffsetInfoCache.getValueDisplay(format(lSlider.getValue()), type));
+            if (valueLabel != null) valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_CM + rollAndOffsetInfoCache.getValueDisplay(format(ArcLenFactorSlider.getValue()), type));
         } else {
-            if (valueLabel != null) valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_M + rollAndOffsetInfoCache.getValueDisplay(format(lSlider.getValue()), type));
+            if (valueLabel != null) valueLabel.setText(GuiText.TRACK_EXTRA_POINT_VALUE_M + rollAndOffsetInfoCache.getValueDisplay(format(ArcLenFactorSlider.getValue()), type));
         }
-        if (slopeLabel != null) slopeLabel.setText(GuiText.TRACK_EXTRA_POINT_SLOPE + rollAndOffsetInfoCache.getSlopeDisplay(format(lSlider.getValue()), type, length));
-        if (handleXLenLabel != null) handleXLenLabel.setText(GuiText.TRACK_EXTRA_POINT_WEIGHT + rollAndOffsetInfoCache.getHandleXDisplay(format(lSlider.getValue()), type, editLeft, length));
+        if (slopeLabel != null) slopeLabel.setText(GuiText.TRACK_EXTRA_POINT_SLOPE + rollAndOffsetInfoCache.getSlopeDisplay(format(ArcLenFactorSlider.getValue()), type, length));
+        if (handleXLenLabel != null) handleXLenLabel.setText(GuiText.TRACK_EXTRA_POINT_WEIGHT + rollAndOffsetInfoCache.getHandleXDisplay(format(ArcLenFactorSlider.getValue()), type, editLeft, length));
     }
 
     private static double format(double value) {

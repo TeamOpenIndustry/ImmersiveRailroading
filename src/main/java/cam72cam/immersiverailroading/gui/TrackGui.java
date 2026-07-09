@@ -186,20 +186,6 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-        trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height * 3, width / 2, height, GuiText.TRACK_EXTRAGUI.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-				targetGuiOpenType = 1;
-				onClose();
-                if (te != null) {
-                    GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
-                } else {
-                    GuiTypes.RAIL.open(MinecraftClient.getPlayer());
-                }
-            }
-        };
-		trackExtraGuiButton.setVisible(settings.type.canRoll());
-
 		//Transfer table doesn't have these property so we can have them overlapped
 		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
 			@Override
@@ -354,6 +340,20 @@ public class TrackGui implements IScreen {
 			}
 		};
 		ytop += height;
+
+		trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, (int) (GUIHelpers.getScreenHeight()*0.75 - height * 2), width / 2, height, GuiText.TRACK_MAIN_TO_EXTRA.toString()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				targetGuiOpenType = 1;
+				onClose();
+				if (te != null) {
+					GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
+				} else {
+					GuiTypes.RAIL.open(MinecraftClient.getPlayer());
+				}
+			}
+		};
+		trackExtraGuiButton.setVisible(settings.type.canRoll());
 
 		Slider zoom_slider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
 										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true) {

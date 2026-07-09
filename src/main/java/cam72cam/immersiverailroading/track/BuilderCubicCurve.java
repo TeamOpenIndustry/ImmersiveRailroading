@@ -139,8 +139,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 		rollAndOffsetInfo = info.settings.rollAndOffsetInfo == null
 							? null
 							: info.settings.rollAndOffsetInfo.subSplit(RollAndOffsetInfo.toRange(curves), true).getFirst();
-		RollAndOffsetInfo.RollYOffsetType type = rollAndOffsetInfo == null
-												 ? RollAndOffsetInfo.RollYOffsetType.MID
+		RollAndOffsetInfo.RollAndVertOffsetAlignType type = rollAndOffsetInfo == null
+												 ? RollAndOffsetInfo.RollAndVertOffsetAlignType.MID
 												 : rollAndOffsetInfo.offsetType();
 
 		double length = curve.lengthWithCache(1000);
@@ -177,7 +177,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
 					Vec3d newP;
-					if(!rollAndOffsetInfo.rollerCoasterMode()) {//superelevision scale
+					if(!rollAndOffsetInfo.degreeMode()) {//superelevision scale
 						newP = new Vec3d(p.x, p.y - rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
 						newP = new Vec3d(p.x, p.y - Math.sin(Math.toRadians(rolls.get(i))) * gauge * 0.5, p.z);
@@ -189,7 +189,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				for(int i = 0; i < points.size(); i++) {
 					Vec3d p = points.get(i);
 					Vec3d newP;
-					if(!rollAndOffsetInfo.rollerCoasterMode()) {//superelevision scale
+					if(!rollAndOffsetInfo.degreeMode()) {//superelevision scale
 						newP = new Vec3d(p.x, p.y + rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
 						newP = new Vec3d(p.x, p.y + Math.sin(Math.toRadians(rolls.get(i))) * gauge * 0.5, p.z);
@@ -204,7 +204,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 			for(int i = 0; i < points.size(); i++) {
 				Vec3d p = points.get(i);
 				Vec3d newP;
-				if (!rollAndOffsetInfo.rollerCoasterMode()) {//yOffset scale
+				if (!rollAndOffsetInfo.degreeMode()) {//yOffset scale
 					newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);
 				} else {
 					newP = new Vec3d(p.x, p.y + yOffsets.get(i) * gaugeScale, p.z);//we may need another method depends on Orientation
@@ -261,7 +261,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 			float roll = 0;
 			if(rolls.get(i) != 0) {
-				if(!info.settings.rollAndOffsetInfo.rollerCoasterMode()) {
+				if(!info.settings.rollAndOffsetInfo.degreeMode()) {
 					double sin = rolls.get(i) * 0.01 * gaugeScale / gauge;//superelevision scale
 					if(sin > 1) sin = 1;
 					if(sin < -1) sin = -1;
