@@ -3,10 +3,12 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -114,8 +116,7 @@ public class LocomotiveSteam extends Locomotive {
 
 		return traction_N * multiplier;
 	}
-	
-	
+
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
@@ -155,6 +156,17 @@ public class LocomotiveSteam extends Locomotive {
 		return (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip();
 	}
 
+	@Override
+	public void setup(EntityRollingStockDefinition def, Gauge gauge, String texture) {
+		super.setup(def, gauge, texture);
+		if (def instanceof LocomotiveSteamDefinition steamDef && steamDef.defaultTenderFeed) {
+			//Apply default tender feed setting
+			steamDef.getModel().getControls()
+					.stream()
+					.filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
+					.forEach(c -> setControlPosition(c, 1));
+		}
+	}
 
 	@Override
 	public void onTick() {
@@ -453,7 +465,7 @@ public class LocomotiveSteam extends Locomotive {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
 		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
 												 .stream()
-												 .filter(x -> x.part.type == ModelComponentType.TENDER_AUTO_REFUEL_CONTROL_X)
+												 .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
 												 .collect(Collectors.toList());
 
 		return autoRefuel.stream().anyMatch(c -> getControlPosition(c) == 1);
@@ -463,7 +475,7 @@ public class LocomotiveSteam extends Locomotive {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
 		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
 												 .stream()
-												 .filter(x -> x.part.type == ModelComponentType.TENDER_AUTO_REFUEL_CONTROL_X)
+												 .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
 												 .collect(Collectors.toList());
 
 		for (Control<?> ctrl : autoRefuel) {
