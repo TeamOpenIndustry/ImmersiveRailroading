@@ -79,7 +79,7 @@ public class TrackFollower {
                 IRPathingData pointPos = new IRPathingData(offsetPos, (betweenPoints < 0 ? rollReadout : -rollReadout) + stock.getRotationRoll());
                 nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, toMinPoint);
 
-                IRPathingData pointPosNext = pointPos.clone();//pointPos need to be retained
+                IRPathingData pointPosNext = pointPos.clone();// pointPos need to be retained
                 nextPosition(stock.getWorld(), stock.gauge, pointPosNext, stock.getRotationYaw(), offsetYaw, betweenPoints);
 
                 Vec3d delta = stock.getPosition().subtract(pointPos.getUMCPos()).scale(max); // Scale copies sign
@@ -95,7 +95,7 @@ public class TrackFollower {
 
                 yawReadout = toPointYaw + atPointYaw;
 
-                rollReadout = (float) (betweenPoints < 0 ? pointPosNext.getRoll() : -pointPosNext.getRoll()) - stock.getRotationRoll();//pointPosNext is more accurate
+                rollReadout = (float) (betweenPoints < 0 ? pointPosNext.getRoll() : -pointPosNext.getRoll()) - stock.getRotationRoll();// pointPosNext is more accurate
                 if(betweenPoints < 0) {
                     rollReadout = -rollReadout;
                 }
