@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
+import cam72cam.immersiverailroading.thirdparty.trackapi.IRPathingData;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.DegreeFuncs;
@@ -26,6 +27,7 @@ public class TrackFollower {
     private final boolean front;
     private Vec3d pos;
     private float yawReadout;
+    private float rollReadout;//Bogey from the whole body
     private final Matrix4 matrix;
 
     public TrackFollower(EntityMoveableRollingStock stock, ModelComponent frame, WheelSet wheels, boolean front) {
@@ -54,10 +56,13 @@ public class TrackFollower {
         if (pos == null || stock.getPosition().distanceToSquared(pos) > recomputeDist * recomputeDist) {
             pos = stock.getPosition();
             float offsetYaw = (front ? stock.getFrontYaw() : stock.getRearYaw());
+            float offsetRoll = (front ? stock.getFrontRoll() : stock.getRearRoll());
             if (offset >= min && offset <= max) {
                 yawReadout = stock.getRotationYaw() - offsetYaw;
+                rollReadout = offsetRoll - stock.getRotationRoll();
                 matrix.setIdentity();
                 matrix.translate(-offset / stock.gauge.scale(), 0, 0);
+                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
                 matrix.rotate(Math.toRadians(yawReadout), 0, 1, 0);
                 matrix.translate(offset / stock.gauge.scale(), 0, 0);
             } else {
@@ -71,20 +76,29 @@ public class TrackFollower {
                 float toPointPitch = 0;
                 float atPointPitch = 0;
 
-                Vec3d pointPos = nextPosition(stock.getWorld(), stock.gauge, offsetPos, stock.getRotationYaw(), offsetYaw, toMinPoint);
-                Vec3d pointPosNext = nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, betweenPoints);
-                Vec3d delta = stock.getPosition().subtract(pointPos).scale(max); // Scale copies sign
-                if (pointPos.distanceTo(pointPosNext) > 0.1 * stock.gauge.scale()) {
+                IRPathingData pointPos = new IRPathingData(offsetPos, (toMinPoint < 0 ? rollReadout : -rollReadout) + stock.getRotationRoll());
+                nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, toMinPoint);
+
+                IRPathingData pointPosNext = pointPos.clone();// pointPos need to be retained
+                nextPosition(stock.getWorld(), stock.gauge, pointPosNext, stock.getRotationYaw(), offsetYaw, betweenPoints);
+
+                Vec3d delta = stock.getPosition().subtract(pointPos.getUMCPos()).scale(max); // Scale copies sign
+                if (pointPos.getUMCPos().distanceTo(pointPosNext.getUMCPos()) > 0.1 * stock.gauge.scale()) {
                     toPointYaw = VecUtil.toYaw(delta) + stock.getRotationYaw() + 180;
-                    atPointYaw = VecUtil.toYaw(pointPos.subtract(pointPosNext)) + stock.getRotationYaw() + 180 - toPointYaw ;
+                    atPointYaw = VecUtil.toYaw(pointPos.getUMCPos().subtract(pointPosNext.getUMCPos())) + stock.getRotationYaw() + 180 - toPointYaw ;
 
                     toPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(delta, stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch();
-                    atPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(pointPos.subtract(pointPosNext), stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch() - toPointPitch;
+                    atPointPitch = -VecUtil.toPitch(VecUtil.rotateYaw(pointPos.getUMCPos().subtract(pointPosNext.getUMCPos()), stock.getRotationYaw() + 180)) + 90 + stock.getRotationPitch() - toPointPitch;
                 } else {
                     pos = null; // Force recompute
                 }
 
                 yawReadout = toPointYaw + atPointYaw;
+
+                rollReadout = (float) (toMinPoint < 0 ? pointPos.getRoll() : -pointPos.getRoll()) - stock.getRotationRoll();// TODO: pointPosNext might be more accurate, but need to fix sign issue
+                if(betweenPoints < 0) {
+                    rollReadout = -rollReadout;
+                }
 
                 float min = this.min;
                 // TODO This implies the code above is broken, but works around some of the weirder edge cases.
@@ -100,6 +114,7 @@ public class TrackFollower {
                 matrix.setIdentity();
                 matrix.rotate(Math.toRadians(toPointYaw), 0, 1, 0);
                 matrix.rotate(Math.toRadians(toPointPitch), 0, 0, 1);
+                matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
                 matrix.translate(-min / stock.gauge.scale(), 0, 0);
                 matrix.rotate(Math.toRadians(atPointYaw), 0, 1, 0);
                 matrix.rotate(Math.toRadians(atPointPitch), 0, 0, 1);
@@ -109,20 +124,21 @@ public class TrackFollower {
         return matrix;
     }
 
-    public Vec3d nextPosition(World world, Gauge gauge, Vec3d currentPosition, float rotationYaw, float bogeyYaw, double distance) {
-        ITrack rail = MovementTrack.findTrack(world, currentPosition, rotationYaw, gauge.value());
+    //Notice that we use bogeyYaw and distance to construct motion direction, so both of them affect plus-minus sign of roll
+    public void nextPosition(World world, Gauge gauge, IRPathingData currentPosition, float rotationYaw, float bogeyYaw, double distance) {
+        ITrack rail = MovementTrack.findTrack(world, currentPosition.getUMCPos(), rotationYaw, gauge.value());
         if (rail == null) {
-            return currentPosition;
+            return;
         }
-        Vec3d result = rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw));
-        if (result == null) {
-            return currentPosition;
-        }
-        return result;
+        rail.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw), rail.getTrackGauges()[0]);
     }
 
     public float getYawReadout() {
         return yawReadout;
+    }
+    //TODO Do we need delta roll readout?
+    public float getRollReadout() {
+        return rollReadout;
     }
 
     public static class TrackFollowers {

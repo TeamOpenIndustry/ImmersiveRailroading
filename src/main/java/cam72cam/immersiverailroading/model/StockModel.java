@@ -152,17 +152,17 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         sway = new SwaySimulator();
     }
 
-    public ModelState addRoll(ModelState state) {
+    public ModelState addEffectRoll(ModelState state) {
         return state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) ->
-                new Matrix4().rotate(Math.toRadians(sway.getRollDegrees(stock, partialTicks)), 1, 0, 0)));
+                new Matrix4().rotate(Math.toRadians(sway.getEffectRollDegrees(stock, partialTicks, stock.getRotationRoll())), 1, 0, 0)));
     }
 
     protected void initStates() {
-        this.rocking = addRoll(this.base);
+        this.rocking = addEffectRoll(this.base);
         this.front = this.base.push(settings -> settings.add((EntityMoveableRollingStock stock, float partialTicks) -> getFrontBogeyMatrix(stock)));
-        this.frontRocking = addRoll(this.front);
+        this.frontRocking = addEffectRoll(this.front);
         this.rear = this.base.push(settings -> settings.add((EntityMoveableRollingStock stock, float partialTicks) -> getRearBogeyMatrix(stock)));
-        this.rearRocking = addRoll(this.rear);
+        this.rearRocking = addEffectRoll(this.rear);
     }
 
     protected void addGauge(ComponentProvider provider, ModelComponentType type, Readouts value) {
@@ -354,7 +354,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
         state.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
-        state.rotate(sway.getRollDegrees(stock, partialTicks), 1, 0, 0);
+        state.rotate(sway.getEffectRollDegrees(stock, partialTicks, stock.getRotationRoll()), 1, 0, 0);
         controls.forEach(c -> c.postRender(stock, state, partialTicks));
         doors.forEach(c -> c.postRender(stock, state, partialTicks));
         gauges.forEach(c -> c.postRender(stock, state, partialTicks));

@@ -3,10 +3,12 @@ package cam72cam.immersiverailroading.entity;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.immersiverailroading.inventory.SlotFilter;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.LocomotiveSteamDefinition;
 import cam72cam.immersiverailroading.util.BurnUtil;
 import cam72cam.immersiverailroading.util.FluidQuantity;
@@ -114,17 +116,14 @@ public class LocomotiveSteam extends Locomotive {
 
 		return traction_N * multiplier;
 	}
-	
-	
+
 	@Override
 	public void onDissassemble() {
 		super.onDissassemble();
 		this.setBoilerTemperature(ambientTemperature());
 		this.setBoilerPressure(0);
-		
-		for (Integer slot : burnTime.keySet()) {
-			burnTime.put(slot, 0);
-		}
+
+        burnTime.replaceAll((_, _) -> 0);
 	}
 
 	@Override
@@ -155,6 +154,17 @@ public class LocomotiveSteam extends Locomotive {
 		return (getDefinition().cab_forward ? -1 : 1) * super.simulateWheelSlip();
 	}
 
+	@Override
+	public void setup(EntityRollingStockDefinition def, Gauge gauge, String texture) {
+		super.setup(def, gauge, texture);
+		if (def instanceof LocomotiveSteamDefinition steamDef && steamDef.defaultTenderFeed) {
+			//Apply default tender feed setting
+			steamDef.getModel().getControls()
+					.stream()
+					.filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
+					.forEach(c -> setControlPosition(c, 1));
+		}
+	}
 
 	@Override
 	public void onTick() {
@@ -184,16 +194,15 @@ public class LocomotiveSteam extends Locomotive {
 
 		EntityCoupleableRollingStock stock = this;
 		CouplerType coupler = getDefinition().cab_forward ? CouplerType.FRONT : CouplerType.BACK;
-		while (coupler != null && stock.getCoupled(coupler) instanceof Tender) {
-			Tender tender = (Tender) stock.getCoupled(coupler);
+		while (coupler != null && stock.getCoupled(coupler) instanceof Tender tender) {
 
-			// Only drain 10mb at a time from the tender
+            // Only drain 10mb at a time from the tender
 			int desiredDrain = 10;
 			if (getTankCapacity().MilliBuckets() - getServerLiquidAmount() >= 10) {
 				theTank.drain(tender.theTank, desiredDrain, false);
 			}
 
-			if (this.getTickCount() % 20 == 0 && this.getDefinition().tender_auto_feed) {
+			if (this.getTickCount() % 20 == 0 && this.isAutoFeedEnabled()) {
 				// Top off stacks
 				for (int slot = 2; slot < this.cargoItems.getSlotCount(); slot ++) {
 					if (BurnUtil.getBurnTime(this.cargoItems.get(slot)) != 0) {
@@ -306,7 +315,7 @@ public class LocomotiveSteam extends Locomotive {
 		if (throttle != 0 && boilerPressure > 0) {
 			double burnableSlots = this.cargoItems.getSlotCount()-2;
 			double maxKCalTick = burnableSlots * coalEnergyKCalTick();
-			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000);
+			double maxPressureTick = maxKCalTick / (this.getTankCapacity().MilliBuckets() / 1000.0);
 			maxPressureTick = maxPressureTick * 0.8; // 20% more pressure gen energyCapability to balance heat loss
 			
 			float delta = (float) (throttle * maxPressureTick);
@@ -446,6 +455,31 @@ public class LocomotiveSteam extends Locomotive {
 
 		for (Control<?> drain : drains) {
 			setControlPosition(drain, enabled ? 1 : 0);
+		}
+	}
+
+	public boolean isAutoFeedEnabled() {
+		// This could be optimized to once-per-tick, but I'm not sure that is necessary
+		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
+												 .stream()
+												 .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
+												 .collect(Collectors.toList());
+		if (!autoRefuel.isEmpty()) {
+			return autoRefuel.stream().anyMatch(c -> getControlPosition(c) == 1);
+		} else {
+			return getDefinition().defaultTenderFeed;
+		}
+	}
+
+	public void setAutoFeed(boolean enabled) {
+		// This could be optimized to once-per-tick, but I'm not sure that is necessary
+		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
+												 .stream()
+												 .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
+												 .collect(Collectors.toList());
+
+		for (Control<?> ctrl : autoRefuel) {
+			setControlPosition(ctrl, enabled ? 1 : 0);
 		}
 	}
 }

@@ -105,6 +105,7 @@ public enum ModelComponentType {
 	ENGINE_START_X("ENGINE_START_#ID#"),
 	COUPLER_ENGAGED_X("COUPLER_ENGAGED_#ID#"),
 	CYLINDER_DRAIN_CONTROL_X("(CYLINDER|DRAIN)_(COCK|EXHAUST)_CONTROL_#ID#"),
+	TENDER_FEED_CONTROL_X("TENDER_FEED_#ID#"),
 
 	// Gauges
 	GAUGE_LIQUID_X("GAUGE_LIQUID_#ID#"),
@@ -146,6 +147,7 @@ public enum ModelComponentType {
 			case BELL_CONTROL_X:
 			case WHISTLE_CONTROL_X:
 			case HORN_CONTROL_X:
+			case TENDER_FEED_CONTROL_X:
 				//Remove _CONTROL
 				primary = primary.substring(0, primary.length() - 8);
 				//Fallthrough

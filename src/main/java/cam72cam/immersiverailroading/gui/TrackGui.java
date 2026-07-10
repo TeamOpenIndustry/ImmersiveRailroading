@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
@@ -37,6 +38,7 @@ public class TrackGui implements IScreen {
 	long frame;
 
 	private TileRailPreview te;
+	private int targetGuiOpenType;
 	private Button typeButton;
 	private TextField lengthInput;
 	private Slider degreesSlider;
@@ -50,6 +52,7 @@ public class TrackGui implements IScreen {
 	private Button directionButton;
 	private Button bedTypeButton;
 	private Button bedFillButton;
+    private Button trackExtraGuiButton;
 
 	private Slider transfertableEntryCountSlider;
 	private Slider transfertableEntrySpacingSlider;
@@ -78,6 +81,8 @@ public class TrackGui implements IScreen {
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
 		settings = RailSettings.from(stack).mutable();
+		targetGuiOpenType = new ItemTrackBlueprint.Data(stack).guiOpenType;
+
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
 		oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
@@ -161,6 +166,7 @@ public class TrackGui implements IScreen {
 				degreesSlider.setVisible(settings.type.hasQuarters());
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
+				trackExtraGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -335,6 +341,20 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
+		trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, (int) (GUIHelpers.getScreenHeight()*0.75 - height * 2), width / 2, height, GuiText.TRACK_MAIN_TO_EXTRA.toString()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				targetGuiOpenType = 1;
+				onClose();
+				if (te != null) {
+					GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
+				} else {
+					GuiTypes.RAIL.open(MinecraftClient.getPlayer());
+				}
+			}
+		};
+		trackExtraGuiButton.setVisible(settings.type.canRoll());
+
 		Slider zoom_slider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
 										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true) {
 			@Override
@@ -365,9 +385,20 @@ public class TrackGui implements IScreen {
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings.immutable()).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
+
+				// Update client data here in order to avoid networking lag
+				ItemStack clientStack = te.getItem();
+				settings.immutable().write(clientStack);
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType);
+				te.setItem(clientStack, MinecraftClient.getPlayer());
 			} else {
-				new ItemRailUpdatePacket(settings.immutable()).sendToServer();
+				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
+
+				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
+				settings.immutable().write(clientStack);
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType);
+				MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
 			}
 		}
 	}
