@@ -253,11 +253,11 @@ public class TileRail extends TileRailBase {
 	}
 
 	@Override
-	public double getTrackGauge() {
+	public double[] getTrackGauges() {
 		if (info == null) {
-			return 0;
+			return new double[]{0};
 		}
-		return info.settings.gauge.value();
+		return new double[]{info.settings.gauge.value()};
 	}
 
 

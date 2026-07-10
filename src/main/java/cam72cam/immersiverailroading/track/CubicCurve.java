@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackSmoothing;
+import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,6 +20,10 @@ public class CubicCurve {
     public double[] len;
     public int segment;
 
+    //Used for subSplit rollAndOffsetInfo
+    public double arcLenFactorStart;
+    public double arcLenFactorEnd;
+
     //http://spencermortensen.com/articles/bezier-circle/
     public final static double c = 0.55191502449;
 
@@ -29,7 +34,13 @@ public class CubicCurve {
         this.p2 = p2;
     }
 
-    public static CubicCurve circle(int radius, float degrees) {
+    public CubicCurve(Vec3d p1, Vec3d ctrl1, Vec3d ctrl2, Vec3d p2, double arcLenFactorStart, double arcLenFactorEnd) {
+        this(p1, ctrl1, ctrl2, p2);
+        this.arcLenFactorStart = arcLenFactorStart;
+        this.arcLenFactorEnd = arcLenFactorEnd;
+    }
+
+    public static CubicCurve circle(int radius, float degrees, double arcLenFactorStart, double arcLenFactorEnd) {
         float cRadScale = degrees / 90;
         Vec3d p1 = new Vec3d(0, 0, radius);
         Vec3d ctrl1 = new Vec3d(cRadScale * c * radius, 0, radius);
@@ -39,7 +50,7 @@ public class CubicCurve {
         Matrix4 quart = new Matrix4();
         quart.rotate(Math.toRadians(-90+degrees), 0, 1, 0);
 
-        return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2)).apply(new Matrix4().translate(0, 0, -radius));
+        return new CubicCurve(p1, ctrl1, quart.apply(ctrl2), quart.apply(p2), arcLenFactorStart, arcLenFactorEnd).apply(new Matrix4().translate(0, 0, -radius));
     }
 
     public CubicCurve apply(Matrix4 mat) {
@@ -47,32 +58,42 @@ public class CubicCurve {
                 mat.apply(p1),
                 mat.apply(ctrl1),
                 mat.apply(ctrl2),
-                mat.apply(p2)
+                mat.apply(p2),
+                arcLenFactorStart, arcLenFactorEnd
         );
     }
 
     public CubicCurve reverse() {
-        return new CubicCurve(p2, ctrl2, ctrl1, p1);
+        return new CubicCurve(p2, ctrl2, ctrl1, p1, arcLenFactorEnd, arcLenFactorStart);
     }
 
-    public CubicCurve truncate(double t) {
-        Vec3d midpoint = this.ctrl1.add(this.ctrl2).scale(t);
-        Vec3d ctrl1 = p1.add(this.ctrl1).scale(t);
-        Vec3d ctrl2 = p2.add(this.ctrl2).scale(t);
+    /**
+     *  DeCasteljau algorithm,
+     *  return left part (0 ~ t) of CubicCurve
+     * */
+    public CubicCurve getLeft(double t) {
+        Vec3d q0 = lerp(p1, ctrl1, t);
+        Vec3d q1 = lerp(ctrl1, ctrl2, t);
+        Vec3d q2 = lerp(ctrl2, p2, t);
 
-        Vec3d temp = ctrl2.add(midpoint).scale(t);
-        ctrl2 = ctrl1.add(midpoint).scale(t);
-        midpoint = ctrl2.add(temp).scale(t);
-        return new CubicCurve(
-                p1,
-                ctrl1,
-                ctrl2,
-                midpoint
-        );
+        Vec3d r0 = lerp(q0, q1, t);
+        Vec3d r1 = lerp(q1, q2, t);
+
+        Vec3d s = lerp(r0, r1, t);
+
+        double localRatio = lengthInBetween(0, t, 10) / lengthInBetween(0, 1, 10);
+        double globalEnd = arcLenFactorStart + localRatio * (arcLenFactorEnd - arcLenFactorStart);
+        return new CubicCurve(p1, q0, r0, s, arcLenFactorStart, globalEnd);
     }
+
+    private Vec3d lerp(Vec3d a, Vec3d b, double t) {
+        return a.scale(1 - t).add(b.scale(t));
+    }
+
+
 
     public Pair<CubicCurve, CubicCurve> split(double t) {
-        return Pair.of(this.truncate(t), this.reverse().truncate(1-t));
+        return Pair.of(this.getLeft(t), this.reverse().getLeft(1-t));
     }
 
     public Vec3d position(double t) {
@@ -149,9 +170,14 @@ public class CubicCurve {
         return length;
     }
 
-    public List<Vec3d> toList(double stepSize) {
-        List<Vec3d> result = new ArrayList<>();
-        result.add(p1);
+    public List<PosRollOffset> toList(double stepSize, RollAndOffsetInfo rollAndOffsetInfo) {//rollAndOffsetInfo is nullable
+        List<PosRollOffset> result = new ArrayList<>();
+        result.add(new PosRollOffset(
+                p1,
+                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(0),
+                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getYOffset(0),
+                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getZOffset(0)
+        ));
         if(p1.equals(p2)){
             return result;
         }
@@ -164,7 +190,7 @@ public class CubicCurve {
                 double low = t[i];
                 double high = t[i+1];
                 double currentLen = len[i];
-                double mid = (low + high) / 2;
+                double mid = (low + high) / 2;//this is a t value not length value!
 
                 for(int j = 1; j <= 7; j++){
                     mid = (low + high) / 2;
@@ -183,13 +209,27 @@ public class CubicCurve {
                     }
                 }
 
-                result.add(position(mid));
+                double scale = (mid - t[i]) / (t[i+1] - t[i]);
+                double arcLen = len[i] + (len[i+1] - len[i]) * scale;
+                double l = arcLen / len[segment];
+
+                result.add(new PosRollOffset(
+                        position(mid),
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(l),
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getYOffset(l),
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getZOffset(l)
+                ));
                 lastLength = currentLen + lengthInBetween(low, mid, 10);
             }
         }
 
         if(len[segment] - lastLength >= 0.8 * stepSize){
-            result.add(p2);
+            result.add(new PosRollOffset(
+                    p2,
+                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getRoll(1),
+                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getYOffset(1),
+                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getZOffset(1)
+            ));
         }
 
         return result;
@@ -208,14 +248,15 @@ public class CubicCurve {
         if (p1.distanceTo(p2) <= maxSize) {
             res.add(this);
         } else {
-            res.addAll(this.truncate(0.5).subsplit(maxSize));
-            res.addAll(this.reverse().truncate(0.5).reverse().subsplit(maxSize));
+            res.addAll(this.getLeft(0.5).subsplit(maxSize));
+            res.addAll(this.reverse().getLeft(0.5).reverse().subsplit(maxSize));
         }
         return res;
     }
 
 
-    public CubicCurve linearize(TrackSmoothing smoothing) {
+    @Deprecated
+    public CubicCurve linearize(TrackSmoothing smoothing) {//TODO: Remove track smoothing and only use pitch-locked
         double start = p1.distanceTo(ctrl1);
         double middle = ctrl1.distanceTo(ctrl2);
         double end = ctrl2.distanceTo(p2);
@@ -223,30 +264,29 @@ public class CubicCurve {
         double lengthGuess = start + middle + end;
         double height = p2.y - p1.y;
 
-        switch (smoothing) {
-            case NEITHER:
-                return new CubicCurve(
-                        p1,
-                        ctrl1.add(0, (start / lengthGuess) * height, 0),
-                        ctrl2.add(0, -(end / lengthGuess) * height, 0),
-                        p2
-                );
-            case NEAR:
-                return new CubicCurve(
-                        p1,
-                        ctrl1,
-                        ctrl2.add(0, -(end / (middle + end)) * height, 0),
-                        p2
-                );
-            case FAR:
-                return new CubicCurve(
-                        p1,
-                        ctrl1.add(0, (start / (start + middle)) * height, 0),
-                        ctrl2,
-                        p2
-                );
-            case BOTH: default:
-                return this;
-        }
+        return switch (smoothing) {
+            case NEITHER -> new CubicCurve(
+                    p1,
+                    ctrl1.add(0, (start / lengthGuess) * height, 0),
+                    ctrl2.add(0, -(end / lengthGuess) * height, 0),
+                    p2,
+                    arcLenFactorStart, arcLenFactorEnd
+            );
+            case NEAR -> new CubicCurve(
+                    p1,
+                    ctrl1,
+                    ctrl2.add(0, -(end / (middle + end)) * height, 0),
+                    p2,
+                    arcLenFactorStart, arcLenFactorEnd
+            );
+            case FAR -> new CubicCurve(
+                    p1,
+                    ctrl1.add(0, (start / (start + middle)) * height, 0),
+                    ctrl2,
+                    p2,
+                    arcLenFactorStart, arcLenFactorEnd
+            );
+            default -> this;
+        };
     }
 }

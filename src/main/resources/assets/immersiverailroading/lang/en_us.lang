@@ -84,6 +84,10 @@ gui.immersiverailroading:selector.transfer_table_entry_count=Transfer Table Entr
 gui.immersiverailroading:selector.transfer_table_entry_spacing=Distance Between Entries: %s
 gui.immersiverailroading:selector.place_blueprint=Place Blueprint
 gui.immersiverailroading:selector.grade_crossing=Grade Crossing
+gui.immersiverailroading:selector.tile_tilt=Tile Tilt
+gui.immersiverailroading:selector.roll_effect_tile=Roll Affect Tiles
+gui.immersiverailroading:selector.degree_mode=Degree Mode
+gui.immersiverailroading:selector.offset_vert_by_normal_mode=Offset Vertical By Track Normal
 gui.immersiverailroading:selector.plate_type=Plate Type: %s
 gui.immersiverailroading:selector.plate_boiler=Plate Boiler: %s
 gui.immersiverailroading:selector.cast_single=Single Casting
@@ -121,6 +125,20 @@ gui.immersiverailroading:track.rail_bed=Bed:        %s
 gui.immersiverailroading:track.rail_bed_fill=Bed Fill:    %s
 gui.immersiverailroading:track.place_blueprint_true=Place:      Blueprint
 gui.immersiverailroading:track.place_blueprint_false=Place:      Track
+
+gui.immersiverailroading:track.arc_len_factor=Curve Percentage: %s
+gui.immersiverailroading:track.roll_offset_type=Roll Vertical Offset
+gui.immersiverailroading:track.extra_insert_point=Insert
+gui.immersiverailroading:track.extra_delete_point=Delete
+gui.immersiverailroading:track.extra_point_value_m=Point Height (Y,m):
+gui.immersiverailroading:track.extra_point_value_cm_degree=Point Height (Y,cm/degree):
+gui.immersiverailroading:track.extra_point_slope=Point Slope (Y/X,‰):
+gui.immersiverailroading:track.extra_point_weight=Point Weight (X Proj.):
+gui.immersiverailroading:track.extra_reset=Reset All
+gui.immersiverailroading:track.extra_edit_left=Edit Left
+gui.immersiverailroading:track.extra_edit_right=Edit Right
+gui.immersiverailroading:track.extra_trackgui=Basic
+gui.immersiverailroading:track.extragui=Advanced
 
 gui.immersiverailroading:loco.works=Works:          %s
 gui.immersiverailroading:loco.power=Power:          %s
@@ -179,6 +197,14 @@ track.immersiverailroading:direction.none=Flexible
 # Intended
 track.immersiverailroading:direction.left=Lock Right
 track.immersiverailroading:direction.right=Lock Left
+
+track.immersiverailroading:extra_info_type.roll=Superelevation
+track.immersiverailroading:extra_info_type.y_offset=Vertical Offset
+track.immersiverailroading:extra_info_type.z_offset=Horizontal Offset
+
+track.immersiverailroading:roll_vert_offset_align_type.mid=Align To Mid
+track.immersiverailroading:roll_vert_offset_align_type.left=Align Left Track
+track.immersiverailroading:roll_vert_offset_align_type.right=Align Right Track
 
 part.immersiverailroading:component.frame=Frame
 part.immersiverailroading:component.front_frame=Front Frame
