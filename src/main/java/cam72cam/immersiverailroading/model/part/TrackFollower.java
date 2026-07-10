@@ -76,7 +76,7 @@ public class TrackFollower {
                 float toPointPitch = 0;
                 float atPointPitch = 0;
 
-                IRPathingData pointPos = new IRPathingData(offsetPos, (betweenPoints < 0 ? rollReadout : -rollReadout) + stock.getRotationRoll());
+                IRPathingData pointPos = new IRPathingData(offsetPos, (toMinPoint < 0 ? rollReadout : -rollReadout) + stock.getRotationRoll());
                 nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, toMinPoint);
 
                 IRPathingData pointPosNext = pointPos.clone();// pointPos need to be retained
@@ -95,8 +95,8 @@ public class TrackFollower {
 
                 yawReadout = toPointYaw + atPointYaw;
 
-                rollReadout = (float) (betweenPoints < 0 ? pointPosNext.getRoll() : -pointPosNext.getRoll()) - stock.getRotationRoll();// pointPosNext is more accurate
-                if(betweenPoints < 0) {
+                rollReadout = (float) (toMinPoint < 0 ? pointPos.getRoll() : -pointPos.getRoll()) - stock.getRotationRoll();// TODO: pointPosNext might be more accurate, but need to fix sign issue
+                if(toMinPoint < 0) {
                     rollReadout = -rollReadout;
                 }
 
@@ -124,6 +124,7 @@ public class TrackFollower {
         return matrix;
     }
 
+    //Notice that we use bogeyYaw and distance to construct motion direction, so both of them affect plus-minus sign of roll
     public void nextPosition(World world, Gauge gauge, IRPathingData currentPosition, float rotationYaw, float bogeyYaw, double distance) {
         ITrack rail = MovementTrack.findTrack(world, currentPosition.getUMCPos(), rotationYaw, gauge.value());
         if (rail == null) {
