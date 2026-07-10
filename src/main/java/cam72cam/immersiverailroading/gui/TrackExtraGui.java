@@ -131,6 +131,8 @@ public class TrackExtraGui implements IScreen {
         //Left panel
         //What else are needed to be displayed here?
         railInfoLabel = new Button(screen, xtop, ytop, 90, height,  GuiText.TRACK_LENGTH.toString(length), (_, _) -> {});
+        railInfoLabel.setEnabled(false);
+
         ytop += height;
         ytop += 5;
         //roll Graph
@@ -280,6 +282,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         rollValueLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        rollValueLabel.setEnabled(false);
 
         ytop += height;
 
@@ -307,6 +310,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         rollSlopeLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        rollSlopeLabel.setEnabled(false);
 
         ytop += height;
 
@@ -334,6 +338,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         rollHandleXLenLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        rollHandleXLenLabel.setEnabled(false);
 
         ytop += height;
         ytop += 5;
@@ -362,6 +367,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         yOffsetValueLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        yOffsetValueLabel.setEnabled(false);
 
         ytop += height;
 
@@ -389,6 +395,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         yOffsetSlopeLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        yOffsetSlopeLabel.setEnabled(false);
 
         ytop += height;
 
@@ -416,6 +423,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         yOffsetHandleXLenLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        yOffsetHandleXLenLabel.setEnabled(false);
 
         ytop += height;
         ytop += 5;
@@ -444,6 +452,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         zOffsetValueLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        zOffsetValueLabel.setEnabled(false);
 
         ytop += height;
 
@@ -471,6 +480,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         zOffsetSlopeLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        zOffsetSlopeLabel.setEnabled(false);
 
         ytop += height;
 
@@ -498,6 +508,7 @@ public class TrackExtraGui implements IScreen {
             return false;
         });
         zOffsetHandleXLenLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 150, height, "", (_, _) -> {});
+        zOffsetHandleXLenLabel.setEnabled(false);
 
         //Update after all components init
         ArcLenFactorSlider.onSlider();
