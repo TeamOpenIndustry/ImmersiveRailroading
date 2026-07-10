@@ -62,8 +62,8 @@ public class TrackFollower {
                 rollReadout = offsetRoll - stock.getRotationRoll();
                 matrix.setIdentity();
                 matrix.translate(-offset / stock.gauge.scale(), 0, 0);
-                matrix.rotate(Math.toRadians(yawReadout), 0, 1, 0);
                 matrix.rotate(Math.toRadians(rollReadout), 1, 0, 0);
+                matrix.rotate(Math.toRadians(yawReadout), 0, 1, 0);
                 matrix.translate(offset / stock.gauge.scale(), 0, 0);
             } else {
                 // Don't need to path to a point that's already on the track.  TODO This can also be used to improve accuracy of the offset rendering
@@ -76,7 +76,7 @@ public class TrackFollower {
                 float toPointPitch = 0;
                 float atPointPitch = 0;
 
-                IRPathingData pointPos = new IRPathingData(offsetPos, toMinPoint < 0 ? rollReadout : -rollReadout);
+                IRPathingData pointPos = new IRPathingData(offsetPos, (betweenPoints < 0 ? rollReadout : -rollReadout) + stock.getRotationRoll());
                 nextPosition(stock.getWorld(), stock.gauge, pointPos, stock.getRotationYaw(), offsetYaw, toMinPoint);
 
                 IRPathingData pointPosNext = pointPos.clone();//pointPos need to be retained
@@ -94,8 +94,9 @@ public class TrackFollower {
                 }
 
                 yawReadout = toPointYaw + atPointYaw;
-                rollReadout = (float) -pointPos.getRoll() - stock.getRotationRoll();
-                if(toMinPoint < 0) {
+
+                rollReadout = (float) (betweenPoints < 0 ? pointPosNext.getRoll() : -pointPosNext.getRoll()) - stock.getRotationRoll();//pointPosNext is more accurate
+                if(betweenPoints < 0) {
                     rollReadout = -rollReadout;
                 }
 
