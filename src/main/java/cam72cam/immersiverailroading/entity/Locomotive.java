@@ -199,7 +199,7 @@ public abstract class Locomotive extends FreightTank {
 			setTrainBrake(getTrainBrake() - trainBrakeNotch);
 			break;
 		case DEAD_MANS_SWITCH:
-			if (deadManChangeTimeout == 0) { 
+			if (deadManChangeTimeout == 0 && getWorld().isServer) {
 				deadMansSwitch = !deadMansSwitch;
 				if (deadMansSwitch) {
 					source.sendMessage(ChatText.DEADMANS_SWITCH_ENABLED.getMessage());
