@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
+import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.MathUtil;
@@ -67,6 +68,10 @@ public class TrackGui implements IScreen {
 	private ListSelector<ItemStack> railBedSelector;
 	private ListSelector<ItemStack> railBedFillSelector;
 
+	//spiralCurve
+	private TextField farRadiusInput;
+	private Button farRadiusLabel;
+
 	private double zoom = 1;
 
 	public TrackGui() {
@@ -112,6 +117,7 @@ public class TrackGui implements IScreen {
             try {
                 val = Integer.parseInt(s);
             } catch (NumberFormatException e) {
+				if(settings.type.hasFarRadius() && s.equals("-")) return true;
                 return false;
             }
             int max = 1000;
@@ -120,10 +126,18 @@ public class TrackGui implements IScreen {
                       ? BuilderTurnTable.maxLength(settings.gauge)
                       : BuilderTransferTable.maxLength(settings.gauge);
             }
-            if (val > 0 && val <= max) {
-                settings.length = val;
-                return true;
-            }
+			if(settings.type.hasFarRadius()) {
+				if (val < max && isCubicParabolaInputValid(val, settings.farRadius, settings.degrees)) {
+					settings.length = val;
+					return true;
+				}
+			} else {
+				if (val > 0 && val <= max) {
+					settings.length = val;
+					return true;
+				}
+			}
+
             return false;
         });
         this.lengthInput.setFocused(true);
@@ -168,6 +182,8 @@ public class TrackGui implements IScreen {
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				trackExtraGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
+				farRadiusInput.setVisible(settings.type.hasFarRadius());
+				farRadiusLabel.setVisible(settings.type.hasFarRadius());
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
@@ -231,12 +247,43 @@ public class TrackGui implements IScreen {
 		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
-				settings.degrees = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
+				float val = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
+				if(settings.type.hasFarRadius()) {
+					while(!isCubicParabolaInputValid(settings.length, settings.farRadius, val)) {
+						val -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
+						if(Math.abs(val) < 1e-6) break;
+					}
+				}
+				settings.degrees = val;
 				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
 			}
 		};
 		degreesSlider.onSlider();
 		ytop += height;
+
+		farRadiusLabel = new Button(screen, xtop, ytop, width / 2, height, GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
+		farRadiusInput = new TextField(screen, xtop + 80, ytop, width / 2, height);
+		farRadiusInput.setValidator(s -> {
+			if (s == null || s.length() == 0) {
+				return true;
+			}
+			int val;
+			try {
+				val = Integer.parseInt(s);
+			} catch (NumberFormatException e) {
+				if(s.equals("-")) return true;
+				return false;
+			}
+			int max = 0x3f3f3f3f;
+
+			if (val < max && isCubicParabolaInputValid(settings.length, val, settings.degrees)) {
+				settings.farRadius = val;
+				return true;
+			}
+
+			return false;
+		});
+		farRadiusInput.setFocused(true);
 
 
 		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
@@ -253,6 +300,8 @@ public class TrackGui implements IScreen {
 		degreesSlider.setVisible(settings.type.hasQuarters());
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
+		farRadiusInput.setVisible(settings.type.hasFarRadius());
+		farRadiusLabel.setVisible(settings.type.hasFarRadius());
 		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 
@@ -553,5 +602,13 @@ public class TrackGui implements IScreen {
 			}
 			model.render(state);
 		}
+	}
+
+	private static boolean isCubicParabolaInputValid(double startRadius, double endRadius, double angleDeg) {
+		if(startRadius < 0 && endRadius < 0) return false;
+		if(startRadius < 0 && endRadius > 0) return true;
+		if(startRadius > 0 && endRadius < 0) return true;
+		if(startRadius > 0 && endRadius > 0) return CubicCurve.isCubicParabolaValid(startRadius, endRadius, angleDeg);
+		return false;
 	}
 }

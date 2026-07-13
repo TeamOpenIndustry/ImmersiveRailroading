@@ -115,6 +115,7 @@ gui.immersiverailroading:none=无
 
 gui.immersiverailroading:track.type=类型：%s
 gui.immersiverailroading:track.length=长度：%s
+gui.immersiverailroading:track.far_radius=远端半径%s
 gui.immersiverailroading:track.gauge=轨距：%s
 gui.immersiverailroading:track.quarters=%s 度转弯
 gui.immersiverailroading:track.curvosity=%s 曲率
@@ -181,6 +182,7 @@ track.immersiverailroading:class.turntable=转车台
 track.immersiverailroading:class.transfertable=移车台
 track.immersiverailroading:class.switch=道岔
 track.immersiverailroading:class.custom=自定义曲线
+track.immersiverailroading:class.cubicparabola=三次抛物缓和曲线
 
 track.immersiverailroading:position.fixed=对齐方块
 track.immersiverailroading:position.pixels=对齐像素

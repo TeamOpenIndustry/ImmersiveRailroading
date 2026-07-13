@@ -41,6 +41,7 @@ public enum GuiText {
 
 	TRACK_TYPE("track.type"),
 	TRACK_LENGTH("track.length"),
+	TRACK_FAR_RADIUS("track.far_radius"),
 	TRACK_GAUGE("track.gauge"),
 	TRACK_QUARTERS("track.quarters"),
 	TRACK_CURVOSITY("track.curvosity"),

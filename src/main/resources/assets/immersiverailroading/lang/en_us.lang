@@ -115,6 +115,7 @@ gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s
 gui.immersiverailroading:track.length=Length:    %s
+gui.immersiverailroading:track.far_radius=Far Radius:%s
 gui.immersiverailroading:track.gauge=Gauge:     %s
 gui.immersiverailroading:track.quarters=%s Degree Turn
 gui.immersiverailroading:track.curvosity=%s Curvosity
@@ -181,6 +182,7 @@ track.immersiverailroading:class.turntable=Turn Table
 track.immersiverailroading:class.transfertable=Transfer Table
 track.immersiverailroading:class.switch=Switch
 track.immersiverailroading:class.custom=Custom Curve
+track.immersiverailroading:class.cubicparabola=Cubic Parabola
 
 track.immersiverailroading:position.fixed=Fixed
 track.immersiverailroading:position.pixels=Pixels

@@ -13,6 +13,7 @@ public class RailSettings {
     public final Gauge gauge;
     public final TrackItems type;
     public final int length;
+    public final float farRadius;
     public final float degrees;
     public final float curvosity;
     // Info of this segment
@@ -30,11 +31,12 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float farRadius, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
         this.length = length;
+        this.farRadius = farRadius;
         this.degrees = degrees;
         this.posType = posType;
         this.smoothing = smoothing;
@@ -122,6 +124,8 @@ public class RailSettings {
         public TrackItems type;
         @TagField("length")
         public int length;
+        @TagField("farRadius")
+        public float farRadius;
         @TagField(value = "degrees", mapper = DegreesMapper.class)
         public float degrees;
         @TagField("curvosity")
@@ -162,6 +166,7 @@ public class RailSettings {
 
             this.type = settings.type;
             this.length = settings.length;
+            this.farRadius = settings.farRadius;
             this.degrees = settings.degrees;
             this.curvosity = settings.curvosity;
             this.posType = settings.posType;
@@ -184,6 +189,7 @@ public class RailSettings {
             pickRollAndOffsetInfo = rollAndOffsetInfo;
 
             length = 10;
+            farRadius = -1;
             degrees = 90;
             posType = TrackPositionType.FIXED;
             smoothing = TrackSmoothing.BOTH;
@@ -205,6 +211,7 @@ public class RailSettings {
                     track,
                     type,
                     length,
+                    farRadius,
                     degrees,
                     curvosity,
                     posType,

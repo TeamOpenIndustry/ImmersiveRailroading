@@ -63,6 +63,7 @@ public class RailInfo {
 		Object[] props = new Object [] {
 				this.settings.type,
 				this.settings.length,
+				this.settings.farRadius,
 				this.settings.degrees,
 				this.settings.curvosity,
 				this.settings.railBed,
@@ -196,6 +197,8 @@ public class RailInfo {
 			return new BuilderSlope(this, world, pos);
 		case TURN:
 			return new BuilderTurn(this, world, pos);
+		case CUBICPARABOLA:
+			return new BuilderCubicParabola(this,world,pos);
 		case SWITCH:
 			return new BuilderSwitch(this, world, pos);
 		case TURNTABLE:
@@ -420,7 +423,7 @@ public class RailInfo {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, length, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , null, null, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
+			RailSettings settings = new RailSettings(gauge, "default", type, length, -1, quarters / 4F * 90, 1, TrackPositionType.FIXED, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , null, null, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
 			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}
