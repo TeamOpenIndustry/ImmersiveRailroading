@@ -189,7 +189,7 @@ public class CubicCurve {
         if (startRadius <= 0 || endRadius <= 0)
             return false;
 
-        if (angleDeg < 0)
+        if (angleDeg < 0 || angleDeg > cubicParabolaMaxAngle)
             return false;
 
         // Degenerate case.
@@ -212,51 +212,8 @@ public class CubicCurve {
         return delta >= 0.0;
     }
 
-    /**
-     * Solves the projected length of a cubic parabola from the specified
-     * radii and total deflection angle.
-     *
-     * <p>The returned length is the projection of the cubic parabola onto
-     * the local x-axis rather than the true arc length.</p>
-     *
-     * @param startRadius Radius at the beginning of the transition.
-     * @param endRadius Radius at the end of the transition.
-     * @param angleDeg Total deflection angle in degrees.
-     * @return Projected length of the cubic parabola.
-     * @throws IllegalArgumentException if the specified parameters cannot
-     *                                  construct a valid cubic parabola.
-     */
-    private static double solveProjectedLength(double startRadius,
-                                               double endRadius,
-                                               double angleDeg) {
-        if (!isCubicParabolaValid(startRadius, endRadius, angleDeg))
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Cannot construct cubic parabola (R1=%.3f, R2=%.3f, angle=%.3f°)",
-                            startRadius, endRadius, angleDeg
-                    )
-            );
-
-        if (endRadius < startRadius) {
-            double tmp = startRadius;
-            startRadius = endRadius;
-            endRadius = tmp;
-        }
-
-        double k = startRadius / endRadius;
-        double k2 = k * k;
-
-        double tanAngle = Math.tan(Math.toRadians(angleDeg));
-
-        double delta =
-                (1.0 - k2) * (1.0 - k2)
-                        - 4.0 * k2 * tanAngle * tanAngle;
-
-        double tanStart =
-                ((1.0 - k2) - Math.sqrt(delta))
-                        / (2.0 * k2 * tanAngle);
-
-        return 2.0 * startRadius * tanStart;
+    public static boolean isCubicParabolaValid(double angleDeg) {
+        return angleDeg > 0 && angleDeg < cubicParabolaMaxAngle;
     }
 
     //    Matlab Script:
@@ -282,22 +239,20 @@ public class CubicCurve {
      * <p>The generated Bézier curve is mathematically identical to the
      * corresponding cubic parabola segment rather than an approximation.</p>
      *
-     * @param startRadius Radius at the beginning of the transition.
-     * @param endRadius Radius at the end of the transition.
+     * @param nearRadius Radius of the near circular arc.
+     * @param farRadius Radius of the far circular arc.
      * @param projectedLength Projection length along the local x-axis.
      */
-    public static CubicCurve cubicParabola(double startRadius,
-                                           double endRadius,
+    public static CubicCurve cubicParabola(double nearRadius,
+                                           double farRadius,
                                            double projectedLength) {
-        boolean largerRadiusAtP1 = startRadius > endRadius;
 
-        if (largerRadiusAtP1) {
-            double tmp = startRadius;
-            startRadius = endRadius;
-            endRadius = tmp;
-        }
+        boolean nearRadiusIsSmaller = nearRadius > farRadius;
 
-        double k = startRadius / endRadius;
+        double smallRadius = Math.min(nearRadius, farRadius);
+        double largeRadius = Math.max(nearRadius, farRadius);
+
+        double k = smallRadius / largeRadius;
         double k2 = k * k;
         double k3 = k2 * k;
 
@@ -310,33 +265,32 @@ public class CubicCurve {
 
         Matrix4 rotation = new Matrix4();
 
-        if (!largerRadiusAtP1) {
+        if (nearRadiusIsSmaller) {
 
             // Small radius -> Large radius
 
             p1 = new Vec3d(
                     k * projectedLength,
                     0,
-                    k3 * projectedLength2 / (6.0 * startRadius));
+                    k3 * projectedLength2 / (6.0 * smallRadius));
 
             ctrl1 = new Vec3d(
                     k * projectedLength + handleLength,
                     0,
-                    k3 * projectedLength2 / (6.0 * startRadius)
-                            + k2 * handleProjection / (2.0 * startRadius));
+                    k3 * projectedLength2 / (6.0 * smallRadius)
+                            + k2 * handleProjection / (2.0 * smallRadius));
 
             ctrl2 = new Vec3d(
                     k * projectedLength + handleLength * 2.0,
                     0,
-                    projectedLength2 / (6.0 * startRadius)
-                            - handleProjection / (2.0 * startRadius));
+                    projectedLength2 / (6.0 * smallRadius)
+                            - handleProjection / (2.0 * smallRadius));
 
             p2 = new Vec3d(
                     projectedLength,
                     0,
-                    projectedLength2 / (6.0 * startRadius));
+                    projectedLength2 / (6.0 * smallRadius));
 
-            // Translate the local origin to P1.
             double originX = p1.x;
             double originZ = p1.z;
 
@@ -345,13 +299,12 @@ public class CubicCurve {
             ctrl2 = ctrl2.add(-originX, 0, -originZ);
             p2 = p2.add(-originX, 0, -originZ);
 
-            // Flip the local z-axis.
             ctrl1 = ctrl1.add(0, 0, -2.0 * ctrl1.z);
             ctrl2 = ctrl2.add(0, 0, -2.0 * ctrl2.z);
             p2 = p2.add(0, 0, -2.0 * p2.z);
 
             rotation.rotate(
-                    -Math.atan(projectedLength * k / (2.0 * endRadius)),
+                    -Math.atan(projectedLength * k / (2.0 * largeRadius)),
                     0, 1, 0);
 
         } else {
@@ -366,21 +319,21 @@ public class CubicCurve {
             ctrl1 = new Vec3d(
                     handleLength,
                     0,
-                    handleProjection / (2.0 * startRadius));
+                    handleProjection / (2.0 * smallRadius));
 
             ctrl2 = new Vec3d(
                     handleLength * 2.0,
                     0,
-                    (1.0 - k3) * projectedLength2 / (6.0 * startRadius)
-                            - k2 * handleProjection / (2.0 * startRadius));
+                    (1.0 - k3) * projectedLength2 / (6.0 * smallRadius)
+                            - k2 * handleProjection / (2.0 * smallRadius));
 
             p2 = new Vec3d(
                     projectedLength * (1.0 - k),
                     0,
-                    (1.0 - k3) * projectedLength2 / (6.0 * startRadius));
+                    (1.0 - k3) * projectedLength2 / (6.0 * smallRadius));
 
             rotation.rotate(
-                    Math.atan(projectedLength / (2.0 * startRadius)),
+                    Math.atan(projectedLength / (2.0 * smallRadius)),
                     0, 1, 0);
         }
 
@@ -392,26 +345,69 @@ public class CubicCurve {
     }
 
     /**
+     * Solves the projected length of a cubic parabola from the specified
+     * radii and total deflection angle.
+     *
+     * <p>The returned length is the projection of the cubic parabola onto
+     * the local x-axis rather than the true arc length.</p>
+     *
+     * @param nearRadius Radius of the near circular arc.
+     * @param farRadius Radius of the far circular arc.
+     * @param angleDeg Total deflection angle in degrees.
+     * @return Projected length of the cubic parabola.
+     * @throws IllegalArgumentException if the specified parameters cannot
+     *                                  construct a valid cubic parabola.
+     */
+    private static double solveProjectedLength(double nearRadius,
+                                               double farRadius,
+                                               double angleDeg) {
+
+        if (!isCubicParabolaValid(nearRadius, farRadius, angleDeg))
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Cannot construct cubic parabola (R1=%.3f, R2=%.3f, angle=%.3f°)",
+                            nearRadius, farRadius, angleDeg));
+
+        double smallRadius = Math.min(nearRadius, farRadius);
+        double largeRadius = Math.max(nearRadius, farRadius);
+
+        double k = smallRadius / largeRadius;
+        double k2 = k * k;
+
+        double tanAngle = Math.tan(Math.toRadians(angleDeg));
+
+        double delta =
+                (1.0 - k2) * (1.0 - k2)
+                        - 4.0 * k2 * tanAngle * tanAngle;
+
+        double tanStart =
+                ((1.0 - k2) - Math.sqrt(delta))
+                        / (2.0 * k2 * tanAngle);
+
+        return 2.0 * smallRadius * tanStart;
+    }
+
+    /**
      * Constructs the exact Bézier representation of a cubic parabola
      * between two circular arcs.
      *
      * <p>The generated Bézier curve is mathematically identical to the
      * corresponding cubic parabola segment rather than an approximation.</p>
      *
-     * @param startRadius Radius at the beginning of the transition.
-     * @param endRadius Radius at the end of the transition.
+     * @param nearRadius Radius of the near circular arc.
+     * @param farRadius Radius of the far circular arc.
      * @param angleDeg Total deflection angle in degrees.
      * @return Cubic Bézier representation of the cubic parabola.
      * @throws IllegalArgumentException if the specified parameters cannot
      *                                  construct a valid cubic parabola.
      */
-    public static CubicCurve cubicParabolaByAngle(double startRadius,
-                                           double endRadius,
-                                           double angleDeg) {
+    public static CubicCurve cubicParabolaByAngle(double nearRadius,
+                                                  double farRadius,
+                                                  double angleDeg) {
         return cubicParabola(
-                startRadius,
-                endRadius,
-                solveProjectedLength(startRadius, endRadius, angleDeg)
+                nearRadius,
+                farRadius,
+                solveProjectedLength(nearRadius, farRadius, angleDeg)
         );
     }
 

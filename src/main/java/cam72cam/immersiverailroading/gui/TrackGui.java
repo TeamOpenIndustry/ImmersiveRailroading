@@ -184,6 +184,11 @@ public class TrackGui implements IScreen {
 				directionButton.setVisible(settings.type.hasDirection());
 				farRadiusInput.setVisible(settings.type.hasFarRadius());
 				farRadiusLabel.setVisible(settings.type.hasFarRadius());
+				if(settings.type.hasFarRadius()) {
+					if(!isCubicParabolaInputValid(settings.length, settings.farRadius, settings.degrees)) toCubicParabola(settings, farRadiusLabel);
+				} else {
+					if(settings.length < 0) toNonCubicParabola(settings, farRadiusLabel);
+				}
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
@@ -262,7 +267,7 @@ public class TrackGui implements IScreen {
 		ytop += height;
 
 		farRadiusLabel = new Button(screen, xtop, ytop, width / 2, height, GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
-		farRadiusInput = new TextField(screen, xtop + 80, ytop, width / 2, height);
+		farRadiusInput = new TextField(screen, xtop + width / 2, ytop, width / 2, height);
 		farRadiusInput.setValidator(s -> {
 			if (s == null || s.length() == 0) {
 				return true;
@@ -278,6 +283,7 @@ public class TrackGui implements IScreen {
 
 			if (val < max && isCubicParabolaInputValid(settings.length, val, settings.degrees)) {
 				settings.farRadius = val;
+				farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
 				return true;
 			}
 
@@ -606,9 +612,25 @@ public class TrackGui implements IScreen {
 
 	private static boolean isCubicParabolaInputValid(double startRadius, double endRadius, double angleDeg) {
 		if(startRadius < 0 && endRadius < 0) return false;
-		if(startRadius < 0 && endRadius > 0) return true;
-		if(startRadius > 0 && endRadius < 0) return true;
+		if(startRadius < 0 && endRadius > 0) return CubicCurve.isCubicParabolaValid(angleDeg);
+		if(startRadius > 0 && endRadius < 0) return CubicCurve.isCubicParabolaValid(angleDeg);
 		if(startRadius > 0 && endRadius > 0) return CubicCurve.isCubicParabolaValid(startRadius, endRadius, angleDeg);
 		return false;
+	}
+
+	private static void toNonCubicParabola(RailSettings.Mutable settings, Button farRadiusLabel) {
+		if(settings.length < 0) {
+			float tmp = settings.length;
+			settings.length = (int) Math.ceil(settings.farRadius);
+			settings.farRadius = tmp;
+			farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
+		}
+	}
+
+	private static void toCubicParabola(RailSettings.Mutable settings, Button farRadiusLabel) {
+		if(!isCubicParabolaInputValid(settings.length, settings.farRadius, settings.degrees)) {
+			settings.farRadius = -1;
+			farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
+		}
 	}
 }

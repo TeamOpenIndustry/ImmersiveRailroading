@@ -20,9 +20,9 @@ public class BuilderCubicParabola extends BuilderCubicCurve{
         }
         CubicCurve curve;
         if(info.settings.farRadius < 0){
-            curve = CubicCurve.cubicParabolaByAngle(info.settings.length, info.settings.degrees, true).apply(mat);
+            curve = CubicCurve.cubicParabolaByAngle(info.settings.length, info.settings.degrees, false).apply(mat);
         } else if(info.settings.length < 0) {
-            curve = CubicCurve.cubicParabolaByAngle(info.settings.farRadius, info.settings.degrees, false).apply(mat);
+            curve = CubicCurve.cubicParabolaByAngle(info.settings.farRadius, info.settings.degrees, true).apply(mat);
         } else {
             curve = CubicCurve.cubicParabolaByAngle(info.settings.length, info.settings.farRadius, info.settings.degrees).apply(mat);
         }
