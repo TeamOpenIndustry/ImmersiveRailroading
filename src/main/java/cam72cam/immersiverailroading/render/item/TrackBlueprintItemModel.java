@@ -28,7 +28,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		state.cull_face(false);
 		state.lighting(false);
 
-		if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
+		if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.TURN_V2 || info.settings.type == TrackItems.SWITCH) {
 			state.translate(0, 0, -0.1 * (info.settings.degrees / 90 * 4));
 		}
 

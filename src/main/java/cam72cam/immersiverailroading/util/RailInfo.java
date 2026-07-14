@@ -197,6 +197,8 @@ public class RailInfo {
 			return new BuilderSlope(this, world, pos);
 		case TURN:
 			return new BuilderTurn(this, world, pos);
+		case TURN_V2:
+			return new BuilderTurnV2(this, world, pos);
 		case CUBICPARABOLA:
 			return new BuilderCubicParabola(this,world,pos);
 		case SWITCH:

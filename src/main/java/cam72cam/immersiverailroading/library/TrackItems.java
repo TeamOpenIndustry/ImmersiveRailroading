@@ -8,12 +8,13 @@ public enum TrackItems {
 	STRAIGHT(0),
 	CROSSING(1),
 	SLOPE(2),
-	TURN(3),
+	TURN(3),// Legacy
 	SWITCH(4),
 	TURNTABLE(5),
 	CUSTOM(7),
 	TRANSFERTABLE(6),
-	CUBICPARABOLA(8);
+	CUBICPARABOLA(8),
+	TURN_V2(9);// TODO: BuilderSwitch
 
 	private final int order;
 
@@ -29,6 +30,7 @@ public enum TrackItems {
 	public boolean hasQuarters() {
 		switch (this) {
 			case TURN:
+			case TURN_V2:
 			case SWITCH:
 			case CUBICPARABOLA:
 				return true;
@@ -51,6 +53,7 @@ public enum TrackItems {
 		switch (this) {
 			case SLOPE:
 			case TURN:
+			case TURN_V2:
 			case SWITCH:
 			case CUSTOM:
 			case CUBICPARABOLA:
@@ -64,6 +67,7 @@ public enum TrackItems {
 		switch (this) {
 			case SLOPE:
 			case TURN:
+			case TURN_V2:
 			case STRAIGHT:
 			case CUSTOM:
 			case CUBICPARABOLA:
@@ -76,6 +80,7 @@ public enum TrackItems {
 	public boolean hasDirection() {
 		switch (this) {
 			case TURN:
+			case TURN_V2:
 			case SWITCH:
 			case CUBICPARABOLA:
 				return true;
