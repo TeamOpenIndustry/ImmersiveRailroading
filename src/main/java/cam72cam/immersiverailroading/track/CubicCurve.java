@@ -98,9 +98,7 @@ public class CubicCurve {
      * @param straightAtP1 {@code true} for Straight→Circular,
      *                     {@code false} for Circular→Straight.
      */
-    public static CubicCurve cubicParabola(double radius,
-                                           double projectedLength,
-                                           boolean straightAtP1) {
+    public static CubicCurve cubicParabola(double radius, double projectedLength, boolean straightAtP1, double arcLenFactorStart, double arcLenFactorEnd) {
 
         double projectedLength2 = projectedLength * projectedLength;
 
@@ -120,7 +118,7 @@ public class CubicCurve {
                     0,
                     -projectedLength2 / (6.0 * radius));
 
-            return new CubicCurve(p1, ctrl1, ctrl2, p2);
+            return new CubicCurve(p1, ctrl1, ctrl2, p2, arcLenFactorStart, arcLenFactorEnd);
 
         } else {
 
@@ -150,7 +148,10 @@ public class CubicCurve {
                     rotation.apply(p1),
                     rotation.apply(ctrl1),
                     rotation.apply(ctrl2),
-                    rotation.apply(p2));
+                    rotation.apply(p2),
+                    arcLenFactorStart,
+                    arcLenFactorEnd
+            );
         }
     }
 
@@ -164,13 +165,10 @@ public class CubicCurve {
      * @param straightAtP1 {@code true} for Straight→Circular,
      *                     {@code false} for Circular→Straight.
      */
-    public static CubicCurve cubicParabolaByAngle(double radius,
-                                                  double angleDeg,
-                                                  boolean straightAtP1) {
-        double projectedLength =
-                2.0 * radius * Math.tan(Math.toRadians(angleDeg));
+    public static CubicCurve cubicParabolaByAngle(double radius, double angleDeg, boolean straightAtP1, double arcLenFactorStart, double arcLenFactorEnd) {
+        double projectedLength = 2.0 * radius * Math.tan(Math.toRadians(angleDeg));
 
-        return cubicParabola(radius, projectedLength, straightAtP1);
+        return cubicParabola(radius, projectedLength, straightAtP1, arcLenFactorStart, arcLenFactorEnd);
     }
 
     /**
@@ -243,9 +241,7 @@ public class CubicCurve {
      * @param farRadius Radius of the far circular arc.
      * @param projectedLength Projection length along the local x-axis.
      */
-    public static CubicCurve cubicParabola(double nearRadius,
-                                           double farRadius,
-                                           double projectedLength) {
+    public static CubicCurve cubicParabola(double nearRadius, double farRadius, double projectedLength, double arcLenFactorStart, double arcLenFactorEnd) {
 
         boolean nearRadiusIsSmaller = nearRadius > farRadius;
 
@@ -303,9 +299,7 @@ public class CubicCurve {
             ctrl2 = ctrl2.add(0, 0, -2.0 * ctrl2.z);
             p2 = p2.add(0, 0, -2.0 * p2.z);
 
-            rotation.rotate(
-                    -Math.atan(projectedLength * k / (2.0 * largeRadius)),
-                    0, 1, 0);
+            rotation.rotate(-Math.atan(projectedLength * k / (2.0 * largeRadius)), 0, 1, 0);
 
         } else {
 
@@ -332,16 +326,17 @@ public class CubicCurve {
                     0,
                     (1.0 - k3) * projectedLength2 / (6.0 * smallRadius));
 
-            rotation.rotate(
-                    Math.atan(projectedLength / (2.0 * smallRadius)),
-                    0, 1, 0);
+            rotation.rotate(Math.atan(projectedLength / (2.0 * smallRadius)), 0, 1, 0);
         }
 
         return new CubicCurve(
                 rotation.apply(p1),
                 rotation.apply(ctrl1),
                 rotation.apply(ctrl2),
-                rotation.apply(p2));
+                rotation.apply(p2),
+                arcLenFactorStart,
+                arcLenFactorEnd
+        );
     }
 
     /**
@@ -358,9 +353,7 @@ public class CubicCurve {
      * @throws IllegalArgumentException if the specified parameters cannot
      *                                  construct a valid cubic parabola.
      */
-    private static double solveProjectedLength(double nearRadius,
-                                               double farRadius,
-                                               double angleDeg) {
+    private static double solveProjectedLength(double nearRadius, double farRadius, double angleDeg) {
 
         if (!isCubicParabolaValid(nearRadius, farRadius, angleDeg))
             throw new IllegalArgumentException(
@@ -401,13 +394,13 @@ public class CubicCurve {
      * @throws IllegalArgumentException if the specified parameters cannot
      *                                  construct a valid cubic parabola.
      */
-    public static CubicCurve cubicParabolaByAngle(double nearRadius,
-                                                  double farRadius,
-                                                  double angleDeg) {
+    public static CubicCurve cubicParabolaByAngle(double nearRadius, double farRadius, double angleDeg, double arcLenFactorStart, double arcLenFactorEnd) {
         return cubicParabola(
                 nearRadius,
                 farRadius,
-                solveProjectedLength(nearRadius, farRadius, angleDeg)
+                solveProjectedLength(nearRadius, farRadius, angleDeg),
+                arcLenFactorStart,
+                arcLenFactorEnd
         );
     }
 

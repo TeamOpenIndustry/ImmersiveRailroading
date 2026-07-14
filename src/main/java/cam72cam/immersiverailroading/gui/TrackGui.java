@@ -187,7 +187,7 @@ public class TrackGui implements IScreen {
 				if(settings.type.hasFarRadius()) {
 					if(!isCubicParabolaInputValid(settings.length, settings.farRadius, settings.degrees)) toCubicParabola(settings, farRadiusLabel);
 				} else {
-					if(settings.length < 0) toNonCubicParabola(settings, farRadiusLabel);
+					if(settings.length < 0) toNonCubicParabola(settings, farRadiusLabel, lengthInput);
 				}
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -618,12 +618,13 @@ public class TrackGui implements IScreen {
 		return false;
 	}
 
-	private static void toNonCubicParabola(RailSettings.Mutable settings, Button farRadiusLabel) {
+	private static void toNonCubicParabola(RailSettings.Mutable settings, Button farRadiusLabel, TextField lengthInput) {
 		if(settings.length < 0) {
 			float tmp = settings.length;
 			settings.length = (int) Math.ceil(settings.farRadius);
 			settings.farRadius = tmp;
 			farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
+			lengthInput.setText("" + settings.length);
 		}
 	}
 

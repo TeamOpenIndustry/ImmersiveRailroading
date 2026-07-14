@@ -20,15 +20,15 @@ public class BuilderCubicParabola extends BuilderCubicCurve{
         }
         CubicCurve curve;
         if(info.settings.farRadius < 0){
-            curve = CubicCurve.cubicParabolaByAngle(info.settings.length, info.settings.degrees, false).apply(mat);
+            curve = CubicCurve.cubicParabolaByAngle(info.settings.length, info.settings.degrees, false, 0, 1).apply(mat);
         } else if(info.settings.length < 0) {
-            curve = CubicCurve.cubicParabolaByAngle(info.settings.farRadius, info.settings.degrees, true).apply(mat);
+            curve = CubicCurve.cubicParabolaByAngle(info.settings.farRadius, info.settings.degrees, true, 0, 1).apply(mat);
         } else {
-            curve = CubicCurve.cubicParabolaByAngle(info.settings.length, info.settings.farRadius, info.settings.degrees).apply(mat);
+            curve = CubicCurve.cubicParabolaByAngle(info.settings.length, info.settings.farRadius, info.settings.degrees, 0, 1).apply(mat);
         }
 
         double height = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
-        curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, height, 0), curve.p2.add(0, height, 0)).linearize(info.settings.smoothing);
+        curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, height, 0), curve.p2.add(0, height, 0), 0, 1).linearize(info.settings.smoothing);
         return curve;
     }
 }
