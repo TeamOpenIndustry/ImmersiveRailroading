@@ -116,6 +116,7 @@ gui.immersiverailroading:none=无
 gui.immersiverailroading:track.type=类型：%s
 gui.immersiverailroading:track.length=长度：%s
 gui.immersiverailroading:track.far_radius=远端半径%s
+gui.immersiverailroading:track.swap_radius=交换半径
 gui.immersiverailroading:track.gauge=轨距：%s
 gui.immersiverailroading:track.quarters=%s 度转弯
 gui.immersiverailroading:track.curvosity=%s 曲率

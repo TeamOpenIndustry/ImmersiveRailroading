@@ -116,6 +116,7 @@ gui.immersiverailroading:none=None
 gui.immersiverailroading:track.type=Type:      %s
 gui.immersiverailroading:track.length=Length:    %s
 gui.immersiverailroading:track.far_radius=Far Radius:%s
+gui.immersiverailroading:track.swap_radius=Swap Radius
 gui.immersiverailroading:track.gauge=Gauge:     %s
 gui.immersiverailroading:track.quarters=%s Degree Turn
 gui.immersiverailroading:track.curvosity=%s Curvosity
