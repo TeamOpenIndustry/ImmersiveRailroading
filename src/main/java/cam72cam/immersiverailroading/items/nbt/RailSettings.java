@@ -227,6 +227,26 @@ public class RailSettings {
                     transfertableEntrySpacing
             );
         }
+
+        public float getValidLength() {
+            return RailSettings.getValidLength(length, farRadius, type);
+        }
+    }
+
+    public float getValidLength() {
+        return getValidLength(length, farRadius, type);
+    }
+
+    private static float getValidLength(float length, float farRadius, TrackItems type) {
+        float res = length;
+        if(type.hasFarRadius()) {
+            if(length < 0) {
+                res = (int) Math.ceil(farRadius);
+            } else if(farRadius > 0) {
+                res = Math.clamp(length, 1, (int) Math.ceil(farRadius));
+            }
+        }
+        return res;
     }
 
     // This assumes that a null RailSettings is serialized.

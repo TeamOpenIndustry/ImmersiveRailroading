@@ -40,11 +40,10 @@ public class TileRail extends TileRailBase {
 			return IBoundingBox.ORIGIN;
 		}
 		if (boundingBox == null) {
-			int length = info.settings.length;
+			int length = (int) info.settings.getValidLength();
 			if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 				length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 			}
-			if(info.settings.type.hasFarRadius() && length < 0) length = (int) Math.ceil(info.settings.farRadius);// Is this enough for cubicParabola?
 			if (info.settings.type == TrackItems.TRANSFERTABLE) {
 				//It is rectangular and length&width may differ a lot
 				length = Math.max(info.settings.length, info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount);
@@ -144,7 +143,7 @@ public class TileRail extends TileRailBase {
 			}
 			if(shouldUpdate){
 				this.markDirty();
-				int maxRange = Math.max((int) Math.max(info.settings.length, Math.ceil(info.settings.farRadius)), info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount);// Is this enough for cubicParabola?
+				int maxRange = Math.max(info.settings.length, info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount);
 				List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < maxRange, EntityCoupleableRollingStock.class);
 				for(EntityCoupleableRollingStock stock : ents) {
 					stock.states.forEach(state -> state.dirty = true);

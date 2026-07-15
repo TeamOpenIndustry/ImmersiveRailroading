@@ -68,6 +68,7 @@ public class ItemRailAugment extends CustomItem {
 						case SWITCH:
 						case TURN:
 						case TURN_V2:
+						case CUBICPARABOLA:
 							return ClickResult.REJECTED;
 						default:
 							break;

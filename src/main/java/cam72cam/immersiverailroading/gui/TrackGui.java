@@ -187,6 +187,7 @@ public class TrackGui implements IScreen {
 				farRadiusLabel.setVisible(settings.type.hasFarRadius());
 				if(settings.type.hasFarRadius()) {
 					if(!isCubicParabolaInputValid(settings.length, settings.farRadius, settings.degrees)) toCubicParabola(settings, farRadiusLabel);
+					degreesSlider.onSlider();
 				} else {
 					if(settings.length < 0) toNonCubicParabola(settings, farRadiusLabel, lengthInput);
 				}
@@ -563,6 +564,28 @@ public class TrackGui implements IScreen {
 							: 0;
 		RailInfo info = new RailInfo(
 				settings.immutable().with(b -> {
+					if(b.type.hasFarRadius()) {
+						if(b.length < 0) {
+							if(b.farRadius < 5) b.farRadius = 5;
+						} else if(b.farRadius < 0) {
+							if(b.length < 5) b.length = 5;
+						} else {
+							if(b.length < b.farRadius) {
+								if(b.length < 5) {
+									float scale = 5f / b.length;
+									b.length = 5;
+									b.farRadius = (float) Math.ceil(b.farRadius * scale);
+								}
+							} else {
+								if(b.farRadius < 5) {
+									float scale = 5f / b.farRadius;
+									b.farRadius = 5;
+									b.length = (int) Math.ceil(b.length * scale);
+								}
+							}
+						}
+						return;
+					}
 					int length = b.length;
 					if (length < 5) {
 						length = 5;
@@ -575,7 +598,7 @@ public class TrackGui implements IScreen {
 				new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null),
 				null, SwitchState.NONE, SwitchState.NONE, tablePos, true);
 
-		int length = info.settings.length;
+		int length = (int) info.settings.getValidLength();
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;
 		if (settings.type.isTable()) {
 			scale /= 2;

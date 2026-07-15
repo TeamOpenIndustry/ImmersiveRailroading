@@ -23,12 +23,26 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	}
 	public static void render(ItemStack stack, World world, RenderState state) {
 		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null);
-		info = info.withSettings(b -> b.length = 10);
+
+		if(info.settings.type.hasFarRadius()) {
+			if(info.settings.length < 0) {
+				info = info.withSettings(b -> b.farRadius = 10);
+			} else if(info.settings.farRadius < 0) {
+				info = info.withSettings(b -> b.length = 10);
+			} else {
+				info = info.withSettings(b -> {
+					b.farRadius = 10;
+					b.length = 20;
+				});
+			}
+		} else {
+			info = info.withSettings(b -> b.length = 10);
+		}
 
 		state.cull_face(false);
 		state.lighting(false);
 
-		if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.TURN_V2 || info.settings.type == TrackItems.SWITCH) {
+		if (info.settings.type.hasQuarters()) {
 			state.translate(0, 0, -0.1 * (info.settings.degrees / 90 * 4));
 		}
 
@@ -36,8 +50,9 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 		state.rotate(-90, 1, 0, 0);
 
+		int length = (int) info.settings.getValidLength();
+		double scale = 0.95 / length;
 
-		double scale = 0.95 / info.settings.length;
 		if (info.settings.type == TrackItems.CROSSING) {
 			scale = 0.95 / 3;
 		}

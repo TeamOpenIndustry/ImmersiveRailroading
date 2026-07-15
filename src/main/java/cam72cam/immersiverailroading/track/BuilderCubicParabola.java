@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3i;
@@ -18,6 +19,12 @@ public class BuilderCubicParabola extends BuilderCubicCurve{
         if (info.placementInfo.direction == TrackDirection.LEFT) {
             mat.scale(1, 1, -1);
         }
+
+        if(info.settings.degrees > CubicCurve.cubicParabolaMaxAngle) {
+            ImmersiveRailroading.error("Invalid cubicParabola degree %s, convert to a safe value", info.settings.degrees);
+            info = info.withSettings(b -> b.degrees = 22.5f);
+        }
+
         CubicCurve curve;
         if(info.settings.farRadius < 0){
             curve = CubicCurve.cubicParabolaByAngle(info.settings.length, info.settings.degrees, false, 0, 1).apply(mat);
