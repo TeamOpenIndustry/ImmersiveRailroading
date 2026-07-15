@@ -975,7 +975,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
-		if (this.augment != null
+		if (this.getWorld().isClient && this.augment != null
 			&& player.hasPermission(Permissions.AUGMENT_TRACK)
 			&& !player.getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_ROLLING_STOCK)) {
 			GuiTypes.RAIL_AUGMENT.open(player, this.getPos());

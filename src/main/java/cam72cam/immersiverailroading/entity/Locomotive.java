@@ -199,7 +199,7 @@ public abstract class Locomotive extends FreightTank {
 			setTrainBrake(getTrainBrake() - trainBrakeNotch);
 			break;
 		case DEAD_MANS_SWITCH:
-			if (deadManChangeTimeout == 0) { 
+			if (deadManChangeTimeout == 0 && getWorld().isServer) {
 				deadMansSwitch = !deadMansSwitch;
 				if (deadMansSwitch) {
 					source.sendMessage(ChatText.DEADMANS_SWITCH_ENABLED.getMessage());
@@ -307,7 +307,7 @@ public abstract class Locomotive extends FreightTank {
 				data.write();
 			}
 			else {
-				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getDefinition().name()));;
+				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getDefinition().name()));
 			}
 			return ClickResult.ACCEPTED;
 		}
@@ -343,8 +343,11 @@ public abstract class Locomotive extends FreightTank {
 			}
 			
 			if (deadMansSwitch && !this.getCurrentSpeed().isZero()) {
-				boolean hasDriver = this.getPassengers().stream().anyMatch(Entity::isPlayer);
-				if (!hasDriver) {
+				boolean hasDriverOnTrain = getTrain().stream()
+											 .filter(t -> t instanceof Locomotive || t instanceof Tender)
+											 .flatMap(t -> t.getPassengers().stream())
+											 .anyMatch(Entity::isPlayer);
+				if (!hasDriverOnTrain) {
 					this.setThrottle(0);
 					this.setTrainBrake(1);
 				}
@@ -502,7 +505,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	public float getThrottleDelta() {
 		return 0.04F;
-	};
+	}
 
 	public float getReverser() {
 		return reverser;
