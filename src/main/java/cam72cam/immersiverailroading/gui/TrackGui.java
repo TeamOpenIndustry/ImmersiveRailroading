@@ -170,6 +170,7 @@ public class TrackGui implements IScreen {
 		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING)
+						.filter(i -> Config.ConfigBalance.EnableLegacyTurn || i != TrackItems.TURN)
 						.sorted(Comparator.comparingInt(TrackItems::getOrder))
 						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
 		) {
@@ -252,12 +253,15 @@ public class TrackGui implements IScreen {
 		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
-				float val = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
+				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
 				if(settings.type.hasFarRadius()) {
+					boolean shouldReset = false;
 					while(!isCubicParabolaInputValid(settings.length, settings.farRadius, val)) {
+						shouldReset = true;
 						val -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
 						if(Math.abs(val) < 1e-6) break;
 					}
+					if(shouldReset) degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
 				}
 				settings.degrees = val;
 				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));

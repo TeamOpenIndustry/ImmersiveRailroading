@@ -8,13 +8,13 @@ public enum TrackItems {
 	STRAIGHT(0),
 	CROSSING(1),
 	SLOPE(2),
-	TURN(3),// Legacy
-	SWITCH(4),
-	TURNTABLE(5),
-	CUSTOM(7),
-	TRANSFERTABLE(6),
-	CUBICPARABOLA(8),
-	TURN_V2(9);// TODO: BuilderSwitch
+	TURN(4),// Legacy
+	SWITCH(6),
+	TURNTABLE(7),
+	CUSTOM(9),
+	TRANSFERTABLE(8),
+	TURN_V2(3),// TODO: BuilderSwitch
+	CUBICPARABOLA(5);
 
 	private final int order;
 

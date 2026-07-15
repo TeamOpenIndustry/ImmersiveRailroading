@@ -177,12 +177,13 @@ immersiverailroading:plate.boiler=Boiler Plate
 track.immersiverailroading:class.straight=Straight
 track.immersiverailroading:class.crossing=Crossing
 track.immersiverailroading:class.slope=Slope
-track.immersiverailroading:class.turn=Turn
+track.immersiverailroading:class.turn_v2=Turn
+track.immersiverailroading:class.turn=Legacy Turn
+track.immersiverailroading:class.cubicparabola=Cubic Parabola
 track.immersiverailroading:class.turntable=Turn Table
 track.immersiverailroading:class.transfertable=Transfer Table
 track.immersiverailroading:class.switch=Switch
 track.immersiverailroading:class.custom=Custom Curve
-track.immersiverailroading:class.cubicparabola=Cubic Parabola
 
 track.immersiverailroading:position.fixed=Fixed
 track.immersiverailroading:position.pixels=Pixels
