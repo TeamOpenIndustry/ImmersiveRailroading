@@ -65,7 +65,7 @@ public class VecYPR extends Vec3d {
     @Override
     public VecYPR add(Vec3d other) {
         //Clear Roll value and others, just serve as a data holder
-        return new VecYPR(this.x + other.x, this.y + other.y, this.z + other.z, this.yaw, this.pitch, this.length);
+        return new VecYPR(this.x + other.x, this.y + other.y, this.z + other.z, this.yaw, this.pitch, 0, this.length);
     }
 
     public void addChild(VecYPR another) {
