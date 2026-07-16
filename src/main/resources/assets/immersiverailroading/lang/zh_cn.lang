@@ -115,7 +115,11 @@ gui.immersiverailroading:none=无
 
 gui.immersiverailroading:track.type=类型：%s
 gui.immersiverailroading:track.length=长度：%s
-gui.immersiverailroading:track.far_radius=远端半径%s
+gui.immersiverailroading:track.no_length=自动计算
+gui.immersiverailroading:track.radius=半径：%s
+gui.immersiverailroading:track.length_radius=长度/半径：%s
+gui.immersiverailroading:track.near_radius=近端半径：%s
+gui.immersiverailroading:track.far_radius=远端半径：%s
 gui.immersiverailroading:track.swap_radius=交换半径
 gui.immersiverailroading:track.gauge=轨距：%s
 gui.immersiverailroading:track.quarters=%s 度转弯

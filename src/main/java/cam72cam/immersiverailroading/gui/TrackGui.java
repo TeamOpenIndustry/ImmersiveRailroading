@@ -41,7 +41,6 @@ public class TrackGui implements IScreen {
 	private TileRailPreview te;
 	private int targetGuiOpenType;
 	private Button typeButton;
-	private TextField lengthInput;
 	private Slider degreesSlider;
 	private Slider curvositySlider;
 	private CheckBox isPreviewCB;
@@ -68,7 +67,11 @@ public class TrackGui implements IScreen {
 	private ListSelector<ItemStack> railBedSelector;
 	private ListSelector<ItemStack> railBedFillSelector;
 
-	//spiralCurve
+	// Length / Radius / Near Radius
+	private TextField lengthInput;
+	private Button lengthLabel;
+
+	// Transition Curve (Cubic Parabola)
 	private TextField farRadiusInput;
 	private Button farRadiusLabel;
 
@@ -107,7 +110,11 @@ public class TrackGui implements IScreen {
 		int height = 20;
 		int xtop = -GUIHelpers.getScreenWidth() / 2;
 		int ytop = -GUIHelpers.getScreenHeight() / 4;
-        this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
+
+		this.lengthLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, getLengthLabelType(settings));
+		this.lengthLabel.setEnabled(false);
+
+        this.lengthInput = new TextField(screen, xtop + width / 2 + 10, ytop, width / 2 - 10, height);
         this.lengthInput.setText("" + settings.length);
         this.lengthInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -121,19 +128,24 @@ public class TrackGui implements IScreen {
                 return false;
             }
             int max = 1000;
-            if (settings.type.isTable()) {
+			if(settings.type.hasQuarters()) {
+				max = Config.ConfigBalance.MaxLengthInput;
+			}
+            if(settings.type.isTable()) {
                 max = settings.type == TrackItems.TURNTABLE
                       ? BuilderTurnTable.maxLength(settings.gauge)
                       : BuilderTransferTable.maxLength(settings.gauge);
             }
 			if(settings.type.hasFarRadius()) {
-				if (val < max && isCubicParabolaInputValid(val, settings.farRadius, settings.degrees)) {
+				if (val <= max && isCubicParabolaInputValid(val, settings.farRadius, settings.degrees)) {
 					settings.length = val;
+					lengthLabel.setText(getLengthLabelType(settings));
 					return true;
 				}
 			} else {
 				if (val > 0 && val <= max) {
 					settings.length = val;
+					lengthLabel.setText(getLengthLabelType(settings));
 					return true;
 				}
 			}
@@ -177,20 +189,28 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(TrackItems option) {
 				settings.type = option;
+
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				degreesSlider.setVisible(settings.type.hasQuarters());
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				trackExtraGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
-				farRadiusInput.setVisible(settings.type.hasFarRadius());
-				farRadiusLabel.setVisible(settings.type.hasFarRadius());
+
 				if(settings.type.hasFarRadius()) {
-					if(!isCubicParabolaInputValid(settings.length, settings.farRadius, settings.degrees)) toCubicParabola(settings, farRadiusLabel, farRadiusInput);
+					if(!isCubicParabolaInputValid(settings.length, settings.farRadius, settings.degrees)) toCubicParabola(settings);
 					degreesSlider.onSlider();
 				} else {
-					if(settings.length < 0) toNonCubicParabola(settings, farRadiusLabel, lengthInput, farRadiusInput);
+					if(settings.length < 0) toNonCubicParabola(settings);
 				}
+
+				lengthInput.setText("" + settings.length);
+				lengthLabel.setText(getLengthLabelType(settings));
+				farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
+				farRadiusInput.setText("" + (int) settings.farRadius);
+				farRadiusInput.setVisible(settings.type.hasFarRadius());
+				farRadiusLabel.setVisible(settings.type.hasFarRadius());
+
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
@@ -271,7 +291,7 @@ public class TrackGui implements IScreen {
 		degreesSlider.onSlider();
 		ytop += height;
 
-		farRadiusLabel = new Button(screen, xtop, ytop, width / 2, height, GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius)) {
+		farRadiusLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius)) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				float temp = settings.farRadius;
@@ -284,7 +304,7 @@ public class TrackGui implements IScreen {
 		};
 		farRadiusLabel.setTooltip(List.of(GuiText.TRACK_SWAP_RADIUS.toString()));
 
-		farRadiusInput = new TextField(screen, xtop + width / 2, ytop, width / 2, height);
+		farRadiusInput = new TextField(screen, xtop + width / 2 + 10, ytop, width / 2 - 10, height);
 		farRadiusInput.setText("" + (int) settings.farRadius);
 		farRadiusInput.setValidator(s -> {
 			if (s == null || s.length() == 0) {
@@ -297,9 +317,9 @@ public class TrackGui implements IScreen {
 				if(s.equals("-")) return true;
 				return false;
 			}
-			int max = 0x3f3f3f3f;
+			int max = Config.ConfigBalance.MaxLengthInput;
 
-			if (val < max && isCubicParabolaInputValid(settings.length, val, settings.degrees)) {
+			if (val <= max && isCubicParabolaInputValid(settings.length, val, settings.degrees)) {
 				settings.farRadius = val;
 				farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
 				return true;
@@ -658,22 +678,38 @@ public class TrackGui implements IScreen {
 		return false;
 	}
 
-	private static void toNonCubicParabola(RailSettings.Mutable settings, Button farRadiusLabel, TextField lengthInput, TextField farRadiusInput) {
+	private static void toNonCubicParabola(RailSettings.Mutable settings) {
 		if(settings.length < 0) {
 			float tmp = settings.length;
 			settings.length = (int) Math.ceil(settings.farRadius);
 			settings.farRadius = tmp;
-			farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
-			lengthInput.setText("" + settings.length);
-			farRadiusInput.setText("" + (int) settings.farRadius);
 		}
 	}
 
-	private static void toCubicParabola(RailSettings.Mutable settings, Button farRadiusLabel, TextField farRadiusInput) {
+	private static void toCubicParabola(RailSettings.Mutable settings) {
 		if(!isCubicParabolaInputValid(settings.length, settings.farRadius, settings.degrees)) {
 			settings.farRadius = -1;
-			farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
-			farRadiusInput.setText("" + (int) settings.farRadius);
+		}
+	}
+
+	private static String getLengthLabelType(RailSettings.Mutable settings) {
+		switch (settings.type) {
+			case STRAIGHT:
+			case SLOPE:
+			case TRANSFERTABLE:
+			case CUSTOM:
+				return GuiText.TRACK_LENGTH.toString(settings.length);
+			case TURN:
+			case TURN_V2:
+			case TURNTABLE:
+				return GuiText.TRACK_RADIUS.toString(settings.length);
+			case CUBICPARABOLA:
+				return GuiText.TRACK_NEAR_RADIUS.toString(settings.length);
+			case SWITCH:
+				return GuiText.TRACK_LENGTH_RADIUS.toString(settings.length);
+			case CROSSING:
+			default:
+				return GuiText.TRACK_NO_LENGTH.toString();
 		}
 	}
 }
