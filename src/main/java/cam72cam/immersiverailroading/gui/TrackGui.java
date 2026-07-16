@@ -190,6 +190,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(TrackItems option) {
 				settings.type = option;
+				settings.pickType = option;
 
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				degreesSlider.setVisible(settings.type.hasQuarters());

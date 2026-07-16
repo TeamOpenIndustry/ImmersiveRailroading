@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 public class RailSettings {
     public final Gauge gauge;
     public final TrackItems type;
+    public final TrackItems pickType;
     public final int length;
     public final float farRadius;
     public final float degrees;
@@ -31,10 +32,11 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, int length, float farRadius, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, TrackItems pickType, int length, float farRadius, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
+        this.pickType = pickType;
         this.length = length;
         this.farRadius = farRadius;
         this.degrees = degrees;
@@ -122,6 +124,8 @@ public class RailSettings {
         public Gauge gauge;
         @TagField("type")
         public TrackItems type;
+        @TagField("pickType")
+        public TrackItems pickType;
         @TagField("length")
         public int length;
         @TagField("farRadius")
@@ -165,6 +169,7 @@ public class RailSettings {
             pickRollAndOffsetInfo = settings.pickRollAndOffsetInfo;
 
             this.type = settings.type;
+            this.pickType = settings.pickType;
             this.length = settings.length;
             this.farRadius = settings.farRadius;
             this.degrees = settings.degrees;
@@ -184,6 +189,7 @@ public class RailSettings {
             // Defaults
             gauge = Gauge.from(Gauge.STANDARD);
             type = TrackItems.STRAIGHT;
+            pickType = type;
             track = "default";
             rollAndOffsetInfo = null;
             pickRollAndOffsetInfo = rollAndOffsetInfo;
@@ -210,6 +216,7 @@ public class RailSettings {
                     gauge,
                     track,
                     type,
+                    pickType,
                     length,
                     farRadius,
                     degrees,
