@@ -70,6 +70,7 @@ public class TrackGui implements IScreen {
 	// Length / Radius / Near Radius
 	private TextField lengthInput;
 	private Button lengthLabel;
+	private static int maxStraightLengthInput = 1000;
 
 	// Transition Curve (Cubic Parabola)
 	private TextField farRadiusInput;
@@ -127,7 +128,7 @@ public class TrackGui implements IScreen {
 				if(settings.type.hasFarRadius() && s.equals("-")) return true;
                 return false;
             }
-            int max = 1000;
+            int max = maxStraightLengthInput;
 			if(settings.type.hasQuarters()) {
 				max = Config.ConfigBalance.MaxLengthInput;
 			}
@@ -204,8 +205,13 @@ public class TrackGui implements IScreen {
 					if(settings.length < 0) toNonCubicParabola(settings);
 				}
 
-				lengthInput.setText("" + settings.length);
+				if(!settings.type.hasQuarters()) {
+					settings.length = Math.min(maxStraightLengthInput, settings.length);
+				}
+
 				lengthLabel.setText(getLengthLabelType(settings));
+				lengthInput.setText("" + settings.length);
+
 				farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
 				farRadiusInput.setText("" + (int) settings.farRadius);
 				farRadiusInput.setVisible(settings.type.hasFarRadius());
