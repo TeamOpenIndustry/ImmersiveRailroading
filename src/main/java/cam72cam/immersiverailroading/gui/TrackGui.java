@@ -213,7 +213,7 @@ public class TrackGui implements IScreen {
 				lengthLabel.setText(getLengthLabelType(settings));
 				lengthInput.setText("" + settings.length);
 
-				farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
+				farRadiusLabel.setText(GuiText.TRACK_LABEL_FAR_RADIUS.toString());
 				farRadiusInput.setText("" + (int) settings.farRadius);
 				farRadiusInput.setVisible(settings.type.hasFarRadius());
 				farRadiusLabel.setVisible(settings.type.hasFarRadius());
@@ -298,13 +298,13 @@ public class TrackGui implements IScreen {
 		degreesSlider.onSlider();
 		ytop += height;
 
-		farRadiusLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius)) {
+		farRadiusLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, GuiText.TRACK_LABEL_FAR_RADIUS.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				float temp = settings.farRadius;
 				settings.farRadius = settings.length;
 				settings.length = (int) temp;
-				farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
+				farRadiusLabel.setText(GuiText.TRACK_LABEL_FAR_RADIUS.toString());
 				lengthInput.setText("" + settings.length);
 				farRadiusInput.setText("" + (int) settings.farRadius);
 			}
@@ -328,7 +328,7 @@ public class TrackGui implements IScreen {
 
 			if (val <= max && isCubicParabolaInputValid(settings.length, val, settings.degrees)) {
 				settings.farRadius = val;
-				farRadiusLabel.setText(GuiText.TRACK_FAR_RADIUS.toString(settings.farRadius));
+				farRadiusLabel.setText(GuiText.TRACK_LABEL_FAR_RADIUS.toString());
 				return true;
 			}
 
@@ -705,18 +705,18 @@ public class TrackGui implements IScreen {
 			case SLOPE:
 			case TRANSFERTABLE:
 			case CUSTOM:
-				return GuiText.TRACK_LENGTH.toString(settings.length);
+				return GuiText.TRACK_LABEL_LENGTH.toString();
 			case TURN:
 			case TURN_V2:
 			case TURNTABLE:
-				return GuiText.TRACK_RADIUS.toString(settings.length);
+				return GuiText.TRACK_LABEL_RADIUS.toString();
 			case CUBICPARABOLA:
-				return GuiText.TRACK_NEAR_RADIUS.toString(settings.length);
+				return GuiText.TRACK_LABEL_NEAR_RADIUS.toString();
 			case SWITCH:
-				return GuiText.TRACK_LENGTH_RADIUS.toString(settings.length);
+				return GuiText.TRACK_LABEL_LENGTH_RADIUS.toString();
 			case CROSSING:
 			default:
-				return GuiText.TRACK_NO_LENGTH.toString();
+				return GuiText.TRACK_LABEL_NO_LENGTH.toString();
 		}
 	}
 }
