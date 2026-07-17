@@ -127,8 +127,8 @@ public class TrackGui implements IScreen {
             } catch (NumberFormatException e) {
                 return false;
             }
-            int max = Config.ConfigBalance.MaxLengthInput;
-            if(settings.type.isTable()) {
+            int max = 1000;
+            if (settings.type.isTable()) {
                 max = settings.type == TrackItems.TURNTABLE
                       ? BuilderTurnTable.maxLength(settings.gauge)
                       : BuilderTransferTable.maxLength(settings.gauge);
@@ -300,7 +300,7 @@ public class TrackGui implements IScreen {
 				if(s.equals("-")) return true;
 				return false;
 			}
-			int max = Config.ConfigBalance.MaxLengthInput;
+			int max = 1000;
 
 			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(val, settings.farPointData.radius(), settings.degrees)) {
 				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = val);
@@ -324,7 +324,7 @@ public class TrackGui implements IScreen {
 				if(s.equals("-")) return true;
 				return false;
 			}
-			int max = Config.ConfigBalance.MaxLengthInput;
+			int max = 1000;
 
 			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(settings.nearPointData.radius(), val, settings.degrees)) {
 				settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = val);

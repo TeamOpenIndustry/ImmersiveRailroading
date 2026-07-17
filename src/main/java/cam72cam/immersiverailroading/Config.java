@@ -211,10 +211,6 @@ public class Config {
 		@Comment("Prevent stock from being built outside the recommended and model gauges")
 		public static boolean DesignGaugeLock = false;
 
-		@Comment("Max Length Input")
-		@Range(min = 1000, max = 50000)
-		public static int MaxLengthInput = 1000;
-
 		@Comment("Angle Placement Segmentation")
 		@Range(min = 1, max = 90)
 		public static int AnglePlacementSegmentation = 4;
