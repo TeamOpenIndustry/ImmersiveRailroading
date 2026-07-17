@@ -120,7 +120,7 @@ gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click to cycle
 gui.immersiverailroading:none=None
 
 gui.immersiverailroading:track.type=Type:      %s
-gui.immersiverailroading:track.length=Length:%s
+gui.immersiverailroading:track.length=Length:    %s
 gui.immersiverailroading:track.gauge=Gauge:     %s
 gui.immersiverailroading:track.quarters=%s Degree Turn
 gui.immersiverailroading:track.curvosity=%s Curvosity

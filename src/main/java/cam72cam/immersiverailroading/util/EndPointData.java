@@ -6,55 +6,30 @@ import java.util.function.Consumer;
 
 @TagMapped(EndPointData.TagMapper.class)
 public record EndPointData (
-        float radius,
-        float pitch,
-        boolean pitchDegreeMode,
-        float heightOffset) {
-    public EndPointData(float radius, float pitch, boolean pitchDegreeMode, float heightOffset) {
-        this.radius = radius;
-        this.pitch = pitch;
-        this.pitchDegreeMode = pitchDegreeMode;
-        this.heightOffset = heightOffset;
-    }
-
+        float radius) {
     public EndPointData(float radius) {
-        this(radius, 0F, false, 0.0F);
+        this.radius = radius;
     }
 
     public static class Mutable {
         @TagField("radius")
         public float radius;
-        @TagField("pitch")
-        public float pitch;
-        @TagField("pitchDegreeMode")
-        public boolean pitchDegreeMode;
-        @TagField("heightOffset")
-        public float heightOffset;
 
         public Mutable(EndPointData endPointData) {
             this.radius = endPointData.radius;
-            this.pitch = endPointData.pitch;
-            this.pitchDegreeMode = endPointData.pitchDegreeMode;
-            this.heightOffset = endPointData.heightOffset;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
             // Defaults
             EndPointData endPointData = new EndPointData(10);
             this.radius = endPointData.radius;
-            this.pitch = endPointData.pitch;
-            this.pitchDegreeMode = endPointData.pitchDegreeMode;
-            this.heightOffset = endPointData.heightOffset;
 
             TagSerializer.deserialize(data, this);
         }
 
         public EndPointData immutable() {
             return new EndPointData(
-                    radius,
-                    pitch,
-                    pitchDegreeMode,
-                    heightOffset
+                    radius
             );
         }
     }
