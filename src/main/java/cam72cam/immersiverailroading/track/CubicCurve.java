@@ -214,22 +214,6 @@ public class CubicCurve {
         return angleDeg > 0 && angleDeg < cubicParabolaMaxAngle;
     }
 
-    //    Matlab Script:
-    //    R = 300;
-    //    R2 = 1000;
-    //    k = R/R2;
-    //    L = 40;
-    //    piece = L*(1-k)/3;
-    //    a = 1/(6*R*L);
-    //
-    //    x = linspace(0,L,500);
-    //    y_th = a*x.^3;
-    //
-    //    P0 = [k*L k^3*L^2/(6*R)];
-    //    P1 = [k*L+piece k^3*L^2/(6*R)+piece*k^2*L/(2*R)];
-    //    P2 = [k*L+piece*2  L^2/(6*R)-piece*L/(2*R)];
-    //    P3 = [L      L^2/(6*R)];
-
     /**
      * Constructs the exact Bézier representation of a cubic parabola
      * between two circular arcs.
