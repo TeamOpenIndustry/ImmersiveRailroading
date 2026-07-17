@@ -303,7 +303,7 @@ public class TrackGui implements IScreen {
 			}
 			int max = Config.ConfigBalance.MaxLengthInput;
 
-			if (val <= max && isCubicParabolaInputValid(val, settings.farPointData.radius(), settings.degrees)) {
+			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(val, settings.farPointData.radius(), settings.degrees)) {
 				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = val);
 				return true;
 			}
@@ -327,7 +327,7 @@ public class TrackGui implements IScreen {
 			}
 			int max = Config.ConfigBalance.MaxLengthInput;
 
-			if (val <= max && isCubicParabolaInputValid(settings.nearPointData.radius(), val, settings.degrees)) {
+			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(settings.nearPointData.radius(), val, settings.degrees)) {
 				settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = val);
 				return true;
 			}
