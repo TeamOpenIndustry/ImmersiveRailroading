@@ -127,7 +127,7 @@ public class TrackGui implements IScreen {
             } catch (NumberFormatException e) {
                 return false;
             }
-            int max = Config.ConfigBalance.MaxLengthInput;//TODO: we need really length of current rail
+            int max = Config.ConfigBalance.MaxLengthInput;
             if(settings.type.isTable()) {
                 max = settings.type == TrackItems.TURNTABLE
                       ? BuilderTurnTable.maxLength(settings.gauge)
