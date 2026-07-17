@@ -99,7 +99,7 @@ public enum TrackItems {
 		}
 	}
 
-	public boolean hasFarRadius() {
+	public boolean isTransitionCurve() {
 		switch (this) {
 			case CUBICPARABOLA:
 				return true;

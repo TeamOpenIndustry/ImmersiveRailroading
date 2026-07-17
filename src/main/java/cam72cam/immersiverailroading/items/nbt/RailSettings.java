@@ -246,7 +246,7 @@ public class RailSettings {
 
     private static float getValidLength(float length, float farRadius, TrackItems type) {
         float res = length;
-        if(type.hasFarRadius()) {
+        if(type.isTransitionCurve()) {
             if(length < 0) {
                 res = (int) Math.ceil(farRadius);
             } else if(farRadius > 0) {
