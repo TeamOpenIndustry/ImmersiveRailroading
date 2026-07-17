@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.items.nbt;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.*;
+import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.serialization.*;
@@ -14,9 +15,10 @@ public class RailSettings {
     public final TrackItems type;
     public final TrackItems pickType;
     public final int length;
-    public final float farRadius;
     public final float degrees;
     public final float curvosity;
+    public final EndPointData nearPointData;
+    public final EndPointData farPointData;
     // Info of this segment
     public final RollAndOffsetInfo rollAndOffsetInfo;
     // Full info when picking items
@@ -32,16 +34,17 @@ public class RailSettings {
     public final int transfertableEntryCount;
     public final int transfertableEntrySpacing;
 
-    public RailSettings(Gauge gauge, String track, TrackItems type, TrackItems pickType, int length, float farRadius, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
+    public RailSettings(Gauge gauge, String track, TrackItems type, TrackItems pickType, int length, float degrees, float curvosity, TrackPositionType posType, TrackSmoothing smoothing, EndPointData nearPointData, EndPointData farPointData, RollAndOffsetInfo rollAndOffsetInfo, RollAndOffsetInfo pickRollAndOffsetInfo, TrackDirection direction, ItemStack railBed, ItemStack railBedFill, boolean isPreview, boolean isGradeCrossing, int count, int spacing) {
         this.gauge = gauge;
         this.track = track;
         this.type = type;
         this.pickType = pickType;
         this.length = length;
-        this.farRadius = farRadius;
         this.degrees = degrees;
         this.posType = posType;
         this.smoothing = smoothing;
+        this.nearPointData = nearPointData;
+        this.farPointData = farPointData;
         this.rollAndOffsetInfo = rollAndOffsetInfo;
         this.pickRollAndOffsetInfo = pickRollAndOffsetInfo;
         this.direction = direction;
@@ -128,8 +131,6 @@ public class RailSettings {
         public TrackItems pickType;
         @TagField("length")
         public int length;
-        @TagField("farRadius")
-        public float farRadius;
         @TagField(value = "degrees", mapper = DegreesMapper.class)
         public float degrees;
         @TagField("curvosity")
@@ -151,6 +152,10 @@ public class RailSettings {
         @TagField("track")
         public String track;
 
+        @TagField("nearPointData")
+        public EndPointData nearPointData;
+        @TagField("farPointData")
+        public EndPointData farPointData;
         @TagField("rollAndOffsetInfo")
         public RollAndOffsetInfo rollAndOffsetInfo;
         @TagField("pickRollAndOffsetInfo")
@@ -165,13 +170,14 @@ public class RailSettings {
             this.gauge = settings.gauge;
             this.track = settings.track;
 
-            rollAndOffsetInfo = settings.rollAndOffsetInfo;
-            pickRollAndOffsetInfo = settings.pickRollAndOffsetInfo;
+            this.nearPointData = settings.nearPointData;
+            this.farPointData = settings.farPointData;
+            this.rollAndOffsetInfo = settings.rollAndOffsetInfo;
+            this.pickRollAndOffsetInfo = settings.pickRollAndOffsetInfo;
 
             this.type = settings.type;
             this.pickType = settings.pickType;
             this.length = settings.length;
-            this.farRadius = settings.farRadius;
             this.degrees = settings.degrees;
             this.curvosity = settings.curvosity;
             this.posType = settings.posType;
@@ -191,11 +197,13 @@ public class RailSettings {
             type = TrackItems.STRAIGHT;
             pickType = type;
             track = "default";
+
+            nearPointData = new EndPointData(0);
+            farPointData = new EndPointData(10);
             rollAndOffsetInfo = null;
             pickRollAndOffsetInfo = rollAndOffsetInfo;
 
             length = 10;
-            farRadius = -1;
             degrees = 90;
             posType = TrackPositionType.FIXED;
             smoothing = TrackSmoothing.BOTH;
@@ -218,11 +226,12 @@ public class RailSettings {
                     type,
                     pickType,
                     length,
-                    farRadius,
                     degrees,
                     curvosity,
                     posType,
                     smoothing,
+                    nearPointData,
+                    farPointData,
                     rollAndOffsetInfo,
                     pickRollAndOffsetInfo,
                     direction,
@@ -235,23 +244,24 @@ public class RailSettings {
             );
         }
 
-        public float getValidLength() {
-            return RailSettings.getValidLength(length, farRadius, type);
+        public float getValidSize() {
+            return RailSettings.getValidSize(nearPointData.radius(), farPointData.radius(), length, type);
         }
     }
 
-    public float getValidLength() {
-        return getValidLength(length, farRadius, type);
+    public float getValidSize() {
+        return getValidSize(nearPointData.radius(), farPointData.radius(), length, type);
     }
 
-    private static float getValidLength(float length, float farRadius, TrackItems type) {
-        float res = length;
-        if(type.isTransitionCurve()) {
-            if(length < 0) {
-                res = (int) Math.ceil(farRadius);
-            } else if(farRadius > 0) {
-                res = Math.clamp(length, 1, (int) Math.ceil(farRadius));
-            }
+    private static float getValidSize(float nearRadius, float farRadius, float length, TrackItems type) {
+        if(!type.isTransitionCurve()) return length;
+        float res;
+        if (Math.abs(nearRadius) < 1e-6) {
+            res = (int) Math.ceil(farRadius);
+        } else if (Math.abs(farRadius) < 1e-6) {
+            res = (int) Math.ceil(nearRadius);
+        } else {
+            res = Math.min(nearRadius, farRadius);
         }
         return res;
     }

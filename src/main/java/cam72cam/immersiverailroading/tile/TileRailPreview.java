@@ -72,7 +72,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		this.customInfo = info;
 		if (customInfo != null) {
 			RailSettings settings = RailSettings.from(item);
-			if(settings.type ==TrackItems.TURN || settings.type == TrackItems.TURN_V2
+			if(settings.type == TrackItems.TURN || settings.type == TrackItems.TURN_V2
 				|| settings.type == TrackItems.STRAIGHT
 				|| settings.type == TrackItems.SLOPE){
 				Vec3d placeOffset = new Vec3d(
