@@ -140,6 +140,7 @@ public class TrackGui implements IScreen {
             return false;
         });
         this.lengthInput.setFocused(true);
+		lengthInput.setEnabled(!settings.type.isTransitionCurve());
 		ytop += height;
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
@@ -186,9 +187,7 @@ public class TrackGui implements IScreen {
 				directionButton.setVisible(settings.type.hasDirection());
 
 				lengthLabel.setText(getLengthLabelType(settings));
-
-				nearRadiusInput.setText("" + (int) settings.nearPointData.radius());//TODO: remove?
-				farRadiusInput.setText("" + (int) settings.farPointData.radius());
+				lengthInput.setEnabled(!settings.type.isTransitionCurve());
 
 				nearRadiusInput.setVisible(settings.type.isTransitionCurve());
 				farRadiusInput.setVisible(settings.type.isTransitionCurve());
@@ -274,7 +273,7 @@ public class TrackGui implements IScreen {
 		degreesSlider.onSlider();
 		ytop += height;
 
-		transitionRadiusLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, GuiText.TRACK_LABEL_TRANSITION_RADIUS.toString()) {
+		transitionRadiusLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, GuiText.LABEL_TRANSITION_RADIUS.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				float temp = settings.farPointData.radius();
@@ -286,7 +285,7 @@ public class TrackGui implements IScreen {
 				farRadiusInput.setText("" + (int) settings.farPointData.radius());
 			}
 		};
-		transitionRadiusLabel.setTooltip(List.of(GuiText.TRACK_SWAP_RADIUS.toString()));
+		transitionRadiusLabel.setTooltip(List.of(GuiText.LABEL_SWAP_RADIUS.toString()));
 
 		nearRadiusInput = new TextField(screen, xtop + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
 		nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
@@ -670,17 +669,16 @@ public class TrackGui implements IScreen {
 			case SLOPE:
 			case TRANSFERTABLE:
 			case CUSTOM:
-				return GuiText.TRACK_LABEL_LENGTH.toString();
+				return GuiText.LABEL_LENGTH.toString();
 			case TURN:
 			case TURN_V2:
 			case TURNTABLE:
-				return GuiText.TRACK_LABEL_RADIUS.toString();
+				return GuiText.LABEL_RADIUS.toString();
 			case SWITCH:
-				return GuiText.TRACK_LABEL_LENGTH_RADIUS.toString();
+				return GuiText.LABEL_LENGTH_RADIUS.toString();
 			case CUBICPARABOLA:
-			case CROSSING:
 			default:
-				return GuiText.TRACK_LABEL_NO_LENGTH.toString();
+				return GuiText.LABEL_NO_LENGTH.toString();
 		}
 	}
 }
