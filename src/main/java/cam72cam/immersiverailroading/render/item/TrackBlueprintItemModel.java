@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.render.item;
 
+import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
@@ -88,7 +89,9 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 			}
 		}
 
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0)), null);
+		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0));
+		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(stack).nearPointData.heightOffset());
+		RailInfo info = new RailInfo(stack, placementInfo, null);
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {

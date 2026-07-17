@@ -76,6 +76,11 @@ public class TrackGui implements IScreen {
 	private TextField farRadiusInput;
 	private Button transitionRadiusLabel;
 
+    // Height Offset
+	private TextField nearHeightOffsetInput;
+	private TextField farHeightOffsetInput;
+	private Button heightOffsetLabel;
+
 	private double zoom = 1;
 
 	public TrackGui() {
@@ -141,6 +146,54 @@ public class TrackGui implements IScreen {
         });
         this.lengthInput.setFocused(true);
 		lengthInput.setEnabled(!settings.type.isTransitionCurve());
+
+		heightOffsetLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, GuiText.LABEL_HEIGHT_OFFSET.toString());
+		heightOffsetLabel.setTooltip(List.of(GuiText.LABEL_RESET_HEIGHT_OFFSET.toString()));
+
+		nearHeightOffsetInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
+		nearHeightOffsetInput.setText("" + settings.nearPointData.heightOffset());
+		nearHeightOffsetInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) {
+				return true;
+			}
+			float val;
+			try {
+				val = Float.parseFloat(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			float max = 0.5f;
+			float min = -0.5f;
+			if (val >= min && val <= max) {
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.heightOffset = val);
+				return true;
+			}
+			return false;
+		});
+		nearHeightOffsetInput.setFocused(true);
+
+		farHeightOffsetInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10 + (width / 2 - 10) / 2, ytop, (width / 2 - 10) / 2, height);
+		farHeightOffsetInput.setText("" + settings.farPointData.heightOffset());
+		farHeightOffsetInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) {
+				return true;
+			}
+			float val;
+			try {
+				val = Float.parseFloat(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			float max = 1.0f;
+			float min = 0.0f;
+			if (val >= min && val <= max) {
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.heightOffset = val);
+				return true;
+			}
+			return false;
+		});
+		farHeightOffsetInput.setFocused(true);
+
 		ytop += height;
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,

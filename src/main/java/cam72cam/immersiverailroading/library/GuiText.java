@@ -12,6 +12,8 @@ public enum GuiText {
 	LABEL_LENGTH_RADIUS("label.length_radius"),
 	LABEL_TRANSITION_RADIUS("label.transition_radius"),
 	LABEL_SWAP_RADIUS("label.swap_radius"),
+	LABEL_HEIGHT_OFFSET("label.height_offset"),
+	LABEL_RESET_HEIGHT_OFFSET("label.reset_height_offset"),
 	SLIDER_ZOOM("slider.zoom"), //Need colon
 	SELECTOR_PAGE("selector.page"),
 	SELECTOR_TYPE("selector.type"),

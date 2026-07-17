@@ -148,7 +148,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		return IBoundingBox.INFINITE;
 	}
 
-	public RailInfo getRailRenderInfo() {
+	public RailInfo getRailRenderInfo() {// Not only for render, but also for build!
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
 			info = new RailInfo(item, placementInfo, customInfo);
 		}
@@ -158,6 +158,10 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public void markDirty() {
 		super.markDirty();
+
+		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(item).nearPointData.heightOffset());
+		customInfo = customInfo == null ? null : customInfo.withFloorYoffset(RailSettings.from(item).farPointData.heightOffset());
+
         info = new RailInfo(item, placementInfo, customInfo);
         if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();

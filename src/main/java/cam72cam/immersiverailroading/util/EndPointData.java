@@ -6,30 +6,41 @@ import java.util.function.Consumer;
 
 @TagMapped(EndPointData.TagMapper.class)
 public record EndPointData (
-        float radius) {
-    public EndPointData(float radius) {
+        float radius,
+        float heightOffset) {
+    public EndPointData(float radius, float heightOffset) {
         this.radius = radius;
+        this.heightOffset = heightOffset;
+    }
+
+    public EndPointData(float radius) {
+        this(radius, 0f);
     }
 
     public static class Mutable {
         @TagField("radius")
         public float radius;
+        @TagField("heightOffset")
+        public float heightOffset;
 
         public Mutable(EndPointData endPointData) {
             this.radius = endPointData.radius;
+            this.heightOffset = endPointData.heightOffset;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
             // Defaults
             EndPointData endPointData = new EndPointData(10);
             this.radius = endPointData.radius;
+            this.heightOffset = endPointData.heightOffset;
 
             TagSerializer.deserialize(data, this);
         }
 
         public EndPointData immutable() {
             return new EndPointData(
-                    radius
+                    radius,
+                    heightOffset
             );
         }
     }
