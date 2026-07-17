@@ -147,7 +147,15 @@ public class TrackGui implements IScreen {
         this.lengthInput.setFocused(true);
 		lengthInput.setEnabled(!settings.type.isTransitionCurve());
 
-		heightOffsetLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, GuiText.LABEL_HEIGHT_OFFSET.toString());
+		heightOffsetLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, GuiText.LABEL_HEIGHT_OFFSET.toString()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.heightOffset = 0);
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.heightOffset = 0);
+				nearHeightOffsetInput.setText("" + settings.nearPointData.heightOffset());
+				farHeightOffsetInput.setText("" + settings.farPointData.heightOffset());
+			}
+		};
 		heightOffsetLabel.setTooltip(List.of(GuiText.LABEL_RESET_HEIGHT_OFFSET.toString()));
 
 		nearHeightOffsetInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
