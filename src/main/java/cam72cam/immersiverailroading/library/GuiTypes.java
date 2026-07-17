@@ -38,13 +38,13 @@ public class GuiTypes {
     public static final BlockGUI CASTING = GuiRegistry.registerBlock(TileMultiblock.class, GuiTypes::createMultiblockScreen);
     public static final BlockGUI PLATE_ROLLER = CASTING;
     private static IScreen createMultiblockScreen(TileMultiblock mb) {
-        if (!mb.isLoaded()) {
+        if (!mb.isLoaded() || mb.getName() == null) {
             return null;
         }
         return switch (mb.getName()) {
             case CastingMultiblock.NAME -> new CastingGUI(mb);
             case PlateRollerMultiblock.NAME -> new PlateRollerGUI(mb);
-            case null, default -> null;
+            default -> null;
         };
     }
 
