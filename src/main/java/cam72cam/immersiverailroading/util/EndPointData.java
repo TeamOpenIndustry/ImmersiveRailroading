@@ -8,10 +8,6 @@ import java.util.function.Consumer;
 public record EndPointData (
         float radius,
         float heightOffset) {
-    public EndPointData(float radius, float heightOffset) {
-        this.radius = radius;
-        this.heightOffset = heightOffset;
-    }
 
     public EndPointData(float radius) {
         this(radius, 0f);
