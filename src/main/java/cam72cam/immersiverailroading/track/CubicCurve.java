@@ -571,12 +571,12 @@ public class CubicCurve {
         return result;
     }
 
-    public float angleStart() {
-        return originalYawStart;
+    public float angleStop() {
+        return VecUtil.toYaw(p2.subtract(ctrl2));
     }
 
-    public float angleStop() {
-        return originalYawEnd;
+    public float angleStart() {
+        return VecUtil.toYaw(p1.subtract(ctrl1)) + 180;
     }
 
     public List<CubicCurve> subsplit(int maxSize) {
