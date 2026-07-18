@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackSmoothing;
+import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
@@ -570,12 +571,12 @@ public class CubicCurve {
         return result;
     }
 
-    public float angleStop() {
-        return VecUtil.toYaw(p2.subtract(ctrl2));
+    public float angleStart() {
+        return originalYawStart;
     }
 
-    public float angleStart() {
-        return VecUtil.toYaw(p1.subtract(ctrl1)) + 180;
+    public float angleStop() {
+        return originalYawEnd;
     }
 
     public List<CubicCurve> subsplit(int maxSize) {
@@ -589,9 +590,121 @@ public class CubicCurve {
         return res;
     }
 
+    private static Vec3d projectHandle(Vec3d base,
+                                       Vec3d ctrl,
+                                       double pitchRad)
+    {
+        double horizontal = VecUtil.flatDistance(base, ctrl);
 
-    @Deprecated
-    public CubicCurve linearize(TrackSmoothing smoothing) {//TODO: Remove track smoothing and only use pitch-locked
+        return new Vec3d(
+                ctrl.x,
+                base.y + horizontal * Math.tan(pitchRad),
+                ctrl.z
+        );
+    }
+
+    private static Vec3d rotateHandle(Vec3d base,
+                                      Vec3d ctrl,
+                                      double pitchRad)
+    {
+        Vec3d offset = ctrl.subtract(base);
+
+        double horizontal =
+                Math.sqrt(offset.x * offset.x + offset.z * offset.z);
+
+        if (horizontal < 1E-8)
+            return ctrl;
+
+        double length = offset.length();
+
+        double newHorizontal = length * Math.cos(pitchRad);
+        double newVertical   = length * Math.sin(pitchRad);
+
+        double scale = newHorizontal / horizontal;
+
+        return new Vec3d(
+                base.x + offset.x * scale,
+                base.y + newVertical,
+                base.z + offset.z * scale
+        );
+    }
+
+    public CubicCurve linearize(TrackSmoothing smoothing,
+                                EndPointData near,
+                                EndPointData far) {
+        return switch (smoothing) {
+
+            case NEITHER_V2 -> {
+
+                double totalLength = VecUtil.flatDistance(p1, p2);
+                double height = p2.y - p1.y;
+
+                Vec3d newCtrl1 = new Vec3d(
+                        ctrl1.x,
+                        p1.y + height * VecUtil.flatDistance(p1, ctrl1) / totalLength,
+                        ctrl1.z
+                );
+
+                Vec3d newCtrl2 = new Vec3d(
+                        ctrl2.x,
+                        p2.y - height * VecUtil.flatDistance(ctrl2, p2) / totalLength,
+                        ctrl2.z
+                );
+
+                yield new CubicCurve(
+                        p1,
+                        newCtrl1,
+                        newCtrl2,
+                        p2,
+                        arcLenFactorStart,
+                        arcLenFactorEnd
+                );
+            }
+
+            case PITCH_LOCKED -> {
+
+                boolean nearRotate =
+                        near.pitchDegreeMode() || !near.projectHandle();
+
+                boolean farRotate =
+                        far.pitchDegreeMode() || !far.projectHandle();
+
+                Vec3d newCtrl1 = nearRotate
+                        ? rotateHandle(
+                        p1,
+                        ctrl1,
+                        near.getPitchRad())
+                        : projectHandle(
+                        p1,
+                        ctrl1,
+                        near.getPitchRad());
+
+                Vec3d newCtrl2 = farRotate
+                        ? rotateHandle(
+                        p2,
+                        ctrl2,
+                        -far.getPitchRad())
+                        : projectHandle(
+                        p2,
+                        ctrl2,
+                        -far.getPitchRad());
+
+                yield new CubicCurve(
+                        p1,
+                        newCtrl1,
+                        newCtrl2,
+                        p2,
+                        arcLenFactorStart,
+                        arcLenFactorEnd
+                );
+            }
+
+            default -> linearizeLegacy(smoothing);
+        };
+    }
+
+
+    private CubicCurve linearizeLegacy(TrackSmoothing smoothing) {
         double start = p1.distanceTo(ctrl1);
         double middle = ctrl1.distanceTo(ctrl2);
         double end = ctrl2.distanceTo(p2);

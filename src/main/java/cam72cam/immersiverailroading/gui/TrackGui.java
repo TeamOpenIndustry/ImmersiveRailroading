@@ -14,10 +14,7 @@ import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.immersiverailroading.track.TrackBase;
-import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
@@ -80,6 +77,13 @@ public class TrackGui implements IScreen {
 	private TextField nearHeightOffsetInput;
 	private TextField farHeightOffsetInput;
 	private Button heightOffsetLabel;
+
+	// Pitch
+	private TextField nearPitchInput;
+	private TextField farPitchInput;
+	private Button pitchLabel;
+	private Button nearPitchSettingButton;
+	private Button farPitchSettingButton;
 
 	private double zoom = 1;
 
@@ -204,6 +208,78 @@ public class TrackGui implements IScreen {
 
 		ytop += height;
 
+		pitchLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, "Near/Far Pitch") {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = 0);
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = 0);
+				nearPitchInput.setText("" + settings.nearPointData.pitch());
+				farPitchInput.setText("" + settings.farPointData.pitch());
+			}
+		};
+		pitchLabel.setTooltip(List.of("test"));
+
+		nearPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
+		nearPitchInput.setText("" + settings.nearPointData.pitch());
+		nearPitchInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) {
+				return true;
+			}
+			float val;
+			try {
+				val = Float.parseFloat(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			float max = 1000f;
+			float min = -1000f;
+			if (val >= min && val <= max) {
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = val);
+				return true;
+			}
+			return false;
+		});
+		nearPitchInput.setFocused(true);
+
+		farPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10 + (width / 2 - 10) / 2, ytop, (width / 2 - 10) / 2, height);
+		farPitchInput.setText("" + settings.farPointData.pitch());
+		farPitchInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) {
+				return true;
+			}
+			float val;
+			try {
+				val = Float.parseFloat(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			float max = 1000f;
+			float min = -1000f;
+			if (val >= min && val <= max) {
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = val);
+				return true;
+			}
+			return false;
+		});
+		farPitchInput.setFocused(true);
+
+		nearPitchSettingButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop + height, width / 2, height, settings.nearPointData.getPitchSetting()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.nearPointData = circlePitchSetting(settings.nearPointData);
+				this.setText(settings.nearPointData.getPitchSetting());
+			}
+		};
+		farPitchSettingButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height, width / 2, height, settings.farPointData.getPitchSetting()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.farPointData = circlePitchSetting(settings.farPointData);
+				this.setText(settings.farPointData.getPitchSetting());
+			}
+		};
+
+		setPitchComponentsVisible();
+
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
 				Gauge.values().stream().collect(Collectors.toMap(Gauge::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
 		) {
@@ -247,6 +323,8 @@ public class TrackGui implements IScreen {
 				trackExtraGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
 
+				setPitchComponentsVisible();
+
 				lengthLabel.setText(getLengthLabelType(settings));
 				lengthInput.setEnabled(!settings.type.isTransitionCurve());
 
@@ -278,6 +356,8 @@ public class TrackGui implements IScreen {
 			public void onClick(Player.Hand hand) {
 				settings.smoothing = next(settings.smoothing, hand);
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
+
+				setPitchComponentsVisible();
 			}
 		};
 		smoothingButton.setVisible(settings.type.hasSmoothing());
@@ -741,5 +821,34 @@ public class TrackGui implements IScreen {
 			default:
 				return GuiText.LABEL_NO_LENGTH.toString();
 		}
+	}
+
+	private EndPointData circlePitchSetting(EndPointData data) {
+		boolean pitchDegreeMode = data.pitchDegreeMode();
+		boolean projectHandle = data.projectHandle();
+
+		return data.with(mutable -> {
+			if (!pitchDegreeMode && projectHandle) {
+				// ‰ Projection -> ‰ Rotation
+				mutable.pitchDegreeMode = false;
+				mutable.projectHandle = false;
+			} else if (!pitchDegreeMode) {
+				// ‰ Rotation -> Degree Rotation
+				mutable.pitchDegreeMode = true;
+				mutable.projectHandle = false;
+			} else {
+				// Degree Rotation -> ‰ Projection
+				mutable.pitchDegreeMode = false;
+				mutable.projectHandle = true;
+			}
+		});
+	}
+
+	private void setPitchComponentsVisible() {
+		pitchLabel.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+		nearPitchInput.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+		farPitchInput.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+		nearPitchSettingButton.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+		farPitchSettingButton.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
 	}
 }

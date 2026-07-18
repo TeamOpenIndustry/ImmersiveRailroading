@@ -7,14 +7,20 @@ import java.util.function.Consumer;
 @TagMapped(EndPointData.TagMapper.class)
 public record EndPointData (
         float radius,
-        float heightOffset) {
-    public EndPointData(float radius, float heightOffset) {
+        float heightOffset,
+        float pitch,
+        boolean pitchDegreeMode,
+        boolean projectHandle) {
+    public EndPointData(float radius, float heightOffset, float pitch, boolean pitchDegreeMode, boolean projectHandle) {
         this.radius = radius;
         this.heightOffset = heightOffset;
+        this.pitch = pitch;
+        this.pitchDegreeMode = pitchDegreeMode;
+        this.projectHandle = projectHandle;
     }
 
     public EndPointData(float radius) {
-        this(radius, 0f);
+        this(radius, 0f, 0f, false, true);
     }
 
     public static class Mutable {
@@ -22,10 +28,19 @@ public record EndPointData (
         public float radius;
         @TagField("heightOffset")
         public float heightOffset;
+        @TagField("pitch")
+        public float pitch;
+        @TagField("pitchDegreeMode")
+        public boolean pitchDegreeMode;
+        @TagField("projectHandle")
+        public boolean projectHandle;
 
         public Mutable(EndPointData endPointData) {
             this.radius = endPointData.radius;
             this.heightOffset = endPointData.heightOffset;
+            this.pitch = endPointData.pitch;
+            this.pitchDegreeMode = endPointData.pitchDegreeMode;
+            this.projectHandle = endPointData.projectHandle;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -33,6 +48,9 @@ public record EndPointData (
             EndPointData endPointData = new EndPointData(10);
             this.radius = endPointData.radius;
             this.heightOffset = endPointData.heightOffset;
+            this.pitch = endPointData.pitch;
+            this.pitchDegreeMode = endPointData.pitchDegreeMode;
+            this.projectHandle = endPointData.projectHandle;
 
             TagSerializer.deserialize(data, this);
         }
@@ -40,9 +58,20 @@ public record EndPointData (
         public EndPointData immutable() {
             return new EndPointData(
                     radius,
-                    heightOffset
+                    heightOffset,
+                    pitch,
+                    pitchDegreeMode,
+                    projectHandle
             );
         }
+    }
+
+    public double getPitchRad() {
+        return pitchDegreeMode ? Math.toRadians(pitch) : Math.atan2(pitch, 1000);
+    }
+
+    public String getPitchSetting() {
+        return "" + pitchDegreeMode + " " + projectHandle;
     }
 
     public EndPointData.Mutable mutable() {
