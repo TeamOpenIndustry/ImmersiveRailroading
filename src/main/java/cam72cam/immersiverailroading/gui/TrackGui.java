@@ -208,7 +208,7 @@ public class TrackGui implements IScreen {
 
 		ytop += height;
 
-		pitchLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, "Near/Far Pitch") {
+		pitchLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, GuiText.LABEL_PITCH.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = 0);
@@ -217,7 +217,7 @@ public class TrackGui implements IScreen {
 				farPitchInput.setText("" + settings.farPointData.pitch());
 			}
 		};
-		pitchLabel.setTooltip(List.of("test"));
+		pitchLabel.setTooltip(List.of(GuiText.LABEL_RESET_PITCH.toString()));
 
 		nearPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
 		nearPitchInput.setText("" + settings.nearPointData.pitch());
@@ -231,8 +231,8 @@ public class TrackGui implements IScreen {
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			float max = 1000f;
-			float min = -1000f;
+			float max = settings.nearPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
+			float min = -max;
 			if (val >= min && val <= max) {
 				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = val);
 				return true;
@@ -253,8 +253,8 @@ public class TrackGui implements IScreen {
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			float max = 1000f;
-			float min = -1000f;
+			float max = settings.farPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
+			float min = -max;
 			if (val >= min && val <= max) {
 				settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = val);
 				return true;
@@ -268,15 +268,19 @@ public class TrackGui implements IScreen {
 			public void onClick(Player.Hand hand) {
 				settings.nearPointData = circlePitchSetting(settings.nearPointData);
 				this.setText(settings.nearPointData.getPitchSetting());
+				nearPitchInput.setText("" + settings.nearPointData.pitch());
 			}
 		};
+		nearPitchSettingButton.setTooltip(List.of(GuiText.LABEL_NEAR_PITCH_SETTING.toString()));
 		farPitchSettingButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height, width / 2, height, settings.farPointData.getPitchSetting()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.farPointData = circlePitchSetting(settings.farPointData);
 				this.setText(settings.farPointData.getPitchSetting());
+				farPitchInput.setText("" + settings.farPointData.pitch());
 			}
 		};
+		farPitchSettingButton.setTooltip(List.of(GuiText.LABEL_FAR_PITCH_SETTING.toString()));
 
 		setPitchComponentsVisible();
 
@@ -307,7 +311,7 @@ public class TrackGui implements IScreen {
 		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING)
-						.filter(i -> Config.ConfigBalance.EnableLegacyTurn || i != TrackItems.TURN)
+						.filter(i -> Config.ConfigBalance.EnableLegacyTrackSettingOption || i != TrackItems.TURN)
 						.sorted(Comparator.comparingInt(TrackItems::getOrder))
 						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
 		) {
@@ -355,6 +359,7 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.smoothing = next(settings.smoothing, hand);
+				if(settings.smoothing == TrackSmoothing.NEITHER && !Config.ConfigBalance.EnableLegacyTrackSettingOption) settings.smoothing = next(settings.smoothing, hand);
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
 
 				setPitchComponentsVisible();
@@ -832,14 +837,17 @@ public class TrackGui implements IScreen {
 				// ‰ Projection -> ‰ Rotation
 				mutable.pitchDegreeMode = false;
 				mutable.projectHandle = false;
+				mutable.pitch = 0;
 			} else if (!pitchDegreeMode) {
 				// ‰ Rotation -> Degree Rotation
 				mutable.pitchDegreeMode = true;
 				mutable.projectHandle = false;
+				mutable.pitch = 0;
 			} else {
 				// Degree Rotation -> ‰ Projection
 				mutable.pitchDegreeMode = false;
 				mutable.projectHandle = true;
+				mutable.pitch = 0;
 			}
 		});
 	}

@@ -76,6 +76,13 @@ gui.immersiverailroading:label.transition_radius=Near/Far Radius:
 gui.immersiverailroading:label.swap_radius=Swap Radius
 gui.immersiverailroading:label.height_offset=Near/Far Y Offset
 gui.immersiverailroading:label.reset_height_offset=Reset Y Offset
+gui.immersiverailroading:label.pitch=Near/Far Pitch
+gui.immersiverailroading:label.reset_pitch=Reset Pitch
+gui.immersiverailroading:label.pitch_setting_common=Common Mode
+gui.immersiverailroading:label.pitch_setting_mix=Mix Mode
+gui.immersiverailroading:label.pitch_setting_degree=Degree Mode
+gui.immersiverailroading:label.near_pitch_setting=Near Pitch Calculating Method
+gui.immersiverailroading:label.far_pitch_setting=Far Pitch Calculating Method
 gui.immersiverailroading:slider.zoom=Zoom:
 gui.immersiverailroading:selector.page=Page %s of %s
 gui.immersiverailroading:selector.type=Type: %s
@@ -201,7 +208,9 @@ track.immersiverailroading:position.smooth_locked=Smooth Locked
 track.immersiverailroading:smoothing.both=Both
 track.immersiverailroading:smoothing.near=Near
 track.immersiverailroading:smoothing.far=Far
-track.immersiverailroading:smoothing.neither=Neither
+track.immersiverailroading:smoothing.neither_v2=Neither
+track.immersiverailroading:smoothing.neither=Legacy Neither
+track.immersiverailroading:smoothing.pitch_locked=Pitch Locked
 
 track.immersiverailroading:direction.none=Flexible
 # Intended

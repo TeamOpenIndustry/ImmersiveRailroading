@@ -14,6 +14,13 @@ public enum GuiText {
 	LABEL_SWAP_RADIUS("label.swap_radius"),
 	LABEL_HEIGHT_OFFSET("label.height_offset"),
 	LABEL_RESET_HEIGHT_OFFSET("label.reset_height_offset"),
+	LABEL_PITCH("label.pitch"),
+	LABEL_RESET_PITCH("label.reset_pitch"),
+	LABEL_PITCH_SETTING_COMMON("label.pitch_setting_common"),
+	LABEL_PITCH_SETTING_MIX("label.pitch_setting_mix"),
+	LABEL_PITCH_SETTING_DEGREE("label.pitch_setting_degree"),
+	LABEL_NEAR_PITCH_SETTING("label.near_pitch_setting"),
+	LABEL_FAR_PITCH_SETTING("label.far_pitch_setting"),
 	SLIDER_ZOOM("slider.zoom"), //Need colon
 	SELECTOR_PAGE("selector.page"),
 	SELECTOR_TYPE("selector.type"),

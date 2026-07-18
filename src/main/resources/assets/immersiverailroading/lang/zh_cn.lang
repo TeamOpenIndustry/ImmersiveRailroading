@@ -76,6 +76,13 @@ gui.immersiverailroading:label.transition_radius=近/远端半径：
 gui.immersiverailroading:label.swap_radius=交换半径
 gui.immersiverailroading:label.height_offset=近/远端高度偏移
 gui.immersiverailroading:label.reset_height_offset=重置高度偏移
+gui.immersiverailroading:label.pitch=近/远端坡度
+gui.immersiverailroading:label.reset_pitch=重置坡度
+gui.immersiverailroading:label.pitch_setting_common=普通模式
+gui.immersiverailroading:label.pitch_setting_mix=混合模式
+gui.immersiverailroading:label.pitch_setting_degree=角度模式
+gui.immersiverailroading:label.near_pitch_setting=近端坡度计算方式
+gui.immersiverailroading:label.far_pitch_setting=远端坡度计算方式
 gui.immersiverailroading:slider.zoom=缩放比例：
 gui.immersiverailroading:selector.page=第 %s 页，共 %s 页
 gui.immersiverailroading:selector.type=类型：%s
@@ -201,7 +208,9 @@ track.immersiverailroading:position.smooth_locked=平滑锁定
 track.immersiverailroading:smoothing.both=双向平滑
 track.immersiverailroading:smoothing.near=仅近端平滑
 track.immersiverailroading:smoothing.far=仅远端平滑
-track.immersiverailroading:smoothing.neither=无平滑
+track.immersiverailroading:smoothing.neither_v2=无平滑
+track.immersiverailroading:smoothing.neither=旧版平滑
+track.immersiverailroading:smoothing.pitch_locked=锁定两端坡度
 
 track.immersiverailroading:direction.none=不锁定
 # Intended

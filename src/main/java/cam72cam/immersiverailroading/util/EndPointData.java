@@ -1,5 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.serialization.*;
 
 import java.util.function.Consumer;
@@ -71,7 +73,11 @@ public record EndPointData (
     }
 
     public String getPitchSetting() {
-        return "" + pitchDegreeMode + " " + projectHandle;
+        if(!pitchDegreeMode && projectHandle) return GuiText.LABEL_PITCH_SETTING_COMMON.toString();
+        else if(!pitchDegreeMode) return GuiText.LABEL_PITCH_SETTING_MIX.toString();
+        else if(!projectHandle) return GuiText.LABEL_PITCH_SETTING_DEGREE.toString();
+        ImmersiveRailroading.error("Invalid pitch setting");
+        return "";
     }
 
     public EndPointData.Mutable mutable() {
