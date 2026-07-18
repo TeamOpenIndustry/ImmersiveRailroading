@@ -209,7 +209,7 @@ track.immersiverailroading:smoothing.both=双向平滑
 track.immersiverailroading:smoothing.near=仅近端平滑
 track.immersiverailroading:smoothing.far=仅远端平滑
 track.immersiverailroading:smoothing.neither_v2=无平滑
-track.immersiverailroading:smoothing.neither=旧版平滑
+track.immersiverailroading:smoothing.neither=旧版无平滑
 track.immersiverailroading:smoothing.pitch_locked=锁定两端坡度
 
 track.immersiverailroading:direction.none=不锁定
