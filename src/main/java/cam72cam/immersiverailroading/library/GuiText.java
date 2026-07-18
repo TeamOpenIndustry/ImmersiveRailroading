@@ -6,6 +6,12 @@ public enum GuiText {
 	LABEL_BRAKE("label.brake"),
 	LABEL_THROTTLE("label.throttle"),
 	LABEL_REVERSER("label.reverser"),
+	LABEL_LENGTH("label.length"),
+	LABEL_NO_LENGTH("label.no_length"),
+	LABEL_RADIUS("label.radius"),
+	LABEL_LENGTH_RADIUS("label.length_radius"),
+	LABEL_TRANSITION_RADIUS("label.transition_radius"),
+	LABEL_SWAP_RADIUS("label.swap_radius"),
 	SLIDER_ZOOM("slider.zoom"), //Need colon
 	SELECTOR_PAGE("selector.page"),
 	SELECTOR_TYPE("selector.type"),

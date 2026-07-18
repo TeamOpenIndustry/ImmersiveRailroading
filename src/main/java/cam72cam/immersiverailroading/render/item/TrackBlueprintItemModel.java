@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.mod.render.*;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -23,12 +24,32 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	}
 	public static void render(ItemStack stack, World world, RenderState state) {
 		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5)), null);
-		info = info.withSettings(b -> b.length = 10);
+
+		if(info.settings.type.isTransitionCurve()) {
+			EndPointData.Mutable nears = info.settings.nearPointData.mutable();
+			EndPointData.Mutable far = info.settings.farPointData.mutable();
+			if(Math.abs(nears.radius) < 1e-6) {
+				far.radius = 10;
+				info = info.withSettings(b -> b.farPointData = far.immutable());
+			} else if(Math.abs(far.radius) < 1e-6) {
+				nears.radius = 10;
+				info = info.withSettings(b -> b.nearPointData = nears.immutable());
+			} else {
+				nears.radius = 20;
+				far.radius = 10;
+				info = info.withSettings(b -> {
+					b.nearPointData = nears.immutable();
+					b.farPointData = far.immutable();
+				});
+			}
+		} else {
+			info = info.withSettings(b -> b.length = 10);
+		}
 
 		state.cull_face(false);
 		state.lighting(false);
 
-		if (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.SWITCH) {
+		if (info.settings.type.hasQuarters()) {
 			state.translate(0, 0, -0.1 * (info.settings.degrees / 90 * 4));
 		}
 
@@ -36,8 +57,9 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 		state.rotate(-90, 1, 0, 0);
 
+		int length = (int) info.settings.getValidSize();
+		double scale = 0.95 / length;
 
-		double scale = 0.95 / info.settings.length;
 		if (info.settings.type == TrackItems.CROSSING) {
 			scale = 0.95 / 3;
 		}
