@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 
 import java.util.function.Consumer;
@@ -7,28 +8,28 @@ import java.util.function.Consumer;
 @TagMapped(EndPointData.TagMapper.class)
 public record EndPointData (
         float radius,
-        float heightOffset) {
+        Vec3d offset) {
 
     public EndPointData(float radius) {
-        this(radius, 0f);
+        this(radius, Vec3d.ZERO);
     }
 
     public static class Mutable {
         @TagField("radius")
         public float radius;
-        @TagField("heightOffset")
-        public float heightOffset;
+        @TagField("offset")
+        public Vec3d offset;
 
         public Mutable(EndPointData endPointData) {
             this.radius = endPointData.radius;
-            this.heightOffset = endPointData.heightOffset;
+            this.offset = endPointData.offset;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
             // Defaults
             EndPointData endPointData = new EndPointData(10);
             this.radius = endPointData.radius;
-            this.heightOffset = endPointData.heightOffset;
+            this.offset = endPointData.offset;
 
             TagSerializer.deserialize(data, this);
         }
@@ -36,7 +37,7 @@ public record EndPointData (
         public EndPointData immutable() {
             return new EndPointData(
                     radius,
-                    heightOffset
+                    offset
             );
         }
     }

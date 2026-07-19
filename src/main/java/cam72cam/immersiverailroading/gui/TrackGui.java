@@ -150,16 +150,16 @@ public class TrackGui implements IScreen {
 		heightOffsetLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, GuiText.LABEL_HEIGHT_OFFSET.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.heightOffset = 0);
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.heightOffset = 0);
-				nearHeightOffsetInput.setText("" + settings.nearPointData.heightOffset());
-				farHeightOffsetInput.setText("" + settings.farPointData.heightOffset());
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
+				nearHeightOffsetInput.setText("" + (float) settings.nearPointData.offset().y);
+				farHeightOffsetInput.setText("" + (float) settings.farPointData.offset().y);
 			}
 		};
 		heightOffsetLabel.setTooltip(List.of(GuiText.LABEL_RESET_HEIGHT_OFFSET.toString()));
 
 		nearHeightOffsetInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
-		nearHeightOffsetInput.setText("" + settings.nearPointData.heightOffset());
+		nearHeightOffsetInput.setText("" + (float) settings.nearPointData.offset().y);
 		nearHeightOffsetInput.setValidator(s -> {
 			if (s == null || s.isEmpty()) {
 				return true;
@@ -170,10 +170,10 @@ public class TrackGui implements IScreen {
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			float max = 0.5f;
-			float min = -0.5f;
+			float max = 1.0f;
+			float min = -1.0f;
 			if (val >= min && val <= max) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.heightOffset = val);
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = new Vec3d(0, val, 0));
 				return true;
 			}
 			return false;
@@ -181,7 +181,7 @@ public class TrackGui implements IScreen {
 		nearHeightOffsetInput.setFocused(true);
 
 		farHeightOffsetInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10 + (width / 2 - 10) / 2, ytop, (width / 2 - 10) / 2, height);
-		farHeightOffsetInput.setText("" + settings.farPointData.heightOffset());
+		farHeightOffsetInput.setText("" + (float) settings.farPointData.offset().y);
 		farHeightOffsetInput.setValidator(s -> {
 			if (s == null || s.isEmpty()) {
 				return true;
@@ -193,9 +193,9 @@ public class TrackGui implements IScreen {
 				return false;
 			}
 			float max = 1.0f;
-			float min = 0.0f;
+			float min = -1.0f;
 			if (val >= min && val <= max) {
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.heightOffset = val);
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = new Vec3d(0, val, 0));
 				return true;
 			}
 			return false;
