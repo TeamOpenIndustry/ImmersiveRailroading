@@ -90,7 +90,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		}
 
 		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0));
-		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(stack).nearPointData.heightOffset());
+		placementInfo = placementInfo.offset(RailSettings.from(stack).nearPointData.offset());
 		RailInfo info = new RailInfo(stack, placementInfo, null);
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);

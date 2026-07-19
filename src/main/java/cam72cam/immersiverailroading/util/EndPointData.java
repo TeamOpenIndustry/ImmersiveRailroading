@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 
 import java.util.function.Consumer;
@@ -9,27 +10,20 @@ import java.util.function.Consumer;
 @TagMapped(EndPointData.TagMapper.class)
 public record EndPointData (
         float radius,
-        float heightOffset,
+        Vec3d offset,
         float pitch,
         boolean pitchDegreeMode,
         boolean projectHandle) {
-    public EndPointData(float radius, float heightOffset, float pitch, boolean pitchDegreeMode, boolean projectHandle) {
-        this.radius = radius;
-        this.heightOffset = heightOffset;
-        this.pitch = pitch;
-        this.pitchDegreeMode = pitchDegreeMode;
-        this.projectHandle = projectHandle;
-    }
 
     public EndPointData(float radius) {
-        this(radius, 0f, 0f, false, true);
+        this(radius, Vec3d.ZERO, 0f, false, true);
     }
 
     public static class Mutable {
         @TagField("radius")
         public float radius;
-        @TagField("heightOffset")
-        public float heightOffset;
+        @TagField("offset")
+        public Vec3d offset;
         @TagField("pitch")
         public float pitch;
         @TagField("pitchDegreeMode")
@@ -39,7 +33,7 @@ public record EndPointData (
 
         public Mutable(EndPointData endPointData) {
             this.radius = endPointData.radius;
-            this.heightOffset = endPointData.heightOffset;
+            this.offset = endPointData.offset;
             this.pitch = endPointData.pitch;
             this.pitchDegreeMode = endPointData.pitchDegreeMode;
             this.projectHandle = endPointData.projectHandle;
@@ -49,7 +43,7 @@ public record EndPointData (
             // Defaults
             EndPointData endPointData = new EndPointData(10);
             this.radius = endPointData.radius;
-            this.heightOffset = endPointData.heightOffset;
+            this.offset = endPointData.offset;
             this.pitch = endPointData.pitch;
             this.pitchDegreeMode = endPointData.pitchDegreeMode;
             this.projectHandle = endPointData.projectHandle;
@@ -60,7 +54,7 @@ public record EndPointData (
         public EndPointData immutable() {
             return new EndPointData(
                     radius,
-                    heightOffset,
+                    offset,
                     pitch,
                     pitchDegreeMode,
                     projectHandle

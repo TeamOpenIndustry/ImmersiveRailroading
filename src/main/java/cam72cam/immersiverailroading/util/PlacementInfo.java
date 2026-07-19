@@ -152,9 +152,8 @@ public class PlacementInfo {
 		return new PlacementInfo(placementPosition.add(offset), direction, yaw, control != null ? control.add(offset) : null);
 	}
 
-	public PlacementInfo withFloorYoffset(float offset) {
-		Vec3d updated = new Vec3d(placementPosition.x, Math.floor(placementPosition.y) + offset, placementPosition.z);
-		return new PlacementInfo(updated, direction, yaw, control);
+	public PlacementInfo offset(Vec3d offset) {
+		return new PlacementInfo(placementPosition.add(offset), direction, yaw, control != null ? control.add(offset) : null);
 	}
 
 	public PlacementInfo withDirection(TrackDirection direction) {

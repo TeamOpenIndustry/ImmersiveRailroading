@@ -91,7 +91,7 @@ public class ItemTrackBlueprint extends CustomItem {
 		}
 
 		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
-		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(stack).nearPointData.heightOffset());
+		placementInfo = placementInfo.offset(RailSettings.from(stack).nearPointData.offset());
 		RailInfo info = new RailInfo(stack, placementInfo, null);
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;

@@ -150,7 +150,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	public RailInfo getRailRenderInfo() {// Not only for render, but also for build!
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
-			info = new RailInfo(item, placementInfo, customInfo);
+			offsetPosition();
 		}
 		return info;
 	}
@@ -158,14 +158,17 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public void markDirty() {
 		super.markDirty();
-
-		placementInfo = placementInfo.withFloorYoffset(RailSettings.from(item).nearPointData.heightOffset());
-		customInfo = customInfo == null ? null : customInfo.withFloorYoffset(RailSettings.from(item).farPointData.heightOffset());
-
-        info = new RailInfo(item, placementInfo, customInfo);
+		offsetPosition();
         if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();
 		}
+	}
+
+	private void offsetPosition() {
+		PlacementInfo placementInfoOffset = placementInfo.offset(RailSettings.from(item).nearPointData.offset());
+		PlacementInfo customInfoOffset = customInfo == null ? null : customInfo.offset(RailSettings.from(item).farPointData.offset());
+
+		info = new RailInfo(item, placementInfoOffset, customInfoOffset);
 	}
 
 	public boolean isMulti() {
