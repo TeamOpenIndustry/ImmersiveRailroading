@@ -2,6 +2,9 @@ package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.TrackPosYawType;
+import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 
@@ -13,10 +16,13 @@ public record EndPointData (
         Vec3d offset,
         float pitch,
         boolean pitchDegreeMode,
-        boolean projectHandle) {
+        boolean projectHandle,
+        TrackPositionType posType,
+        TrackPosYawType posYawType,
+        float posYaw) {
 
     public EndPointData(float radius) {
-        this(radius, Vec3d.ZERO, 0f, false, true);
+        this(radius, Vec3d.ZERO, 0f, false, true, TrackPositionType.FIXED, TrackPosYawType.ANGLE_SEGMENTATION, 0f);
     }
 
     public static class Mutable {
@@ -30,6 +36,12 @@ public record EndPointData (
         public boolean pitchDegreeMode;
         @TagField("projectHandle")
         public boolean projectHandle;
+        @TagField("pos_type")
+        public TrackPositionType posType;
+        @TagField("pos_yaw_type")
+        public TrackPosYawType posYawType;
+        @TagField("pos_yaw")
+        public float posYaw;
 
         public Mutable(EndPointData endPointData) {
             this.radius = endPointData.radius;
@@ -37,6 +49,9 @@ public record EndPointData (
             this.pitch = endPointData.pitch;
             this.pitchDegreeMode = endPointData.pitchDegreeMode;
             this.projectHandle = endPointData.projectHandle;
+            this.posType = endPointData.posType;
+            this.posYawType = endPointData.posYawType;
+            this.posYaw = endPointData.posYaw;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -47,6 +62,9 @@ public record EndPointData (
             this.pitch = endPointData.pitch;
             this.pitchDegreeMode = endPointData.pitchDegreeMode;
             this.projectHandle = endPointData.projectHandle;
+            this.posType = endPointData.posType;
+            this.posYawType = endPointData.posYawType;
+            this.posYaw = endPointData.posYaw;
 
             TagSerializer.deserialize(data, this);
         }
@@ -57,7 +75,10 @@ public record EndPointData (
                     offset,
                     pitch,
                     pitchDegreeMode,
-                    projectHandle
+                    projectHandle,
+                    posType,
+                    posYawType,
+                    posYaw
             );
         }
     }

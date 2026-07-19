@@ -205,6 +205,9 @@ track.immersiverailroading:position.pixels_locked=像素锁定
 track.immersiverailroading:position.smooth=无限制
 track.immersiverailroading:position.smooth_locked=平滑锁定
 
+track.immersiverailroading:position_yaw.angle_specified=指定角度
+track.immersiverailroading:position_yaw.angle_segmentation=均分角度
+
 track.immersiverailroading:smoothing.both=双向平滑
 track.immersiverailroading:smoothing.near=仅近端平滑
 track.immersiverailroading:smoothing.far=仅远端平滑

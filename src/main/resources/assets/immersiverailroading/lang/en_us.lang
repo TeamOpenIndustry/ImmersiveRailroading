@@ -205,6 +205,9 @@ track.immersiverailroading:position.pixels_locked=Pixels Locked
 track.immersiverailroading:position.smooth=Smooth
 track.immersiverailroading:position.smooth_locked=Smooth Locked
 
+track.immersiverailroading:position_yaw.angle_specified=Angle Specified
+track.immersiverailroading:position_yaw.angle_segmentation=Angle Segmentation
+
 track.immersiverailroading:smoothing.both=Both
 track.immersiverailroading:smoothing.near=Near
 track.immersiverailroading:smoothing.far=Far
