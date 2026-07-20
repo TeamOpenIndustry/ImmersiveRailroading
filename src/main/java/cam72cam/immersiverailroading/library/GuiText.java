@@ -31,6 +31,7 @@ public enum GuiText {
 	SELECTOR_RAIL_BED("selector.rail_bed"),
 	SELECTOR_RAIL_BED_FILL("selector.rail_bed_fill"),
 	SELECTOR_POSITION("selector.position"),
+	SELECTOR_POSITION_YAW("selector.position_yaw"),
 	SELECTOR_SMOOTHING("selector.smoothing"),
 	SELECTOR_DIRECTION("selector.direction"),
 	SELECTOR_PLACE_BLUEPRINT("selector.place_blueprint"),

@@ -13,6 +13,8 @@ import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.serialization.TagCompound;
 
+import java.util.function.Consumer;
+
 @TagMapped(PlacementInfo.TagMapper.class)
 public class PlacementInfo {
 	public final Vec3d placementPosition; // relative
@@ -41,7 +43,7 @@ public class PlacementInfo {
 		yawHead = ((- yawHead % 360) + 360) % 360;
 		if(posYawType == TrackPosYawType.ANGLE_SEGMENTATION) {
 			this.yaw = ((int)((yawHead + 90/(segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
-		} else {
+		} else if(posYawType == TrackPosYawType.ANGLE_SPECIFIED) {
 			float base = posYaw;
 			float base2 = 90 - base;
 
@@ -54,6 +56,8 @@ public class PlacementInfo {
 			float dist2 = Math.min(Math.abs(cand2 - yawHead), 360 - Math.abs(cand2 - yawHead));
 
 			this.yaw = (dist1 <= dist2) ? cand1 : cand2;
+		} else {
+			this.yaw = yawHead;
 		}
 
 		TrackDirection direction = settings.direction;
@@ -179,6 +183,10 @@ public class PlacementInfo {
 	}
 
 	public PlacementInfo withDirection(TrackDirection direction) {
+		return new PlacementInfo(placementPosition, direction, yaw, control);
+	}
+
+	public PlacementInfo withYaw(float yaw) {
 		return new PlacementInfo(placementPosition, direction, yaw, control);
 	}
 

@@ -95,6 +95,7 @@ gui.immersiverailroading:selector.curvosity=%s 曲率
 gui.immersiverailroading:selector.rail_bed=道床类型：%s
 gui.immersiverailroading:selector.rail_bed_fill=道床填方类型：%s
 gui.immersiverailroading:selector.position=位置锁定方式：%s
+gui.immersiverailroading:selector.position_yaw=朝向锁定方式：%s
 gui.immersiverailroading:selector.smoothing=垂直平滑：%s
 gui.immersiverailroading:selector.direction=方向：%s
 gui.immersiverailroading:selector.transfer_table_entry_count=移车台轨道数：%s

@@ -99,6 +99,14 @@ public class TileRailPreview extends BlockEntityTickable {
 					case STRAIGHT:
 					case SLOPE:
 					default:
+//						if(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_FREE) {
+//							int placeOffLength = (int) Math.round(placeOffset.length());
+//							float placementYaw = VecUtil.toYaw(placeOffset);
+//							placementInfo = placementInfo.withYaw(placementYaw);
+//							length = placeOffLength + 1;
+//						} else {
+//							length = Math.max(0, shadowLength) + 1;
+//						}
 						length = Math.max(0, shadowLength) + 1;
 						break;
 				}

@@ -95,6 +95,7 @@ gui.immersiverailroading:selector.curvosity=%s Curvosity
 gui.immersiverailroading:selector.rail_bed=Rail Bed: %s
 gui.immersiverailroading:selector.rail_bed_fill=Rail Bed Fill: %s
 gui.immersiverailroading:selector.position=Position: %s
+gui.immersiverailroading:selector.position_yaw=Yaw Type: %s
 gui.immersiverailroading:selector.smoothing=Vertical Smoothing: %s
 gui.immersiverailroading:selector.direction=Direction: %s
 gui.immersiverailroading:selector.transfer_table_entry_count=Transfer Table Entries: %s

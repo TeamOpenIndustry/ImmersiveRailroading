@@ -62,11 +62,11 @@ public class TrackEndPointGui implements IScreen {
     // PosType
     private Button nearPosTypeButton;
     private TextField nearYawInput;
-    private Button nearPosYawTypeLabel;
+    private Button nearPosYawTypeSelector;
 
     private Button farPosTypeButton;
     private TextField farYawInput;
-    private Button farPosYawTypeLabel;
+    private Button farPosYawTypeSelector;
 
     private Button trackGuiButton;
 
@@ -328,7 +328,7 @@ public class TrackEndPointGui implements IScreen {
         farPitchSettingButton.setTooltip(List.of(GuiText.LABEL_PITCH_SETTING.toString()));
 
         // Bottom Page
-        ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 3);
+        ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 4);
 
         // TrackGui
 
@@ -345,7 +345,7 @@ public class TrackEndPointGui implements IScreen {
 
         ytop += height;
 
-        // Pos Type
+        // Pos Type TODO: Track Snapping Gui Components
 
         nearPosTypeButton = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType())) {
             @Override
@@ -364,37 +364,29 @@ public class TrackEndPointGui implements IScreen {
 
         ytop += height;
 
-        nearPosYawTypeLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, settings.nearPointData.posYawType().toString()) {
+        nearPosYawTypeSelector = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION_YAW.toString(settings.nearPointData.posYawType())) {
             @Override
             public void onClick(Player.Hand hand) {
-                if(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SEGMENTATION) {
-                    settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = TrackPosYawType.ANGLE_SPECIFIED);
-                    nearYawInput.setVisible(true);
-                } else {
-                    settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = TrackPosYawType.ANGLE_SEGMENTATION);
-                    nearYawInput.setVisible(false);
-                }
-                this.setText(settings.nearPointData.posYawType().toString());
+                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
+                nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
+                this.setText( GuiText.SELECTOR_POSITION_YAW.toString(settings.nearPointData.posYawType()));
             }
         };
-        nearPosYawTypeLabel.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
+        nearPosYawTypeSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
 
-        farPosYawTypeLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, settings.farPointData.posYawType().toString()) {
+        farPosYawTypeSelector = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION_YAW.toString(settings.farPointData.posYawType())) {
             @Override
             public void onClick(Player.Hand hand) {
-                if(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SEGMENTATION) {
-                    settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = TrackPosYawType.ANGLE_SPECIFIED);
-                    farYawInput.setVisible(true);
-                } else {
-                    settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = TrackPosYawType.ANGLE_SEGMENTATION);
-                    farYawInput.setVisible(false);
-                }
-                this.setText(settings.farPointData.posYawType().toString());
+                settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
+                farYawInput.setEnabled(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
+                this.setText(GuiText.SELECTOR_POSITION_YAW.toString(settings.farPointData.posYawType()));
             }
         };
-        farPosYawTypeLabel.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
+        farPosYawTypeSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
 
-        nearYawInput = new TextField(screen, left_xStart + width / 2 + 20, ytop, width / 4, height);
+        ytop += height;
+
+        nearYawInput = new TextField(screen, left_xStart, ytop, width - 30, height);
         nearYawInput.setText("" + settings.nearPointData.posYaw());
         nearYawInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -416,7 +408,7 @@ public class TrackEndPointGui implements IScreen {
         });
         nearYawInput.setFocused(true);
 
-        farYawInput = new TextField(screen, right_xStart + width / 2 + 20, ytop, width / 4, height);
+        farYawInput = new TextField(screen, right_xStart, ytop, width - 30, height);
         farYawInput.setText("" + settings.farPointData.posYaw());
         farYawInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -438,17 +430,20 @@ public class TrackEndPointGui implements IScreen {
         });
         farYawInput.setFocused(true);
 
-        nearRadiusLabel.setVisible(settings.type.isTransitionCurve());
-        farRadiusLabel.setVisible(settings.type.isTransitionCurve());
-        nearRadiusInput.setVisible(settings.type.isTransitionCurve());
-        farRadiusInput.setVisible(settings.type.isTransitionCurve());
+        nearRadiusLabel.setEnabled(settings.type.isTransitionCurve());
+        farRadiusLabel.setEnabled(settings.type.isTransitionCurve());
+        nearRadiusInput.setEnabled(settings.type.isTransitionCurve());
+        farRadiusInput.setEnabled(settings.type.isTransitionCurve());
 
-        nearPitchLabel.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        farPitchLabel.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        nearPitchInput.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        farPitchInput.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        nearPitchSettingButton.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        farPitchSettingButton.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+        nearPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+        farPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+        nearPitchInput.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+        farPitchInput.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+        nearPitchSettingButton.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+        farPitchSettingButton.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+
+        nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
+        farYawInput.setEnabled(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
     }
 
     public void onClose() {
