@@ -99,7 +99,7 @@ public class TrackExchangerGui implements IScreen {
 				TrackItems.STRAIGHT, TrackItems.STRAIGHT,
 				10,
 				0,
-				1,
+				1, TrackPositionType.FIXED,
 				TrackSmoothing.BOTH,
 				new EndPointData(0), new EndPointData(10),
                 null,null,

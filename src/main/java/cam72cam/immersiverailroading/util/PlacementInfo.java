@@ -3,8 +3,6 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.TrackPosYawType;
-import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -31,31 +29,11 @@ public class PlacementInfo {
 		return MathUtil.clamp(Config.ConfigBalance.AnglePlacementSegmentation, 1, 90);
 	}
 	
-	public PlacementInfo(ItemStack stack, float yawHead, Vec3d hit, boolean isNear) {
+	public PlacementInfo(ItemStack stack, float yawHead, Vec3d hit) {
+		yawHead = ((- yawHead % 360) + 360) % 360;
+		this.yaw = ((int)((yawHead + 90/(segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
 
 		RailSettings settings = RailSettings.from(stack);
-		TrackPositionType posType = isNear ? settings.nearPointData.posType() : settings.farPointData.posType();
-		TrackPosYawType posYawType = isNear ? settings.nearPointData.posYawType() : settings.farPointData.posYawType();
-		float posYaw = isNear ? settings.nearPointData.posYaw() : settings.farPointData.posYaw();
-
-		yawHead = ((- yawHead % 360) + 360) % 360;
-		if(posYawType == TrackPosYawType.ANGLE_SEGMENTATION) {
-			this.yaw = ((int)((yawHead + 90/(segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
-		} else {
-			float base = posYaw;
-			float base2 = 90 - base;
-
-			float diff1 = (yawHead - base + 360) % 360;
-			float cand1 = ((base + 90 * Math.round(diff1 / 90)) % 360 + 360) % 360;
-			float dist1 = Math.min(Math.abs(cand1 - yawHead), 360 - Math.abs(cand1 - yawHead));
-
-			float diff2 = (yawHead - base2 + 360) % 360;
-			float cand2 = ((base2 + 90 * Math.round(diff2 / 90)) % 360 + 360) % 360;
-			float dist2 = Math.min(Math.abs(cand2 - yawHead), 360 - Math.abs(cand2 - yawHead));
-
-			this.yaw = (dist1 <= dist2) ? cand1 : cand2;
-		}
-
 		TrackDirection direction = settings.direction;
 		if (direction == TrackDirection.NONE) {
 			direction = (yawHead % 90 < 45) ? TrackDirection.RIGHT : TrackDirection.LEFT;
@@ -67,7 +45,7 @@ public class PlacementInfo {
 		double hitX = hit.x % 1;
 		double hitZ = hit.z % 1;
 
-		switch (posType) {
+		switch (settings.posType) {
 			case FIXED:
 				hitX = 0.5f;
 				hitZ = 0.5f;
