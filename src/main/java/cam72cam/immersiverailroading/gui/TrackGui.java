@@ -37,51 +37,20 @@ public class TrackGui implements IScreen {
 
 	private TileRailPreview te;
 	private int targetGuiOpenType;
-	private Button typeButton;
-	private Slider curvositySlider;
-	private CheckBox isPreviewCB;
-	private CheckBox isGradeCrossingCB;
-	private Button gaugeButton;
-	private Button trackButton;
-	private Button smoothingButton;
-	private Button directionButton;
-	private Button bedTypeButton;
-	private Button bedFillButton;
-    private Button trackExtraGuiButton;
-
-	private Slider transfertableEntryCountSlider;
-	private Slider transfertableEntrySpacingSlider;
-
 	private final List<ItemStack> oreDict;
-
 	private RailSettings.Mutable settings;
-
-	private ListSelector<Gauge> gaugeSelector;
-	private ListSelector<TrackItems> typeSelector;
-	private ListSelector<TrackDefinition>  trackSelector;
-	private ListSelector<ItemStack> railBedSelector;
-	private ListSelector<ItemStack> railBedFillSelector;
 
 	// Length / Radius
 	private TextField lengthInput;
 	private Button lengthLabel;
 
-	// Transition Curve (Cubic Parabola)
-	private TextField nearRadiusInput;
-	private TextField farRadiusInput;
-	private Button transitionRadiusLabel;
+	// Gauge
+	private Button gaugeButton;
+	private ListSelector<Gauge> gaugeSelector;
 
-    // Height Offset
-	private TextField nearHeightOffsetInput;
-	private TextField farHeightOffsetInput;
-	private Button heightOffsetLabel;
-
-	// Pitch
-	private TextField nearPitchInput;
-	private TextField farPitchInput;
-	private Button pitchLabel;
-	private Button nearPitchSettingButton;
-	private Button farPitchSettingButton;
+	// Track Type
+	private Button typeButton;
+	private ListSelector<TrackItems> typeSelector;
 
 	// Turn Angle
 	boolean degreeInputType = false;
@@ -89,13 +58,32 @@ public class TrackGui implements IScreen {
 	private TextField degreesInput;
 	private Button degreesInputTypeButton;
 
-	// PosType
-	private Button nearPosTypeButton;
-	private Button farPosTypeButton;
-	private TextField nearYawInput;
-	private Button nearPosYawTypeLabel;
-	private TextField farYawInput;
-	private Button farPosYawTypeLabel;
+	private Slider curvositySlider;
+	private Button smoothingButton;
+	private Button directionButton;
+
+	// Transfer Table
+	private Slider transfertableEntryCountSlider;
+	private Slider transfertableEntrySpacingSlider;
+
+	// Rail Bed
+	private Button bedTypeButton;
+	private ListSelector<ItemStack> railBedSelector;
+
+	// Bed Fill
+	private Button bedFillButton;
+	private ListSelector<ItemStack> railBedFillSelector;
+
+	// Track Model
+	private Button trackButton;
+	private ListSelector<TrackDefinition> trackSelector;
+
+	private Button posTypeButton;
+	private CheckBox isPreviewCB;
+	private CheckBox isGradeCrossingCB;
+
+	private Button trackExtraGuiButton;
+	private Button trackEndPointGuiButton;
 
 	private double zoom = 1;
 
@@ -163,138 +151,7 @@ public class TrackGui implements IScreen {
         this.lengthInput.setFocused(true);
 		lengthInput.setEnabled(!settings.type.isTransitionCurve());
 
-		heightOffsetLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, GuiText.LABEL_HEIGHT_OFFSET.toString()) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
-				nearHeightOffsetInput.setText("" + (float) settings.nearPointData.offset().y);
-				farHeightOffsetInput.setText("" + (float) settings.farPointData.offset().y);
-			}
-		};
-		heightOffsetLabel.setTooltip(List.of(GuiText.LABEL_RESET_HEIGHT_OFFSET.toString()));
-
-		nearHeightOffsetInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
-		nearHeightOffsetInput.setText("" + (float) settings.nearPointData.offset().y);
-		nearHeightOffsetInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
-			float val;
-			try {
-				val = Float.parseFloat(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			float max = 1.0f;
-			float min = -1.0f;
-			if (val >= min && val <= max) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = new Vec3d(0, val, 0));
-				return true;
-			}
-			return false;
-		});
-		nearHeightOffsetInput.setFocused(true);
-
-		farHeightOffsetInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10 + (width / 2 - 10) / 2, ytop, (width / 2 - 10) / 2, height);
-		farHeightOffsetInput.setText("" + (float) settings.farPointData.offset().y);
-		farHeightOffsetInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
-			float val;
-			try {
-				val = Float.parseFloat(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			float max = 1.0f;
-			float min = -1.0f;
-			if (val >= min && val <= max) {
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = new Vec3d(0, val, 0));
-				return true;
-			}
-			return false;
-		});
-		farHeightOffsetInput.setFocused(true);
-
 		ytop += height;
-
-		pitchLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2 + 10, height, GuiText.LABEL_PITCH.toString()) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = 0);
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = 0);
-				nearPitchInput.setText("" + settings.nearPointData.pitch());
-				farPitchInput.setText("" + settings.farPointData.pitch());
-			}
-		};
-		pitchLabel.setTooltip(List.of(GuiText.LABEL_RESET_PITCH.toString()));
-
-		nearPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
-		nearPitchInput.setText("" + settings.nearPointData.pitch());
-		nearPitchInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
-			float val;
-			try {
-				val = Float.parseFloat(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			float max = settings.nearPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
-			float min = -max;
-			if (val >= min && val <= max) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = val);
-				return true;
-			}
-			return false;
-		});
-		nearPitchInput.setFocused(true);
-
-		farPitchInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2 + 10 + (width / 2 - 10) / 2, ytop, (width / 2 - 10) / 2, height);
-		farPitchInput.setText("" + settings.farPointData.pitch());
-		farPitchInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
-			float val;
-			try {
-				val = Float.parseFloat(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			float max = settings.farPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
-			float min = -max;
-			if (val >= min && val <= max) {
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = val);
-				return true;
-			}
-			return false;
-		});
-		farPitchInput.setFocused(true);
-
-		nearPitchSettingButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop + height, width / 2, height, settings.nearPointData.getPitchSetting()) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.nearPointData = circlePitchSetting(settings.nearPointData);
-				this.setText(settings.nearPointData.getPitchSetting());
-				nearPitchInput.setText("" + settings.nearPointData.pitch());
-			}
-		};
-		nearPitchSettingButton.setTooltip(List.of(GuiText.LABEL_NEAR_PITCH_SETTING.toString()));
-		farPitchSettingButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, ytop + height, width / 2, height, settings.farPointData.getPitchSetting()) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.farPointData = circlePitchSetting(settings.farPointData);
-				this.setText(settings.farPointData.getPitchSetting());
-				farPitchInput.setText("" + settings.farPointData.pitch());
-			}
-		};
-		farPitchSettingButton.setTooltip(List.of(GuiText.LABEL_FAR_PITCH_SETTING.toString()));
-
-		setPitchComponentsVisible();
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
 				Gauge.values().stream().collect(Collectors.toMap(Gauge::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
@@ -332,6 +189,8 @@ public class TrackGui implements IScreen {
 				settings.type = option;
 				settings.pickType = option;
 
+				lengthLabel.setText(getLengthLabelType(settings));
+				lengthInput.setEnabled(!settings.type.isTransitionCurve());
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				degreesSlider.setVisible(settings.type.hasQuarters());
 				degreesInput.setVisible(settings.type.hasQuarters() && degreeInputType);
@@ -341,14 +200,7 @@ public class TrackGui implements IScreen {
 				trackExtraGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
 
-				setPitchComponentsVisible();
-
-				lengthLabel.setText(getLengthLabelType(settings));
-				lengthInput.setEnabled(!settings.type.isTransitionCurve());
-
-				nearRadiusInput.setVisible(settings.type.isTransitionCurve());
-				farRadiusInput.setVisible(settings.type.isTransitionCurve());
-				transitionRadiusLabel.setVisible(settings.type.isTransitionCurve());
+				degreesSlider.onSlider();
 
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -368,76 +220,6 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		//Near
-		nearPosYawTypeLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, width / 2, height, settings.nearPointData.posYawType().toString()) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				if(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SEGMENTATION) {
-					settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = TrackPosYawType.ANGLE_SPECIFIED);
-				} else {
-					settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = TrackPosYawType.ANGLE_SEGMENTATION);
-				}
-				this.setText(settings.nearPointData.posYawType().toString());
-			}
-		};
-
-		nearYawInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2, ytop, width / 2, height);
-		nearYawInput.setText("" + settings.nearPointData.posYaw());
-		nearYawInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
-			float val;
-			try {
-				val = Float.parseFloat(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			float max = 90;
-			float min = 0;
-			if (val >= min && val <= max) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYaw = val);
-				return true;
-			}
-			return false;
-		});
-		nearYawInput.setFocused(true);
-
-		// Far
-		farPosYawTypeLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop + height, width / 2, height, settings.farPointData.posYawType().toString()) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				if(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SEGMENTATION) {
-					settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = TrackPosYawType.ANGLE_SPECIFIED);
-				} else {
-					settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = TrackPosYawType.ANGLE_SEGMENTATION);
-				}
-				this.setText(settings.farPointData.posYawType().toString());
-			}
-		};
-
-		farYawInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width + width / 2, ytop + height, width / 2, height);
-		farYawInput.setText("" + settings.farPointData.posYaw());
-		farYawInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
-			float val;
-			try {
-				val = Float.parseFloat(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			float max = 90;
-			float min = 0;
-			if (val >= min && val <= max) {
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.posYaw = val);
-				return true;
-			}
-			return false;
-		});
-		farYawInput.setFocused(true);
-
 		//Transfer table doesn't have these property so we can have them overlapped
 		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
 			@Override
@@ -445,8 +227,6 @@ public class TrackGui implements IScreen {
 				settings.smoothing = next(settings.smoothing, hand);
 				if(settings.smoothing == TrackSmoothing.NEITHER && !Config.ConfigBalance.EnableLegacyTrackSettingOption) settings.smoothing = next(settings.smoothing, hand);
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
-
-				setPitchComponentsVisible();
 			}
 		};
 		smoothingButton.setVisible(settings.type.hasSmoothing());
@@ -489,7 +269,7 @@ public class TrackGui implements IScreen {
 				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
 				if(settings.type.isTransitionCurve()) {
 					boolean shouldReset = false;
-					while(!isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
+					while(!CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
 						shouldReset = true;
 						val -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
 						if(Math.abs(val) < 1e-6) break;
@@ -535,69 +315,6 @@ public class TrackGui implements IScreen {
 
 		ytop += height;
 
-		transitionRadiusLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, GuiText.LABEL_TRANSITION_RADIUS.toString()) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				float temp = settings.farPointData.radius();
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = settings.nearPointData.radius());
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = temp);
-
-				settings.length = (int) temp;
-				nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
-				farRadiusInput.setText("" + (int) settings.farPointData.radius());
-			}
-		};
-		transitionRadiusLabel.setTooltip(List.of(GuiText.LABEL_SWAP_RADIUS.toString()));
-
-		nearRadiusInput = new TextField(screen, xtop + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
-		nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
-		nearRadiusInput.setValidator(s -> {
-			if (s == null || s.length() == 0) {
-				return true;
-			}
-			int val;
-			try {
-				val = Integer.parseInt(s);
-			} catch (NumberFormatException e) {
-				if(s.equals("-")) return true;
-				return false;
-			}
-			int max = 1000;
-
-			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(val, settings.farPointData.radius(), settings.degrees)) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = val);
-				return true;
-			}
-
-			return false;
-		});
-		nearRadiusInput.setFocused(true);
-
-		farRadiusInput = new TextField(screen, xtop + width / 2 + 10 + (width / 2 - 10) / 2, ytop, (width / 2 - 10) / 2, height);
-		farRadiusInput.setText("" + (int) settings.farPointData.radius());
-		farRadiusInput.setValidator(s -> {
-			if (s == null || s.length() == 0) {
-				return true;
-			}
-			int val;
-			try {
-				val = Integer.parseInt(s);
-			} catch (NumberFormatException e) {
-				if(s.equals("-")) return true;
-				return false;
-			}
-			int max = 1000;
-
-			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(settings.nearPointData.radius(), val, settings.degrees)) {
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = val);
-				return true;
-			}
-
-			return false;
-		});
-		farRadiusInput.setFocused(true);
-
-
 		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
 			@Override
 			public void onSlider() {
@@ -614,9 +331,6 @@ public class TrackGui implements IScreen {
 		degreesInputTypeButton.setVisible(settings.type.hasQuarters());
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
-		nearRadiusInput.setVisible(settings.type.isTransitionCurve());
-		farRadiusInput.setVisible(settings.type.isTransitionCurve());
-		transitionRadiusLabel.setVisible(settings.type.isTransitionCurve());
 		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 
@@ -680,18 +394,11 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		nearPosTypeButton = new Button(screen, xtop, ytop, width / 2, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType())) {
+		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posType = next(settings.nearPointData.posType(), hand));
-				nearPosTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()));
-			}
-		};
-		farPosTypeButton = new Button(screen, xtop + width / 2, ytop, width / 2, height, GuiText.SELECTOR_POSITION.toString(settings.farPointData.posType())) {
-			@Override
-			public void onClick(Player.Hand hand) {
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.posType = next(settings.farPointData.posType(), hand));
-				farPosTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.farPointData.posType()));
+				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()));
 			}
 		};
 		ytop += height;
@@ -712,7 +419,21 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, (int) (GUIHelpers.getScreenHeight()*0.75 - height * 2), width / 2, height, GuiText.TRACK_MAIN_TO_EXTRA.toString()) {
+		trackEndPointGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4, width / 2, height, GuiText.TRACK_MAIN_TO_END_POINT.toString()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				targetGuiOpenType = 2;
+				onClose();
+				if (te != null) {
+					GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
+				} else {
+					GuiTypes.RAIL.open(MinecraftClient.getPlayer());
+				}
+			}
+		};
+		trackEndPointGuiButton.setVisible(settings.type.canRoll());
+
+		trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height, width / 2, height, GuiText.TRACK_MAIN_TO_EXTRA.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				targetGuiOpenType = 1;
@@ -926,14 +647,6 @@ public class TrackGui implements IScreen {
 		}
 	}
 
-	private static boolean isCubicParabolaInputValid(double startRadius, double endRadius, double angleDeg) {
-		if(Math.abs(startRadius) < 1e-6 && Math.abs(endRadius) < 1e-6) return false;
-		if(Math.abs(startRadius) < 1e-6 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(angleDeg);
-		if(startRadius > 0.5 && Math.abs(endRadius) < 1e-6) return CubicCurve.isCubicParabolaValid(angleDeg);
-		if(startRadius > 0.5 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(startRadius, endRadius, angleDeg);
-		return false;
-	}
-
 	private static String getLengthLabelType(RailSettings.Mutable settings) {
 		switch (settings.type) {
 			case STRAIGHT:
@@ -951,37 +664,5 @@ public class TrackGui implements IScreen {
 			default:
 				return GuiText.LABEL_NO_LENGTH.toString();
 		}
-	}
-
-	private EndPointData circlePitchSetting(EndPointData data) {
-		boolean pitchDegreeMode = data.pitchDegreeMode();
-		boolean projectHandle = data.projectHandle();
-
-		return data.with(mutable -> {
-			if (!pitchDegreeMode && projectHandle) {
-				// ‰ Projection -> ‰ Rotation
-				mutable.pitchDegreeMode = false;
-				mutable.projectHandle = false;
-				mutable.pitch = 0;
-			} else if (!pitchDegreeMode) {
-				// ‰ Rotation -> Degree Rotation
-				mutable.pitchDegreeMode = true;
-				mutable.projectHandle = false;
-				mutable.pitch = 0;
-			} else {
-				// Degree Rotation -> ‰ Projection
-				mutable.pitchDegreeMode = false;
-				mutable.projectHandle = true;
-				mutable.pitch = 0;
-			}
-		});
-	}
-
-	private void setPitchComponentsVisible() {
-		pitchLabel.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-		nearPitchInput.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-		farPitchInput.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-		nearPitchSettingButton.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-		farPitchSettingButton.setVisible(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
 	}
 }
