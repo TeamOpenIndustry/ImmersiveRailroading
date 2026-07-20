@@ -72,7 +72,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		this.customInfo = info;
 		if (customInfo != null) {
 			RailSettings settings = RailSettings.from(item);
-			if(settings.type ==TrackItems.TURN
+			if(settings.type == TrackItems.TURN || settings.type == TrackItems.TURN_V2
 				|| settings.type == TrackItems.STRAIGHT
 				|| settings.type == TrackItems.SLOPE){
 				Vec3d placeOffset = new Vec3d(
@@ -80,7 +80,7 @@ public class TileRailPreview extends BlockEntityTickable {
 						0,
 						customInfo.placementPosition.z - placementInfo.placementPosition.z
 				);
-				float yaw = settings.type == TrackItems.TURN
+				float yaw = settings.type == TrackItems.TURN || settings.type == TrackItems.TURN_V2
 							? placementInfo.yaw + ((settings.direction == TrackDirection.LEFT ? -1 : 1) * (Math.abs(settings.degrees) / 2)) //Calculate arc direction for turn
 							: placementInfo.yaw; //Simply use its yaw
 				Vec3d unit = new Vec3d(0, 0, 1).rotateYaw(yaw);
@@ -89,6 +89,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 				switch (settings.type) {
 					case TURN:
+					case TURN_V2:
 						//Transform it back to radius
 						double sin = Math.sin(Math.toRadians(settings.degrees / 2));
 						length = sin != 0d

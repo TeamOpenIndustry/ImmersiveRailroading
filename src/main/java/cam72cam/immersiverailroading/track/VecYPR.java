@@ -54,18 +54,13 @@ public class VecYPR extends Vec3d {
     }
 
     public VecYPR withOrientation(Orientation orientation) {
-        VecYPR orientationYPR = orientation.toYPR();
-        VecYPR result = new VecYPR(this.x, this.y, this.z,
-                                   orientationYPR.yaw, orientationYPR.pitch, orientationYPR.roll,
-                                   this.length, this.parts.toArray(new TrackModelPart[0]));
-        result.children.addAll(this.children);
-        return result;
+        VecYPR orientedYPR = orientation.toYPR();
+        return copyWith(this.x, this.y, this.z, orientedYPR.yaw, orientedYPR.pitch, orientedYPR.roll);
     }
 
     @Override
     public VecYPR add(Vec3d other) {
-        //Clear Roll value and others, just serve as a data holder
-        return new VecYPR(this.x + other.x, this.y + other.y, this.z + other.z, this.yaw, this.pitch, this.length);
+        return copyWith(this.x + other.x, this.y + other.y, this.z + other.z, this.yaw, this.pitch, this.roll);
     }
 
     public void addChild(VecYPR another) {
@@ -94,5 +89,12 @@ public class VecYPR extends Vec3d {
 
     public List<VecYPR> getChildren() {
         return children;
+    }
+
+    private VecYPR copyWith(double x, double y, double z, float yaw, float pitch, float roll) {
+        //Preserve other data and override position/orientation
+        VecYPR result = new VecYPR(x, y, z, yaw, pitch, roll, this.length, this.parts.toArray(new TrackModelPart[0]));
+        result.children.addAll(this.children);
+        return result;
     }
 }
