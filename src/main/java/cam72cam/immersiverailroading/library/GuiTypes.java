@@ -50,13 +50,10 @@ public class GuiTypes {
 
     private static IScreen createTrackGuiScreen(TileRailPreview te) {
         try {
-            int guiOpenType = new ItemTrackBlueprint.Data(te.getItem()).guiOpenType;
-            if (guiOpenType == 0) {
+            if (new ItemTrackBlueprint.Data(te.getItem()).guiOpenType == 0) {
                 return new TrackGui(te);
-            } else if(guiOpenType == 1) {
-                return new TrackExtraGui(te);
             } else {
-                return new TrackEndPointGui(te);
+                return new TrackExtraGui(te);
             }
         } catch (NullPointerException e) {
             return new TrackGui(te);
@@ -65,13 +62,10 @@ public class GuiTypes {
     private static IScreen createTrackGuiScreen() {
         ItemStack stack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
         try {
-            int guiOpenType = new ItemTrackBlueprint.Data(stack).guiOpenType;
-            if (guiOpenType == 0) {
+            if (new ItemTrackBlueprint.Data(stack).guiOpenType == 0) {
                 return new TrackGui();
-            } else if(guiOpenType == 1) {
-                return new TrackExtraGui();
             } else {
-                return new TrackEndPointGui();
+                return new TrackExtraGui();
             }
         } catch (NullPointerException e) {
             return new TrackGui();

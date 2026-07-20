@@ -211,14 +211,6 @@ public class CubicCurve {
         return delta >= 0.0;
     }
 
-    public static boolean isCubicParabolaInputValid(double startRadius, double endRadius, double angleDeg) {
-        if(Math.abs(startRadius) < 1e-6 && Math.abs(endRadius) < 1e-6) return false;
-        if(Math.abs(startRadius) < 1e-6 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(angleDeg);
-        if(startRadius > 0.5 && Math.abs(endRadius) < 1e-6) return CubicCurve.isCubicParabolaValid(angleDeg);
-        if(startRadius > 0.5 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(startRadius, endRadius, angleDeg);
-        return false;
-    }
-
     public static boolean isCubicParabolaValid(double angleDeg) {
         return angleDeg > 0 && angleDeg < cubicParabolaMaxAngle;
     }
