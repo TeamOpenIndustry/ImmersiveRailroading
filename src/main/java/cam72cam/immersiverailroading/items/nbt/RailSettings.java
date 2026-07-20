@@ -210,6 +210,11 @@ public class RailSettings {
             transfertableEntryCount = 1;
             transfertableEntrySpacing = 1;
 
+            if (data.hasKey("pos_type")) {
+                TrackPositionType oldPosType = data.getEnum("pos_type", TrackPositionType.class);
+                nearPointData = nearPointData.with(mutable -> mutable.posType = oldPosType);
+            }
+
             TagSerializer.deserialize(data, this);
         }
 
@@ -275,8 +280,6 @@ public class RailSettings {
                         d.set(fieldName, target);
                     },
                     d -> {
-                        TagCompound railData = d.get(fieldName);
-                        NbtMigratorRegistry.applyAll(railData);
                         try {
                             return new Mutable(d.get(fieldName)).immutable();
                         } catch (SerializationException e) {
