@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.TrackPosYawType;
 import cam72cam.immersiverailroading.library.TrackPositionType;
-import cam72cam.mod.gui.screen.Button;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 
@@ -19,10 +18,11 @@ public record EndPointData (
         boolean projectHandle,
         TrackPositionType posType,
         TrackPosYawType posYawType,
-        float posYaw) {
+        float posYaw,
+        TrackSnapSettings trackSnapSettings) {
 
     public EndPointData(float radius) {
-        this(radius, Vec3d.ZERO, 0f, false, true, TrackPositionType.FIXED, TrackPosYawType.ANGLE_SEGMENTATION, 0f);
+        this(radius, Vec3d.ZERO, 0f, false, true, TrackPositionType.FIXED, TrackPosYawType.ANGLE_SEGMENTATION, 0f, new TrackSnapSettings());
     }
 
     public static class Mutable {
@@ -42,6 +42,8 @@ public record EndPointData (
         public TrackPosYawType posYawType;
         @TagField("pos_yaw")
         public float posYaw;
+        @TagField("track_snap_type")
+        public TrackSnapSettings trackSnapSettings;
 
         public Mutable(EndPointData endPointData) {
             this.radius = endPointData.radius;
@@ -52,6 +54,7 @@ public record EndPointData (
             this.posType = endPointData.posType;
             this.posYawType = endPointData.posYawType;
             this.posYaw = endPointData.posYaw;
+            this.trackSnapSettings = endPointData.trackSnapSettings;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -65,6 +68,7 @@ public record EndPointData (
             this.posType = endPointData.posType;
             this.posYawType = endPointData.posYawType;
             this.posYaw = endPointData.posYaw;
+            this.trackSnapSettings = endPointData.trackSnapSettings;
 
             TagSerializer.deserialize(data, this);
         }
@@ -78,7 +82,8 @@ public record EndPointData (
                     projectHandle,
                     posType,
                     posYawType,
-                    posYaw
+                    posYaw,
+                    trackSnapSettings
             );
         }
     }
