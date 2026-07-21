@@ -42,7 +42,7 @@ public record EndPointData (
         public TrackPosYawType posYawType;
         @TagField("pos_yaw")
         public float posYaw;
-        @TagField("track_snap_type")
+        @TagField("track_snap_settings")
         public TrackSnapSettings trackSnapSettings;
 
         public Mutable(EndPointData endPointData) {

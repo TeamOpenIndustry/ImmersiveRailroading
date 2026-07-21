@@ -1,12 +1,10 @@
 package cam72cam.immersiverailroading.util;
 
-import cam72cam.mod.serialization.SerializationException;
-import cam72cam.mod.serialization.TagCompound;
-import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagSerializer;
+import cam72cam.mod.serialization.*;
 
 import java.util.function.Consumer;
 
+@TagMapped(TrackSnapSettings.TagMapper.class)
 public record TrackSnapSettings(
         boolean snapPos,
         boolean snapYaw,
@@ -18,13 +16,13 @@ public record TrackSnapSettings(
 
     public static class Mutable {
         @TagField("snapPos")
-        boolean snapPos;
+        public boolean snapPos;
         @TagField("snapYaw")
-        boolean snapYaw;
+        public boolean snapYaw;
         @TagField("snapPitch")
-        boolean snapPitch;
+        public boolean snapPitch;
         @TagField("snapRoll")
-        boolean snapRoll;
+        public boolean snapRoll;
 
         public Mutable(TrackSnapSettings type) {
             this.snapPos = type.snapPos();
