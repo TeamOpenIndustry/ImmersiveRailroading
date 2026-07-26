@@ -279,8 +279,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		List<Matrix3> correctLeftOrientation = new ArrayList<>();
 		List<Matrix3> correctRightOrientation = new ArrayList<>();
 
-		Vec3d[] leftPos = null;
-		Vec3d[] rightPos = null;
+		Vec3d[] leftPos;
+		Vec3d[] rightPos;
 
 		if (correctPartRailOrientatio) {
 			if (points.size() < 2 || info.settings.rollAndOffsetInfo == null) {
@@ -312,8 +312,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
 								length, true, info.settings.gauge.value());
 
-				correctLeftOrientation.add(startBase.rotateLocalPitch(startLeftPitch));
-				correctRightOrientation.add(startBase.rotateLocalPitch(startRightPitch));
+				correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
+				correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
 
 				//Mid
 				for (int i = 1; i < points.size() - 1; i++) {
@@ -335,8 +335,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
 								length, true, info.settings.gauge.value());
 
-				correctLeftOrientation.add(endBase.rotateLocalPitch(endLeftPitch));
-				correctRightOrientation.add(endBase.rotateLocalPitch(endRightPitch));
+				correctLeftOrientation.add(endBase.copy().rotateLocalPitch(endLeftPitch));
+				correctRightOrientation.add(endBase.copy().rotateLocalPitch(endRightPitch));
 			}
 		}
 
