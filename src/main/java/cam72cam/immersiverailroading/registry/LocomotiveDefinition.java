@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
-import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.library.unit.ForceDisplayType;
 import cam72cam.immersiverailroading.library.unit.PowerDisplayType;
 import cam72cam.immersiverailroading.util.DataBlock;
@@ -14,7 +13,6 @@ import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.resource.Identifier;
 
-import java.io.IOException;
 import java.util.List;
 
 public abstract class LocomotiveDefinition extends FreightDefinition {
@@ -39,10 +37,6 @@ public abstract class LocomotiveDefinition extends FreightDefinition {
     @Override
     protected Identifier defaultDataLocation() {
         return new Identifier(ImmersiveRailroading.MODID, "rolling_stock/default/locomotive.caml");
-    }
-    
-    public GuiBuilder getRemoteOverlay(DataBlock data) throws IOException {
-        return hasIndependentBrake() ? GuiBuilder.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/independent.caml")) : null;
     }
 
     @Override
