@@ -376,4 +376,8 @@ public class Simulation {
 
         new Simulation(world);
     }
+
+    public static double calculateRoll(double frontRoll, double rearRoll) {//TODO: multi bogey support?
+        return (frontRoll + rearRoll) / 2;
+    }
 }

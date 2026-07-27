@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import util.Matrix4;
 
@@ -61,7 +62,7 @@ public class RailBaseModel {
 		}
 
 		if (snow != 0) {
-			model.addSnow(snow + (int)(height * 8), new Matrix4());
+			model.addSnow(snow + (int)(Math.max(height, 0.1) * 8), new Matrix4());
 			return model;
 		} else if (!bed.isEmpty() && tileHeight != 0.000001f) {
 			model.addItemBlock(bed, new Matrix4().scale(1, height, 1));
