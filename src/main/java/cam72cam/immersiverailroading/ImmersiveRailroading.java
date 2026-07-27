@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.gui.AugmentFilterGUI;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
+import cam72cam.immersiverailroading.gui.overlay.RemoteOverlay;
 import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
@@ -11,6 +12,9 @@ import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.remotecontrol.RemoteControlData;
+import cam72cam.immersiverailroading.remotecontrol.WirelessRemotecontrolClient;
+import cam72cam.immersiverailroading.remotecontrol.WirelessRemotecontrolServer;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.item.*;
@@ -41,6 +45,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.text.Command;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -49,6 +54,8 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 	public static final int ENTITY_SYNC_DISTANCE = 512;
 	private static ImmersiveRailroading instance;
+	
+	private static RemoteOverlay remoteGui;
 
 	public ImmersiveRailroading() {
 		instance = this;
@@ -86,9 +93,12 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(GuiBuilder.ControlChangePacket::new, PacketDirection.ClientToServer);
 				Packet.register(ItemPaintBrush.PaintBrushPacket::new, PacketDirection.ClientToServer);
 				Packet.register(AugmentFilterGUI.AugmentFilterChangePacket::new, PacketDirection.ClientToServer);
+				Packet.register(RemoteControlSyncPacket::new, PacketDirection.ServerToClient);
+				Packet.register(RemoteControlActivePacket::new, PacketDirection.ClientToServer);
 
 				ServerChronoState.register();
-
+				WirelessRemotecontrolServer.init();
+				
 				IRBlocks.register();
 				IRItems.register();
 				GuiTypes.register();
@@ -172,15 +182,15 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRenderer.register(Tender.class, stockRender);
 				EntityRenderer.register(HandCar.class, stockRender);
 
-
 				Function<KeyTypes, Runnable> onKeyPress = type -> () -> {
-	                UUID target = WirelessRemotecontrolInputHandler.getTarget();
-	                if (target != null) {
-
-	                    new KeyPressPacket(type, target).sendToServer();
-	                }
-	                new KeyPressPacket(type).sendToServer();
-	                };
+					UUID target = WirelessRemotecontrolClient.getLoco();
+					if (target != null) {
+						new KeyPressPacket(type, target).sendToServer(); // Remote control
+					}
+					else if (MinecraftClient.getPlayer().getRiding() instanceof EntityRollingStock) {
+						new KeyPressPacket(type).sendToServer();
+					}
+				};
 				Keyboard.registerKey("ir_keys.increase_throttle", KeyCode.NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
 				Keyboard.registerKey("ir_keys.zero_throttle", KeyCode.NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
 				Keyboard.registerKey("ir_keys.decrease_throttle", KeyCode.NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
@@ -201,11 +211,11 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				Audio.setSoundChannels(ConfigSound.customAudioChannels);
 				break;
-			case SETUP:
+			case SETUP:				
 				GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
 
-				GlobalRender.registerOverlay((state, pt) -> {
+				GlobalRender.registerOverlay((state, _) -> {
 					Entity riding = MinecraftClient.getPlayer().getRiding();
 					if (!(riding instanceof EntityRollingStock)) {
 						return;
@@ -214,6 +224,24 @@ public class ImmersiveRailroading extends ModCore.Mod {
 					if (stock.getDefinition().getOverlay() != null) {
 						stock.getDefinition().getOverlay().render(state, stock);
 					}
+				});
+				// Remote Overlay
+				try {
+				    remoteGui = RemoteOverlay.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/fbg.json"));
+				} catch (IOException e) {
+				    e.printStackTrace();
+				}
+
+				GlobalRender.registerOverlay((state, _) -> {
+				    UUID activeLoco = WirelessRemotecontrolClient.getLoco();
+			        if (activeLoco == null || remoteGui == null) {
+			            return;
+			        }
+					RemoteControlData data = WirelessRemotecontrolClient.getData();
+			        if(data == null) {
+			            return;
+			        }
+			        remoteGui.render(state, data);
 				});
 
 				ClientEvents.MOUSE_GUI.subscribe(evt -> {
@@ -233,9 +261,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				ClientEvents.TICK.subscribe(GuiBuilder::onClientTick);
 				ClientEvents.TICK.subscribe(EntityRollingStockDefinition.ControlSoundsDefinition::cleanupStoppedSounds);
-
+				ClientEvents.TICK.subscribe(WirelessRemotecontrolClient::onClientTick);
+	                                         
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
-
+	
 				ClientPartDragging.register();
 				break;
 			case RELOAD:

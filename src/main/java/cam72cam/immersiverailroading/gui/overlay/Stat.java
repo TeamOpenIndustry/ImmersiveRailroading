@@ -28,7 +28,7 @@ public enum Stat {
     UNITS_CARGO_FILL,
     ;
 
-    private static final String[] formats = {"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f"};
+    protected static final String[] formats = {"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f"};
 
     public String getValue(EntityRollingStock stock) {
         return this.getValue(stock, getDefaultDecimal());
