@@ -294,6 +294,14 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 	}
 	
+	@Override
+	public void setEmergency(boolean emergency) {
+		super.setEmergency(emergency);
+		if (emergency) {
+			setTurnedOn(false);
+		}
+	}
+	
 	public RemoteControlData getRemoteControlData() {
 		RemoteControlData data = new RemoteControlData();	    
 	    data.throttle = getThrottle();

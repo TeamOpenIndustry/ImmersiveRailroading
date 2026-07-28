@@ -21,6 +21,7 @@ import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 
+import java.security.Permissions;
 import java.util.OptionalDouble;
 import java.util.UUID;
 
@@ -44,6 +45,10 @@ public abstract class Locomotive extends FreightTank {
 	@TagSync
 	@TagField("AIR_BRAKE")
 	private float trainBrake = 0;
+
+	@TagSync
+	@TagField("EMERGENCY")
+	private boolean emergency = false;
 
 	@TagSync
 	@TagField("HORN")
@@ -661,4 +666,18 @@ public abstract class Locomotive extends FreightTank {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;
 	}
+
+    public void setEmergency(boolean emergency) {
+    	if (emergency) {
+        	setThrottle(0);
+        	setTrainBrake(1);
+        	this.emergency = true;
+    	} else {
+    		this.emergency = false;
+    	}
+    }
+    
+    public boolean getEmergency() {
+    	return emergency;
+    }
 }
