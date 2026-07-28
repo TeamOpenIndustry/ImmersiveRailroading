@@ -108,16 +108,8 @@ overlay = null  # Optional: Custom in-game overlay GUI.  See examples in immersi
 particles = # Optional: Configure general particle emitter settings
     smoke =
         texture = "immersiverailroading:textures/light.png"
-        # You can set multiple textures here in another format, and IR would use them randomly
-        # In CAML, specify multiple times for multiple potential textures, like
-        # texture : "location of tex1"
-        # texture : "location of tex2"
-        # texture : "location of tex3"
-        # In JSON, like
-        # "texture" : ["location of tex1", "location of tex2", "location of tex3"]
     steam =
         texture = "immersiverailroading:textures/light.png"
-        # Similarly, steam can also use multiple textures like smoke
 
 # Each animation in CAML will have it's own animation: block
 # While in JSON it will be in the [{"properties": "values"}, {"properties": "values"}] format
