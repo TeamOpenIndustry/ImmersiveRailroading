@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
 import cam72cam.immersiverailroading.library.TrackModelPart;
-import cam72cam.mod.math.Matrix3;
 import cam72cam.mod.math.Vec3d;
 
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ public class VecYPR extends Vec3d {
     private final float yaw;
     private final float pitch;
     private final float roll;
-    private final Matrix3 matrixCache;
     private final float length;
     private final List<TrackModelPart> parts;
     private final List<VecYPR> children;
@@ -22,7 +20,6 @@ public class VecYPR extends Vec3d {
         this.yaw = yaw;
         this.pitch = pitch;
         this.roll = roll;
-        this.matrixCache = Matrix3.fromEuler(yaw, pitch, roll);
 
         this.parts = Arrays.asList(parts);
         this.length = length;
@@ -56,9 +53,9 @@ public class VecYPR extends Vec3d {
         this(orig.x, orig.y, orig.z, yaw, pitch, roll, length, parts);
     }
 
-    public VecYPR withMatrix3(Matrix3 matrix3) {
-        Vec3d ypr = matrix3.toEuler();
-        return copyWith(this.x, this.y, this.z, (float) ypr.x, (float) ypr.y, (float) ypr.z);
+    public VecYPR withOrientation(Orientation orientation) {
+        VecYPR orientedYPR = orientation.toYPR();
+        return copyWith(this.x, this.y, this.z, orientedYPR.yaw, orientedYPR.pitch, orientedYPR.roll);
     }
 
     @Override
@@ -92,10 +89,6 @@ public class VecYPR extends Vec3d {
 
     public List<VecYPR> getChildren() {
         return children;
-    }
-
-    public Matrix3 toMatrix3() {
-        return matrixCache.copy();
     }
 
     private VecYPR copyWith(double x, double y, double z, float yaw, float pitch, float roll) {

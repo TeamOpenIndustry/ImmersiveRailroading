@@ -7,7 +7,6 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Matrix3;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
@@ -230,8 +229,8 @@ public class BuilderCubicCurve extends BuilderIterator {
 					pitch = (float) -Math.toDegrees(Math.atan2(next.y - prev.y, VecUtil.flatDistance(next, prev)));
 					yaw = VecUtil.toYaw(points.get(i+1).subtract(points.get(i-1)));
 				}
-				Matrix3 orientation = Matrix3.fromEuler(yaw, pitch, roll);
-				Vec3d newP = p.add(orientation.up().scale(yOffsets.get(i) * gaugeScale));
+				Orientation orientation = Orientation.fromYPR(yaw, pitch, roll);
+				Vec3d newP = p.add(orientation.up.scale(yOffsets.get(i) * gaugeScale));
 				newPosList.add(newP);
 			}
 			for(int i = 0; i < points.size(); i++) {
