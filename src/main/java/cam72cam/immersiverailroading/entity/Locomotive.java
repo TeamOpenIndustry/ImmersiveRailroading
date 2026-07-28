@@ -259,6 +259,8 @@ public abstract class Locomotive extends FreightTank {
 		super.onDragRelease(control);
 		if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
 			setControlPosition(control, 0.5f);
+		} else if (control.part.type.equals(ModelComponentType.EMERGENCY_X)) {
+			setEmergency(getControlPosition(control) > 0.5);
 		}
 	}
 
