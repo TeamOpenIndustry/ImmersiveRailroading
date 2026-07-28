@@ -8,10 +8,11 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.resource.Identifier;
 
 import java.util.List;
+import java.util.Random;
 
 public class DieselExhaust {
     private final List<ModelComponent> components;
@@ -31,8 +32,9 @@ public class DieselExhaust {
                 Vec3d fakeMotion = stock.getVelocity();
                 for (ModelComponent exhaust : components) {
                     Vec3d particlePos = stock.getModelMatrix().apply(exhaust.center);
-                    double smokeMod = (1 + MathUtil.clamp(Math.abs(stock.getCurrentSpeed().minecraft())*2, 0.2, 1))/2;
-                    Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * stock.gauge.scale(), fakeMotion.z), (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width() * stock.gauge.scale(), stock.getDefinition().smokeParticleTexture));
+                    double smokeMod = (1 + Math.clamp(Math.abs(stock.getCurrentSpeed().minecraft())*2, 0.2, 1)) / 2;
+                    Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + 0.4 * stock.gauge.scale(), fakeMotion.z),
+                                                                               (int) (40 * (1+throttle) * smokeMod), throttle, throttle, exhaust.width() * stock.gauge.scale(), stock.getDefinition().getSmokeParticle()));
                 }
             }
         }

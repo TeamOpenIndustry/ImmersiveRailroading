@@ -92,8 +92,8 @@ public abstract class EntityRollingStockDefinition {
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
     private final Map<String, LightDefinition> lights = new HashMap<>();
     protected final Map<String, ControlSoundsDefinition> controlSounds = new HashMap<>();
-    public Identifier smokeParticleTexture;
-    public Identifier steamParticleTexture;
+    private List<Identifier> smokeParticleTextures;
+    private List<Identifier> steamParticleTextures;
     private boolean isLinearBrakeControl;
     private GuiBuilder overlay;
     private List<String> extraTooltipInfo;
@@ -535,16 +535,29 @@ public abstract class EntityRollingStockDefinition {
             extra_tooltip_info.forEach(value -> extraTooltipInfo.add(value.asString()));
         }
 
-        smokeParticleTexture = steamParticleTexture = DEFAULT_PARTICLE_TEXTURE;
+        smokeParticleTextures = steamParticleTextures = List.of(DEFAULT_PARTICLE_TEXTURE);
         DataBlock particles = data.getBlock("particles");
         if (particles != null) {
             DataBlock smoke = particles.getBlock("smoke");
             if (smoke != null) {
-                smokeParticleTexture = new Identifier(smoke.getValue("texture").asString());
+                List<DataBlock.Value> smokeTextures = smoke.getValues("texture");
+                if (smokeTextures != null) {
+                    smokeParticleTextures = smokeTextures.stream().map(val -> new Identifier(val.asString())).toList();
+                } else {
+                    //Legacy
+                    smokeParticleTextures = List.of(new Identifier(smoke.getValue("texture").asString()));
+                }
             }
+
             DataBlock steam = particles.getBlock("steam");
             if (steam != null) {
-                steamParticleTexture = new Identifier(steam.getValue("texture").asString());
+                List<DataBlock.Value> steamTextures = steam.getValues("texture");
+                if (steamTextures != null) {
+                    steamParticleTextures = steamTextures.stream().map(val -> new Identifier(val.asString())).toList();
+                } else {
+                    //Legacy
+                    steamParticleTextures = List.of(new Identifier(steam.getValue("texture").asString()));
+                }
             }
         }
 
@@ -905,6 +918,24 @@ public abstract class EntityRollingStockDefinition {
 
     public List<String> getExtraTooltipInfo() {
         return extraTooltipInfo;
+    }
+
+    public Identifier getSmokeParticle() {
+        if (smokeParticleTextures.size() == 1) {
+            //Fast fallback
+            return smokeParticleTextures.getFirst();
+        }
+        int i = ImmersiveRailroading.RANDOM.nextInt(smokeParticleTextures.size());
+        return smokeParticleTextures.get(i);
+    }
+
+    public Identifier getSteamParticle() {
+        if (steamParticleTextures.size() == 1) {
+            //Fast fallback
+            return steamParticleTextures.getFirst();
+        }
+        int i = ImmersiveRailroading.RANDOM.nextInt(steamParticleTextures.size());
+        return steamParticleTextures.get(i);
     }
 
     public double getSwayMultiplier() {
