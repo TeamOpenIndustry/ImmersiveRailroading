@@ -543,6 +543,9 @@ public abstract class EntityRollingStockDefinition {
                 List<DataBlock.Value> smokeTextures = smoke.getValues("texture");
                 if (smokeTextures != null) {
                     smokeParticleTextures = smokeTextures.stream().map(val -> new Identifier(val.asString())).toList();
+                    if (smokeParticleTextures.isEmpty()) {
+                        throw new RuntimeException("Please add at least 1 particle texture in smoke textures!");
+                    }
                 } else {
                     //Legacy
                     smokeParticleTextures = List.of(new Identifier(smoke.getValue("texture").asString()));
@@ -554,6 +557,9 @@ public abstract class EntityRollingStockDefinition {
                 List<DataBlock.Value> steamTextures = steam.getValues("texture");
                 if (steamTextures != null) {
                     steamParticleTextures = steamTextures.stream().map(val -> new Identifier(val.asString())).toList();
+                    if (steamParticleTextures.isEmpty()) {
+                        throw new RuntimeException("Please add at least 1 particle texture in steam textures!");
+                    }
                 } else {
                     //Legacy
                     steamParticleTextures = List.of(new Identifier(steam.getValue("texture").asString()));
