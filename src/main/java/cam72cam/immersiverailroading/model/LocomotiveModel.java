@@ -88,6 +88,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         if (def.hasIndependentBrake()) {
             addGauge(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, Readouts.INDEPENDENT_BRAKE);
         }
+        addGauge(provider, ModelComponentType.GAUGE_EMERGENCY_X, Readouts.EMERGENCY);
 
         addControl(provider, ModelComponentType.BELL_CONTROL_X);
         addControl(provider, ModelComponentType.THROTTLE_BRAKE_X);
@@ -97,6 +98,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         if (def.hasIndependentBrake()) {
             addControl(provider, ModelComponentType.INDEPENDENT_BRAKE_X);
         }
+        addControl(provider, ModelComponentType.EMERGENCY_X);
     }
 
     @Override
