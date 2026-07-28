@@ -16,6 +16,8 @@ public class RemoteControlData {
 	public float reverser;
 	@TagField("emergency")
 	public boolean emergency;
+	@TagField("horn")
+	public float horn;
 	
 	public RemoteControlData() {
 	}

@@ -47,7 +47,7 @@ public class GuiBuilder {
 
     protected final Readouts readout;
     private final String control;
-    protected final String setting;
+    private final String setting;
     private final String texture_variant;
     protected final Float setting_default;
     private final boolean global;

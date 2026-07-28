@@ -147,29 +147,26 @@ public class RemoteOverlay extends GuiBuilder {
         if (readout != null) {
         	switch (readout) {
 			case THROTTLE: {
-				return data.throttle;
+				value = data.throttle;
 			}
 			case BRAKE_PRESSURE: {
-				return data.brakePressure;
+				value = data.brakePressure;
 			}
 			case INDEPENDENT_BRAKE: {
-				return data.indBrake;
+				value = data.indBrake;
 			}
 			case REVERSER: {
-				return data.reverser;
+				value = data.reverser;
 			}
 			case EMERGENCY: {
-				return data.emergency ? 1 : 0;
+				value = data.emergency ? 1 : 0;
+			}
+			case HORN, WHISTLE: {
+				value = data.horn > 0 ? 1 : 0;
 			}
 			default:
-				return 0;
+				value = 0;
 			}
-        } else if (setting != null) {
-            if (!ConfigGraphics.settings.containsKey(setting) && setting_default != null) {
-                ConfigGraphics.settings.put(setting, setting_default);
-            }
-
-            value = ConfigGraphics.settings.getOrDefault(setting, 0f);
         }
 
         switch (clamp) {
@@ -204,7 +201,7 @@ public class RemoteOverlay extends GuiBuilder {
             case UNITS_SPEED:
                 return ConfigGraphics.speedUnit.toUnitString();
 			default:
-				return "no stat";
+				return "not valid";
 		}
 	}
 	
@@ -233,6 +230,7 @@ public class RemoteOverlay extends GuiBuilder {
 	            case BRAKE_PRESSURE:
 	            case INDEPENDENT_BRAKE:
 	            case EMERGENCY:
+	            case WHISTLE, HORN:
 	                break;
 	            default:
 	                return null;
@@ -260,9 +258,6 @@ public class RemoteOverlay extends GuiBuilder {
 	    return tlx != 0 || tly != 0 || rotdeg != 0 || scalex != null || scaley != null || toggle;
 	}
 	
-    private void onMouseClick() {
-    }
-	
 	private void onMouseMove(RemoteControlData data, Matrix4 matrix, RemoteOverlay target, int maxx, int maxy, int x, int y) {
 	    float value = getValue(data);
 	    matrix = matrix.copy();
@@ -271,6 +266,9 @@ public class RemoteOverlay extends GuiBuilder {
 	    applyValue(matrix, value);
 
 	    if (target == this) {
+	    	if (toggle) {
+	    		return;
+	    	}
 	        float closestValue = value;
 	        double closestDelta = 999999;
 
@@ -317,8 +315,8 @@ public class RemoteOverlay extends GuiBuilder {
             target = scrollTarget;
         }
 
-        if (target != null) {
-            float value = target.getValue(data);
+        if (target != null && !target.toggle) {
+            float value = target.getValue(data);            
             value += scroll / -50 * ConfigGraphics.ScrollSpeed;
 
             target.sendRemoteControlChange(value);
@@ -334,8 +332,11 @@ public class RemoteOverlay extends GuiBuilder {
     public void onMouseRelease(RemoteControlData data) {
         float value = getValue(data);
 
-        if (readout == Readouts.HORN || readout == Readouts.WHISTLE) {
-            value = 0;
+        if (toggle) {
+            value = 1 - value;
+            if (invert) {
+                value = 1 - value;
+            }
         }
 
         sendRemoteControlChange(value);
@@ -348,9 +349,6 @@ public class RemoteOverlay extends GuiBuilder {
                     target.onMouseRelease(data);
                 }
                 target = find(data, new Matrix4(), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, event.y);
-                if (target != null) {
-                    target.onMouseClick();
-                }
                 return target == null;
             case RELEASE:
                 if (target != null) {
