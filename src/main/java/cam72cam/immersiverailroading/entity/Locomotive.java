@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.remotecontrol.RemoteControlData;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.MathUtil;
@@ -21,7 +22,6 @@ import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 
-import java.security.Permissions;
 import java.util.OptionalDouble;
 import java.util.UUID;
 
@@ -680,4 +680,16 @@ public abstract class Locomotive extends FreightTank {
     public boolean getEmergency() {
     	return emergency;
     }
+    
+	public RemoteControlData getRemoteControlData() {
+		RemoteControlData data = new RemoteControlData();	    
+	    data.throttle = getThrottle();
+	    data.brakePressure = getBrakePressure();
+	    data.indBrake = getIndependentBrake();
+	    data.reverser = getReverser();
+	    data.speed = getCurrentSpeed();
+	    data.emergency = getEmergency();
+
+	    return data;
+	}
 }

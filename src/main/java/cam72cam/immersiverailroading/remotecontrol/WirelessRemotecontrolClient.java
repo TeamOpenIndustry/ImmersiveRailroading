@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.items.ItemWirelessRemotecontrol;
 import cam72cam.immersiverailroading.net.RemoteControlActivePacket;
 import cam72cam.mod.MinecraftClient;
@@ -56,5 +57,18 @@ public class WirelessRemotecontrolClient {
     
     private static void clearData() {
     	cachedData = null;
+    }
+    
+    public static void applyLocalReadoutUpdate(Readouts readout, float value) {
+        if (cachedData == null) {
+            return;
+        }
+        switch (readout) {
+            case THROTTLE: cachedData.throttle = value; break;
+            case REVERSER: cachedData.reverser = value; break;
+            case BRAKE_PRESSURE: cachedData.brakePressure = value; break;
+            case INDEPENDENT_BRAKE: cachedData.indBrake = value; break;
+            default: break;
+        }
     }
 }

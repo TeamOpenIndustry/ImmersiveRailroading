@@ -5,14 +5,14 @@ import cam72cam.immersiverailroading.remotecontrol.WirelessRemotecontrolClient;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.serialization.TagField;
 
-public class RemoteControlSyncPacket extends Packet {
+public class RemoteControlServerPacket extends Packet {
 	@TagField("data")
     private RemoteControlData data;
 
-    public RemoteControlSyncPacket() {
+    public RemoteControlServerPacket() {
     }
 
-    public RemoteControlSyncPacket(RemoteControlData data) {
+    public RemoteControlServerPacket(RemoteControlData data) {
         this.data = data;
     }
 

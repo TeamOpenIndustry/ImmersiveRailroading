@@ -1,15 +1,23 @@
 package cam72cam.immersiverailroading.gui.overlay;
 
+import java.awt.Polygon;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.net.RemoteControlClientPacket;
 import cam72cam.immersiverailroading.remotecontrol.RemoteControlData;
+import cam72cam.immersiverailroading.remotecontrol.WirelessRemotecontrolClient;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.Speed;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.DirectDraw;
 import cam72cam.mod.render.opengl.RenderState;
@@ -19,6 +27,10 @@ import util.Matrix4;
 
 public class RemoteOverlay extends GuiBuilder {
 	private List<RemoteOverlay> elements;
+	
+	private static RemoteOverlay target = null;
+    private static RemoteOverlay scrollTarget = null;
+    private static int lastScrolled = 0;
 
 	protected RemoteOverlay(DataBlock data) throws IOException {
 		super(data);
@@ -146,6 +158,9 @@ public class RemoteOverlay extends GuiBuilder {
 			case REVERSER: {
 				return data.reverser;
 			}
+			case EMERGENCY: {
+				return data.emergency ? 1 : 0;
+			}
 			default:
 				return 0;
 			}
@@ -189,6 +204,178 @@ public class RemoteOverlay extends GuiBuilder {
 			default:
 				return "no stat";
 		}
+	}
+	
+	private RemoteOverlay find(RemoteControlData data, Matrix4 matrix, int maxx, int maxy, int x, int y) {
+	    float value = getValue(data);
+	    if (translucent && value == 0) {
+	        return null;
+	    }
+	    matrix = matrix.copy();
+	    applyPosition(matrix, maxx, maxy);
+	    applyValue(matrix, value);
+	    for (RemoteOverlay element : elements) {
+	        RemoteOverlay found = element.find(data, matrix, maxx, maxy, x, y);
+	        if (found != null) {
+	            return found;
+	        }
+	    }
+
+	    if (interactable() && (image != null || text != null)) {
+	        if (readout == null) {
+	            return null;
+	        }
+	        switch (readout) {
+	            case THROTTLE:
+	            case REVERSER:
+	            case BRAKE_PRESSURE:
+	            case INDEPENDENT_BRAKE:
+	            case EMERGENCY:
+	                break;
+	            default:
+	                return null;
+	        }
+
+	        int border = 2;
+	        Vec3d cornerA = matrix.apply(new Vec3d((image == null ? -width : 0) - border, -border, 0));
+	        Vec3d cornerB = matrix.apply(new Vec3d((image == null ? -width : 0) - border, height + border, 0));
+	        Vec3d cornerC = matrix.apply(new Vec3d(width + border, -border, 0));
+	        Vec3d cornerD = matrix.apply(new Vec3d(width + border, height + border, 0));
+
+	        Polygon poly = new Polygon(
+	                new int[]{(int) cornerA.x, (int) cornerB.x, (int) cornerC.x, (int) cornerD.x},
+	                new int[]{(int) cornerA.y, (int) cornerB.y, (int) cornerC.y, (int) cornerD.y},
+	                4
+	        );
+	        if (poly.getBounds2D().contains(x, y)) {
+	            return this;
+	        }
+	    }
+	    return null;
+	}
+	
+	private boolean interactable() {
+	    return tlx != 0 || tly != 0 || rotdeg != 0 || scalex != null || scaley != null;
+	}
+	
+    private void onMouseClick() {
+    }
+	
+	private void onMouseMove(RemoteControlData data, Matrix4 matrix, RemoteOverlay target, int maxx, int maxy, int x, int y) {
+	    float value = getValue(data);
+	    matrix = matrix.copy();
+	    applyPosition(matrix, maxx, maxy);
+	    Matrix4 preApply = matrix.copy();
+	    applyValue(matrix, value);
+
+	    if (target == this) {
+	        float closestValue = value;
+	        double closestDelta = 999999;
+
+	        for (float checkValue = 0; checkValue <= 1; checkValue += 0.01) {
+	            Matrix4 temp = preApply.copy();
+	            if (tlx != 0 || tly != 0) {
+	                temp.translate(tlx * checkValue, tly * checkValue, 0);
+	            }
+	            if (rotdeg != 0) {
+	                temp.translate(rotx, roty, 0);
+	                temp.rotate(Math.toRadians(rotdeg * checkValue + rotoff), 0, 0, 1);
+	                temp.translate(-rotx, -roty, 0);
+	            }
+	            if (scalex != null || scaley != null) {
+	                temp.scale(scalex != null ? scalex * checkValue : 1, scaley != null ? scaley * checkValue : 1, 1);
+	            }
+	            Vec3d checkMiddle = temp.apply(new Vec3d(width / 2f, height / 2f, 0));
+	            double delta = checkMiddle.distanceTo(new Vec3d(x, y, 0));
+	            if (delta < closestDelta) {
+	                closestDelta = delta;
+	                closestValue = checkValue;
+	            }
+	        }
+
+	        if (closestValue != value) {
+	            float val = invert ? 1 - closestValue : closestValue;
+	            sendRemoteControlChange(val);
+	        }
+	    } else {
+	        for (RemoteOverlay element : elements) {
+	            element.onMouseMove(data, matrix, target, maxx, maxy, x, y);
+	        }
+	    }
+	}
+	
+	public boolean onMouseScroll(double scroll, RemoteControlData data, int maxx, int maxy, int x, int y) {
+        if (!MinecraftClient.isReady()) {
+            return true;
+        }
+        int ticks = MinecraftClient.getPlayer().getTickCount();
+
+        RemoteOverlay target = find(data, new Matrix4(), maxx, maxy, x, y);
+        if (target == null && lastScrolled + 20 > ticks) {
+            target = scrollTarget;
+        }
+
+        if (target != null) {
+            float value = target.getValue(data);
+            value += scroll / -50 * ConfigGraphics.ScrollSpeed;
+
+            target.sendRemoteControlChange(value);
+
+            scrollTarget = target;
+            lastScrolled = ticks;
+
+            return false;
+        }
+        return true;
+    }
+
+    public void onMouseRelease(RemoteControlData data) {
+        float value = getValue(data);
+
+        if (readout == Readouts.HORN || readout == Readouts.WHISTLE) {
+            value = 0;
+        }
+
+        sendRemoteControlChange(value);
+    }
+
+    public boolean click(ClientEvents.MouseGuiEvent event, RemoteControlData data) {
+        switch (event.action) {
+            case CLICK:
+                if (target != null) {
+                    target.onMouseRelease(data);
+                }
+                target = find(data, new Matrix4(), GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, event.y);
+                if (target != null) {
+                    target.onMouseClick();
+                }
+                return target == null;
+            case RELEASE:
+                if (target != null) {
+                    target.onMouseRelease(data);
+                    target = null;
+                    return false;
+                }
+                break;
+            case MOVE:
+                if (target != null) {
+                    this.onMouseMove(data, new Matrix4(), target, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, event.y);
+                    return false;
+                }
+                break;
+            case SCROLL:
+                return this.onMouseScroll(event.scroll, data, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), event.x, event.y);
+        }
+        return true;
+    }
+	
+	private void sendRemoteControlChange(float value) {
+	    UUID activeLoco = WirelessRemotecontrolClient.getLoco();
+	    if (activeLoco == null || readout == null) {
+	        return;
+	    }
+	    new RemoteControlClientPacket(activeLoco, readout, value).sendToServer();
+	    WirelessRemotecontrolClient.applyLocalReadoutUpdate(readout, value);
 	}
 
 }

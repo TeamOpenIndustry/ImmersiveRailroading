@@ -55,14 +55,14 @@ public class GuiBuilder {
     protected final boolean translucent;
     private final boolean toggle;
     protected final ClampMode clamp;
-    private final float tlx;
-    private final float tly;
-    private final float rotx;
-    private final float roty;
-    private final float rotdeg;
-    private final float rotoff;
-    private final Float scalex;
-    private final Float scaley;
+    protected final float tlx;
+    protected final float tly;
+    protected final float rotx;
+    protected final float roty;
+    protected final float rotdeg;
+    protected final float rotoff;
+    protected final Float scalex;
+    protected final Float scaley;
 
     protected final Map<Float, Integer> colors = new HashMap<>();
     private final EntityRollingStockDefinition.ControlSoundsDefinition sound;
@@ -472,7 +472,7 @@ public class GuiBuilder {
         return tlx != 0 || tly != 0 || rotdeg != 0 || scalex != null || scaley != null || toggle;
     }
 
-    private void onMouseClick(EntityRollingStock stock) {
+    protected void onMouseClick(EntityRollingStock stock) {
         if (sound != null) {
             sound.effects(stock, true, getValue(stock), MinecraftClient.getPlayer().getPosition());
         }
