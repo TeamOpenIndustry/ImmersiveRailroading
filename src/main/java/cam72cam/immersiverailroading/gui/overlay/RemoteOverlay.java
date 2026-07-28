@@ -201,6 +201,8 @@ public class RemoteOverlay extends GuiBuilder {
 	                case kmh:
 	                    return String.format(format, Math.abs(speed.metric()));
 	            }
+            case UNITS_SPEED:
+                return ConfigGraphics.speedUnit.toUnitString();
 			default:
 				return "no stat";
 		}
@@ -255,7 +257,7 @@ public class RemoteOverlay extends GuiBuilder {
 	}
 	
 	private boolean interactable() {
-	    return tlx != 0 || tly != 0 || rotdeg != 0 || scalex != null || scaley != null;
+	    return tlx != 0 || tly != 0 || rotdeg != 0 || scalex != null || scaley != null || toggle;
 	}
 	
     private void onMouseClick() {
