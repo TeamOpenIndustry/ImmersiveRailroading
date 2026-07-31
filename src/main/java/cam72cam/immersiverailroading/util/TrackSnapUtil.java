@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.library.TrackSmoothing;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase;
@@ -11,7 +11,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 
@@ -105,4 +104,88 @@ public class TrackSnapUtil {
         }
         return null;
     }
+
+    //TODO: keep stack info so that we wont lost it after applying snapping
+
+    public static SnappedResult applyNearSnapAndAdjust(
+            Player player, World world, Vec3i pos, Vec3d hit,
+            ItemStack stack, RailSettings stackInfo
+    ) {
+        float yaw = player.getRotationYawHead();
+        VecYPR snapped = null;
+        if(stackInfo.nearPointData.trackSnapSettings().snapPos()) {
+            snapped = TrackSnapUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack);
+            if(snapped != null) {
+                pos = new Vec3i(snapped.x, snapped.y, snapped.z);
+                hit = snapped.subtract(pos);
+
+                if(stackInfo.nearPointData.trackSnapSettings().snapYaw()) yaw = snapped.getYaw();
+                if(stackInfo.nearPointData.trackSnapSettings().snapPitch() && stackInfo.smoothing == TrackSmoothing.PITCH_LOCKED) {
+                    float newPitch = stackInfo.nearPointData.pitchDegreeMode() ? snapped.getPitch() : (float) (Math.tan(Math.toRadians(snapped.getPitch())) * 1000);
+                    EndPointData nearPointData = stackInfo.nearPointData.with(mutable -> mutable.pitch = newPitch);
+                    stackInfo = stackInfo.with(mutable -> mutable.nearPointData = nearPointData);
+                }
+                if(stackInfo.nearPointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
+                    double newRoll = stackInfo.rollAndOffsetInfo.degreeMode() ? snapped.getRoll() : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
+                    RollAndOffsetInfo.Mutable rollAndOffsetInfo = stackInfo.rollAndOffsetInfo.mutable();
+                    rollAndOffsetInfo.tryDeltaValue(0, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
+                    stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollAndOffsetInfo.immutable());
+                }
+                stackInfo.write(stack);
+            }
+        }
+
+        pos = pos.up();
+
+        if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+            if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
+                pos = pos.down();
+            }
+        }
+
+        return new SnappedResult(pos, hit, yaw);
+    }
+
+    public static SnappedResult applyFarSnapAndAdjust(
+            Player player, World world, Vec3i pos, Vec3d hit,
+            ItemStack stack, RailSettings stackInfo
+    ) {
+        float yaw = player.getRotationYawHead();
+        VecYPR snapped = null;
+        if(stackInfo.farPointData.trackSnapSettings().snapPos()) {
+            snapped = TrackSnapUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack);
+            if(snapped != null) {
+                pos = new Vec3i(snapped.x, snapped.y, snapped.z);
+                hit = snapped.subtract(pos);
+
+                if(stackInfo.farPointData.trackSnapSettings().snapYaw()) yaw = snapped.getYaw();
+                if(stackInfo.farPointData.trackSnapSettings().snapPitch() && stackInfo.smoothing == TrackSmoothing.PITCH_LOCKED) {
+                    float newPitch = stackInfo.farPointData.pitchDegreeMode() ? snapped.getPitch() : (float) (Math.tan(Math.toRadians(snapped.getPitch())) * 1000);
+                    float finalNewPitch = -newPitch;// Invert as direction is on the opposite
+                    EndPointData farPointData = stackInfo.farPointData.with(mutable -> mutable.pitch = finalNewPitch);
+                    stackInfo = stackInfo.with(mutable -> mutable.farPointData = farPointData);
+                }
+                if(stackInfo.farPointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
+                    double newRoll = stackInfo.rollAndOffsetInfo.degreeMode() ? snapped.getRoll() : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
+                    RollAndOffsetInfo.Mutable rollAndOffsetInfo = stackInfo.rollAndOffsetInfo.mutable();
+                    newRoll = -newRoll;// Invert as direction is on the opposite
+                    rollAndOffsetInfo.tryDeltaValue(1.0, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
+                    stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollAndOffsetInfo.immutable());
+                }
+                stackInfo.write(stack);
+            }
+        }
+
+        pos = pos.up();
+
+        if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+            if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
+                pos = pos.down();
+            }
+        }
+
+        return new SnappedResult(pos, hit, yaw);
+    }
+
+    public record SnappedResult(Vec3i pos, Vec3d hit, float yaw) {}
 }

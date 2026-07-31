@@ -4,12 +4,8 @@ import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
-import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.EndPointData;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.render.*;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -17,6 +13,8 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
+
+import static cam72cam.immersiverailroading.util.TrackSnapUtil.applyNearSnapAndAdjust;
 
 public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	@Override
@@ -81,17 +79,17 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		Vec3d hit = vec.subtract(pos);
 		World world = player.getWorld();
 
-		pos = pos.up();
+		RailSettings stackInfo = RailSettings.from(stack);
 
-		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
-				pos = pos.down();
-			}
-		}
+		TrackSnapUtil.SnappedResult result = applyNearSnapAndAdjust(player, world, pos, hit, stack, stackInfo);
+		pos = result.pos();
+		hit = result.hit();
+		float yaw = result.yaw();
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getRotationYawHead(), hit.subtract(0, hit.y, 0), true);
+		PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true);
 		placementInfo = placementInfo.offset(RailSettings.from(stack).nearPointData.offset());
 		RailInfo info = new RailInfo(stack, placementInfo, null);
+
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
 		if (cached != null) {

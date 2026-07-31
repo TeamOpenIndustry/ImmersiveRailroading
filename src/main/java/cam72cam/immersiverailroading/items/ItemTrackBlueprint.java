@@ -5,12 +5,9 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.TrackSmoothing;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
-import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
@@ -19,11 +16,12 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static cam72cam.immersiverailroading.util.TrackSnapUtil.applyNearSnapAndAdjust;
 
 public class ItemTrackBlueprint extends CustomItem {
 	public ItemTrackBlueprint() {
@@ -69,44 +67,10 @@ public class ItemTrackBlueprint extends CustomItem {
 			return ClickResult.ACCEPTED;
 		}
 
-		float yaw = player.getRotationYawHead();
-
-		boolean snapSucceeded = false;
-		if(stackInfo.nearPointData.trackSnapSettings().snapPos()) {
-			VecYPR snapped = TrackSnapUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack);
-			if(snapped != null) {
-				snapSucceeded = true;
-				pos = new Vec3i(snapped.x, snapped.y, snapped.z);
-				hit = snapped.subtract(pos);
-
-				// TODO: add helper functions to do some operations inner RollAndOffsetInfo and EndPointData
-				// TODO: goldenSpike
-				// TODO: track snap gui config
-				if(stackInfo.nearPointData.trackSnapSettings().snapYaw()) yaw = snapped.getYaw();
-				if(stackInfo.nearPointData.trackSnapSettings().snapPitch() && stackInfo.smoothing == TrackSmoothing.PITCH_LOCKED) {
-					float newPitch = stackInfo.nearPointData.pitchDegreeMode() ? snapped.getPitch() : (float) (Math.tan(Math.toRadians(snapped.getPitch())) * 1000);
-					EndPointData nearPointData = stackInfo.nearPointData.with(mutable -> mutable.pitch = newPitch);
-					stackInfo = stackInfo.with(mutable -> mutable.nearPointData = nearPointData);
-				}
-				if(stackInfo.nearPointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
-					double newRoll = stackInfo.rollAndOffsetInfo.degreeMode() ? snapped.getRoll() : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
-					RollAndOffsetInfo.Mutable rollAndOffsetInfo = stackInfo.rollAndOffsetInfo.mutable();
-					rollAndOffsetInfo.tryDeltaValue(0, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
-					stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollAndOffsetInfo.immutable());
-				}
-				stackInfo.write(stack);
-			}
-		}
-
-		if(!snapSucceeded) {
-			pos = pos.up();
-
-			if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-				if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
-					pos = pos.down();
-				}
-			}
-		}
+		TrackSnapUtil.SnappedResult result = applyNearSnapAndAdjust(player, world, pos, hit, stack, stackInfo);
+		pos = result.pos();
+		hit = result.hit();
+		float yaw = result.yaw();
 
 		if (stackInfo.isPreview) {
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
