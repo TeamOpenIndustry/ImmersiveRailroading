@@ -11,7 +11,7 @@ public record TrackSnapSettings(
         boolean snapPitch,
         boolean snapRoll){
     public TrackSnapSettings() {
-        this(true, true, true, true);
+        this(true, true, false, false);
     }
 
     public static class Mutable {
