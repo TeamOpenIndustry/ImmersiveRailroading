@@ -71,6 +71,7 @@ public class ItemTrackBlueprint extends CustomItem {
 		pos = result.pos();
 		hit = result.hit();
 		float yaw = result.yaw();
+		boolean snapped = result.succeeded();
 
 		if (stackInfo.isPreview) {
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
@@ -79,13 +80,13 @@ public class ItemTrackBlueprint extends CustomItem {
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true);
+				PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
 				te.setup(stack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true);
+		PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
 		placementInfo = placementInfo.offset(RailSettings.from(stack).nearPointData.offset());
 		RailInfo info = new RailInfo(stack, placementInfo, null);
 		info.build(player, pos);
@@ -149,7 +150,7 @@ public class ItemTrackBlueprint extends CustomItem {
 	}
 
 	public static class Data extends ItemDataSerializer {
-		// 0 for original gui, 1 for TrackExtraGui
+		// 0 for original gui, 1 for TrackExtraGui, 2 fot TrackEndPointGui
 		@TagField
 		public int guiOpenType;
 

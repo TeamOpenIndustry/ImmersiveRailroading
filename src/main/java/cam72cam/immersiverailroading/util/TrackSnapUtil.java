@@ -111,11 +111,13 @@ public class TrackSnapUtil {
             Player player, World world, Vec3i pos, Vec3d hit,
             ItemStack stack, RailSettings stackInfo
     ) {
+        boolean succeeded = false;
         float yaw = player.getRotationYawHead();
         VecYPR snapped = null;
         if(stackInfo.nearPointData.trackSnapSettings().snapPos()) {
             snapped = TrackSnapUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack);
             if(snapped != null) {
+                succeeded = true;
                 pos = new Vec3i(snapped.x, snapped.y, snapped.z);
                 hit = snapped.subtract(pos);
 
@@ -143,18 +145,20 @@ public class TrackSnapUtil {
             }
         }
 
-        return new SnappedResult(pos, hit, yaw);
+        return new SnappedResult(pos, hit, yaw, succeeded);
     }
 
     public static SnappedResult applyFarSnapAndAdjust(
             Player player, World world, Vec3i pos, Vec3d hit,
             ItemStack stack, RailSettings stackInfo
     ) {
+        boolean succeeded = false;
         float yaw = player.getRotationYawHead();
         VecYPR snapped = null;
         if(stackInfo.farPointData.trackSnapSettings().snapPos()) {
             snapped = TrackSnapUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack);
             if(snapped != null) {
+                succeeded = true;
                 pos = new Vec3i(snapped.x, snapped.y, snapped.z);
                 hit = snapped.subtract(pos);
 
@@ -184,8 +188,8 @@ public class TrackSnapUtil {
             }
         }
 
-        return new SnappedResult(pos, hit, yaw);
+        return new SnappedResult(pos, hit, yaw, succeeded);
     }
 
-    public record SnappedResult(Vec3i pos, Vec3d hit, float yaw) {}
+    public record SnappedResult(Vec3i pos, Vec3d hit, float yaw, boolean succeeded) {}
 }

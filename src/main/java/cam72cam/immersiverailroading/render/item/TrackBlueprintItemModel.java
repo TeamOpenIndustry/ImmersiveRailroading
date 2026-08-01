@@ -22,7 +22,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		return new StandardModel().addCustom((state, pt) -> TrackBlueprintItemModel.render(stack, world, state));
 	}
 	public static void render(ItemStack stack, World world, RenderState state) {
-		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5), true), null);
+		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5), true, false), null);
 
 		if(info.settings.type.isTransitionCurve()) {
 			EndPointData.Mutable nears = info.settings.nearPointData.mutable();
@@ -85,8 +85,9 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		pos = result.pos();
 		hit = result.hit();
 		float yaw = result.yaw();
+		boolean snapped = result.succeeded();
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true);
+		PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
 		placementInfo = placementInfo.offset(RailSettings.from(stack).nearPointData.offset());
 		RailInfo info = new RailInfo(stack, placementInfo, null);
 

@@ -33,7 +33,7 @@ public class PlacementInfo {
 		return MathUtil.clamp(Config.ConfigBalance.AnglePlacementSegmentation, 1, 90);
 	}
 	
-	public PlacementInfo(ItemStack stack, float yawHead, Vec3d hit, boolean isNear) {
+	public PlacementInfo(ItemStack stack, float yawHead, Vec3d hit, boolean isNear, boolean overrideYaw) {
 
 		RailSettings settings = RailSettings.from(stack);
 		TrackPositionType posType = isNear ? settings.nearPointData.posType() : settings.farPointData.posType();
@@ -41,9 +41,11 @@ public class PlacementInfo {
 		float posYaw = isNear ? settings.nearPointData.posYaw() : settings.farPointData.posYaw();
 
 		yawHead = ((- yawHead % 360) + 360) % 360;
-		if(posYawType == TrackPosYawType.ANGLE_SEGMENTATION) {
+		if(overrideYaw) {
+			this.yaw = yawHead;
+		} else if(posYawType == TrackPosYawType.ANGLE_SEGMENTATION) {
 			this.yaw = ((int)((yawHead + 90/(segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
-		} else if(posYawType == TrackPosYawType.ANGLE_SPECIFIED) {
+		} else {
 			float base = posYaw;
 			float base2 = 90 - base;
 
@@ -56,8 +58,6 @@ public class PlacementInfo {
 			float dist2 = Math.min(Math.abs(cand2 - yawHead), 360 - Math.abs(cand2 - yawHead));
 
 			this.yaw = (dist1 <= dist2) ? cand1 : cand2;
-		} else {
-			this.yaw = yawHead;
 		}
 
 		TrackDirection direction = settings.direction;
