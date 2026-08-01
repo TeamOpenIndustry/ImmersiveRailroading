@@ -82,6 +82,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
 				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
 				int posY = (int) Math.floor(gagPos.y + nextUp.y + placeOff.y);
+//				if(posY - Math.floor(gagPos.y + nextUp.y + placeOff.y) > 1 - 1e-4) posY ++;
 
 				Vec3i gag = new Vec3i(posX, posY, posZ);
 				if (!positions.contains(gag)) {
@@ -121,21 +122,27 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						relHeight += 1;
 					}
 
+					float bedThickness = 0.1f;
+
 					if(rollEffectTile) {
+						int offsetInt;
 						if(height + relHeight > 0.9) {
-							int offsetInt = (int) Math.floor(height + relHeight + 0.1);
-							bedHeights.put(gag, (float) (height + relHeight - offsetInt));
-							yOffset.put(gag, (int) (deltaGapPos - relHeight + offsetInt));
+							offsetInt = (int) Math.floor(height + relHeight + bedThickness);
 						}else {
-							bedHeights.put(gag, (float) (height + relHeight));
-							yOffset.put(gag, (int) (deltaGapPos - relHeight));
+							offsetInt = 0;
 						}
+
+						float heightResult = (float) (height + relHeight - offsetInt);
+						bedHeights.put(gag, heightResult);
+						railHeights.put(gag, heightResult);
+						yOffset.put(gag, (int) (deltaGapPos - relHeight + offsetInt));
+						topNormals.put(gag, tileTilt ? topFacing : null);
 					} else {//legacy, will be dropped
 						bedHeights.put(gag, (float) (height + Math.max(0, relHeight - 0.1)));
+						railHeights.put(gag, (float) relHeight);
 						yOffset.put(gag, (int) (deltaGapPos - relHeight));
+						topNormals.put(gag, null);
 					}
-                    railHeights.put(gag, (float) relHeight);
-					topNormals.put(gag, tileTilt ? topFacing : null);
 				}
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
