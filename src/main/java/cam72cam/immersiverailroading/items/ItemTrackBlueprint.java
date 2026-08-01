@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static cam72cam.immersiverailroading.util.TrackSnapUtil.applyNearSnapAndAdjust;
+import static cam72cam.immersiverailroading.util.TrackSnapUtil.applySnapAndAdjust;
 
 public class ItemTrackBlueprint extends CustomItem {
 	public ItemTrackBlueprint() {
@@ -67,20 +67,22 @@ public class ItemTrackBlueprint extends CustomItem {
 			return ClickResult.ACCEPTED;
 		}
 
-		TrackSnapUtil.SnappedResult result = applyNearSnapAndAdjust(player, world, pos, hit, stack, stackInfo);
+		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, stackInfo, true);
 		pos = result.pos();
 		hit = result.hit();
 		float yaw = result.yaw();
 		boolean snapped = result.succeeded();
 
 		if (stackInfo.isPreview) {
+			boolean down = false;
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
 				pos = pos.up();
+				if(hit.y >= 0.5) down = true;
 			}
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
+				PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, down ? hit.y + 1 : hit.y, 0), true, snapped);
 				te.setup(stack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;

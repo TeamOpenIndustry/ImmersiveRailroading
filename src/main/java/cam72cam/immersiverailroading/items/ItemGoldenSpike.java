@@ -4,9 +4,7 @@ import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.TrackSnapUtil;
 import cam72cam.mod.item.*;
@@ -23,7 +21,7 @@ import cam72cam.mod.util.Facing;
 import java.util.Collections;
 import java.util.List;
 
-import static cam72cam.immersiverailroading.util.TrackSnapUtil.applyFarSnapAndAdjust;
+import static cam72cam.immersiverailroading.util.TrackSnapUtil.applySnapAndAdjust;
 
 public class ItemGoldenSpike extends CustomItem {
 	public ItemGoldenSpike() {
@@ -59,7 +57,7 @@ public class ItemGoldenSpike extends CustomItem {
 
 				ItemStack stack = tr.getItem();
 				RailSettings stackInfo = RailSettings.from(stack);
-				TrackSnapUtil.SnappedResult result = applyFarSnapAndAdjust(player, world, pos, hit, stack, stackInfo);
+				TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, stackInfo, false);
 				pos = result.pos();
 				hit = result.hit();
 				float yaw = result.yaw();

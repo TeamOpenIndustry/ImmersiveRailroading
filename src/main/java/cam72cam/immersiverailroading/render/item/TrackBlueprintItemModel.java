@@ -14,7 +14,7 @@ import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
 
-import static cam72cam.immersiverailroading.util.TrackSnapUtil.applyNearSnapAndAdjust;
+import static cam72cam.immersiverailroading.util.TrackSnapUtil.applySnapAndAdjust;
 
 public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 	@Override
@@ -81,7 +81,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 
 		RailSettings stackInfo = RailSettings.from(stack);
 
-		TrackSnapUtil.SnappedResult result = applyNearSnapAndAdjust(player, world, pos, hit, stack, stackInfo);
+		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, stackInfo, true);
 		pos = result.pos();
 		hit = result.hit();
 		float yaw = result.yaw();
