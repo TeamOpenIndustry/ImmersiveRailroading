@@ -78,6 +78,7 @@ public class TrackGui implements IScreen {
 	private Button trackButton;
 	private ListSelector<TrackDefinition> trackSelector;
 
+	// Position Type
 	private Button nearPosTypeButton;
 	private Button farPosTypeButton;
 

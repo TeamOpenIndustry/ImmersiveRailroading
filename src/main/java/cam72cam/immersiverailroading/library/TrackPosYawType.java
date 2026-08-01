@@ -7,7 +7,6 @@ import java.util.Locale;
 public enum TrackPosYawType {
 	ANGLE_SEGMENTATION,
 	ANGLE_SPECIFIED,
-//	ANGLE_FREE
 	;
 	
 	@Override

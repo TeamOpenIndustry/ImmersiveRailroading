@@ -47,12 +47,12 @@ public class TrackSnapUtil {
                         if (renderData.isEmpty()) continue;
 
                         if (renderData.size() > 1) {
-                            Vec3d p1 = renderData.get(0)
+                            Vec3d p1 = renderData.getFirst()
                                     .add(rail.info.placementInfo.placementPosition)
                                     .add(tile.getPos());
-                            float yaw1 = renderData.get(0).getYaw();
-                            float pitch1 = renderData.get(0).getPitch();
-                            float roll1 = renderData.get(0).getRoll();
+                            float yaw1 = renderData.getFirst().getYaw();
+                            float pitch1 = renderData.getFirst().getPitch();
+                            float roll1 = renderData.getFirst().getRoll();
                             double dist1 = p1.distanceTo(worldPos);
                             if (dist1 < min) {
                                 min = dist1;
@@ -62,10 +62,10 @@ public class TrackSnapUtil {
                                 roll = -roll1;
                             }
 
-                            Vec3d p2 = renderData.get(renderData.size() - 1).add(rail.info.placementInfo.placementPosition).add(tile.getPos());
-                            float yaw2 = renderData.get(renderData.size() - 1).getYaw();
-                            float pitch2 = renderData.get(renderData.size() - 1).getPitch();
-                            float roll2 = renderData.get(renderData.size() - 1).getRoll();
+                            Vec3d p2 = renderData.getLast().add(rail.info.placementInfo.placementPosition).add(tile.getPos());
+                            float yaw2 = renderData.getLast().getYaw();
+                            float pitch2 = renderData.getLast().getPitch();
+                            float roll2 = renderData.getLast().getRoll();
                             double dist2 = p2.distanceTo(worldPos);
                             if (dist2 < min) {
                                 min = dist2;
@@ -75,11 +75,11 @@ public class TrackSnapUtil {
                                 roll = roll2;
                             }
                         } else {
-                            Vec3d p = renderData.get(0)
+                            Vec3d p = renderData.getFirst()
                                     .add(rail.info.placementInfo.placementPosition)
                                     .add(tile.getPos());
-                            float currentYaw = renderData.get(0).getYaw();
-                            float currentPitch = renderData.get(0).getPitch();
+                            float currentYaw = renderData.getFirst().getYaw();
+                            float currentPitch = renderData.getFirst().getPitch();
                             if (Math.abs(currentYaw - rotationYawHead) > 90) {
                                 currentYaw += 180;
                             }
