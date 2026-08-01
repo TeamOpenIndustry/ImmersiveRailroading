@@ -23,6 +23,10 @@ public enum GuiText {
 	LABEL_POS_YAW_TYPE("label.pos_yaw_type"),
 	LABEL_NEAR("label.near"),
 	LABEL_FAR("label.far"),
+	LABEL_SNAP_POS("label.snap_pos"),
+	LABEL_SNAP_YAW("label.snap_yaw"),
+	LABEL_SNAP_PITCH("label.snap_pitch"),
+	LABEL_SNAP_ROLL("label.snap_roll"),
 	SLIDER_ZOOM("slider.zoom"), //Need colon
 	SELECTOR_PAGE("selector.page"),
 	SELECTOR_TYPE("selector.type"),

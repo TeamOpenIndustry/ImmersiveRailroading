@@ -445,23 +445,25 @@ public class TrackEndPointGui implements IScreen {
 
         // Track Snap
 
-        nearPosSnapCB = new CheckBox(screen, left_xStart, ytop, "pos", settings.nearPointData.trackSnapSettings().snapPos()){
+        nearPosSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), settings.nearPointData.trackSnapSettings().snapPos()){
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPos = this.isChecked());
                 settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                setNearSnapComponentsVisibility();
             }
         };
 
-        farPosSnapCB = new CheckBox(screen, right_xStart, ytop, "pos", settings.farPointData.trackSnapSettings().snapPos()){
+        farPosSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), settings.farPointData.trackSnapSettings().snapPos()){
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPos = this.isChecked());
                 settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                setFarSnapComponentsVisibility();
             }
         };
 
-        nearYawSnapCB = new CheckBox(screen, left_xStart + width / 2 + 15, ytop, "yaw", settings.nearPointData.trackSnapSettings().snapYaw()){
+        nearYawSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), settings.nearPointData.trackSnapSettings().snapYaw()){
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = this.isChecked());
@@ -469,7 +471,7 @@ public class TrackEndPointGui implements IScreen {
             }
         };
 
-        farYawSnapCB = new CheckBox(screen, right_xStart + width / 2 + 15, ytop, "yaw", settings.farPointData.trackSnapSettings().snapYaw()){
+        farYawSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), settings.farPointData.trackSnapSettings().snapYaw()){
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = this.isChecked());
@@ -479,7 +481,7 @@ public class TrackEndPointGui implements IScreen {
 
         ytop += height;
 
-        nearPitchSnapCB = new CheckBox(screen, left_xStart, ytop, "pitch", settings.nearPointData.trackSnapSettings().snapPitch()){
+        nearPitchSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), settings.nearPointData.trackSnapSettings().snapPitch()){
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = this.isChecked());
@@ -487,7 +489,7 @@ public class TrackEndPointGui implements IScreen {
             }
         };
 
-        farPitchSnapCB = new CheckBox(screen, right_xStart, ytop, "pitch", settings.farPointData.trackSnapSettings().snapPitch()){
+        farPitchSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), settings.farPointData.trackSnapSettings().snapPitch()){
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = this.isChecked());
@@ -495,7 +497,7 @@ public class TrackEndPointGui implements IScreen {
             }
         };
 
-        nearRollSnapCB = new CheckBox(screen, left_xStart + width / 2 + 15, ytop, "Roll", settings.nearPointData.trackSnapSettings().snapRoll()){
+        nearRollSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), settings.nearPointData.trackSnapSettings().snapRoll()){
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = this.isChecked());
@@ -503,15 +505,13 @@ public class TrackEndPointGui implements IScreen {
             }
         };
 
-        farRollSnapCB = new CheckBox(screen, right_xStart + width / 2 + 15, ytop, "Roll", settings.farPointData.trackSnapSettings().snapRoll()){
+        farRollSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), settings.farPointData.trackSnapSettings().snapRoll()){
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = this.isChecked());
                 settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
             }
         };
-
-        // TODO: 这8个组件状态保存了但是被覆盖了
 
         nearRadiusLabel.setEnabled(settings.type.isTransitionCurve());
         farRadiusLabel.setEnabled(settings.type.isTransitionCurve());
@@ -527,6 +527,9 @@ public class TrackEndPointGui implements IScreen {
 
         nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
         farYawInput.setEnabled(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
+
+        setNearSnapComponentsVisibility();
+        setFarSnapComponentsVisibility();
     }
 
     public void onClose() {
@@ -580,5 +583,19 @@ public class TrackEndPointGui implements IScreen {
         settings.length = (int) temp;
         nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
         farRadiusInput.setText("" + (int) settings.farPointData.radius());
+    }
+
+    private void setNearSnapComponentsVisibility() {
+        boolean near = settings.nearPointData.trackSnapSettings().snapPos();
+        nearYawSnapCB.setVisible(near);
+        nearPitchSnapCB.setVisible(near);
+        nearRollSnapCB.setVisible(near);
+    }
+
+    private void setFarSnapComponentsVisibility() {
+        boolean far = settings.farPointData.trackSnapSettings().snapPos();
+        farYawSnapCB.setVisible(far);
+        farPitchSnapCB.setVisible(far);
+        farRollSnapCB.setVisible(far);
     }
 }

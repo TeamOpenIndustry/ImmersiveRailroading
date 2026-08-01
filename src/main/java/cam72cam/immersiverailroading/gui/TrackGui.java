@@ -78,7 +78,9 @@ public class TrackGui implements IScreen {
 	private Button trackButton;
 	private ListSelector<TrackDefinition> trackSelector;
 
-	private Button posTypeButton;
+	private Button nearPosTypeButton;
+	private Button farPosTypeButton;
+
 	private CheckBox isPreviewCB;
 	private CheckBox isGradeCrossingCB;
 
@@ -198,6 +200,7 @@ public class TrackGui implements IScreen {
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				trackExtraGuiButton.setVisible(settings.type.canRoll());
+				trackEndPointGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
 
 				degreesSlider.onSlider();
@@ -394,11 +397,18 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType())) {
+		nearPosTypeButton = new Button(screen, xtop, ytop, width / 2, height, settings.nearPointData.posType().toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posType = next(settings.nearPointData.posType(), hand));
-				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()));
+				nearPosTypeButton.setText(settings.nearPointData.posType().toString());
+			}
+		};
+		farPosTypeButton = new Button(screen, xtop + width / 2, ytop, width / 2, height, settings.farPointData.posType().toString()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.posType = next(settings.farPointData.posType(), hand));
+				farPosTypeButton.setText(settings.farPointData.posType().toString());
 			}
 		};
 		ytop += height;
