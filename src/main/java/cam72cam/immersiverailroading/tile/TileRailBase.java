@@ -860,7 +860,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public int getStrongPower(Facing facing) {
-		return getAugment() == Augment.DETECTOR ? this.redstoneLevel : 0;
+		return ConfigDebug.detectorOutputStrongCharging && getAugment() == Augment.DETECTOR ? this.redstoneLevel : 0;
 	}
 
 	@Override
