@@ -154,13 +154,17 @@ public class ItemTrackBlueprint extends CustomItem {
 		@TagField
 		public int guiOpenType;
 
+		@TagField
+		public boolean unlockGuiTurnDegree;
+
 		public Data(ItemStack stack) {
 			super(stack);
 		}
 
-		public static void writeTo(ItemStack stack, int targetGuiOpenType) {
+		public static void writeTo(ItemStack stack, int targetGuiOpenType, boolean unlockGuiTurnDegree) {
 			ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
 			data.guiOpenType = targetGuiOpenType;
+			data.unlockGuiTurnDegree = unlockGuiTurnDegree;
 			data.write();
 		}
 	}

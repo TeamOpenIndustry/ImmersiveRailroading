@@ -53,7 +53,7 @@ public class TrackGui implements IScreen {
 	private ListSelector<TrackItems> typeSelector;
 
 	// Turn Angle
-	boolean degreeInputType = false;
+	boolean unlockGuiTurnDegree;
 	private Slider degreesSlider;
 	private TextField degreesInput;
 	private Button degreesInputTypeButton;
@@ -102,7 +102,9 @@ public class TrackGui implements IScreen {
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
 		settings = RailSettings.from(stack).mutable();
-		targetGuiOpenType = new ItemTrackBlueprint.Data(stack).guiOpenType;
+		ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
+		targetGuiOpenType = data.guiOpenType;
+		unlockGuiTurnDegree = data.unlockGuiTurnDegree;
 
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
@@ -196,7 +198,7 @@ public class TrackGui implements IScreen {
 				lengthInput.setEnabled(!settings.type.isTransitionCurve());
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				degreesSlider.setVisible(settings.type.hasQuarters());
-				degreesInput.setVisible(settings.type.hasQuarters() && degreeInputType);
+				degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
 				degreesInputTypeButton.setVisible(settings.type.hasQuarters());
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
@@ -270,6 +272,7 @@ public class TrackGui implements IScreen {
 		this.degreesSlider = new Slider(screen, 25 + xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
+				if(unlockGuiTurnDegree) return;
 				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
 				if(settings.type.isTransitionCurve()) {
 					boolean shouldReset = false;
@@ -301,6 +304,9 @@ public class TrackGui implements IScreen {
 			float max = 90f;
 			float min = 1f;
 			if (val >= min && val <= max) {
+				if(settings.type.isTransitionCurve() && !CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
+					return false;
+				}
 				settings.degrees = val;
 				return true;
 			}
@@ -311,9 +317,9 @@ public class TrackGui implements IScreen {
 		degreesInputTypeButton = new Button(screen, xtop + width - 20, ytop, height, height, "↔") {
 			@Override
 			public void onClick(Player.Hand hand) {
-				degreeInputType = !degreeInputType;
-				degreesInput.setVisible(degreeInputType);
-				degreesSlider.setVisible(!degreeInputType);
+				unlockGuiTurnDegree = !unlockGuiTurnDegree;
+				degreesInput.setVisible(unlockGuiTurnDegree);
+				degreesSlider.setVisible(!unlockGuiTurnDegree);
 			}
 		};
 
@@ -330,8 +336,8 @@ public class TrackGui implements IScreen {
 		ytop += height;
 
 		directionButton.setVisible(settings.type.hasDirection());
-		degreesSlider.setVisible(settings.type.hasQuarters());
-		degreesInput.setVisible(settings.type.hasQuarters() && degreeInputType);
+		degreesSlider.setVisible(settings.type.hasQuarters() && !unlockGuiTurnDegree);
+		degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
 		degreesInputTypeButton.setVisible(settings.type.hasQuarters());
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
@@ -488,19 +494,19 @@ public class TrackGui implements IScreen {
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
 
 				// Update client data here in order to avoid networking lag
 				ItemStack clientStack = te.getItem();
 				settings.immutable().write(clientStack);
-				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType);
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
 				te.setItem(clientStack, MinecraftClient.getPlayer());
 			} else {
-				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
+				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
 
 				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
 				settings.immutable().write(clientStack);
-				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType);
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
 				MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
 			}
 		}
