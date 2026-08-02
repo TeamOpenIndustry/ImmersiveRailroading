@@ -532,9 +532,7 @@ public class TrackExtraGui implements IScreen {
             //Also update client Item to update Rail information
             ItemStack clientStack = te.getItem();
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
-            data.guiOpenType = targetGuiOpenType;
-            data.write();
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
             te.setItem(clientStack, MinecraftClient.getPlayer());
         } else {
             new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
@@ -542,9 +540,7 @@ public class TrackExtraGui implements IScreen {
             //Also update client Item to update Rail information
             ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
-            data.guiOpenType = targetGuiOpenType;
-            data.write();
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
             MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
         }
     }
