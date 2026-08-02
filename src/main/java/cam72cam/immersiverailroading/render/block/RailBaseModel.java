@@ -11,8 +11,10 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.cutter.Plane;
 import util.Matrix4;
 
 public class RailBaseModel {
@@ -50,10 +52,12 @@ public class RailBaseModel {
 			});
 		}
 
+		Plane plane = new Plane(new Vec3d(0.5, 0.5, 0.5), new Vec3d(-1, 0, -2));
+
 		if (augment != null) {
 			height = height + 0.1f * (float)gauge.scale() * 1.25f;
 
-			model.addColorBlock(augment.color(), new Matrix4().scale(1, height, 1));
+			model.addColorBlock(augment.color(), new Matrix4().scale(1, height, 1), plane);
 			return model;
 		}
 
@@ -62,10 +66,10 @@ public class RailBaseModel {
 		}
 
 		if (snow != 0) {
-			model.addSnow(snow + (int)(Math.max(height, 0.1) * 8), new Matrix4());
+			model.addSnow(snow + (int)(Math.max(height, 0.1) * 8), new Matrix4(), plane);
 			return model;
 		} else if (!bed.isEmpty() && tileHeight != 0.000001f) {
-			model.addItemBlock(bed, new Matrix4().scale(1, height, 1));
+			model.addItemBlock(bed, new Matrix4().scale(1, height, 1), plane);
 			return model;
 		}
 

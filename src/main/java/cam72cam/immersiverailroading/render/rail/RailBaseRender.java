@@ -3,8 +3,10 @@ package cam72cam.immersiverailroading.render.rail;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.render.cutter.Plane;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
@@ -20,9 +22,12 @@ public class RailBaseRender {
 				if (base.isScaleModel()) {
 					height += 0.1f * (float) info.settings.gauge.scale();
 				}
+
+				Plane plane = new Plane(new Vec3d(0.5, 0.5, 0.5), new Vec3d(-0.5, -0.5, -0.5));
+
 				model.addItemBlock(info.settings.railBed, new Matrix4()
 						.translate(basePos.x, basePos.y, basePos.z)
-						.scale(1, height, 1)
+						.scale(1, height, 1), plane
 				);
 			}
 		}

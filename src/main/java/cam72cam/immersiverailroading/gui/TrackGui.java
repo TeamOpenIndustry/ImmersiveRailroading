@@ -583,7 +583,7 @@ public class TrackGui implements IScreen {
 				for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
 					Vec3i basePos = base.getPos();
 					model.addItemBlock(info.settings.railBedFill, new Matrix4()
-							.translate(basePos.x, basePos.y-1, basePos.z)
+							.translate(basePos.x, basePos.y-1, basePos.z), null
 					);
 				}
 				model.render(state);
@@ -648,7 +648,7 @@ public class TrackGui implements IScreen {
 			for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
 				Vec3i basePos = base.getPos();
 				model.addItemBlock(info.settings.railBedFill, new Matrix4()
-						.translate(basePos.x, basePos.y-1, basePos.z)
+						.translate(basePos.x, basePos.y-1, basePos.z), null
 				);
 			}
 			model.render(state);

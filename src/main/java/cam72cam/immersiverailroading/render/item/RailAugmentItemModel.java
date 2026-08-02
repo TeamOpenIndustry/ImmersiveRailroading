@@ -13,6 +13,6 @@ public class RailAugmentItemModel implements ItemRender.IItemModel {
 	@Override
 	public StandardModel getModel(World world, ItemStack stack) {
 		Color color = new ItemRailAugment.Data(stack).augment.color();
-		return new StandardModel().addColorBlock(color, new Matrix4().translate(0, 0.4, 0).scale(1, 0.2f, 1));
+		return new StandardModel().addColorBlock(color, new Matrix4().translate(0, 0.4, 0).scale(1, 0.2f, 1), null);
 	}
 }
