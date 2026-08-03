@@ -693,11 +693,11 @@ public abstract class EntityRollingStockDefinition {
     }
 
     public boolean isAtFront(Gauge gauge, Vec3d pos) {
-        return pos.z >= this.passengerCompartmentLength * gauge.scale();
+        return pos.z >= (this.passengerCompartmentLength - this.passengerCenter.x) * gauge.scale();
     }
 
     public boolean isAtRear(Gauge gauge, Vec3d pos) {
-        return pos.z <= -this.passengerCompartmentLength * gauge.scale();
+        return pos.z <= (-this.passengerCompartmentLength - this.passengerCenter.x) * gauge.scale();
     }
 
     public List<ItemComponentType> getItemComponents() {

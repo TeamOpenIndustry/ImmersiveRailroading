@@ -30,6 +30,7 @@ public class NavMesh {
             Vec3d bounds = model.floor.max.subtract(model.floor.min);
             definition.passengerCompartmentLength = bounds.x/2;
             definition.passengerCompartmentWidth = bounds.z/2;
+            definition.passengerCenter = model.floor.center;
         } else {
             floorFaces = legacyFloorFaces(definition);
             root = buildBVH(new ArrayList<>(floorFaces), 0);
@@ -150,7 +151,7 @@ public class NavMesh {
         double apx = p.x - a.x, apy = p.y - a.y, apz = p.z - a.z;
         double abLenSq = abx*abx + aby*aby + abz*abz;
         double t = abLenSq < 1e-9 ? 0 : (apx*abx + apy*aby + apz*abz) / abLenSq;
-        t = Math.max(0, Math.min(1, t));
+        t = Math.clamp(t, 0, 1);
         return new Vec3d(a.x + abx * t, a.y + aby * t, a.z + abz * t);
     }
 
@@ -272,11 +273,10 @@ public class NavMesh {
         Vec3d a = box.min().scale(1.0 / s);
         Vec3d b = box.max().scale(1.0 / s);
 
-        IBoundingBox out = IBoundingBox.from(
+        return IBoundingBox.from(
                 new Vec3d(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z)),
                 new Vec3d(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z))
         );
-        return out;
     }
 
     private double getCentroid(OBJFace tri, Axis axis) {
