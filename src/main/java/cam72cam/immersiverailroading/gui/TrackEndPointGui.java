@@ -73,6 +73,8 @@ public class TrackEndPointGui implements IScreen {
     // Track Snapping
     private CheckBox nearPosSnapCB;
     private CheckBox farPosSnapCB;
+    private CheckBox nearHeightSnapCB;
+    private CheckBox farHeightSnapCB;
     private CheckBox nearYawSnapCB;
     private CheckBox farYawSnapCB;
     private CheckBox nearPitchSnapCB;
@@ -341,7 +343,7 @@ public class TrackEndPointGui implements IScreen {
         farPitchSettingButton.setTooltip(List.of(GuiText.LABEL_PITCH_SETTING.toString()));
 
         // Bottom Page
-        ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 6);
+        ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 7);
 
         // TrackGui
 
@@ -358,7 +360,7 @@ public class TrackEndPointGui implements IScreen {
 
         ytop += height;
 
-        // Pos Type TODO: Track Snapping Gui Components
+        // Pos Type
 
         nearPosTypeButton = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType())) {
             @Override
@@ -460,6 +462,26 @@ public class TrackEndPointGui implements IScreen {
             @Override
             public void onClick(Player.Hand hand) {
                 TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPos = this.isChecked());
+                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                setFarSnapComponentsVisibility();
+            }
+        };
+
+        ytop += height;
+
+        nearHeightSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.nearPointData.trackSnapSettings().snapHeight()){
+            @Override
+            public void onClick(Player.Hand hand) {
+                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = this.isChecked());
+                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                setNearSnapComponentsVisibility();
+            }
+        };
+
+        farHeightSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.farPointData.trackSnapSettings().snapHeight()){
+            @Override
+            public void onClick(Player.Hand hand) {
+                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = this.isChecked());
                 settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
                 setFarSnapComponentsVisibility();
             }
@@ -589,6 +611,7 @@ public class TrackEndPointGui implements IScreen {
 
     private void setNearSnapComponentsVisibility() {
         boolean near = settings.nearPointData.trackSnapSettings().snapPos();
+        nearHeightSnapCB.setVisible(near);
         nearYawSnapCB.setVisible(near);
         nearPitchSnapCB.setVisible(near);
         nearRollSnapCB.setVisible(near);
@@ -596,6 +619,7 @@ public class TrackEndPointGui implements IScreen {
 
     private void setFarSnapComponentsVisibility() {
         boolean far = settings.farPointData.trackSnapSettings().snapPos();
+        farHeightSnapCB.setVisible(far);
         farYawSnapCB.setVisible(far);
         farPitchSnapCB.setVisible(far);
         farRollSnapCB.setVisible(far);

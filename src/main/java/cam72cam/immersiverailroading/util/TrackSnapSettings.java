@@ -7,16 +7,19 @@ import java.util.function.Consumer;
 @TagMapped(TrackSnapSettings.TagMapper.class)
 public record TrackSnapSettings(
         boolean snapPos,
+        boolean snapHeight,
         boolean snapYaw,
         boolean snapPitch,
         boolean snapRoll){
     public TrackSnapSettings() {
-        this(true, true, false, false);
+        this(true, true, true, false, false);
     }
 
     public static class Mutable {
         @TagField("snapPos")
         public boolean snapPos;
+        @TagField("snapHeight")
+        public boolean snapHeight;
         @TagField("snapYaw")
         public boolean snapYaw;
         @TagField("snapPitch")
@@ -26,6 +29,7 @@ public record TrackSnapSettings(
 
         public Mutable(TrackSnapSettings type) {
             this.snapPos = type.snapPos();
+            this.snapHeight = type.snapHeight;
             this.snapYaw = type.snapYaw();
             this.snapPitch = type.snapPitch();
             this.snapRoll = type.snapRoll();
@@ -35,6 +39,7 @@ public record TrackSnapSettings(
             // Defaults
             TrackSnapSettings type = new TrackSnapSettings();
             this.snapPos = type.snapPos();
+            this.snapHeight = type.snapHeight();
             this.snapYaw = type.snapYaw();
             this.snapPitch = type.snapPitch();
             this.snapRoll = type.snapRoll();
@@ -45,6 +50,7 @@ public record TrackSnapSettings(
         public TrackSnapSettings immutable() {
             return new TrackSnapSettings(
                     snapPos,
+                    snapHeight,
                     snapYaw,
                     snapPitch,
                     snapRoll

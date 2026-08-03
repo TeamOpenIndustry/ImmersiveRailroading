@@ -158,8 +158,7 @@ public class TrackSnapUtil {
                     yaw = snapped.getYaw();
                 }
 
-                boolean snapHeight = true;
-                if(snapHeight) {
+                if(pointData.trackSnapSettings().snapHeight()) {
                     Vec3d offset = new Vec3d(0, Math.abs(hit.y) > 1e-4 ? hit.y : 0, 0);
                     EndPointData updated = pointData.with(mutable -> mutable.offset = offset);
                     stackInfo = isNear
