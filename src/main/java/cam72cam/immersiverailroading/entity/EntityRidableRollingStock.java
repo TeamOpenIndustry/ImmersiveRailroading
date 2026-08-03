@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.model.part.Seat;
-import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IRidable;
@@ -35,7 +34,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	private Map<String, UUID> seatedPassengers = new HashMap<>();
 
 	// Hack to remount players if they were seated
-	private Map<UUID, Vec3d> remount = new HashMap<>();
+	private final Map<UUID, Vec3d> remount = new HashMap<>();
 
 
 
@@ -92,7 +91,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			int wiggle = 10;
 			off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
 		}
-		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger));
+		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger), true);
 
 		return off;
 	}
@@ -121,7 +120,8 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if (seat != null) {
 			offset = seat;
 		} else {
-			offset = this.getDefinition().correctPassengerBounds(gauge, offset.subtract(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0), shouldRiderSit(passenger));
+			offset = this.getDefinition().correctPassengerBounds(gauge, offset.subtract(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0),
+																 shouldRiderSit(passenger), false);
 		}
 		offset = offset.add(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0);
 
@@ -151,7 +151,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
         movement = new Vec3d(movement.x, 0, movement.z).rotateYaw(this.getRotationYaw() - source.getRotationYawHead());
 
-		offset = offset.add(getDefinition().correctMovement(this, this.gauge, offset, movement));
+		offset = offset.add(getDefinition().calculateCorrectedMovement(this, this.gauge, offset, movement));
 
         if (this instanceof EntityCoupleableRollingStock) {
 			EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock) this;
@@ -187,7 +187,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
         if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL)) &&
 				getWorld().isServer &&
-				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source)).equals(offset)
+				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source), false).equals(offset)
 		) {
         	this.removePassenger(source);
 		}

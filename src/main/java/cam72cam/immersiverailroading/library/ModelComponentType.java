@@ -121,6 +121,7 @@ public enum ModelComponentType {
 
 	// Floor
 	FLOOR("FLOOR"),
+	//TODO Find a proper way to implement this
 	COLLISION("COLLISION"),
 
 	// REST

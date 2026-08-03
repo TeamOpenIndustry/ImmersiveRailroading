@@ -14,7 +14,6 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.EntityRegistry;
-import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.FaceAccessor;
@@ -596,40 +595,7 @@ public abstract class EntityRollingStockDefinition {
         return renderComponents.get(name);
     }
 
-    // Don't know if this will ever be used
-
-//    public boolean hitsNavCollisionMesh(Gauge gauge, Vec3d passengerOffset, Vec3d movement) {
-//        if (navMesh.collisionRoot == null) {
-//            return false;
-//        }
-//        // Flip coords
-//        passengerOffset = passengerOffset.rotateYaw(-90);
-//        movement = movement.rotateYaw(-90);
-//
-//        passengerOffset = passengerOffset.add(movement);
-//
-//        IBoundingBox rayBox = IBoundingBox.from(
-//                passengerOffset.subtract(0.25f, 0.5f, 0.25f),
-//                passengerOffset.add(0.25f, 0.5f, 0.25f)
-//        );
-//        List<OBJFace> nearby = new ArrayList<>();
-//        navMesh.queryBVH(navMesh.collisionRoot, rayBox, nearby, gauge.scale());
-//
-//        Vec3d rayStart = passengerOffset.add(0, 1, 0);
-//        Vec3d rayDir = movement.normalize();
-//
-//        for (OBJFace tri : nearby) {
-//            Double t = MathUtil.intersectRayTriangle(rayStart, rayDir, tri);
-//            if (t != null) {
-//               return true;
-//            }
-//        }
-//
-//        return false;
-//    }
-
-    // TODO Rename
-    public Vec3d correctMovement(EntityRollingStock stock, Gauge gauge, Vec3d passengerOffset, Vec3d movement) {
+    public Vec3d calculateCorrectedMovement(EntityRollingStock stock, Gauge gauge, Vec3d passengerOffset, Vec3d movement) {
         if (movement.length() == 0) {
             return movement;
         }
@@ -699,45 +665,39 @@ public abstract class EntityRollingStockDefinition {
         return null;
     }
 
-    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d passengerOffset, boolean shouldSit) {
+    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d passengerOffset, boolean shouldSit, boolean isNewlyMounted) {
         // Flip coords
         passengerOffset = passengerOffset.rotateYaw(-90);
 
-        // TODO: check for loop
-        // Added 40m search range just in case
-        for (float searchRange : new float[]{0.5f, 5f, 10f, 40f}) {
-            IBoundingBox rayBox = IBoundingBox.from(
-                    passengerOffset.subtract(searchRange, searchRange, searchRange),
-                    passengerOffset.add(searchRange, searchRange, searchRange)
-            );
-            List<OBJFace> nearby = new ArrayList<>();
-            navMesh.queryBVH(navMesh.root, rayBox, nearby, gauge.scale());
-            if (nearby.isEmpty()) {
-                continue;
+        float searchRange = isNewlyMounted ? Float.POSITIVE_INFINITY : 0.5f;
+        IBoundingBox rayBox = IBoundingBox.from(
+                passengerOffset.subtract(searchRange, searchRange, searchRange),
+                passengerOffset.add(searchRange, searchRange, searchRange)
+        );
+        List<OBJFace> nearby = new ArrayList<>();
+        navMesh.queryBVH(navMesh.root, rayBox, nearby, gauge.scale());
+        if (nearby.isEmpty()) {
+            return passengerOffset.rotateYaw(90);
+        }
+
+        Vec3d closestPoint = null;
+        double closestDistanceSq = 0;
+        for (OBJFace face : nearby) {
+            Vec3d p0 = face.vertex0.pos;
+            Vec3d p1 = face.vertex1.pos;
+            Vec3d p2 = face.vertex2.pos;
+
+            Vec3d pointOnTri = MathUtil.closestPointOnTriangle(passengerOffset, p0, p1, p2);
+            double distSq = passengerOffset.distanceToSquared(new Vec3d(pointOnTri.x, 0, pointOnTri.z));
+
+            if (closestPoint == null || distSq < closestDistanceSq) {
+                closestDistanceSq = distSq;
+                closestPoint = pointOnTri;
             }
-
-            Vec3d closestPoint = null;
-            double closestDistanceSq = 0;
-            for (OBJFace face : nearby) {
-                Vec3d p0 = face.vertex0.pos;
-                Vec3d p1 = face.vertex1.pos;
-                Vec3d p2 = face.vertex2.pos;
-
-                Vec3d pointOnTri = MathUtil.closestPointOnTriangle(passengerOffset, p0, p1, p2);
-                double distSq = passengerOffset.distanceToSquared(new Vec3d(pointOnTri.x, 0, pointOnTri.z));
-
-                if (closestPoint == null || distSq < closestDistanceSq) {
-                    closestDistanceSq = distSq;
-                    closestPoint = pointOnTri;
-                }
-            }
-
-            // flip coords
-            return closestPoint.rotateYaw(90);
         }
 
         // flip coords
-        return passengerOffset.rotateYaw(90);
+        return closestPoint.rotateYaw(90);
     }
 
     public boolean isAtFront(Gauge gauge, Vec3d pos) {
