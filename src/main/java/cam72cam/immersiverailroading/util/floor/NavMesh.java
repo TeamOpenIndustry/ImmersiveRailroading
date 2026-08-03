@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.floor;
+package cam72cam.immersiverailroading.util.floor;
 
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
