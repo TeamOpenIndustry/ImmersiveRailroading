@@ -273,7 +273,10 @@ public class TrackGui implements IScreen {
 		this.degreesSlider = new Slider(screen, 25 + xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
-				if(unlockGuiTurnDegree) return;
+				if(unlockGuiTurnDegree) {
+					degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+					return;
+				}
 				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
 				if(settings.type.isTransitionCurve()) {
 					boolean shouldReset = false;
