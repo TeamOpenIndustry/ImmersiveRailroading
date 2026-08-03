@@ -14,8 +14,8 @@ public record EndPointData (
         float radius,
         Vec3d offset,
         float pitch,
-        boolean pitchDegreeMode,
-        boolean projectHandle,
+        boolean pitchDegreeMode,// If true, pitch stores the angle, otherwise it stores the slope in per mille
+        boolean projectHandle,// If true, control points only moves vertically to get target pitch, otherwise the handles will be rotated to get target pitch
         TrackPositionType posType,
         TrackPosYawType posYawType,
         float posYaw,
