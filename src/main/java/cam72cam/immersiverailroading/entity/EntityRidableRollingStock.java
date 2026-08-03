@@ -128,7 +128,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		return offset;
 	}
 
-	private boolean isNearestDoorOpen(Player source) {
+	private boolean isNearestConnectingDoorOpen(Player source) {
 		// Find any doors that are close enough that are closed (and then negate)
 		return !this.getDefinition().getModel().getDoors().stream()
 				.filter(d -> d.type == Door.Types.CONNECTING)
@@ -159,7 +159,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			boolean atFront = this.getDefinition().isAtFront(gauge, offset);
 			boolean atBack = this.getDefinition().isAtRear(gauge, offset);
 			// TODO config for strict doors
-			boolean atDoor = isNearestDoorOpen(source);
+			boolean atDoor = isNearestConnectingDoorOpen(source);
 
 			atFront &= atDoor;
 			atBack &= atDoor;
@@ -169,7 +169,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				if (atCoupler && couplable.isCoupled(coupler)) {
 					EntityCoupleableRollingStock coupled = ((EntityCoupleableRollingStock) this).getCoupled(coupler);
 					if (coupled != null) {
-						if (((EntityRidableRollingStock)coupled).isNearestDoorOpen(source)) {
+						if (((EntityRidableRollingStock)coupled).isNearestConnectingDoorOpen(source)) {
 							coupled.addPassenger(source);
 						}
 					} else if (this.getTickCount() > 20) {

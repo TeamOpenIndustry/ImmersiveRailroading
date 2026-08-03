@@ -598,7 +598,7 @@ public abstract class EntityRollingStockDefinition {
 
         // Slide along closed doors
         Vec3d doorTangent;
-        if ((doorTangent = getDoorTangent(stock, flippedOffset, target)) != null) {
+        if ((doorTangent = getDoorTangent(stock, gauge, flippedOffset, target)) != null) {
             doorTangent = doorTangent.rotateYaw(90);
             double proj = movement.dotProduct(doorTangent);
             return doorTangent.scale(proj);
@@ -624,7 +624,7 @@ public abstract class EntityRollingStockDefinition {
         return clamped.subtract(flippedOffset).rotateYaw(90);
     }
 
-    private Vec3d getDoorTangent(EntityRollingStock stock, Vec3d start, Vec3d end) {
+    private Vec3d getDoorTangent(EntityRollingStock stock, Gauge gauge, Vec3d start, Vec3d end) {
         // Maybe filter by nearest door?
         List<Door<?>> doors = getModel().getDoors().stream()
                 .filter(d -> d.type == Door.Types.CONNECTING || d.type == Door.Types.INTERNAL)
@@ -635,8 +635,8 @@ public abstract class EntityRollingStockDefinition {
 
         for (Door<?> door : doors) {
             IBoundingBox box = IBoundingBox.from(
-                    door.part.min,
-                    door.part.max
+                    door.part.min.scale(gauge.scale()),
+                    door.part.max.scale(gauge.scale())
             );
             intersects = box.intersectsSegment(start.add(0, 1, 0), end.add(0, 1, 0));
             if (intersects) {
@@ -646,8 +646,8 @@ public abstract class EntityRollingStockDefinition {
         }
 
         if (intersects) {
-            Vec3d p1 = intersectingDoor.part.min;
-            Vec3d p2 = intersectingDoor.part.max;
+            Vec3d p1 = intersectingDoor.part.min.scale(gauge.scale());
+            Vec3d p2 = intersectingDoor.part.max.scale(gauge.scale());
 
             p2 = new Vec3d(p2.x, p1.y, p2.z);
 
