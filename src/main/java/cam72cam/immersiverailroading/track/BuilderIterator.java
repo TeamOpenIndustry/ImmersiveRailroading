@@ -63,7 +63,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Vec3d placeOff = new Vec3d(
 				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.x, 1)),
 				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.y, 1)),
-                Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
+				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
 		);
 		int mainX = (int) Math.floor(path.get(path.size() / 2).x + placeOff.x);
 		int mainZ = (int) Math.floor(path.get(path.size() / 2).z + placeOff.z);
@@ -77,12 +77,11 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			gagPos = gagPos.add(0, heightOffset, 0);
 
-			for (double q = -horiz; q <= horiz; q += 0.1) {//TODO: need rework
+			for (double q = -horiz; q <= horiz; q += 0.1) {
 				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());
 				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
 				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
 				int posY = (int) Math.floor(gagPos.y + nextUp.y + placeOff.y);
-//				if(posY - Math.floor(gagPos.y + nextUp.y + placeOff.y) > 1 - 1e-4) posY ++;
 
 				Vec3i gag = new Vec3i(posX, posY, posZ);
 				if (!positions.contains(gag)) {
@@ -122,9 +121,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						relHeight += 1;
 					}
 
+					// TODO: this is a temporary fix, requiring rework after model cut implemented
 					float bedThickness = 0.1f;
 
-					if(rollEffectTile) {
+					if(rollEffectTile) {// bedHeight will be the same as railHeight in this case
 						int offsetInt;
 						if(height + relHeight > 0.9) {
 							offsetInt = (int) Math.floor(height + relHeight + bedThickness);
@@ -243,8 +243,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 	@Override
 	public List<TrackBase> getTracksForRender() {
-        return super.getTracksForRender();
-    }
+		return super.getTracksForRender();
+	}
 
 	private static float delta(float a, float b) {
 		float angle = (float) Math.toDegrees(Math.toRadians(a) - Math.toRadians(b));
@@ -264,7 +264,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		double scale = info.settings.gauge.scale();
 		Pair<Double, List<VecYPR>> pair = getPathForRender(scale * info.getTrackModel().spacing);
 		List<VecYPR> points = pair.getRight();
-        float renderScale = (float) (pair.getLeft() / info.getTrackModel().spacing);
+		float renderScale = (float) (pair.getLeft() / info.getTrackModel().spacing);
 		renderScale *= 1.005f;//Avoid some gaps
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
@@ -383,28 +383,28 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 
 			//Merge situation when angle == 0
-            VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
-            if (direction == TrackDirection.RIGHT) {
+			VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
+			if (direction == TrackDirection.RIGHT) {
 				float leftLen = (1 - angle / 180);
 				float rightLen = (1 + angle / 180);
-                if(correctPartRailOrientatio) {//correct rail part
+				if(correctPartRailOrientatio) {//correct rail part
 					cur = cur.withOrientation(correctLeftOrientation.get(i));
 					switchPos = switchPos.withOrientation(correctRightOrientation.get(i));
-                }
-                vec.addChild(new VecYPR(switchPos, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
-                vec.addChild(new VecYPR(cur, rightLen * renderScale, TrackModelPart.RAIL_RIGHT));
-            } else {
+				}
+				vec.addChild(new VecYPR(switchPos, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
+				vec.addChild(new VecYPR(cur, rightLen * renderScale, TrackModelPart.RAIL_RIGHT));
+			} else {
 				float leftLen = (1 - angle / 180);
 				float rightLen = (1 + angle / 180);
-                if(correctPartRailOrientatio) {//correct rail part
+				if(correctPartRailOrientatio) {//correct rail part
 					switchPos = switchPos.withOrientation(correctLeftOrientation.get(i));
 					cur = cur.withOrientation(correctRightOrientation.get(i));
-                }
-                vec.addChild(new VecYPR(cur, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
-                vec.addChild(new VecYPR(switchPos, rightLen * renderScale, TrackModelPart.RAIL_RIGHT));
-            }
-            data.add(vec);
-        }
+				}
+				vec.addChild(new VecYPR(cur, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
+				vec.addChild(new VecYPR(switchPos, rightLen * renderScale, TrackModelPart.RAIL_RIGHT));
+			}
+			data.add(vec);
+		}
 
 		return data;
 	}
