@@ -1048,6 +1048,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public ItemStack onPick() {
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
+		ItemTrackBlueprint.Data.writeTo(stack, 0, true);
 
 		TileRail parent = this.getParentTile();
 		if (parent == null) {
@@ -1062,8 +1063,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}else {
 			parent.info.settings.with(mutable -> mutable.type = mutable.pickType).write(stack);
 		}
-
-		ItemTrackBlueprint.Data.writeTo(stack, 0, true);
 
 		return stack;
 	}

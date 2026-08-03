@@ -85,6 +85,7 @@ public class TrackGui implements IScreen {
 	private CheckBox isPreviewCB;
 	private CheckBox isGradeCrossingCB;
 
+	// Other Gui
 	private Button trackExtraGuiButton;
 	private Button trackEndPointGuiButton;
 
@@ -320,6 +321,7 @@ public class TrackGui implements IScreen {
 				unlockGuiTurnDegree = !unlockGuiTurnDegree;
 				degreesInput.setVisible(unlockGuiTurnDegree);
 				degreesSlider.setVisible(!unlockGuiTurnDegree);
+				if(!unlockGuiTurnDegree) degreesSlider.onSlider();
 			}
 		};
 

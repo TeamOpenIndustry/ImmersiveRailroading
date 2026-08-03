@@ -56,7 +56,7 @@ public class RailSettings {
     }
 
     public void write(ItemStack stack) {
-        TagCompound data = new TagCompound();
+        TagCompound data = stack.getTagCompound();
         try {
             TagSerializer.serialize(data, mutable());
         } catch (SerializationException e) {
