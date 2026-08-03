@@ -111,7 +111,7 @@ public class NavMesh {
 
         //Use %.4f, allowing minor errors
         private static String vecKey(Vec3d vec) {
-            return String.format("%.4f,%.4f,%.4f", vec.x, vec.y, vec.z);
+            return String.format(Locale.ROOT, "%.4f,%.4f,%.4f", vec.x, vec.y, vec.z);
         }
     }
 
