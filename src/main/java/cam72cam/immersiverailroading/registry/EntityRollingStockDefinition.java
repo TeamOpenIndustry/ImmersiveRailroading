@@ -68,7 +68,6 @@ public abstract class EntityRollingStockDefinition {
     public float darken;
     public Identifier modelLoc;
     protected StockModel<?, ?> model;
-    public Vec3d passengerCenter;
     private float bogeyFront;
     private float bogeyRear;
     private float couplerOffsetFront;
@@ -80,6 +79,7 @@ public abstract class EntityRollingStockDefinition {
     private double rearBounds;
     private double heightBounds;
     private double widthBounds;
+    public Vec3d passengerCenter;
     public Double passengerCompartmentLength;
     public Double passengerCompartmentWidth;
     private double weight;
@@ -664,7 +664,7 @@ public abstract class EntityRollingStockDefinition {
         // Flip coords
         passengerOffset = passengerOffset.rotateYaw(-90);
 
-        float searchRange = isNewlyMounted ? Float.POSITIVE_INFINITY : (float) (0.5 * gauge.scale());
+        float searchRange = isNewlyMounted ? Float.POSITIVE_INFINITY : NavMesh.RANGE * (float) gauge.scale();
         IBoundingBox rayBox = IBoundingBox.from(
                 passengerOffset.subtract(searchRange, searchRange, searchRange),
                 passengerOffset.add(searchRange, searchRange, searchRange)

@@ -20,6 +20,8 @@ import java.util.*;
  * Here we use the model coordinate (unscaled, -X forward) to store data
  */
 public class NavMesh {
+    public static final float RANGE = 0.5f;
+
     public final BVHNode root;
     // public final BVHNode collisionRoot;
     //Edges that are only connected to 1 face, useful when checking holes
@@ -34,6 +36,7 @@ public class NavMesh {
         if (model.floor != null) {
             floorFaces = collectFloorFaces(model);
             root = buildBVH(new ArrayList<>(floorFaces), 0);
+            //Overwrite legacy definition
             Vec3d bounds = model.floor.max.subtract(model.floor.min);
             definition.passengerCompartmentLength = bounds.x/2;
             definition.passengerCompartmentWidth = bounds.z/2;
@@ -152,8 +155,8 @@ public class NavMesh {
 
     public boolean isPointOnFloor(Vec3d point, double scale) {
         IBoundingBox box = IBoundingBox.from(
-                point.subtract(0.05 * scale, 0.5 * scale, 0.05 * scale),
-                point.add(0.05 * scale, 0.5 * scale, 0.05 * scale)
+                point.subtract(RANGE * 0.1 * scale, RANGE * scale, RANGE * 0.1 * scale),
+                point.add(RANGE * 0.1 * scale, RANGE * scale, RANGE * 0.1 * scale)
         );
         List<OBJFace> nearby = new ArrayList<>();
         queryBVH(root, box, nearby, scale);
