@@ -137,4 +137,16 @@ public class MathUtil {
 		double w = vc  * denom;
 		return p0.add(ab.scale(v)).add(ac.scale(w));
 	}
+
+	public static Vec3d closestPointOnSegmentXZ(Vec3d p, Vec3d a, Vec3d b) {
+		double abx = b.x - a.x;
+		double abz = b.z - a.z;
+		double abLenSq = abx * abx + abz * abz;
+		if (abLenSq < 1e-12) {
+			return new Vec3d(a.x, p.y, a.z);
+		}
+		double t = ((p.x - a.x) * abx + (p.z - a.z) * abz) / abLenSq;
+		t = Math.clamp(t, 0.0, 1.0);
+		return new Vec3d(a.x + abx * t, p.y, a.z + abz * t);
+	}
 }

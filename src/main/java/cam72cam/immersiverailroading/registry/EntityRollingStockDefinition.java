@@ -622,14 +622,15 @@ public abstract class EntityRollingStockDefinition {
             return movement;
         }
 
-        Vec3d tangent = edge.end.subtract(edge.start);
-        if (tangent.length() < 1e-6) {
+        //Try to slide along the edge instead of cancel normal direction movement
+        double ex = edge.end.x - edge.start.x;
+        double ez = edge.end.z - edge.start.z;
+        if (ex * ex + ez * ez < 1e-12) {
             return Vec3d.ZERO;
         }
-        tangent = tangent.normalize().rotateYaw(90);
 
-        double proj = movement.x * tangent.x + movement.y * tangent.y + movement.z * tangent.z;
-        return tangent.scale(proj);
+        Vec3d clamped = MathUtil.closestPointOnSegmentXZ(target, edge.start, edge.end);
+        return clamped.subtract(flippedOffset).rotateYaw(90);
     }
 
     private Vec3d getDoorTangent(EntityRollingStock stock, Vec3d start, Vec3d end) {
