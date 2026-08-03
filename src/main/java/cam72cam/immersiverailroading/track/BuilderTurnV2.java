@@ -6,8 +6,8 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 import util.Matrix4;
 
-public class BuilderTurn extends BuilderCubicCurve {
-    public BuilderTurn(RailInfo info, World world, Vec3i pos) {
+public class BuilderTurnV2 extends BuilderCubicCurve {
+    public BuilderTurnV2(RailInfo info, World world, Vec3i pos) {
         super(info, world, pos);
     }
 
@@ -20,7 +20,7 @@ public class BuilderTurn extends BuilderCubicCurve {
         if (info.placementInfo.direction == TrackDirection.LEFT) {
             mat.scale(1, 1, -1);
         }
-        CubicCurve curve = CubicCurve.circleSimpleMortensen(radius, info.settings.degrees, 0, 1).apply(mat);
+        CubicCurve curve = CubicCurve.circleClassic(radius, info.settings.degrees, 0, 1).apply(mat);
 
         double height = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
         if (height != 0) {

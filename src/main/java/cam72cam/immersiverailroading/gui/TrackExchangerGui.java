@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemTrackExchangerUpdatePacket;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
+import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
@@ -95,11 +96,12 @@ public class TrackExchangerGui implements IScreen {
 		// This could be more efficient...
 		RailSettings settings = new RailSettings(gauge,
 				track,
-				TrackItems.STRAIGHT,
+				TrackItems.STRAIGHT, TrackItems.STRAIGHT,
 				10,
 				0,
 				1, TrackPositionType.FIXED,
 				TrackSmoothing.BOTH,
+				new EndPointData(0), new EndPointData(10),
                 null,null,
 				TrackDirection.NONE,
 				railBed,

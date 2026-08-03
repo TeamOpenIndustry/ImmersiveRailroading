@@ -72,7 +72,7 @@ public class Config {
 		@Comment("Break block around the border of the tracks in creative")
 		public static boolean enableSideBlockClearing = true;
 
-		@Comment("Clear blocsk in creative mode when placing tracks")
+		@Comment("Clear blocks in creative mode when placing tracks")
 		public static boolean creativePlacementClearsBlocks = true;
 
 		@Comment("Requires solid block to be placed under the rails")
@@ -215,6 +215,9 @@ public class Config {
 		@Range(min = 1, max = 90)
 		public static int AnglePlacementSegmentation = 4;
 
+		@Comment("Enable Legacy Turn")
+		public static boolean EnableLegacyTurn = true;
+
 		@Comment("Machine power factor (0 means no power required)")
 		@Range(min = 0, max = 10)
 		public static float machinePowerFactor = 1.0f;
@@ -304,6 +307,9 @@ public class Config {
 
 		@Comment("Does stock drops itself/components when player is in creative mode?")
 		public static boolean stockDropInCreativeMode = true;
+
+		@Comment("If your map depends on strong charging of detectors then enable this, otherwise set it as false to avoid some synchronization issues")
+		public static boolean detectorOutputStrongCharging = false;
 	}
 
 	public static boolean isFuelRequired(Gauge gauge) {

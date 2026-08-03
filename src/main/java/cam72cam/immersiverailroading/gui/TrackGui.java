@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
+import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.immersiverailroading.util.MathUtil;
@@ -40,7 +41,6 @@ public class TrackGui implements IScreen {
 	private TileRailPreview te;
 	private int targetGuiOpenType;
 	private Button typeButton;
-	private TextField lengthInput;
 	private Slider degreesSlider;
 	private Slider curvositySlider;
 	private CheckBox isPreviewCB;
@@ -66,6 +66,15 @@ public class TrackGui implements IScreen {
 	private ListSelector<TrackDefinition>  trackSelector;
 	private ListSelector<ItemStack> railBedSelector;
 	private ListSelector<ItemStack> railBedFillSelector;
+
+	// Length / Radius
+	private TextField lengthInput;
+	private Button lengthLabel;
+
+	// Transition Curve (Cubic Parabola)
+	private TextField nearRadiusInput;
+	private TextField farRadiusInput;
+	private Button transitionRadiusLabel;
 
 	private double zoom = 1;
 
@@ -102,7 +111,11 @@ public class TrackGui implements IScreen {
 		int height = 20;
 		int xtop = -GUIHelpers.getScreenWidth() / 2;
 		int ytop = -GUIHelpers.getScreenHeight() / 4;
-        this.lengthInput = new TextField(screen, xtop, ytop, width-1, height);
+
+		this.lengthLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, getLengthLabelType(settings));
+		this.lengthLabel.setEnabled(false);
+
+        this.lengthInput = new TextField(screen, xtop + width / 2 + 10, ytop, width / 2 - 10, height);
         this.lengthInput.setText("" + settings.length);
         this.lengthInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
@@ -127,6 +140,7 @@ public class TrackGui implements IScreen {
             return false;
         });
         this.lengthInput.setFocused(true);
+		lengthInput.setEnabled(!settings.type.isTransitionCurve());
 		ytop += height;
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
@@ -156,18 +170,29 @@ public class TrackGui implements IScreen {
 		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING)
+						.filter(i -> Config.ConfigBalance.EnableLegacyTurn || i != TrackItems.TURN)
 						.sorted(Comparator.comparingInt(TrackItems::getOrder))
 						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
 		) {
 			@Override
 			public void onClick(TrackItems option) {
 				settings.type = option;
+				settings.pickType = option;
+
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
 				degreesSlider.setVisible(settings.type.hasQuarters());
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				trackExtraGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
+
+				lengthLabel.setText(getLengthLabelType(settings));
+				lengthInput.setEnabled(!settings.type.isTransitionCurve());
+
+				nearRadiusInput.setVisible(settings.type.isTransitionCurve());
+				farRadiusInput.setVisible(settings.type.isTransitionCurve());
+				transitionRadiusLabel.setVisible(settings.type.isTransitionCurve());
+
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
 							  ? BuilderTurnTable.maxLength(settings.gauge)
@@ -231,12 +256,84 @@ public class TrackGui implements IScreen {
 		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
-				settings.degrees = degreesSlider.getValueInt() * (90F/Config.ConfigBalance.AnglePlacementSegmentation);
+				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
+				if(settings.type.isTransitionCurve()) {
+					boolean shouldReset = false;
+					while(!isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
+						shouldReset = true;
+						val -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
+						if(Math.abs(val) < 1e-6) break;
+					}
+					if(shouldReset) degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
+				}
+				settings.degrees = val;
 				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
 			}
 		};
 		degreesSlider.onSlider();
 		ytop += height;
+
+		transitionRadiusLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, GuiText.LABEL_TRANSITION_RADIUS.toString()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				float temp = settings.farPointData.radius();
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = settings.nearPointData.radius());
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = temp);
+
+				settings.length = (int) temp;
+				nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
+				farRadiusInput.setText("" + (int) settings.farPointData.radius());
+			}
+		};
+		transitionRadiusLabel.setTooltip(List.of(GuiText.LABEL_SWAP_RADIUS.toString()));
+
+		nearRadiusInput = new TextField(screen, xtop + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
+		nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
+		nearRadiusInput.setValidator(s -> {
+			if (s == null || s.length() == 0) {
+				return true;
+			}
+			int val;
+			try {
+				val = Integer.parseInt(s);
+			} catch (NumberFormatException e) {
+				if(s.equals("-")) return true;
+				return false;
+			}
+			int max = 1000;
+
+			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(val, settings.farPointData.radius(), settings.degrees)) {
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = val);
+				return true;
+			}
+
+			return false;
+		});
+		nearRadiusInput.setFocused(true);
+
+		farRadiusInput = new TextField(screen, xtop + width / 2 + 10 + (width / 2 - 10) / 2, ytop, (width / 2 - 10) / 2, height);
+		farRadiusInput.setText("" + (int) settings.farPointData.radius());
+		farRadiusInput.setValidator(s -> {
+			if (s == null || s.length() == 0) {
+				return true;
+			}
+			int val;
+			try {
+				val = Integer.parseInt(s);
+			} catch (NumberFormatException e) {
+				if(s.equals("-")) return true;
+				return false;
+			}
+			int max = 1000;
+
+			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(settings.nearPointData.radius(), val, settings.degrees)) {
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = val);
+				return true;
+			}
+
+			return false;
+		});
+		farRadiusInput.setFocused(true);
 
 
 		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
@@ -253,6 +350,9 @@ public class TrackGui implements IScreen {
 		degreesSlider.setVisible(settings.type.hasQuarters());
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
+		nearRadiusInput.setVisible(settings.type.isTransitionCurve());
+		farRadiusInput.setVisible(settings.type.isTransitionCurve());
+		transitionRadiusLabel.setVisible(settings.type.isTransitionCurve());
 		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 
@@ -516,7 +616,7 @@ public class TrackGui implements IScreen {
 				new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null),
 				null, SwitchState.NONE, SwitchState.NONE, tablePos, true);
 
-		int length = info.settings.length;
+		int length = (int) info.settings.getValidSize();
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;
 		if (settings.type.isTable()) {
 			scale /= 2;
@@ -552,6 +652,33 @@ public class TrackGui implements IScreen {
 				);
 			}
 			model.render(state);
+		}
+	}
+
+	private static boolean isCubicParabolaInputValid(double startRadius, double endRadius, double angleDeg) {
+		if(Math.abs(startRadius) < 1e-6 && Math.abs(endRadius) < 1e-6) return false;
+		if(Math.abs(startRadius) < 1e-6 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(angleDeg);
+		if(startRadius > 0.5 && Math.abs(endRadius) < 1e-6) return CubicCurve.isCubicParabolaValid(angleDeg);
+		if(startRadius > 0.5 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(startRadius, endRadius, angleDeg);
+		return false;
+	}
+
+	private static String getLengthLabelType(RailSettings.Mutable settings) {
+		switch (settings.type) {
+			case STRAIGHT:
+			case SLOPE:
+			case TRANSFERTABLE:
+			case CUSTOM:
+				return GuiText.LABEL_LENGTH.toString();
+			case TURN:
+			case TURN_V2:
+			case TURNTABLE:
+				return GuiText.LABEL_RADIUS.toString();
+			case SWITCH:
+				return GuiText.LABEL_LENGTH_RADIUS.toString();
+			case CUBICPARABOLA:
+			default:
+				return GuiText.LABEL_NO_LENGTH.toString();
 		}
 	}
 }

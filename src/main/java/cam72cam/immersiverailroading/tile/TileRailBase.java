@@ -155,7 +155,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 			}
 		}
-		properties.redstoneMode = RedstoneMode.ENABLED;
 		setAugmentProperties(properties);
 		this.markDirty();
 	}
@@ -188,7 +187,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 								  PlayerMessage.translate(ChatText.AUGMENT_FILTER_FAIL.getRaw(),
 														  this.getPos().x, this.getPos().y, this.getPos().z)));
 			}
-			compiledFilter = stock -> true;
+			compiledFilter = _ -> true;
 			return;
 		}
 		positive = positive.and(negative.negate());
@@ -789,14 +788,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 						newRedstone = stock != null ? Math.min(15, stock.getPassengerCount()) : 0;
 						break;
 					case CARGO:
-						newRedstone = 0;
-						if (stock instanceof Freight) {
+                        if (stock instanceof Freight) {
 							newRedstone = ((Freight) stock).getPercentCargoFull() * 15 / 100;
 						}
 						break;
 					case LIQUID:
-						newRedstone = 0;
-						if (stock instanceof FreightTank) {
+                        if (stock instanceof FreightTank) {
 							newRedstone = ((FreightTank) stock).getPercentLiquidFull() * 15 / 100;
 						}
 						break;
@@ -863,7 +860,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	@Override
 	public int getStrongPower(Facing facing) {
-		return getAugment() == Augment.DETECTOR ? this.redstoneLevel : 0;
+		return ConfigDebug.detectorOutputStrongCharging && getAugment() == Augment.DETECTOR ? this.redstoneLevel : 0;
 	}
 
 	@Override
@@ -976,10 +973,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (this.getWorld().isClient && this.augment != null
-			&& player.hasPermission(Permissions.AUGMENT_TRACK)
-			&& !player.getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_ROLLING_STOCK)) {
-			GuiTypes.RAIL_AUGMENT.open(player, this.getPos());
-			return true;
+				&& player.hasPermission(Permissions.AUGMENT_TRACK)
+				&& !player.getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_ROLLING_STOCK)) {
+			//If player is trying to remove this augment, don't open gui
+			if (!player.getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_LARGE_WRENCH)
+					&& !player.getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_LARGE_WRENCH)) {
+				GuiTypes.RAIL_AUGMENT.open(player, this.getPos());
+				return true;
+			}
 		}
 
 		ItemStack stack = player.getHeldItem(hand);
@@ -1053,9 +1054,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 		if(parent.info.settings.rollAndOffsetInfo != null) {
-			parent.info.settings.with(mutable -> mutable.rollAndOffsetInfo = mutable.pickRollAndOffsetInfo).write(stack);
+			parent.info.settings.with(mutable -> {
+				mutable.rollAndOffsetInfo = mutable.pickRollAndOffsetInfo;
+				mutable.type = mutable.pickType;
+			}).write(stack);
 		}else {
-			parent.info.settings.write(stack);
+			parent.info.settings.with(mutable -> mutable.type = mutable.pickType).write(stack);
 		}
 
 		return stack;
