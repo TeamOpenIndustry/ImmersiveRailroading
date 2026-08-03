@@ -104,9 +104,14 @@ public class NavMesh {
         }
 
         String key() {
-            String startKey = start.toString();
-            String endKey = end.toString();
+            String startKey = vecKey(start);
+            String endKey = vecKey(end);
             return startKey.compareTo(endKey) <= 0 ? startKey + "|" + endKey : endKey + "|" + startKey;
+        }
+
+        //Use %.4f, allowing minor errors
+        private static String vecKey(Vec3d vec) {
+            return String.format("%.4f,%.4f,%.4f", vec.x, vec.y, vec.z);
         }
     }
 
