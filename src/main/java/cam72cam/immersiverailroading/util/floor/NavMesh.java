@@ -14,6 +14,11 @@ import cam72cam.mod.util.Axis;
 
 import java.util.*;
 
+/**
+ * Helper class used for tracking FLOOR meshes using BVH
+ * <p>
+ * Here we use the model coordinate (unscaled, -X forward) to store data
+ */
 public class NavMesh {
     public final BVHNode root;
     // public final BVHNode collisionRoot;
@@ -131,8 +136,7 @@ public class NavMesh {
         edgeCount.merge(key, 1, Integer::sum);
     }
 
-    public Edge closestBoundaryEdge(Vec3d point, double scale) {
-        point = point.scale(1 / scale);
+    public Edge closestBoundaryEdge(Vec3d point) {
         Edge closest = null;
         double closestDistSq = Double.MAX_VALUE;
         for (Edge edge : floorBoundaryEdges) {

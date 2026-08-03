@@ -591,24 +591,25 @@ public abstract class EntityRollingStockDefinition {
             return movement;
         }
 
+        double scale = gauge.scale();
         // Flip Cords
         Vec3d flippedOffset = passengerOffset.rotateYaw(-90);
         Vec3d flippedMovement = movement.rotateYaw(-90);
-        Vec3d target = flippedOffset.add(flippedMovement);
+        Vec3d flippedTarget = flippedOffset.add(flippedMovement);
 
-        // Slide along closed doors
+        // Try to slide along closed doors
         Vec3d doorTangent;
-        if ((doorTangent = getDoorTangent(stock, gauge, flippedOffset, target)) != null) {
+        if ((doorTangent = getDoorTangent(stock, gauge, flippedOffset, flippedTarget)) != null) {
             doorTangent = doorTangent.rotateYaw(90);
             double proj = movement.dotProduct(doorTangent);
             return doorTangent.scale(proj);
         }
 
-        if (navMesh.isPointOnFloor(target, gauge.scale())) {
+        if (navMesh.isPointOnFloor(flippedTarget, scale)) {
             return movement;
         }
 
-        NavMesh.Edge edge = navMesh.closestBoundaryEdge(flippedOffset, gauge.scale());
+        NavMesh.Edge edge = navMesh.closestBoundaryEdge(flippedOffset.scale(1 / scale));
         if (edge == null) {
             return movement;
         }
@@ -620,7 +621,9 @@ public abstract class EntityRollingStockDefinition {
             return Vec3d.ZERO;
         }
 
-        Vec3d clamped = MathUtil.closestPointOnSegmentXZ(target, edge.start.scale(gauge.scale()), edge.end.scale(gauge.scale()));
+        //Project onto the nearest edge
+        Vec3d clamped = MathUtil.closestPointOnSegmentXZ(flippedTarget, edge.start.scale(scale), edge.end.scale(scale));
+        //Flip back
         return clamped.subtract(flippedOffset).rotateYaw(90);
     }
 
