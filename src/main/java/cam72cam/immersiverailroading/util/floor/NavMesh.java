@@ -23,7 +23,6 @@ public class NavMesh {
     public static final float RANGE = 0.5f;
 
     public final BVHNode root;
-    // public final BVHNode collisionRoot;
     //Edges that are only connected to 1 face, useful when checking holes
     private final List<Edge> floorBoundaryEdges;
     // Theoretically this could be much lower. IR floor meshes probably won't use the whole depth, but who knows
@@ -47,8 +46,6 @@ public class NavMesh {
         }
 
         floorBoundaryEdges = computeBoundaryEdges(floorFaces);
-
-        // collisionRoot = initCollisionMesh(model);
     }
 
     private List<OBJFace> collectFloorFaces(StockModel<?, ?> model) {
@@ -181,23 +178,6 @@ public class NavMesh {
 
     private static double signXZ(Vec3d p, Vec3d a, Vec3d b) {
         return (p.x - b.x) * (a.z - b.z) - (a.x - b.x) * (p.z - b.z);
-    }
-
-    private BVHNode initCollisionMesh(StockModel<?, ?> model) {
-        FaceAccessor accessor = model.getFaceAccessor();
-
-        List<OBJFace> collision = new ArrayList<>();
-        if (model.collision != null) {
-            model.collision.modelIDs.forEach(group -> {
-                FaceAccessor sub = accessor.getSubByGroup(group);
-                sub.forEach(a -> collision.add(a.asOBJFace()));
-            });
-        }
-
-        if (collision.isEmpty()) {
-            return null;
-        }
-        return buildBVH(collision, 0);
     }
 
     public static class BVHNode {

@@ -122,7 +122,7 @@ public enum ModelComponentType {
 	// Floor
 	FLOOR("FLOOR"),
 	//TODO Find a proper way to implement this
-	COLLISION("COLLISION"),
+	//COLLISION("COLLISION"),
 
 	// REST
 	IMMERSIVERAILROADING_BASE_COMPONENT("IMMERSIVERAILROADING_BASE_COMPNOENT"),
