@@ -461,18 +461,9 @@ public abstract class EntityRollingStockDefinition {
 
         DataBlock passenger = data.getBlock("passenger");
 
-        if (passenger.getValue("center_x") != null && passenger.getValue("center_y") != null) {
-            passengerCenter = new Vec3d(-passenger.getValue("center_x").asDouble(), passenger.getValue("center_y").asDouble() - 0.35, 0).scale(internal_model_scale);
-        }
-
-        if (passenger.getValue("length") != null) {
-            passengerCompartmentLength = passenger.getValue("length").asDouble() * internal_model_scale;
-        }
-
-        if (passenger.getValue("width") != null) {
-            passengerCompartmentWidth = passenger.getValue("width").asDouble() * internal_model_scale;
-        }
-
+        passengerCenter = new Vec3d(-passenger.getValue("center_x").asDouble(), passenger.getValue("center_y").asDouble() - 0.35, 0).scale(internal_model_scale);
+        passengerCompartmentLength = passenger.getValue("length").asDouble() * internal_model_scale;
+        passengerCompartmentWidth = passenger.getValue("width").asDouble() * internal_model_scale;
         maxPassengers = passenger.getValue("slots").asInteger();
         shouldSit = passenger.getValue("should_sit").asBoolean();
 
