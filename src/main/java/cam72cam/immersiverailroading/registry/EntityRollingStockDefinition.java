@@ -599,7 +599,7 @@ public abstract class EntityRollingStockDefinition {
 
         // Try to slide along closed doors
         Vec3d doorTangent;
-        if ((doorTangent = getDoorTangent(stock, gauge, flippedOffset, flippedTarget)) != null) {
+        if ((doorTangent = getCollidingDoorTangent(stock, gauge, flippedOffset, flippedTarget)) != null) {
             doorTangent = doorTangent.rotateYaw(90);
             double proj = movement.dotProduct(doorTangent);
             return doorTangent.scale(proj);
@@ -627,7 +627,8 @@ public abstract class EntityRollingStockDefinition {
         return clamped.subtract(flippedOffset).rotateYaw(90);
     }
 
-    private Vec3d getDoorTangent(EntityRollingStock stock, Gauge gauge, Vec3d start, Vec3d end) {
+    //Trying to query closed doors we're colliding and get their tangent to restrict moving
+    private Vec3d getCollidingDoorTangent(EntityRollingStock stock, Gauge gauge, Vec3d start, Vec3d end) {
         // Maybe filter by nearest door?
         List<Door<?>> doors = getModel().getDoors().stream()
                 .filter(d -> d.type == Door.Types.CONNECTING || d.type == Door.Types.INTERNAL)
