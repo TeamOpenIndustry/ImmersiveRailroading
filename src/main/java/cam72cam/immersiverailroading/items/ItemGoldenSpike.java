@@ -54,16 +54,15 @@ public class ItemGoldenSpike extends CustomItem {
 			Vec3i tepos = new Data(held).pos;
 			if (tepos != null) {
 				TileRailPreview tr = world.getBlockEntity(tepos, TileRailPreview.class);
-
-				ItemStack stack = tr.getItem();
-				RailSettings stackInfo = RailSettings.from(stack);
-				TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, stackInfo, false);
-				pos = result.pos();
-				hit = result.hit();
-				float yaw = result.yaw();
-				boolean snapped = result.succeeded();
-
 				if (tr != null) {
+					ItemStack stack = tr.getItem();
+					RailSettings stackInfo = RailSettings.from(stack);
+					TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, stackInfo, false);
+					pos = result.pos();
+					hit = result.hit();
+					float yaw = result.yaw();
+					boolean snapped = result.succeeded();
+
 					if (tr.isAboveRails()) {
 						tepos = tepos.down();
 					}
