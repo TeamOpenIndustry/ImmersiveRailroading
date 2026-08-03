@@ -15,15 +15,17 @@ import cam72cam.mod.world.World;
 import java.util.List;
 
 public class TrackSnapUtil {
-    public static VecYPR getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack) {
+    public static VecYPR getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
         RailSettings stackInfo = RailSettings.from(stack);
-        EndPointData endPointData = stackInfo.nearPointData;
+        EndPointData endPointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
         Vec3d worldPos = new Vec3d(pos).add(hit);
         Vec3d minPos = worldPos;
         double min = Double.MAX_VALUE;
         int hori = Math.max((int) (stackInfo.gauge.scale() * 2), 1);
         int vert = 1;
+        boolean succeeded = false;
         float yaw = player.getRotationYaw();
+        float yawHead = (540 - yaw) % 360;
         float pitch = 0;
         float roll = 0;
         float rotationYawHead = (player.getRotationYawHead() + 360f) % 360f;
@@ -54,12 +56,20 @@ public class TrackSnapUtil {
                             float pitch1 = renderData.getFirst().getPitch();
                             float roll1 = renderData.getFirst().getRoll();
                             double dist1 = p1.distanceTo(worldPos);
-                            if (dist1 < min) {
+                            if (
+                                    dist1 < min ||
+                                    (
+                                            endPointData.trackSnapSettings().snapYaw() &&
+                                            dist1 - 0.5 < min && succeeded &&
+                                            Math.abs(VecUtil.delta(yaw1, yawHead)) < Math.abs(VecUtil.delta(yaw, yawHead))
+                                    )
+                            ) {
                                 min = dist1;
                                 minPos = p1;
                                 yaw = yaw1;
                                 pitch = pitch1;
                                 roll = -roll1;
+                                succeeded = true;
                             }
 
                             Vec3d p2 = renderData.getLast().add(rail.info.placementInfo.placementPosition).add(tile.getPos());
@@ -67,12 +77,20 @@ public class TrackSnapUtil {
                             float pitch2 = renderData.getLast().getPitch();
                             float roll2 = renderData.getLast().getRoll();
                             double dist2 = p2.distanceTo(worldPos);
-                            if (dist2 < min) {
+                            if (
+                                    dist2 < min ||
+                                    (
+                                            endPointData.trackSnapSettings().snapYaw() &&
+                                            dist2 - 0.5 < min && succeeded &&
+                                            Math.abs(VecUtil.delta(yaw2, yawHead)) < Math.abs(VecUtil.delta(yaw, yawHead))
+                                    )
+                            ) {
                                 min = dist2;
                                 minPos = p2;
                                 yaw = yaw2 + 180;
                                 pitch = -pitch2;
                                 roll = roll2;
+                                succeeded = true;
                             }
                         } else {
                             Vec3d p = renderData.getFirst()
@@ -84,11 +102,19 @@ public class TrackSnapUtil {
                                 currentYaw += 180;
                             }
                             double dist = p.distanceTo(worldPos);
-                            if (dist < min) {
+                            if (
+                                    dist < min ||
+                                    (
+                                            endPointData.trackSnapSettings().snapYaw() &&
+                                            dist - 0.5 < min && succeeded &&
+                                            Math.abs(VecUtil.delta(currentYaw, yawHead)) < Math.abs(VecUtil.delta(yaw, yawHead))
+                                    )
+                            ) {
                                 min = dist;
                                 minPos = p;
                                 yaw = currentYaw;
                                 pitch = currentPitch;
+                                succeeded = true;
                             }
                         }
 
@@ -117,7 +143,7 @@ public class TrackSnapUtil {
         EndPointData pointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
 
         if (pointData.trackSnapSettings().snapPos()) {
-            snapped = TrackSnapUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack);
+            snapped = TrackSnapUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack, isNear);
             if (snapped != null) {
                 succeeded = true;
 
