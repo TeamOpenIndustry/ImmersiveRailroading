@@ -592,7 +592,7 @@ public abstract class EntityRollingStockDefinition {
         }
 
         double scale = gauge.scale();
-        // Flip Cords
+        // Flip Cords from game (-Z forward) to model (-X forward)
         Vec3d flippedOffset = passengerOffset.rotateYaw(-90);
         Vec3d flippedMovement = movement.rotateYaw(-90);
         Vec3d flippedTarget = flippedOffset.add(flippedMovement);
