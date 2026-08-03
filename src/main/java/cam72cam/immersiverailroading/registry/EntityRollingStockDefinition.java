@@ -608,7 +608,7 @@ public abstract class EntityRollingStockDefinition {
             return movement;
         }
 
-        NavMesh.Edge edge = navMesh.closestBoundaryEdge(flippedOffset);
+        NavMesh.Edge edge = navMesh.closestBoundaryEdge(flippedOffset, gauge.scale());
         if (edge == null) {
             return movement;
         }
@@ -620,7 +620,7 @@ public abstract class EntityRollingStockDefinition {
             return Vec3d.ZERO;
         }
 
-        Vec3d clamped = MathUtil.closestPointOnSegmentXZ(target, edge.start, edge.end);
+        Vec3d clamped = MathUtil.closestPointOnSegmentXZ(target, edge.start.scale(gauge.scale()), edge.end.scale(gauge.scale()));
         return clamped.subtract(flippedOffset).rotateYaw(90);
     }
 
@@ -661,7 +661,7 @@ public abstract class EntityRollingStockDefinition {
         // Flip coords
         passengerOffset = passengerOffset.rotateYaw(-90);
 
-        float searchRange = isNewlyMounted ? Float.POSITIVE_INFINITY : 0.5f;
+        float searchRange = isNewlyMounted ? Float.POSITIVE_INFINITY : (float) (0.5 * gauge.scale());
         IBoundingBox rayBox = IBoundingBox.from(
                 passengerOffset.subtract(searchRange, searchRange, searchRange),
                 passengerOffset.add(searchRange, searchRange, searchRange)

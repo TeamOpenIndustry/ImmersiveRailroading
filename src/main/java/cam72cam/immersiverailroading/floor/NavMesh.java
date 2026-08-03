@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.floor;
 
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
@@ -16,6 +17,7 @@ import java.util.*;
 public class NavMesh {
     public final BVHNode root;
     // public final BVHNode collisionRoot;
+    //Edges that are only connected to 1 face, useful when checking holes
     private final List<Edge> floorBoundaryEdges;
     // Theoretically this could be much lower. IR floor meshes probably won't use the whole depth, but who knows
     private static final int MAX_DEPTH = 20;
@@ -95,6 +97,12 @@ public class NavMesh {
             this.start = start;
             this.end = end;
         }
+
+        String key() {
+            String startKey = start.toString();
+            String endKey = end.toString();
+            return startKey.compareTo(endKey) <= 0 ? startKey + "|" + endKey : endKey + "|" + startKey;
+        }
     }
 
     private List<Edge> computeBoundaryEdges(List<OBJFace> triangles) {
@@ -117,26 +125,18 @@ public class NavMesh {
     }
 
     private void addEdge(Vec3d a, Vec3d b, Map<String, Edge> edgeByKey, Map<String, Integer> edgeCount) {
-        String key = edgeKey(a, b);
-        edgeByKey.putIfAbsent(key, new Edge(a, b));
+        Edge newEdge = new Edge(a, b);
+        String key = newEdge.key();
+        edgeByKey.putIfAbsent(key, newEdge);
         edgeCount.merge(key, 1, Integer::sum);
     }
 
-    private static String edgeKey(Vec3d a, Vec3d b) {
-        String ka = pointKey(a);
-        String kb = pointKey(b);
-        return ka.compareTo(kb) <= 0 ? ka + "|" + kb : kb + "|" + ka;
-    }
-
-    private static String pointKey(Vec3d v) {
-        return String.format(Locale.ROOT, "%.4f,%.4f,%.4f", v.x, v.y, v.z);
-    }
-
-    public Edge closestBoundaryEdge(Vec3d point) {
+    public Edge closestBoundaryEdge(Vec3d point, double scale) {
+        point = point.scale(1 / scale);
         Edge closest = null;
         double closestDistSq = Double.MAX_VALUE;
         for (Edge edge : floorBoundaryEdges) {
-            Vec3d onSeg = closestPointOnSegment(point, edge.start, edge.end);
+            Vec3d onSeg = MathUtil.closestPointOnSegmentXZ(point, edge.start, edge.end);
             double distSq = point.distanceToSquared(onSeg);
             if (distSq < closestDistSq) {
                 closestDistSq = distSq;
@@ -146,20 +146,10 @@ public class NavMesh {
         return closest;
     }
 
-    private static Vec3d closestPointOnSegment(Vec3d p, Vec3d a, Vec3d b) {
-        double abx = b.x - a.x, aby = b.y - a.y, abz = b.z - a.z;
-        double apx = p.x - a.x, apy = p.y - a.y, apz = p.z - a.z;
-        double abLenSq = abx*abx + aby*aby + abz*abz;
-        double t = abLenSq < 1e-9 ? 0 : (apx*abx + apy*aby + apz*abz) / abLenSq;
-        t = Math.clamp(t, 0, 1);
-        return new Vec3d(a.x + abx * t, a.y + aby * t, a.z + abz * t);
-    }
-
-
     public boolean isPointOnFloor(Vec3d point, double scale) {
         IBoundingBox box = IBoundingBox.from(
-                point.subtract(0.05, 0.5, 0.05),
-                point.add(0.05, 0.5, 0.05)
+                point.subtract(0.05 * scale, 0.5 * scale, 0.05 * scale),
+                point.add(0.05 * scale, 0.5 * scale, 0.05 * scale)
         );
         List<OBJFace> nearby = new ArrayList<>();
         queryBVH(root, box, nearby, scale);
