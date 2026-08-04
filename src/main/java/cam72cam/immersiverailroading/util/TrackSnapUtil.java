@@ -42,7 +42,10 @@ public class TrackSnapUtil {
 
                         TileRail rail = (TileRail) tile;
                         if (rail == null || rail.info == null ||
-                                Math.abs(rail.getTrackGauges()[0] - stackInfo.gauge.value()) > 1.0E-6) continue;
+                                Math.abs(rail.getTrackGauges()[0] - stackInfo.gauge.value()) > 1.0E-6) {
+                            if(tile.getReplacedTile() == null) break;
+                            continue;
+                        }
 
                         BuilderBase builder = rail.info.getBuilder(world);
                         List<VecYPR> renderData = builder.getRenderData();
