@@ -123,6 +123,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			offset = this.getDefinition().correctPassengerBounds(gauge, offset.subtract(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0),
 																 shouldRiderSit(passenger), false);
 		}
+		//TODO roll
 		offset = offset.add(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0);
 
 		return offset;
@@ -151,12 +152,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
         movement = new Vec3d(movement.x, 0, movement.z).rotateYaw(this.getRotationYaw() - source.getRotationYawHead());
 
-		offset = offset.add(getDefinition().calculateCorrectedMovement(this, this.gauge, offset, movement));
+		Vec3d other = getDefinition().calculateCorrectedMovement(this, this.gauge, offset, movement);
+		offset = offset.add(other);
 
-        if (this instanceof EntityCoupleableRollingStock) {
-			EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock) this;
-
-			boolean atFront = this.getDefinition().isAtFront(gauge, offset);
+        if (this instanceof EntityCoupleableRollingStock couplable) {
+            boolean atFront = this.getDefinition().isAtFront(gauge, offset);
 			boolean atBack = this.getDefinition().isAtRear(gauge, offset);
 			// TODO config for strict doors
 			boolean atDoor = isNearestConnectingDoorOpen(source);
@@ -185,9 +185,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			}
         }
 
-        if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL)) &&
-				getWorld().isServer &&
-				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source), false).equals(offset)
+        if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL))
+			&& getWorld().isServer
+			&& !this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source), false).equals(offset)
 		) {
         	this.removePassenger(source);
 		}

@@ -609,20 +609,11 @@ public abstract class EntityRollingStockDefinition {
             return movement;
         }
 
-        NavMesh.Edge edge = navMesh.closestBoundaryEdge(flippedOffset.scale(1 / scale));
-        if (edge == null) {
+        //Try to slide along the edge (if present)
+        Vec3d clamped = navMesh.closestBoundaryPoint(flippedTarget, scale);
+        if (clamped == null) {
             return movement;
         }
-
-        //Try to slide along the edge instead of cancel normal direction movement
-        double ex = edge.end.x - edge.start.x;
-        double ez = edge.end.z - edge.start.z;
-        if (ex * ex + ez * ez < 1e-12) {
-            return Vec3d.ZERO;
-        }
-
-        //Project onto the nearest edge
-        Vec3d clamped = MathUtil.closestPointOnSegmentXZ(flippedTarget, edge.start.scale(scale), edge.end.scale(scale));
         //Flip back
         return clamped.subtract(flippedOffset).rotateYaw(90);
     }

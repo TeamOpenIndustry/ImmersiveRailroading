@@ -141,18 +141,19 @@ public class NavMesh {
         edgeCount.merge(key, 1, Integer::sum);
     }
 
-    public Edge closestBoundaryEdge(Vec3d point) {
-        Edge closest = null;
-        double closestDistSq = Double.MAX_VALUE;
+    public Vec3d closestBoundaryPoint(Vec3d point, double scale) {
+        point = point.scale(1 / scale);
+        Vec3d best = null;
+        double bestDistSq = Double.MAX_VALUE;
         for (Edge edge : floorBoundaryEdges) {
             Vec3d onSeg = MathUtil.closestPointOnSegmentXZ(point, edge.start, edge.end);
             double distSq = point.distanceToSquared(onSeg);
-            if (distSq < closestDistSq) {
-                closestDistSq = distSq;
-                closest = edge;
+            if (distSq < bestDistSq) {
+                bestDistSq = distSq;
+                best = onSeg;
             }
         }
-        return closest;
+        return best == null ? null : best.scale(scale);
     }
 
     public boolean isPointOnFloor(Vec3d point, double scale) {
