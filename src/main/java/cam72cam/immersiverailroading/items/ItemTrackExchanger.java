@@ -1,18 +1,11 @@
 package cam72cam.immersiverailroading.items;
 
-import cam72cam.immersiverailroading.IRBlocks;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
