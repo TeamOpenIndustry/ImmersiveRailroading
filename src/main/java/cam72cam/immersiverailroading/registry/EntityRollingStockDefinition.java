@@ -667,25 +667,47 @@ public abstract class EntityRollingStockDefinition {
             return passengerOffset.rotateYaw(90);
         }
 
-        Vec3d closestPoint = null;
-        double closestDistanceSq = 0;
+        // If a player is already in bounds, we want to find the highest result, otherwise the nearest result
+        Vec3d highest = null;
+        double highestY = Double.NEGATIVE_INFINITY;
+        Vec3d nearest = null;
+        double nearestDistSq = Double.MAX_VALUE;
+
         for (OBJFace face : nearby) {
             Vec3d p0 = face.vertex0.pos;
             Vec3d p1 = face.vertex1.pos;
             Vec3d p2 = face.vertex2.pos;
 
             Vec3d pointOnTri = MathUtil.closestPointOnTriangle(passengerOffset, p0, p1, p2);
+
+            // For newly mounted players we always want the nearest result
+            if (!isNewlyMounted && MathUtil.pointInTriangleXZ(passengerOffset, p0, p1, p2)) {
+                Double h = MathUtil.heightAtXZ(passengerOffset, p0, p1, p2);
+                if (h != null) {
+                    if (h > highestY && h - passengerOffset.y <= searchRange) {
+                        highestY = h;
+                        highest = new Vec3d(passengerOffset.x, h, passengerOffset.z);
+                    }
+                    continue;
+                }
+                // (Near-)Vertical face that still has an XZ footprint: fall through to nearest
+            }
+
+            //Not directly within horizontal bounds, keep the nearest fallback
             //Use normal Y for mounting, and 0 for internal moving (mostly going across stairs)
             double distSq = passengerOffset
                     .distanceToSquared(new Vec3d(pointOnTri.x, isNewlyMounted ? pointOnTri.y : 0, pointOnTri.z));
-
-            if (closestPoint == null || distSq < closestDistanceSq) {
-                closestDistanceSq = distSq;
-                closestPoint = pointOnTri;
+            if (distSq < nearestDistSq) {
+                nearestDistSq = distSq;
+                nearest = pointOnTri;
             }
         }
 
-        // flip coords
+        Vec3d closestPoint = highest != null ? highest : nearest;
+        if (closestPoint == null) {
+            closestPoint = passengerOffset;
+        }
+        // Flip coords back
         return closestPoint.rotateYaw(90);
     }
 

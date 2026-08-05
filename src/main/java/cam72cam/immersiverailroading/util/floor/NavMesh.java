@@ -164,26 +164,11 @@ public class NavMesh {
         List<OBJFace> nearby = new ArrayList<>();
         queryBVH(root, box, nearby, scale);
         for (OBJFace tri : nearby) {
-            if (pointInTriangleXZ(point, tri)) {
+            if (MathUtil.pointInTriangleXZ(point, tri.vertex0.pos, tri.vertex1.pos, tri.vertex2.pos)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private static boolean pointInTriangleXZ(Vec3d p, OBJFace tri) {
-        double d1 = signXZ(p, tri.vertex0.pos, tri.vertex1.pos);
-        double d2 = signXZ(p, tri.vertex1.pos, tri.vertex2.pos);
-        double d3 = signXZ(p, tri.vertex2.pos, tri.vertex0.pos);
-
-        boolean hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-        boolean hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-        return !(hasNeg && hasPos);
-    }
-
-    private static double signXZ(Vec3d p, Vec3d a, Vec3d b) {
-        return (p.x - b.x) * (a.z - b.z) - (a.x - b.x) * (p.z - b.z);
     }
 
     public static class BVHNode {
@@ -232,9 +217,7 @@ public class NavMesh {
         queryBVHInternal(node, query, result, scale);
     }
 
-
-
-    public void queryBVHInternal(BVHNode node, IBoundingBox query, List<OBJFace> result, double scale) {
+    private void queryBVHInternal(BVHNode node, IBoundingBox query, List<OBJFace> result, double scale) {
         if (node == null) return;
         if (!node.bounds.intersects(query)) return;
 

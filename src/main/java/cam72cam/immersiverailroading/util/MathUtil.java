@@ -52,19 +52,19 @@ public class MathUtil {
 
 	//Enough for now
 	public static int clamp(int val, int min, int max) {
-		return Math.max(min, Math.min(max, val));
+		return Math.clamp(val, min, max);
 	}
 
 	public static long clamp(long val, long min, long max) {
-		return Math.max(min, Math.min(max, val));
+		return Math.clamp(val, min, max);
 	}
 
 	public static float clamp(float val, float min, float max) {
-		return Math.max(min, Math.min(max, val));
+		return Math.clamp(val, min, max);
 	}
 
 	public static double clamp(double val, double min, double max) {
-		return Math.max(min, Math.min(max, val));
+		return Math.clamp(val, min, max);
 	}
 
 	public static Double intersectRayTriangle(Vec3d rayOrigin, Vec3d rayDir, OBJFace face) {
@@ -148,5 +148,38 @@ public class MathUtil {
 		double t = ((p.x - a.x) * abx + (p.z - a.z) * abz) / abLenSq;
 		t = Math.clamp(t, 0.0, 1.0);
 		return new Vec3d(a.x + abx * t, p.y, a.z + abz * t);
+	}
+
+	// True if p's XZ lies within the XZ footprint of triangle (a, b, c)
+	public static boolean pointInTriangleXZ(Vec3d p, Vec3d a, Vec3d b, Vec3d c) {
+		// Degenerate XZ footprint (e.g. a vertical face): contains no area, so never "inside"
+		double area2 = (b.x - a.x) * (c.z - a.z) - (c.x - a.x) * (b.z - a.z);
+		if (Math.abs(area2) < 1e-12) {
+			return false;
+		}
+
+		double d1 = signXZ(p, a, b);
+		double d2 = signXZ(p, b, c);
+		double d3 = signXZ(p, c, a);
+
+		boolean hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+		boolean hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+		return !(hasNeg && hasPos);
+	}
+
+	// Y coord of the triangle's plane at (p.x, p.z), returns NaN for a (near-)vertical triangle,
+	public static Double heightAtXZ(Vec3d p, Vec3d a, Vec3d b, Vec3d c) {
+		Vec3d ab = b.subtract(a);
+		Vec3d ac = c.subtract(a);
+		Vec3d n = ab.crossProduct(ac);
+		if (Math.abs(n.y) < 1e-9) {
+			return null;
+		}
+		return a.y - (n.x * (p.x - a.x) + n.z * (p.z - a.z)) / n.y;
+	}
+
+	private static double signXZ(Vec3d p, Vec3d a, Vec3d b) {
+		return (p.x - b.x) * (a.z - b.z) - (a.x - b.x) * (p.z - b.z);
 	}
 }
