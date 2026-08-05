@@ -195,7 +195,7 @@ public class RailSettings {
 
             nearPointData = new EndPointData(0);
             farPointData = new EndPointData(10);
-            rollAndOffsetInfo = null;
+            rollAndOffsetInfo = RollAndOffsetInfo.getDefault();
             pickRollAndOffsetInfo = rollAndOffsetInfo;
 
             length = 10;

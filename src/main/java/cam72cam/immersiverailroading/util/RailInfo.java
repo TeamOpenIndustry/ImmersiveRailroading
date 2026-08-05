@@ -427,7 +427,7 @@ public class RailInfo {
 			SwitchState switchForced = SwitchState.values()[nbt.getInteger("switchForced")];
 			double tablePos = nbt.getDouble("tablePos");
 
-			RailSettings settings = new RailSettings(gauge, "default", type, type, length, quarters / 4F * 90, 1, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , new EndPointData(0), new EndPointData(10), null, null, TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
+			RailSettings settings = new RailSettings(gauge, "default", type, type, length, quarters / 4F * 90, 1, type == TrackItems.SLOPE ? TrackSmoothing.NEITHER : TrackSmoothing.BOTH , new EndPointData(0), new EndPointData(10), RollAndOffsetInfo.getDefault(), RollAndOffsetInfo.getDefault(), TrackDirection.NONE, railBed, cam72cam.mod.item.ItemStack.EMPTY, false, false, 1,  1);
 			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
 	}
