@@ -45,7 +45,8 @@ public class WirelessRemotecontrolServer {
             Entity entity = world.getEntity(locoUUID, Locomotive.class);
             Player player = world.getEntity(playerUUID, Player.class);
             if (entity instanceof Locomotive loco && player != null) {
-                new RemoteControlServerPacket(loco.getRemoteControlData()).sendToPlayer(player);
+            	loco.keepLoaded();
+            	new RemoteControlServerPacket(loco.getRemoteControlData()).sendToPlayer(player);
             }
         });
     }

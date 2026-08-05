@@ -57,7 +57,7 @@ public class KeyPressPacket extends Packet {
 	
 	private void handleRemoteControl(Player player) {
 		EntityRollingStock stock = getWorld().getEntity(loco, Locomotive.class); 
-		if ((stock instanceof Locomotive || player.getRiding() instanceof EntityRollingStock) && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+		if (stock != null && (stock instanceof Locomotive || player.getRiding() instanceof EntityRollingStock) && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
 			ItemStack held = player.getHeldItem(Player.Hand.SECONDARY); 
 			ItemWirelessRemotecontrol.Data data = new ItemWirelessRemotecontrol.Data(held);
 			if (loco.equals(data.linked)) {
