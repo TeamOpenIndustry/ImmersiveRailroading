@@ -18,6 +18,14 @@ public class RemoteControlData {
 	public boolean emergency;
 	@TagField("horn")
 	public float horn;
+	@TagField("sanding")
+	public boolean sanding;
+	@TagField("tractiveEffort")
+	public float tractiveEffort;
+	@TagField("brakeCylPressure")
+	public float brakeCylPressure;
+	@TagField("engine")
+	public boolean engine;
 	
 	public RemoteControlData() {
 	}

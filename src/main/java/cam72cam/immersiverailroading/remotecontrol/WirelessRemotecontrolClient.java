@@ -64,11 +64,28 @@ public class WirelessRemotecontrolClient {
             return;
         }
         switch (readout) {
-            case THROTTLE: cachedData.throttle = value; break;
-            case REVERSER: cachedData.reverser = value; break;
-            case BRAKE_PRESSURE: cachedData.brakePressure = value; break;
-            case INDEPENDENT_BRAKE: cachedData.indBrake = value; break;
-            default: break;
+            case THROTTLE:
+            	cachedData.throttle = value;
+            	break;
+            case REVERSER:
+            	cachedData.reverser = value;
+            	break;
+            case BRAKE_PRESSURE:
+            	cachedData.brakePressure = value;
+            	break;
+            case INDEPENDENT_BRAKE:
+            	cachedData.indBrake = value;
+            	break;
+            case EMERGENCY:
+            	cachedData.emergency = value > 0.5;
+            	break;
+            case WHISTLE, HORN:
+            	cachedData.horn = value;
+            	break;
+            case ENGINE:
+            	cachedData.engine = value > 0.5;
+            default:
+            	break;
         }
     }
 }
