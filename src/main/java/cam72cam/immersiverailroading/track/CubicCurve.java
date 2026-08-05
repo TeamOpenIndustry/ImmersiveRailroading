@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.TrackSmoothing;
 import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
@@ -602,11 +603,17 @@ public class CubicCurve {
                                        Vec3d ctrl,
                                        double pitchRad)
     {
+        double pitchTan = Math.tan(pitchRad);
+        if(pitchTan >= 10) {
+            ImmersiveRailroading.warn("The pitch used for the projection is too large! The tangent value %s will be forced to 10.", pitchTan);
+            pitchTan = 10;
+        }
+
         double horizontal = VecUtil.flatDistance(base, ctrl);
 
         return new Vec3d(
                 ctrl.x,
-                base.y + horizontal * Math.tan(pitchRad),
+                base.y + horizontal * pitchTan,
                 ctrl.z
         );
     }
