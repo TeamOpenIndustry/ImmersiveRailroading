@@ -63,7 +63,7 @@ public class ItemTrackExchanger extends CustomItem {
 			return ClickResult.ACCEPTED;
 		}
 
-		return ClickResult.ACCEPTED;
+		return ClickResult.PASS;
 	}
 
 	public static class Data extends ItemDataSerializer {
