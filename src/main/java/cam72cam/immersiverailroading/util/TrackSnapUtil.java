@@ -12,7 +12,9 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TrackSnapUtil {
     public static VecYPR getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
@@ -35,15 +37,21 @@ public class TrackSnapUtil {
                 for (int z = -hori; z <= hori; z++) {
                     Vec3i offset = pos.add(x, y, z);
                     TileRailBase tile = world.getBlockEntity(offset, TileRailBase.class);
+                    Set<Vec3i> visited = new HashSet<>();
+
                     while (tile != null){
+                        if (visited.contains(tile.getPos())) break;
+                        visited.add(tile.getPos());
+
                         if (!(tile instanceof TileRail)) {
                             tile = tile.getParentTile();
                         }
 
                         TileRail rail = (TileRail) tile;
-                        if (rail == null || rail.info == null ||
-                                Math.abs(rail.getTrackGauges()[0] - stackInfo.gauge.value()) > 1.0E-6) {
-                            if(tile.getReplacedTile() == null) break;
+                        if (rail == null || rail.info == null || Math.abs(rail.getTrackGauges()[0] - stackInfo.gauge.value()) > 1.0E-6) {
+                            TileRailBase next = tile.getReplacedTile();
+                            if (next == null) break;
+                            tile = next;
                             continue;
                         }
 
