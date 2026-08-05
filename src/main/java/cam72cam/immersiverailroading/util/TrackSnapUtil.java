@@ -49,7 +49,7 @@ public class TrackSnapUtil {
 
                         TileRail rail = (TileRail) tile;
                         if (rail == null || rail.info == null || Math.abs(rail.getTrackGauges()[0] - stackInfo.gauge.value()) > 1.0E-6) {
-                            TileRailBase next = tile.getReplacedTile();
+                            TileRailBase next = tile != null ? tile.getReplacedTile() : null;
                             if (next == null) break;
                             tile = next;
                             continue;

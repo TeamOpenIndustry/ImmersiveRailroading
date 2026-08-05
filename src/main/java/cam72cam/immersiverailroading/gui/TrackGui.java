@@ -198,7 +198,8 @@ public class TrackGui implements IScreen {
 				lengthLabel.setText(getLengthLabelType(settings));
 				lengthInput.setEnabled(!settings.type.isTransitionCurve());
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-				degreesSlider.setVisible(settings.type.hasQuarters());
+				degreesSlider.setVisible(settings.type.hasQuarters() && !unlockGuiTurnDegree);
+				degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
 				degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
 				degreesInputTypeButton.setVisible(settings.type.hasQuarters());
 				curvositySlider.setVisible(settings.type.hasCurvosity());
@@ -269,30 +270,6 @@ public class TrackGui implements IScreen {
 		transfertableEntrySpacingSlider.onSlider();
 		ytop += height;
 
-
-		this.degreesSlider = new Slider(screen, 25 + xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
-			@Override
-			public void onSlider() {
-				if(unlockGuiTurnDegree) {
-					degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
-					return;
-				}
-				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
-				if(settings.type.isTransitionCurve()) {
-					boolean shouldReset = false;
-					while(!CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
-						shouldReset = true;
-						val -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
-						if(Math.abs(val) < 1e-6) break;
-					}
-					if(shouldReset) degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
-				}
-				settings.degrees = val;
-				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
-			}
-		};
-		degreesSlider.onSlider();
-
 		degreesInput = new TextField(screen, 25 + xtop, ytop, width - 50, height);
 		degreesInput.setText("" + settings.degrees);
 		degreesInput.setValidator(s -> {
@@ -312,11 +289,44 @@ public class TrackGui implements IScreen {
 					return false;
 				}
 				settings.degrees = val;
+				degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
 				return true;
 			}
 			return false;
 		});
 		degreesInput.setFocused(true);
+
+		this.degreesSlider = new Slider(screen, 25 + xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
+			@Override
+			public void onSlider() {
+				if(unlockGuiTurnDegree) {
+					while(settings.type.isTransitionCurve() && !CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), settings.degrees)) {
+						settings.degrees --;
+						if(Math.abs(settings.degrees) < 1e-6) {
+							settings.degrees = 0;
+							break;
+						}
+					}
+					degreesInput.setText("" + settings.degrees);
+					degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+					return;
+				}
+				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
+				if(settings.type.isTransitionCurve()) {
+					boolean shouldReset = false;
+					while(!CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
+						shouldReset = true;
+						val -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
+						if(Math.abs(val) < 1e-6) break;
+					}
+					if(shouldReset) degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
+				}
+				settings.degrees = val;
+				degreesInput.setText("" + settings.degrees);
+				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+			}
+		};
+		degreesSlider.onSlider();
 
 		degreesInputTypeButton = new Button(screen, xtop + width - 20, ytop, height, height, "↔") {
 			@Override
