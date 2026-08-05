@@ -145,6 +145,7 @@ public class NavMesh {
         point = point.scale(1 / scale);
         Vec3d best = null;
         double bestDistSq = Double.MAX_VALUE;
+        //Assuming cache floorBoundaryEdges is more effective that BVH edges
         for (Edge edge : floorBoundaryEdges) {
             Vec3d onSeg = MathUtil.closestPointOnSegment(point, edge.start, edge.end);
             double distSq = point.distanceToSquared(onSeg);

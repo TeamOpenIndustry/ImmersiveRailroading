@@ -166,7 +166,7 @@ public class MathUtil {
 		return !(hasNeg && hasPos);
 	}
 
-	// Y coord of the triangle's plane at (p.x, p.z), returns NaN for a (near-)vertical triangle,
+	// Y coord of the triangle's plane at (p.x, p.z), returns null for a (near-)vertical triangle,
 	public static Double heightAtXZ(Vec3d p, Vec3d a, Vec3d b, Vec3d c) {
 		Vec3d ab = b.subtract(a);
 		Vec3d ac = c.subtract(a);
