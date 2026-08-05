@@ -3,8 +3,6 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJFace;
 
-import java.util.List;
-
 public class MathUtil {
 	public static double gradeToRadians(double grade) {
 		return Math.atan2(grade, 100);
@@ -138,16 +136,16 @@ public class MathUtil {
 		return p0.add(ab.scale(v)).add(ac.scale(w));
 	}
 
-	public static Vec3d closestPointOnSegmentXZ(Vec3d p, Vec3d a, Vec3d b) {
-		double abx = b.x - a.x;
-		double abz = b.z - a.z;
-		double abLenSq = abx * abx + abz * abz;
+	public static Vec3d closestPointOnSegment(Vec3d p, Vec3d a, Vec3d b) {
+		double abx = b.x - a.x, aby = b.y - a.y, abz = b.z - a.z;
+		double apx = p.x - a.x, apy = p.y - a.y, apz = p.z - a.z;
+		double abLenSq = abx * abx + aby * aby + abz * abz;
 		if (abLenSq < 1e-12) {
-			return new Vec3d(a.x, p.y, a.z);
+			return a;
 		}
-		double t = ((p.x - a.x) * abx + (p.z - a.z) * abz) / abLenSq;
+		double t = (apx * abx + apy * aby + apz * abz) / abLenSq;
 		t = Math.clamp(t, 0.0, 1.0);
-		return new Vec3d(a.x + abx * t, p.y, a.z + abz * t);
+		return new Vec3d(a.x + abx * t, a.y + aby * t, a.z + abz * t);
 	}
 
 	// True if p's XZ lies within the XZ footprint of triangle (a, b, c)

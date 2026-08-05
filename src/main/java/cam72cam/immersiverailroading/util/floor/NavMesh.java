@@ -146,7 +146,7 @@ public class NavMesh {
         Vec3d best = null;
         double bestDistSq = Double.MAX_VALUE;
         for (Edge edge : floorBoundaryEdges) {
-            Vec3d onSeg = MathUtil.closestPointOnSegmentXZ(point, edge.start, edge.end);
+            Vec3d onSeg = MathUtil.closestPointOnSegment(point, edge.start, edge.end);
             double distSq = point.distanceToSquared(onSeg);
             if (distSq < bestDistSq) {
                 bestDistSq = distSq;
