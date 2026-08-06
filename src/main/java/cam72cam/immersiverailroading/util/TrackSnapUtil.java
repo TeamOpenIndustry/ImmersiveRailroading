@@ -185,9 +185,11 @@ public class TrackSnapUtil {
                     yaw = snapped.getYaw();
                 }
 
-                if(pointData.trackSnapSettings().snapHeight()) {
+                if (pointData.trackSnapSettings().snapHeight()) {
                     Vec3d offset = new Vec3d(0, Math.abs(hit.y) > 1e-4 ? hit.y : 0, 0);
                     EndPointData updated = pointData.with(mutable -> mutable.offset = offset);
+
+                    pointData = updated;
                     stackInfo = isNear
                             ? stackInfo.with(mutable -> mutable.nearPointData = updated)
                             : stackInfo.with(mutable -> mutable.farPointData = updated);
@@ -198,6 +200,8 @@ public class TrackSnapUtil {
                             ? snapped.getPitch()
                             : (float) (Math.tan(Math.toRadians(snapped.getPitch())) * 1000);
                     EndPointData updated = pointData.with(mutable -> mutable.pitch = isNear ? newPitch : -newPitch);
+
+                    pointData = updated;
                     stackInfo = isNear
                             ? stackInfo.with(mutable -> mutable.nearPointData = updated)
                             : stackInfo.with(mutable -> mutable.farPointData = updated);
@@ -208,6 +212,7 @@ public class TrackSnapUtil {
                             ? snapped.getRoll()
                             : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
                     if (!isNear) newRoll = -newRoll;
+
                     RollAndOffsetInfo.Mutable rollMutable = stackInfo.rollAndOffsetInfo.mutable();
                     double index = isNear ? 0.0 : 1.0;
                     rollMutable.tryDeltaValue(index, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
