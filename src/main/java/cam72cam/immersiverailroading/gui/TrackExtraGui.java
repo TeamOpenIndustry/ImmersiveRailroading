@@ -107,7 +107,7 @@ public class TrackExtraGui implements IScreen {
 
         //Common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
         //Degree mode:degree
-        rollMax = rollAndOffsetInfoCache.degreeMode ? 45 : 60;//180 for Degree mode later
+        rollMax = rollAndOffsetInfoCache.degreeMode ? 180 : 60;//180 for Degree mode later
         yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
@@ -228,7 +228,7 @@ public class TrackExtraGui implements IScreen {
                                            (_, self) -> {
                                                edited = true;
                                                rollAndOffsetInfoCache.degreeMode = self.isChecked();
-                                               rollMax = rollAndOffsetInfoCache.degreeMode ? 45 : 60;//180 for degree mode later
+                                               rollMax = rollAndOffsetInfoCache.degreeMode ? 180 : 60;//180 for degree mode later
                                            });
 
         offsetVertByNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 12,

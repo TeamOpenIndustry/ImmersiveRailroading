@@ -9,6 +9,7 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackModelPart;
+import cam72cam.immersiverailroading.util.BlockPlaneHeight;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -41,8 +42,15 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		positions = new HashSet<>();
 		HashMap<Vec3i, Float> bedHeights = new HashMap<>();
 		HashMap<Vec3i, Float> railHeights = new HashMap<>();
-		// Pre-calculated rail bed top face normal dir for further use
+
+		// Pre-calculated rail bed top face normal dir for further use TODO: merge these 2 to Plane
 		HashMap<Vec3i, Vec3d> topNormals = new HashMap<>();
+		HashMap<Vec3i, Vec3d> topPositions = new HashMap<>();
+
+		// Used for Calculate average Planes
+		HashMap<Vec3i, List<Vec3d>> allTopNormals = new HashMap<>();
+		HashMap<Vec3i, List<Vec3d>> allTopPositions = new HashMap<>();
+
 		HashMap<Vec3i, Integer> yOffset = new HashMap<>();
 		HashSet<Vec3i> flexPositions = new HashSet<>();
 
@@ -94,17 +102,27 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					if(!rollEffectTile) tileTilt = false;
 
 					if(rollEffectTile) {
-						double cx = posX;
-						double cz = posZ;
-						double dx = topFacing.x, dy = topFacing.y, dz = topFacing.z;
-						double px = gagPos.x, pz = gagPos.z;
+						Vec3d planePoint = new Vec3d(
+								gagPos.x,
+								gagPos.y,
+								gagPos.z
+						);
 
-						if (Math.abs(dy) < 1e-5) {
-							rollDelta = 0;
-						}else {
-							rollDelta = ( dx * (px - cx) + dz * (pz - cz) ) / dy;
-						}
-					}else {//legacy
+
+						float localHeight =
+								BlockPlaneHeight.calculate(
+										planePoint.subtract(
+												new Vec3d(
+														posX,
+														posY,
+														posZ
+												)
+										),
+										topFacing
+								);
+
+						rollDelta = localHeight - (gagPos.y - posY);
+					} else {//legacy
 						rollDelta = 0;
 					}
 
