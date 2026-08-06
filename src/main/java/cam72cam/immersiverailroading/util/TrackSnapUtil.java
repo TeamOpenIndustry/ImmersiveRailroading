@@ -110,8 +110,8 @@ public class TrackSnapUtil {
                                                             endPointData.trackSnapSettings().snapYaw()
                                                                     && dist1 - 0.5 < min
                                                                     && succeeded
-                                                                    && Math.abs(VecUtil.delta(yaw1, yawHead))
-                                                                    < Math.abs(VecUtil.delta(yaw, yawHead))
+                                                                    && VecUtil.delta(yaw1, yawHead)
+                                                                    < VecUtil.delta(yaw, yawHead)
                                                     )
                                     ) {
 
@@ -148,8 +148,8 @@ public class TrackSnapUtil {
                                                             endPointData.trackSnapSettings().snapYaw()
                                                                     && dist2 - 0.5 < min
                                                                     && succeeded
-                                                                    && Math.abs(VecUtil.delta(yaw2, yawHead))
-                                                                    < Math.abs(VecUtil.delta(yaw, yawHead))
+                                                                    && VecUtil.delta(yaw2, yawHead)
+                                                                    < VecUtil.delta(yaw, yawHead)
                                                     )
                                     ) {
 
@@ -175,10 +175,12 @@ public class TrackSnapUtil {
 
                                     float currentYaw = data.getYaw();
                                     float currentPitch = data.getPitch();
+                                    float currentRoll = data.getRoll();
 
 
-                                    if (Math.abs(currentYaw - rotationYawHead) > 90) {
+                                    if (VecUtil.delta(currentYaw, rotationYawHead) > 90) {
                                         currentYaw += 180;
+                                        currentRoll = -currentRoll;
                                     }
 
 
@@ -191,16 +193,17 @@ public class TrackSnapUtil {
                                                             endPointData.trackSnapSettings().snapYaw()
                                                                     && dist - 0.5 < min
                                                                     && succeeded
-                                                                    && Math.abs(VecUtil.delta(currentYaw, yawHead))
-                                                                    < Math.abs(VecUtil.delta(yaw, yawHead))
+                                                                    && VecUtil.delta(currentYaw, yawHead)
+                                                                    < VecUtil.delta(yaw, yawHead)
                                                     )
                                     ) {
 
                                         min = dist;
                                         minPos = p;
 
-                                        yaw = currentYaw;
-                                        pitch = currentPitch;
+                                        yaw = currentYaw + 180;
+                                        pitch = -currentPitch;
+                                        roll = currentRoll;
 
                                         succeeded = true;
                                     }
