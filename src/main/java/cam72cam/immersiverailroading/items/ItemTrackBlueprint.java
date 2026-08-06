@@ -152,7 +152,7 @@ public class ItemTrackBlueprint extends CustomItem {
 	}
 
 	public static class Data extends ItemDataSerializer {
-		// 0 for original gui, 1 for TrackExtraGui, 2 fot TrackEndPointGui
+		// 0 for original gui, 1 for TrackExtraGui, 2 for TrackEndPointGui
 		@TagField
 		public int guiOpenType;
 
