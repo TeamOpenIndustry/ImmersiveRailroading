@@ -604,9 +604,10 @@ public class CubicCurve {
                                        double pitchRad)
     {
         double pitchTan = Math.tan(pitchRad);
-        if(pitchTan >= 10) {
-            ImmersiveRailroading.warn("The pitch used for the projection is too large! The tangent value %s will be forced to 10.", pitchTan);
-            pitchTan = 10;
+        if (Math.abs(pitchTan) >= 10) {
+            double limit = pitchTan > 0 ? 10 : -10;
+            ImmersiveRailroading.warn("The pitch tangent value %s is out of range and will be clamped to %s.", pitchTan, limit);
+            pitchTan = limit;
         }
 
         double horizontal = VecUtil.flatDistance(base, ctrl);
