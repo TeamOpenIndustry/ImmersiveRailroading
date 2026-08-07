@@ -599,9 +599,7 @@ public class CubicCurve {
         return res;
     }
 
-    private static Vec3d projectHandle(Vec3d base,
-                                       Vec3d ctrl,
-                                       double pitchRad)
+    private static Vec3d projectHandle(Vec3d base, Vec3d ctrl, double pitchRad)
     {
         double pitchTan = Math.tan(pitchRad);
         if (Math.abs(pitchTan) >= 10) {
@@ -612,24 +610,16 @@ public class CubicCurve {
 
         double horizontal = VecUtil.flatDistance(base, ctrl);
 
-        return new Vec3d(
-                ctrl.x,
-                base.y + horizontal * pitchTan,
-                ctrl.z
-        );
+        return new Vec3d(ctrl.x, base.y + horizontal * pitchTan, ctrl.z);
     }
 
-    private static Vec3d rotateHandle(Vec3d base,
-                                      Vec3d ctrl,
-                                      double pitchRad)
+    private static Vec3d rotateHandle(Vec3d base, Vec3d ctrl, double pitchRad)
     {
         Vec3d offset = ctrl.subtract(base);
 
-        double horizontal =
-                Math.sqrt(offset.x * offset.x + offset.z * offset.z);
+        double horizontal = Math.sqrt(offset.x * offset.x + offset.z * offset.z);
 
-        if (horizontal < 1E-8)
-            return ctrl;
+        if (horizontal < 1E-8) return ctrl;
 
         double length = offset.length();
 
