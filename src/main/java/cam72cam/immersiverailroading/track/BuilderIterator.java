@@ -1,9 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -13,6 +10,7 @@ import cam72cam.immersiverailroading.util.BlockPlaneHeight;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.cutter.Plane;
 import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagSerializer;
@@ -40,18 +38,19 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		super(info, world, pos);
 
 		positions = new HashSet<>();
-		HashMap<Vec3i, Float> bedHeights = new HashMap<>();
-		HashMap<Vec3i, Float> railHeights = new HashMap<>();
+
+		HashMap<Vec3i, Float> railHeights = new HashMap<>();// we will merge railHeight and bedHeight later
 
 		// Pre-calculated rail bed top face normal dir for further use TODO: merge these 2 to Plane
-		HashMap<Vec3i, Vec3d> topNormals = new HashMap<>();
-		HashMap<Vec3i, Vec3d> topPositions = new HashMap<>();
+		HashMap<Vec3i, Plane> planes = new HashMap<>();
+		HashMap<Vec3i, Float> bedHeights = new HashMap<>();
 
-		// Used for Calculate average Planes
+		// AVG required
 		HashMap<Vec3i, List<Vec3d>> allTopNormals = new HashMap<>();
 		HashMap<Vec3i, List<Vec3d>> allTopPositions = new HashMap<>();
+		HashMap<Vec3i, List<Float>> allBedHeights = new HashMap<>();
 
-		HashMap<Vec3i, Integer> yOffset = new HashMap<>();
+		List<Vec3i> trackBlockPositions = new ArrayList<>();
 		HashSet<Vec3i> flexPositions = new HashSet<>();
 
 		double horiz = info.settings.gauge.scale() * 1.1;
@@ -78,8 +77,19 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		int mainY = (int) Math.floor(path.get(path.size() / 2).y + placeOff.y);
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale() / 2));
 
-		for (VecYPR cur : path) {
+		boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
+//		boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
+		boolean tileTilt = rollEffectTile;
+		if(!rollEffectTile) tileTilt = false;
+		double modelHeight = info.getTrackModel().getHeight();
+		float bedThickness = 0.1f;// TODO: config able
+
+		for (int i = 0; i < path.size(); i++) {
+
+			VecYPR cur = path.get(i);
 			Vec3d gagPos = cur;
+			Vec3d curNormal = computeTopFaceNormal(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
+			gagPos = cur.add(curNormal.scale(-modelHeight)).add(0, modelHeight, 0).add(curNormal.scale(bedThickness));
 
 			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
 
@@ -87,38 +97,29 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			for (double q = -horiz; q <= horiz; q += 0.1) {
 				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());
+
 				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
 				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
 				int posY = (int) Math.floor(gagPos.y + nextUp.y + placeOff.y);
-
 				Vec3i gag = new Vec3i(posX, posY, posZ);
-				if (!positions.contains(gag)) {
-					positions.add(gag);
 
-					Vec3d topFacing = computeTopFaceNormal(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
+				if (true) {
+					boolean isNew = false;
+					if(!positions.contains(gag)) {
+						isNew = true;
+						positions.add(gag);
+					}
+
+					Vec3d topFacing = computeTopFaceNormal(path, i, q);
 					double rollDelta;
-					boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
-					boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
-					if(!rollEffectTile) tileTilt = false;
 
 					if(rollEffectTile) {
 						Vec3d planePoint = new Vec3d(
-								gagPos.x,
+								gagPos.x + 0.5,
 								gagPos.y,
-								gagPos.z
+								gagPos.z + 0.5
 						);
-
-						float localHeight =
-								BlockPlaneHeight.calculate(
-										planePoint.subtract(
-												new Vec3d(
-														posX,
-														posY,
-														posZ
-												)
-										),
-										topFacing
-								);
+						float localHeight = BlockPlaneHeight.calculate(planePoint.subtract(gag), topFacing);
 
 						rollDelta = localHeight - (gagPos.y - posY);
 					} else {//legacy
@@ -138,27 +139,35 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						relHeight += 1;
 					}
 
-					// TODO: this is a temporary fix, requiring rework after model cut implemented
-					float bedThickness = 0.1f;
-
 					if(rollEffectTile) {// bedHeight will be the same as railHeight in this case
 						int offsetInt;
-						if(height + relHeight > 0.9) {
-							offsetInt = (int) Math.floor(height + relHeight + bedThickness);
+						if(height + relHeight > 1) {
+							offsetInt = (int) Math.floor(height + relHeight);
 						}else {
 							offsetInt = 0;
 						}
 
+						// Height for snow and common block rail
 						float heightResult = (float) (height + relHeight - offsetInt);
-						bedHeights.put(gag, heightResult);
-						railHeights.put(gag, heightResult);
-						yOffset.put(gag, (int) (deltaGapPos - relHeight + offsetInt));
-						topNormals.put(gag, tileTilt ? topFacing : null);
-					} else {//legacy, will be dropped
+						trackBlockPositions.add(gag);
+
+						// AVG required
+						List<Float> currentBedHeights = allBedHeights.get(gag) != null ? allBedHeights.get(gag) : new ArrayList<>();
+						currentBedHeights.add(heightResult);
+						allBedHeights.put(gag, currentBedHeights);
+
+						List<Vec3d> currentTopNormals = allTopNormals.get(gag) != null ? allTopNormals.get(gag) : new ArrayList<>();
+						currentTopNormals.add(topFacing);
+						allTopNormals.put(gag, currentTopNormals);
+
+						List<Vec3d> currentTopPositions = allTopPositions.get(gag) != null ? allTopPositions.get(gag) : new ArrayList<>();
+						currentTopPositions.add(gagPos.add(placeOff).subtract(gag));
+						allTopPositions.put(gag, currentTopPositions);
+
+					} else if(isNew){//legacy, will be dropped
 						bedHeights.put(gag, (float) (height + Math.max(0, relHeight - 0.1)));
 						railHeights.put(gag, (float) relHeight);
-						yOffset.put(gag, (int) (deltaGapPos - relHeight));
-						topNormals.put(gag, null);
+						trackBlockPositions.add(gag);
 					}
 				}
 				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
@@ -167,14 +176,51 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 			if (!isFlex && endOfTrack) {
 				mainX = (int) Math.floor(gagPos.x + placeOff.x);
+				mainY = (int) Math.floor(gagPos.y + placeOff.y);
 				mainZ = (int) Math.floor(gagPos.z + placeOff.z);
 			}
 		}
 
-		if (!yOffset.containsKey(new Vec3i(mainX, mainY, mainZ))) {
+
+		for (Map.Entry<Vec3i, List<Float>> entry : allBedHeights.entrySet()) {
+			Vec3i gapPos = entry.getKey();
+
+			List<Float> currentHeights = allBedHeights.get(gapPos);
+			int count = currentHeights.size();
+			float heightSum = 0;
+			for (float height : currentHeights) {
+				heightSum += height;
+			}
+			float averageBedHeight = heightSum / count;
+
+			List<Vec3d> currentTopNormals = allTopNormals.get(gapPos);
+			int countTopNormal = currentTopNormals.size();
+			Vec3d topNormalSum = Vec3d.ZERO;
+			for (Vec3d topNormal : currentTopNormals) {
+				topNormalSum = topNormalSum.add(topNormal);
+			}
+			Vec3d avgTopNormal = topNormalSum.scale(1d / countTopNormal);
+
+			List<Vec3d> currentTopPositions = allTopPositions.get(gapPos);
+			int positionCount = currentTopPositions.size();
+			Vec3d topPositionSum = Vec3d.ZERO;
+			for (Vec3d position : currentTopPositions) {
+				topPositionSum = topPositionSum.add(position);
+			}
+			Vec3d avgTopPosition = topPositionSum.scale(1d / positionCount);
+
+			// put
+			if(avgTopNormal.y < 0) averageBedHeight = -averageBedHeight;
+			bedHeights.put(gapPos, averageBedHeight);
+			railHeights.put(gapPos, averageBedHeight);
+			planes.put(gapPos, new Plane(new Vec3d(avgTopPosition.x, avgTopPosition.y, avgTopPosition.z), avgTopNormal.scale(-1)));
+		}
+
+
+		if (!trackBlockPositions.contains(new Vec3i(mainX, mainY, mainZ))) {
 			// Try a few different offsets
 			for (Facing value : Facing.values()) {
-				if (yOffset.containsKey(new Vec3i(mainX + value.getXMultiplier(), mainY + value.getYMultiplier(), mainZ + value.getZMultiplier()))) {
+				if (trackBlockPositions.contains(new Vec3i(mainX + value.getXMultiplier(), mainY + value.getYMultiplier(), mainZ + value.getZMultiplier()))) {
 					mainX += value.getXMultiplier();
 					mainY += value.getYMultiplier();
 					mainZ += value.getZMultiplier();
@@ -182,7 +228,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 			}
 		}
-		if (!yOffset.containsKey(new Vec3i(mainX, mainY, mainZ))) {
+		if (!trackBlockPositions.contains(new Vec3i(mainX, mainY, mainZ))) {
 			// No luck, code is really borked now.  Throw an exception to help track this.
 			TagCompound debug = new TagCompound();
 			try {
@@ -193,26 +239,36 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			throw new RuntimeException("Invalid track builder " + debug);
 		}
 
-		Vec3i mainPos = new Vec3i(mainX, yOffset.get(new Vec3i(mainX, mainY, mainZ)), mainZ);
+		Vec3i mainPos = new Vec3i(mainX, mainY, mainZ);
 		this.setParentPos(mainPos);
 		TrackRail main = new TrackRail(this, mainPos	);
 		tracks.add(main);
 		main.setRailHeight(railHeights.get(new Vec3i(mainX, mainY, mainZ)));
 		main.setBedHeight(bedHeights.get(new Vec3i(mainX, mainY, mainZ)));
+		main.setBedFace(tileTilt ? planes.get(new Vec3i(mainX, mainY, mainZ)) : null);
 
 		for (Vec3i tilePos : positions) {
 			if (tilePos.x == mainX && tilePos.z == mainZ && tilePos.y == mainY) {
 				// Skip parent block
 				continue;
 			}
-			TrackBase tg = new TrackGag(this, new Vec3i(tilePos.x, yOffset.get(tilePos), tilePos.z));
+			TrackBase tg = new TrackGag(this, new Vec3i(tilePos.x, tilePos.y, tilePos.z));
 			if (flexPositions.contains(tilePos)) {
 				tg.setFlexible();
 			}
 			tg.setRailHeight(railHeights.get(tilePos));
 			tg.setBedHeight(bedHeights.get(tilePos));
+			tg.setBedFace(tileTilt ? planes.get(tilePos) : null);
 			tracks.add(tg);
 		}
+	}
+
+	// TODO 以及预览的块现在裁剪还不对,有一些小细节没改完
+
+	private Vec3d computeTopFaceNormal(List<VecYPR> points, int index, double q) { // TODO: correct pitch introduced by roll change
+		VecYPR cur = points.get(index);
+		Vec3d normal = computeTopFaceNormal(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
+		return normal;
 	}
 
 	private Vec3d computeTopFaceNormal(double yawDeg, double pitchDeg, double rollDeg) {

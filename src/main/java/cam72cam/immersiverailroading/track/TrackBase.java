@@ -78,6 +78,7 @@ public abstract class TrackBase {
 			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
+			tr.setBedFace(getBedFace());
 			tr.setScaleModel(isScaleModel());
 			return tr;
 		}
@@ -119,6 +120,7 @@ public abstract class TrackBase {
 		}
 		tr.setRailHeight(getRailHeight());
 		tr.setBedHeight(getBedHeight());
+		tr.setBedFace(getBedFace());
 		tr.setScaleModel(isScaleModel());
 		for (int i = 0; i < hasSnow; i++) {
 			tr.handleSnowTick();

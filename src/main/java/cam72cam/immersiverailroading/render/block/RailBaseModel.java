@@ -11,7 +11,6 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
-import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.cutter.Plane;
 import util.Matrix4;
@@ -26,6 +25,7 @@ public class RailBaseModel {
 
 		float height = te.getBedHeight();
 		float tileHeight = height;
+		Plane plane = te.getBedFace();
 		int snow = te.getSnowLayers();
 		Augment augment = te.getAugment();
 		double gauged = te.getRenderGauge();
@@ -51,24 +51,24 @@ public class RailBaseModel {
 			});
 		}
 
-		Plane plane = new Plane(new Vec3d(0.5, 0.5, 0.5), new Vec3d(1, 0, 1));
+//		Plane plane = new Plane(new Vec3d(0.5, 0.5, 0.5), new Vec3d(1, 0, 1));
 
-		if (augment != null) {
-			height = height + 0.1f * (float)gauge.scale() * 1.25f;
+		if (plane != null) height = 1;
+		Matrix4 matrix4;
+		if(height > 0) matrix4 = new Matrix4().scale(1, height, 1);
+		else if(height == 0) matrix4 = new Matrix4().scale(1, 1e-4, 1);
+		else matrix4 = new Matrix4().translate(0, -height, 0).scale(1, 1 + height, 1);
 
-			model.addColorBlock(augment.color(), new Matrix4().scale(1, height, 1), plane);
+		if (augment != null) {//TODO augment offset a little
+			model.addColorBlock(augment.color(), matrix4, plane);
 			return model;
 		}
-
-//		if(te.isScaleModel()){
-//			height = height + 0.1f * (float) gauge.scale();
-//		}
 
 		if (snow != 0) {
 			model.addSnow(snow + (int)(Math.max(height, 0.1) * 8), new Matrix4(), plane);
 			return model;
 		} else if (!bed.isEmpty() && tileHeight != 0.000001f) {
-			model.addItemBlock(bed, new Matrix4().scale(1, height, 1), plane);
+			model.addItemBlock(bed, matrix4, plane);
 			return model;
 		}
 

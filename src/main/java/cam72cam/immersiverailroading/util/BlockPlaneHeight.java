@@ -2,21 +2,23 @@ package cam72cam.immersiverailroading.util;
 
 import cam72cam.mod.math.Vec3d;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class BlockPlaneHeight {
+
+    private static final double EPS = 1e-8;
 
     private BlockPlaneHeight() {}
 
     /**
-     * Calculate the highest Y where plane intersects a unit cube.
+     * Calculate the center Y of plane intersection with a unit cube.
      *
      * Cube:
      * min = (0,0,0)
      * max = (1,1,1)
      *
-     * plane:
-     * point + normal
-     *
-     * @return highest intersection Y
+     * @return center Y of intersection polygon
      */
     public static float calculate(Vec3d point, Vec3d normal) {
 
@@ -25,6 +27,7 @@ public final class BlockPlaneHeight {
         Vec3d[] corners = new Vec3d[8];
 
         int i = 0;
+
         for (int x = 0; x <= 1; x++) {
             for (int y = 0; y <= 1; y++) {
                 for (int z = 0; z <= 1; z++) {
@@ -33,18 +36,6 @@ public final class BlockPlaneHeight {
             }
         }
 
-        double maxY = Double.NEGATIVE_INFINITY;
-
-        // check top face first
-        for (int x = 0; x <= 1; x++) {
-            for (int z = 0; z <= 1; z++) {
-                Vec3d p = new Vec3d(x, 1, z);
-
-                if (onPlane(p, point, normal)) {
-                    return 1.0f;
-                }
-            }
-        }
 
         int[][] edges = {
                 {0,1},
@@ -61,43 +52,99 @@ public final class BlockPlaneHeight {
                 {6,7}
         };
 
+
+        List<Vec3d> intersections =
+                new ArrayList<>();
+
+
         for (int[] edge : edges) {
+
             Vec3d a = corners[edge[0]];
             Vec3d b = corners[edge[1]];
 
-            double da = distance(a, point, normal);
-            double db = distance(b, point, normal);
 
-            double denominator = da - db;
+            double da =
+                    distance(
+                            a,
+                            point,
+                            normal
+                    );
 
-            // Edge parallel to plane, or both endpoints on plane
-            if (Math.abs(denominator) < 1e-8) {
+            double db =
+                    distance(
+                            b,
+                            point,
+                            normal
+                    );
+
+
+            if (Math.abs(da - db) < EPS) {
                 continue;
             }
 
+
             if (da * db <= 0) {
-                double t = da / denominator;
 
-                Vec3d hit = a.add(
-                        b.subtract(a).scale(t)
+                double t =
+                        da / (da - db);
+
+
+                Vec3d hit =
+                        a.add(
+                                b.subtract(a)
+                                        .scale(t)
+                        );
+
+
+                addUnique(
+                        intersections,
+                        hit
                 );
-
-                maxY = Math.max(maxY, hit.y);
             }
         }
 
-        if (maxY == Double.NEGATIVE_INFINITY) {
+
+        if (intersections.isEmpty()) {
             return 0;
         }
 
-        return (float) maxY;
+
+        double y = 0;
+
+        for (Vec3d v : intersections) {
+            y += v.y;
+        }
+
+
+        return (float)
+                (y / intersections.size());
     }
 
-    private static boolean onPlane(Vec3d p, Vec3d plane, Vec3d normal) {
-        return Math.abs(distance(p, plane, normal)) < 1e-6;
+
+    private static void addUnique(
+            List<Vec3d> list,
+            Vec3d value) {
+
+        for (Vec3d v : list) {
+
+            if (Math.abs(v.x - value.x) < EPS
+                    && Math.abs(v.y - value.y) < EPS
+                    && Math.abs(v.z - value.z) < EPS) {
+
+                return;
+            }
+        }
+
+        list.add(value);
     }
 
-    private static double distance(Vec3d p, Vec3d plane, Vec3d normal) {
-        return p.subtract(plane).dotProduct(normal);
+
+    private static double distance(
+            Vec3d p,
+            Vec3d plane,
+            Vec3d normal) {
+
+        return p.subtract(plane)
+                .dotProduct(normal);
     }
 }

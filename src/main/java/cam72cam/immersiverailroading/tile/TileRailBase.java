@@ -227,7 +227,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	public float getFullHeight() {
-		return Math.max(this.bedHeight, this.snowLayers / 8.0f);
+		return Math.abs(this.bedHeight) > this.snowLayers / 8.0f ? this.bedHeight : this.snowLayers / 8.0f;
 	}
 	
 	public void handleSnowTick() {
@@ -299,7 +299,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 							return null;
 						}
 						TagCompound planeTag = nbt.get(fieldname);
-						Vec3d normal = planeTag.getVec3d("noraml");
+						Vec3d normal = planeTag.getVec3d("normal");
 						double d = planeTag.getDouble("d");
                         return new Plane(normal, d);
 					}
@@ -986,14 +986,27 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	/* NEW STUFF */
 
 	private final SingleCache<Double, IBoundingBox> boundingBox =
-			new SingleCache<>(height -> IBoundingBox.ORIGIN.expand(new Vec3d(1, height, 1)));//TODO: OBB or support other axis
+			new SingleCache<>(height -> {
+
+				if (height >= 0) {
+					return IBoundingBox.ORIGIN.expand(
+							new Vec3d(1, height, 1)
+					);
+				}
+
+				return IBoundingBox.ORIGIN
+						.expand(new Vec3d(1, 1 + height, 1))
+						.offset(new Vec3d(0, -height, 0));
+			});
+	//TODO: OBB
+
 	@Override
 	public IBoundingBox getBoundingBox() {
 		if (this instanceof TileRailGag && (getParent() == null || !getWorld().isBlockLoaded(getParent()))) {
 			// Accessing TEs (parent) in chunks that are currently loading can cause problems
-			return boundingBox.get(getFullHeight() + 0.1);
+			return boundingBox.get((double) getFullHeight());
 		}
-		return boundingBox.get(getFullHeight() + 0.1 * (getTrackGauges()[0] / Gauge.STANDARD));
+		return boundingBox.get(getFullHeight() * (getTrackGauges()[0] / Gauge.STANDARD));
 	}
 
 	@Override
