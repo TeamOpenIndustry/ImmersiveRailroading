@@ -645,9 +645,7 @@ public class CubicCurve {
         );
     }
 
-    public CubicCurve linearize(TrackSmoothing smoothing,
-                                EndPointData near,
-                                EndPointData far) {
+    public CubicCurve linearize(TrackSmoothing smoothing, EndPointData near, EndPointData far) {
         return switch (smoothing) {
 
             case NEITHER_V2 -> {
@@ -679,31 +677,17 @@ public class CubicCurve {
 
             case PITCH_LOCKED -> {
 
-                boolean nearRotate =
-                        near.pitchDegreeMode() || !near.projectHandle();
+                boolean nearRotate = near.pitchDegreeMode() || !near.projectHandle();
 
-                boolean farRotate =
-                        far.pitchDegreeMode() || !far.projectHandle();
+                boolean farRotate = far.pitchDegreeMode() || !far.projectHandle();
 
                 Vec3d newCtrl1 = nearRotate
-                        ? rotateHandle(
-                        p1,
-                        ctrl1,
-                        near.getPitchRad())
-                        : projectHandle(
-                        p1,
-                        ctrl1,
-                        near.getPitchRad());
+                        ? rotateHandle(p1, ctrl1, near.getPitchRad())
+                        : projectHandle(p1, ctrl1, near.getPitchRad());
 
                 Vec3d newCtrl2 = farRotate
-                        ? rotateHandle(
-                        p2,
-                        ctrl2,
-                        -far.getPitchRad())
-                        : projectHandle(
-                        p2,
-                        ctrl2,
-                        -far.getPitchRad());
+                        ? rotateHandle(p2, ctrl2, -far.getPitchRad())
+                        : projectHandle(p2, ctrl2, -far.getPitchRad());
 
                 yield new CubicCurve(
                         p1,
