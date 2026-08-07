@@ -116,28 +116,22 @@ public class TrackEndPointGui implements IScreen {
         int ytop = -GUIHelpers.getScreenHeight() / 4;
 
         // Near/Far Label
-        nearLabel = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.LABEL_NEAR.toString());
+        nearLabel = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.LABEL_NEAR.toString(), (_, _) -> {});
         nearLabel.setEnabled(false);
-        farLabel = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.LABEL_FAR.toString());
+        farLabel = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.LABEL_FAR.toString(), (_, _) -> {});
         farLabel.setEnabled(false);
 
         ytop += height;
 
         // Transition Radius
-        nearRadiusLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_TRANSITION_RADIUS.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                swapTransitionRadius();
-            }
-        };
+        nearRadiusLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_TRANSITION_RADIUS.toString(), (hand, button) -> {
+            swapTransitionRadius();
+        });
         nearRadiusLabel.setTooltip(List.of(GuiText.LABEL_SWAP_RADIUS.toString()));
 
-        farRadiusLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_TRANSITION_RADIUS.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                swapTransitionRadius();
-            }
-        };
+        farRadiusLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_TRANSITION_RADIUS.toString(), (hand, button) -> {
+            swapTransitionRadius();
+        });
         farRadiusLabel.setTooltip(List.of(GuiText.LABEL_SWAP_RADIUS.toString()));
 
         nearRadiusInput = new TextField(screen, left_xStart + width / 2 + 20, ytop, width / 4, height);
@@ -192,22 +186,16 @@ public class TrackEndPointGui implements IScreen {
 
         // Height Offset
 
-        nearHeightOffsetLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_HEIGHT_OFFSET.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
-                nearHeightOffsetInput.setText("" + (float) settings.nearPointData.offset().y);
-            }
-        };
+        nearHeightOffsetLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_HEIGHT_OFFSET.toString(), (hand, button) -> {
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
+            nearHeightOffsetInput.setText("" + (float) settings.nearPointData.offset().y);
+        });
         nearHeightOffsetLabel.setTooltip(List.of(GuiText.LABEL_RESET_HEIGHT_OFFSET.toString()));
 
-        farHeightOffsetLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_HEIGHT_OFFSET.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
-                farHeightOffsetInput.setText("" + (float) settings.farPointData.offset().y);
-            }
-        };
+        farHeightOffsetLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_HEIGHT_OFFSET.toString(), (hand, button) -> {
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
+            farHeightOffsetInput.setText("" + (float) settings.farPointData.offset().y);
+        });
         farHeightOffsetLabel.setTooltip(List.of(GuiText.LABEL_RESET_HEIGHT_OFFSET.toString()));
 
         nearHeightOffsetInput = new TextField(screen, left_xStart + width / 2 + 20, ytop, width / 4, height);
@@ -258,22 +246,16 @@ public class TrackEndPointGui implements IScreen {
 
         // Pitch
 
-        nearPitchLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_PITCH.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = 0);
-                nearPitchInput.setText("" + settings.nearPointData.pitch());
-            }
-        };
+        nearPitchLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_PITCH.toString(), (hand, button) -> {
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = 0);
+            nearPitchInput.setText("" + settings.nearPointData.pitch());
+        });
         nearPitchLabel.setTooltip(List.of(GuiText.LABEL_RESET_PITCH.toString()));
 
-        farPitchLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_PITCH.toString()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = 0);
-                farPitchInput.setText("" + settings.farPointData.pitch());
-            }
-        };
+        farPitchLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_PITCH.toString(), (hand, button) -> {
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = 0);
+            farPitchInput.setText("" + settings.farPointData.pitch());
+        });
         farPitchLabel.setTooltip(List.of(GuiText.LABEL_RESET_PITCH.toString()));
 
         nearPitchInput = new TextField(screen, left_xStart + width / 2 + 20, ytop, width / 4, height);
@@ -322,24 +304,18 @@ public class TrackEndPointGui implements IScreen {
 
         ytop += height;
 
-        nearPitchSettingButton = new Button(screen, left_xStart, ytop, width - 30, height, settings.nearPointData.getPitchSetting()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.nearPointData = circlePitchSetting(settings.nearPointData);
-                this.setText(settings.nearPointData.getPitchSetting());
-                nearPitchInput.setText("" + settings.nearPointData.pitch());
-            }
-        };
+        nearPitchSettingButton = new Button(screen, left_xStart, ytop, width - 30, height, settings.nearPointData.getPitchSetting(), (hand, button) -> {
+            settings.nearPointData = circlePitchSetting(settings.nearPointData);
+            button.setText(settings.nearPointData.getPitchSetting());
+            nearPitchInput.setText("" + settings.nearPointData.pitch());
+        });
         nearPitchSettingButton.setTooltip(List.of(GuiText.LABEL_PITCH_SETTING.toString()));
 
-        farPitchSettingButton = new Button(screen, right_xStart, ytop, width - 30, height, settings.farPointData.getPitchSetting()) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.farPointData = circlePitchSetting(settings.farPointData);
-                this.setText(settings.farPointData.getPitchSetting());
-                farPitchInput.setText("" + settings.farPointData.pitch());
-            }
-        };
+        farPitchSettingButton = new Button(screen, right_xStart, ytop, width - 30, height, settings.farPointData.getPitchSetting(), (hand, button) -> {
+            settings.farPointData = circlePitchSetting(settings.farPointData);
+            button.setText(settings.farPointData.getPitchSetting());
+            farPitchInput.setText("" + settings.farPointData.pitch());
+        });
         farPitchSettingButton.setTooltip(List.of(GuiText.LABEL_PITCH_SETTING.toString()));
 
         // Bottom Page
@@ -362,41 +338,29 @@ public class TrackEndPointGui implements IScreen {
 
         // Pos Type
 
-        nearPosTypeButton = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType())) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posType = next(settings.nearPointData.posType(), hand));
-                nearPosTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()));
-            }
-        };
-        farPosTypeButton = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.farPointData.posType())) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.posType = next(settings.farPointData.posType(), hand));
-                farPosTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.farPointData.posType()));
-            }
-        };
+        nearPosTypeButton = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()), (hand, button) -> {
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posType = next(settings.nearPointData.posType(), hand));
+            button.setText(GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()));
+        });
+        farPosTypeButton = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.farPointData.posType()), (hand, button) -> {
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.posType = next(settings.farPointData.posType(), hand));
+            button.setText(GuiText.SELECTOR_POSITION.toString(settings.farPointData.posType()));
+        });
 
         ytop += height;
 
-        nearPosYawTypeSelector = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION_YAW.toString(settings.nearPointData.posYawType())) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
-                nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
-                this.setText( GuiText.SELECTOR_POSITION_YAW.toString(settings.nearPointData.posYawType()));
-            }
-        };
+        nearPosYawTypeSelector = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION_YAW.toString(settings.nearPointData.posYawType()), (hand, button) -> {
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
+            nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
+            button.setText(GuiText.SELECTOR_POSITION_YAW.toString(settings.nearPointData.posYawType()));
+        });
         nearPosYawTypeSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
 
-        farPosYawTypeSelector = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION_YAW.toString(settings.farPointData.posYawType())) {
-            @Override
-            public void onClick(Player.Hand hand) {
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
-                farYawInput.setEnabled(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
-                this.setText(GuiText.SELECTOR_POSITION_YAW.toString(settings.farPointData.posYawType()));
-            }
-        };
+        farPosYawTypeSelector = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION_YAW.toString(settings.farPointData.posYawType()), (hand, button) -> {
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
+            farYawInput.setEnabled(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
+            button.setText(GuiText.SELECTOR_POSITION_YAW.toString(settings.farPointData.posYawType()));
+        });
         farPosYawTypeSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
 
         ytop += height;
@@ -449,93 +413,63 @@ public class TrackEndPointGui implements IScreen {
 
         // Track Snap
 
-        nearPosSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), settings.nearPointData.trackSnapSettings().snapPos()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPos = this.isChecked());
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-                setNearSnapComponentsVisibility();
-            }
-        };
+        nearPosSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), settings.nearPointData.trackSnapSettings().snapPos(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPos = self.isChecked());
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+            setNearSnapComponentsVisibility();
+        });
 
-        farPosSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), settings.farPointData.trackSnapSettings().snapPos()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPos = this.isChecked());
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-                setFarSnapComponentsVisibility();
-            }
-        };
+        farPosSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), settings.farPointData.trackSnapSettings().snapPos(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPos = self.isChecked());
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+            setFarSnapComponentsVisibility();
+        });
 
         ytop += height;
 
-        nearHeightSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.nearPointData.trackSnapSettings().snapHeight()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = this.isChecked());
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-                setNearSnapComponentsVisibility();
-            }
-        };
+        nearHeightSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.nearPointData.trackSnapSettings().snapHeight(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = self.isChecked());
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+            setNearSnapComponentsVisibility();
+        });
 
-        farHeightSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.farPointData.trackSnapSettings().snapHeight()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = this.isChecked());
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-                setFarSnapComponentsVisibility();
-            }
-        };
+        farHeightSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.farPointData.trackSnapSettings().snapHeight(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = self.isChecked());
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+            setFarSnapComponentsVisibility();
+        });
 
-        nearYawSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), settings.nearPointData.trackSnapSettings().snapYaw()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = this.isChecked());
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-            }
-        };
+        nearYawSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), settings.nearPointData.trackSnapSettings().snapYaw(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = self.isChecked());
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        });
 
-        farYawSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), settings.farPointData.trackSnapSettings().snapYaw()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = this.isChecked());
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-            }
-        };
+        farYawSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), settings.farPointData.trackSnapSettings().snapYaw(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = self.isChecked());
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        });
 
         ytop += height;
 
-        nearPitchSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), settings.nearPointData.trackSnapSettings().snapPitch()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = this.isChecked());
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-            }
-        };
+        nearPitchSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), settings.nearPointData.trackSnapSettings().snapPitch(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = self.isChecked());
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        });
 
-        farPitchSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), settings.farPointData.trackSnapSettings().snapPitch()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = this.isChecked());
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-            }
-        };
+        farPitchSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), settings.farPointData.trackSnapSettings().snapPitch(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = self.isChecked());
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        });
 
-        nearRollSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), settings.nearPointData.trackSnapSettings().snapRoll()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = this.isChecked());
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-            }
-        };
+        nearRollSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), settings.nearPointData.trackSnapSettings().snapRoll(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = self.isChecked());
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        });
 
-        farRollSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), settings.farPointData.trackSnapSettings().snapRoll()){
-            @Override
-            public void onClick(Player.Hand hand) {
-                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = this.isChecked());
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-            }
-        };
+        farRollSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), settings.farPointData.trackSnapSettings().snapRoll(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = self.isChecked());
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        });
 
         nearRadiusLabel.setEnabled(settings.type.isTransitionCurve());
         farRadiusLabel.setEnabled(settings.type.isTransitionCurve());
