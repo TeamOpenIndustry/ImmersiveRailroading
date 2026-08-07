@@ -108,7 +108,6 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 								gagPos.z
 						);
 
-
 						float localHeight =
 								BlockPlaneHeight.calculate(
 										planePoint.subtract(

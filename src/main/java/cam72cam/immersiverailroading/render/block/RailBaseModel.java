@@ -12,7 +12,6 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.cutter.Plane;
 import util.Matrix4;
@@ -52,7 +51,7 @@ public class RailBaseModel {
 			});
 		}
 
-		Plane plane = new Plane(new Vec3d(0.5, 0.5, 0.5), new Vec3d(-1, 0, -2));
+		Plane plane = new Plane(new Vec3d(0.5, 0.5, 0.5), new Vec3d(1, 0, 1));
 
 		if (augment != null) {
 			height = height + 0.1f * (float)gauge.scale() * 1.25f;
@@ -61,9 +60,9 @@ public class RailBaseModel {
 			return model;
 		}
 
-		if(te.isScaleModel()){
-			height = height + 0.1f * (float) gauge.scale();
-		}
+//		if(te.isScaleModel()){
+//			height = height + 0.1f * (float) gauge.scale();
+//		}
 
 		if (snow != 0) {
 			model.addSnow(snow + (int)(Math.max(height, 0.1) * 8), new Matrix4(), plane);

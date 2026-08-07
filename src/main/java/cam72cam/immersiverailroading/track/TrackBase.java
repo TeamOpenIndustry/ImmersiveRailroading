@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.cutter.Plane;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.util.SingleCache;
 
@@ -20,6 +21,7 @@ public abstract class TrackBase {
 	protected Vec3i rel;
 	private float bedHeight;
 	private float railHeight;
+	private Plane bedFace;
 	//Override default value
 	private boolean scaleModel = true;
 
@@ -133,6 +135,7 @@ public abstract class TrackBase {
 		setBedHeight(height);
 		setRailHeight(height);
 	}
+
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
 	}
@@ -145,6 +148,14 @@ public abstract class TrackBase {
 	public float getRailHeight() {
 		return railHeight;
 	}
+
+	public void setBedFace(Plane bedFace) {
+		this.bedFace = bedFace;
+	}
+	public Plane getBedFace	() {
+		return bedFace;
+	}
+
 	public void setScaleModel(boolean scaleModel) {
 		this.scaleModel = scaleModel;
 	}
