@@ -107,7 +107,7 @@ public class TrackExtraGui implements IScreen {
 
         //Common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
         //Degree mode:degree
-        rollMax = rollAndOffsetInfoCache.degreeMode ? 180 : 60;//180 for Degree mode later
+        rollMax = 180;
         yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
@@ -207,7 +207,7 @@ public class TrackExtraGui implements IScreen {
                                             }
                                         });
 
-        railBlockNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 1,
+        railBlockNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 65, ytop + 1,
                                   GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.railBlockNormal,
                                   (_, self) -> {
                                       if(rollAndOffsetInfoCache.rollEffectTile) {
@@ -221,14 +221,12 @@ public class TrackExtraGui implements IScreen {
                                           self.setChecked(false);
                                       }
                                   });
-        railBlockNormalCB.setVisible(false);//modifiable vanilla block model later
 
         degreeModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2, ytop + 1,
                                            GuiText.SELECTOR_DEGREE_MODE.toString(), rollAndOffsetInfoCache.degreeMode,
                                            (_, self) -> {
                                                edited = true;
                                                rollAndOffsetInfoCache.degreeMode = self.isChecked();
-                                               rollMax = rollAndOffsetInfoCache.degreeMode ? 180 : 60;//180 for degree mode later
                                            });
 
         offsetVertByNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 12,

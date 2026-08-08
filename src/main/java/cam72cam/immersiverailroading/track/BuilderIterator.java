@@ -78,8 +78,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale() / 2));
 
 		boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
-//		boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
-		boolean tileTilt = rollEffectTile;
+		boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
 		if(!rollEffectTile) tileTilt = false;
 		double modelHeight = info.getTrackModel().getHeight();
 		float bedThickness = 0.1f;// TODO: config able
