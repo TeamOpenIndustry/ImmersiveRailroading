@@ -62,22 +62,32 @@ public class RailBaseModel {
 			return model;
 		}
 		if (snow != 0) {
-			float snowHeight = snow / 8f;
-            Vec3d[] beFaceRaw = BlockPlaneHeight.fromPlane(bedFace);
-			float fullHeight = BlockPlaneHeight.getFullHeight(beFaceRaw[0], beFaceRaw[1]);
-			float planeMinHeight = BlockPlaneHeight.getCutPlaneMinHeight(beFaceRaw[0], beFaceRaw[1]);
-			float planeMaxHeight = BlockPlaneHeight.getCutPlaneMaxHeight(beFaceRaw[0], beFaceRaw[1]);
 
-			if(planeMinHeight < snowHeight && planeMaxHeight > snowHeight ) {
-				model.addSnow(snow, new Matrix4(), null);
-				model.addSnow(8, new Matrix4(), bedFace);
-			} else if (Math.abs(fullHeight - 1) < 1e-6) {
-				model.addSnow(8, new Matrix4(), bedFace);
-			} else if (planeMinHeight >= snowHeight) {
-				model.addSnow(8, new Matrix4(), bedFace);
+			float snowHeight = snow / 8f;
+			if(bedFace != null) {
+				boolean isUp = bedFace.normal.y < 0;
+				if(!isUp) {
+					model.addSnow(8, new Matrix4(), bedFace);
+					return model;
+				}
+
+				Vec3d[] beFaceRaw = BlockPlaneHeight.fromPlane(bedFace);
+				float planeMinHeight = BlockPlaneHeight.getCutPlaneMinHeight(beFaceRaw[0], beFaceRaw[1]);
+				float planeMaxHeight = BlockPlaneHeight.getCutPlaneMaxHeight(beFaceRaw[0], beFaceRaw[1]);
+
+				if (planeMaxHeight <= snowHeight) {
+					model.addSnow(snow, new Matrix4(), null);
+				} else if (planeMinHeight >= snowHeight) {
+					model.addSnow(8, new Matrix4(), bedFace);
+				} else {
+					model.addSnow(snow, new Matrix4(), null);
+					model.addSnow(8, new Matrix4(), bedFace);
+				}
 			} else {
 				model.addSnow(snow, new Matrix4(), null);
 			}
+
+
 			return model;
 		} else if (!bed.isEmpty()) {
 			model.addItemBlock(bed, bedFace == null ? bedblockMatrix4 : new Matrix4(), bedFace);
