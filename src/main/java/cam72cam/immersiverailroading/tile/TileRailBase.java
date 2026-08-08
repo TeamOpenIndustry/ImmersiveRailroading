@@ -226,7 +226,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	public float getFullHeight() {
-		return Math.abs(this.bedHeight) > this.snowLayers / 8.0f ? this.bedHeight : this.snowLayers / 8.0f;
+		float bedHeight = this.bedHeight;
+		float snowHeight = this.snowLayers / 8.0f;
+		if(bedHeight >= 0) {
+			return Math.max(bedHeight, snowHeight);
+		} else { // Inverted tile
+			return bedHeight;
+		}
 	}
 	
 	public void handleSnowTick() {
