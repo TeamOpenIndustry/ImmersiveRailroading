@@ -6,66 +6,78 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
+/**
+ * A simple compiler for augment stock filtering logics, supports && and || and parens.
+ * <p>
+ * The compiler is case-sensitive.
+ */
 public class StockFilterCompiler {
-    private static final Map<String, BiFunction<EntityRollingStock, String, Boolean>> prefixes = new HashMap<>();
+    private static final Map<String, BiFunction<EntityRollingStock, String, Boolean>> PREFIXES = new HashMap<>();
+    private static final Map<String, Integer> PRECEDENCE = new HashMap<>();
+
     private static final String AND = "&&";
     private static final String OR = "||";
     private static final String START_PAREN = "(";
     private static final String END_PAREN = ")";
 
     static {
-        prefixes.put("type", (stock, content) -> {
-            switch (content) {
-                case "locomotive":
-                    return stock instanceof LocomotiveDiesel
-                           || stock instanceof LocomotiveSteam
-                           || stock instanceof HandCar;
-                case "diesel":
-                    return stock instanceof LocomotiveDiesel;
-                case "steam":
-                    return stock instanceof LocomotiveSteam;
-                case "handcar":
-                    return stock instanceof HandCar;
-                case "passenger":
-                    return stock instanceof CarPassenger;
-                case "tender":
-                    return stock instanceof Tender;
-                case "tank":
-                    return stock instanceof CarTank;
-                case "freight":
-                    return stock instanceof CarFreight;
-                default:
-                    return false;
-            }
-        });
-        prefixes.put("tag", (stock, content) -> DefinitionManager.isTaggedWith(stock.getDefinition(), content));
-        prefixes.put("stock", (stock, content) -> {
+        // type:[stock type]
+        PREFIXES.put("type", (stock, content) ->
+                switch (content) {
+                    case "locomotive" -> stock instanceof LocomotiveDiesel
+                            || stock instanceof LocomotiveSteam
+                            || stock instanceof HandCar;
+                    case "diesel" -> stock instanceof LocomotiveDiesel;
+                    case "steam" -> stock instanceof LocomotiveSteam;
+                    case "handcar" -> stock instanceof HandCar;
+                    case "passenger" -> stock instanceof CarPassenger;
+                    case "tender" -> stock instanceof Tender;
+                    case "tank" -> stock instanceof CarTank;
+                    case "freight" -> stock instanceof CarFreight;
+                    default -> false;
+                });
+        // tag:[stock tag] (tags defined in json/caml)
+        PREFIXES.put("tag", (stock, content) -> DefinitionManager.isTaggedWith(stock.getDefinition(), content));
+        // stock:[definition name]
+        PREFIXES.put("stock", (stock, content) -> {
             String definitionFileName = stock.getDefinitionID().split("/")[2];
             return definitionFileName.substring(0, definitionFileName.length() - 5).equals(content);
         });
-        prefixes.put("works", (stock, content) -> stock instanceof Locomotive && ((Locomotive) stock).getDefinition().works.equals(content));
-        prefixes.put("author", (stock, content) -> stock.getDefinition().modelerName.equals(content));
-        prefixes.put("pack", (stock, content) -> stock.getDefinition().packName.equals(content));
-        prefixes.put("nametag", (stock, content) -> stock.tag.equals(content));
+        // works:[locomotive works]
+        PREFIXES.put("works", (stock, content) -> stock instanceof Locomotive && ((Locomotive) stock).getDefinition().works.equals(content));
+        // author:[modeler name]
+        PREFIXES.put("author", (stock, content) -> stock.getDefinition().modelerName.equals(content));
+        // pack:[pack name]
+        PREFIXES.put("pack", (stock, content) -> stock.getDefinition().packName.equals(content));
+        // nametag:[nametagged stock name]
+        PREFIXES.put("nametag", (stock, content) -> content.equals(stock.tag));
+
+        // Lower value = lower precedence
+        PRECEDENCE.put(OR, 1);
+        PRECEDENCE.put(AND, 2);
+
     }
 
+    /** Compile a filter expression into a predicate */
     public static Predicate<EntityRollingStock> compile(String expression, boolean defaultVal) {
-        //A filter supports (/&&/||/) to add logic calculation
         if (expression == null || expression.trim().isEmpty()) {
-            //If it's a positive filter then return true, otherwise return false then negate
-            return s -> defaultVal;
+            return _ -> defaultVal;
         }
 
-        expression = expression.trim();
+        List<String> tokens = tokenize(expression);
+        List<String> rpn = toRPN(tokens);
+        return evaluate(rpn);
+    }
 
+    /** Splits an expression into operand/operator/parens, preserving original semantics. */
+    private static List<String> tokenize(String expression) {
         List<String> tokens = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int parenDepth = 0;
 
         Runnable flushBuffer = () -> {
-            if (buffer.length() > 0) {
+            if (!buffer.isEmpty()) {
                 String token = buffer.toString().trim();
                 if (!token.isEmpty()) {
                     tokens.add(token);
@@ -74,7 +86,6 @@ public class StockFilterCompiler {
             }
         };
 
-        //Parse tokens
         for (int i = 0; i < expression.length(); i++) {
             char c = expression.charAt(i);
 
@@ -111,7 +122,6 @@ public class StockFilterCompiler {
                     }
                     break;
                 default:
-                    //Default token
                     buffer.append(c);
             }
         }
@@ -121,166 +131,100 @@ public class StockFilterCompiler {
         }
 
         flushBuffer.run();
-        Node node = buildAST(tokens);
-        return node.predicate.get();
+        return tokens;
     }
 
-    private static Node buildAST(List<String> tokens) {
-        Node root = new Node();
-        Node current = root;
-        Stack<Node> paren = new Stack<>();
+    /** Converts an infix token list into Reverse Polish Notation using the shunting-yard algorithm */
+    private static List<String> toRPN(List<String> tokens) {
+        List<String> output = new ArrayList<>(tokens.size());
+        Deque<String> operators = new ArrayDeque<>();
 
-        BiFunction<Boolean, Boolean, Boolean> and = (b1, b2) -> b1 && b2;
-        BiFunction<Boolean, Boolean, Boolean> or = (b1, b2) -> b1 || b2;
-
-        //I used a complex way to build it, but it works...
         for (String token : tokens) {
             switch (token) {
-                case START_PAREN:
-                    //Add a new child node and move current pointer to it
-                    Node child = new Node();
-                    if (current.leftChild == null) {
-                        current.leftChild = child;
-                    } else {
-                        current.rightChild = child;
+                case START_PAREN -> operators.push(token);
+                case END_PAREN -> {
+                    while (!operators.isEmpty() && !operators.peek().equals(START_PAREN)) {
+                        output.add(operators.pop());
                     }
-                    child.parent = current;
-                    current = child;
-                    //Store status
-                    paren.push(current);
-                    break;
-                case END_PAREN:
-                    //Revert status
-                    current = paren.pop();
-                    break;
-                case AND:
-                    if (current.parent == null) {
-                        //If current is root node then add a new root, then move current pointer to it
-                        Node newParent = new Node();
-                        newParent.leftChild = current;
-                        current.parent = newParent;
-                        current = newParent;
-                        current.symbol = and;
-                        //Change root
-                        root = newParent;
-                    } else {
-                        if (current.parent.symbol == null) {
-                            //Move current pointer to parent and change symbol to &&
-                            current = current.parent;
-                            current.symbol = and;
-                        } else {
-                            if (current.parent.symbol == and) {
-                                //If current token's symbol has higher or equal priority than parent's, insert
-                                //a node between them and move current pointer to inserted
-                                Node insert = new Node();
-                                if (current.parent.leftChild == current) {
-                                    current.parent.leftChild = insert;
-                                } else {
-                                    current.parent.rightChild = insert;
-                                }
-                                current.parent = insert;
-                                current = insert;
-                                current.symbol = and;
-                            } else {
-                                //Otherwise insert a node between parent and grandparent
-                                Node parent = current.parent;
-                                if (parent == root) {
-                                    //If parent is root then add a new root, then move current pointer to it
-                                    Node newRoot = new Node();
-                                    root.parent = newRoot;
-                                    root = newRoot;
-                                    current = root;
-                                    current.symbol = and;
-                                } else {
-                                    Node grand = parent.parent;
-                                    Node insert = new Node();
-                                    if (grand.leftChild == parent) {
-                                        grand.leftChild = insert;
-                                    } else {
-                                        grand.rightChild = insert;
-                                    }
-                                    parent.parent = insert;
-                                    current = insert;
-                                    current.symbol = and;
-                                }
-                            }
-                        }
-                        Node inter = current;
-                        //The tree may not be completed, use Supplier to avoid NPE
-                        current.predicate = () -> inter.leftChild.predicate.get().and(inter.rightChild.predicate.get());
+                    if (operators.isEmpty()) {
+                        throw new IllegalArgumentException("Unmatched closing parenthesis");
                     }
-                    break;
-                case OR:
-                    //Same as above
-                    if (current.parent != null) {
-                        if (current.parent.symbol == null) {
-                            current = current.parent;
-                        } else {
-                            //OR's priority is lower than AND so no check
-                            Node insert = new Node();
-                            if (current.parent.leftChild == current) {
-                                current.parent.leftChild = insert;
-                            } else {
-                                current.parent.rightChild = insert;
-                            }
-                            current.parent = insert;
-                            current = insert;
-                        }
-                        current.symbol = or;
-                        Node inter = current;
-                        current.predicate = () -> inter.leftChild.predicate.get().or(inter.rightChild.predicate.get());
-                    } else {
-                        Node newParent = new Node();
-                        newParent.leftChild = current;
-                        current.parent = newParent;
-                        current = newParent;
-                        current.symbol = or;
-                        root = newParent;
+                    // Discard the matching '('
+                    operators.pop();
+                }
+                case AND, OR -> {
+                    // Pop operators with equal or higher precedence onto the output first.
+                    while (!operators.isEmpty()
+                            && PRECEDENCE.containsKey(operators.peek())
+                            && PRECEDENCE.get(operators.peek()) >= PRECEDENCE.get(token)) {
+                        output.add(operators.pop());
                     }
+                    operators.push(token);
+                }
+                // Operand
+                default -> output.add(token);
+            }
+        }
+
+        while (!operators.isEmpty()) {
+            String op = operators.pop();
+            if (op.equals(START_PAREN)) {
+                throw new IllegalArgumentException("Unmatched opening parenthesis");
+            }
+            output.add(op);
+        }
+
+        return output;
+    }
+
+    /** Evaluates a Reverse Polish Notation token list into a single predicate. */
+    private static Predicate<EntityRollingStock> evaluate(List<String> rpn) {
+        Deque<Predicate<EntityRollingStock>> stack = new ArrayDeque<>();
+
+        for (String token : rpn) {
+            switch (token) {
+                case AND, OR:
+                    combine(stack, token);
                     break;
                 default:
-                    //Add a new child node and move current pointer to it
-                    Node newNode = new Node();
-                    newNode.predicate = () -> getPredicate(token);
-                    newNode.parent = current;
-                    if (current.leftChild == null) {
-                        current.leftChild = newNode;
-                    } else {
-                        current.rightChild = newNode;
-                    }
-                    current = newNode;
+                    stack.push(compileToken(token));
             }
         }
 
-        //Remove empty nodes from root
-        while (root.leftChild == null || root.rightChild == null) {
-            if (root.leftChild == null && root.rightChild == null) {
-                break;
-            }
-            root = root.leftChild == null ? root.rightChild : root.leftChild;
+        if (stack.size() != 1) {
+            throw new IllegalArgumentException("Invalid filter expression");
         }
-
-        return root;
+        return stack.pop();
     }
 
-    private static Predicate<EntityRollingStock> getPredicate(String token) {
-        String[] strings = token.split(":");
-        if (strings.length == 2) {
-            return stock -> prefixes.get(strings[0]).apply(stock, strings[1]);
+    /** Pops two predicates from the stack and pushes back their operated combination. */
+    private static void combine(Deque<Predicate<EntityRollingStock>> stack, String operator) {
+        if (stack.size() < 2) {
+            throw new IllegalArgumentException("Missing operand for " + operator);
+        }
+        Predicate<EntityRollingStock> right = stack.pop();
+        Predicate<EntityRollingStock> left = stack.pop();
+        if (operator.equals(AND)) {
+            stack.push(stock -> left.test(stock) && right.test(stock));
         } else {
-            throw new IllegalArgumentException("Invalid token format: " + token);
+            stack.push(stock -> left.test(stock) || right.test(stock));
         }
     }
 
-    private static class Node {
-        //If this node is a leaf...
-        Supplier<Predicate<EntityRollingStock>> predicate;
-        //If this node isn't a leaf...
-        //May not need a function here, but reserved for scalability
-        BiFunction<Boolean, Boolean, Boolean> symbol;
+    /** Builds a predicate for a single KV pair */
+    private static Predicate<EntityRollingStock> compileToken(String token) {
+        String[] parts = token.split(":", 2);
+        if (parts.length != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
+            throw new IllegalArgumentException("Invalid filter token \"" + token + "\": expected <prefix>:<value>");
+        }
+        parts[0] = parts[0].trim();
+        parts[1] = parts[1].trim();
 
-        Node parent;
-        Node leftChild;
-        Node rightChild;
+        BiFunction<EntityRollingStock, String, Boolean> handler = PREFIXES.get(parts[0]);
+        if (handler == null) {
+            throw new IllegalArgumentException("Unknown filter prefix \"" + parts[0] + "\" in token \"" + token + "\"");
+        }
+
+        return stock -> handler.apply(stock, parts[1]);
     }
 }
