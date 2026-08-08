@@ -22,9 +22,8 @@ public class VecUtil {
 			double cosRoll = Math.cos(rollRad);
 			double sinRoll = Math.sin(rollRad);
 
-			double horizontalLen = Math.sqrt(x * x + z * z);
-
-            y = horizontalLen * sinRoll;
+			double horizontalLen = Math.sqrt(x * x + z * z) * Math.signum(distance);
+			y = horizontalLen * sinRoll;
 
 			x *= cosRoll;
 			z *= cosRoll;

@@ -87,9 +87,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		for (int i = 0; i < path.size(); i++) {
 
 			VecYPR cur = path.get(i);
-			Vec3d gagPos = cur;
-			Vec3d curNormal = computeTopFaceNormal(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
-			gagPos = cur.add(curNormal.scale(-modelHeight)).add(0, modelHeight, 0).add(curNormal.scale(bedThickness));
+			Vec3d curNormal = Orientation.fromYPR(cur).up;
+			Vec3d gagPos = cur.add(curNormal.scale(-modelHeight)).add(0, modelHeight, 0).add(curNormal.scale(bedThickness));
 
 			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
 
@@ -263,55 +262,56 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		}
 	}
 
-	// TODO 以及预览的块现在裁剪还不对,有一些小细节没改完
+	private Vec3d computeTopFaceNormal(List<VecYPR> points, int index, double q) {
+		VecYPR current = points.get(index);
+		Orientation base = Orientation.fromYPR(current);
+		int size = points.size();
 
-	private Vec3d computeTopFaceNormal(List<VecYPR> points, int index, double q) { // TODO: correct pitch introduced by roll change
-		VecYPR cur = points.get(index);
-		Vec3d normal = computeTopFaceNormal(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
-		return normal;
-	}
-
-	private Vec3d computeTopFaceNormal(double yawDeg, double pitchDeg, double rollDeg) {
-		double yawRad = Math.toRadians(yawDeg);
-		double pitchRad = Math.toRadians(pitchDeg);
-		double rollRad = Math.toRadians(rollDeg);
-
-		// Compute forward direction vector
-		double cosYaw = Math.cos(yawRad);
-		double sinYaw = Math.sin(yawRad);
-		double cosPitch = Math.cos(pitchRad);
-		double sinPitch = Math.sin(pitchRad);
-		// pitch > 0 is downhill => forward.y is negative
-		Vec3d forward = new Vec3d(cosYaw * cosPitch, -sinPitch, sinYaw * cosPitch).normalize();
-
-		Vec3d upNoRoll;
-		if (Math.abs(pitchRad) < 1e-6) {
-			upNoRoll = new Vec3d(0, 1, 0);
-		} else {
-			// Calculate right vector (handle case where forward is nearly parallel to Y axis)
-			Vec3d worldUp = new Vec3d(0, 1, 0);
-			Vec3d right;
-			if (Math.abs(forward.dotProduct(worldUp)) > 0.9999) {
-				// Forward almost vertical, use Z axis as temporary reference
-				right = new Vec3d(0, 0, 1).crossProduct(forward).normalize();
-			} else {
-				right = forward.crossProduct(worldUp).normalize();
-			}
-			upNoRoll = right.crossProduct(forward).normalize();
+		// Early return for invalid cases
+		if (size < 2 || info.settings.rollAndOffsetInfo == null) {
+			return base.up;
 		}
 
-		if (Math.abs(rollRad) < 1e-6) {
-			return upNoRoll;
+		double totalLength = size * info.settings.gauge.scale() * info.getTrackModel().spacing;
+
+		// Start point
+		if (index == 0) {
+			float pitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(totalLength, true, q);
+			return base.rotatePitch(pitch).up;
 		}
 
-		// roll > 0 means left higher than right → up direction should rotate around forward by -rollRad
-		double cosR = Math.cos(-rollRad);
-		double sinR = Math.sin(-rollRad);
-		// Rodrigues rotation formula
-		Vec3d rotated = upNoRoll.scale(cosR)
-				.add(forward.crossProduct(upNoRoll).scale(sinR))
-				.add(forward.scale(forward.dotProduct(upNoRoll) * (1 - cosR)));
-		return rotated.normalize();
+		// End point
+		if (index == size - 1) {
+			float pitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(totalLength, true, q);
+			return base.rotatePitch(pitch).up;
+		}
+
+		// Middle point – compute local derivatives using neighbors
+		VecYPR previous = points.get(index - 1);
+		VecYPR next = points.get(index + 1);
+
+		Vec3d prevPos = new Vec3d(previous.x, previous.y, previous.z);
+		Vec3d currPos = new Vec3d(current.x, current.y, current.z);
+		Vec3d nextPos = new Vec3d(next.x, next.y, next.z);
+
+		Orientation prevO = Orientation.fromYPR(previous);
+		Orientation currO = Orientation.fromYPR(current);
+		Orientation nextO = Orientation.fromYPR(next);
+
+		Vec3d rightPrev = prevPos.add(prevO.right.scale(q));
+		Vec3d rightCurr = currPos.add(currO.right.scale(q));
+		Vec3d rightNext = nextPos.add(nextO.right.scale(q));
+
+		Orientation mid = new Orientation(
+				rightNext.subtract(rightPrev),
+				rightCurr.subtract(currPos)
+		);
+
+		if (q < 0) {
+			mid = new Orientation(mid.forward.scale(-1), mid.right);
+		}
+
+		return mid.up;
 	}
 
 	@Override
