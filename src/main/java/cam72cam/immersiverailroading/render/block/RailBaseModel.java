@@ -61,11 +61,16 @@ public class RailBaseModel {
 			model.addColorBlock(augment.color(), bedFace == null ? bedblockMatrix4 : new Matrix4(), bedFace);
 			return model;
 		}
-		if (snow != 0) {
+
+		boolean renderSnow = false;
+		if(bedHeight > 0) renderSnow = snow > Math.floor(bedHeight * 8f);
+		else renderSnow = snow > 7;
+
+		if (renderSnow) {
 
 			float snowHeight = snow / 8f;
 			if(bedFace != null) {
-				boolean isUp = bedFace.normal.y < 0;
+				boolean isUp = bedHeight >= 0;
 				if(!isUp) {
 					model.addSnow(8, new Matrix4(), bedFace);
 					return model;

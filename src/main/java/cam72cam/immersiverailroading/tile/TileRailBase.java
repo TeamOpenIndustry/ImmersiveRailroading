@@ -221,8 +221,18 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	public void setSnowLayers(int snowLayers) {
-		this.snowLayers = snowLayers;
+		int min = getMinSnowLayers();
+		this.snowLayers = Math.max(snowLayers, min);
 		this.markDirty();
+	}
+
+	private int getMinSnowLayers() {
+		float bed = getBedHeight();
+		if (bed >= 0) {
+			return (int) Math.floor(bed * 8);
+		} else {
+			return 7;
+		}
 	}
 
 	public float getFullHeight() {
@@ -422,19 +432,23 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	public void cleanSnow(int snowLevel) {
-		int snow = this.getSnowLayers();
-		if (snow > snowLevel) {
-			this.setSnowLayers(snowLevel);
-			int snowDown = snow -1;
-			for (int i = 1; i <= 3; i ++) {
+		int min = getMinSnowLayers();
+		int target = Math.max(snowLevel, min);
+		int current = this.getSnowLayers();
+
+		if (current > target) {
+			this.setSnowLayers(target); // 截断到目标值
+			int removed = current - target; // 实际移除的雪层数
+			int snowDown = removed; // 待散播的雪层数
+
+			for (int i = 1; i <= 3; i++) {
 				Facing[] horiz = Facing.values().clone();
 				if (Math.random() > 0.5) {
-					// Split between sides of the track
 					ArrayUtils.reverse(horiz);
 				}
 				for (Facing facing : horiz) {
 					Vec3i ph = getWorld().getPrecipitationHeight(getPos().offset(facing, i));
-					for (int j = 0; j < 3; j ++) {
+					for (int j = 0; j < 3; j++) {
 						if (getWorld().isAir(ph) && !ITrack.isRail(getWorld(), ph.down())) {
 							getWorld().setSnowLevel(ph, snowDown);
 							return;
