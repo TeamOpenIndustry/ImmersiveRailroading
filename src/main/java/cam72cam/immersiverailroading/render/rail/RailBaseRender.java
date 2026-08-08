@@ -19,15 +19,18 @@ public class RailBaseRender {
 			for (TrackBase base : tracks) {
 				Vec3i basePos = base.getPos();
 				float height = base.getBedHeight();
-				if (base.isScaleModel()) {
-					height += 0.1f * (float) info.settings.gauge.scale();
-				}
+				Plane plane = base.getBedFace();
 
-				Plane plane = new Plane(new Vec3d(0.5, 0.5, 0.5), new Vec3d(-0.5, -0.5, -0.5));
+				if (plane != null) height = 1;
+				Matrix4 matrix4;
+				if(height > 0) matrix4 = new Matrix4().scale(1, height, 1);
+				else if(height == 0) matrix4 = new Matrix4().scale(1, 1e-4, 1);
+				else matrix4 = new Matrix4().translate(0, -height, 0).scale(1, 1 + height, 1);
 
 				model.addItemBlock(info.settings.railBed, new Matrix4()
 						.translate(basePos.x, basePos.y, basePos.z)
-						.scale(1, height, 1), plane
+						.multiply(matrix4),
+						base.getBedFace()
 				);
 			}
 		}

@@ -51,15 +51,13 @@ public class RailBaseModel {
 			});
 		}
 
-//		Plane plane = new Plane(new Vec3d(0.5, 0.5, 0.5), new Vec3d(1, 0, 1));
-
 		if (plane != null) height = 1;
 		Matrix4 matrix4;
 		if(height > 0) matrix4 = new Matrix4().scale(1, height, 1);
 		else if(height == 0) matrix4 = new Matrix4().scale(1, 1e-4, 1);
 		else matrix4 = new Matrix4().translate(0, -height, 0).scale(1, 1 + height, 1);
 
-		if (augment != null) {//TODO augment offset a little
+		if (augment != null) {
 			model.addColorBlock(augment.color(), matrix4, plane);
 			return model;
 		}
