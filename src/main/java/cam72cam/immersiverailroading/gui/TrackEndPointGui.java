@@ -2,10 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
-import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.library.GuiTypes;
-import cam72cam.immersiverailroading.library.TrackPosYawType;
-import cam72cam.immersiverailroading.library.TrackSmoothing;
+import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.CubicCurve;
@@ -64,7 +61,7 @@ public class TrackEndPointGui implements IScreen {
     // PosType
     private Button nearPosTypeButton;
     private TextField nearYawInput;
-    private Button nearPosYawTypeSelector;
+    private Button nearPosYawAlignSelector;
 
     private Button farPosTypeButton;
     private TextField farYawInput;
@@ -349,17 +346,17 @@ public class TrackEndPointGui implements IScreen {
 
         ytop += height;
 
-        nearPosYawTypeSelector = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION_YAW.toString(settings.nearPointData.posYawType()), (hand, button) -> {
+        nearPosYawAlignSelector = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_YAW_ALIGN.toString(settings.nearPointData.posYawType()), (hand, button) -> {
             settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
-            nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
-            button.setText(GuiText.SELECTOR_POSITION_YAW.toString(settings.nearPointData.posYawType()));
+            nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
+            button.setText(GuiText.SELECTOR_YAW_ALIGN.toString(settings.nearPointData.posYawType()));
         });
-        nearPosYawTypeSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
+        nearPosYawAlignSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
 
-        farPosYawTypeSelector = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION_YAW.toString(settings.farPointData.posYawType()), (hand, button) -> {
+        farPosYawTypeSelector = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_YAW_ALIGN.toString(settings.farPointData.posYawType()), (hand, button) -> {
             settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
-            farYawInput.setEnabled(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
-            button.setText(GuiText.SELECTOR_POSITION_YAW.toString(settings.farPointData.posYawType()));
+            farYawInput.setEnabled(settings.farPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
+            button.setText(GuiText.SELECTOR_YAW_ALIGN.toString(settings.farPointData.posYawType()));
         });
         farPosYawTypeSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
 
@@ -476,15 +473,15 @@ public class TrackEndPointGui implements IScreen {
         nearRadiusInput.setEnabled(settings.type.isTransitionCurve());
         farRadiusInput.setEnabled(settings.type.isTransitionCurve());
 
-        nearPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        farPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        nearPitchInput.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        farPitchInput.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        nearPitchSettingButton.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
-        farPitchSettingButton.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_LOCKED);
+        nearPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        farPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        nearPitchInput.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        farPitchInput.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        nearPitchSettingButton.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        farPitchSettingButton.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
 
-        nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
-        farYawInput.setEnabled(settings.farPointData.posYawType() == TrackPosYawType.ANGLE_SPECIFIED);
+        nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
+        farYawInput.setEnabled(settings.farPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
 
         setNearSnapComponentsVisibility();
         setFarSnapComponentsVisibility();

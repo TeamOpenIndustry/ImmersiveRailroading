@@ -195,7 +195,7 @@ public class TrackSnapUtil {
                             : stackInfo.with(mutable -> mutable.farPointData = updated);
                 }
 
-                if (pointData.trackSnapSettings().snapPitch() && stackInfo.smoothing == TrackSmoothing.PITCH_LOCKED) {
+                if (pointData.trackSnapSettings().snapPitch() && stackInfo.smoothing == TrackSmoothing.PITCH_SPECIFIED) {
                     float newPitch = pointData.pitchDegreeMode()
                             ? snapped.getPitch()
                             : (float) (Math.tan(Math.toRadians(snapped.getPitch())) * 1000);

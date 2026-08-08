@@ -10,7 +10,7 @@ public enum TrackSmoothing {
 	FAR,
 	NEITHER,
 	NEITHER_V2,
-	PITCH_LOCKED;
+	PITCH_SPECIFIED;
 
 	@Override
 	public String toString() {

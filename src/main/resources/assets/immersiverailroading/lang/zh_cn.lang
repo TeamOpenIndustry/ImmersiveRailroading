@@ -100,7 +100,9 @@ gui.immersiverailroading:selector.curvosity=%s 曲率
 gui.immersiverailroading:selector.rail_bed=道床类型：%s
 gui.immersiverailroading:selector.rail_bed_fill=道床填方类型：%s
 gui.immersiverailroading:selector.position=位置锁定方式：%s
-gui.immersiverailroading:selector.position_yaw=朝向锁定方式：%s
+gui.immersiverailroading:selector.position.near=%s（近端）
+gui.immersiverailroading:selector.position.far=%s（远端）
+gui.immersiverailroading:selector.yaw_alignment=朝向锁定方式：%s
 gui.immersiverailroading:selector.smoothing=垂直平滑：%s
 gui.immersiverailroading:selector.direction=方向：%s
 gui.immersiverailroading:selector.transfer_table_entry_count=移车台轨道数：%s
@@ -142,6 +144,8 @@ gui.immersiverailroading:track.gauge=轨距：%s
 gui.immersiverailroading:track.quarters=%s 度转弯
 gui.immersiverailroading:track.curvosity=%s 曲率
 gui.immersiverailroading:track.position=位置锁定方式：%s
+gui.immersiverailroading:track.position.near=近端位置锁定方式：%s
+gui.immersiverailroading:track.position.far=远端位置锁定方式：%s
 gui.immersiverailroading:track.smoothing=垂直平滑：%s
 gui.immersiverailroading:track.direction=方向：%s
 gui.immersiverailroading:track.rail_bed=道床：%s
@@ -214,15 +218,15 @@ track.immersiverailroading:position.pixels_locked=像素锁定
 track.immersiverailroading:position.smooth=无限制
 track.immersiverailroading:position.smooth_locked=平滑锁定
 
-track.immersiverailroading:position_yaw.angle_specified=指定角度
-track.immersiverailroading:position_yaw.angle_segmentation=均分角度
+track.immersiverailroading:yaw_alignment.angle_specified=指定角度
+track.immersiverailroading:yaw_alignment.angle_segmentation=均分角度
 
 track.immersiverailroading:smoothing.both=双向平滑
 track.immersiverailroading:smoothing.near=仅近端平滑
 track.immersiverailroading:smoothing.far=仅远端平滑
 track.immersiverailroading:smoothing.neither_v2=无平滑
 track.immersiverailroading:smoothing.neither=旧版无平滑
-track.immersiverailroading:smoothing.pitch_locked=锁定两端坡度
+track.immersiverailroading:smoothing.pitch_specified=指定两端坡度
 
 track.immersiverailroading:direction.none=不锁定
 # Intended

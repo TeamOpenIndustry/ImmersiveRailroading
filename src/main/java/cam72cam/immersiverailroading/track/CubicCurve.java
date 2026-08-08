@@ -665,7 +665,7 @@ public class CubicCurve {
                 );
             }
 
-            case PITCH_LOCKED -> {
+            case PITCH_SPECIFIED -> {
 
                 boolean nearRotate = near.pitchDegreeMode() || !near.projectHandle();
 

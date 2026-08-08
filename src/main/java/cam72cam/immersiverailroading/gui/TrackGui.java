@@ -233,7 +233,9 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.smoothing = next(settings.smoothing, hand);
-				if(settings.smoothing == TrackSmoothing.NEITHER && !Config.ConfigBalance.EnableLegacyTrackSettingOption) settings.smoothing = next(settings.smoothing, hand);
+				if(settings.smoothing == TrackSmoothing.NEITHER && !Config.ConfigBalance.EnableLegacyTrackSettingOption) {
+					settings.smoothing = next(settings.smoothing, hand);
+				}
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
 			}
 		};
@@ -419,18 +421,18 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		nearPosTypeButton = new Button(screen, xtop, ytop, width / 2, height, settings.nearPointData.posType().toString()) {
+		nearPosTypeButton = new Button(screen, xtop, ytop, width / 2, height, GuiText.SELECTOR_POSITION_NEAR.toString(settings.nearPointData.posType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posType = next(settings.nearPointData.posType(), hand));
-				nearPosTypeButton.setText(settings.nearPointData.posType().toString());
+				nearPosTypeButton.setText(GuiText.SELECTOR_POSITION_NEAR.toString(settings.nearPointData.posType()));
 			}
 		};
-		farPosTypeButton = new Button(screen, xtop + width / 2, ytop, width / 2, height, settings.farPointData.posType().toString()) {
+		farPosTypeButton = new Button(screen, xtop + width / 2, ytop, width / 2, height, GuiText.SELECTOR_POSITION_FAR.toString(settings.farPointData.posType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.farPointData = settings.farPointData.with(mutable -> mutable.posType = next(settings.farPointData.posType(), hand));
-				farPosTypeButton.setText(settings.farPointData.posType().toString());
+				farPosTypeButton.setText(GuiText.SELECTOR_POSITION_FAR.toString(settings.farPointData.posType()));
 			}
 		};
 		ytop += height;

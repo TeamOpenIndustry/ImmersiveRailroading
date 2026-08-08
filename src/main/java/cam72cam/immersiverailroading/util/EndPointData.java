@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.GuiText;
-import cam72cam.immersiverailroading.library.TrackPosYawType;
+import cam72cam.immersiverailroading.library.TrackYawAlignmentType;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
@@ -17,12 +17,12 @@ public record EndPointData (
         boolean pitchDegreeMode,// If true, pitch stores the angle, otherwise it stores the slope in per mille
         boolean projectHandle,// If true, control points only moves vertically to get target pitch, otherwise the handles will be rotated to get target pitch
         TrackPositionType posType,
-        TrackPosYawType posYawType,
+        TrackYawAlignmentType posYawType,
         float posYaw,
         TrackSnapSettings trackSnapSettings) {
 
     public EndPointData(float radius) {
-        this(radius, Vec3d.ZERO, 0f, false, true, TrackPositionType.FIXED, TrackPosYawType.ANGLE_SEGMENTATION, 0f, new TrackSnapSettings());
+        this(radius, Vec3d.ZERO, 0f, false, true, TrackPositionType.FIXED, TrackYawAlignmentType.ANGLE_SEGMENTATION, 0f, new TrackSnapSettings());
     }
 
     public static class Mutable {
@@ -39,7 +39,7 @@ public record EndPointData (
         @TagField("pos_type")
         public TrackPositionType posType;
         @TagField("pos_yaw_type")
-        public TrackPosYawType posYawType;
+        public TrackYawAlignmentType posYawType;
         @TagField("pos_yaw")
         public float posYaw;
         @TagField("track_snap_settings")

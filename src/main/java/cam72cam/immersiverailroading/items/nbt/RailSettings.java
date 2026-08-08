@@ -276,7 +276,7 @@ public class RailSettings {
                     },
                     d -> {
                         TagCompound railData = d.get(fieldName);
-                        NbtMigratorRegistry.applyAll(railData);
+                        NbtMigrators.migrateTrackAlignment(railData);
                         try {
                             return new Mutable(d.get(fieldName)).immutable();
                         } catch (SerializationException e) {

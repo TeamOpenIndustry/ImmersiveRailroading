@@ -3,7 +3,7 @@ package cam72cam.immersiverailroading.util;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.TrackDirection;
-import cam72cam.immersiverailroading.library.TrackPosYawType;
+import cam72cam.immersiverailroading.library.TrackYawAlignmentType;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -12,8 +12,6 @@ import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.serialization.TagCompound;
-
-import java.util.function.Consumer;
 
 @TagMapped(PlacementInfo.TagMapper.class)
 public class PlacementInfo {
@@ -37,14 +35,14 @@ public class PlacementInfo {
 
 		RailSettings settings = RailSettings.from(stack);
 		TrackPositionType posType = isNear ? settings.nearPointData.posType() : settings.farPointData.posType();
-		TrackPosYawType posYawType = isNear ? settings.nearPointData.posYawType() : settings.farPointData.posYawType();
+		TrackYawAlignmentType posYawType = isNear ? settings.nearPointData.posYawType() : settings.farPointData.posYawType();
 		float posYaw = isNear ? settings.nearPointData.posYaw() : settings.farPointData.posYaw();
 
 		yawHead = ((- yawHead % 360) + 360) % 360;
 		if(overrideYaw) {
 			this.yaw = yawHead;
-		} else if(posYawType == TrackPosYawType.ANGLE_SEGMENTATION) {
-			this.yaw = ((int)((yawHead + 90/(segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
+		} else if(posYawType == TrackYawAlignmentType.ANGLE_SEGMENTATION) {
+			this.yaw = ((int)((yawHead + 90 / (segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
 		} else {
 			float base = posYaw;
 			float base2 = 90 - base;

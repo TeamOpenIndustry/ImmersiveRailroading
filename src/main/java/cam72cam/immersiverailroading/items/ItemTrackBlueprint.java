@@ -130,8 +130,14 @@ public class ItemTrackBlueprint extends CustomItem {
 			tooltip.add(String.format(indented, GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName())));
 		}
 
-		tooltip.add(GuiText.TRACK_POSITION.toString(""));
-		tooltip.add(String.format(indented, settings.nearPointData.posType()));
+		if (settings.nearPointData.posType() == settings.farPointData.posType()) {
+			//The same type on both ends
+			tooltip.add(GuiText.TRACK_POSITION.toString(settings.nearPointData.posType()));
+		} else {
+			tooltip.add(GuiText.TRACK_POSITION_NEAR.toString(settings.nearPointData.posType()));
+			tooltip.add(GuiText.TRACK_POSITION_FAR.toString(settings.farPointData.posType()));
+		}
+
 		if (settings.type.hasSmoothing()) {
 			tooltip.add(String.format(indented, GuiText.TRACK_SMOOTHING.toString(settings.smoothing)));
 		}

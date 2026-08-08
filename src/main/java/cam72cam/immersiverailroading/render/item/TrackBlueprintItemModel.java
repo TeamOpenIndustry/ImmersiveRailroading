@@ -25,19 +25,19 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		RailInfo info = new RailInfo(stack, new PlacementInfo(stack, 1, new Vec3d(0.5, 0.5, 0.5), true, false), null);
 
 		if(info.settings.type.isTransitionCurve()) {
-			EndPointData.Mutable nears = info.settings.nearPointData.mutable();
+			EndPointData.Mutable near = info.settings.nearPointData.mutable();
 			EndPointData.Mutable far = info.settings.farPointData.mutable();
-			if(Math.abs(nears.radius) < 1e-6) {
+			if(Math.abs(near.radius) < 1e-6) {
 				far.radius = 10;
 				info = info.withSettings(b -> b.farPointData = far.immutable());
 			} else if(Math.abs(far.radius) < 1e-6) {
-				nears.radius = 10;
-				info = info.withSettings(b -> b.nearPointData = nears.immutable());
+				near.radius = 10;
+				info = info.withSettings(b -> b.nearPointData = near.immutable());
 			} else {
-				nears.radius = 20;
+				near.radius = 20;
 				far.radius = 10;
 				info = info.withSettings(b -> {
-					b.nearPointData = nears.immutable();
+					b.nearPointData = near.immutable();
 					b.farPointData = far.immutable();
 				});
 			}
