@@ -81,11 +81,11 @@ public class RailBaseModel {
 				float planeMaxHeight = BlockPlaneHeight.getCutPlaneMaxHeight(beFaceRaw[0], beFaceRaw[1]);
 
 				if (planeMaxHeight <= snowHeight) {
-					model.addSnow(snow, new Matrix4(), null);
+					model.addSnow(snow, new Matrix4(), BlockPlaneHeight.createBottomSidePlane(bedFace));
 				} else if (planeMinHeight >= snowHeight) {
 					model.addSnow(8, new Matrix4(), bedFace);
 				} else {
-					model.addSnow(snow, new Matrix4(), null);
+					model.addSnow(snow, new Matrix4(), BlockPlaneHeight.createBottomSidePlane(bedFace));
 					model.addSnow(8, new Matrix4(), bedFace);
 				}
 			} else {

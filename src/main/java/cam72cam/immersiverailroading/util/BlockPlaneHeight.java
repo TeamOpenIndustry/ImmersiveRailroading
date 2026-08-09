@@ -183,6 +183,127 @@ public final class BlockPlaneHeight {
     }
 
 
+    public static Plane createBottomSidePlane(Plane plane) {
+        Vec3d[] raw = fromPlane(plane);
+        Vec3d point = raw[0];
+        Vec3d normal = raw[1];
+        List<Vec3d> bottom = getBottomIntersections(point, normal);
+
+        if (bottom.size() != 2) {
+            return null;
+        }
+
+        Vec3d p0 = bottom.get(0);
+        Vec3d p1 = bottom.get(1);
+
+        Vec3d edge = p1.subtract(p0).normalize();
+
+        // vertical plane normal
+        Vec3d candidateNormal =
+                edge.crossProduct(new Vec3d(0, 1, 0))
+                        .normalize();
+
+        Vec3d center = p0.add(p1).scale(0.5);
+
+        /*
+         * 判断哪个方向是未切区域
+         *
+         * 原切割面:
+         * distance > 0 的一侧认为是保留区域
+         */
+        Vec3d testOffset =
+                candidateNormal.scale(0.01);
+
+        double positive =
+                distance(
+                        center.add(testOffset),
+                        point,
+                        normal
+                );
+
+        double negative =
+                distance(
+                        center.subtract(testOffset),
+                        point,
+                        normal
+                );
+
+
+        // candidateNormal 指向被切掉区域，翻转
+        if (positive < negative) {
+            candidateNormal = candidateNormal.scale(-1);
+        }
+
+
+        /*
+         * Plane:
+         * n dot x + d = 0
+         */
+        double d =
+                -candidateNormal.dotProduct(center);
+
+
+        return new Plane(candidateNormal, d);
+    }
+
+
+    private static List<Vec3d> getBottomIntersections(
+            Vec3d point,
+            Vec3d normal
+    ) {
+
+        normal = normal.normalize();
+
+        Vec3d[] corners = {
+                new Vec3d(0,0,0),
+                new Vec3d(1,0,0),
+                new Vec3d(0,0,1),
+                new Vec3d(1,0,1)
+        };
+
+        int[][] edges = {
+                {0,1},
+                {0,2},
+                {1,3},
+                {2,3}
+        };
+
+
+        List<Vec3d> result = new ArrayList<>();
+
+
+        for (int[] edge : edges) {
+
+            Vec3d a = corners[edge[0]];
+            Vec3d b = corners[edge[1]];
+
+            double da = distance(a, point, normal);
+            double db = distance(b, point, normal);
+
+
+            if (Math.abs(da-db) < EPS) {
+                continue;
+            }
+
+
+            if (da * db <= 0) {
+
+                double t = da / (da-db);
+
+                Vec3d hit =
+                        a.add(
+                                b.subtract(a)
+                                        .scale(t)
+                        );
+
+                addUnique(result, hit);
+            }
+        }
+
+        return result;
+    }
+
+
     /**
      * Get intersection points between plane and cube edges.
      */
