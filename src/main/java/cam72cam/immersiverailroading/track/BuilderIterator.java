@@ -6,11 +6,11 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackModelPart;
-import cam72cam.immersiverailroading.util.BlockPlaneHeight;
-import cam72cam.immersiverailroading.util.MathUtil;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.math.Matrix3;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.cutter.BlockCutHelper;
 import cam72cam.mod.render.cutter.Plane;
 import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
@@ -18,9 +18,6 @@ import cam72cam.mod.serialization.TagSerializer;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
-
-import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.immersiverailroading.util.VecUtil;
 
 public abstract class BuilderIterator extends BuilderBase implements IIterableTrack {
 	protected HashSet<Vec3i> positions;
@@ -118,7 +115,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 								gagPos.y,
 								gagPos.z + 0.5
 						);
-						float localHeight = BlockPlaneHeight.calculate(planePoint.subtract(gag), topFacing);
+						float localHeight = BlockCutHelper.getCutCenterHeight(new Plane(planePoint.subtract(gag), topFacing));
 
 						rollDelta = localHeight - (gagPos.y - posY);
 					} else {//legacy
