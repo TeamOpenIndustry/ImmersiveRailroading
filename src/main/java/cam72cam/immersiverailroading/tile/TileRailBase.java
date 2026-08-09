@@ -29,7 +29,6 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.cutter.Plane;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
-import cam72cam.mod.serialization.TagSerializer;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.sound.StandardSound;
@@ -246,7 +245,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 	
 	public void handleSnowTick() {
-		if (this.snowLayers < (ConfigDebug.deepSnow ? 8 : 1)) {
+		if (this.snowLayers < (ConfigBalance.deepSnow ? 8 : 1)) {
 			this.snowLayers += 1;
 			this.markDirty();
 		}

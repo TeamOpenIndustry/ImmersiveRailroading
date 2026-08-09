@@ -127,6 +127,9 @@ public class Config {
 		@Range(min = 0, max = 100)
 		public static int blockWeight = 10;
 
+		@Comment( "Deep Snow on tracks" )
+		public static boolean deepSnow = false;
+
 		@Comment( "MilliBuckets per Liter" )
 		public static int MB_PER_LITER = 1;
 
@@ -253,9 +256,6 @@ public class Config {
 		@Comment( "Range between couplers to try coupling" )
 		@Range(min = 0, max = 1)
 		public static double couplerRange = 0.3;
-
-		@Comment( "Deep Snow on tracks" )
-		public static boolean deepSnow = false;
 
 		@Comment( "How fast snow should accumulate, 0 = disabled, 20 = fast, 400 = slow" )
 		@Range(min = 0, max = 1000)
