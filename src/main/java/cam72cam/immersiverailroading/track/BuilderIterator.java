@@ -78,8 +78,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
 		boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
 		if(!rollEffectTile) tileTilt = false;
-		double modelHeight = info.getTrackModel().getHeight();
-		float bedThickness = 0.1f;// TODO: config able
+		double modelHeight = info.getTrackHeight();
+		float bedThickness = (float) (0.1f * info.settings.gauge.scale());
+		// TODO: config able thickness (float) and whether track rotation center depends on model (boolean)
 
 		for (int i = 0; i < path.size(); i++) {
 
