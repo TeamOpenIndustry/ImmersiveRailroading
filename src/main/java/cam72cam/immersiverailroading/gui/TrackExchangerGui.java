@@ -153,6 +153,9 @@ public class TrackExchangerGui implements IScreen {
 	public void draw(IScreenBuilder builder, RenderState state) {
 		frame++;
 
+		GUIHelpers.drawRect(200, 0, GUIHelpers.getScreenWidth() - 200, GUIHelpers.getScreenHeight(), 0xCC000000);
+		GUIHelpers.drawRect(0, 0, 200, GUIHelpers.getScreenHeight(), 0xEE000000);
+
 		int baseScale = 8;
 		// This could be more efficient...
 		RailSettings settings = new RailSettings(gauge,
