@@ -56,8 +56,7 @@ public class ItemGoldenSpike extends CustomItem {
 				TileRailPreview tr = world.getBlockEntity(tepos, TileRailPreview.class);
 				if (tr != null) {
 					ItemStack stack = tr.getItem();
-					RailSettings stackInfo = RailSettings.from(stack);
-					TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, stackInfo, false);
+					TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, false);
 					pos = result.pos();
 					hit = result.hit();
 					float yaw = result.yaw();

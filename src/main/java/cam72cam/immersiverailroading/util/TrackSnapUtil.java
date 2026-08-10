@@ -160,9 +160,8 @@ public class TrackSnapUtil {
 
     //TODO: keep stack info so that we wont lost it after applying snapping
 
-    public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit,
-                                                    ItemStack stack, RailSettings stackInfo,
-                                                    boolean isNear) {
+    public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
+        RailSettings stackInfo = RailSettings.from(stack);
         boolean succeeded = false;
         float yaw = player.getRotationYawHead();
         VecYPR snapped = null;
@@ -170,7 +169,7 @@ public class TrackSnapUtil {
         EndPointData pointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
 
         if (pointData.trackSnapSettings().snapPos()) {
-            snapped = TrackSnapUtil.getNeighborNode(player, player.getWorld(), pos, hit, stack, isNear);
+            snapped = TrackSnapUtil.getNeighborNode(player, world, pos, hit, stack, isNear);
             if (snapped != null) {
                 succeeded = true;
 

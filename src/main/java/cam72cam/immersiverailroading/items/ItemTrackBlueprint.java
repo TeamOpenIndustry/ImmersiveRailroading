@@ -67,7 +67,8 @@ public class ItemTrackBlueprint extends CustomItem {
 			return ClickResult.ACCEPTED;
 		}
 
-		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, stackInfo, true);
+		ItemStack snappedStack = stack.copy();
+		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, snappedStack, true);
 		pos = result.pos();
 		hit = result.hit();
 		float yaw = result.yaw();
@@ -82,15 +83,15 @@ public class ItemTrackBlueprint extends CustomItem {
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, down ? hit.y + 1 : hit.y, 0), true, snapped);
-				te.setup(stack, placementInfo);
+				PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, hit.subtract(0, down ? hit.y + 1 : hit.y, 0), true, snapped);
+				te.setup(snappedStack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
-		placementInfo = placementInfo.offset(RailSettings.from(stack).nearPointData.offset());
-		RailInfo info = new RailInfo(stack, placementInfo, null);
+		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
+		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
+		RailInfo info = new RailInfo(snappedStack, placementInfo, null);
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;
     }

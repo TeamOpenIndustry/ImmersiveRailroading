@@ -79,17 +79,16 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		Vec3d hit = vec.subtract(pos);
 		World world = player.getWorld();
 
-		RailSettings stackInfo = RailSettings.from(stack);
-
-		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, stackInfo, true);
+		ItemStack snappedStack = stack.copy();
+		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, snappedStack, true);
 		pos = result.pos();
 		hit = result.hit();
 		float yaw = result.yaw();
 		boolean snapped = result.succeeded();
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
-		placementInfo = placementInfo.offset(RailSettings.from(stack).nearPointData.offset());
-		RailInfo info = new RailInfo(stack, placementInfo, null);
+		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
+		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
+		RailInfo info = new RailInfo(snappedStack, placementInfo, null);
 
 		String key = info.uniqueID + info.placementInfo.placementPosition;
 		RailInfo cached = infoCache.get(key);
