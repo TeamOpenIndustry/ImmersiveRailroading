@@ -214,7 +214,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				Audio.setSoundChannels(ConfigSound.customAudioChannels);
 				break;
-			case SETUP:				
+			case SETUP:
 				GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
 

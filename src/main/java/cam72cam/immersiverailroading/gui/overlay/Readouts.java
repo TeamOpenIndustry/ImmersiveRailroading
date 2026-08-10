@@ -203,11 +203,6 @@ public enum Readouts {
                     steam.setAutoFeed(value > 0.9);
                 }
             }
-            case SANDING -> {
-            	if (stock instanceof Locomotive loco) {
-            		loco.sandingKey = (value >= 0.5);
-            	}
-            }
             case EMERGENCY -> {
             	if (stock instanceof Locomotive loco) {
             		loco.setEmergency(value >= 0.5);

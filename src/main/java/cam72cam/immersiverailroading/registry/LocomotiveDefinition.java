@@ -16,7 +16,6 @@ import cam72cam.mod.resource.Identifier;
 import java.util.List;
 
 public abstract class LocomotiveDefinition extends FreightDefinition {
-    
     public boolean toggleBell;
     public SoundDefinition bell;
     public String works;
