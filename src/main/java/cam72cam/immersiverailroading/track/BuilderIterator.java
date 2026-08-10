@@ -78,15 +78,15 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
 		boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
 		if(!rollEffectTile) tileTilt = false;
-		double modelHeight = info.getTrackHeight();
-		float bedThickness = (float) (0.1f * info.settings.gauge.scale());
-		// TODO: config able thickness (float) and whether track rotation center depends on model (boolean)
+
+		Vec3d bedFacePivotOffset = info.settings.trackFaceTransSetting.getFacePivotOffset(info.getTrackHeight());
+		float bedThickness = (float) (info.settings.trackFaceTransSetting.bedThickness() * info.settings.gauge.scale());
 
 		for (int i = 0; i < path.size(); i++) {
 
 			VecYPR cur = path.get(i);
 			Vec3d curNormal = cur.toMatrix3().up();
-			Vec3d gagPos = cur.add(curNormal.scale(-modelHeight)).add(0, modelHeight, 0).add(curNormal.scale(bedThickness));
+			Vec3d gagPos = cur.add(applyNormalRotation(bedFacePivotOffset.scale(-1), curNormal)).add(bedFacePivotOffset).add(curNormal.scale(bedThickness));
 
 			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
 
@@ -262,6 +262,22 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		}
 	}
 
+	public static Vec3d applyNormalRotation(Vec3d offset, Vec3d normal) {
+		Vec3d up = normal.normalize();
+
+		Vec3d right = up.crossProduct(new Vec3d(0, 1, 0));
+		if (right.lengthSquared() < 1e-12) { // 法线刚好垂直（与Y平行），换世界Z
+			right = up.crossProduct(new Vec3d(0, 0, 1));
+		}
+		right = right.normalize();
+
+		Vec3d forward = right.crossProduct(up).normalize();
+
+		return right.scale(offset.x)
+				.add(up.scale(offset.y))
+				.add(forward.scale(offset.z));
+	}
+
 	private Vec3d computeTopFaceNormal(List<VecYPR> points, int index, double q) {
 		VecYPR current = points.get(index);
 		Matrix3 base = current.toMatrix3();
@@ -391,7 +407,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
 								length, true, info.settings.gauge.value());
 
-				correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
+				correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));// TODO: pitch fix only works when pivot is on rail face yet
 				correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
 
 				//Mid

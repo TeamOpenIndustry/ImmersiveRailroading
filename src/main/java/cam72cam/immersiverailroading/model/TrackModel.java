@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.VBO;
@@ -190,11 +191,12 @@ public class TrackModel extends OBJModel{
         Matrix4 matrix = new Matrix4();
         matrix.translate(piece.x, piece.y, piece.z);
 
+        Vec3d modelPivot = info.settings.trackFaceTransSetting.getFacePivotOffset(getHeight());
         matrix.rotate(Math.toRadians(piece.getYaw()), 0, 1, 0);
-        matrix.translate(0, getHeight(), 0);
+        matrix.translate(modelPivot.x, modelPivot.y, modelPivot.z);
         matrix.rotate(Math.toRadians(piece.getPitch()), 1, 0, 0);
         matrix.rotate(Math.toRadians(piece.getRoll()), 0, 0, 1);
-        matrix.translate(0, -getHeight(), 0);
+        matrix.translate(-modelPivot.x, -modelPivot.y, -modelPivot.z);
 
         matrix.rotate(Math.toRadians(-90), 0, 1, 0);
 

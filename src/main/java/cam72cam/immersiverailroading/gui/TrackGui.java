@@ -74,6 +74,12 @@ public class TrackGui implements IScreen {
 	private Button bedFillButton;
 	private ListSelector<ItemStack> railBedFillSelector;
 
+	private Button bedThicknessLabel;
+	private TextField bedThicknessInput;
+	private Button trackFaceTransTypeButton;
+	private Button trackFaceOffsetHeightLabel;
+	private TextField trackFaceOffsetHeightInput;
+
 	// Track Model
 	private Button trackButton;
 	private ListSelector<TrackDefinition> trackSelector;
@@ -485,6 +491,61 @@ public class TrackGui implements IScreen {
 			}
 		};
 		trackExtraGuiButton.setVisible(settings.type.canRoll());
+
+
+		bedThicknessLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 2, width / 4, height, "Bed Thickness") {};
+		bedThicknessInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 2, width / 4, height);
+		bedThicknessInput.setText("" + settings.trackFaceTransSetting.bedThickness());
+		bedThicknessInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) {
+				return true;
+			}
+			float val;
+			try {
+				val = Float.parseFloat(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			float max = 1f;
+			float min = 0f;
+			if (val >= min && val <= max) {
+				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.bedThickness = val);
+				return true;
+			}
+			return false;
+		});
+		bedThicknessInput.setFocused(true);
+
+		trackFaceTransTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 3, width / 2, height, "test " + settings.trackFaceTransSetting.facePivotType()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.facePivotType = next(settings.trackFaceTransSetting.facePivotType(), hand));
+				this.setText("test " + settings.trackFaceTransSetting.facePivotType());
+			}
+		};
+
+		trackFaceOffsetHeightLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 4, width / 4, height, "Pivot Offset") {};
+		trackFaceOffsetHeightInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 4, width / 4, height);
+		trackFaceOffsetHeightInput.setText("" + settings.trackFaceTransSetting.facePivotOffset().y);
+		trackFaceOffsetHeightInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) {
+				return true;
+			}
+			float val;
+			try {
+				val = Float.parseFloat(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			float max = 1f;
+			float min = 0f;
+			if (val >= min && val <= max) {
+				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.facePivotOffset = new Vec3d(0, val, 0));
+				return true;
+			}
+			return false;
+		});
+		trackFaceOffsetHeightInput.setFocused(true);
 
 		Slider zoom_slider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
 										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true) {
