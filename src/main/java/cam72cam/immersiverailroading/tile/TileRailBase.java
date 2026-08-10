@@ -10,6 +10,7 @@ import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRailAugment;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Door;
@@ -1047,6 +1048,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public ItemStack onPick() {
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
+		ItemTrackBlueprint.Data.writeTo(stack, 0, true);
 
 		TileRail parent = this.getParentTile();
 		if (parent == null) {

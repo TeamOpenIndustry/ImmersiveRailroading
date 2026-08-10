@@ -40,6 +40,7 @@ public class TrackExtraGui implements IScreen {
     private RailSettings.Mutable settings;
     private RollAndOffsetInfo.Mutable rollAndOffsetInfoCache;
     private int targetGuiOpenType;
+    private boolean unlockGuiTurnDegree;
     private boolean edited;
     private boolean editLeft;
     private final double length;
@@ -85,7 +86,9 @@ public class TrackExtraGui implements IScreen {
     private TrackExtraGui(ItemStack stack, TileRailPreview te) {
         stack = stack.copy();
         this.settings = RailSettings.from(stack).mutable();
-        this.targetGuiOpenType = new ItemTrackBlueprint.Data(stack).guiOpenType;
+        ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
+        this.targetGuiOpenType = data.guiOpenType;
+        this.unlockGuiTurnDegree = data.unlockGuiTurnDegree;
         this.te = te;
 
         if(this.te != null) {//TODO:Switch and multiSwitch support
@@ -524,30 +527,28 @@ public class TrackExtraGui implements IScreen {
         }
 
         if (this.te != null) {
-            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
+            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
 
             //Also update client Item to update Rail information
             ItemStack clientStack = te.getItem();
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
-            data.guiOpenType = targetGuiOpenType;
-            data.write();
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
             te.setItem(clientStack, MinecraftClient.getPlayer());
         } else {
-            new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
+            new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
 
             //Also update client Item to update Rail information
             ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(clientStack);
-            data.guiOpenType = targetGuiOpenType;
-            data.write();
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
             MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
         }
     }
 
     @Override
     public void draw(IScreenBuilder builder, RenderState state) {
+        GUIHelpers.drawRect(0, 0, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), 0xCC000000);
+
         int height = 20;
         double xScale = 200;
         double rollYScale = height * 1.5 / rollMax;

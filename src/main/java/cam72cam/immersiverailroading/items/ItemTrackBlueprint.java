@@ -7,12 +7,8 @@ import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
-import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
-import cam72cam.immersiverailroading.util.BlockUtil;
-import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
@@ -24,6 +20,8 @@ import cam72cam.mod.world.World;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static cam72cam.immersiverailroading.util.TrackSnapUtil.applySnapAndAdjust;
 
 public class ItemTrackBlueprint extends CustomItem {
 	public ItemTrackBlueprint() {
@@ -69,29 +67,31 @@ public class ItemTrackBlueprint extends CustomItem {
 			return ClickResult.ACCEPTED;
 		}
 
-		pos = pos.up();
-		
-		if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-			if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() < 0.5) {
-				pos = pos.down();
-			}
-		}
+		ItemStack snappedStack = stack.copy();
+		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, snappedStack, true);
+		pos = result.pos();
+		hit = result.hit();
+		float yaw = result.yaw();
+		boolean snapped = result.succeeded();
 
 		if (stackInfo.isPreview) {
+			boolean down = false;
 			if (!BlockUtil.canBeReplaced(world, pos, false)) {
 				pos = pos.up();
+				if(hit.y >= 0.5) down = true;
 			}
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
-				te.setup(stack, placementInfo);
+				PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, hit.subtract(0, down ? hit.y + 1 : hit.y, 0), true, snapped);
+				te.setup(snappedStack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
-		PlacementInfo placementInfo = new PlacementInfo(stack, player.getYawHead(), hit.subtract(0, hit.y, 0));
-		RailInfo info = new RailInfo(stack, placementInfo, null);
+		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
+		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
+		RailInfo info = new RailInfo(snappedStack, placementInfo, null);
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;
     }
@@ -131,8 +131,14 @@ public class ItemTrackBlueprint extends CustomItem {
 			tooltip.add(String.format(indented, GuiText.TRACK_RAIL_BED_FILL.toString(settings.railBedFill.getDisplayName())));
 		}
 
-		tooltip.add(GuiText.TRACK_POSITION.toString(""));
-		tooltip.add(String.format(indented, settings.posType));
+		if (settings.nearPointData.posType() == settings.farPointData.posType()) {
+			//The same type on both ends
+			tooltip.add(GuiText.TRACK_POSITION.toString(settings.nearPointData.posType()));
+		} else {
+			tooltip.add(GuiText.TRACK_POSITION_NEAR.toString(settings.nearPointData.posType()));
+			tooltip.add(GuiText.TRACK_POSITION_FAR.toString(settings.farPointData.posType()));
+		}
+
 		if (settings.type.hasSmoothing()) {
 			tooltip.add(String.format(indented, GuiText.TRACK_SMOOTHING.toString(settings.smoothing)));
 		}
@@ -153,17 +159,21 @@ public class ItemTrackBlueprint extends CustomItem {
 	}
 
 	public static class Data extends ItemDataSerializer {
-		// 0 for original gui, 1 for TrackExtraGui
+		// 0 for original gui, 1 for TrackExtraGui, 2 for TrackEndPointGui
 		@TagField
 		public int guiOpenType;
+
+		@TagField
+		public boolean unlockGuiTurnDegree;
 
 		public Data(ItemStack stack) {
 			super(stack);
 		}
 
-		public static void writeTo(ItemStack stack, int targetGuiOpenType) {
+		public static void writeTo(ItemStack stack, int targetGuiOpenType, boolean unlockGuiTurnDegree) {
 			ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
 			data.guiOpenType = targetGuiOpenType;
+			data.unlockGuiTurnDegree = unlockGuiTurnDegree;
 			data.write();
 		}
 	}

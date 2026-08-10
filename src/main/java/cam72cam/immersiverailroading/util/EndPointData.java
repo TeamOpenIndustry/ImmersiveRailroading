@@ -1,37 +1,103 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiText;
+import cam72cam.immersiverailroading.library.TrackYawAlignmentType;
+import cam72cam.immersiverailroading.library.TrackPositionType;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 
 import java.util.function.Consumer;
 
 @TagMapped(EndPointData.TagMapper.class)
 public record EndPointData (
-        float radius) {
+        float radius,
+        Vec3d offset,
+        float pitch,
+        boolean pitchDegreeMode,// If true, pitch stores the angle, otherwise it stores the slope in per mille
+        boolean projectHandle,// If true, control points only moves vertically to get target pitch, otherwise the handles will be rotated to get target pitch
+        TrackPositionType posType,
+        TrackYawAlignmentType posYawType,
+        float posYaw,
+        TrackSnapSettings trackSnapSettings) {
+
     public EndPointData(float radius) {
-        this.radius = radius;
+        this(radius, Vec3d.ZERO, 0f, false, true, TrackPositionType.FIXED, TrackYawAlignmentType.ANGLE_SEGMENTATION, 0f, new TrackSnapSettings());
     }
 
     public static class Mutable {
         @TagField("radius")
         public float radius;
+        @TagField("offset")
+        public Vec3d offset;
+        @TagField("pitch")
+        public float pitch;
+        @TagField("pitchDegreeMode")
+        public boolean pitchDegreeMode;
+        @TagField("projectHandle")
+        public boolean projectHandle;
+        @TagField("pos_type")
+        public TrackPositionType posType;
+        @TagField("pos_yaw_type")
+        public TrackYawAlignmentType posYawType;
+        @TagField("pos_yaw")
+        public float posYaw;
+        @TagField("track_snap_settings")
+        public TrackSnapSettings trackSnapSettings;
 
         public Mutable(EndPointData endPointData) {
             this.radius = endPointData.radius;
+            this.offset = endPointData.offset;
+            this.pitch = endPointData.pitch;
+            this.pitchDegreeMode = endPointData.pitchDegreeMode;
+            this.projectHandle = endPointData.projectHandle;
+            this.posType = endPointData.posType;
+            this.posYawType = endPointData.posYawType;
+            this.posYaw = endPointData.posYaw;
+            this.trackSnapSettings = endPointData.trackSnapSettings;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
             // Defaults
             EndPointData endPointData = new EndPointData(10);
             this.radius = endPointData.radius;
+            this.offset = endPointData.offset;
+            this.pitch = endPointData.pitch;
+            this.pitchDegreeMode = endPointData.pitchDegreeMode;
+            this.projectHandle = endPointData.projectHandle;
+            this.posType = endPointData.posType;
+            this.posYawType = endPointData.posYawType;
+            this.posYaw = endPointData.posYaw;
+            this.trackSnapSettings = endPointData.trackSnapSettings;
 
             TagSerializer.deserialize(data, this);
         }
 
         public EndPointData immutable() {
             return new EndPointData(
-                    radius
+                    radius,
+                    offset,
+                    pitch,
+                    pitchDegreeMode,
+                    projectHandle,
+                    posType,
+                    posYawType,
+                    posYaw,
+                    trackSnapSettings
             );
         }
+    }
+
+    public double getPitchRad() {
+        return pitchDegreeMode ? Math.toRadians(pitch) : Math.atan2(pitch, 1000);
+    }
+
+    public String getPitchSetting() {
+        if(!pitchDegreeMode && projectHandle) return GuiText.LABEL_PITCH_SETTING_COMMON.toString();
+        else if(!pitchDegreeMode) return GuiText.LABEL_PITCH_SETTING_MIX.toString();
+        else if(!projectHandle) return GuiText.LABEL_PITCH_SETTING_DEGREE.toString();
+        ImmersiveRailroading.error("Invalid pitch setting");
+        return "";
     }
 
     public EndPointData.Mutable mutable() {
