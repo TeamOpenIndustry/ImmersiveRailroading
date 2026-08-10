@@ -218,8 +218,8 @@ public class Config {
 		@Range(min = 1, max = 90)
 		public static int AnglePlacementSegmentation = 4;
 
-		@Comment("Enable Legacy Turn")
-		public static boolean EnableLegacyTurn = true;
+		@Comment("Enable Legacy Track Setting Option")
+		public static boolean EnableLegacyTrackSettingOption = true;
 
 		@Comment("Machine power factor (0 means no power required)")
 		@Range(min = 0, max = 10)

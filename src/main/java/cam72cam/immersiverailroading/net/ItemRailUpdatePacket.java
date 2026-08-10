@@ -16,18 +16,22 @@ public class ItemRailUpdatePacket extends Packet {
 	private Vec3i pos;
 	@TagField
 	private int guiOpenType;
+	@TagField
+	public boolean unlockGuiTurnDegree;
 
 	public ItemRailUpdatePacket() { }
 
-	public ItemRailUpdatePacket(RailSettings settings, int guiOpenType) {
+	public ItemRailUpdatePacket(RailSettings settings, int guiOpenType, boolean unlockGuiTurnDegree) {
 		this.settings = settings;
 		this.guiOpenType = guiOpenType;
+		this.unlockGuiTurnDegree = unlockGuiTurnDegree;
 	}
 
-	public ItemRailUpdatePacket(Vec3i tilePreviewPos, RailSettings settings, int guiOpenType) {
+	public ItemRailUpdatePacket(Vec3i tilePreviewPos, RailSettings settings, int guiOpenType, boolean unlockGuiTurnDegree) {
 		this.pos = tilePreviewPos;
 		this.settings = settings;
 		this.guiOpenType = guiOpenType;
+		this.unlockGuiTurnDegree = unlockGuiTurnDegree;
 	}
 
 	@Override
@@ -37,14 +41,14 @@ public class ItemRailUpdatePacket extends Packet {
 			if (tile != null) {
 				ItemStack stack = tile.getItem();
 				settings.write(stack);
-				ItemTrackBlueprint.Data.writeTo(stack, guiOpenType);
+				ItemTrackBlueprint.Data.writeTo(stack, guiOpenType, unlockGuiTurnDegree);
 				tile.setItem(stack, getPlayer());
 			}
 		} else {
 			Player player = this.getPlayer();
 			ItemStack stack = player.getHeldItem(Player.Hand.PRIMARY);
 			settings.write(stack);
-			ItemTrackBlueprint.Data.writeTo(stack, guiOpenType);
+			ItemTrackBlueprint.Data.writeTo(stack, guiOpenType, unlockGuiTurnDegree);
 			player.setHeldItem(Player.Hand.PRIMARY, stack);
 		}
 	}

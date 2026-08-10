@@ -14,10 +14,7 @@ import cam72cam.immersiverailroading.track.BuilderTransferTable;
 import cam72cam.immersiverailroading.track.BuilderTurnTable;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.immersiverailroading.track.TrackBase;
-import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
@@ -40,41 +37,57 @@ public class TrackGui implements IScreen {
 
 	private TileRailPreview te;
 	private int targetGuiOpenType;
-	private Button typeButton;
-	private Slider degreesSlider;
-	private Slider curvositySlider;
-	private CheckBox isPreviewCB;
-	private CheckBox isGradeCrossingCB;
-	private Button gaugeButton;
-	private Button trackButton;
-	private Button posTypeButton;
-	private Button smoothingButton;
-	private Button directionButton;
-	private Button bedTypeButton;
-	private Button bedFillButton;
-    private Button trackExtraGuiButton;
-
-	private Slider transfertableEntryCountSlider;
-	private Slider transfertableEntrySpacingSlider;
-
 	private final List<ItemStack> oreDict;
-
 	private RailSettings.Mutable settings;
-
-	private ListSelector<Gauge> gaugeSelector;
-	private ListSelector<TrackItems> typeSelector;
-	private ListSelector<TrackDefinition>  trackSelector;
-	private ListSelector<ItemStack> railBedSelector;
-	private ListSelector<ItemStack> railBedFillSelector;
 
 	// Length / Radius
 	private TextField lengthInput;
 	private Button lengthLabel;
 
-	// Transition Curve (Cubic Parabola)
-	private TextField nearRadiusInput;
-	private TextField farRadiusInput;
-	private Button transitionRadiusLabel;
+	// Gauge
+	private Button gaugeButton;
+	private ListSelector<Gauge> gaugeSelector;
+
+	// Track Type
+	private Button typeButton;
+	private ListSelector<TrackItems> typeSelector;
+
+	// Turn Angle
+	boolean unlockGuiTurnDegree;
+	private Slider degreesSlider;
+	private TextField degreesInput;
+	private Button degreesInputTypeButton;
+
+	private Slider curvositySlider;
+	private Button smoothingButton;
+	private Button directionButton;
+
+	// Transfer Table
+	private Slider transfertableEntryCountSlider;
+	private Slider transfertableEntrySpacingSlider;
+
+	// Rail Bed
+	private Button bedTypeButton;
+	private ListSelector<ItemStack> railBedSelector;
+
+	// Bed Fill
+	private Button bedFillButton;
+	private ListSelector<ItemStack> railBedFillSelector;
+
+	// Track Model
+	private Button trackButton;
+	private ListSelector<TrackDefinition> trackSelector;
+
+	// Position Type
+	private Button nearPosTypeButton;
+	private Button farPosTypeButton;
+
+	private CheckBox isPreviewCB;
+	private CheckBox isGradeCrossingCB;
+
+	// Other Gui
+	private Button trackExtraGuiButton;
+	private Button trackEndPointGuiButton;
 
 	private double zoom = 1;
 
@@ -90,7 +103,9 @@ public class TrackGui implements IScreen {
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
 		settings = RailSettings.from(stack).mutable();
-		targetGuiOpenType = new ItemTrackBlueprint.Data(stack).guiOpenType;
+		ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
+		targetGuiOpenType = data.guiOpenType;
+		unlockGuiTurnDegree = data.unlockGuiTurnDegree;
 
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
@@ -141,6 +156,7 @@ public class TrackGui implements IScreen {
         });
         this.lengthInput.setFocused(true);
 		lengthInput.setEnabled(!settings.type.isTransitionCurve());
+
 		ytop += height;
 
 		gaugeSelector = new ListSelector<Gauge>(screen, width, 100, height, settings.gauge,
@@ -170,7 +186,7 @@ public class TrackGui implements IScreen {
 		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING)
-						.filter(i -> Config.ConfigBalance.EnableLegacyTurn || i != TrackItems.TURN)
+						.filter(i -> Config.ConfigBalance.EnableLegacyTrackSettingOption || i != TrackItems.TURN)
 						.sorted(Comparator.comparingInt(TrackItems::getOrder))
 						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
 		) {
@@ -179,19 +195,22 @@ public class TrackGui implements IScreen {
 				settings.type = option;
 				settings.pickType = option;
 
-				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-				degreesSlider.setVisible(settings.type.hasQuarters());
-				curvositySlider.setVisible(settings.type.hasCurvosity());
-				smoothingButton.setVisible(settings.type.hasSmoothing());
-				trackExtraGuiButton.setVisible(settings.type.canRoll());
-				directionButton.setVisible(settings.type.hasDirection());
-
 				lengthLabel.setText(getLengthLabelType(settings));
 				lengthInput.setEnabled(!settings.type.isTransitionCurve());
 
-				nearRadiusInput.setVisible(settings.type.isTransitionCurve());
-				farRadiusInput.setVisible(settings.type.isTransitionCurve());
-				transitionRadiusLabel.setVisible(settings.type.isTransitionCurve());
+				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
+
+				degreesSlider.setVisible(settings.type.hasQuarters() && !unlockGuiTurnDegree);
+				degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
+				degreesInputTypeButton.setVisible(settings.type.hasQuarters());
+				degreesSlider.onSlider();
+
+				curvositySlider.setVisible(settings.type.hasCurvosity());
+				smoothingButton.setVisible(settings.type.hasSmoothing());
+				directionButton.setVisible(settings.type.hasDirection());
+
+				trackExtraGuiButton.setVisible(settings.type.canRoll());
+				trackEndPointGuiButton.setVisible(settings.type.canRoll());
 
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -216,6 +235,9 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.smoothing = next(settings.smoothing, hand);
+				if(settings.smoothing == TrackSmoothing.NEITHER && !Config.ConfigBalance.EnableLegacyTrackSettingOption) {
+					settings.smoothing = next(settings.smoothing, hand);
+				}
 				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
 			}
 		};
@@ -252,14 +274,51 @@ public class TrackGui implements IScreen {
 		transfertableEntrySpacingSlider.onSlider();
 		ytop += height;
 
+		degreesInput = new TextField(screen, 25 + xtop, ytop, width - 50, height);
+		degreesInput.setText("" + settings.degrees);
+		degreesInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) {
+				return true;
+			}
+			float val;
+			try {
+				val = Float.parseFloat(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			float max = 90f;
+			float min = 1f;
+			if (val >= min && val <= max) {
+				if(settings.type.isTransitionCurve() && !CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
+					return false;
+				}
+				settings.degrees = val;
+				degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
+				return true;
+			}
+			return false;
+		});
+		degreesInput.setFocused(true);
 
-		this.degreesSlider = new Slider(screen, 25+xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
+		this.degreesSlider = new Slider(screen, 25 + xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
+				if(unlockGuiTurnDegree) {
+					while(settings.type.isTransitionCurve() && !CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), settings.degrees)) {
+						settings.degrees --;
+						if(Math.abs(settings.degrees) < 1e-6) {
+							settings.degrees = 0;
+							break;
+						}
+					}
+					degreesInput.setText("" + settings.degrees);
+					degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+					return;
+				}
 				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
 				if(settings.type.isTransitionCurve()) {
 					boolean shouldReset = false;
-					while(!isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
+					while(!CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
 						shouldReset = true;
 						val -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
 						if(Math.abs(val) < 1e-6) break;
@@ -267,74 +326,23 @@ public class TrackGui implements IScreen {
 					if(shouldReset) degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
 				}
 				settings.degrees = val;
+				degreesInput.setText("" + settings.degrees);
 				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
 			}
 		};
 		degreesSlider.onSlider();
-		ytop += height;
 
-		transitionRadiusLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, GuiText.LABEL_TRANSITION_RADIUS.toString()) {
+		degreesInputTypeButton = new Button(screen, xtop + width - 20, ytop, height, height, "↔") {
 			@Override
 			public void onClick(Player.Hand hand) {
-				float temp = settings.farPointData.radius();
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = settings.nearPointData.radius());
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = temp);
-
-				settings.length = (int) temp;
-				nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
-				farRadiusInput.setText("" + (int) settings.farPointData.radius());
+				unlockGuiTurnDegree = !unlockGuiTurnDegree;
+				degreesInput.setVisible(unlockGuiTurnDegree);
+				degreesSlider.setVisible(!unlockGuiTurnDegree);
+				if(!unlockGuiTurnDegree) degreesSlider.onSlider();
 			}
 		};
-		transitionRadiusLabel.setTooltip(List.of(GuiText.LABEL_SWAP_RADIUS.toString()));
 
-		nearRadiusInput = new TextField(screen, xtop + width / 2 + 10, ytop, (width / 2 - 10) / 2, height);
-		nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
-		nearRadiusInput.setValidator(s -> {
-			if (s == null || s.length() == 0) {
-				return true;
-			}
-			int val;
-			try {
-				val = Integer.parseInt(s);
-			} catch (NumberFormatException e) {
-				if(s.equals("-")) return true;
-				return false;
-			}
-			int max = 1000;
-
-			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(val, settings.farPointData.radius(), settings.degrees)) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = val);
-				return true;
-			}
-
-			return false;
-		});
-		nearRadiusInput.setFocused(true);
-
-		farRadiusInput = new TextField(screen, xtop + width / 2 + 10 + (width / 2 - 10) / 2, ytop, (width / 2 - 10) / 2, height);
-		farRadiusInput.setText("" + (int) settings.farPointData.radius());
-		farRadiusInput.setValidator(s -> {
-			if (s == null || s.length() == 0) {
-				return true;
-			}
-			int val;
-			try {
-				val = Integer.parseInt(s);
-			} catch (NumberFormatException e) {
-				if(s.equals("-")) return true;
-				return false;
-			}
-			int max = 1000;
-
-			if (val > -1e-6 && val <= max && isCubicParabolaInputValid(settings.nearPointData.radius(), val, settings.degrees)) {
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = val);
-				return true;
-			}
-
-			return false;
-		});
-		farRadiusInput.setFocused(true);
-
+		ytop += height;
 
 		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
 			@Override
@@ -347,12 +355,14 @@ public class TrackGui implements IScreen {
 		ytop += height;
 
 		directionButton.setVisible(settings.type.hasDirection());
-		degreesSlider.setVisible(settings.type.hasQuarters());
+
+		degreesSlider.setVisible(settings.type.hasQuarters() && !unlockGuiTurnDegree);
+		degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
+		degreesInputTypeButton.setVisible(settings.type.hasQuarters());
+
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
-		nearRadiusInput.setVisible(settings.type.isTransitionCurve());
-		farRadiusInput.setVisible(settings.type.isTransitionCurve());
-		transitionRadiusLabel.setVisible(settings.type.isTransitionCurve());
+
 		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 
@@ -416,11 +426,18 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		posTypeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_POSITION.toString(settings.posType)) {
+		nearPosTypeButton = new Button(screen, xtop, ytop, width / 2, height, GuiText.SELECTOR_POSITION_NEAR.toString(settings.nearPointData.posType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.posType = next(settings.posType, hand);
-				posTypeButton.setText(GuiText.SELECTOR_POSITION.toString(settings.posType));
+				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posType = next(settings.nearPointData.posType(), hand));
+				nearPosTypeButton.setText(GuiText.SELECTOR_POSITION_NEAR.toString(settings.nearPointData.posType()));
+			}
+		};
+		farPosTypeButton = new Button(screen, xtop + width / 2, ytop, width / 2, height, GuiText.SELECTOR_POSITION_FAR.toString(settings.farPointData.posType())) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				settings.farPointData = settings.farPointData.with(mutable -> mutable.posType = next(settings.farPointData.posType(), hand));
+				farPosTypeButton.setText(GuiText.SELECTOR_POSITION_FAR.toString(settings.farPointData.posType()));
 			}
 		};
 		ytop += height;
@@ -441,7 +458,21 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, (int) (GUIHelpers.getScreenHeight()*0.75 - height * 2), width / 2, height, GuiText.TRACK_MAIN_TO_EXTRA.toString()) {
+		trackEndPointGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4, width / 2, height, GuiText.TRACK_MAIN_TO_END_POINT.toString()) {
+			@Override
+			public void onClick(Player.Hand hand) {
+				targetGuiOpenType = 2;
+				onClose();
+				if (te != null) {
+					GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
+				} else {
+					GuiTypes.RAIL.open(MinecraftClient.getPlayer());
+				}
+			}
+		};
+		trackEndPointGuiButton.setVisible(settings.type.canRoll());
+
+		trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height, width / 2, height, GuiText.TRACK_MAIN_TO_EXTRA.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				targetGuiOpenType = 1;
@@ -485,19 +516,19 @@ public class TrackGui implements IScreen {
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
 
 				// Update client data here in order to avoid networking lag
 				ItemStack clientStack = te.getItem();
 				settings.immutable().write(clientStack);
-				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType);
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
 				te.setItem(clientStack, MinecraftClient.getPlayer());
 			} else {
-				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType).sendToServer();
+				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
 
 				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
 				settings.immutable().write(clientStack);
-				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType);
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
 				MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
 			}
 		}
@@ -653,14 +684,6 @@ public class TrackGui implements IScreen {
 			}
 			model.render(state);
 		}
-	}
-
-	private static boolean isCubicParabolaInputValid(double startRadius, double endRadius, double angleDeg) {
-		if(Math.abs(startRadius) < 1e-6 && Math.abs(endRadius) < 1e-6) return false;
-		if(Math.abs(startRadius) < 1e-6 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(angleDeg);
-		if(startRadius > 0.5 && Math.abs(endRadius) < 1e-6) return CubicCurve.isCubicParabolaValid(angleDeg);
-		if(startRadius > 0.5 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(startRadius, endRadius, angleDeg);
-		return false;
 	}
 
 	private static String getLengthLabelType(RailSettings.Mutable settings) {
