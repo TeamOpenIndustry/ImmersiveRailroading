@@ -162,7 +162,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						allTopPositions.put(gag, currentTopPositions);
 
 					} else if(isNew){//legacy, will be dropped
-						bedHeights.put(gag, (float) (height + Math.max(0, relHeight - 0.1)));
+
+
+						bedHeights.put(gag, (float) (height + Math.max(0, relHeight)));
 						railHeights.put(gag, (float) relHeight);
 						trackBlockPositions.add(gag);
 					}
