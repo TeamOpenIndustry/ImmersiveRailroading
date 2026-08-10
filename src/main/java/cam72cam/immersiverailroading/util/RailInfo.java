@@ -82,7 +82,9 @@ public class RailInfo {
 				this.customInfo.direction
 		};
 		String id = Arrays.toString(props);
-		if (!placementInfo.placementPosition.equals(customInfo.placementPosition) || this.settings.nearPointData.posType() != TrackPositionType.FIXED) {
+		if (!placementInfo.placementPosition.equals(customInfo.placementPosition)
+				|| this.settings.nearPointData.posType() != TrackPositionType.FIXED
+				|| this.settings.farPointData.posType() != TrackPositionType.FIXED) {
 			id += placementInfo.placementPosition.subtract(customInfo.placementPosition);
 		}
 		if (placementInfo.control != null) {
