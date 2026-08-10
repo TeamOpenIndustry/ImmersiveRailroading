@@ -15,6 +15,7 @@ import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.*;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.render.opengl.RenderState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -554,5 +555,12 @@ public class TrackEndPointGui implements IScreen {
         farYawSnapCB.setVisible(far);
         farPitchSnapCB.setVisible(far);
         farRollSnapCB.setVisible(far);
+    }
+
+    @Override
+    public void draw(IScreenBuilder builder, RenderState state) {
+        GUIHelpers.drawRect(GUIHelpers.getScreenWidth() - 200 + 30, 0, 200 - 30, GUIHelpers.getScreenHeight(), 0xEE000000);
+        GUIHelpers.drawRect(0, 0, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), 0xCC000000);
+        GUIHelpers.drawRect(0, 0, 200 - 30, GUIHelpers.getScreenHeight(), 0xEE000000);
     }
 }

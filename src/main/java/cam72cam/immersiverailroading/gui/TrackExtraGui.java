@@ -547,6 +547,8 @@ public class TrackExtraGui implements IScreen {
 
     @Override
     public void draw(IScreenBuilder builder, RenderState state) {
+        GUIHelpers.drawRect(0, 0, GUIHelpers.getScreenWidth(), GUIHelpers.getScreenHeight(), 0xCC000000);
+
         int height = 20;
         double xScale = 200;
         double rollYScale = height * 1.5 / rollMax;
