@@ -197,18 +197,20 @@ public class TrackGui implements IScreen {
 
 				lengthLabel.setText(getLengthLabelType(settings));
 				lengthInput.setEnabled(!settings.type.isTransitionCurve());
+
 				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
+
 				degreesSlider.setVisible(settings.type.hasQuarters() && !unlockGuiTurnDegree);
 				degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
-				degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
 				degreesInputTypeButton.setVisible(settings.type.hasQuarters());
+				degreesSlider.onSlider();
+
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
-				trackExtraGuiButton.setVisible(settings.type.canRoll());
-				trackEndPointGuiButton.setVisible(settings.type.canRoll());
 				directionButton.setVisible(settings.type.hasDirection());
 
-				degreesSlider.onSlider();
+				trackExtraGuiButton.setVisible(settings.type.canRoll());
+				trackEndPointGuiButton.setVisible(settings.type.canRoll());
 
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -353,11 +355,14 @@ public class TrackGui implements IScreen {
 		ytop += height;
 
 		directionButton.setVisible(settings.type.hasDirection());
+
 		degreesSlider.setVisible(settings.type.hasQuarters() && !unlockGuiTurnDegree);
 		degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
 		degreesInputTypeButton.setVisible(settings.type.hasQuarters());
+
 		curvositySlider.setVisible(settings.type.hasCurvosity());
 		smoothingButton.setVisible(settings.type.hasSmoothing());
+
 		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
 
