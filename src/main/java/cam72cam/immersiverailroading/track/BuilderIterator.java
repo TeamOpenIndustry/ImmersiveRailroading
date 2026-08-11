@@ -266,7 +266,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Vec3d up = normal.normalize();
 
 		Vec3d right = up.crossProduct(new Vec3d(0, 1, 0));
-		if (right.lengthSquared() < 1e-12) { // 法线刚好垂直（与Y平行），换世界Z
+		if (right.lengthSquared() < 1e-12) {
 			right = up.crossProduct(new Vec3d(0, 0, 1));
 		}
 		right = right.normalize();
@@ -407,7 +407,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
 								length, true, info.settings.gauge.value());
 
-				correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));// TODO: pitch fix only works when pivot is on rail face yet
+				// TODO: pitch fix only works best when pivot is on rail face yet, can we fix it?
+				correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
 				correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
 
 				//Mid

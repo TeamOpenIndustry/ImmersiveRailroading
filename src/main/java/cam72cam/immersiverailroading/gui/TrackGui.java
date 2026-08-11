@@ -95,7 +95,8 @@ public class TrackGui implements IScreen {
 	private Button trackExtraGuiButton;
 	private Button trackEndPointGuiButton;
 
-	private double zoom = 1;
+	private Slider zoomSlider;
+	private double zoom = 0.5;
 
 	public TrackGui() {
 		this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY));
@@ -214,9 +215,6 @@ public class TrackGui implements IScreen {
 				curvositySlider.setVisible(settings.type.hasCurvosity());
 				smoothingButton.setVisible(settings.type.hasSmoothing());
 				directionButton.setVisible(settings.type.hasDirection());
-
-				trackExtraGuiButton.setVisible(settings.type.canRoll());
-				trackEndPointGuiButton.setVisible(settings.type.canRoll());
 
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
@@ -476,7 +474,6 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		trackEndPointGuiButton.setVisible(settings.type.canRoll());
 
 		trackExtraGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height, width / 2, height, GuiText.TRACK_MAIN_TO_EXTRA.toString()) {
 			@Override
@@ -490,43 +487,19 @@ public class TrackGui implements IScreen {
 				}
 			}
 		};
-		trackExtraGuiButton.setVisible(settings.type.canRoll());
 
-
-		bedThicknessLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 2, width / 4, height, "Bed Thickness") {};
-		bedThicknessInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 2, width / 4, height);
-		bedThicknessInput.setText("" + settings.trackFaceTransSetting.bedThickness());
-		bedThicknessInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
-			float val;
-			try {
-				val = Float.parseFloat(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			float max = 1f;
-			float min = 0f;
-			if (val >= min && val <= max) {
-				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.bedThickness = val);
-				return true;
-			}
-			return false;
-		});
-		bedThicknessInput.setFocused(true);
-
-		trackFaceTransTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 3, width / 2, height, "test " + settings.trackFaceTransSetting.facePivotType()) {
+		trackFaceTransTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 2, width / 2 + width / 4, height, GuiText.SELECTOR_TRACK_PIVOT_TYPE.toString(settings.trackFaceTransSetting.facePivotType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.facePivotType = next(settings.trackFaceTransSetting.facePivotType(), hand));
-				this.setText("test " + settings.trackFaceTransSetting.facePivotType());
+				this.setText(GuiText.SELECTOR_TRACK_PIVOT_TYPE.toString(settings.trackFaceTransSetting.facePivotType()));
 			}
 		};
 
-		trackFaceOffsetHeightLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 4, width / 4, height, "Pivot Offset") {};
-		trackFaceOffsetHeightInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 4, width / 4, height);
-		trackFaceOffsetHeightInput.setText("" + settings.trackFaceTransSetting.facePivotOffset().y);
+		trackFaceOffsetHeightLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 3, width / 2, height, GuiText.LABEL_TRACK_PIVOT_OFFSET.toString()) {};
+		trackFaceOffsetHeightLabel.setEnabled(false);
+		trackFaceOffsetHeightInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 3, width / 4, height);
+		trackFaceOffsetHeightInput.setText("" + (float) settings.trackFaceTransSetting.facePivotOffset().y);
 		trackFaceOffsetHeightInput.setValidator(s -> {
 			if (s == null || s.isEmpty()) {
 				return true;
@@ -547,8 +520,32 @@ public class TrackGui implements IScreen {
 		});
 		trackFaceOffsetHeightInput.setFocused(true);
 
-		Slider zoom_slider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight()*0.75 - height),
-										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, 1, true) {
+		bedThicknessLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 4, width / 2, height, GuiText.LABEL_BED_THICKNESS.toString()) {};
+		bedThicknessLabel.setEnabled(false);
+		bedThicknessInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 4, width / 4, height);
+		bedThicknessInput.setText("" + (float) settings.trackFaceTransSetting.bedThickness());
+		bedThicknessInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) {
+				return true;
+			}
+			float val;
+			try {
+				val = Float.parseFloat(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			float max = 1f;
+			float min = 0f;
+			if (val >= min && val <= max) {
+				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.bedThickness = val);
+				return true;
+			}
+			return false;
+		});
+		bedThicknessInput.setFocused(true);
+
+		zoomSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight() * 0.75 - height),
+										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, zoom, true) {
 			@Override
 			public void onSlider() {
 				zoom = this.getValue();
@@ -564,6 +561,17 @@ public class TrackGui implements IScreen {
 		trackSelector.setVisible(false);
 		railBedSelector.setVisible(false);
 		railBedFillSelector.setVisible(false);
+
+		trackEndPointGuiButton.setVisible(isVisible);
+		trackExtraGuiButton.setVisible(isVisible);
+
+		trackFaceTransTypeButton.setVisible(isVisible);
+		trackFaceOffsetHeightLabel.setVisible(isVisible);
+		trackFaceOffsetHeightInput.setVisible(isVisible);
+		bedThicknessLabel.setVisible(isVisible);
+		bedThicknessInput.setVisible(isVisible);
+
+		zoomSlider.setVisible(isVisible);
 
 		selector.setVisible(!isVisible);
 	}
