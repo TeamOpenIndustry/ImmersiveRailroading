@@ -30,7 +30,7 @@ public class RailBaseRender {
 				model.addItemBlock(info.settings.railBed, new Matrix4()
 						.translate(basePos.x, basePos.y, basePos.z)
 						.multiply(matrix4),
-                        bedFace != null ? bedFace.offset(basePos) : null
+                        bedFace != null ? bedFace.offset(new Vec3d(basePos)) : null
 				);
 			}
 		}
