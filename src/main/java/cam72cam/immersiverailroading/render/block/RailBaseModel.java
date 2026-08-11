@@ -53,7 +53,7 @@ public class RailBaseModel {
 
 		Matrix4 bedblockMatrix4;
 		if(bedHeight > 0) bedblockMatrix4 = new Matrix4().scale(1, bedHeight, 1);
-		else if(bedHeight == 0) bedblockMatrix4 = new Matrix4().scale(1, 1e-4, 1);
+		else if(bedHeight == 0) bedblockMatrix4 = new Matrix4().scale(1, 1e-3, 1);
 		else bedblockMatrix4 = new Matrix4().translate(0, -bedHeight, 0).scale(1, 1 + bedHeight, 1);
 
 		if (augment != null) {

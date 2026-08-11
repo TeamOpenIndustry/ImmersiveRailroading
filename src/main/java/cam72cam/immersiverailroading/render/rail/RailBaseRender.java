@@ -18,19 +18,19 @@ public class RailBaseRender {
 		if (!info.settings.railBed.isEmpty()) {
 			for (TrackBase base : tracks) {
 				Vec3i basePos = base.getPos();
-				float height = base.getBedHeight();
-				Plane plane = base.getBedFace();
+				float bedHeight = base.getBedHeight();
+				Plane bedFace = base.getBedFace();
 
-				if (plane != null) height = 1;
+				if (bedFace != null) bedHeight = 1;
 				Matrix4 matrix4;
-				if(height > 0) matrix4 = new Matrix4().scale(1, height, 1);
-				else if(height == 0) matrix4 = new Matrix4().scale(1, 1e-4, 1);
-				else matrix4 = new Matrix4().translate(0, -height, 0).scale(1, 1 + height, 1);
+				if(bedHeight > 0) matrix4 = new Matrix4().scale(1, bedHeight, 1);
+				else if(bedHeight == 0) matrix4 = new Matrix4().scale(1, 1e-3, 1);
+				else matrix4 = new Matrix4().translate(0, -bedHeight, 0).scale(1, 1 + bedHeight, 1);
 
 				model.addItemBlock(info.settings.railBed, new Matrix4()
 						.translate(basePos.x, basePos.y, basePos.z)
 						.multiply(matrix4),
-						base.getBedFace()
+                        bedFace != null ? bedFace.offset(basePos) : null
 				);
 			}
 		}
