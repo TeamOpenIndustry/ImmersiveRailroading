@@ -12,7 +12,7 @@ public class PlateItemModel implements ItemRender.IItemModel {
 	@Override
 	public StandardModel getModel(World world, ItemStack stack) {
 		StandardModel model = new StandardModel();
-		model.addColorBlock(Color.GRAY, new Matrix4().translate(0, 0, 0.5).scale(1, 1, 0.03), null);
+		model.addColorBlock(Color.GRAY, new Matrix4().translate(0, 0, 0.5).scale(1, 1, 0.03));
 		return model;
 	}
 }

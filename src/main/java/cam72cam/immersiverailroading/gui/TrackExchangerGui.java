@@ -222,8 +222,7 @@ public class TrackExchangerGui implements IScreen {
 				for (TrackBase base : info.getBuilder(MinecraftClient.getPlayer().getWorld()).getTracksForRender()) {
 					Vec3i basePos = base.getPos();
 					model.addItemBlock(info.settings.railBedFill, new Matrix4()
-							.translate(basePos.x, basePos.y-1, basePos.z),
-							null
+							.translate(basePos.x, basePos.y-1, basePos.z)
 					);
 				}
 				model.render(state);

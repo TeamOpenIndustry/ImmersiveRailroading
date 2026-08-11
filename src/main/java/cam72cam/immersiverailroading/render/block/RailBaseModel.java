@@ -87,7 +87,7 @@ public class RailBaseModel {
 					model.addSnow(8, new Matrix4(), bedFace);
 				}
 			} else {
-				model.addSnow(snow, new Matrix4(), null);
+				model.addSnow(snow, new Matrix4());
 			}
 
 			return model;
