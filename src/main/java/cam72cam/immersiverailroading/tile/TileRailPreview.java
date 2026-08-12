@@ -119,7 +119,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public boolean onClick(Player player, Player.Hand hand, Facing facing, Vec3d hit) {
 		if (player.isCrouching()) {
 			if (getWorld().isServer) {
-				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getRotationYawHead(), hit));
+				this.setPlacementInfo(new PlacementInfo(this.getItem(), player.getRotationYawHead(), hit, true, false));
 			}
 			return false;
 		} else if (getWorld().isClient && !player.getHeldItem(hand).is(IRItems.ITEM_GOLDEN_SPIKE)) {
@@ -148,9 +148,9 @@ public class TileRailPreview extends BlockEntityTickable {
 		return IBoundingBox.INFINITE;
 	}
 
-	public RailInfo getRailRenderInfo() {
+	public RailInfo getRailRenderInfo() {// Not only for render, but also for build!
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
-			info = new RailInfo(item, placementInfo, customInfo);
+			offsetPosition();
 		}
 		return info;
 	}
@@ -158,10 +158,17 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public void markDirty() {
 		super.markDirty();
-        info = new RailInfo(item, placementInfo, customInfo);
+		offsetPosition();
         if (isMulti() && getWorld().isServer) {
 			new PreviewRenderPacket(this).sendToAll();
 		}
+	}
+
+	private void offsetPosition() {
+		PlacementInfo placementInfoOffset = placementInfo.offset(RailSettings.from(item).nearPointData.offset());
+		PlacementInfo customInfoOffset = customInfo == null ? null : customInfo.offset(RailSettings.from(item).farPointData.offset());
+
+		info = new RailInfo(item, placementInfoOffset, customInfoOffset);
 	}
 
 	public boolean isMulti() {
