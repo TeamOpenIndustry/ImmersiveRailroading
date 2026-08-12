@@ -3,10 +3,10 @@ package cam72cam.immersiverailroading.registry;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.entity.EntityBuildableRollingStock;
+import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
-import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.util.floor.NavMesh;
+import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
@@ -14,9 +14,10 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.EntityRegistry;
+import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJGroup;
-import cam72cam.mod.model.obj.VertexBuffer;
+import cam72cam.mod.model.obj.FaceAccessor;
+import cam72cam.mod.model.obj.OBJFace;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.serialization.ResourceCache.GenericByteBuffer;
@@ -29,8 +30,8 @@ import cam72cam.mod.world.World;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -67,7 +68,6 @@ public abstract class EntityRollingStockDefinition {
     public float darken;
     public Identifier modelLoc;
     protected StockModel<?, ?> model;
-    private Vec3d passengerCenter;
     private float bogeyFront;
     private float bogeyRear;
     private float couplerOffsetFront;
@@ -79,15 +79,16 @@ public abstract class EntityRollingStockDefinition {
     private double rearBounds;
     private double heightBounds;
     private double widthBounds;
-    private double passengerCompartmentLength;
-    private double passengerCompartmentWidth;
+    public Vec3d passengerCenter;
+    public Double passengerCompartmentLength;
+    public Double passengerCompartmentWidth;
     private double weight;
     private int maxPassengers;
     private int snowLayers;
     private float interiorLightLevel;
     private boolean hasIndependentBrake;
     private boolean hasPressureBrake;
-    private final Map<ModelComponentType, List<ModelComponent>> renderComponents;
+    private final EnumMap<ModelComponentType, List<ModelComponent>> renderComponents;
     private final List<ItemComponentType> itemComponents;
     private final Function<EntityBuildableRollingStock, float[][]> heightmap;
     private final Map<String, LightDefinition> lights = new HashMap<>();
@@ -106,6 +107,8 @@ public abstract class EntityRollingStockDefinition {
     public List<AnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
     public Map<String, DataBlock> widgetConfig;
+
+    public NavMesh navMesh;
 
     public static class SoundDefinition {
         public final Identifier start;
@@ -316,7 +319,9 @@ public abstract class EntityRollingStockDefinition {
         this.model = createModel();
         this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.shouldRender(x)).collect(Collectors.toList());
 
-        this.renderComponents = new HashMap<>();
+        this.navMesh = new NavMesh(this);
+
+        this.renderComponents = new EnumMap<>(ModelComponentType.class);
         for (ModelComponent component : model.allComponents) {
             renderComponents.computeIfAbsent(component.type, v -> new ArrayList<>())
                     .add(0, component);
@@ -448,14 +453,15 @@ public abstract class EntityRollingStockDefinition {
             for (DataBlock alternate : alternates) {
                 alternate.getValueMap().forEach((key, value) -> textureNames.put(value.asString(), key));
             }
-        } catch (java.io.FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             ImmersiveRailroading.catching(ex);
         }
 
         modelLoc = data.getValue("model").asIdentifier();
 
         DataBlock passenger = data.getBlock("passenger");
-        passengerCenter = new Vec3d(0, passenger.getValue("center_y").asDouble() - 0.35, passenger.getValue("center_x").asDouble()).scale(internal_model_scale);
+
+        passengerCenter = new Vec3d(-passenger.getValue("center_x").asDouble(), passenger.getValue("center_y").asDouble() - 0.35, 0).scale(internal_model_scale);
         passengerCompartmentLength = passenger.getValue("length").asDouble() * internal_model_scale;
         passengerCompartmentWidth = passenger.getValue("width").asDouble() * internal_model_scale;
         maxPassengers = passenger.getValue("slots").asInteger();
@@ -599,35 +605,137 @@ public abstract class EntityRollingStockDefinition {
         return renderComponents.get(name);
     }
 
-    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d pos, boolean shouldSit) {
-        double gs = gauge.scale();
-        Vec3d passengerCenter = this.passengerCenter.scale(gs);
-        pos = pos.subtract(passengerCenter);
-        if (pos.z > this.passengerCompartmentLength * gs) {
-            pos = new Vec3d(pos.x, pos.y, this.passengerCompartmentLength * gs);
+    public Vec3d calculateCorrectedMovement(EntityRollingStock stock, Gauge gauge, Vec3d passengerOffset, Vec3d movement) {
+        if (movement.length() == 0) {
+            return movement;
         }
 
-        if (pos.z < -this.passengerCompartmentLength * gs) {
-            pos = new Vec3d(pos.x, pos.y, -this.passengerCompartmentLength * gs);
+        double scale = gauge.scale();
+        // Flip Cords from game (-Z forward) to model (-X forward)
+        Vec3d flippedOffset = passengerOffset.rotateYaw(-90);
+        Vec3d flippedMovement = movement.rotateYaw(-90);
+        Vec3d flippedTarget = flippedOffset.add(flippedMovement);
+
+        // Try to slide along closed doors
+        Vec3d doorTangent;
+        if ((doorTangent = getCollidingDoorTangent(stock, gauge, flippedOffset, flippedTarget)) != null) {
+            doorTangent = doorTangent.rotateYaw(90);
+            double proj = movement.dotProduct(doorTangent);
+            return doorTangent.scale(proj);
         }
 
-        if (Math.abs(pos.x) > this.passengerCompartmentWidth / 2 * gs) {
-            pos = new Vec3d(Math.copySign(this.passengerCompartmentWidth / 2 * gs, pos.x), pos.y, pos.z);
+        if (navMesh.isPointOnFloor(flippedTarget, scale)) {
+            return movement;
         }
 
-        pos = new Vec3d(pos.x, passengerCenter.y - (shouldSit ? 0.75 : 0), pos.z + passengerCenter.z);
+        //Try to slide along the edge (if present)
+        Vec3d clamped = navMesh.closestBoundaryPoint(flippedTarget, scale);
+        if (clamped == null) {
+            return movement;
+        }
+        //Flip back
+        return clamped.subtract(flippedOffset).rotateYaw(90);
+    }
 
-        return pos;
+    //Trying to query closed doors we're colliding and get their tangent to restrict moving
+    private Vec3d getCollidingDoorTangent(EntityRollingStock stock, Gauge gauge, Vec3d start, Vec3d end) {
+        // Maybe filter by nearest door?
+        List<Door<?>> doors = getModel().getDoors().stream()
+                .filter(d -> d.type == Door.Types.CONNECTING || d.type == Door.Types.INTERNAL)
+                .filter(d -> !d.isOpen(stock)).collect(Collectors.toUnmodifiableList());
+
+        boolean intersects = false;
+        Door<?> intersectingDoor = null;
+
+        for (Door<?> door : doors) {
+            IBoundingBox box = IBoundingBox.from(
+                    door.part.min.scale(gauge.scale()),
+                    door.part.max.scale(gauge.scale())
+            );
+            intersects = box.intersectsSegment(start.add(0, 1, 0), end.add(0, 1, 0));
+            if (intersects) {
+                intersectingDoor = door;
+                break;
+            }
+        }
+
+        if (intersects) {
+            Vec3d p1 = intersectingDoor.part.min.scale(gauge.scale());
+            Vec3d p2 = intersectingDoor.part.max.scale(gauge.scale());
+
+            p2 = new Vec3d(p2.x, p1.y, p2.z);
+
+            return p2.subtract(p1).normalize();
+        }
+
+        return null;
+    }
+
+    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d passengerOffset, boolean shouldSit, boolean isNewlyMounted) {
+        // Flip coords
+        passengerOffset = passengerOffset.rotateYaw(-90);
+
+        float searchRange = isNewlyMounted ? Float.POSITIVE_INFINITY : NavMesh.RANGE * (float) gauge.scale();
+        IBoundingBox rayBox = IBoundingBox.from(
+                passengerOffset.subtract(searchRange, searchRange, searchRange),
+                passengerOffset.add(searchRange, searchRange, searchRange)
+        );
+        List<OBJFace> nearby = new ArrayList<>();
+        navMesh.queryBVH(navMesh.root, rayBox, nearby, gauge.scale());
+        if (nearby.isEmpty()) {
+            return passengerOffset.rotateYaw(90);
+        }
+
+        // If a player is already in bounds, we want to find the highest result, otherwise the nearest result
+        Vec3d highest = null;
+        double highestY = Double.NEGATIVE_INFINITY;
+        Vec3d nearest = null;
+        double nearestDistSq = Double.MAX_VALUE;
+
+        for (OBJFace face : nearby) {
+            Vec3d p0 = face.vertex0.pos;
+            Vec3d p1 = face.vertex1.pos;
+            Vec3d p2 = face.vertex2.pos;
+
+            Vec3d pointOnTri = MathUtil.closestPointOnTriangle(passengerOffset, p0, p1, p2);
+
+            // For newly mounted players we always want the nearest result
+            if (!isNewlyMounted && MathUtil.pointInTriangleXZ(passengerOffset, p0, p1, p2)) {
+                Double h = MathUtil.heightAtXZ(passengerOffset, p0, p1, p2);
+                if (h != null) {
+                    if (h > highestY && h - passengerOffset.y <= searchRange) {
+                        highestY = h;
+                        highest = new Vec3d(passengerOffset.x, h, passengerOffset.z);
+                    }
+                    continue;
+                }
+                // (Near-)Vertical face that still has an XZ footprint: fall through to nearest
+            }
+
+            //Not directly within horizontal bounds, keep the nearest fallback
+            //Use normal Y for mounting, and 0 for internal moving (mostly going across stairs)
+            double distSq = passengerOffset
+                    .distanceToSquared(new Vec3d(pointOnTri.x, isNewlyMounted ? pointOnTri.y : 0, pointOnTri.z));
+            if (distSq < nearestDistSq) {
+                nearestDistSq = distSq;
+                nearest = pointOnTri;
+            }
+        }
+
+        Vec3d closestPoint = highest != null ? highest : nearest;
+        if (closestPoint == null) {
+            closestPoint = passengerOffset;
+        }
+        // Flip coords back
+        return closestPoint.rotateYaw(90);
     }
 
     public boolean isAtFront(Gauge gauge, Vec3d pos) {
-        pos = pos.subtract(passengerCenter.scale(gauge.scale()));
-        return pos.z >= this.passengerCompartmentLength * gauge.scale();
+        return pos.z >= (this.passengerCompartmentLength - this.passengerCenter.x) * gauge.scale();
     }
 
     public boolean isAtRear(Gauge gauge, Vec3d pos) {
-        pos = pos.subtract(passengerCenter.scale(gauge.scale()));
-        return pos.z <= -this.passengerCompartmentLength * gauge.scale();
+        return pos.z <= (-this.passengerCompartmentLength - this.passengerCenter.x) * gauge.scale();
     }
 
     public List<ItemComponentType> getItemComponents() {
@@ -694,33 +802,31 @@ public abstract class EntityRollingStockDefinition {
                     .collect(Collectors.toList());
             data = new float[components.size() * xRes * zRes];
 
-            VertexBuffer vb = def.model.vbo.buffer.get();
+            FaceAccessor visitor = def.model.getFaceAccessor();
 
             for (int i = 0; i < components.size(); i++) {
                 ModelComponent rc = components.get(i);
                 int idx = i * xRes * zRes;
                 for (String group : rc.modelIDs) {
-                    OBJGroup faces = def.model.groups.get(group);
+                    FaceAccessor grouped = visitor.getSubByGroup(group);
 
-                    for (int face = faces.faceStart; face <= faces.faceStop; face++) {
+                    for (FaceAccessor face : grouped) {
                         Path2D path = new Path2D.Float();
-                        float fheight = 0;
-                        boolean first = true;
-                        for (int point = 0; point < vb.vertsPerFace; point++) {
-                            int vertex = face * vb.vertsPerFace * vb.stride + point * vb.stride;
-                            float vertX = vb.data[vertex + 0];
-                            float vertY = vb.data[vertex + 1];
-                            float vertZ = vb.data[vertex + 2];
-                            vertX += def.frontBounds;
-                            vertZ += def.widthBounds / 2;
-                            if (first) {
-                                path.moveTo(vertX * ratio, vertZ * ratio);
-                                first = false;
-                            } else {
-                                path.lineTo(vertX * ratio, vertZ * ratio);
-                            }
-                            fheight += vertY / vb.vertsPerFace;
-                        }
+                        float faceHeight = 0;
+
+                        double v0x = (face.v0.x() + def.frontBounds) * ratio;
+                        double v0z = (face.v0.z() + def.widthBounds / 2) * ratio;
+                        double v1x = (face.v1.x() + def.frontBounds) * ratio;
+                        double v1z = (face.v1.z() + def.widthBounds / 2) * ratio;
+                        double v2x = (face.v2.x() + def.frontBounds) * ratio;
+                        double v2z = (face.v2.z() + def.widthBounds / 2) * ratio;
+
+                        path.moveTo(v0x, v0z);
+                        path.lineTo(v1x, v1z);
+                        path.lineTo(v2x, v2z);
+
+                        faceHeight = faceHeight + (face.v0.y() + face.v1.y() + face.v2.y()) / 3;
+
                         Rectangle2D bounds = path.getBounds2D();
                         if (bounds.getWidth() * bounds.getHeight() < 1) {
                             continue;
@@ -730,7 +836,7 @@ public abstract class EntityRollingStockDefinition {
                                 float relX = ((xRes - 1) - x);
                                 float relZ = z;
                                 if (bounds.contains(relX, relZ) && path.contains(relX, relZ)) {
-                                    float relHeight = fheight / (float) def.heightBounds;
+                                    float relHeight = faceHeight / (float) def.heightBounds;
                                     relHeight = ((int) Math.ceil(relHeight * precision)) / (float) precision;
                                     data[idx + x * zRes + z] = Math.max(data[idx + x * zRes + z], relHeight);
                                 }
@@ -958,5 +1064,4 @@ public abstract class EntityRollingStockDefinition {
     public int getSnowLayers() {
         return snowLayers;
     }
-
 }
