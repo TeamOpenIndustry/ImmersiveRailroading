@@ -30,7 +30,10 @@ public class MultiPreviewRender {
 
                 if (GlobalRender.getCameraPos(partialTicks).distanceTo(placementPosition) < GlobalRender.getRenderDistance() + 50) {
                     RenderState placementState = state.clone().translate(placementPosition);
-                    placementState.translate(0, -preview.getOriginPlacementInfoPos().y, 0);//TODO: is this enough?
+
+                    if(info.placementInfo.placementPosition.y + preview.getOriginPlacementInfoPos().y < -1) placementState.translate(0, Math.ceil(info.placementInfo.placementPosition.y + preview.getOriginPlacementInfoPos().y), 0);// TODO: wired edge case, it works now but is this enough?
+                    placementState.translate(0, -preview.getOriginPlacementInfoPos().y, 0);// TODO: is this enough?
+
                     RailRender.render(info, null, preview.getWorld(), builder.pos, true, placementState);
                 }
             }

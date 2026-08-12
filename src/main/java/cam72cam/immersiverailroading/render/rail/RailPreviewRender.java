@@ -26,10 +26,13 @@ public class RailPreviewRender {
             }
             // Move to specified position
             Vec3d placementPosition = info.placementInfo.placementPosition;
+            if(placementPosition.y < -1) {
+                placementPosition = placementPosition.add(0, Math.ceil(placementPosition.y),0);// TODO: wired edge case, it works now but is this enough?
+            }
             state.translate(placementPosition.x, placementPosition.y, placementPosition.z);
             if (!te.isMulti()) {
                 RailRender.render(info, te.getOriginPlacementInfoPos(), te.getWorld(), te.isAboveRails() ? te.getPos().down() : te.getPos(), true, state);
-            }// TODO: still very wired edge case when info.placementInfo.placementPosition.y is about -1
+            }
             MinecraftClient.endProfiler();
 		});
 
