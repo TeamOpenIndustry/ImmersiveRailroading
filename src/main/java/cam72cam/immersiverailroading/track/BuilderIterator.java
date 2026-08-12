@@ -59,20 +59,19 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			horiz += 2f * info.settings.gauge.scale();
 		}
 		double clamp = 0.17 * info.settings.gauge.scale();
-		float heightOffset = (float) ((info.placementInfo.placementPosition.y) % 1);
 
 		List<VecYPR> path = getPath(0.25);
+		Vec3d placementOffset = info.placementInfo.placementPosition;
+        path.replaceAll(vecYPR -> vecYPR.add(placementOffset));
+
 		VecYPR start = path.getFirst();
 		VecYPR end = path.getLast();
 
-		Vec3d placeOff = new Vec3d(
-				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.x, 1)),
-				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.y, 1)),
-				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
+		Vec3i mainPos = new Vec3i(
+				(int) Math.floor(path.get(path.size() / 2).x),
+				(int) Math.floor(path.get(path.size() / 2).y),
+				(int) Math.floor(path.get(path.size() / 2).z)
 		);
-		int mainX = (int) Math.floor(path.get(path.size() / 2).x + placeOff.x);
-		int mainZ = (int) Math.floor(path.get(path.size() / 2).z + placeOff.z);
-		int mainY = (int) Math.floor(path.get(path.size() / 2).y + placeOff.y);
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale() / 2));
 
 		boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
@@ -90,14 +89,12 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
 
-			gagPos = gagPos.add(0, heightOffset, 0);
-
 			for (double q = -horiz; q <= horiz; q += 0.1) {
 				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());
 
-				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
-				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
-				int posY = (int) Math.floor(gagPos.y + nextUp.y + placeOff.y);
+				int posX = (int) Math.floor(gagPos.x + nextUp.x);
+				int posZ = (int) Math.floor(gagPos.z + nextUp.z);
+				int posY = (int) Math.floor(gagPos.y + nextUp.y);
 				Vec3i gag = new Vec3i(posX, posY, posZ);
 
 				if (true) {
@@ -158,7 +155,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						allTopNormals.put(gag, currentTopNormals);
 
 						List<Vec3d> currentTopPositions = allTopPositions.get(gag) != null ? allTopPositions.get(gag) : new ArrayList<>();
-						currentTopPositions.add(gagPos.add(placeOff).subtract(gag));
+						currentTopPositions.add(gagPos.subtract(gag));
 						allTopPositions.put(gag, currentTopPositions);
 
 					} else if(isNew){//legacy, will be dropped
@@ -174,9 +171,11 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 			}
 			if (!isFlex && endOfTrack) {
-				mainX = (int) Math.floor(gagPos.x + placeOff.x);
-				mainY = (int) Math.floor(gagPos.y + placeOff.y);
-				mainZ = (int) Math.floor(gagPos.z + placeOff.z);
+				mainPos = new Vec3i(
+						(int) Math.floor(gagPos.x),
+						(int) Math.floor(gagPos.y),
+						(int) Math.floor(gagPos.z)
+				);
 			}
 		}
 
@@ -216,18 +215,17 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		}
 
 
-		if (!trackBlockPositions.contains(new Vec3i(mainX, mainY, mainZ))) {
+		if (!trackBlockPositions.contains(mainPos)) {
 			// Try a few different offsets
 			for (Facing value : Facing.values()) {
-				if (trackBlockPositions.contains(new Vec3i(mainX + value.getXMultiplier(), mainY + value.getYMultiplier(), mainZ + value.getZMultiplier()))) {
-					mainX += value.getXMultiplier();
-					mainY += value.getYMultiplier();
-					mainZ += value.getZMultiplier();
+				Vec3i vec = new Vec3i(value.getXMultiplier(), value.getYMultiplier(), value.getZMultiplier());
+				if (trackBlockPositions.contains(mainPos.add(vec))) {
+					mainPos = mainPos.add(vec);
 					break;
 				}
 			}
 		}
-		if (!trackBlockPositions.contains(new Vec3i(mainX, mainY, mainZ))) {
+		if (!trackBlockPositions.contains(mainPos)) {
 			// No luck, code is really borked now.  Throw an exception to help track this.
 			TagCompound debug = new TagCompound();
 			try {
@@ -238,16 +236,15 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			throw new RuntimeException("Invalid track builder " + debug);
 		}
 
-		Vec3i mainPos = new Vec3i(mainX, mainY, mainZ);
 		this.setParentPos(mainPos);
 		TrackRail main = new TrackRail(this, mainPos	);
 		tracks.add(main);
-		main.setRailHeight(railHeights.get(new Vec3i(mainX, mainY, mainZ)));
-		main.setBedHeight(bedHeights.get(new Vec3i(mainX, mainY, mainZ)));
-		main.setBedFace(tileTilt ? planes.get(new Vec3i(mainX, mainY, mainZ)) : null);
+		main.setRailHeight(railHeights.get(mainPos));
+		main.setBedHeight(bedHeights.get(mainPos));
+		main.setBedFace(tileTilt ? planes.get(mainPos) : null);
 
 		for (Vec3i tilePos : positions) {
-			if (tilePos.x == mainX && tilePos.z == mainZ && tilePos.y == mainY) {
+			if (tilePos.equals(mainPos)) {
 				// Skip parent block
 				continue;
 			}

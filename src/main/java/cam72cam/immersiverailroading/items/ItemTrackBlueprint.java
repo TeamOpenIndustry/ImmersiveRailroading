@@ -68,28 +68,26 @@ public class ItemTrackBlueprint extends CustomItem {
 		}
 
 		ItemStack snappedStack = stack.copy();
-		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, snappedStack, true);
+		TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, snappedStack, true, stackInfo.isPreview);
 		pos = result.pos();
 		hit = result.hit();
 		float yaw = result.yaw();
 		boolean snapped = result.succeeded();
 
-		if (stackInfo.isPreview) {
-			boolean down = false;
-			if (!BlockUtil.canBeReplaced(world, pos, false)) {
-				pos = pos.up();
-				if(hit.y >= 0.5) down = true;
-			}
+		if (stackInfo.isPreview) { //TODO: TilePreview RailBase not get offset in so many cases
+			if(!BlockUtil.canBeReplaced(world, pos, false)) return ClickResult.REJECTED;
+
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, hit.subtract(0, down ? hit.y + 1 : hit.y, 0), true, snapped);
+				PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, hit.y % 1, hit.z), true, snapped);
+				// For TilePreview, to update offset properly we need to use Vec3i PlacementInfo, TilePreview will handle offset itself!
 				te.setup(snappedStack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
-		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, hit.subtract(0, hit.y, 0), true, snapped);
+		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, hit.y % 1, hit.z), true, snapped);
 		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
 		RailInfo info = new RailInfo(snappedStack, placementInfo, null);
 		info.build(player, pos);

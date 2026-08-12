@@ -145,7 +145,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	@Override
 	public IBoundingBox getRenderBoundingBox() {
-		return IBoundingBox.INFINITE;
+		return IBoundingBox.INFINITE;// TODO: return real bounding of curve
 	}
 
 	public RailInfo getRailRenderInfo() {// Not only for render, but also for build!
@@ -173,7 +173,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	public boolean isMulti() {
 		if (getRailRenderInfo().getBuilder(getWorld()) instanceof IIterableTrack) {
-			return ((IIterableTrack)getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
+			return ((IIterableTrack) getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
 		}
 		return false;
 	}

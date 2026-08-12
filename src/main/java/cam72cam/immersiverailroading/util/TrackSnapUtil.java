@@ -160,7 +160,7 @@ public class TrackSnapUtil {
 
     //TODO: keep stack info so that we wont lost it after applying snapping
 
-    public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
+    public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear, boolean isPreView) {
         RailSettings stackInfo = RailSettings.from(stack);
         boolean succeeded = false;
         float yaw = player.getRotationYawHead();
@@ -185,7 +185,7 @@ public class TrackSnapUtil {
                 }
 
                 if (pointData.trackSnapSettings().snapHeight()) {
-                    Vec3d offset = new Vec3d(0, Math.abs(hit.y) > 1e-4 ? hit.y : 0, 0);
+                    Vec3d offset = new Vec3d(0, hit.y, 0);
                     EndPointData updated = pointData.with(mutable -> mutable.offset = offset);
 
                     pointData = updated;
@@ -223,8 +223,26 @@ public class TrackSnapUtil {
         }
 
         if (succeeded) {
-            pos = new Vec3i(snapped);
-            hit = snapped.subtract(pos);
+            if(!isPreView) {
+                pos = new Vec3i(snapped);
+                hit = snapped.subtract(pos);
+            } else {// This logic is strongly bind to TilePreview
+                pos = new Vec3i(snapped);
+                pos = pos.up().up();
+
+                if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                        pos = pos.down();
+                    }
+                }
+                if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                        pos = pos.down();
+                    }
+                }
+
+                hit = snapped.subtract(pos);
+            }
         } else {
             pos = pos.up();
             if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
