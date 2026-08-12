@@ -43,7 +43,6 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     private ModelComponent shell;
     private ModelComponent remaining;
     public ModelComponent floor;
-    public ModelComponent collision;
     protected final List<Door<ENTITY>> doors;
     protected final List<Control<ENTITY>> controls;
     protected final List<Readout<ENTITY>> gauges;
@@ -140,7 +139,6 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
         // Parse Floor and Collision Meshes
         this.floor = provider.parse(ModelComponentType.FLOOR);
-        this.collision = provider.parse(ModelComponentType.COLLISION);
 
         parseComponents(provider, def);
         provider.parse(ModelComponentType.IMMERSIVERAILROADING_BASE_COMPONENT);

@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
-import cam72cam.immersiverailroading.floor.NavMesh;
+import cam72cam.immersiverailroading.util.floor.NavMesh;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
@@ -14,7 +14,6 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.EntityRegistry;
-import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.obj.FaceAccessor;
@@ -69,7 +68,6 @@ public abstract class EntityRollingStockDefinition {
     public float darken;
     public Identifier modelLoc;
     protected StockModel<?, ?> model;
-    public Vec3d passengerCenter;
     private float bogeyFront;
     private float bogeyRear;
     private float couplerOffsetFront;
@@ -81,6 +79,7 @@ public abstract class EntityRollingStockDefinition {
     private double rearBounds;
     private double heightBounds;
     private double widthBounds;
+    public Vec3d passengerCenter;
     public Double passengerCompartmentLength;
     public Double passengerCompartmentWidth;
     private double weight;
@@ -462,18 +461,9 @@ public abstract class EntityRollingStockDefinition {
 
         DataBlock passenger = data.getBlock("passenger");
 
-        if (passenger.getValue("center_x") != null && passenger.getValue("center_y") != null) {
-            passengerCenter = new Vec3d(-passenger.getValue("center_x").asDouble(), passenger.getValue("center_y").asDouble() - 0.35, 0).scale(internal_model_scale);
-        }
-
-        if (passenger.getValue("length") != null) {
-            passengerCompartmentLength = passenger.getValue("length").asDouble() * internal_model_scale;
-        }
-
-        if (passenger.getValue("width") != null) {
-            passengerCompartmentWidth = passenger.getValue("width").asDouble() * internal_model_scale;
-        }
-
+        passengerCenter = new Vec3d(-passenger.getValue("center_x").asDouble(), passenger.getValue("center_y").asDouble() - 0.35, 0).scale(internal_model_scale);
+        passengerCompartmentLength = passenger.getValue("length").asDouble() * internal_model_scale;
+        passengerCompartmentWidth = passenger.getValue("width").asDouble() * internal_model_scale;
         maxPassengers = passenger.getValue("slots").asInteger();
         shouldSit = passenger.getValue("should_sit").asBoolean();
 
@@ -596,77 +586,40 @@ public abstract class EntityRollingStockDefinition {
         return renderComponents.get(name);
     }
 
-    // Don't know if this will ever be used
-
-//    public boolean hitsNavCollisionMesh(Gauge gauge, Vec3d passengerOffset, Vec3d movement) {
-//        if (navMesh.collisionRoot == null) {
-//            return false;
-//        }
-//        // Flip coords
-//        passengerOffset = passengerOffset.rotateYaw(-90);
-//        movement = movement.rotateYaw(-90);
-//
-//        passengerOffset = passengerOffset.add(movement);
-//
-//        IBoundingBox rayBox = IBoundingBox.from(
-//                passengerOffset.subtract(0.25f, 0.5f, 0.25f),
-//                passengerOffset.add(0.25f, 0.5f, 0.25f)
-//        );
-//        List<OBJFace> nearby = new ArrayList<>();
-//        navMesh.queryBVH(navMesh.collisionRoot, rayBox, nearby, gauge.scale());
-//
-//        Vec3d rayStart = passengerOffset.add(0, 1, 0);
-//        Vec3d rayDir = movement.normalize();
-//
-//        for (OBJFace tri : nearby) {
-//            Double t = MathUtil.intersectRayTriangle(rayStart, rayDir, tri);
-//            if (t != null) {
-//               return true;
-//            }
-//        }
-//
-//        return false;
-//    }
-
-    // TODO Rename
-    public Vec3d correctMovement(EntityRollingStock stock, Gauge gauge, Vec3d passengerOffset, Vec3d movement) {
+    public Vec3d calculateCorrectedMovement(EntityRollingStock stock, Gauge gauge, Vec3d passengerOffset, Vec3d movement) {
         if (movement.length() == 0) {
             return movement;
         }
 
-        // Flip Cords
+        double scale = gauge.scale();
+        // Flip Cords from game (-Z forward) to model (-X forward)
         Vec3d flippedOffset = passengerOffset.rotateYaw(-90);
         Vec3d flippedMovement = movement.rotateYaw(-90);
-        Vec3d target = flippedOffset.add(flippedMovement);
+        Vec3d flippedTarget = flippedOffset.add(flippedMovement);
 
-        // Slide along closed doors
+        // Try to slide along closed doors
         Vec3d doorTangent;
-        if ((doorTangent = getDoorTangent(stock, flippedOffset, target)) != null) {
+        if ((doorTangent = getCollidingDoorTangent(stock, gauge, flippedOffset, flippedTarget)) != null) {
             doorTangent = doorTangent.rotateYaw(90);
             double proj = movement.dotProduct(doorTangent);
             return doorTangent.scale(proj);
         }
 
-        if (navMesh.isPointOnFloor(target, gauge.scale())) {
+        if (navMesh.isPointOnFloor(flippedTarget, scale)) {
             return movement;
         }
 
-        NavMesh.Edge edge = navMesh.closestBoundaryEdge(flippedOffset);
-        if (edge == null) {
+        //Try to slide along the edge (if present)
+        Vec3d clamped = navMesh.closestBoundaryPoint(flippedTarget, scale);
+        if (clamped == null) {
             return movement;
         }
-
-        Vec3d tangent = edge.end.subtract(edge.start);
-        if (tangent.length() < 1e-6) {
-            return Vec3d.ZERO;
-        }
-        tangent = tangent.normalize().rotateYaw(90);
-
-        double proj = movement.x * tangent.x + movement.y * tangent.y + movement.z * tangent.z;
-        return tangent.scale(proj);
+        //Flip back
+        return clamped.subtract(flippedOffset).rotateYaw(90);
     }
 
-    private Vec3d getDoorTangent(EntityRollingStock stock, Vec3d start, Vec3d end) {
+    //Trying to query closed doors we're colliding and get their tangent to restrict moving
+    private Vec3d getCollidingDoorTangent(EntityRollingStock stock, Gauge gauge, Vec3d start, Vec3d end) {
         // Maybe filter by nearest door?
         List<Door<?>> doors = getModel().getDoors().stream()
                 .filter(d -> d.type == Door.Types.CONNECTING || d.type == Door.Types.INTERNAL)
@@ -677,8 +630,8 @@ public abstract class EntityRollingStockDefinition {
 
         for (Door<?> door : doors) {
             IBoundingBox box = IBoundingBox.from(
-                    door.part.min,
-                    door.part.max
+                    door.part.min.scale(gauge.scale()),
+                    door.part.max.scale(gauge.scale())
             );
             intersects = box.intersectsSegment(start.add(0, 1, 0), end.add(0, 1, 0));
             if (intersects) {
@@ -688,8 +641,8 @@ public abstract class EntityRollingStockDefinition {
         }
 
         if (intersects) {
-            Vec3d p1 = intersectingDoor.part.min;
-            Vec3d p2 = intersectingDoor.part.max;
+            Vec3d p1 = intersectingDoor.part.min.scale(gauge.scale());
+            Vec3d p2 = intersectingDoor.part.max.scale(gauge.scale());
 
             p2 = new Vec3d(p2.x, p1.y, p2.z);
 
@@ -699,53 +652,71 @@ public abstract class EntityRollingStockDefinition {
         return null;
     }
 
-    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d passengerOffset, boolean shouldSit) {
+    public Vec3d correctPassengerBounds(Gauge gauge, Vec3d passengerOffset, boolean shouldSit, boolean isNewlyMounted) {
         // Flip coords
         passengerOffset = passengerOffset.rotateYaw(-90);
 
-        // TODO: check for loop
-        // Added 40m search range just in case
-        for (float searchRange : new float[]{0.5f, 5f, 10f, 40f}) {
-            IBoundingBox rayBox = IBoundingBox.from(
-                    passengerOffset.subtract(searchRange, searchRange, searchRange),
-                    passengerOffset.add(searchRange, searchRange, searchRange)
-            );
-            List<OBJFace> nearby = new ArrayList<>();
-            navMesh.queryBVH(navMesh.root, rayBox, nearby, gauge.scale());
-            if (nearby.isEmpty()) {
-                continue;
-            }
-
-            Vec3d closestPoint = null;
-            double closestDistanceSq = 0;
-            for (OBJFace face : nearby) {
-                Vec3d p0 = face.vertex0.pos;
-                Vec3d p1 = face.vertex1.pos;
-                Vec3d p2 = face.vertex2.pos;
-
-                Vec3d pointOnTri = MathUtil.closestPointOnTriangle(passengerOffset, p0, p1, p2);
-                double distSq = passengerOffset.distanceToSquared(new Vec3d(pointOnTri.x, 0, pointOnTri.z));
-
-                if (closestPoint == null || distSq < closestDistanceSq) {
-                    closestDistanceSq = distSq;
-                    closestPoint = pointOnTri;
-                }
-            }
-
-            // flip coords
-            return closestPoint.rotateYaw(90);
+        float searchRange = isNewlyMounted ? Float.POSITIVE_INFINITY : NavMesh.RANGE * (float) gauge.scale();
+        IBoundingBox rayBox = IBoundingBox.from(
+                passengerOffset.subtract(searchRange, searchRange, searchRange),
+                passengerOffset.add(searchRange, searchRange, searchRange)
+        );
+        List<OBJFace> nearby = new ArrayList<>();
+        navMesh.queryBVH(navMesh.root, rayBox, nearby, gauge.scale());
+        if (nearby.isEmpty()) {
+            return passengerOffset.rotateYaw(90);
         }
 
-        // flip coords
-        return passengerOffset.rotateYaw(90);
+        // If a player is already in bounds, we want to find the highest result, otherwise the nearest result
+        Vec3d highest = null;
+        double highestY = Double.NEGATIVE_INFINITY;
+        Vec3d nearest = null;
+        double nearestDistSq = Double.MAX_VALUE;
+
+        for (OBJFace face : nearby) {
+            Vec3d p0 = face.vertex0.pos;
+            Vec3d p1 = face.vertex1.pos;
+            Vec3d p2 = face.vertex2.pos;
+
+            Vec3d pointOnTri = MathUtil.closestPointOnTriangle(passengerOffset, p0, p1, p2);
+
+            // For newly mounted players we always want the nearest result
+            if (!isNewlyMounted && MathUtil.pointInTriangleXZ(passengerOffset, p0, p1, p2)) {
+                Double h = MathUtil.heightAtXZ(passengerOffset, p0, p1, p2);
+                if (h != null) {
+                    if (h > highestY && h - passengerOffset.y <= searchRange) {
+                        highestY = h;
+                        highest = new Vec3d(passengerOffset.x, h, passengerOffset.z);
+                    }
+                    continue;
+                }
+                // (Near-)Vertical face that still has an XZ footprint: fall through to nearest
+            }
+
+            //Not directly within horizontal bounds, keep the nearest fallback
+            //Use normal Y for mounting, and 0 for internal moving (mostly going across stairs)
+            double distSq = passengerOffset
+                    .distanceToSquared(new Vec3d(pointOnTri.x, isNewlyMounted ? pointOnTri.y : 0, pointOnTri.z));
+            if (distSq < nearestDistSq) {
+                nearestDistSq = distSq;
+                nearest = pointOnTri;
+            }
+        }
+
+        Vec3d closestPoint = highest != null ? highest : nearest;
+        if (closestPoint == null) {
+            closestPoint = passengerOffset;
+        }
+        // Flip coords back
+        return closestPoint.rotateYaw(90);
     }
 
     public boolean isAtFront(Gauge gauge, Vec3d pos) {
-        return pos.z >= this.passengerCompartmentLength * gauge.scale();
+        return pos.z >= (this.passengerCompartmentLength - this.passengerCenter.x) * gauge.scale();
     }
 
     public boolean isAtRear(Gauge gauge, Vec3d pos) {
-        return pos.z <= -this.passengerCompartmentLength * gauge.scale();
+        return pos.z <= (-this.passengerCompartmentLength - this.passengerCenter.x) * gauge.scale();
     }
 
     public List<ItemComponentType> getItemComponents() {

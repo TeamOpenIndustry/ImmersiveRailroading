@@ -1,7 +1,8 @@
-package cam72cam.immersiverailroading.floor;
+package cam72cam.immersiverailroading.util.floor;
 
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
@@ -13,9 +14,16 @@ import cam72cam.mod.util.Axis;
 
 import java.util.*;
 
+/**
+ * Helper class used for tracking FLOOR meshes using BVH
+ * <p>
+ * Here we use the model coordinate (unscaled, -X forward) to store data
+ */
 public class NavMesh {
+    public static final float RANGE = 0.5f;
+
     public final BVHNode root;
-    // public final BVHNode collisionRoot;
+    //Edges that are only connected to 1 face, useful when checking holes
     private final List<Edge> floorBoundaryEdges;
     // Theoretically this could be much lower. IR floor meshes probably won't use the whole depth, but who knows
     private static final int MAX_DEPTH = 20;
@@ -27,17 +35,17 @@ public class NavMesh {
         if (model.floor != null) {
             floorFaces = collectFloorFaces(model);
             root = buildBVH(new ArrayList<>(floorFaces), 0);
+            //Overwrite legacy definition
             Vec3d bounds = model.floor.max.subtract(model.floor.min);
             definition.passengerCompartmentLength = bounds.x/2;
             definition.passengerCompartmentWidth = bounds.z/2;
+            definition.passengerCenter = model.floor.center;
         } else {
             floorFaces = legacyFloorFaces(definition);
             root = buildBVH(new ArrayList<>(floorFaces), 0);
         }
 
         floorBoundaryEdges = computeBoundaryEdges(floorFaces);
-
-        // collisionRoot = initCollisionMesh(model);
     }
 
     private List<OBJFace> collectFloorFaces(StockModel<?, ?> model) {
@@ -94,6 +102,17 @@ public class NavMesh {
             this.start = start;
             this.end = end;
         }
+
+        String key() {
+            String startKey = vecKey(start);
+            String endKey = vecKey(end);
+            return startKey.compareTo(endKey) <= 0 ? startKey + "|" + endKey : endKey + "|" + startKey;
+        }
+
+        //Use %.4f, allowing minor errors
+        private static String vecKey(Vec3d vec) {
+            return String.format(Locale.ROOT, "%.4f,%.4f,%.4f", vec.x, vec.y, vec.z);
+        }
     }
 
     private List<Edge> computeBoundaryEdges(List<OBJFace> triangles) {
@@ -116,90 +135,41 @@ public class NavMesh {
     }
 
     private void addEdge(Vec3d a, Vec3d b, Map<String, Edge> edgeByKey, Map<String, Integer> edgeCount) {
-        String key = edgeKey(a, b);
-        edgeByKey.putIfAbsent(key, new Edge(a, b));
+        Edge newEdge = new Edge(a, b);
+        String key = newEdge.key();
+        edgeByKey.putIfAbsent(key, newEdge);
         edgeCount.merge(key, 1, Integer::sum);
     }
 
-    private static String edgeKey(Vec3d a, Vec3d b) {
-        String ka = pointKey(a);
-        String kb = pointKey(b);
-        return ka.compareTo(kb) <= 0 ? ka + "|" + kb : kb + "|" + ka;
-    }
-
-    private static String pointKey(Vec3d v) {
-        return String.format(Locale.ROOT, "%.4f,%.4f,%.4f", v.x, v.y, v.z);
-    }
-
-    public Edge closestBoundaryEdge(Vec3d point) {
-        Edge closest = null;
-        double closestDistSq = Double.MAX_VALUE;
+    public Vec3d closestBoundaryPoint(Vec3d point, double scale) {
+        point = point.scale(1 / scale);
+        Vec3d best = null;
+        double bestDistSq = Double.MAX_VALUE;
+        //Assuming cache floorBoundaryEdges is more effective that BVH edges
         for (Edge edge : floorBoundaryEdges) {
-            Vec3d onSeg = closestPointOnSegment(point, edge.start, edge.end);
+            Vec3d onSeg = MathUtil.closestPointOnSegment(point, edge.start, edge.end);
             double distSq = point.distanceToSquared(onSeg);
-            if (distSq < closestDistSq) {
-                closestDistSq = distSq;
-                closest = edge;
+            if (distSq < bestDistSq) {
+                bestDistSq = distSq;
+                best = onSeg;
             }
         }
-        return closest;
+        return best == null ? null : best.scale(scale);
     }
-
-    private static Vec3d closestPointOnSegment(Vec3d p, Vec3d a, Vec3d b) {
-        double abx = b.x - a.x, aby = b.y - a.y, abz = b.z - a.z;
-        double apx = p.x - a.x, apy = p.y - a.y, apz = p.z - a.z;
-        double abLenSq = abx*abx + aby*aby + abz*abz;
-        double t = abLenSq < 1e-9 ? 0 : (apx*abx + apy*aby + apz*abz) / abLenSq;
-        t = Math.max(0, Math.min(1, t));
-        return new Vec3d(a.x + abx * t, a.y + aby * t, a.z + abz * t);
-    }
-
 
     public boolean isPointOnFloor(Vec3d point, double scale) {
         IBoundingBox box = IBoundingBox.from(
-                point.subtract(0.05, 0.5, 0.05),
-                point.add(0.05, 0.5, 0.05)
+                point.subtract(RANGE * 0.1 * scale, RANGE * scale, RANGE * 0.1 * scale),
+                point.add(RANGE * 0.1 * scale, RANGE * scale, RANGE * 0.1 * scale)
         );
         List<OBJFace> nearby = new ArrayList<>();
         queryBVH(root, box, nearby, scale);
         for (OBJFace tri : nearby) {
-            if (pointInTriangleXZ(point, tri)) {
+            if (MathUtil.pointInTriangleXZ(point, tri.vertex0.pos, tri.vertex1.pos, tri.vertex2.pos)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private static boolean pointInTriangleXZ(Vec3d p, OBJFace tri) {
-        double d1 = signXZ(p, tri.vertex0.pos, tri.vertex1.pos);
-        double d2 = signXZ(p, tri.vertex1.pos, tri.vertex2.pos);
-        double d3 = signXZ(p, tri.vertex2.pos, tri.vertex0.pos);
-
-        boolean hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-        boolean hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-        return !(hasNeg && hasPos);
-    }
-
-    private static double signXZ(Vec3d p, Vec3d a, Vec3d b) {
-        return (p.x - b.x) * (a.z - b.z) - (a.x - b.x) * (p.z - b.z);
-    }
-
-    private BVHNode initCollisionMesh(StockModel<?, ?> model) {
-        FaceAccessor accessor = model.getFaceAccessor();
-
-        List<OBJFace> collision = new ArrayList<>();
-        if (model.collision != null) {
-            model.collision.modelIDs.forEach(group -> {
-                FaceAccessor sub = accessor.getSubByGroup(group);
-                sub.forEach(a -> collision.add(a.asOBJFace()));
-            });
-        }
-
-        if (collision.isEmpty()) {
-            return null;
-        }
-        return buildBVH(collision, 0);
     }
 
     public static class BVHNode {
@@ -248,9 +218,7 @@ public class NavMesh {
         queryBVHInternal(node, query, result, scale);
     }
 
-
-
-    public void queryBVHInternal(BVHNode node, IBoundingBox query, List<OBJFace> result, double scale) {
+    private void queryBVHInternal(BVHNode node, IBoundingBox query, List<OBJFace> result, double scale) {
         if (node == null) return;
         if (!node.bounds.intersects(query)) return;
 
@@ -272,11 +240,10 @@ public class NavMesh {
         Vec3d a = box.min().scale(1.0 / s);
         Vec3d b = box.max().scale(1.0 / s);
 
-        IBoundingBox out = IBoundingBox.from(
+        return IBoundingBox.from(
                 new Vec3d(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z)),
                 new Vec3d(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z))
         );
-        return out;
     }
 
     private double getCentroid(OBJFace tri, Axis axis) {
