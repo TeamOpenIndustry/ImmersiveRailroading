@@ -70,27 +70,16 @@ public class NavMesh {
             center = Vec3d.ZERO;
         }
 
-        OBJFace face1 = new OBJFace();
-        OBJFace face2 = new OBJFace();
-
         Vec2f uv = new Vec2f(0, 0);
         Vec3d normal = new Vec3d(0, 1, 0);
 
-        Vec3d vertex1 = center.add(-length, 0, width / 2);
-        Vec3d vertex2 = center.add(length, 0, width / 2);
-        Vec3d vertex3 = center.add(length,  0, -width / 2);
-        Vec3d vertex4 = center.add(-length, 0, -width / 2);
+        OBJFace.Vertex vertex1 = new OBJFace.Vertex(center.add(-length, 0, width / 2), uv);
+        OBJFace.Vertex vertex2 = new OBJFace.Vertex(center.add(length, 0, width / 2), uv);
+        OBJFace.Vertex vertex3 = new OBJFace.Vertex(center.add(length, 0, -width / 2), uv);
+        OBJFace.Vertex vertex4 = new OBJFace.Vertex(center.add(-length, 0, -width / 2), uv);
 
-        face1.vertex0 = new OBJFace.Vertex(vertex1, uv);
-        face1.vertex1 = new OBJFace.Vertex(vertex2, uv);
-        face1.vertex2 = new OBJFace.Vertex(vertex3, uv);
-
-        face2.vertex0 = new OBJFace.Vertex(vertex1, uv);
-        face2.vertex1 = new OBJFace.Vertex(vertex3, uv);
-        face2.vertex2 = new OBJFace.Vertex(vertex4, uv);
-
-        face1.normal = normal;
-        face2.normal = normal;
+        OBJFace face1 = new OBJFace(vertex1, vertex2, vertex3, normal);
+        OBJFace face2 = new OBJFace(vertex1, vertex3, vertex4, normal);
 
         return Arrays.asList(face1, face2);
     }
