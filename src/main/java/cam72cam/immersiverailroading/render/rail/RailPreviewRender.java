@@ -28,8 +28,8 @@ public class RailPreviewRender {
             Vec3d placementPosition = info.placementInfo.placementPosition;
             state.translate(placementPosition.x, placementPosition.y, placementPosition.z);
             if (!te.isMulti()) {
-                RailRender.render(info, te.getWorld(), te.isAboveRails() ? te.getPos().down() : te.getPos(), true, state);
-            }
+                RailRender.render(info, te.getOriginPlacementInfoPos(), te.getWorld(), te.isAboveRails() ? te.getPos().down() : te.getPos(), true, state);
+            }// TODO: still very wired edge case when info.placementInfo.placementPosition.y is about -1
             MinecraftClient.endProfiler();
 		});
 

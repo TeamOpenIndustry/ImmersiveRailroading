@@ -105,6 +105,6 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		Vec3d offPos = info.placementInfo.placementPosition.add(pos).subtract(cameraPos);
 		state.translate(offPos.x, offPos.y, offPos.z);
 
-		RailRender.render(info, world, pos, true, state);
+		RailRender.render(info, null, world, pos, true, state);
 	}
 }
