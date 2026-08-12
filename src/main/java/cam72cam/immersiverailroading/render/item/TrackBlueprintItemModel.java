@@ -86,7 +86,7 @@ public class TrackBlueprintItemModel implements ItemRender.IItemModel {
 		float yaw = result.yaw();
 		boolean snapped = result.succeeded();
 
-		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, hit.y % 1, hit.z), true, snapped);
+		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z), true, snapped);
 		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
 		RailInfo info = new RailInfo(snappedStack, placementInfo, null);
 

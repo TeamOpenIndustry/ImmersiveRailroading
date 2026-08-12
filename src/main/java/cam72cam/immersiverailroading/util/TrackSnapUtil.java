@@ -244,12 +244,20 @@ public class TrackSnapUtil {
                 hit = snapped.subtract(pos);
             }
         } else {
-            pos = pos.up();
-            if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
+            pos = pos.up().up();
+
+            if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
                 if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
                     pos = pos.down();
                 }
             }
+            if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                    pos = pos.down();
+                }
+            }
+
+            hit = new Vec3d(hit.x, 0, hit.z);
         }
 
         return new SnappedResult(pos, hit, yaw, succeeded);

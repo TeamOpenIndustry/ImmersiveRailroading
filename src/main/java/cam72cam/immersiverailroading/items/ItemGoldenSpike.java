@@ -65,7 +65,7 @@ public class ItemGoldenSpike extends CustomItem {
 					if (tr.isAboveRails()) {
 						tepos = tepos.down();
 					}
-					tr.setCustomInfo(new PlacementInfo(stack, yaw, new Vec3d(hit.x, hit.y % 1, hit.z).add(pos).subtract(tepos), false, snapped));
+					tr.setCustomInfo(new PlacementInfo(stack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z).add(pos).subtract(tepos), false, snapped));
 				}
 			}
 		}

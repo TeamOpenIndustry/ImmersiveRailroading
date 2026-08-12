@@ -85,16 +85,16 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 			VecYPR cur = path.get(i);
 			Vec3d curNormal = cur.toMatrix3().up();
-			Vec3d gagPos = cur.add(applyNormalRotation(bedFacePivotOffset.scale(-1), curNormal)).add(bedFacePivotOffset).add(curNormal.scale(bedThickness));
+			Vec3d facePivot = cur.add(applyNormalRotation(bedFacePivotOffset.scale(-1), curNormal)).add(bedFacePivotOffset).add(curNormal.scale(bedThickness));
 
-			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
+			boolean isFlex = facePivot.distanceTo(start) < flexDist || facePivot.distanceTo(end) < flexDist;
 
 			for (double q = -horiz; q <= horiz; q += 0.1) {
 				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());
 
-				int posX = (int) Math.floor(gagPos.x + nextUp.x);
-				int posZ = (int) Math.floor(gagPos.z + nextUp.z);
-				int posY = (int) Math.floor(gagPos.y + nextUp.y);
+				int posX = (int) Math.floor(facePivot.x + nextUp.x);
+				int posZ = (int) Math.floor(facePivot.z + nextUp.z);
+				int posY = (int) Math.floor(facePivot.y + nextUp.y);
 				Vec3i gag = new Vec3i(posX, posY, posZ);
 
 				if (true) {
@@ -105,22 +105,22 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					}
 
 					Vec3d topFacing = computeTopFaceNormal(path, i, q);
-					double rollDelta;
+					double rollPitchDelta;
 
 					if(rollEffectTile) {
 						Vec3d planePoint = new Vec3d(
-								gagPos.x + 0.5,
-								gagPos.y,
-								gagPos.z + 0.5
+								facePivot.x + 0.5,
+								facePivot.y,
+								facePivot.z + 0.5
 						);
 						float localHeight = BlockCutHelper.getCutCenterHeight(new Plane(planePoint.subtract(gag), topFacing));
 
-						rollDelta = localHeight - (gagPos.y - posY);
+						rollPitchDelta = localHeight - (facePivot.y - posY);
 					} else {//legacy
-						rollDelta = 0;
+						rollPitchDelta = 0;
 					}
 
-					double deltaGapPos = gagPos.y + rollDelta;
+					double faceSample = facePivot.y + rollPitchDelta;
 					double height = 0;
 					if (info.settings.isGradeCrossing) {//legacy, a rough gradeCrossing...
 						height = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
@@ -128,8 +128,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						height = Math.min(height, clamp);
 					}
 
-					double relHeight = deltaGapPos % 1;
-					if (deltaGapPos < 0) {
+					double relHeight = faceSample % 1;
+					if(faceSample == 1) relHeight = 1;// seems we don't need to handle error?
+
+					if (faceSample < 0) {
 						relHeight += 1;
 					}
 
@@ -142,7 +144,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						}
 
 						// Height for snow and common block rail
-						float heightResult = (float) (height + relHeight - offsetInt);
+						float heightResult = (float) (height + relHeight - offsetInt);// TODO: 边界情况height offset 0.9碰撞箱不匹配
 						trackBlockPositions.add(gag);
 
 						// AVG required
@@ -155,7 +157,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						allTopNormals.put(gag, currentTopNormals);
 
 						List<Vec3d> currentTopPositions = allTopPositions.get(gag) != null ? allTopPositions.get(gag) : new ArrayList<>();
-						currentTopPositions.add(gagPos.subtract(gag));
+						currentTopPositions.add(facePivot.subtract(gag));
 						allTopPositions.put(gag, currentTopPositions);
 
 					} else if(isNew){//legacy, will be dropped
@@ -172,9 +174,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 			if (!isFlex && endOfTrack) {
 				mainPos = new Vec3i(
-						(int) Math.floor(gagPos.x),
-						(int) Math.floor(gagPos.y),
-						(int) Math.floor(gagPos.z)
+						(int) Math.floor(facePivot.x),
+						(int) Math.floor(facePivot.y),
+						(int) Math.floor(facePivot.z)
 				);
 			}
 		}

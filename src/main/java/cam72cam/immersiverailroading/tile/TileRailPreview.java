@@ -30,7 +30,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@TagField
 	private PlacementInfo customInfo;
 	@TagField
-	private boolean isAboveRails = false;
+	private boolean isAboveRails = false;//TODO: use Vec3i to replace this
 
 	public ItemStack getItem() {
 		return this.item;
@@ -39,7 +39,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setup(ItemStack stack, PlacementInfo info) {
 		this.item = stack.copy();
 		this.placementInfo = info;
-		this.isAboveRails = BlockUtil.isIRRail(getWorld(), getPos().down()) && getWorld().getBlockEntity(getPos().down(), TileRailBase.class).getRailHeight() < 0.5;
+		this.isAboveRails = placementInfo.placementPosition.y < 0;
 		this.markDirty();
 	}
 
@@ -155,6 +155,10 @@ public class TileRailPreview extends BlockEntityTickable {
 		return info;
 	}
 
+	public Vec3d getOriginPlacementInfoPos() {
+		return placementInfo.placementPosition;
+	}
+
 	@Override
 	public void markDirty() {
 		super.markDirty();
@@ -193,9 +197,9 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer != null && entityPlayer.isCrouching()) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, isAboveRails() ? getPos().down() : getPos())) {
+			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
-				return isAboveRails();
+				return false;//TODO: the goldenSpike tile will not be removed as we do this now
 			}
 			return false;
 		}

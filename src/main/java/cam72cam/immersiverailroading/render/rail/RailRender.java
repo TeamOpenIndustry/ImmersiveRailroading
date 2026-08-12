@@ -105,7 +105,7 @@ public class RailRender {
 		MinecraftClient.endProfiler();
 
 		if (renderOverlay) {
-			Vec3d off = info.placementInfo.placementPosition;
+			Vec3d off = info.placementInfo.placementPosition;//TODO: things really behaves extremely wired here
 			state.translate(-off.x, -off.y, -off.z);
 
 			MinecraftClient.startProfiler("base");

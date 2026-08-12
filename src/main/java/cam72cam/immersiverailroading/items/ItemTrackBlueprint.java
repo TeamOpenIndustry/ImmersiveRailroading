@@ -80,14 +80,14 @@ public class ItemTrackBlueprint extends CustomItem {
 			world.setBlock(pos, IRBlocks.BLOCK_RAIL_PREVIEW);
 			TileRailPreview te = world.getBlockEntity(pos, TileRailPreview.class);
 			if (te != null) {
-				PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, hit.y % 1, hit.z), true, snapped);
+				PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z), true, snapped);
 				// For TilePreview, to update offset properly we need to use Vec3i PlacementInfo, TilePreview will handle offset itself!
 				te.setup(snappedStack, placementInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
-		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, hit.y % 1, hit.z), true, snapped);
+		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z), true, snapped);
 		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
 		RailInfo info = new RailInfo(snappedStack, placementInfo, null);
 		info.build(player, pos);
