@@ -7,13 +7,24 @@ import java.util.UUID;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.CustomItem;
+import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.Recipes;
 import cam72cam.mod.serialization.TagField;
 
 public class ItemWirelessRemotecontrol extends CustomItem {
 	
 	public ItemWirelessRemotecontrol() {
 		super(ImmersiveRailroading.MODID, "item_wireless_remotecontrol");
+		
+		Fuzzy redstoneTorch = Fuzzy.REDSTONE_TORCH;
+		Fuzzy redstone = Fuzzy.REDSTONE_DUST;
+		Fuzzy iron = Fuzzy.IRON_INGOT;
+		Fuzzy gold = Fuzzy.GOLD_INGOT;
+		Recipes.shapedRecipe(this, 3,
+				redstone, redstoneTorch, redstone,
+				iron, gold, iron,
+				iron, iron, iron);
 	}
 
     @Override
