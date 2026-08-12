@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
-import cam72cam.immersiverailroading.items.ItemWirelessRemotecontrol;
+import cam72cam.immersiverailroading.items.ItemWirelessRemoteControl;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementTrack;
@@ -324,7 +324,7 @@ public abstract class Locomotive extends FreightTank {
                 return ClickResult.ACCEPTED;
             }
             if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
-                ItemWirelessRemotecontrol.Data data = new ItemWirelessRemotecontrol.Data(player.getHeldItem(hand));
+                ItemWirelessRemoteControl.Data data = new ItemWirelessRemoteControl.Data(player.getHeldItem(hand));
                 if (player.isCrouching()) {
                     player.sendMessage(data.linked == null ? ChatText.WIRELESS_REMOTECONTROL_NOLINK.getMessage() : ChatText.WIRELESS_REMOTECONTROL_UNLINK.getMessage());
                     data.linked = null;

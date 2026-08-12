@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.mod.item.CreativeTab;
 import cam72cam.mod.item.CustomItem;
 import cam72cam.mod.item.Fuzzy;
@@ -12,9 +13,9 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.item.Recipes;
 import cam72cam.mod.serialization.TagField;
 
-public class ItemWirelessRemotecontrol extends CustomItem {
+public class ItemWirelessRemoteControl extends CustomItem {
 	
-	public ItemWirelessRemotecontrol() {
+	public ItemWirelessRemoteControl() {
 		super(ImmersiveRailroading.MODID, "item_wireless_remotecontrol");
 		
 		Fuzzy redstoneTorch = Fuzzy.REDSTONE_TORCH;
@@ -40,7 +41,9 @@ public class ItemWirelessRemotecontrol extends CustomItem {
     @Override
     public List<String> getTooltip(ItemStack stack) {
         Data d = new Data(stack);
-        return Collections.singletonList(d.linked == null ? "Not linked to any locomotive" : "Linked to: " + d.linked);
+        return Collections.singletonList(d.linked == null ?
+                GuiText.REMOTE_CONTROL_NOT_LINKED_TOOLTIP.toString() :
+                    GuiText.REMOTE_CONTROL_LINKED_TOOLTIP.toString(d.linked));
     }
 
 	public static class Data extends ItemDataSerializer {

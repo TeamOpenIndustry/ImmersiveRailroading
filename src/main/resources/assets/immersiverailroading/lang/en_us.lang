@@ -143,6 +143,9 @@ gui.immersiverailroading:item.paint_brush.mode=Current mode: %s
 gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click to cycle modes
 gui.immersiverailroading:none=None
 
+gui.immersiverailroading:item.remote_control_linked=Linked to: %s
+gui.immersiverailroading:item.remote_control_not_linked=Not linked to any locomotive
+
 gui.immersiverailroading:track.type=Type:      %s
 gui.immersiverailroading:track.length=Length:    %s
 gui.immersiverailroading:track.gauge=Gauge:     %s

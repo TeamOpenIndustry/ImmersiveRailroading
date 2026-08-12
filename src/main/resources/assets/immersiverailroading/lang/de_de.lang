@@ -114,6 +114,9 @@ gui.immersiverailroading:item.paint_brush.mode=Aktueller Modus: %s
 gui.immersiverailroading:item.paint_brush.description=Schleichen + Rechtsklick um den Modus durchwechseln
 gui.immersiverailroading:none=kein
 
+gui.immersiverailroading:item.remote_control_linked=Verlinkt mit: %s
+gui.immersiverailroading:item.remote_control_not_linked=Nicht mit einer Lokomotive verlinkt
+
 gui.immersiverailroading:track.type=Typ:                   %s
 gui.immersiverailroading:track.length= Länge:                 %s
 gui.immersiverailroading:track.gauge=Spurweite:             %s

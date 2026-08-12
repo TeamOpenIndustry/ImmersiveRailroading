@@ -5,7 +5,8 @@ import java.util.UUID;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
-import cam72cam.immersiverailroading.items.ItemWirelessRemotecontrol;
+import cam72cam.immersiverailroading.gui.overlay.RemoteOverlay;
+import cam72cam.immersiverailroading.items.ItemWirelessRemoteControl;
 import cam72cam.immersiverailroading.net.RemoteControlActivePacket;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
@@ -14,9 +15,12 @@ import cam72cam.mod.item.ItemStack;
 public class WirelessRemotecontrolClient {
 	private static UUID loco = null;
 	private static RemoteControlData cachedData = null;
+    public static RemoteOverlay remoteGui;
 	
 	private WirelessRemotecontrolClient() {
 	}
+	
+
 
     public static void onClientTick() {
         if (!MinecraftClient.isReady()) {
@@ -39,7 +43,7 @@ public class WirelessRemotecontrolClient {
         if (!held.is(IRItems.ITEM_WIRELESS_REMOTECONTROL)) {
             return null;
         }
-        ItemWirelessRemotecontrol.Data data = new ItemWirelessRemotecontrol.Data(held);
+        ItemWirelessRemoteControl.Data data = new ItemWirelessRemoteControl.Data(held);
         return data.linked;
     }
 
@@ -64,28 +68,14 @@ public class WirelessRemotecontrolClient {
             return;
         }
         switch (readout) {
-            case THROTTLE:
-            	cachedData.throttle = value;
-            	break;
-            case REVERSER:
-            	cachedData.reverser = value;
-            	break;
-            case BRAKE_PRESSURE:
-            	cachedData.brakePressure = value;
-            	break;
-            case INDEPENDENT_BRAKE:
-            	cachedData.indBrake = value;
-            	break;
-            case EMERGENCY:
-            	cachedData.emergency = value > 0.5;
-            	break;
-            case WHISTLE, HORN:
-            	cachedData.horn = value;
-            	break;
-            case ENGINE:
-            	cachedData.engine = value > 0.5;
-            default:
-            	break;
+            case THROTTLE -> cachedData.throttle = value;
+            case REVERSER -> cachedData.reverser = value;
+            case BRAKE_PRESSURE -> cachedData.brakePressure = value;
+            case INDEPENDENT_BRAKE -> cachedData.indBrake = value;
+            case EMERGENCY -> cachedData.emergency = value > 0.5;
+            case WHISTLE, HORN -> cachedData.horn = value;
+            case ENGINE -> cachedData.engine = value > 0.5;
+            default -> throw new IllegalArgumentException("Unexpected value: " + readout);
         }
     }
 }

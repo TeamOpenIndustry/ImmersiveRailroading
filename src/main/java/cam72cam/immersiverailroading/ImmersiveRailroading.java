@@ -56,8 +56,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 	public static final Random RANDOM = new Random();
 	public static final int ENTITY_SYNC_DISTANCE = 512;
 	private static ImmersiveRailroading instance;
-	
-	private static RemoteOverlay remoteGui;
 
 	public ImmersiveRailroading() {
 		instance = this;
@@ -228,24 +226,25 @@ public class ImmersiveRailroading extends ModCore.Mod {
 						stock.getDefinition().getOverlay().render(state, stock);
 					}
 				});
+				
 				// Remote Overlay
-				try {
-				    remoteGui = RemoteOverlay.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/fbg.json"));
-				} catch (IOException e) {
-				    e.printStackTrace();
-				}
+		        try {
+		            WirelessRemotecontrolClient.remoteGui = RemoteOverlay.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/fbg.caml"));
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
 
-				GlobalRender.registerOverlay((state, _) -> {
-				    UUID activeLoco = WirelessRemotecontrolClient.getLoco();
-			        if (activeLoco == null || remoteGui == null) {
-			            return;
-			        }
-					RemoteControlData data = WirelessRemotecontrolClient.getData();
-			        if(data == null) {
-			            return;
-			        }
-			        remoteGui.render(state, data);
-				});
+		        GlobalRender.registerOverlay((state, _) -> {
+		            UUID activeLoco = WirelessRemotecontrolClient.getLoco();
+		            if (activeLoco == null || WirelessRemotecontrolClient.remoteGui == null) {
+		                return;
+		            }
+		            RemoteControlData data = WirelessRemotecontrolClient.getData();
+		            if(data == null) {
+		                return;
+		            }
+		            WirelessRemotecontrolClient.remoteGui.render(state, data);
+		        });
 
 				ClientEvents.MOUSE_GUI.subscribe(evt -> {
 					if (!MinecraftClient.isReady()) {
@@ -257,10 +256,9 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				    if (activeLoco != null) {
 				        RemoteControlData data = WirelessRemotecontrolClient.getData();
 				        if (data != null) {
-				            return remoteGui.click(evt, data);
+				            return WirelessRemotecontrolClient.remoteGui.click(evt, data);
 				        }
 				    }
-				    //
 
 					Entity riding = MinecraftClient.getPlayer().getRiding();
 					if (!(riding instanceof EntityRollingStock)) {

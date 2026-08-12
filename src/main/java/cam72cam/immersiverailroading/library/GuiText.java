@@ -116,6 +116,8 @@ public enum GuiText {
 	TRACK_SWITCHER_TOOLTIP("item.track_exchanger"),
 	PAINT_BRUSH_MODE_TOOLTIP("item.paint_brush.mode"),
 	PAINT_BRUSH_DESCRIPTION_TOOLTIP("item.paint_brush.description"),
+	REMOTE_CONTROL_LINKED_TOOLTIP("item.remote_control_linked"),
+	REMOTE_CONTROL_NOT_LINKED_TOOLTIP("item.remote_control_not_linked"),
 
 	LABEL_CURRENT_AUGMENT("label.current_augment"),
 	LABEL_ACTUATOR_FILTER("label.actuator_filter"),
