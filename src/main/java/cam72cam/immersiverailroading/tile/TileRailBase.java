@@ -246,7 +246,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 	
 	public void handleSnowTick() {
-		if (this.snowLayers < (ConfigBalance.deepSnow ? 8 : 1)) {
+		if (this.snowLayers < (ConfigBalance.deepSnow ? 8 : getMinSnowLayers() + 1)) {
 			this.snowLayers += 1;
 			this.markDirty();
 		}
