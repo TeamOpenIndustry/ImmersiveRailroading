@@ -100,7 +100,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 		Vec3d ctrl2 = nextPos.add(VecUtil.fromYaw(ctrlGuess, angle2));
 
 		CubicCurve adjusted = new CubicCurve(Vec3d.ZERO, ctrl1, ctrl2, nextPos, 0, 1)
-				                      .linearize(info.settings.smoothing);
+				                      .linearize(info.settings.smoothing, info.settings.nearPointData, info.settings.farPointData);
 		ctrl1 = adjusted.ctrl1;
 		ctrl2 = adjusted.ctrl2;
 
