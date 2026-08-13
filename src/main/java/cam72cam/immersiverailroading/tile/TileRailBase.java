@@ -1111,7 +1111,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		if (stack.isValidTool(ToolType.SHOVEL)) {
 			if (this.getWorld().isServer) {
 				System.out.println(this.getMinSnowLayers() + " " + snowLayers + " " + bedHeight);
-				this.cleanSnow(1);
+				this.cleanSnow(0);
 				this.setSnowLayers(0);
 				stack.damageItem(1, player);
 			}
