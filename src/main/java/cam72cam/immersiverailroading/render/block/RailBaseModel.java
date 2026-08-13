@@ -61,12 +61,7 @@ public class RailBaseModel {
 			return model;
 		}
 
-		boolean renderSnow = false;
-		if(bedHeight > 0) renderSnow = snow > Math.floor(bedHeight * 8f);
-		else renderSnow = snow > 7;
-
-		if (renderSnow) {
-
+		if (snow > te.getMinSnowLayers()) {
 			float snowHeight = snow / 8f;
 			if(bedFace != null) {
 				boolean isUp = bedHeight >= 0;

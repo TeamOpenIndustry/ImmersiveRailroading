@@ -226,10 +226,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		this.markDirty();
 	}
 
-	private int getMinSnowLayers() {
+	public int getMinSnowLayers() {
 		float bed = getBedHeight();
 		if (bed >= 0) {
-			return (int) Math.floor(bed * 8);
+			return Math.min((int) Math.floor(bed * 8), 7);
 		} else {
 			return 7;
 		}
@@ -437,9 +437,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		int current = this.getSnowLayers();
 
 		if (current > target) {
-			this.setSnowLayers(target); // 截断到目标值
-			int removed = current - target; // 实际移除的雪层数
-			int snowDown = removed; // 待散播的雪层数
+			this.setSnowLayers(target);
+			int removed = current - target;
+			int snowDown = removed;
 
 			for (int i = 1; i <= 3; i++) {
 				Facing[] horiz = Facing.values().clone();
@@ -1094,12 +1094,14 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (stack.is(Fuzzy.SNOW_LAYER)) {
 			if (this.getWorld().isServer) {
+				System.out.println(this.getMinSnowLayers() + " " + snowLayers + " " + bedHeight);
 				this.handleSnowTick();
 			}
 			return true;
 		}
 		if (stack.is(Fuzzy.SNOW_BLOCK)) {
 			if (this.getWorld().isServer) {
+				System.out.println(this.getMinSnowLayers() + " " + snowLayers + " " + bedHeight);
 				for (int i = 0; i < 8; i ++) {
 					this.handleSnowTick();
 				}
@@ -1108,6 +1110,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		if (stack.isValidTool(ToolType.SHOVEL)) {
 			if (this.getWorld().isServer) {
+				System.out.println(this.getMinSnowLayers() + " " + snowLayers + " " + bedHeight);
 				this.cleanSnow(1);
 				this.setSnowLayers(0);
 				stack.damageItem(1, player);

@@ -37,9 +37,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 		positions = new HashSet<>();
 
-		HashMap<Vec3i, Float> railHeights = new HashMap<>();// we will merge railHeight and bedHeight later
+		HashMap<Vec3i, Float> railHeights = new HashMap<>();// legacy
 
-		// Pre-calculated rail bed top face normal dir for further use TODO: merge these 2 to Plane
+		// Pre-calculated rail bed top face normal dir for further use
 		HashMap<Vec3i, Plane> planes = new HashMap<>();
 		HashMap<Vec3i, Float> bedHeights = new HashMap<>();
 
@@ -121,11 +121,13 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 					}
 
 					double faceSample = facePivot.y + rollPitchDelta;
-					double height = 0;
-					if (info.settings.isGradeCrossing) {//legacy, a rough gradeCrossing...
-						height = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
-						height *= info.settings.gauge.scale();
-						height = Math.min(height, clamp);
+
+					//legacy, a very rough gradeCrossing...
+					double crossingHeight = 0;
+					if (info.settings.isGradeCrossing) {
+						crossingHeight = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
+						crossingHeight *= info.settings.gauge.scale();
+						crossingHeight = Math.min(crossingHeight, clamp);
 					}
 
 					double relHeight = faceSample % 1;
@@ -137,17 +139,16 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
 					if(rollEffectTile) {// bedHeight will be the same as railHeight in this case
 						int offsetInt;
-						if(height + relHeight > 1) {
-							offsetInt = (int) Math.floor(height + relHeight);
+						if(crossingHeight + relHeight > 1) {
+							offsetInt = (int) Math.floor(crossingHeight + relHeight);
 						}else {
 							offsetInt = 0;
 						}
 
 						// Height for snow and common block rail
-						float heightResult = (float) (height + relHeight - offsetInt);// TODO: 边界情况height offset 0.9碰撞箱不匹配
+						float heightResult = (float) (crossingHeight + relHeight - offsetInt);
 						trackBlockPositions.add(gag);
 
-						// AVG required
 						List<Float> currentBedHeights = allBedHeights.get(gag) != null ? allBedHeights.get(gag) : new ArrayList<>();
 						currentBedHeights.add(heightResult);
 						allBedHeights.put(gag, currentBedHeights);
@@ -160,10 +161,8 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						currentTopPositions.add(facePivot.subtract(gag));
 						allTopPositions.put(gag, currentTopPositions);
 
-					} else if(isNew){//legacy, will be dropped
-
-
-						bedHeights.put(gag, (float) (height + Math.max(0, relHeight)));
+					} else if(isNew){// legacy
+						bedHeights.put(gag, (float) (crossingHeight + Math.max(0, relHeight)));
 						railHeights.put(gag, (float) relHeight);
 						trackBlockPositions.add(gag);
 					}
