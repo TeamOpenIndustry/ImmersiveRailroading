@@ -29,6 +29,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.List;
 
@@ -157,9 +158,11 @@ public class GuiBuilder {
         // Image stuff
         this.image = data.getValue("image").asIdentifier(null);
         if (image != null) {
-            BufferedImage tmp = ImageIO.read(this.image.getResourceStream());
-            width = tmp.getWidth();
-            height = tmp.getHeight();
+            try (InputStream resourceStream = this.image.getResourceStream()) {
+                BufferedImage tmp = ImageIO.read(resourceStream);
+                width = tmp.getWidth();
+                height = tmp.getHeight();
+            }
         } else if (text != null) {
             width = (int) (textHeight/4 * text.length()); // Guesstimate
             height = (int) textHeight;
