@@ -1284,5 +1284,5 @@ public record RollAndOffsetInfo(
             }
         }
         return idx;
-    };
+    }
 }
