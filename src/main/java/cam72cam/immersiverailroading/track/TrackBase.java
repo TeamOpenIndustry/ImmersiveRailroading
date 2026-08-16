@@ -8,7 +8,7 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.cutter.Plane;
+import cam72cam.mod.math.Plane;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.util.SingleCache;
 

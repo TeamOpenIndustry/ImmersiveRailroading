@@ -27,7 +27,7 @@ import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.render.cutter.Plane;
+import cam72cam.mod.math.Plane;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
 import cam72cam.mod.sound.Audio;
@@ -50,7 +50,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private float bedHeight = 0;
 	@TagField("railHeight")
 	private float railHeight = 0;
-	@TagField(value = "bedFace", mapper = PlaneMapper.class)
+	@TagField(value = "bedFace")
 	private Plane bedFace;
 	@TagField("scaleBedFill")
 	private boolean scaleModel = true;
@@ -293,32 +293,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void readUpdate(TagCompound nbt) {
 		if (nbt.hasKey("renderBed")) {
 			this.railBedCache = new ItemStack(nbt.get("renderBed"));
-		}
-	}
-
-	public static class PlaneMapper implements TagMapper<Plane> {
-		public TagAccessor<Plane> apply(Class<Plane> t, String fieldname, TagField tag) {
-			return new TagAccessor<>(
-					(nbt, plane) -> {
-						if(plane == null){
-							nbt.remove(fieldname);
-							return;
-						}
-						TagCompound PlaneTag = new TagCompound();
-						PlaneTag.setVec3d("normal", plane.normal);
-						PlaneTag.setDouble("d", plane.d);
-						nbt.set(fieldname,PlaneTag);
-					},
-					nbt -> {
-						if(!nbt.hasKey(fieldname)){
-							return null;
-						}
-						TagCompound planeTag = nbt.get(fieldname);
-						Vec3d normal = planeTag.getVec3d("normal");
-						double d = planeTag.getDouble("d");
-                        return new Plane(normal, d);
-					}
-			);
 		}
 	}
 	

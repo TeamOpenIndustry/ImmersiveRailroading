@@ -12,7 +12,7 @@ import cam72cam.mod.math.Matrix3;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.cutter.BlockCutHelper;
-import cam72cam.mod.render.cutter.Plane;
+import cam72cam.mod.math.Plane;
 import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagSerializer;

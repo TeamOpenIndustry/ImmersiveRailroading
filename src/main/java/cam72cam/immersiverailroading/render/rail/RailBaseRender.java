@@ -6,7 +6,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.cutter.Plane;
+import cam72cam.mod.math.Plane;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
