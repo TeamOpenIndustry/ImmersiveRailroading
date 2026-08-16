@@ -5,6 +5,7 @@ import java.util.*;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackModelPart;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.math.Matrix3;
@@ -352,7 +353,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Pair<Double, List<VecYPR>> pair = getPathForRender(scale * info.getTrackModel().spacing);
 		List<VecYPR> points = pair.getRight();
 		float renderScale = (float) (pair.getLeft() / info.getTrackModel().spacing);
-		renderScale *= 1.005f;//Avoid some gaps
+		if(info.settings.pickType != TrackItems.STRAIGHT) renderScale *= 1.005f;//TODO: calculate the scale according to real gap
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
 		int switchSize = 0;
