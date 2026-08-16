@@ -87,8 +87,8 @@ public abstract class TrackBase {
 		}
 
 		Vec3i bedFillPos;
-		if(bedFace != null) { // TODO: they may be broken by bed block
-			Facing facing = Facing.fromNormal(bedFace.normal);
+		if(getBedFace() != null) { // TODO: they may be broken by bed block
+			Facing facing = Facing.fromNormal(getBedFace().normal);
 			Vec3i axis = new Vec3i(facing.getXMultiplier(), facing.getYMultiplier(), facing.getZMultiplier());
 			bedFillPos = pos.add(axis);
 		} else {
