@@ -98,77 +98,76 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				int posY = (int) Math.floor(facePivot.y + nextUp.y);
 				Vec3i gag = new Vec3i(posX, posY, posZ);
 
-				if (true) {
-					boolean isNew = false;
-					if(!positions.contains(gag)) {
-						isNew = true;
-						positions.add(gag);
-					}
+                boolean isNewPos = false;
+                if(!positions.contains(gag)) {
+                    isNewPos = true;
+                    positions.add(gag);
+                }
 
-					Vec3d topFacing = computeTopFaceNormal(path, i, q);
-					double rollPitchDelta;
+                Vec3d topFacing = computeTopFaceNormal(path, i, q);
+                double rollPitchDelta;
 
-					if(rollEffectTile) {
-						Vec3d planePoint = new Vec3d(
-								facePivot.x + 0.5,
-								facePivot.y,
-								facePivot.z + 0.5
-						);
-						float localHeight = BlockCutHelper.getCutCenterHeight(new Plane(planePoint.subtract(gag), topFacing));
+                if(rollEffectTile) {
+                    Vec3d planePoint = new Vec3d(
+                            facePivot.x + 0.5,
+                            facePivot.y,
+                            facePivot.z + 0.5
+                    );
+                    float localHeight = BlockCutHelper.getCutCenterHeight(new Plane(planePoint.subtract(gag), topFacing));
 
-						rollPitchDelta = localHeight - (facePivot.y - posY);
-					} else {//legacy
-						rollPitchDelta = 0;
-					}
+                    rollPitchDelta = localHeight - (facePivot.y - posY);
+                } else {//legacy
+                    rollPitchDelta = 0;
+                }
 
-					double faceSample = facePivot.y + rollPitchDelta;
+                double faceSample = facePivot.y + rollPitchDelta;
 
-					//legacy, a very rough gradeCrossing...
-					double crossingHeight = 0;
-					if (info.settings.isGradeCrossing) {
-						crossingHeight = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
-						crossingHeight *= info.settings.gauge.scale();
-						crossingHeight = Math.min(crossingHeight, clamp);
-					}
+                //legacy, a very rough gradeCrossing...
+                double crossingHeight = 0;
+                if (info.settings.isGradeCrossing) {
+                    crossingHeight = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
+                    crossingHeight *= info.settings.gauge.scale();
+                    crossingHeight = Math.min(crossingHeight, clamp);
+                }
 
-					double relHeight = faceSample % 1;
-					if(faceSample == 1) relHeight = 1;// seems we don't need to handle error?
+                double relHeight = faceSample % 1;
+                if(faceSample == 1) relHeight = 1;// seems we don't need to handle error?
 
-					if (faceSample < 0) {
-						relHeight += 1;
-					}
+                if (faceSample < 0) {
+                    relHeight += 1;
+                }
 
-					if(rollEffectTile) {// bedHeight will be the same as railHeight in this case
-						int offsetInt;
-						if(crossingHeight + relHeight > 1) {
-							offsetInt = (int) Math.floor(crossingHeight + relHeight);
-						}else {
-							offsetInt = 0;
-						}
+                if(rollEffectTile) {// bedHeight will be the same as railHeight in this case
+                    int offsetInt;
+                    if(crossingHeight + relHeight > 1) {
+                        offsetInt = (int) Math.floor(crossingHeight + relHeight);
+                    }else {
+                        offsetInt = 0;
+                    }
 
-						// Height for snow and common block rail
-						float heightResult = (float) (crossingHeight + relHeight - offsetInt);
-						trackBlockPositions.add(gag);
+                    // Height for snow and common block rail
+                    float heightResult = (float) (crossingHeight + relHeight - offsetInt);
+                    trackBlockPositions.add(gag);
 
-						List<Float> currentBedHeights = allBedHeights.get(gag) != null ? allBedHeights.get(gag) : new ArrayList<>();
-						currentBedHeights.add(heightResult);
-						allBedHeights.put(gag, currentBedHeights);
+                    List<Float> currentBedHeights = allBedHeights.get(gag) != null ? allBedHeights.get(gag) : new ArrayList<>();
+                    currentBedHeights.add(heightResult);
+                    allBedHeights.put(gag, currentBedHeights);
 
-						List<Vec3d> currentTopNormals = allTopNormals.get(gag) != null ? allTopNormals.get(gag) : new ArrayList<>();
-						currentTopNormals.add(topFacing);
-						allTopNormals.put(gag, currentTopNormals);
+                    List<Vec3d> currentTopNormals = allTopNormals.get(gag) != null ? allTopNormals.get(gag) : new ArrayList<>();
+                    currentTopNormals.add(topFacing);
+                    allTopNormals.put(gag, currentTopNormals);
 
-						List<Vec3d> currentTopPositions = allTopPositions.get(gag) != null ? allTopPositions.get(gag) : new ArrayList<>();
-						currentTopPositions.add(facePivot.subtract(gag));
-						allTopPositions.put(gag, currentTopPositions);
+                    List<Vec3d> currentTopPositions = allTopPositions.get(gag) != null ? allTopPositions.get(gag) : new ArrayList<>();
+                    currentTopPositions.add(facePivot.subtract(gag));
+                    allTopPositions.put(gag, currentTopPositions);
 
-					} else if(isNew){// legacy
-						bedHeights.put(gag, (float) (crossingHeight + Math.max(0, relHeight)));
-						railHeights.put(gag, (float) relHeight);
-						trackBlockPositions.add(gag);
-					}
-				}
-				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
+                } else if(isNewPos){// legacy
+                    bedHeights.put(gag, (float) (crossingHeight + Math.max(0, relHeight)));
+                    railHeights.put(gag, (float) relHeight);
+                    trackBlockPositions.add(gag);
+                }
+
+                if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
 				}
 			}
@@ -299,6 +298,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		if (index == size - 1) {
 			float pitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(totalLength, true, q);
 			return base.copy().rotateLocalPitch(pitch).up();
+		}
+
+		if(Math.abs(q) < 1e-6) {
+			return base.up();
 		}
 
 		// Middle point – compute local derivatives using neighbors
