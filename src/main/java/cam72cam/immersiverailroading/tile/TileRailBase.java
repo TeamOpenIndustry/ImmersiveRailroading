@@ -232,9 +232,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private final SingleCache<Vec3i, Vec3i> parentCache = new SingleCache<>(parent -> parent.add(getPos()));
 	public Vec3i getParent() {
 		if (parent == null) {
-			if (ticksExisted > 5 && getWorld().isServer) {
+			if (ticksExisted > 60 && getWorld().isServer) {
 				ImmersiveRailroading.warn("Invalid block without parent");
 				// Might be null during init
+				// TODO Provide a method to check if loading finished
 				getWorld().setToAir(getPos());
 			}
 			return null;
