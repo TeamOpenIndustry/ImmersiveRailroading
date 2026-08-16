@@ -7,9 +7,11 @@ import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.math.Plane;
 import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.SingleCache;
 
 public abstract class TrackBase {
@@ -84,10 +86,17 @@ public abstract class TrackBase {
 			return tr;
 		}
 
-		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, pos.down(), false)) {
-			builder.world.setBlock(pos.down(), builder.info.settings.railBedFill);
+		Vec3i bedFillPos;
+		if(bedFace != null) { // TODO: they may be broken by bed block
+			Facing facing = Facing.fromNormal(bedFace.normal);
+			Vec3i axis = new Vec3i(facing.getXMultiplier(), facing.getYMultiplier(), facing.getZMultiplier());
+			bedFillPos = pos.add(axis);
+		} else {
+			bedFillPos = pos.down();
 		}
-
+		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, bedFillPos, false)) {
+			builder.world.setBlock(bedFillPos, builder.info.settings.railBedFill);
+		}
 
 		TagCompound replaced = null;
 		int hasSnow = 0;
