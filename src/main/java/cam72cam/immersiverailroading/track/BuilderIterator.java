@@ -61,7 +61,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		}
 		double clamp = 0.17 * info.settings.gauge.scale();
 
-		List<VecYPR> path = getPath(0.25);
+		List<VecYPR> path = new ArrayList<>(getPath(0.25));
 		Vec3d placementOffset = info.placementInfo.placementPosition;
         path.replaceAll(vecYPR -> vecYPR.add(placementOffset));
 
