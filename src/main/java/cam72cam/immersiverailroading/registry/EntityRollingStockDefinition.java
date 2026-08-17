@@ -319,7 +319,7 @@ public abstract class EntityRollingStockDefinition {
 
         this.stockModel = createModel();
         Model model = stockModel.model;
-        this.itemGroups = model.getSpeculars().keySet().stream()
+        this.itemGroups = model.getGroups().keySet().stream()
                                .filter(x -> !ModelComponentType.shouldRender(x))
                                .collect(Collectors.toList());
 

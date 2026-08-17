@@ -30,7 +30,7 @@ public class RailBuilderRender {
 
         MinecraftClient.startProfiler("irTrackModel");
         try (ModelRenderer.Binding binding =
-                     ModelRenderer.getRendererFor(track.model).bind(state, info.settings.type.isTable())) {
+                     ModelRenderer.getRendererFor(cached).bind(state, info.settings.type.isTable())) {
             binding.enqueueOpaque();
         }
         MinecraftClient.endProfiler();
