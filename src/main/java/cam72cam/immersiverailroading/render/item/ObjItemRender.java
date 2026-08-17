@@ -5,7 +5,6 @@ import cam72cam.mod.model.common.ModelLoader;
 import cam72cam.mod.model.common.mesh.Model;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.common.ModelConfig;
 import cam72cam.mod.render.common.ModelRenderer;
 import cam72cam.mod.resource.Identifier;
 
@@ -34,8 +33,7 @@ public class ObjItemRender {
                     .rotate(rotation.y, 0, 1, 0)
                     .rotate(rotation.z, 0, 0, 1)
                     .scale(scale, scale, scale);
-            ModelConfig cfg = new ModelConfig().synchronous();
-            try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(cfg, state)) {
+            try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(state)) {
                 vbo.enqueueOpaque();
             }
         });
