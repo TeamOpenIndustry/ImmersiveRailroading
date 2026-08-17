@@ -10,7 +10,6 @@ import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -271,7 +270,7 @@ public class ModelState {
 
     public void render(ModelRenderer.Binding binding, EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
         // Get all groups that we can render from components that are available
-        List<ModelComponent.ModelGroup> groups = new ArrayList<>();
+        List<ModelComponent.ModelGroupData> groups = new ArrayList<>();
 
         for (ModelComponent component : components) {
             if (available == null || available.remove(component.type)) {
@@ -279,7 +278,7 @@ public class ModelState {
                 if (groupVisibility == null) {
                     groups.addAll(component.groups);
                 } else {
-                    for (ModelComponent.ModelGroup g : component.groups) {
+                    for (ModelComponent.ModelGroupData g : component.groups) {
                         Boolean visible = groupVisibility.visible(stock, g.modelID);
                         if (visible == null || visible) {
                             groups.add(g);
@@ -316,7 +315,7 @@ public class ModelState {
             }
         };
 
-        for (ModelComponent.ModelGroup group : groups) {
+        for (ModelComponent.ModelGroupData group : groups) {
             if (group.transparent && !ConfigGraphics.RenderSemiTransparentParts) {
                 // Don't render the group
                 continue;

@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.common.mesh.Model;
+import cam72cam.mod.model.common.mesh.ModelGroup;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -24,10 +25,10 @@ public class ModelComponent {
     public final boolean wooden;
     private final Model model;
 
-    public final List<ModelGroup> groups;
+    public final List<ModelGroupData> groups;
 
     public static final Pattern lcgPattern = Pattern.compile("_LCG_([^_]+)");
-    public static class ModelGroup {
+    public static class ModelGroupData {
         public final String modelID;
         public final String LCG;
         public final boolean linvert;
@@ -35,7 +36,7 @@ public class ModelComponent {
         public final boolean fullbright;
         public final boolean transparent;
 
-        public ModelGroup(String modelID) {
+        public ModelGroupData(String modelID) {
             Matcher m = lcgPattern.matcher(modelID);
             LCG = m.find() ? m.group(1) : null;
 
@@ -74,7 +75,7 @@ public class ModelComponent {
         this.pos = pos;
         this.id = id;
         this.modelIDs = modelIDs;
-        this.groups = modelIDs.stream().map(ModelGroup::new).collect(Collectors.toList());
+        this.groups = modelIDs.stream().map(ModelGroupData::new).collect(Collectors.toList());
         this.key = String.join(" ", modelIDs);
         this.model = model;
         min = model.minOfGroups(this.modelIDs);
@@ -107,12 +108,12 @@ public class ModelComponent {
     }
 
     public static Vec3d center(List<ModelComponent> components) {
-        double minX = components.get(0).min.x;
-        double minY = components.get(0).min.y;
-        double minZ = components.get(0).min.z;
-        double maxX = components.get(0).max.x;
-        double maxY = components.get(0).max.y;
-        double maxZ = components.get(0).max.z;
+        double minX = components.getFirst().min.x;
+        double minY = components.getFirst().min.y;
+        double minZ = components.getFirst().min.z;
+        double maxX = components.getFirst().max.x;
+        double maxY = components.getFirst().max.y;
+        double maxZ = components.getFirst().max.z;
 
         for (ModelComponent rc : components) {
             minX = Math.min(minX, rc.min.x);
@@ -129,7 +130,7 @@ public class ModelComponent {
         return stock.getModelMatrix().apply(pos);
     }
 
-    public List<cam72cam.mod.model.common.mesh.ModelGroup> groups() {
+    public List<ModelGroup> groups() {
         return modelIDs.stream().map(model.getGroups()::get).collect(Collectors.toList());
     }
 }
