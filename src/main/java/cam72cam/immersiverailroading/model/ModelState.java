@@ -4,15 +4,14 @@ import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.render.obj.OBJRender;
+import cam72cam.mod.render.common.ModelRenderer;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
-import org.apache.commons.lang3.tuple.Pair;
 import util.Matrix4;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ModelState {
@@ -255,7 +254,7 @@ public class ModelState {
                     this.transparent == other.transparent;
         }
 
-        void copy(GroupState other) {
+        void copyFrom(GroupState other) {
             this.matrix = other.matrix;
             this.blockLight = other.blockLight;
             this.skyLight = other.skyLight;
@@ -270,7 +269,7 @@ public class ModelState {
         }
     }
 
-    public void render(OBJRender.Binding vbo, EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
+    public void render(ModelRenderer.Binding binding, EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
         // Get all groups that we can render from components that are available
         List<ModelComponent.ModelGroup> groups = new ArrayList<>();
 
@@ -314,9 +313,6 @@ public class ModelState {
             }
             if (current.blockLight != null && current.skyLight != null) {
                 state.lightmap(current.blockLight, current.skyLight);
-            }
-            if (current.transparent) {
-                state.blend(ALPHA_BLEND).depth_mask(false);
             }
         };
 
@@ -362,22 +358,30 @@ public class ModelState {
 
             // Flush
             if (!currentGroups.isEmpty()) {
-                vbo.draw(currentGroups, currentModifier);
+                if (current.transparent) {
+                    binding.enqueueTransparent(currentGroups, currentModifier);
+                } else {
+                    binding.enqueueOpaque(currentGroups, currentModifier);
+                }
             }
 
             // Start tracking the next set of groups
             currentGroups.clear();
             currentGroups.add(group.modelID);
-            current.copy(next);
+            current.copyFrom(next);
         }
 
         // Flush
         if (!currentGroups.isEmpty()) {
-            vbo.draw(currentGroups, currentModifier);
+            if (current.transparent) {
+                binding.enqueueTransparent(currentGroups, currentModifier);
+            } else {
+                binding.enqueueOpaque(currentGroups, currentModifier);
+            }
         }
 
         for (ModelState child : children) {
-            child.render(vbo, stock, available, partialTicks);
+            child.render(binding, stock, available, partialTicks);
         }
     }
 }

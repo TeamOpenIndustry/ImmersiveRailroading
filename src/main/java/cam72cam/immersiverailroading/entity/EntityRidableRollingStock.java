@@ -62,9 +62,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				.filter(x -> x.getValue().equals(passenger))
 				.map(Map.Entry::getKey).findFirst().orElse(null);
 		return this.getDefinition().getModel().getSeats().stream()
-				.filter(s -> s.part.key.equals(seat))
-				.map(s -> new Vec3d(s.part.center.z, s.part.min.y, -s.part.center.x).scale(gauge.scale()).subtract(0, 0.6, 0))
-				.findFirst().orElse(null);
+		           .filter(s -> s.part.key.equals(seat))
+		           .map(s -> new Vec3d(s.part.center.z, s.part.min.y, -s.part.center.x).scale(gauge.scale()).subtract(0, 0.6, 0))
+		           .findFirst().orElse(null);
 	}
 
 	@Override
@@ -132,11 +132,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	private boolean isNearestConnectingDoorOpen(Player source) {
 		// Find any doors that are close enough that are closed (and then negate)
 		return !this.getDefinition().getModel().getDoors().stream()
-				.filter(d -> d.type == Door.Types.CONNECTING)
-				.filter(d -> d.center(this).distanceTo(source.getPosition()) < getDefinition().getLength(this.gauge)/3)
-				.min(Comparator.comparingDouble(d -> d.center(this).distanceTo(source.getPosition())))
-				.filter(x -> !x.isOpen(this))
-				.isPresent();
+		            .filter(d -> d.type == Door.Types.CONNECTING)
+		            .filter(d -> d.center(this).distanceTo(source.getPosition()) < getDefinition().getLength(this.gauge)/3)
+		            .min(Comparator.comparingDouble(d -> d.center(this).distanceTo(source.getPosition())))
+		            .filter(x -> !x.isOpen(this))
+		            .isPresent();
 	}
 
 	private Vec3d playerMovement(Player source, Vec3d offset) {

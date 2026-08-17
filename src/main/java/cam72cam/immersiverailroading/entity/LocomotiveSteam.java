@@ -160,9 +160,9 @@ public class LocomotiveSteam extends Locomotive {
 		if (def instanceof LocomotiveSteamDefinition steamDef && steamDef.defaultTenderFeed) {
 			//Apply default tender feed setting
 			steamDef.getModel().getControls()
-					.stream()
-					.filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
-					.forEach(c -> setControlPosition(c, 1));
+			        .stream()
+			        .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
+			        .forEach(c -> setControlPosition(c, 1));
 		}
 	}
 
@@ -181,9 +181,9 @@ public class LocomotiveSteam extends Locomotive {
 
 
 		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
-				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
-				.mapToDouble(this::getControlPosition)
-				.max();
+		                             .filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
+		                             .mapToDouble(this::getControlPosition)
+		                             .max();
 		if (control.isPresent() && control.getAsDouble() > 0) {
 			this.setHorn(10, hornPlayer);
 		}
@@ -461,9 +461,9 @@ public class LocomotiveSteam extends Locomotive {
 	public boolean isAutoFeedEnabled() {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
 		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
-												 .stream()
-												 .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
-												 .collect(Collectors.toList());
+		                                             .stream()
+		                                             .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
+		                                             .collect(Collectors.toList());
 		if (!autoRefuel.isEmpty()) {
 			return autoRefuel.stream().anyMatch(c -> getControlPosition(c) == 1);
 		} else {
@@ -474,9 +474,9 @@ public class LocomotiveSteam extends Locomotive {
 	public void setAutoFeed(boolean enabled) {
 		// This could be optimized to once-per-tick, but I'm not sure that is necessary
 		List<Control<?>> autoRefuel = getDefinition().getModel().getControls()
-												 .stream()
-												 .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
-												 .collect(Collectors.toList());
+		                                             .stream()
+		                                             .filter(x -> x.part.type == ModelComponentType.TENDER_FEED_CONTROL_X)
+		                                             .collect(Collectors.toList());
 
 		for (Control<?> ctrl : autoRefuel) {
 			setControlPosition(ctrl, enabled ? 1 : 0);

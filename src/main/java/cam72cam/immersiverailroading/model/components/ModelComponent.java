@@ -4,8 +4,7 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJGroup;
-import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.mod.model.common.mesh.Model;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -23,7 +22,7 @@ public class ModelComponent {
     public final Vec3d max;
     public final Vec3d center;
     public final boolean wooden;
-    private final OBJModel model;
+    private final Model model;
 
     public final List<ModelGroup> groups;
 
@@ -70,7 +69,7 @@ public class ModelComponent {
         }
     }
 
-    public ModelComponent(ModelComponentType type, ModelPosition pos, Integer id, OBJModel model, Set<String> modelIDs) {
+    public ModelComponent(ModelComponentType type, ModelPosition pos, Integer id, Model model, Set<String> modelIDs) {
         this.type = type;
         this.pos = pos;
         this.id = id;
@@ -78,8 +77,8 @@ public class ModelComponent {
         this.groups = modelIDs.stream().map(ModelGroup::new).collect(Collectors.toList());
         this.key = String.join(" ", modelIDs);
         this.model = model;
-        min = model.minOfGroup(this.modelIDs);
-        max = model.maxOfGroup(this.modelIDs);
+        min = model.minOfGroups(this.modelIDs);
+        max = model.maxOfGroups(this.modelIDs);
         center = new Vec3d((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
         wooden = modelIDs.stream().anyMatch(g -> g.contains("WOOD"));
 
@@ -130,7 +129,7 @@ public class ModelComponent {
         return stock.getModelMatrix().apply(pos);
     }
 
-    public List<OBJGroup> groups() {
-        return modelIDs.stream().map(model.groups::get).collect(Collectors.toList());
+    public List<cam72cam.mod.model.common.mesh.ModelGroup> groups() {
+        return modelIDs.stream().map(model.getGroups()::get).collect(Collectors.toList());
     }
 }

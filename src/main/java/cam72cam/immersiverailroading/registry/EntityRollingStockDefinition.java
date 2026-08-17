@@ -16,8 +16,9 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.FaceAccessor;
-import cam72cam.mod.model.obj.OBJFace;
+import cam72cam.mod.model.common.mesh.Face;
+import cam72cam.mod.model.common.mesh.Model;
+import cam72cam.mod.model.common.util.FaceAccessor;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.serialization.ResourceCache.GenericByteBuffer;
@@ -67,7 +68,7 @@ public abstract class EntityRollingStockDefinition {
     private ValveGearConfig valveGear;
     public float darken;
     public Identifier modelLoc;
-    protected StockModel<?, ?> model;
+    protected StockModel<?, ?> stockModel;
     private float bogeyFront;
     private float bogeyRear;
     private float couplerOffsetFront;
@@ -316,25 +317,27 @@ public abstract class EntityRollingStockDefinition {
 
         loadData(transformData(data));
 
-        this.model = createModel();
-        this.itemGroups = model.groups.keySet().stream().filter(x -> !ModelComponentType.shouldRender(x)).collect(Collectors.toList());
+        this.stockModel = createModel();
+        Model model = stockModel.model;
+        this.itemGroups = model.getSpeculars().keySet().stream()
+                               .filter(x -> !ModelComponentType.shouldRender(x))
+                               .collect(Collectors.toList());
 
         this.navMesh = new NavMesh(this);
 
         this.renderComponents = new EnumMap<>(ModelComponentType.class);
-        for (ModelComponent component : model.allComponents) {
-            renderComponents.computeIfAbsent(component.type, v -> new ArrayList<>())
-                    .add(0, component);
+        for (ModelComponent component : stockModel.allComponents) {
+            renderComponents.computeIfAbsent(component.type, v -> new ArrayList<>()).add(0, component);
         }
 
-        itemComponents = model.allComponents.stream()
-                .map(component -> component.type)
-                .map(ItemComponentType::from)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        itemComponents = stockModel.allComponents.stream()
+                                                 .map(component -> component.type)
+                                                 .map(ItemComponentType::from)
+                                                 .filter(Objects::nonNull)
+                                                 .collect(Collectors.toList());
 
-        frontBounds = -model.minOfGroup(model.groups()).x;
-        rearBounds = model.maxOfGroup(model.groups()).x;
+        frontBounds = -model.minOfGroups(model.groups()).x;
+        rearBounds = model.maxOfGroups(model.groups()).x;
         widthBounds = model.widthOfGroups(model.groups());
 
         // Bad hack for height bounds
@@ -641,8 +644,8 @@ public abstract class EntityRollingStockDefinition {
     private Vec3d getCollidingDoorTangent(EntityRollingStock stock, Gauge gauge, Vec3d start, Vec3d end) {
         // Maybe filter by nearest door?
         List<Door<?>> doors = getModel().getDoors().stream()
-                .filter(d -> d.type == Door.Types.CONNECTING || d.type == Door.Types.INTERNAL)
-                .filter(d -> !d.isOpen(stock)).collect(Collectors.toUnmodifiableList());
+                                        .filter(d -> d.type == Door.Types.CONNECTING || d.type == Door.Types.INTERNAL)
+                                        .filter(d -> !d.isOpen(stock)).collect(Collectors.toUnmodifiableList());
 
         boolean intersects = false;
         Door<?> intersectingDoor = null;
@@ -680,7 +683,7 @@ public abstract class EntityRollingStockDefinition {
                 passengerOffset.subtract(searchRange, searchRange, searchRange),
                 passengerOffset.add(searchRange, searchRange, searchRange)
         );
-        List<OBJFace> nearby = new ArrayList<>();
+        List<Face> nearby = new ArrayList<>();
         navMesh.queryBVH(navMesh.root, rayBox, nearby, gauge.scale());
         if (nearby.isEmpty()) {
             return passengerOffset.rotateYaw(90);
@@ -692,7 +695,7 @@ public abstract class EntityRollingStockDefinition {
         Vec3d nearest = null;
         double nearestDistSq = Double.MAX_VALUE;
 
-        for (OBJFace face : nearby) {
+        for (Face face : nearby) {
             Vec3d p0 = face.vertex0.pos;
             Vec3d p1 = face.vertex1.pos;
             Vec3d p2 = face.vertex2.pos;
@@ -802,7 +805,7 @@ public abstract class EntityRollingStockDefinition {
                     .collect(Collectors.toList());
             data = new float[components.size() * xRes * zRes];
 
-            FaceAccessor visitor = def.model.getFaceAccessor();
+            FaceAccessor visitor = def.stockModel.model.getFaceAccessor();
 
             for (int i = 0; i < components.size(); i++) {
                 ModelComponent rc = components.get(i);
@@ -851,7 +854,7 @@ public abstract class EntityRollingStockDefinition {
     private Function<EntityBuildableRollingStock, float[][]> initHeightmap() {
         String key = String.format(
                 "%s-%s-%s-%s-%s-%s",
-                model.hash, frontBounds, rearBounds, widthBounds, heightBounds, renderComponents.size());
+                stockModel.model.hash, frontBounds, rearBounds, widthBounds, heightBounds, renderComponents.size());
         try {
             ResourceCache<HeightMapData> cache = new ResourceCache<>(
                     new Identifier(modelLoc.getDomain(), modelLoc.getPath() + "_heightmap_" + key.hashCode()),
@@ -957,7 +960,7 @@ public abstract class EntityRollingStockDefinition {
         return new StockModel<>(this);
     }
     public StockModel<?, ?> getModel() {
-        return this.model;
+        return this.stockModel;
     }
 
     /**

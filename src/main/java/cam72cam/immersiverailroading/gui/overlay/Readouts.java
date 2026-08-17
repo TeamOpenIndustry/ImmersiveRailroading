@@ -93,9 +93,9 @@ public enum Readouts {
             case ENGINE ->
                 stock instanceof LocomotiveDiesel diesel && diesel.isTurnedOn() ? 1 : 0;
             case FRONT_BOGEY_ANGLE ->
-                stock instanceof EntityMoveableRollingStock moveable ? yawToPercent(stock.getDefinition().getModel().getFrontYaw(moveable), 90) : 0;
+                    stock instanceof EntityMoveableRollingStock moveable ? yawToPercent(stock.getDefinition().getModel().getFrontYaw(moveable), 90) : 0;
             case REAR_BOGEY_ANGLE ->
-                stock instanceof EntityMoveableRollingStock moveable ? yawToPercent(stock.getDefinition().getModel().getRearYaw(moveable), 90) : 0;
+                    stock instanceof EntityMoveableRollingStock moveable ? yawToPercent(stock.getDefinition().getModel().getRearYaw(moveable), 90) : 0;
             case FRONT_LOCOMOTIVE_ANGLE -> {
                 StockModel<?, ?> stockModel = stock.getDefinition().getModel();
                 yield stockModel instanceof LocomotiveModel<?, ?> locoModel && stock instanceof EntityMoveableRollingStock moveable

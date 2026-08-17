@@ -7,8 +7,8 @@ import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import cam72cam.mod.model.obj.FaceAccessor;
-import cam72cam.mod.model.obj.OBJFace;
+import cam72cam.mod.model.common.mesh.Face;
+import cam72cam.mod.model.common.util.FaceAccessor;
 import cam72cam.mod.model.obj.Vec2f;
 import cam72cam.mod.util.Axis;
 
@@ -31,7 +31,7 @@ public class NavMesh {
 
     public NavMesh(EntityRollingStockDefinition definition) {
         StockModel<?, ?> model = definition.getModel();
-        List<OBJFace> floorFaces;
+        List<Face> floorFaces;
         if (model.floor != null) {
             floorFaces = collectFloorFaces(model);
             root = buildBVH(new ArrayList<>(floorFaces), 0);
@@ -48,17 +48,17 @@ public class NavMesh {
         floorBoundaryEdges = computeBoundaryEdges(floorFaces);
     }
 
-    private List<OBJFace> collectFloorFaces(StockModel<?, ?> model) {
-        FaceAccessor accessor = model.getFaceAccessor();
-        List<OBJFace> floor = new ArrayList<>();
-        model.floor.modelIDs.forEach(group -> {
+    private List<Face> collectFloorFaces(StockModel<?, ?> stock) {
+        FaceAccessor accessor = stock.model.getFaceAccessor();
+        List<Face> floor = new ArrayList<>();
+        stock.floor.modelIDs.forEach(group -> {
             FaceAccessor sub = accessor.getSubByGroup(group);
             sub.forEach(a -> floor.add(a.asOBJFace()));
         });
         return floor;
     }
 
-    private List<OBJFace> legacyFloorFaces(EntityRollingStockDefinition def) {
+    private List<Face> legacyFloorFaces(EntityRollingStockDefinition def) {
         Vec3d center = def.passengerCenter;
         Double length = def.passengerCompartmentLength;
         Double width = def.passengerCompartmentWidth;
@@ -73,13 +73,13 @@ public class NavMesh {
         Vec2f uv = new Vec2f(0, 0);
         Vec3d normal = new Vec3d(0, 1, 0);
 
-        OBJFace.Vertex vertex1 = new OBJFace.Vertex(center.add(-length, 0, width / 2), uv);
-        OBJFace.Vertex vertex2 = new OBJFace.Vertex(center.add(length, 0, width / 2), uv);
-        OBJFace.Vertex vertex3 = new OBJFace.Vertex(center.add(length, 0, -width / 2), uv);
-        OBJFace.Vertex vertex4 = new OBJFace.Vertex(center.add(-length, 0, -width / 2), uv);
+        Face.Vertex vertex1 = new Face.Vertex(center.add(-length, 0, width / 2), uv);
+        Face.Vertex vertex2 = new Face.Vertex(center.add(length, 0, width / 2), uv);
+        Face.Vertex vertex3 = new Face.Vertex(center.add(length, 0, -width / 2), uv);
+        Face.Vertex vertex4 = new Face.Vertex(center.add(-length, 0, -width / 2), uv);
 
-        OBJFace face1 = new OBJFace(vertex1, vertex2, vertex3, normal);
-        OBJFace face2 = new OBJFace(vertex1, vertex3, vertex4, normal);
+        Face face1 = new Face(vertex1, vertex2, vertex3, normal);
+        Face face2 = new Face(vertex1, vertex3, vertex4, normal);
 
         return Arrays.asList(face1, face2);
     }
@@ -104,11 +104,11 @@ public class NavMesh {
         }
     }
 
-    private List<Edge> computeBoundaryEdges(List<OBJFace> triangles) {
+    private List<Edge> computeBoundaryEdges(List<Face> triangles) {
         Map<String, Edge> edgeByKey = new HashMap<>();
         Map<String, Integer> edgeCount = new HashMap<>();
 
-        for (OBJFace tri : triangles) {
+        for (Face tri : triangles) {
             addEdge(tri.vertex0.pos, tri.vertex1.pos, edgeByKey, edgeCount);
             addEdge(tri.vertex1.pos, tri.vertex2.pos, edgeByKey, edgeCount);
             addEdge(tri.vertex2.pos, tri.vertex0.pos, edgeByKey, edgeCount);
@@ -151,9 +151,9 @@ public class NavMesh {
                 point.subtract(RANGE * 0.1 * scale, RANGE * scale, RANGE * 0.1 * scale),
                 point.add(RANGE * 0.1 * scale, RANGE * scale, RANGE * 0.1 * scale)
         );
-        List<OBJFace> nearby = new ArrayList<>();
+        List<Face> nearby = new ArrayList<>();
         queryBVH(root, box, nearby, scale);
-        for (OBJFace tri : nearby) {
+        for (Face tri : nearby) {
             if (MathUtil.pointInTriangleXZ(point, tri.vertex0.pos, tri.vertex1.pos, tri.vertex2.pos)) {
                 return true;
             }
@@ -165,17 +165,17 @@ public class NavMesh {
         IBoundingBox bounds;
         BVHNode left;
         BVHNode right;
-        List<OBJFace> triangles;
+        List<Face> triangles;
 
         boolean isLeaf() {
             return triangles != null;
         }
     }
 
-    public BVHNode buildBVH(List<OBJFace> triangles, int depth) {
+    public BVHNode buildBVH(List<Face> triangles, int depth) {
         if (triangles.size() <= LEAF_SIZE || depth > MAX_DEPTH) {
             IBoundingBox bounds = IBoundingBox.from(Vec3i.ZERO);
-            for (OBJFace face : triangles) {
+            for (Face face : triangles) {
                 bounds = bounds.expandToFit(face.getBoundingBox());
             }
             BVHNode node = new BVHNode();
@@ -185,7 +185,7 @@ public class NavMesh {
         }
 
         IBoundingBox bounds = IBoundingBox.from(Vec3i.ZERO);
-        for (OBJFace face : triangles) {
+        for (Face face : triangles) {
             bounds = bounds.expandToFit(face.getBoundingBox());
         }
 
@@ -202,19 +202,19 @@ public class NavMesh {
         return node;
     }
 
-    public void queryBVH(BVHNode node, IBoundingBox query, List<OBJFace> result, double scale) {
+    public void queryBVH(BVHNode node, IBoundingBox query, List<Face> result, double scale) {
         query = unscaleBoxUniform(query, scale);
         queryBVHInternal(node, query, result, scale);
     }
 
-    private void queryBVHInternal(BVHNode node, IBoundingBox query, List<OBJFace> result, double scale) {
+    private void queryBVHInternal(BVHNode node, IBoundingBox query, List<Face> result, double scale) {
         if (node == null) return;
         if (!node.bounds.intersects(query)) return;
 
 //        query = unscaleBoxUniform(query, scale);
 
         if (node.isLeaf()) {
-            for (OBJFace tri : node.triangles) {
+            for (Face tri : node.triangles) {
                 if (tri.getBoundingBox().intersects(query)) {
                     result.add(tri.scale(scale));
                 }
@@ -235,7 +235,7 @@ public class NavMesh {
         );
     }
 
-    private double getCentroid(OBJFace tri, Axis axis) {
+    private double getCentroid(Face tri, Axis axis) {
         return (VecUtil.getByAxis(tri.vertex0.pos, axis) + VecUtil.getByAxis(tri.vertex1.pos, axis) + VecUtil.getByAxis(tri.vertex2.pos, axis)) / 3f;
     }
 }

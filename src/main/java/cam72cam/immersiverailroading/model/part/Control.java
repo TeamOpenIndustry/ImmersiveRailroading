@@ -16,6 +16,7 @@ import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
+import cam72cam.mod.model.common.mesh.ModelGroup;
 import cam72cam.mod.model.obj.OBJGroup;
 import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.opengl.RenderState;
@@ -124,9 +125,9 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             this.rotations.put(Axis.Z, axis.getValue("Z").asFloat());
             this.center = part.center;
         } else {
-            OBJGroup rot = part.groups().stream()
-                    .filter(g -> Pattern.matches(rotpat, g.name))
-                    .findFirst().orElse(null);
+            ModelGroup rot = part.groups().stream()
+                                 .filter(g -> Pattern.matches(rotpat, g.name))
+                                 .findFirst().orElse(null);
             if (rot != null && rot.normal != null) {
                 this.rotationPoint = rot.max.add(rot.min).scale(0.5);
                 String[] split = rot.name.split("_");
