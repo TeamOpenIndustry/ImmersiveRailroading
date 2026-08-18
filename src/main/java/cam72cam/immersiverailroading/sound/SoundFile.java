@@ -38,6 +38,8 @@ public class SoundFile {
         for (RandomDef file : files) {
             // TODO create category for custom sound
             ISound sound =  stock.createSound(file.file(), true, distance, () -> 100f);
+            sound.setPitch(pitch);
+            sound.setVolume(volume);
             sounds.put(sound, file.likelihood());
         }
 
