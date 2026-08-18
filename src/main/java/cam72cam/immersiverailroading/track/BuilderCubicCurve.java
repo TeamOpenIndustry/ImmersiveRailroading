@@ -211,7 +211,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				Vec3d p = points.get(i);
 				float yaw;
 				float pitch;
-				float roll = rawRolls.get(i).floatValue();
+				float roll = (float) RollAndOffsetInfo.getRollDeg(rawRolls.get(i), info.settings.rollAndOffsetInfo.degreeMode());
 				if (points.size() == 1) {
 					yaw = info.placementInfo.yaw;
 					pitch = 0;
@@ -297,14 +297,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 			float roll = 0;
 			if(rawRolls.get(i) != 0) {
-				if(!info.settings.rollAndOffsetInfo.degreeMode()) {
-					double sin = rawRolls.get(i) * 0.01 / Gauge.STANDARD;//superelevision scale
-					if(sin > 1) sin = 1;
-					if(sin < -1) sin = -1;
-					roll = (float) Math.toDegrees(Math.asin(sin));
-				} else {
-					roll = rawRolls.get(i).floatValue();
-				}
+				roll = (float) RollAndOffsetInfo.getRollDeg(rawRolls.get(i), info.settings.rollAndOffsetInfo.degreeMode());
 			}
 
 			res.add(new VecYPR(p.x, p.y, p.z, yaw, pitch, roll, -1));

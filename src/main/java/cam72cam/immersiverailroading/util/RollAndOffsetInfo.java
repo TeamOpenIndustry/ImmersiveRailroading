@@ -1164,6 +1164,10 @@ public record RollAndOffsetInfo(
 
     public double getRollDeg(double l) {
         double rawRoll = getRawRoll(l);
+        return getRollDeg(rawRoll, degreeMode);
+    }
+
+    public static double getRollDeg(double rawRoll, boolean degreeMode) {
         if(!degreeMode) {
             double sin = rawRoll * 0.01 / Gauge.STANDARD;
             if(sin > 1) sin = 1;

@@ -185,21 +185,20 @@ public class TrackSnapUtil {
                     yaw = snapped.getYaw();
                 }
 
+                if (pointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
+                    double newRoll = stackInfo.rollAndOffsetInfo.degreeMode()
+                            ? snapped.getRoll()
+                            : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
+                    if (!isNear) newRoll = -newRoll;
+
+                    RollAndOffsetInfo.Mutable rollMutable = stackInfo.rollAndOffsetInfo.mutable();
+                    rollMutable.tryDeltaValue(isNear ? 0.0 : 1.0, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
+                    stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollMutable.immutable());
+                }
+
                 if (pointData.trackSnapSettings().snapHeight()) {
                     Vec3d offset = new Vec3d(0, hit.y, 0);
-
-                    if (pointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
-                        double newRoll = stackInfo.rollAndOffsetInfo.degreeMode()
-                                ? snapped.getRoll()
-                                : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
-                        if (!isNear) newRoll = -newRoll;
-
-                        RollAndOffsetInfo.Mutable rollMutable = stackInfo.rollAndOffsetInfo.mutable();
-                        rollMutable.tryDeltaValue(isNear ? 0.0 : 1.0, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
-                        stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollMutable.immutable());
-                    }
-
-                    if(stackInfo.rollAndOffsetInfo != null) {
+                    if(stackInfo.rollAndOffsetInfo != null) {// Must be done after roll is confirmed
                         RollAndOffsetInfo.RollAndVertOffsetAlignType type = stackInfo.rollAndOffsetInfo.rollOffsetType();
                         double rawRoll = stackInfo.rollAndOffsetInfo.getRawRoll(isNear ? 0.0 : 1.0);
                         if(!isNear) rawRoll = -rawRoll;
