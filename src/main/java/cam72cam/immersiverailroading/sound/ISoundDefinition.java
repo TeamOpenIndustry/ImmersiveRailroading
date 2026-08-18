@@ -8,4 +8,10 @@ import cam72cam.immersiverailroading.util.DataBlock;
 public interface ISoundDefinition {
     void play(EntityMoveableRollingStock stock);
     void removed(EntityMoveableRollingStock stock);
+
+    enum PlayState {
+        INSIDE,
+        OUTSIDE,
+        BOTH
+    }
 }

@@ -5,6 +5,8 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ControllerType;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.sound.ISound;
 
 import java.util.Map;
@@ -22,6 +24,7 @@ public class OneShotSounds implements ISoundDefinition {
     private final TriggerCondition condition;
     private final float trigger;
     private final float timer;
+    private final PlayState playState;
 
     private float oldVal = -1;
     private long lastPlayed = -1;
@@ -40,6 +43,7 @@ public class OneShotSounds implements ISoundDefinition {
         this.condition = TriggerCondition.valueOf(json.getValue("trigger_type").asString().toUpperCase());
         this.trigger = json.getValue("trigger_value").asFloat();
         this.timer = json.getValue("timer").asFloat();
+        this.playState = PlayState.valueOf(json.getValue("play_state").asString("BOTH").toUpperCase());
     }
 
     @Override
@@ -48,6 +52,29 @@ public class OneShotSounds implements ISoundDefinition {
         if (sounds == null) {
             sounds = soundFile.create(stock);
             entitySounds.put(stock.getUUID(), sounds);
+        }
+
+        Player player = MinecraftClient.getPlayer();
+        switch (playState) {
+            case INSIDE -> {
+                if (!stock.isPassenger(player)) {
+                    for (ISound sound : sounds.keySet()) {
+                        sound.stop();
+                    }
+                    return;
+                }
+            }
+            case OUTSIDE -> {
+                if (stock.isPassenger(player)) {
+                    for (ISound sound : sounds.keySet()) {
+                        sound.stop();
+                    }
+                    return;
+                }
+            }
+            case BOTH -> {
+                // Nothing happens
+            }
         }
 
         for (ISound sound : sounds.keySet()) {
