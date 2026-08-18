@@ -41,7 +41,7 @@ public abstract class TrackBase {
 		this.correctedOverlayBuilder = builder.pos;
 	}
 
-	private final SingleCache<Vec3i, Vec3i> downCache = new SingleCache<>(Vec3i::down);
+	private final SingleCache<Vec3i, Vec3i> downCache = new SingleCache<>(pos -> getBedFillPos(pos, getBedFace()));
 	public boolean isDownSolid(boolean countFill) {
 		Vec3i pos = downCache.get(getPos());
 		return
@@ -67,6 +67,13 @@ public abstract class TrackBase {
 		return isDownSolid(true) && (BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
+	public void tryPlaceBedFill() {
+		Vec3i bedFillPos = getBedFillPos();
+		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, bedFillPos, false)) {
+			builder.world.setBlock(bedFillPos, builder.info.settings.railBedFill);
+		}
+	}
+
 	public TileRailBase placeTrack(boolean actuallyPlace) {
 		Vec3i pos = getPos();
 
@@ -79,22 +86,10 @@ public abstract class TrackBase {
 			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
-			tr.setSnowLayers((int) Math.floor(getBedHeight() * 8f));
+			tr.setSnowLayers(tr.getMinSnowLayers());
 			tr.setBedFace(getBedFace());
 			tr.setScaleModel(isScaleModel());
 			return tr;
-		}
-
-		Vec3i bedFillPos;
-		if(getBedFace() != null) { // TODO: they may be broken by bed block
-			Facing facing = Facing.fromNormal(getBedFace().normal);
-			Vec3i axis = new Vec3i(facing.getXMultiplier(), facing.getYMultiplier(), facing.getZMultiplier());
-			bedFillPos = pos.add(axis);
-		} else {
-			bedFillPos = pos.down();
-		}
-		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, bedFillPos, false)) {
-			builder.world.setBlock(bedFillPos, builder.info.settings.railBedFill); // TODO: Advanced embankment placer
 		}
 
 		TagCompound replaced = null;
@@ -136,6 +131,20 @@ public abstract class TrackBase {
 			tr.handleSnowTick();
 		}
 		return tr;
+	}
+
+	private static Vec3i getBedFillPos(Vec3i pos, Plane bedFace) {
+		if(bedFace != null) {
+			Facing facing = Facing.fromNormal(bedFace.normal);
+			Vec3i axis = new Vec3i(facing.getXMultiplier(), facing.getYMultiplier(), facing.getZMultiplier());
+			return pos.add(axis);
+		} else {
+			return pos.down();
+		}
+	}
+
+	public Vec3i getBedFillPos() {
+		return getBedFillPos(getPos(), getBedFace());
 	}
 
 	private final SingleCache<Vec3i, Vec3i> posCache = new SingleCache<>(pos -> pos.add(rel));
