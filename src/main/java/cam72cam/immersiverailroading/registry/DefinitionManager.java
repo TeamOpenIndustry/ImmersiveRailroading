@@ -93,7 +93,7 @@ public class DefinitionManager {
     public static void initDefinitions() {
         if (definitions != null) {
             for (EntityRollingStockDefinition def : definitions.values()) {
-                if (def.stockModel != null) {
+                if (def.stockModel.model != null) {
                     def.stockModel.model.free();
                 }
             }
