@@ -644,20 +644,24 @@ public abstract class EntityRollingStockDefinition {
         });
 
         customSoundDef = new ArrayList<>();
-        data.getBlocks("loop").forEach(l -> {
-            SoundFile soundFile = soundFiles.get(l.getValue("sound").asString());
-            ModifierChain modifierChain = modifierChains.get(l.getValue("modifier_chain").asString());
+        if (data.getBlocks("loop") != null) {
+            data.getBlocks("loop").forEach(l -> {
+                SoundFile soundFile = soundFiles.get(l.getValue("sound").asString());
+                ModifierChain modifierChain = modifierChains.get(l.getValue("modifier_chain").asString());
 
-            ISoundDefinition def = new LoopedSound(l, soundFile, modifierChain);
-            customSoundDef.add(def);
-        });
+                ISoundDefinition def = new LoopedSound(l, soundFile, modifierChain);
+                customSoundDef.add(def);
+            });
+        }
 
-        data.getBlocks("oneshot").forEach(o -> {
-            SoundFile soundFile = soundFiles.get(o.getValue("sound").asString());
+        if (data.getBlocks("oneshot") != null) {
+            data.getBlocks("oneshot").forEach(o -> {
+                SoundFile soundFile = soundFiles.get(o.getValue("sound").asString());
 
-            ISoundDefinition def = new OneShotSounds(o, soundFile);
-            customSoundDef.add(def);
-        });
+                ISoundDefinition def = new OneShotSounds(o, soundFile);
+                customSoundDef.add(def);
+            });
+        }
     }
 
     public List<ModelComponent> getComponents(ModelComponentType name) {
