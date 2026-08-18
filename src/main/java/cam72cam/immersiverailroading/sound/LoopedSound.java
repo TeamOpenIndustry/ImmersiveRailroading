@@ -5,6 +5,8 @@ import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ControllerType;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.util.DataBlock;
+import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.sound.ISound;
 
 import java.util.*;
@@ -21,6 +23,7 @@ public class LoopedSound implements ISoundDefinition {
     private final LoopCondition condition;
     private final float rangeStart;
     private final float rangeEnd;
+    private final PlayState playState;
 
     private float oldVal = -1;
 
@@ -41,6 +44,8 @@ public class LoopedSound implements ISoundDefinition {
 
         this.rangeStart = json.getValue("active_range_start").asFloat();
         this.rangeEnd = json.getValue("active_range_end").asFloat();
+
+        this.playState = PlayState.valueOf(json.getValue("play_state").asString("BOTH").toUpperCase());
     }
 
     @Override
@@ -49,6 +54,29 @@ public class LoopedSound implements ISoundDefinition {
         if (sounds == null) {
             sounds = soundFile.create(stock);
             entitySounds.put(stock.getUUID(), sounds);
+        }
+
+        Player player = MinecraftClient.getPlayer();
+        switch (playState) {
+            case INSIDE -> {
+                if (!stock.isPassenger(player)) {
+                    for (ISound sound : sounds.keySet()) {
+                        sound.stop();
+                    }
+                    return;
+                }
+            }
+            case OUTSIDE -> {
+                if (stock.isPassenger(player)) {
+                    for (ISound sound : sounds.keySet()) {
+                        sound.stop();
+                    }
+                    return;
+                }
+            }
+            case BOTH -> {
+                // Nothing happens
+            }
         }
 
         float newVal = switch (controllerType) {
