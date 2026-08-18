@@ -58,7 +58,7 @@ public abstract class BuilderBase {
 			return ;
 		}
 		*/
-		for(TrackBase track : tracks) {// TODO: Separate bedFill placement logic for implementation of advanced placement features
+		for(TrackBase track : tracks) { // TODO: Advanced embankment placer
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
 			} else {

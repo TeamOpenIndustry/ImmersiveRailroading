@@ -94,7 +94,7 @@ public abstract class TrackBase {
 			bedFillPos = pos.down();
 		}
 		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, bedFillPos, false)) {
-			builder.world.setBlock(bedFillPos, builder.info.settings.railBedFill);
+			builder.world.setBlock(bedFillPos, builder.info.settings.railBedFill); // TODO: Advanced embankment placer
 		}
 
 		TagCompound replaced = null;
