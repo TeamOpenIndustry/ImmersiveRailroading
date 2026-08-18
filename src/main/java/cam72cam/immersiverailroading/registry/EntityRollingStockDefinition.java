@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.sound.*;
 import cam72cam.immersiverailroading.util.floor.NavMesh;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.util.*;
@@ -27,6 +28,7 @@ import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.world.World;
+import org.glassfish.jaxb.core.v2.model.core.EnumLeafInfo;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -107,6 +109,8 @@ public abstract class EntityRollingStockDefinition {
     public List<AnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
     public Map<String, DataBlock> widgetConfig;
+
+    public List<ISoundDefinition> customSoundDef;
 
     public NavMesh navMesh;
 
@@ -518,6 +522,14 @@ public abstract class EntityRollingStockDefinition {
         snowLayers = properties.getValue("snow_layers").asInteger();
 
         DataBlock sounds = data.getBlock("sounds");
+        // New
+        Identifier file = sounds.getValue("file").asIdentifier();
+        if (file != null) {
+            loadSounds(file);
+        }
+
+        // Legacy
+        // TODO make optional
         wheel_sound = sounds.getValue("wheels").asIdentifier();
         clackFront = clackRear = sounds.getValue("clack").asIdentifier();
         clackFront = sounds.getValue("clack_front").asIdentifier(clackFront);
@@ -596,6 +608,56 @@ public abstract class EntityRollingStockDefinition {
         if (widgets != null) {
             widgetConfig = widgets.getBlockMap();
         }
+    }
+
+    // TODO maybe move?
+    public void loadSounds(Identifier file) throws IOException {
+        DataBlock data;
+        InputStream fileStream = file.getResourceStream();
+        if (file.getPath().endsWith(".caml")) {
+            data = CAML.parse(fileStream);
+        } else {
+            data = JSON.parse(fileStream);
+        }
+
+        data = transformData(data);
+
+        Map<String, SoundFile> soundFiles = new HashMap<>();
+        data.getBlocks("sounds").forEach(s -> {
+            SoundFile soundFile = new SoundFile(s);
+            String name = s.getValue("name").asString();
+            soundFiles.put(name, soundFile);
+        });
+
+        Map<String, Curve> curves = new HashMap<>();
+        data.getBlocks("curve").forEach(c -> {
+            Curve curve = new Curve(c);
+            String name = c.getValue("name").asString();
+            curves.put(name, curve);
+        });
+
+        Map<String, ModifierChain> modifierChains = new HashMap<>();
+        data.getBlocks("modifier_chain").forEach(m -> {
+            ModifierChain modifierChain = new ModifierChain(m, curves);
+            String name = m.getValue("name").asString();
+            modifierChains.put(name, modifierChain);
+        });
+
+        customSoundDef = new ArrayList<>();
+        data.getBlocks("loop").forEach(l -> {
+            SoundFile soundFile = soundFiles.get(l.getValue("sound").asString());
+            ModifierChain modifierChain = modifierChains.get(l.getValue("modifier_chain").asString());
+
+            ISoundDefinition def = new LoopedSound(l, soundFile, modifierChain);
+            customSoundDef.add(def);
+        });
+
+        data.getBlocks("oneshot").forEach(o -> {
+            SoundFile soundFile = soundFiles.get(o.getValue("sound").asString());
+
+            ISoundDefinition def = new OneShotSounds(o, soundFile);
+            customSoundDef.add(def);
+        });
     }
 
     public List<ModelComponent> getComponents(ModelComponentType name) {
