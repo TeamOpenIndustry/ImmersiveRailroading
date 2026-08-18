@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.sound;
 
+import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.resource.Identifier;
@@ -36,8 +37,7 @@ public class SoundFile {
         Map<ISound, Float> sounds = new HashMap<>();
 
         for (RandomDef file : files) {
-            // TODO create category for custom sound
-            ISound sound =  stock.createSound(file.file(), true, distance, () -> 100f);
+            ISound sound =  stock.createSound(file.file(), true, distance, ConfigSound.SoundCategories.RollingStock::general);
             sound.setPitch(pitch);
             sound.setVolume(volume);
             sounds.put(sound, file.likelihood());
