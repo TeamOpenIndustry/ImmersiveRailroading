@@ -131,7 +131,7 @@ public abstract class BuilderBase {
 		this.drops = drops;
 	}
 
-	public void clearArea() { // Clear 6-block tall right-of-way ignoring snow UNLESS the snow directly intersects with the location of a future track tile.
+	public void clearArea() { // Clear 6-block tall right-of-way ignoring snow UNLESS the snow directly intersects with the location of a future track tile. TODO: adapt bedFace
 		for (TrackBase track : tracks) {
 			for (int i = 0; i < 6 * info.settings.gauge.scale(); i++) {
 				Vec3i main = track.getPos().up(i);
