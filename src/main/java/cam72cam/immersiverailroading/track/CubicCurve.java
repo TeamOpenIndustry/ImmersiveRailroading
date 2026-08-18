@@ -519,7 +519,7 @@ public class CubicCurve {
         List<PosRollOffset> result = new ArrayList<>();
         result.add(new PosRollOffset(
                 p1,
-                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(0),
+                rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRawRoll(0),
                 rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getYOffset(0),
                 rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getZOffset(0)
         ));
@@ -560,7 +560,7 @@ public class CubicCurve {
 
                 result.add(new PosRollOffset(
                         position(mid),
-                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRoll(l),
+                        rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getRawRoll(l),
                         rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getYOffset(l),
                         rollAndOffsetInfo == null ? 0 : rollAndOffsetInfo.getZOffset(l)
                 ));
@@ -571,7 +571,7 @@ public class CubicCurve {
         if(len[segment] - lastLength >= 0.8 * stepSize){
             result.add(new PosRollOffset(
                     p2,
-                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getRoll(1),
+                    rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getRawRoll(1),
                     rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getYOffset(1),
                     rollAndOffsetInfo==null ? 0 : rollAndOffsetInfo.getZOffset(1)
             ));

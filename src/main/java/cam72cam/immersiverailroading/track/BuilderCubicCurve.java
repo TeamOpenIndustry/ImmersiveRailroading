@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.track;
 
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.util.PlacementInfo;
@@ -157,7 +158,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 
 		List<PosRollOffset> posRollOffsets = curve.toList(stepSize, rollAndOffsetInfo);
 		List<Vec3d> points = PosRollOffset.getPoints(posRollOffsets);
-		List<Double> rolls = PosRollOffset.getRolls(posRollOffsets);
+		List<Double> rawRolls = PosRollOffset.getRawRolls(posRollOffsets);
 		List<Double> yOffsets = PosRollOffset.getYOffsets(posRollOffsets);
 		List<Double> zOffsets = PosRollOffset.getZOffsets(posRollOffsets);
 		List<Vec3d> originPoints = new ArrayList<>();
@@ -210,7 +211,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 				Vec3d p = points.get(i);
 				float yaw;
 				float pitch;
-				float roll = rolls.get(i).floatValue();
+				float roll = rawRolls.get(i).floatValue();
 				if (points.size() == 1) {
 					yaw = info.placementInfo.yaw;
 					pitch = 0;
@@ -248,9 +249,9 @@ public class BuilderCubicCurve extends BuilderIterator {
 					Vec3d p = points.get(i);
 					Vec3d newP;
 					if(!rollAndOffsetInfo.degreeMode()) {//superelevision scale
-						newP = new Vec3d(p.x, p.y - rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
+						newP = new Vec3d(p.x, p.y - rawRolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
-						newP = new Vec3d(p.x, p.y - Math.sin(Math.toRadians(rolls.get(i))) * gauge * 0.5, p.z);
+						newP = new Vec3d(p.x, p.y - Math.sin(Math.toRadians(rawRolls.get(i))) * gauge * 0.5, p.z);
 					}
 					points.set(i, newP);
 				}
@@ -260,9 +261,9 @@ public class BuilderCubicCurve extends BuilderIterator {
 					Vec3d p = points.get(i);
 					Vec3d newP;
 					if(!rollAndOffsetInfo.degreeMode()) {//superelevision scale
-						newP = new Vec3d(p.x, p.y + rolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
+						newP = new Vec3d(p.x, p.y + rawRolls.get(i) * gaugeScale * 0.01 * 0.5, p.z);
 					} else {
-						newP = new Vec3d(p.x, p.y + Math.sin(Math.toRadians(rolls.get(i))) * gauge * 0.5, p.z);
+						newP = new Vec3d(p.x, p.y + Math.sin(Math.toRadians(rawRolls.get(i))) * gauge * 0.5, p.z);
 					}
 					points.set(i, newP);
 				}
@@ -295,14 +296,14 @@ public class BuilderCubicCurve extends BuilderIterator {
 			}
 
 			float roll = 0;
-			if(rolls.get(i) != 0) {
+			if(rawRolls.get(i) != 0) {
 				if(!info.settings.rollAndOffsetInfo.degreeMode()) {
-					double sin = rolls.get(i) * 0.01 * gaugeScale / gauge;//superelevision scale
+					double sin = rawRolls.get(i) * 0.01 / Gauge.STANDARD;//superelevision scale
 					if(sin > 1) sin = 1;
 					if(sin < -1) sin = -1;
 					roll = (float) Math.toDegrees(Math.asin(sin));
 				} else {
-					roll = rolls.get(i).floatValue();
+					roll = rawRolls.get(i).floatValue();
 				}
 			}
 

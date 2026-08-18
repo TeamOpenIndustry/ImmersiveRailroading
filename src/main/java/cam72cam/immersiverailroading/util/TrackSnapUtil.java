@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackSmoothing;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
@@ -186,7 +187,36 @@ public class TrackSnapUtil {
 
                 if (pointData.trackSnapSettings().snapHeight()) {
                     Vec3d offset = new Vec3d(0, hit.y, 0);
-                    EndPointData updated = pointData.with(mutable -> mutable.offset = offset);
+
+                    if (pointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
+                        double newRoll = stackInfo.rollAndOffsetInfo.degreeMode()
+                                ? snapped.getRoll()
+                                : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
+                        if (!isNear) newRoll = -newRoll;
+
+                        RollAndOffsetInfo.Mutable rollMutable = stackInfo.rollAndOffsetInfo.mutable();
+                        rollMutable.tryDeltaValue(isNear ? 0.0 : 1.0, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
+                        stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollMutable.immutable());
+                    }
+
+                    if(stackInfo.rollAndOffsetInfo != null) {
+                        RollAndOffsetInfo.RollAndVertOffsetAlignType type = stackInfo.rollAndOffsetInfo.rollOffsetType();
+                        double rawRoll = stackInfo.rollAndOffsetInfo.getRawRoll(isNear ? 0.0 : 1.0);
+                        if(!isNear) rawRoll = -rawRoll;
+                        double rollOffset = stackInfo.rollAndOffsetInfo.degreeMode()
+                                ? Math.sin(Math.toRadians(rawRoll)) * Gauge.STANDARD * stackInfo.gauge.scale()
+                                : rawRoll * 0.01 * stackInfo.gauge.scale();
+                        if(!isNear) rollOffset = -rollOffset;
+
+                        if(type == RollAndOffsetInfo.RollAndVertOffsetAlignType.LEFT) {
+                            offset = offset.add(0, rollOffset / 2, 0);
+                        } else if(type == RollAndOffsetInfo.RollAndVertOffsetAlignType.RIGHT) {
+                            offset = offset.subtract(0, rollOffset / 2, 0);
+                        }
+                    }
+
+                    Vec3d finalOffset = offset;
+                    EndPointData updated = pointData.with(mutable -> mutable.offset = finalOffset);
 
                     pointData = updated;
                     stackInfo = isNear
@@ -204,18 +234,6 @@ public class TrackSnapUtil {
                     stackInfo = isNear
                             ? stackInfo.with(mutable -> mutable.nearPointData = updated)
                             : stackInfo.with(mutable -> mutable.farPointData = updated);
-                }
-
-                if (pointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
-                    double newRoll = stackInfo.rollAndOffsetInfo.degreeMode()
-                            ? snapped.getRoll()
-                            : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
-                    if (!isNear) newRoll = -newRoll;
-
-                    RollAndOffsetInfo.Mutable rollMutable = stackInfo.rollAndOffsetInfo.mutable();
-                    double index = isNear ? 0.0 : 1.0;
-                    rollMutable.tryDeltaValue(index, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
-                    stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollMutable.immutable());
                 }
 
                 stackInfo.write(stack);

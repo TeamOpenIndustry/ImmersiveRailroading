@@ -566,7 +566,7 @@ public class TrackExtraGui implements IScreen {
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
         rollGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, rollYScale, 1, 0.05f, 0.05f, 0);
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, rollYScale);
-        rollGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getRoll(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
+        rollGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getRawRoll(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
         //yOffset Graph
         state.translate(0, height * 3 + 5, 0);
