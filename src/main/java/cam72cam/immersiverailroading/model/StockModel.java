@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
+import cam72cam.immersiverailroading.sound.ISoundDefinition;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
@@ -63,6 +64,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     private final PartSound slidingSound;
     private final FlangeSound flangeSound;
     private final SwaySimulator sway;
+
+    // TODO rename
+    private List<ISoundDefinition> soundSystem = new ArrayList<>();
 
     public StockModel(DEFINITION def) throws Exception {
         super(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds, i -> {
@@ -154,6 +158,10 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         slidingSound = new PartSound(new SoundDefinition(def.sliding_sound), true, 40, ConfigSound.SoundCategories.RollingStock::sliding);
         flangeSound = new FlangeSound(def.flange_sound, true, 40);
         sway = new SwaySimulator();
+
+        if (def.customSoundDef != null) {
+            this.soundSystem = def.customSoundDef;
+        }
     }
 
     public ModelState addEffectRoll(ModelState state) {
@@ -264,6 +272,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         slidingSound.effects(stock, stock.sliding ? Math.min(1, adjust*4) : 0);
         flangeSound.effects(stock);
         sway.effects(stock);
+
+        // TODO how to handle stock that is off??
+        soundSystem.forEach(s -> s.play(stock));
     }
 
     public final void onClientRemoved(EntityMoveableRollingStock stock) {
@@ -281,6 +292,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         slidingSound.removed(stock);
         flangeSound.removed(stock);
         sway.removed(stock);
+
+        soundSystem.forEach(s -> s.removed(stock));
     }
 
     private int lod_level = LOD_LARGE;
