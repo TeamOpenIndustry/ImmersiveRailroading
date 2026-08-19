@@ -3,10 +3,12 @@ package cam72cam.immersiverailroading.sound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ControllerType;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
 
 import java.util.*;
@@ -24,6 +26,9 @@ public class LoopedSound implements ISoundDefinition {
     private final float rangeStart;
     private final float rangeEnd;
     private final PlayState playState;
+    private final String emitter;
+
+    private Vec3d emitterPos;
 
     private float oldVal = -1;
 
@@ -46,10 +51,23 @@ public class LoopedSound implements ISoundDefinition {
         this.rangeEnd = json.getValue("active_range_end").asFloat();
 
         this.playState = PlayState.valueOf(json.getValue("play_state").asString("BOTH").toUpperCase());
+
+        this.emitter = json.getValue("emitter").asString();
     }
 
     @Override
     public void play(EntityMoveableRollingStock stock) {
+        if (emitterPos == null) {
+            if (emitter != null) {
+                StockModel<?, ?> model = stock.getDefinition().getModel();
+                Optional<String> name = model.groups().stream().filter(f -> f.contains(emitter)).findFirst();
+                name.ifPresent(n -> emitterPos = model.centerOfGroups(Collections.singletonList(n)).rotateYaw(90));
+            } else {
+                emitterPos = new Vec3d(0, 0, 0);
+            }
+        }
+
+
         Map<ISound, Float> sounds = entitySounds.get(stock.getUUID());
         if (sounds == null) {
             sounds = soundFile.create(stock);
@@ -112,15 +130,17 @@ public class LoopedSound implements ISoundDefinition {
                 return;
             }
 
+            Vec3d orientedEmitter = emitterPos.rotateYaw(stock.getRotationYaw());
+
             if (!toBePlayed.isPlaying()) {
-                toBePlayed.play(stock.getPosition());
+                toBePlayed.play(stock.getPosition().add(orientedEmitter));
             }
             if (modifierChain != null) {
                 modifierChain.apply(stock, toBePlayed);
             }
 
             toBePlayed.setVelocity(stock.getVelocity());
-            toBePlayed.setPosition(stock.getPosition());
+            toBePlayed.setPosition(stock.getPosition().add(orientedEmitter));
         } else {
             oldVal = newVal;
 
