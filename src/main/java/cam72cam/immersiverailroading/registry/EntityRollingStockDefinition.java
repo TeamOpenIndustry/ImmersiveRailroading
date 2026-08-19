@@ -805,13 +805,13 @@ public abstract class EntityRollingStockDefinition {
                     .collect(Collectors.toList());
             data = new float[components.size() * xRes * zRes];
 
-            FaceAccessor visitor = def.stockModel.model.getFaceAccessor();
+            FaceAccessor accessor = def.stockModel.model.getFaceAccessor();
 
             for (int i = 0; i < components.size(); i++) {
                 ModelComponent rc = components.get(i);
                 int idx = i * xRes * zRes;
                 for (String group : rc.modelIDs) {
-                    FaceAccessor grouped = visitor.getSubByGroup(group);
+                    FaceAccessor grouped = accessor.ofGroup(group);
 
                     for (FaceAccessor face : grouped) {
                         Path2D path = new Path2D.Float();

@@ -52,8 +52,8 @@ public class NavMesh {
         FaceAccessor accessor = stock.model.getFaceAccessor();
         List<Face> floor = new ArrayList<>();
         stock.floor.modelIDs.forEach(group -> {
-            FaceAccessor sub = accessor.getSubByGroup(group);
-            sub.forEach(a -> floor.add(a.asOBJFace()));
+            FaceAccessor grouped = accessor.ofGroup(group);
+            grouped.forEach(a -> floor.add(a.snapFace()));
         });
         return floor;
     }

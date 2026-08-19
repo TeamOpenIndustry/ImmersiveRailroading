@@ -7,7 +7,7 @@ import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.model.common.ModelLoader;
 import cam72cam.mod.model.common.mesh.Model;
-import cam72cam.mod.model.common.util.ModelSetBuilder;
+import cam72cam.mod.model.common.mesh.ModelSetBuilder;
 import cam72cam.mod.resource.Identifier;
 import trackapi.lib.Gauges;
 import util.Matrix4;
