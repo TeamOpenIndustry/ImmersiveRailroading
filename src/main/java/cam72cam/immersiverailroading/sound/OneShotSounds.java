@@ -3,15 +3,15 @@ package cam72cam.immersiverailroading.sound;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ControllerType;
+import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
 
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class OneShotSounds implements ISoundDefinition {
     private final ExpireableMap<UUID, Map<ISound, Float>> entitySounds = new ExpireableMap<>((key, value) -> value.keySet().forEach(ISound::stop));
@@ -25,6 +25,9 @@ public class OneShotSounds implements ISoundDefinition {
     private final float trigger;
     private final float timer;
     private final PlayState playState;
+    private final String emitter;
+
+    private Vec3d emitterPos;
 
     private float oldVal = -1;
     private long lastPlayed = -1;
@@ -44,10 +47,22 @@ public class OneShotSounds implements ISoundDefinition {
         this.trigger = json.getValue("trigger_value").asFloat();
         this.timer = json.getValue("timer").asFloat();
         this.playState = PlayState.valueOf(json.getValue("play_state").asString("BOTH").toUpperCase());
+        this.emitter = json.getValue("emitter").asString();
     }
 
     @Override
     public void play(EntityMoveableRollingStock stock) {
+        if (emitterPos == null) {
+            if (emitter != null) {
+                StockModel<?, ?> model = stock.getDefinition().getModel();
+                Optional<String> name = model.groups().stream().filter(f -> f.contains(emitter)).findFirst();
+                name.ifPresent(n -> emitterPos = model.centerOfGroups(Collections.singletonList(n)).rotateYaw(90));
+            } else {
+                emitterPos = new Vec3d(0, 0, 0);
+            }
+        }
+
+
         Map<ISound, Float> sounds = entitySounds.get(stock.getUUID());
         if (sounds == null) {
             sounds = soundFile.create(stock);
@@ -77,9 +92,11 @@ public class OneShotSounds implements ISoundDefinition {
             }
         }
 
+        Vec3d orientedEmitter = emitterPos.rotateYaw(stock.getRotationYaw());
+
         for (ISound sound : sounds.keySet()) {
             if (sound.isPlaying()) {
-                sound.setPosition(stock.getPosition());
+                sound.setPosition(stock.getPosition().add(orientedEmitter));
                 sound.setVelocity(stock.getVelocity());
             }
         }
@@ -124,7 +141,7 @@ public class OneShotSounds implements ISoundDefinition {
             }
 
             if (!toBePlayed.isPlaying()) {
-                toBePlayed.play(stock.getPosition());
+                toBePlayed.play(stock.getPosition().add(orientedEmitter));
                 lastPlayed = System.nanoTime();
             }
         } else {
