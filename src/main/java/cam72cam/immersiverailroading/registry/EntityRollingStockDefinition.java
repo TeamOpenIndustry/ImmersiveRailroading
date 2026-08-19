@@ -630,18 +630,22 @@ public abstract class EntityRollingStockDefinition {
         });
 
         Map<String, Curve> curves = new HashMap<>();
-        data.getBlocks("curve").forEach(c -> {
-            Curve curve = new Curve(c);
-            String name = c.getValue("name").asString();
-            curves.put(name, curve);
-        });
+        if (data.getBlocks("curve") != null) {
+            data.getBlocks("curve").forEach(c -> {
+                Curve curve = new Curve(c);
+                String name = c.getValue("name").asString();
+                curves.put(name, curve);
+            });
+        }
 
         Map<String, ModifierChain> modifierChains = new HashMap<>();
-        data.getBlocks("modifier_chain").forEach(m -> {
-            ModifierChain modifierChain = new ModifierChain(m, curves);
-            String name = m.getValue("name").asString();
-            modifierChains.put(name, modifierChain);
-        });
+        if (data.getBlocks("modifier_chain") != null) {
+            data.getBlocks("modifier_chain").forEach(m -> {
+                ModifierChain modifierChain = new ModifierChain(m, curves);
+                String name = m.getValue("name").asString();
+                modifierChains.put(name, modifierChain);
+            });
+        }
 
         customSoundDef = new ArrayList<>();
         if (data.getBlocks("loop") != null) {
