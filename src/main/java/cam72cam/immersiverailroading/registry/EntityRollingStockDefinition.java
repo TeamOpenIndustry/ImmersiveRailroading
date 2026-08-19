@@ -28,7 +28,6 @@ import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.world.World;
-import org.glassfish.jaxb.core.v2.model.core.EnumLeafInfo;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
