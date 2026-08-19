@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.sound;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
+import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ControllerType;
 import cam72cam.immersiverailroading.model.StockModel;
@@ -26,6 +27,7 @@ public class OneShotSounds implements ISoundDefinition {
     private final float timer;
     private final PlayState playState;
     private final String emitter;
+    private final boolean playWhenOn;
 
     private Vec3d emitterPos;
 
@@ -48,6 +50,7 @@ public class OneShotSounds implements ISoundDefinition {
         this.timer = json.getValue("timer").asFloat();
         this.playState = PlayState.valueOf(json.getValue("play_state").asString("BOTH").toUpperCase());
         this.emitter = json.getValue("emitter").asString();
+        this.playWhenOn = json.getValue("only_play_when_on").asBoolean(false);
     }
 
     @Override
@@ -89,6 +92,12 @@ public class OneShotSounds implements ISoundDefinition {
             }
             case BOTH -> {
                 // Nothing happens
+            }
+        }
+
+        if (stock instanceof LocomotiveDiesel loc) {
+            if (!loc.isRunning() && playWhenOn) {
+                return;
             }
         }
 
