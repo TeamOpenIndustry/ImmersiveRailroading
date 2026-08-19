@@ -64,7 +64,7 @@ public class MovementTrack {
 
 		for (double iteratedDistance = 0; iteratedDistance < totalDistance; iteratedDistance += maxDistance) {
 			Vec3i iterationBlockPosition = new Vec3i(iterationPosition.getUMCPos());
-			if (!iterationBlockPosition.equals(teBlockPosition)) {
+			if (!iterationBlockPosition.equals(teBlockPosition)) {// run over a block
 				teBlockPosition = iterationBlockPosition;
 
 				te = findTrack(world, iterationPosition.getUMCPos(), VecUtil.toWrongYaw(motion), gauge);

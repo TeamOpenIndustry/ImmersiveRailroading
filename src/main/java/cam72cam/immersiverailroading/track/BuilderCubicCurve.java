@@ -199,7 +199,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 			if(zOffsets.get(i) != 0) {// The side effect of too much offset is that some dot spacing becomes less uniform, and should we offset points in toList?
 				correctYaw = true;
 				// Can we still calculate this if pitch is 90?
-				Vec3d horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90).scale(gaugeScale / gauge);//zOffset scale
+				Vec3d horizontalOffset = VecUtil.fromYaw(zOffsets.get(i), yaw - 90).scale(gaugeScale);//zOffset scale
 				points.set(i, points.get(i).add(horizontalOffset));
 			}
 		}
