@@ -94,8 +94,10 @@ public class OneShotSounds implements ISoundDefinition {
 
         Vec3d orientedEmitter = emitterPos.rotateYaw(stock.getRotationYaw());
 
+        boolean isAnyPlaying = false;
         for (ISound sound : sounds.keySet()) {
             if (sound.isPlaying()) {
+                isAnyPlaying = true;
                 sound.setPosition(stock.getPosition().add(orientedEmitter));
                 sound.setVelocity(stock.getVelocity());
             }
@@ -133,6 +135,7 @@ public class OneShotSounds implements ISoundDefinition {
                 cumulative += entry.getValue();
                 if (r < cumulative) {
                     toBePlayed = entry.getKey();
+                    break;
                 }
             }
 
@@ -140,7 +143,7 @@ public class OneShotSounds implements ISoundDefinition {
                 return;
             }
 
-            if (!toBePlayed.isPlaying()) {
+            if (!isAnyPlaying) {
                 toBePlayed.play(stock.getPosition().add(orientedEmitter));
                 lastPlayed = System.nanoTime();
             }

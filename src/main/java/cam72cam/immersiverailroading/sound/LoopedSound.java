@@ -102,6 +102,21 @@ public class LoopedSound implements ISoundDefinition {
             case CONTROL_GROUP -> stock.getControlPosition(controller);
         };
 
+        Vec3d orientedEmitter = emitterPos.rotateYaw(stock.getRotationYaw());
+
+        boolean isAnyPlaying = false;
+        for (ISound sound : sounds.keySet()) {
+            if (sound.isPlaying()) {
+                isAnyPlaying = true;
+                sound.setPosition(stock.getPosition().add(orientedEmitter));
+                sound.setVelocity(stock.getVelocity());
+            }
+
+            if (modifierChain != null) {
+                modifierChain.apply(stock, sound);
+            }
+        }
+
         if (condition.check(oldVal, newVal, rangeStart, rangeEnd)) {
             oldVal = newVal;
 
@@ -123,6 +138,7 @@ public class LoopedSound implements ISoundDefinition {
                 cumulative += entry.getValue();
                 if (r < cumulative) {
                     toBePlayed = entry.getKey();
+                    break;
                 }
             }
 
@@ -130,17 +146,9 @@ public class LoopedSound implements ISoundDefinition {
                 return;
             }
 
-            Vec3d orientedEmitter = emitterPos.rotateYaw(stock.getRotationYaw());
-
-            if (!toBePlayed.isPlaying()) {
+            if (!isAnyPlaying) {
                 toBePlayed.play(stock.getPosition().add(orientedEmitter));
             }
-            if (modifierChain != null) {
-                modifierChain.apply(stock, toBePlayed);
-            }
-
-            toBePlayed.setVelocity(stock.getVelocity());
-            toBePlayed.setPosition(stock.getPosition().add(orientedEmitter));
         } else {
             oldVal = newVal;
 
