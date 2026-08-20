@@ -110,7 +110,7 @@ public class TrackExtraGui implements IScreen {
 
         //Common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
         //Degree mode:degree
-        rollMax = 180;
+        rollMax = 30;
         yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
