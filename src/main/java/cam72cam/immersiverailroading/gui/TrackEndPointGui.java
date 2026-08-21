@@ -142,7 +142,7 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                return s.equals(".") || s.equals("-");
+                return s.equals("-");
             }
             int max = 1000;
 
@@ -165,7 +165,7 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                return s.equals(".") || s.equals("-");
+                return s.equals("-");
             }
             int max = 1000;
 
