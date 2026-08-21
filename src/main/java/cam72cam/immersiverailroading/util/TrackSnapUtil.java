@@ -15,6 +15,8 @@ import cam72cam.mod.world.World;
 
 import java.util.*;
 
+//TODO: existing snapped tile preview issues: 1.very high bed thickness 2.very big roll
+// so tile preview is not 100% accurate yet...
 public class TrackSnapUtil {
     public static VecYPR getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
         RailSettings stackInfo = RailSettings.from(stack);
