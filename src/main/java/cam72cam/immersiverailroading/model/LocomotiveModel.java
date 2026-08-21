@@ -166,7 +166,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     public Set<ItemEntity> filterItems(EntityMoveableRollingStock stock, List<ItemEntity> entities) {
         Set<ItemEntity> result = super.filterItems(stock, entities);
         if (this.cargoFillFront != null) {
-            Matrix4 inverted = getFrontLocomotiveMatrix(stock);
+            Matrix4 inverted = getFrontLocomotiveMatrix(stock).copy();
             inverted.invert();
             entities.stream().filter(entity -> {
                 final Vec3d point1 = inverted.apply(entity.getPosition());
@@ -174,7 +174,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
             }).forEach(result::add);
         }
         if (this.cargoFillRear != null) {
-            Matrix4 inverted = getRearLocomotiveMatrix(stock);
+            Matrix4 inverted = getRearLocomotiveMatrix(stock).copy();
             inverted.invert();
             entities.stream().filter(entity -> {
                 final Vec3d point1 = inverted.apply(entity.getPosition());
