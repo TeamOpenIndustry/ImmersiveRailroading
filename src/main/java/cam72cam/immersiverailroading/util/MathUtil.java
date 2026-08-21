@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJFace;
+import cam72cam.mod.model.common.mesh.Face;
 
 public class MathUtil {
 	public static double gradeToRadians(double grade) {
@@ -65,7 +65,7 @@ public class MathUtil {
 		return Math.clamp(val, min, max);
 	}
 
-	public static Double intersectRayTriangle(Vec3d rayOrigin, Vec3d rayDir, OBJFace face) {
+	public static Double intersectRayTriangle(Vec3d rayOrigin, Vec3d rayDir, Face face) {
 		final float EPSILON = 1e-6f;
 
 		Vec3d edge1 = face.vertex1.pos.subtract(face.vertex0.pos);
