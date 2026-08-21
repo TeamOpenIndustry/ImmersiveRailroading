@@ -30,24 +30,34 @@ public class ModifierChain {
     }
 
     public void apply(EntityRollingStock stock, ISound sound) {
+        float newVolume = -1;
+        float newPitch = -1;
+
         for (Modifier modifier : modifiers) {
-            modifier.apply(stock, sound);
+            float newVal = modifier.get(stock);
+            switch (modifier.type) {
+                case VOLUME -> newVolume = newVolume != -1 ? newVolume * newVal : newVal;
+                case PITCH -> newPitch = newPitch != -1? newPitch * newVal : newVal;
+            }
+        }
+
+        if (newVolume != -1) {
+            sound.setVolume(newVolume);
+        }
+
+        if (newPitch != -1) {
+            sound.setPitch(newPitch);
         }
     }
 
     public record Modifier(ModifierType type, String controller, ControllerType controllerType, Curve curve) {
 
-        public void apply(EntityRollingStock stock, ISound sound) {
+        public float get(EntityRollingStock stock) {
             float state = switch (controllerType) {
                 case CONTROL_GROUP -> stock.getControlPosition(controller);
                 case READOUT -> Readouts.valueOf(controller.toUpperCase()).getValue(stock);
             };
-            float value = (float) curve.interpolate(state);
-
-            switch (type) {
-                case VOLUME -> sound.setVolume(value);
-                case PITCH -> sound.setPitch(value);
-            }
+            return (float) curve.interpolate(state);
         }
     }
 
