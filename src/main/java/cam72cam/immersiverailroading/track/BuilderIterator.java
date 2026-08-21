@@ -440,6 +440,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		for (int i = 0; i < points.size(); i++) {
 			VecYPR cur = points.get(i);
 			VecYPR switchPos = cur;
+			boolean disableSwitchRailCorrection = false;
 			if (switchStraight ) {
 				double switchOffset = 1 - (i / (double)switchSize);
 				if (switchOffset > 0) {
@@ -450,6 +451,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						offsetAngle = -offsetAngle;
 					}
 					switchPos = new VecYPR(cur.add(offset), cur.getYaw() + (float)offsetAngle, cur.getPitch(), cur.getRoll());
+					disableSwitchRailCorrection = true;
 				}
 			}
 
@@ -477,7 +479,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				float rightLen = (1 + angle / 180);
 				if(correctPartRailOrientation) {//correct rail part
 					cur = cur.withMatrix3(correctLeftOrientation.get(i));
-					switchPos = switchPos.withMatrix3(correctRightOrientation.get(i));
+					if(!disableSwitchRailCorrection) switchPos = switchPos.withMatrix3(correctRightOrientation.get(i));
 				}
 				vec.addChild(new VecYPR(switchPos, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
 				vec.addChild(new VecYPR(cur, rightLen * renderScale, TrackModelPart.RAIL_RIGHT));
@@ -485,7 +487,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				float leftLen = (1 - angle / 180);
 				float rightLen = (1 + angle / 180);
 				if(correctPartRailOrientation) {//correct rail part
-					switchPos = switchPos.withMatrix3(correctLeftOrientation.get(i));
+					if(!disableSwitchRailCorrection) switchPos = switchPos.withMatrix3(correctLeftOrientation.get(i));
 					cur = cur.withMatrix3(correctRightOrientation.get(i));
 				}
 				vec.addChild(new VecYPR(cur, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
