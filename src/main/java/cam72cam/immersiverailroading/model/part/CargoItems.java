@@ -145,7 +145,7 @@ public class CargoItems {
                                 ModelConfig cfg = new ModelConfig().variant(data.texture);
                                 ModelRenderer renderer = ModelRenderer.getRendererFor(data.def.getModel().model);
                                 try (ModelRenderer.Binding binder = renderer.bind(cfg, s)) {
-                                    binder.enqueueOpaque(data.def.itemGroups);
+                                    binder.enqueueTransparent(data.def.itemGroups);
                                 }
                             });
                             renderSlot++;
@@ -173,7 +173,7 @@ public class CargoItems {
                                 ModelConfig cfg = new ModelConfig().variant(data.texture);
                                 ModelRenderer renderer = ModelRenderer.getRendererFor(data.def.getModel().model);
                                 try (ModelRenderer.Binding binder = renderer.bind(cfg, s)) {
-                                    binder.enqueueOpaque(data.def.itemGroups);
+                                    binder.enqueueTransparent(data.def.itemGroups);
                                 }
                             });
                             renderSlot++;

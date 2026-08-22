@@ -34,7 +34,7 @@ public class ObjItemRender {
                     .rotate(rotation.z, 0, 0, 1)
                     .scale(scale, scale, scale);
             try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(state)) {
-                vbo.enqueueOpaque();
+                vbo.enqueueTransparent();
             }
         });
     }
