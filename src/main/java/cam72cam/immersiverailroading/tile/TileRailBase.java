@@ -404,14 +404,20 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return this.willBeReplaced;
 	}
 
-	public void cleanSnow(int snowLevel) {
+	/**
+	 * @param relativeSnowLevel Relative to the snow level of getMinSnowLayers
+	 * */
+	public void cleanSnow(int relativeSnowLevel) {
 		int min = getMinSnowLayers();
-		int target = Math.max(snowLevel, min);
-		int current = this.getSnowLayers();
+		if (relativeSnowLevel < 0) {
+			relativeSnowLevel = 0;
+		}
+		int absTarget = Math.min(relativeSnowLevel + min, 8);
+		int absCurrent = this.getSnowLayers();
 
-		if (current > target) {
-			this.setSnowLayers(target);
-            int snowDown = current - target;
+		if (absCurrent > absTarget) {
+			this.setSnowLayers(absTarget);
+            int snowDown = absCurrent - absTarget;
 
 			for (int i = 1; i <= 3; i++) {
 				Facing[] horiz = Facing.values().clone();
