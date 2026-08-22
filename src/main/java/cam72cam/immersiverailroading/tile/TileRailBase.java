@@ -29,7 +29,6 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.math.Plane;
 import cam72cam.mod.serialization.TagField;
-import cam72cam.mod.serialization.TagMapper;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
 import cam72cam.mod.sound.StandardSound;
@@ -617,13 +616,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		
 		ticksExisted += 1;
 
-		if (ConfigDebug.snowAccumulateRate > 0 && ((int) (Math.random() * ConfigDebug.snowAccumulateRate * 10) == 0)) {
+		if (ConfigBalance.snowAccumulateRate > 0 && ((int) (Math.random() * ConfigBalance.snowAccumulateRate * 10) == 0)) {
 			if (getWorld().isSnowing(getPos()) && getWorld().canSeeSky(getPos().up())) {
 				this.handleSnowTick();
 			}
 		}
-		if (ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
-			if ((int) (Math.random() * ConfigDebug.snowMeltRate * 10) == 0) {
+		if (ConfigBalance.snowMeltRate != 0 && this.snowLayers > getMinSnowLayers()) {
+			if ((int) (Math.random() * ConfigBalance.snowMeltRate * 10) == 0) {
 				if (!getWorld().isSnowing(getPos())) {
 					this.setSnowLayers(this.snowLayers -= 1);
 				}
