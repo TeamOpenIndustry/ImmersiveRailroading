@@ -14,6 +14,8 @@ import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.List;
+
 public class MultiPreviewRender {
     private static ExpireableMap<Pair<World, Vec3i>, TileRailPreview> previews = new ExpireableMap<>();
 
@@ -24,13 +26,25 @@ public class MultiPreviewRender {
     private static void render(RenderState state, float partialTicks) {
         state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(1, 1);
         for (TileRailPreview preview : previews.values()) {
-            for (BuilderBase builder : ((IIterableTrack) preview.getRailRenderInfo().getBuilder(preview.getWorld(), preview.isAboveRails() ? preview.getPos().down() :preview.getPos())).getSubBuilders()) {
+            List<BuilderBase> subBuilders = ((IIterableTrack) preview.getRailRenderInfo()
+                                                                     .getBuilder(preview.getWorld(), preview.isAboveRails()
+                                                                                                     ? preview.getPos().down()
+                                                                                                     : preview.getPos()))
+                                                                     .getSubBuilders();
+            for (BuilderBase builder : subBuilders) {
                 RailInfo info = builder.info;
                 Vec3d placementPosition = info.placementInfo.placementPosition.add(builder.pos);
 
                 if (GlobalRender.getCameraPos(partialTicks).distanceTo(placementPosition) < GlobalRender.getRenderDistance() + 50) {
                     RenderState placementState = state.clone().translate(placementPosition);
-                    RailRender.render(info, preview.getWorld(), builder.pos, true, placementState);
+
+                    if(info.placementInfo.placementPosition.y + preview.getOriginPlacementInfoPos().y < -1 && preview.isAboveRails()) {
+                        // TODO: weird edge case, it works now but is this enough?
+                        placementState.translate(0, Math.ceil(info.placementInfo.placementPosition.y + preview.getOriginPlacementInfoPos().y), 0);
+                    }
+                    placementState.translate(0, -preview.getOriginPlacementInfoPos().y, 0);// TODO: is this enough?
+
+                    RailRender.render(info, null, preview.getWorld(), builder.pos, true, placementState);
                 }
             }
         }

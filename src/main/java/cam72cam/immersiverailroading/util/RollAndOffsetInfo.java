@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
+import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.mod.math.Vec3d;
@@ -1157,8 +1158,22 @@ public record RollAndOffsetInfo(
         return left;
     }
 
-    public double getRoll(double l) {
+    public double getRawRoll(double l) {
         return getValue(this.arcLenFactors, l, rolls, rollCtrls);
+    }
+
+    public double getRollDeg(double l) {
+        double rawRoll = getRawRoll(l);
+        return getRollDeg(rawRoll, degreeMode);
+    }
+
+    public static double getRollDeg(double rawRoll, boolean degreeMode) {
+        if(!degreeMode) {
+            double sin = Math.clamp(rawRoll * 0.01 / Gauge.STANDARD, -1, 1);
+            return Math.toDegrees(Math.asin(sin));
+        } else {
+            return rawRoll;
+        }
     }
 
     /**

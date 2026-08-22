@@ -30,7 +30,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@TagField
 	private PlacementInfo customInfo;
 	@TagField
-	private boolean isAboveRails = false;
+	private boolean isAboveRails = false;//TODO: use Vec3i to replace this
 
 	public ItemStack getItem() {
 		return this.item;
@@ -39,7 +39,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setup(ItemStack stack, PlacementInfo info) {
 		this.item = stack.copy();
 		this.placementInfo = info;
-		this.isAboveRails = BlockUtil.isIRRail(getWorld(), getPos().down()) && getWorld().getBlockEntity(getPos().down(), TileRailBase.class).getRailHeight() < 0.5;
+		this.isAboveRails = placementInfo.placementPosition.y < 0;
 		this.markDirty();
 	}
 
@@ -145,7 +145,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	@Override
 	public IBoundingBox getRenderBoundingBox() {
-		return IBoundingBox.INFINITE;
+		return IBoundingBox.INFINITE;// TODO: return real bounding of curve
 	}
 
 	public RailInfo getRailRenderInfo() {// Not only for render, but also for build!
@@ -153,6 +153,10 @@ public class TileRailPreview extends BlockEntityTickable {
 			offsetPosition();
 		}
 		return info;
+	}
+
+	public Vec3d getOriginPlacementInfoPos() {
+		return placementInfo.placementPosition;
 	}
 
 	@Override
@@ -173,7 +177,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	public boolean isMulti() {
 		if (getRailRenderInfo().getBuilder(getWorld()) instanceof IIterableTrack) {
-			return ((IIterableTrack)getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
+			return ((IIterableTrack) getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
 		}
 		return false;
 	}
@@ -193,7 +197,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer != null && entityPlayer.isCrouching()) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, isAboveRails() ? getPos().down() : getPos())) {
+			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
 				return isAboveRails();
 			}
