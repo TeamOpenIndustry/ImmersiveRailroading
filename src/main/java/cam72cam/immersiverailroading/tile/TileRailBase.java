@@ -27,6 +27,7 @@ import cam72cam.mod.fluid.ITank;
 import cam72cam.mod.item.*;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.math.Plane;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.sound.SoundCategory;
@@ -48,6 +49,8 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	private float bedHeight = 0;
 	@TagField("railHeight")
 	private float railHeight = 0;
+	@TagField(value = "bedFace")
+	private Plane bedFace;
 	@TagField("scaleBedFill")
 	private boolean scaleModel = true;
 	@TagField("augment")
@@ -104,6 +107,15 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return Math.min(this.bedHeight, replacedHeight);
 		}
 		return this.bedHeight;
+	}
+
+	public void setBedFace(Plane bedFace) { this.bedFace = bedFace; }
+	public Plane getBedFace() {
+		if (this.replaced != null && this.replaced.hasKey("bedFace")) {// TODO
+			TagCompound bedFace = replaced.get("bedFace");
+			return new Plane(bedFace.getVec3d("normal"), bedFace.getDouble("d"));
+		}
+		return this.bedFace;
 	}
 
 	public double getRenderGauge() {
@@ -214,16 +226,32 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 
 	public void setSnowLayers(int snowLayers) {
-		this.snowLayers = snowLayers;
+		int min = getMinSnowLayers();
+		this.snowLayers = Math.max(snowLayers, min);
 		this.markDirty();
 	}
 
+	public int getMinSnowLayers() {
+		float bed = getBedHeight();
+		if (bed >= 0) {
+			return Math.min((int) Math.floor(bed * 8), 7);
+		} else {
+			return 7;
+		}
+	}
+
 	public float getFullHeight() {
-		return Math.max(this.bedHeight, this.snowLayers / 8.0f);
+		float bedHeight = this.bedHeight;
+		float snowHeight = this.snowLayers / 8.0f;
+		if(bedHeight >= 0) {
+			return Math.max(Math.max(0.001f, bedHeight), snowHeight);
+		} else { // Inverted tile
+			return bedHeight;
+		}
 	}
 	
 	public void handleSnowTick() {
-		if (this.snowLayers < (ConfigDebug.deepSnow ? 8 : 1)) {
+		if (this.snowLayers < (ConfigBalance.deepSnow ? 8 : getMinSnowLayers() + 1)) {
 			this.snowLayers += 1;
 			this.markDirty();
 		}
@@ -383,20 +411,29 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		return this.willBeReplaced;
 	}
 
-	public void cleanSnow(int snowLevel) {
-		int snow = this.getSnowLayers();
-		if (snow > snowLevel) {
-			this.setSnowLayers(snowLevel);
-			int snowDown = snow -1;
-			for (int i = 1; i <= 3; i ++) {
+	/**
+	 * @param relativeSnowLevel Relative to the snow level of getMinSnowLayers
+	 * */
+	public void cleanSnow(int relativeSnowLevel) {
+		int min = getMinSnowLayers();
+		if (relativeSnowLevel < 0) {
+			relativeSnowLevel = 0;
+		}
+		int absTarget = Math.min(relativeSnowLevel + min, 8);
+		int absCurrent = this.getSnowLayers();
+
+		if (absCurrent > absTarget) {
+			this.setSnowLayers(absTarget);
+            int snowDown = absCurrent - absTarget;
+
+			for (int i = 1; i <= 3; i++) {
 				Facing[] horiz = Facing.values().clone();
 				if (Math.random() > 0.5) {
-					// Split between sides of the track
 					ArrayUtils.reverse(horiz);
 				}
 				for (Facing facing : horiz) {
 					Vec3i ph = getWorld().getPrecipitationHeight(getPos().offset(facing, i));
-					for (int j = 0; j < 3; j ++) {
+					for (int j = 0; j < 3; j++) {
 						if (getWorld().isAir(ph) && !ITrack.isRail(getWorld(), ph.down())) {
 							getWorld().setSnowLevel(ph, snowDown);
 							return;
@@ -587,13 +624,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		
 		ticksExisted += 1;
 
-		if (ConfigDebug.snowAccumulateRate > 0 && ((int) (Math.random() * ConfigDebug.snowAccumulateRate * 10) == 0)) {
+		if (ConfigBalance.snowAccumulateRate > 0 && ((int) (Math.random() * ConfigBalance.snowAccumulateRate * 10) == 0)) {
 			if (getWorld().isSnowing(getPos()) && getWorld().canSeeSky(getPos().up())) {
 				this.handleSnowTick();
 			}
 		}
-		if (ConfigDebug.snowMeltRate != 0 && this.snowLayers != 0) {
-			if ((int) (Math.random() * ConfigDebug.snowMeltRate * 10) == 0) {
+		if (ConfigBalance.snowMeltRate != 0 && this.snowLayers > getMinSnowLayers()) {
+			if ((int) (Math.random() * ConfigBalance.snowMeltRate * 10) == 0) {
 				if (!getWorld().isSnowing(getPos())) {
 					this.setSnowLayers(this.snowLayers -= 1);
 				}
@@ -952,14 +989,24 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	/* NEW STUFF */
 
 	private final SingleCache<Double, IBoundingBox> boundingBox =
-			new SingleCache<>(height -> IBoundingBox.ORIGIN.expand(new Vec3d(1, height, 1)));//TODO: OBB or support other axis
+			new SingleCache<>(height -> {
+				//TODO: OBB
+				if (height >= 0) {
+					return IBoundingBox.ORIGIN.expand(new Vec3d(1, height, 1));
+				}
+
+				return IBoundingBox.ORIGIN
+						.expand(new Vec3d(1, 1 + height, 1))
+						.offset(new Vec3d(0, -height, 0));
+			});
+
 	@Override
 	public IBoundingBox getBoundingBox() {
 		if (this instanceof TileRailGag && (getParent() == null || !getWorld().isBlockLoaded(getParent()))) {
 			// Accessing TEs (parent) in chunks that are currently loading can cause problems
-			return boundingBox.get(getFullHeight() + 0.1);
+			return boundingBox.get((double) getFullHeight());
 		}
-		return boundingBox.get(getFullHeight() + 0.1 * (getTrackGauges()[0] / Gauge.STANDARD));
+		return boundingBox.get(getFullHeight() * (getTrackGauges()[0] / Gauge.STANDARD));
 	}
 
 	@Override
@@ -1044,7 +1091,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		if (stack.isValidTool(ToolType.SHOVEL)) {
 			if (this.getWorld().isServer) {
-				this.cleanSnow(1);
+				this.cleanSnow(0);
 				this.setSnowLayers(0);
 				stack.damageItem(1, player);
 			}

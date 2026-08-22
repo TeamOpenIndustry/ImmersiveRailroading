@@ -6,6 +6,7 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.TrackFaceTransSetting;
 import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -40,7 +41,23 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	public static void render(ItemStack stack, World world, RenderState state) {
 		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
 		RailInfo info = new RailInfo(
-                new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, TrackItems.STRAIGHT, 18, 0, 1, TrackSmoothing.BOTH, new EndPointData(0), new EndPointData(10), null, null, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false, 1, 1),
+                new RailSettings(
+						data.gauge,
+						data.track,
+						TrackItems.STRAIGHT, TrackItems.STRAIGHT,
+						18,
+						0,
+						1,
+						TrackSmoothing.BOTH,
+						new EndPointData(0), new EndPointData(10),
+						null, null,
+						TrackDirection.NONE,
+						new TrackFaceTransSetting(),
+						data.railBed, ItemStack.EMPTY,
+						false,
+						false,
+						1, 1
+				),
 				new PlacementInfo(Vec3d.ZERO, TrackDirection.NONE, 0, Vec3d.ZERO),
 				null,
 				SwitchState.NONE,

@@ -90,6 +90,9 @@ gui.immersiverailroading:label.snap_height=吸附高度
 gui.immersiverailroading:label.snap_yaw=吸附水平朝向
 gui.immersiverailroading:label.snap_pitch=吸附坡度
 gui.immersiverailroading:label.snap_roll=吸附滚转
+gui.immersiverailroading:label.bed_thickness=道床厚度
+gui.immersiverailroading:label.track_pivot_offset=轨道旋转中心偏移
+
 gui.immersiverailroading:slider.zoom=缩放比例：
 gui.immersiverailroading:selector.page=第 %s 页，共 %s 页
 gui.immersiverailroading:selector.type=类型：%s
@@ -120,6 +123,7 @@ gui.immersiverailroading:selector.cast_repeat=循环铸造
 gui.immersiverailroading:selector.paintbrush_random=应用随机涂装
 gui.immersiverailroading:selector.paintbrush_apply_to_stock=应用至此车厢
 gui.immersiverailroading:selector.paintbrush_apply_to_train=应用至全列车
+gui.immersiverailroading:selector.track_pivot_type=旋转中心类型：%s
 # 后面的已经有”检测“了，补全句首即可
 gui.immersiverailroading:selector.augment.detect=当前：
 gui.immersiverailroading:selector.augment.redstone=红石模式：
@@ -240,6 +244,10 @@ track.immersiverailroading:extra_info_type.z_offset=水平偏移
 track.immersiverailroading:roll_vert_offset_align_type.mid=对齐中间点
 track.immersiverailroading:roll_vert_offset_align_type.left=左侧轨道对齐
 track.immersiverailroading:roll_vert_offset_align_type.right=右侧轨道对齐
+
+track.immersiverailroading:face_pivot_type.rail_face_center=轨道平面中心
+track.immersiverailroading:face_pivot_type.curve_center=曲线中心
+track.immersiverailroading:face_pivot_type.custom=自定义
 
 part.immersiverailroading:component.frame=车架
 part.immersiverailroading:component.front_frame=前车架

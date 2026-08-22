@@ -1,27 +1,24 @@
 package cam72cam.immersiverailroading.track;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackModelPart;
-import cam72cam.immersiverailroading.util.MathUtil;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.math.Matrix3;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.render.cutter.BlockCutHelper;
+import cam72cam.mod.math.Plane;
 import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagSerializer;
 import cam72cam.mod.util.Facing;
 import cam72cam.mod.world.World;
 import org.apache.commons.lang3.tuple.Pair;
-
-import cam72cam.immersiverailroading.util.RailInfo;
-import cam72cam.immersiverailroading.util.VecUtil;
 
 public abstract class BuilderIterator extends BuilderBase implements IIterableTrack {
 	protected HashSet<Vec3i> positions;
@@ -40,11 +37,19 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		super(info, world, pos);
 
 		positions = new HashSet<>();
-		HashMap<Vec3i, Float> bedHeights = new HashMap<>();
-		HashMap<Vec3i, Float> railHeights = new HashMap<>();
+
+		HashMap<Vec3i, Float> railHeights = new HashMap<>();// legacy
+
 		// Pre-calculated rail bed top face normal dir for further use
-		HashMap<Vec3i, Vec3d> topNormals = new HashMap<>();
-		HashMap<Vec3i, Integer> yOffset = new HashMap<>();
+		HashMap<Vec3i, Plane> planes = new HashMap<>();
+		HashMap<Vec3i, Float> bedHeights = new HashMap<>();
+
+		// AVG required
+		HashMap<Vec3i, List<Vec3d>> allTopNormals = new HashMap<>();
+		HashMap<Vec3i, List<Vec3d>> allTopPositions = new HashMap<>();
+		HashMap<Vec3i, List<Float>> allBedHeights = new HashMap<>();
+
+		List<Vec3i> trackBlockPositions = new ArrayList<>();
 		HashSet<Vec3i> flexPositions = new HashSet<>();
 
 		double horiz = info.settings.gauge.scale() * 1.1;
@@ -55,118 +60,173 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			horiz += 2f * info.settings.gauge.scale();
 		}
 		double clamp = 0.17 * info.settings.gauge.scale();
-		float heightOffset = (float) ((info.placementInfo.placementPosition.y) % 1);
 
-		List<VecYPR> path = getPath(0.25);
+		List<VecYPR> path = new ArrayList<>(getPath(0.25));
+		Vec3d placementOffset = info.placementInfo.placementPosition;
+        path.replaceAll(vecYPR -> vecYPR.add(placementOffset));
+
 		VecYPR start = path.getFirst();
 		VecYPR end = path.getLast();
 
-		Vec3d placeOff = new Vec3d(
-				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.x, 1)),
-				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.y, 1)),
-				Math.abs(MathUtil.trueModulus(info.placementInfo.placementPosition.z, 1))
+		Vec3i mainPos = new Vec3i(
+				(int) Math.floor(path.get(path.size() / 2).x),
+				(int) Math.floor(path.get(path.size() / 2).y),
+				(int) Math.floor(path.get(path.size() / 2).z)
 		);
-		int mainX = (int) Math.floor(path.get(path.size() / 2).x + placeOff.x);
-		int mainZ = (int) Math.floor(path.get(path.size() / 2).z + placeOff.z);
-		int mainY = (int) Math.floor(path.get(path.size() / 2).y + placeOff.y);
 		int flexDist = (int) Math.max(1, 3 * (0.5 + info.settings.gauge.scale() / 2));
 
-		for (VecYPR cur : path) {
-			Vec3d gagPos = cur;
+		boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
+		boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
+		if(!rollEffectTile) tileTilt = false;
 
-			boolean isFlex = gagPos.distanceTo(start) < flexDist || gagPos.distanceTo(end) < flexDist;
+		Vec3d bedFacePivotOffset = info.settings.trackFaceTransSetting.getFacePivotOffset(info.getTrackHeight());
+		float bedThickness = (float) (info.settings.trackFaceTransSetting.bedThickness() * info.settings.gauge.scale());
 
-			gagPos = gagPos.add(0, heightOffset, 0);
+		for (int i = 0; i < path.size(); i++) {
+
+			VecYPR cur = path.get(i);
+			Vec3d curNormal = cur.toMatrix3().up();
+			Vec3d facePivot = cur.add(applyNormalRotation(bedFacePivotOffset.scale(-1), curNormal)).add(bedFacePivotOffset).add(curNormal.scale(bedThickness));
+
+			boolean isFlex = facePivot.distanceTo(start) < flexDist || facePivot.distanceTo(end) < flexDist;
 
 			for (double q = -horiz; q <= horiz; q += 0.1) {
 				Vec3d nextUp = VecUtil.fromYawRoll(q, 90 + cur.getYaw(), cur.getRoll());
-				int posX = (int) Math.floor(gagPos.x + nextUp.x + placeOff.x);
-				int posZ = (int) Math.floor(gagPos.z + nextUp.z + placeOff.z);
-				int posY = (int) Math.floor(gagPos.y + nextUp.y + placeOff.y);
 
+				int posX = (int) Math.floor(facePivot.x + nextUp.x);
+				int posZ = (int) Math.floor(facePivot.z + nextUp.z);
+				int posY = (int) Math.floor(facePivot.y + nextUp.y);
 				Vec3i gag = new Vec3i(posX, posY, posZ);
-				if (!positions.contains(gag)) {
-					positions.add(gag);
 
-					Vec3d topFacing = computeTopFaceNormal(-cur.getYaw() - 90, -cur.getPitch(), cur.getRoll());
-					double rollDelta;
-					boolean rollEffectTile = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.rollEffectTile();
-					boolean tileTilt = info.settings.rollAndOffsetInfo != null && info.settings.rollAndOffsetInfo.railBlockNormal();
-					if(!rollEffectTile) tileTilt = false;
+                boolean isNewPos = false;
+                if(!positions.contains(gag)) {
+                    isNewPos = true;
+                    positions.add(gag);
+                }
 
-					if(rollEffectTile) {
-						double cx = posX;
-						double cz = posZ;
-						double dx = topFacing.x, dy = topFacing.y, dz = topFacing.z;
-						double px = gagPos.x, pz = gagPos.z;
+                Vec3d topFacing = computeTopFaceNormal(path, i, q);
+                double rollPitchDelta;
 
-						if (Math.abs(dy) < 1e-5) {
-							rollDelta = 0;
-						}else {
-							rollDelta = ( dx * (px - cx) + dz * (pz - cz) ) / dy;
-						}
-					}else {//legacy
-						rollDelta = 0;
-					}
+                if(rollEffectTile) {
+                    Vec3d planePoint = new Vec3d(
+                            facePivot.x + 0.5,
+                            facePivot.y,
+                            facePivot.z + 0.5
+                    );
+                    float localHeight = BlockCutHelper.getCutCenterHeight(new Plane(planePoint.subtract(gag), topFacing));
 
-					double deltaGapPos = gagPos.y + rollDelta;
-					double height = 0;
-					if (info.settings.isGradeCrossing) {//legacy, a rough gradeCrossing...
-						height = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
-						height *= info.settings.gauge.scale();
-						height = Math.min(height, clamp);
-					}
+                    rollPitchDelta = localHeight - (facePivot.y - posY);
+                } else {//legacy
+                    rollPitchDelta = 0;
+                }
 
-					double relHeight = deltaGapPos % 1;
-					if (deltaGapPos < 0) {
-						relHeight += 1;
-					}
+                double faceSample = facePivot.y + rollPitchDelta;
 
-					// TODO: this is a temporary fix, requiring rework after model cut implemented
-					float bedThickness = 0.1f;
+                //legacy, a very rough gradeCrossing...
+                double crossingHeight = 0;
+                if (info.settings.isGradeCrossing) {
+                    crossingHeight = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
+                    crossingHeight *= info.settings.gauge.scale();
+                    crossingHeight = Math.min(crossingHeight, clamp);
+                }
 
-					if(rollEffectTile) {// bedHeight will be the same as railHeight in this case
-						int offsetInt;
-						if(height + relHeight > 0.9) {
-							offsetInt = (int) Math.floor(height + relHeight + bedThickness);
-						}else {
-							offsetInt = 0;
-						}
+                double relHeight = faceSample % 1;
+                if(faceSample == 1) relHeight = 1;// seems we don't need to handle error?
 
-						float heightResult = (float) (height + relHeight - offsetInt);
-						bedHeights.put(gag, heightResult);
-						railHeights.put(gag, heightResult);
-						yOffset.put(gag, (int) (deltaGapPos - relHeight + offsetInt));
-						topNormals.put(gag, tileTilt ? topFacing : null);
-					} else {//legacy, will be dropped
-						bedHeights.put(gag, (float) (height + Math.max(0, relHeight - 0.1)));
-						railHeights.put(gag, (float) relHeight);
-						yOffset.put(gag, (int) (deltaGapPos - relHeight));
-						topNormals.put(gag, null);
-					}
-				}
-				if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
+                if (faceSample < 0) {
+                    relHeight += 1;
+                }
+
+                if(rollEffectTile) {// bedHeight will be the same as railHeight in this case
+                    int offsetInt;
+                    if(crossingHeight + relHeight > 1) {
+                        offsetInt = (int) Math.floor(crossingHeight + relHeight);
+                    }else {
+                        offsetInt = 0;
+                    }
+
+                    // Height for snow and common block rail
+                    float heightResult = (float) (crossingHeight + relHeight - offsetInt);
+                    trackBlockPositions.add(gag);
+
+                    List<Float> currentBedHeights = allBedHeights.get(gag) != null ? allBedHeights.get(gag) : new ArrayList<>();
+                    currentBedHeights.add(heightResult);
+                    allBedHeights.put(gag, currentBedHeights);
+
+                    List<Vec3d> currentTopNormals = allTopNormals.get(gag) != null ? allTopNormals.get(gag) : new ArrayList<>();
+                    currentTopNormals.add(topFacing);
+                    allTopNormals.put(gag, currentTopNormals);
+
+                    List<Vec3d> currentTopPositions = allTopPositions.get(gag) != null ? allTopPositions.get(gag) : new ArrayList<>();
+                    currentTopPositions.add(facePivot.subtract(gag));
+                    allTopPositions.put(gag, currentTopPositions);
+
+                } else if(isNewPos){// legacy
+                    bedHeights.put(gag, (float) (crossingHeight + Math.max(0, relHeight)));
+                    railHeights.put(gag, (float) relHeight);
+                    trackBlockPositions.add(gag);
+                }
+
+                if (isFlex || Math.abs(q) > info.settings.gauge.value()) {
 					flexPositions.add(gag);
 				}
 			}
 			if (!isFlex && endOfTrack) {
-				mainX = (int) Math.floor(gagPos.x + placeOff.x);
-				mainZ = (int) Math.floor(gagPos.z + placeOff.z);
+				mainPos = new Vec3i(
+						(int) Math.floor(facePivot.x),
+						(int) Math.floor(facePivot.y),
+						(int) Math.floor(facePivot.z)
+				);
 			}
 		}
 
-		if (!yOffset.containsKey(new Vec3i(mainX, mainY, mainZ))) {
+
+		for (Map.Entry<Vec3i, List<Float>> entry : allBedHeights.entrySet()) {
+			Vec3i gapPos = entry.getKey();
+
+			List<Float> currentHeights = allBedHeights.get(gapPos);
+			int count = currentHeights.size();
+			float heightSum = 0;
+			for (float height : currentHeights) {
+				heightSum += height;
+			}
+			float averageBedHeight = heightSum / count;
+
+			List<Vec3d> currentTopNormals = allTopNormals.get(gapPos);
+			int countTopNormal = currentTopNormals.size();
+			Vec3d topNormalSum = Vec3d.ZERO;
+			for (Vec3d topNormal : currentTopNormals) {
+				topNormalSum = topNormalSum.add(topNormal);
+			}
+			Vec3d avgTopNormal = topNormalSum.scale(1d / countTopNormal);
+
+			List<Vec3d> currentTopPositions = allTopPositions.get(gapPos);
+			int positionCount = currentTopPositions.size();
+			Vec3d topPositionSum = Vec3d.ZERO;
+			for (Vec3d position : currentTopPositions) {
+				topPositionSum = topPositionSum.add(position);
+			}
+			Vec3d avgTopPosition = topPositionSum.scale(1d / positionCount);
+
+			// put
+			if(avgTopNormal.y < 0) averageBedHeight = -averageBedHeight;
+			bedHeights.put(gapPos, averageBedHeight);
+			railHeights.put(gapPos, averageBedHeight);
+			planes.put(gapPos, new Plane(new Vec3d(avgTopPosition.x, avgTopPosition.y, avgTopPosition.z), avgTopNormal.scale(-1)));
+		}
+
+
+		if (!trackBlockPositions.contains(mainPos)) {
 			// Try a few different offsets
 			for (Facing value : Facing.values()) {
-				if (yOffset.containsKey(new Vec3i(mainX + value.getXMultiplier(), mainY + value.getYMultiplier(), mainZ + value.getZMultiplier()))) {
-					mainX += value.getXMultiplier();
-					mainY += value.getYMultiplier();
-					mainZ += value.getZMultiplier();
+				Vec3i vec = new Vec3i(value.getXMultiplier(), value.getYMultiplier(), value.getZMultiplier());
+				if (trackBlockPositions.contains(mainPos.add(vec))) {
+					mainPos = mainPos.add(vec);
 					break;
 				}
 			}
 		}
-		if (!yOffset.containsKey(new Vec3i(mainX, mainY, mainZ))) {
+		if (!trackBlockPositions.contains(mainPos)) {
 			// No luck, code is really borked now.  Throw an exception to help track this.
 			TagCompound debug = new TagCompound();
 			try {
@@ -177,69 +237,99 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			throw new RuntimeException("Invalid track builder " + debug);
 		}
 
-		Vec3i mainPos = new Vec3i(mainX, yOffset.get(new Vec3i(mainX, mainY, mainZ)), mainZ);
 		this.setParentPos(mainPos);
 		TrackRail main = new TrackRail(this, mainPos	);
 		tracks.add(main);
-		main.setRailHeight(railHeights.get(new Vec3i(mainX, mainY, mainZ)));
-		main.setBedHeight(bedHeights.get(new Vec3i(mainX, mainY, mainZ)));
+		main.setRailHeight(railHeights.get(mainPos));
+		main.setBedHeight(bedHeights.get(mainPos));
+		main.setBedFace(tileTilt ? planes.get(mainPos) : null);
 
 		for (Vec3i tilePos : positions) {
-			if (tilePos.x == mainX && tilePos.z == mainZ && tilePos.y == mainY) {
+			if (tilePos.equals(mainPos)) {
 				// Skip parent block
 				continue;
 			}
-			TrackBase tg = new TrackGag(this, new Vec3i(tilePos.x, yOffset.get(tilePos), tilePos.z));
+			TrackBase tg = new TrackGag(this, new Vec3i(tilePos.x, tilePos.y, tilePos.z));
 			if (flexPositions.contains(tilePos)) {
 				tg.setFlexible();
 			}
 			tg.setRailHeight(railHeights.get(tilePos));
 			tg.setBedHeight(bedHeights.get(tilePos));
+			tg.setBedFace(tileTilt ? planes.get(tilePos) : null);
 			tracks.add(tg);
 		}
 	}
 
-	private Vec3d computeTopFaceNormal(double yawDeg, double pitchDeg, double rollDeg) {
-		double yawRad = Math.toRadians(yawDeg);
-		double pitchRad = Math.toRadians(pitchDeg);
-		double rollRad = Math.toRadians(rollDeg);
+	public static Vec3d applyNormalRotation(Vec3d offset, Vec3d normal) {
+		Vec3d up = normal.normalize();
 
-		// Compute forward direction vector
-		double cosYaw = Math.cos(yawRad);
-		double sinYaw = Math.sin(yawRad);
-		double cosPitch = Math.cos(pitchRad);
-		double sinPitch = Math.sin(pitchRad);
-		// pitch > 0 is downhill => forward.y is negative
-		Vec3d forward = new Vec3d(cosYaw * cosPitch, -sinPitch, sinYaw * cosPitch).normalize();
+		Vec3d right = up.crossProduct(new Vec3d(0, 1, 0));
+		if (right.lengthSquared() < 1e-12) {
+			right = up.crossProduct(new Vec3d(0, 0, 1));
+		}
+		right = right.normalize();
 
-		Vec3d upNoRoll;
-		if (Math.abs(pitchRad) < 1e-6) {
-			upNoRoll = new Vec3d(0, 1, 0);
-		} else {
-			// Calculate right vector (handle case where forward is nearly parallel to Y axis)
-			Vec3d worldUp = new Vec3d(0, 1, 0);
-			Vec3d right;
-			if (Math.abs(forward.dotProduct(worldUp)) > 0.9999) {
-				// Forward almost vertical, use Z axis as temporary reference
-				right = new Vec3d(0, 0, 1).crossProduct(forward).normalize();
-			} else {
-				right = forward.crossProduct(worldUp).normalize();
-			}
-			upNoRoll = right.crossProduct(forward).normalize();
+		Vec3d forward = right.crossProduct(up).normalize();
+
+		return right.scale(offset.x)
+				.add(up.scale(offset.y))
+				.add(forward.scale(offset.z));
+	}
+
+	private Vec3d computeTopFaceNormal(List<VecYPR> points, int index, double q) {
+		VecYPR current = points.get(index);
+		Matrix3 base = current.toMatrix3();
+		int size = points.size();
+
+		// Early return for invalid cases
+		if (size < 2 || info.settings.rollAndOffsetInfo == null) {
+			return base.up();
 		}
 
-		if (Math.abs(rollRad) < 1e-6) {
-			return upNoRoll;
+		double totalLength = size * info.settings.gauge.scale() * info.getTrackModel().spacing;
+
+		// Start point
+		if (index == 0) {
+			float pitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(totalLength, true, q);
+			return base.copy().rotateLocalPitch(pitch).up();
 		}
 
-		// roll > 0 means left higher than right → up direction should rotate around forward by -rollRad
-		double cosR = Math.cos(-rollRad);
-		double sinR = Math.sin(-rollRad);
-		// Rodrigues rotation formula
-		Vec3d rotated = upNoRoll.scale(cosR)
-				.add(forward.crossProduct(upNoRoll).scale(sinR))
-				.add(forward.scale(forward.dotProduct(upNoRoll) * (1 - cosR)));
-		return rotated.normalize();
+		// End point
+		if (index == size - 1) {
+			float pitch = (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(totalLength, true, q);
+			return base.copy().rotateLocalPitch(pitch).up();
+		}
+
+		if(Math.abs(q) < 1e-6) {
+			return base.up();
+		}
+
+		// Middle point – compute local derivatives using neighbors
+		VecYPR previous = points.get(index - 1);
+		VecYPR next = points.get(index + 1);
+
+		Vec3d prevPos = new Vec3d(previous.x, previous.y, previous.z);
+		Vec3d currPos = new Vec3d(current.x, current.y, current.z);
+		Vec3d nextPos = new Vec3d(next.x, next.y, next.z);
+
+		Matrix3 prevO = previous.toMatrix3();
+		Matrix3 currO = current.toMatrix3();
+		Matrix3 nextO = next.toMatrix3();
+
+		Vec3d rightPrev = prevPos.add(prevO.right().scale(q));
+		Vec3d rightCurr = currPos.add(currO.right().scale(q));
+		Vec3d rightNext = nextPos.add(nextO.right().scale(q));
+
+		Matrix3 mid = Matrix3.fromBasis(
+				rightNext.subtract(rightPrev),
+				rightCurr.subtract(currPos)
+		);
+
+		if (q < 0) {
+			mid = Matrix3.fromBasis(mid.forward().scale(-1), mid.right());
+		}
+
+		return mid.up();
 	}
 
 	@Override
@@ -266,7 +356,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Pair<Double, List<VecYPR>> pair = getPathForRender(scale * info.getTrackModel().spacing);
 		List<VecYPR> points = pair.getRight();
 		float renderScale = (float) (pair.getLeft() / info.getTrackModel().spacing);
-		renderScale *= 1.005f;//Avoid some gaps
+		if(info.settings.pickType != TrackItems.STRAIGHT) {
+			//TODO: calculate the scale according to real gap
+			renderScale *= 1.005f;
+		}
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
 		int switchSize = 0;
@@ -289,67 +382,68 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Vec3d[] leftPos;
 		Vec3d[] rightPos;
 
-		if (correctPartRailOrientation) {
-			if (points.size() < 2 || info.settings.rollAndOffsetInfo == null) {
-				correctPartRailOrientation = false;
-			} else {
-				renderScale *= 1.02f;
-				double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
-				leftPos = new Vec3d[points.size()];
-				rightPos = new Vec3d[points.size()];
+        if (points.size() < 2 || info.settings.rollAndOffsetInfo == null) {
+            correctPartRailOrientation = false;
+        } else {
+            double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
+            leftPos = new Vec3d[points.size()];
+            rightPos = new Vec3d[points.size()];
 
-				// Pre-calculate rail part pos
-				for (int i = 0; i < points.size(); i++) {
-					VecYPR cur = points.get(i);
-					Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
-					Matrix3 o = cur.toMatrix3();
+			// Pre-calculate rail part pos
+            for (int i = 0; i < points.size(); i++) {
+                VecYPR cur = points.get(i);
+                Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
+                Matrix3 o = cur.toMatrix3();
 
-					leftPos[i]  = pos.subtract(o.right().scale(info.settings.gauge.value() * 0.5));
-					rightPos[i] = pos.add(o.right().scale(info.settings.gauge.value() * 0.5));
-				}
+                leftPos[i] = pos.subtract(o.right().scale(info.settings.gauge.value() * 0.5));
+                rightPos[i] = pos.add(o.right().scale(info.settings.gauge.value() * 0.5));
+            }
 
-				//Start
-				Matrix3 startBase = points.getFirst().toMatrix3();
+			//Start
+            Matrix3 startBase = points.getFirst().toMatrix3();
 
-				float startLeftPitch =
-						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
-								length, false, info.settings.gauge.value());
+            float startLeftPitch =
+                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
+                            length, false, info.settings.gauge.value());
 
-				float startRightPitch =
-						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
-								length, true, info.settings.gauge.value());
+            float startRightPitch =
+                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
+                            length, true, info.settings.gauge.value());
 
-				correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
-				correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
+			// TODO: pitch fix only works best when pivot is on rail face yet, can we fix it?
+            correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
+            correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
 
-				//Mid
-				for (int i = 1; i < points.size() - 1; i++) {
-					Matrix3 leftOrientation = Matrix3.fromBasis(leftPos[i+1].subtract(leftPos[i-1]), points.get(i).subtract(leftPos[i]));
-					Matrix3 rightOrientation = Matrix3.fromBasis(rightPos[i+1].subtract(rightPos[i-1]), rightPos[i].subtract(points.get(i)));
+			//Mid
+            for (int i = 1; i < points.size() - 1; i++) {
+                Matrix3 leftOrientation = Matrix3.fromBasis(leftPos[i + 1].subtract(leftPos[i - 1]),
+                                                            points.get(i).subtract(leftPos[i]));
+                Matrix3 rightOrientation = Matrix3.fromBasis(rightPos[i + 1].subtract(rightPos[i - 1]),
+                                                             rightPos[i].subtract(points.get(i)));
 
-					correctLeftOrientation.add(rightOrientation);//this is extremely wired but it seems the best way...
-					correctRightOrientation.add(leftOrientation);
-				}
+                correctLeftOrientation.add(rightOrientation);//this is extremely wired but it seems the best way...
+                correctRightOrientation.add(leftOrientation);
+            }
 
-				//End
-				Matrix3 endBase = points.getLast().toMatrix3();
+			//End
+            Matrix3 endBase = points.getLast().toMatrix3();
 
-				float endLeftPitch =
-						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
-								length, false, info.settings.gauge.value());
+            float endLeftPitch =
+                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
+                            length, false, info.settings.gauge.value());
 
-				float endRightPitch =
-						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
-								length, true, info.settings.gauge.value());
+            float endRightPitch =
+                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
+                            length, true, info.settings.gauge.value());
 
-				correctLeftOrientation.add(endBase.copy().rotateLocalPitch(endLeftPitch));
-				correctRightOrientation.add(endBase.copy().rotateLocalPitch(endRightPitch));
-			}
-		}
+            correctLeftOrientation.add(endBase.copy().rotateLocalPitch(endLeftPitch));
+            correctRightOrientation.add(endBase.copy().rotateLocalPitch(endRightPitch));
+        }
 
-		for (int i = 0; i < points.size(); i++) {
+        for (int i = 0; i < points.size(); i++) {
 			VecYPR cur = points.get(i);
 			VecYPR switchPos = cur;
+			boolean disableSwitchRailCorrection = false;
 			if (switchStraight ) {
 				double switchOffset = 1 - (i / (double)switchSize);
 				if (switchOffset > 0) {
@@ -360,6 +454,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 						offsetAngle = -offsetAngle;
 					}
 					switchPos = new VecYPR(cur.add(offset), cur.getYaw() + (float)offsetAngle, cur.getPitch(), cur.getRoll());
+					disableSwitchRailCorrection = true;
 				}
 			}
 
@@ -381,21 +476,20 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 
 			//Merge situation when angle == 0
-			VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
-			if (direction == TrackDirection.RIGHT) {
-				float leftLen = (1 - angle / 180);
-				float rightLen = (1 + angle / 180);
-				if(correctPartRailOrientation) {//correct rail part
+			VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);
+			//TODO: a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
+            float leftLen = (1 - angle / 180);
+            float rightLen = (1 + angle / 180);
+            if (direction == TrackDirection.RIGHT) {
+                if (correctPartRailOrientation) {//correct rail part
 					cur = cur.withMatrix3(correctLeftOrientation.get(i));
-					switchPos = switchPos.withMatrix3(correctRightOrientation.get(i));
+					if(!disableSwitchRailCorrection) switchPos = switchPos.withMatrix3(correctRightOrientation.get(i));
 				}
 				vec.addChild(new VecYPR(switchPos, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
 				vec.addChild(new VecYPR(cur, rightLen * renderScale, TrackModelPart.RAIL_RIGHT));
 			} else {
-				float leftLen = (1 - angle / 180);
-				float rightLen = (1 + angle / 180);
-				if(correctPartRailOrientation) {//correct rail part
-					switchPos = switchPos.withMatrix3(correctLeftOrientation.get(i));
+                if (correctPartRailOrientation) {//correct rail part
+					if(!disableSwitchRailCorrection) switchPos = switchPos.withMatrix3(correctLeftOrientation.get(i));
 					cur = cur.withMatrix3(correctRightOrientation.get(i));
 				}
 				vec.addChild(new VecYPR(cur, leftLen * renderScale, TrackModelPart.RAIL_LEFT));

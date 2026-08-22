@@ -10,10 +10,7 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.track.TrackBase;
-import cam72cam.immersiverailroading.util.EndPointData;
-import cam72cam.immersiverailroading.util.IRFuzzy;
-import cam72cam.immersiverailroading.util.PlacementInfo;
-import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.gui.helpers.GUIHelpers;
@@ -158,7 +155,8 @@ public class TrackExchangerGui implements IScreen {
 
 		int baseScale = 8;
 		// This could be more efficient...
-		RailSettings settings = new RailSettings(gauge,
+		RailSettings settings = new RailSettings(
+				gauge,
 				track,
 				TrackItems.STRAIGHT, TrackItems.STRAIGHT,
 				10,
@@ -168,12 +166,11 @@ public class TrackExchangerGui implements IScreen {
 				new EndPointData(0), new EndPointData(10),
                 null,null,
 				TrackDirection.NONE,
-				railBed,
-				ItemStack.EMPTY,
+				new TrackFaceTransSetting(),
+				railBed, ItemStack.EMPTY,
 				false,
 				false,
-				1,
-				1
+				1, 1
 		);
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
 		settings.write(stack);

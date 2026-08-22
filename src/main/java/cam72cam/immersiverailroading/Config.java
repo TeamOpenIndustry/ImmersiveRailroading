@@ -127,6 +127,17 @@ public class Config {
 		@Range(min = 0, max = 100)
 		public static int blockWeight = 10;
 
+		@Comment( "Deep Snow on tracks" )
+		public static boolean deepSnow = false;
+
+		@Comment( "How fast snow should melt, 0 = disabled, 20 = fast, 400 = slow" )
+		@Range(min = 0, max = 1000)
+		public static int snowMeltRate = 0;
+
+		@Comment( "How fast snow should accumulate, 0 = disabled, 20 = fast, 400 = slow" )
+		@Range(min = 0, max = 1000)
+		public static int snowAccumulateRate = 400;
+
 		@Comment( "MilliBuckets per Liter" )
 		public static int MB_PER_LITER = 1;
 
@@ -253,17 +264,6 @@ public class Config {
 		@Comment( "Range between couplers to try coupling" )
 		@Range(min = 0, max = 1)
 		public static double couplerRange = 0.3;
-
-		@Comment( "Deep Snow on tracks" )
-		public static boolean deepSnow = false;
-
-		@Comment( "How fast snow should accumulate, 0 = disabled, 20 = fast, 400 = slow" )
-		@Range(min = 0, max = 1000)
-		public static int snowAccumulateRate = 400;
-
-		@Comment( "How fast snow should melt, 0 = disabled, 20 = fast, 400 = slow" )
-		@Range(min = 0, max = 1000)
-		public static int snowMeltRate = 0;
 
 		@Comment("Keep rolling stock loaded even when it is not moving")
 		public static boolean keepStockLoaded = true;

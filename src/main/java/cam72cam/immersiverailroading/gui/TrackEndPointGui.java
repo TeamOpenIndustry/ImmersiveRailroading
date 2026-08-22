@@ -142,8 +142,7 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                if(s.equals("-")) return true;
-                return false;
+                return s.equals("-");
             }
             int max = 1000;
 
@@ -166,8 +165,7 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                if(s.equals("-")) return true;
-                return false;
+                return s.equals("-");
             }
             int max = 1000;
 
@@ -206,10 +204,10 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                return false;
+                return s.equals(".") || s.equals("-");
             }
-            float max = 0.9f;//TODO: 1.0 and -1.0 cause problem now
-            float min = -0.9f;
+            float max = 2f;
+            float min = -2f;
             if (val >= min && val <= max) {
                 settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = new Vec3d(0, val, 0));
                 return true;
@@ -228,10 +226,10 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                return false;
+                return s.equals(".") || s.equals("-");
             }
-            float max = 0.9f;
-            float min = -0.9f;
+            float max = 2f;
+            float min = -2f;
             if (val >= min && val <= max) {
                 settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = new Vec3d(0, val, 0));
                 return true;
@@ -266,7 +264,7 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                return false;
+                return s.equals(".") || s.equals("-");
             }
             float max = settings.nearPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
             float min = -max;
@@ -288,7 +286,7 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                return false;
+                return s.equals(".") || s.equals("-");
             }
             float max = settings.farPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
             float min = -max;
@@ -373,7 +371,7 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                return false;
+                return s.equals(".") || s.equals("-");
             }
             float max = 90;
             float min = 0;
@@ -395,7 +393,7 @@ public class TrackEndPointGui implements IScreen {
             try {
                 val = Float.parseFloat(s);
             } catch (NumberFormatException e) {
-                return false;
+                return s.equals(".") || s.equals("-");
             }
             float max = 90;
             float min = 0;

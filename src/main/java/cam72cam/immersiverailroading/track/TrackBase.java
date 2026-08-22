@@ -8,7 +8,9 @@ import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.math.Plane;
 import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.util.Facing;
 import cam72cam.mod.util.SingleCache;
 
 public abstract class TrackBase {
@@ -20,6 +22,7 @@ public abstract class TrackBase {
 	protected Vec3i rel;
 	private float bedHeight;
 	private float railHeight;
+	private Plane bedFace;
 	//Override default value
 	private boolean scaleModel = true;
 
@@ -38,7 +41,7 @@ public abstract class TrackBase {
 		this.correctedOverlayBuilder = builder.pos;
 	}
 
-	private final SingleCache<Vec3i, Vec3i> downCache = new SingleCache<>(Vec3i::down);
+	private final SingleCache<Vec3i, Vec3i> downCache = new SingleCache<>(pos -> getBedFillPos(pos, getBedFace()));
 	public boolean isDownSolid(boolean countFill) {
 		Vec3i pos = downCache.get(getPos());
 		return
@@ -64,6 +67,13 @@ public abstract class TrackBase {
 		return isDownSolid(true) && (BlockUtil.canBeReplaced(builder.world, pos, flexible || builder.overrideFlexible) || isOverTileRail());
 	}
 
+	public void tryPlaceBedFill() {
+		Vec3i bedFillPos = getBedFillPos();
+		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, bedFillPos, false)) {
+			builder.world.setBlock(bedFillPos, builder.info.settings.railBedFill);
+		}
+	}
+
 	public TileRailBase placeTrack(boolean actuallyPlace) {
 		Vec3i pos = getPos();
 
@@ -76,14 +86,11 @@ public abstract class TrackBase {
 			}
 			tr.setRailHeight(getRailHeight());
 			tr.setBedHeight(getBedHeight());
+			tr.setSnowLayers(tr.getMinSnowLayers());
+			tr.setBedFace(getBedFace());
 			tr.setScaleModel(isScaleModel());
 			return tr;
 		}
-
-		if (!builder.info.settings.railBedFill.isEmpty() && BlockUtil.canBeReplaced(builder.world, pos.down(), false)) {
-			builder.world.setBlock(pos.down(), builder.info.settings.railBedFill);
-		}
-
 
 		TagCompound replaced = null;
 		int hasSnow = 0;
@@ -117,11 +124,27 @@ public abstract class TrackBase {
 		}
 		tr.setRailHeight(getRailHeight());
 		tr.setBedHeight(getBedHeight());
+		tr.setSnowLayers(tr.getMinSnowLayers());
+		tr.setBedFace(getBedFace());
 		tr.setScaleModel(isScaleModel());
 		for (int i = 0; i < hasSnow; i++) {
 			tr.handleSnowTick();
 		}
 		return tr;
+	}
+
+	private static Vec3i getBedFillPos(Vec3i pos, Plane bedFace) {
+		if(bedFace != null) {
+			Facing facing = Facing.fromNormal(bedFace.normal);
+			Vec3i axis = new Vec3i(facing.getXMultiplier(), facing.getYMultiplier(), facing.getZMultiplier());
+			return pos.add(axis);
+		} else {
+			return pos.down();
+		}
+	}
+
+	public Vec3i getBedFillPos() {
+		return getBedFillPos(getPos(), getBedFace());
 	}
 
 	private final SingleCache<Vec3i, Vec3i> posCache = new SingleCache<>(pos -> pos.add(rel));
@@ -133,6 +156,7 @@ public abstract class TrackBase {
 		setBedHeight(height);
 		setRailHeight(height);
 	}
+
 	public void setBedHeight(float height) {
 		this.bedHeight = height;
 	}
@@ -145,6 +169,14 @@ public abstract class TrackBase {
 	public float getRailHeight() {
 		return railHeight;
 	}
+
+	public void setBedFace(Plane bedFace) {
+		this.bedFace = bedFace;
+	}
+	public Plane getBedFace	() {
+		return bedFace;
+	}
+
 	public void setScaleModel(boolean scaleModel) {
 		this.scaleModel = scaleModel;
 	}

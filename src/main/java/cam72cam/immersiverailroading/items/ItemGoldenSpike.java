@@ -56,7 +56,7 @@ public class ItemGoldenSpike extends CustomItem {
 				TileRailPreview tr = world.getBlockEntity(tepos, TileRailPreview.class);
 				if (tr != null) {
 					ItemStack stack = tr.getItem();
-					TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, false);
+					TrackSnapUtil.SnappedResult result = applySnapAndAdjust(player, world, pos, hit, stack, false, false);
 					pos = result.pos();
 					hit = result.hit();
 					float yaw = result.yaw();
@@ -65,7 +65,7 @@ public class ItemGoldenSpike extends CustomItem {
 					if (tr.isAboveRails()) {
 						tepos = tepos.down();
 					}
-					tr.setCustomInfo(new PlacementInfo(stack, yaw, hit.subtract(0, hit.y, 0).add(pos).subtract(tepos), false, snapped));
+					tr.setCustomInfo(new PlacementInfo(stack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z).add(pos).subtract(tepos), false, snapped));
 				}
 			}
 		}
