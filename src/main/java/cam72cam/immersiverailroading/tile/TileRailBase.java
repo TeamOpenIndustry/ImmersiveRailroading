@@ -412,8 +412,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (current > target) {
 			this.setSnowLayers(target);
-			int removed = current - target;
-			int snowDown = removed;
+            int snowDown = current - target;
 
 			for (int i = 1; i <= 3; i++) {
 				Facing[] horiz = Facing.values().clone();
@@ -978,18 +977,15 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 	private final SingleCache<Double, IBoundingBox> boundingBox =
 			new SingleCache<>(height -> {
-
+				//TODO: OBB
 				if (height >= 0) {
-					return IBoundingBox.ORIGIN.expand(
-							new Vec3d(1, height, 1)
-					);
+					return IBoundingBox.ORIGIN.expand(new Vec3d(1, height, 1));
 				}
 
 				return IBoundingBox.ORIGIN
 						.expand(new Vec3d(1, 1 + height, 1))
 						.offset(new Vec3d(0, -height, 0));
 			});
-	//TODO: OBB
 
 	@Override
 	public IBoundingBox getBoundingBox() {
@@ -1068,14 +1064,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (stack.is(Fuzzy.SNOW_LAYER)) {
 			if (this.getWorld().isServer) {
-				System.out.println(this.getMinSnowLayers() + " " + snowLayers + " " + bedHeight);
 				this.handleSnowTick();
 			}
 			return true;
 		}
 		if (stack.is(Fuzzy.SNOW_BLOCK)) {
 			if (this.getWorld().isServer) {
-				System.out.println(this.getMinSnowLayers() + " " + snowLayers + " " + bedHeight);
 				for (int i = 0; i < 8; i ++) {
 					this.handleSnowTick();
 				}
@@ -1084,7 +1078,6 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 		if (stack.isValidTool(ToolType.SHOVEL)) {
 			if (this.getWorld().isServer) {
-				System.out.println(this.getMinSnowLayers() + " " + snowLayers + " " + bedHeight);
 				this.cleanSnow(0);
 				this.setSnowLayers(0);
 				stack.damageItem(1, player);

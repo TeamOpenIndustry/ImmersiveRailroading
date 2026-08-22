@@ -356,7 +356,10 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Pair<Double, List<VecYPR>> pair = getPathForRender(scale * info.getTrackModel().spacing);
 		List<VecYPR> points = pair.getRight();
 		float renderScale = (float) (pair.getLeft() / info.getTrackModel().spacing);
-		if(info.settings.pickType != TrackItems.STRAIGHT) renderScale *= 1.005f;//TODO: calculate the scale according to real gap
+		if(info.settings.pickType != TrackItems.STRAIGHT) {
+			//TODO: calculate the scale according to real gap
+			renderScale *= 1.005f;
+		}
 
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
 		int switchSize = 0;
@@ -379,65 +382,65 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Vec3d[] leftPos;
 		Vec3d[] rightPos;
 
-		if (correctPartRailOrientation) {
-			if (points.size() < 2 || info.settings.rollAndOffsetInfo == null) {
-				correctPartRailOrientation = false;
-			} else {
-				double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
-				leftPos = new Vec3d[points.size()];
-				rightPos = new Vec3d[points.size()];
+        if (points.size() < 2 || info.settings.rollAndOffsetInfo == null) {
+            correctPartRailOrientation = false;
+        } else {
+            double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
+            leftPos = new Vec3d[points.size()];
+            rightPos = new Vec3d[points.size()];
 
-				// Pre-calculate rail part pos
-				for (int i = 0; i < points.size(); i++) {
-					VecYPR cur = points.get(i);
-					Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
-					Matrix3 o = cur.toMatrix3();
+			// Pre-calculate rail part pos
+            for (int i = 0; i < points.size(); i++) {
+                VecYPR cur = points.get(i);
+                Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
+                Matrix3 o = cur.toMatrix3();
 
-					leftPos[i]  = pos.subtract(o.right().scale(info.settings.gauge.value() * 0.5));
-					rightPos[i] = pos.add(o.right().scale(info.settings.gauge.value() * 0.5));
-				}
+                leftPos[i] = pos.subtract(o.right().scale(info.settings.gauge.value() * 0.5));
+                rightPos[i] = pos.add(o.right().scale(info.settings.gauge.value() * 0.5));
+            }
 
-				//Start
-				Matrix3 startBase = points.getFirst().toMatrix3();
+			//Start
+            Matrix3 startBase = points.getFirst().toMatrix3();
 
-				float startLeftPitch =
-						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
-								length, false, info.settings.gauge.value());
+            float startLeftPitch =
+                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
+                            length, false, info.settings.gauge.value());
 
-				float startRightPitch =
-						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
-								length, true, info.settings.gauge.value());
+            float startRightPitch =
+                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
+                            length, true, info.settings.gauge.value());
 
-				// TODO: pitch fix only works best when pivot is on rail face yet, can we fix it?
-				correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
-				correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
+			// TODO: pitch fix only works best when pivot is on rail face yet, can we fix it?
+            correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
+            correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
 
-				//Mid
-				for (int i = 1; i < points.size() - 1; i++) {
-					Matrix3 leftOrientation = Matrix3.fromBasis(leftPos[i+1].subtract(leftPos[i-1]), points.get(i).subtract(leftPos[i]));
-					Matrix3 rightOrientation = Matrix3.fromBasis(rightPos[i+1].subtract(rightPos[i-1]), rightPos[i].subtract(points.get(i)));
+			//Mid
+            for (int i = 1; i < points.size() - 1; i++) {
+                Matrix3 leftOrientation = Matrix3.fromBasis(leftPos[i + 1].subtract(leftPos[i - 1]),
+                                                            points.get(i).subtract(leftPos[i]));
+                Matrix3 rightOrientation = Matrix3.fromBasis(rightPos[i + 1].subtract(rightPos[i - 1]),
+                                                             rightPos[i].subtract(points.get(i)));
 
-					correctLeftOrientation.add(rightOrientation);//this is extremely wired but it seems the best way...
-					correctRightOrientation.add(leftOrientation);
-				}
+                correctLeftOrientation.add(rightOrientation);//this is extremely wired but it seems the best way...
+                correctRightOrientation.add(leftOrientation);
+            }
 
-				//End
-				Matrix3 endBase = points.getLast().toMatrix3();
+			//End
+            Matrix3 endBase = points.getLast().toMatrix3();
 
-				float endLeftPitch =
-						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
-								length, false, info.settings.gauge.value());
+            float endLeftPitch =
+                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
+                            length, false, info.settings.gauge.value());
 
-				float endRightPitch =
-						(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
-								length, true, info.settings.gauge.value());
+            float endRightPitch =
+                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
+                            length, true, info.settings.gauge.value());
 
-				correctLeftOrientation.add(endBase.copy().rotateLocalPitch(endLeftPitch));
-				correctRightOrientation.add(endBase.copy().rotateLocalPitch(endRightPitch));
-			}
-		}
+            correctLeftOrientation.add(endBase.copy().rotateLocalPitch(endLeftPitch));
+            correctRightOrientation.add(endBase.copy().rotateLocalPitch(endRightPitch));
+        }
 
-		for (int i = 0; i < points.size(); i++) {
+        for (int i = 0; i < points.size(); i++) {
 			VecYPR cur = points.get(i);
 			VecYPR switchPos = cur;
 			boolean disableSwitchRailCorrection = false;
@@ -473,20 +476,19 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 
 			//Merge situation when angle == 0
-			VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);//TODO:add a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
-			if (direction == TrackDirection.RIGHT) {
-				float leftLen = (1 - angle / 180);
-				float rightLen = (1 + angle / 180);
-				if(correctPartRailOrientation) {//correct rail part
+			VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);
+			//TODO: a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
+            float leftLen = (1 - angle / 180);
+            float rightLen = (1 + angle / 180);
+            if (direction == TrackDirection.RIGHT) {
+                if (correctPartRailOrientation) {//correct rail part
 					cur = cur.withMatrix3(correctLeftOrientation.get(i));
 					if(!disableSwitchRailCorrection) switchPos = switchPos.withMatrix3(correctRightOrientation.get(i));
 				}
 				vec.addChild(new VecYPR(switchPos, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
 				vec.addChild(new VecYPR(cur, rightLen * renderScale, TrackModelPart.RAIL_RIGHT));
 			} else {
-				float leftLen = (1 - angle / 180);
-				float rightLen = (1 + angle / 180);
-				if(correctPartRailOrientation) {//correct rail part
+                if (correctPartRailOrientation) {//correct rail part
 					if(!disableSwitchRailCorrection) switchPos = switchPos.withMatrix3(correctLeftOrientation.get(i));
 					cur = cur.withMatrix3(correctRightOrientation.get(i));
 				}

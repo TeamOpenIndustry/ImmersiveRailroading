@@ -1169,9 +1169,7 @@ public record RollAndOffsetInfo(
 
     public static double getRollDeg(double rawRoll, boolean degreeMode) {
         if(!degreeMode) {
-            double sin = rawRoll * 0.01 / Gauge.STANDARD;
-            if(sin > 1) sin = 1;
-            if(sin < -1) sin = -1;
+            double sin = Math.clamp(rawRoll * 0.01 / Gauge.STANDARD, -1, 1);
             return Math.toDegrees(Math.asin(sin));
         } else {
             return rawRoll;

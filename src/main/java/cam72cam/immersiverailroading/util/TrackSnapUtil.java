@@ -15,9 +15,8 @@ import cam72cam.mod.world.World;
 
 import java.util.*;
 
-//TODO: existing snapped tile preview issues: 1.very high bed thickness 2.very big roll
-// so tile preview is not 100% accurate yet...
 public class TrackSnapUtil {
+    
     public static VecYPR getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
         RailSettings stackInfo = RailSettings.from(stack);
         EndPointData endPointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
@@ -163,7 +162,7 @@ public class TrackSnapUtil {
 
     //TODO: keep stack info so that we wont lost it after applying snapping
 
-    public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear, boolean isPreView) {
+    public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear, boolean isPreview) {
         RailSettings stackInfo = RailSettings.from(stack);
         boolean succeeded = false;
         float yaw = player.getRotationYawHead();
@@ -242,7 +241,7 @@ public class TrackSnapUtil {
         }
 
         if (succeeded) {
-            if(!isPreView) {
+            if(!isPreview) {
                 pos = new Vec3i(snapped);
                 hit = snapped.subtract(pos);
             } else {// This logic is strongly bind to TilePreview

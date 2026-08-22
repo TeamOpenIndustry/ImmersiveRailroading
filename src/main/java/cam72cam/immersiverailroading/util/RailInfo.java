@@ -445,7 +445,7 @@ public class RailInfo {
 					railBed, cam72cam.mod.item.ItemStack.EMPTY,
 					false,
 					false,
-					1,  1
+					1, 1
 			);
 			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
 		}
