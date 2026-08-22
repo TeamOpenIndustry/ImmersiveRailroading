@@ -534,7 +534,7 @@ public class TrackGui implements IScreen {
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			float max = 1f;
+			float max = 0.4f;
 			float min = 0f;
 			if (val >= min && val <= max) {
 				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.bedThickness = val);
