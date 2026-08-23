@@ -124,7 +124,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 
                 //legacy, a very rough gradeCrossing...
                 double crossingHeight = 0;
-                if (info.settings.isGradeCrossing) {
+                if (info.settings.isGradeCrossing && !rollEffectTile) { // only enable this when rollEffectTile is false
                     crossingHeight = 0.306 - Math.abs(Math.round(q)) / (3 * horiz);
                     crossingHeight *= info.settings.gauge.scale();
                     crossingHeight = Math.min(crossingHeight, clamp);
@@ -137,16 +137,16 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
                     relHeight += 1;
                 }
 
-                if(rollEffectTile) {// bedHeight will be the same as railHeight in this case
+                if(rollEffectTile) { // bedHeight will be the same as railHeight in this case
                     int offsetInt;
-                    if(crossingHeight + relHeight > 1) {
-                        offsetInt = (int) Math.floor(crossingHeight + relHeight);
+                    if(relHeight > 1) {
+                        offsetInt = (int) Math.floor(relHeight);
                     }else {
                         offsetInt = 0;
                     }
 
                     // Height for snow and common block rail
-                    float heightResult = (float) (crossingHeight + relHeight - offsetInt);
+                    float heightResult = (float) (relHeight - offsetInt);
                     trackBlockPositions.add(gag);
 
                     List<Float> currentBedHeights = allBedHeights.get(gag) != null ? allBedHeights.get(gag) : new ArrayList<>();
@@ -161,7 +161,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
                     currentTopPositions.add(facePivot.subtract(gag));
                     allTopPositions.put(gag, currentTopPositions);
 
-                } else if(isNewPos){// legacy
+                } else if(isNewPos){ // legacy
                     bedHeights.put(gag, (float) (crossingHeight + Math.max(0, relHeight)));
                     railHeights.put(gag, (float) relHeight);
                     trackBlockPositions.add(gag);
