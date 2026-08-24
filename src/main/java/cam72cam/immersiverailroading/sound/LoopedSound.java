@@ -14,7 +14,7 @@ import cam72cam.mod.sound.ISound;
 
 import java.util.*;
 
-public class LoopedSound implements ISoundDefinition {
+public class LoopedSound implements StockSound {
     private final ExpireableMap<UUID, Map<ISound, Float>> entitySounds = new ExpireableMap<>((key, value) -> value.keySet().forEach(ISound::stop));
 
     private final SoundFile soundFile;

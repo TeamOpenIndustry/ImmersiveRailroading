@@ -109,7 +109,7 @@ public abstract class EntityRollingStockDefinition {
     public Map<String, Float> cgDefaults;
     public Map<String, DataBlock> widgetConfig;
 
-    public List<ISoundDefinition> customSoundDef;
+    public List<StockSound> customSounds;
 
     public NavMesh navMesh;
 
@@ -646,14 +646,14 @@ public abstract class EntityRollingStockDefinition {
             });
         }
 
-        customSoundDef = new ArrayList<>();
+        customSounds = new ArrayList<>();
         if (data.getBlocks("loop") != null) {
             data.getBlocks("loop").forEach(l -> {
                 SoundFile soundFile = soundFiles.get(l.getValue("sound").asString());
                 ModifierChain modifierChain = modifierChains.get(l.getValue("modifier_chain").asString());
 
-                ISoundDefinition def = new LoopedSound(l, soundFile, modifierChain);
-                customSoundDef.add(def);
+                StockSound def = new LoopedSound(l, soundFile, modifierChain);
+                customSounds.add(def);
             });
         }
 
@@ -661,8 +661,8 @@ public abstract class EntityRollingStockDefinition {
             data.getBlocks("oneshot").forEach(o -> {
                 SoundFile soundFile = soundFiles.get(o.getValue("sound").asString());
 
-                ISoundDefinition def = new OneShotSounds(o, soundFile);
-                customSoundDef.add(def);
+                StockSound def = new OneShotSounds(o, soundFile);
+                customSounds.add(def);
             });
         }
     }

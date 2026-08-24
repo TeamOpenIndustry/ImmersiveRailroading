@@ -14,7 +14,7 @@ import cam72cam.mod.sound.ISound;
 
 import java.util.*;
 
-public class OneShotSounds implements ISoundDefinition {
+public class OneShotSounds implements StockSound {
     private final ExpireableMap<UUID, Map<ISound, Float>> entitySounds = new ExpireableMap<>((key, value) -> value.keySet().forEach(ISound::stop));
 
     private final SoundFile soundFile;
