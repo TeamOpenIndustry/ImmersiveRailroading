@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.sound.ISound;
@@ -64,7 +65,7 @@ public class LoopedSound implements StockSound {
             if (emitter != null) {
                 StockModel<?, ?> model = stock.getDefinition().getModel();
                 Optional<String> name = model.groups().stream().filter(f -> f.contains(emitter)).findFirst();
-                name.ifPresent(n -> emitterPos = model.centerOfGroups(Collections.singletonList(n)).rotateYaw(90));
+                name.ifPresent(n -> emitterPos = model.centerOfGroups(Collections.singletonList(n)));
             } else {
                 emitterPos = new Vec3d(0, 0, 0);
             }
@@ -111,13 +112,13 @@ public class LoopedSound implements StockSound {
             case CONTROL_GROUP -> stock.getControlPosition(controller);
         };
 
-        Vec3d orientedEmitter = emitterPos.rotateYaw(stock.getRotationYaw());
+        Vec3d soundPosition = stock.getModelMatrix().apply(emitterPos);
 
         boolean isAnyPlaying = false;
         for (ISound sound : sounds.keySet()) {
             if (sound.isPlaying()) {
                 isAnyPlaying = true;
-                sound.setPosition(stock.getPosition().add(orientedEmitter));
+                sound.setPosition(soundPosition);
                 sound.setVelocity(stock.getVelocity());
             }
 
@@ -128,6 +129,8 @@ public class LoopedSound implements StockSound {
 
         if (condition.check(oldVal, newVal, rangeStart, rangeEnd)) {
             oldVal = newVal;
+
+            ModCore.info("Playing Sound at %s. Player position: %s", soundPosition, player.getPosition());
 
             ISound toBePlayed = null;
 
@@ -156,7 +159,7 @@ public class LoopedSound implements StockSound {
             }
 
             if (!isAnyPlaying) {
-                toBePlayed.play(stock.getPosition().add(orientedEmitter));
+                toBePlayed.play(soundPosition);
             }
         } else {
             oldVal = newVal;

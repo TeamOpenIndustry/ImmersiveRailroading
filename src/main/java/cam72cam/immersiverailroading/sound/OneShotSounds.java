@@ -59,7 +59,7 @@ public class OneShotSounds implements StockSound {
             if (emitter != null) {
                 StockModel<?, ?> model = stock.getDefinition().getModel();
                 Optional<String> name = model.groups().stream().filter(f -> f.contains(emitter)).findFirst();
-                name.ifPresent(n -> emitterPos = model.centerOfGroups(Collections.singletonList(n)).rotateYaw(90));
+                name.ifPresent(n -> emitterPos = model.centerOfGroups(Collections.singletonList(n)));
             } else {
                 emitterPos = new Vec3d(0, 0, 0);
             }
@@ -101,13 +101,13 @@ public class OneShotSounds implements StockSound {
             }
         }
 
-        Vec3d orientedEmitter = emitterPos.rotateYaw(stock.getRotationYaw());
+        Vec3d soundPosition = stock.getModelMatrix().apply(emitterPos);
 
         boolean isAnyPlaying = false;
         for (ISound sound : sounds.keySet()) {
             if (sound.isPlaying()) {
                 isAnyPlaying = true;
-                sound.setPosition(stock.getPosition().add(orientedEmitter));
+                sound.setPosition(soundPosition);
                 sound.setVelocity(stock.getVelocity());
             }
         }
@@ -153,7 +153,7 @@ public class OneShotSounds implements StockSound {
             }
 
             if (!isAnyPlaying) {
-                toBePlayed.play(stock.getPosition().add(orientedEmitter));
+                toBePlayed.play(soundPosition);
                 lastPlayed = System.nanoTime();
             }
         } else {
