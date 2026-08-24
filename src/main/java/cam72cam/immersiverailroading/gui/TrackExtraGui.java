@@ -28,53 +28,69 @@ import java.util.List;
 
 //Advanced settings for the track
 public class TrackExtraGui implements IScreen {
+    private int targetGuiOpenType;
+    private boolean unlockGuiTurnDegree;
+
     private double rollMax;
     private double yOffsetMax;
     private double zOffsetMax;
+
     Color curveColor;
     Color pointColor;
     Color handlePointColor;
     Color handleLineColor;
     Color arrowColor;
+
     private TileRailPreview te;
     private RailSettings.Mutable settings;
     private RollAndOffsetInfo.Mutable rollAndOffsetInfoCache;
-    private int targetGuiOpenType;
-    private boolean unlockGuiTurnDegree;
+
     private boolean edited;
     private boolean editLeft;
     private final double length;
+
     private final RailInfo referenceInfo;//Only for calculating length and rendering
     private final List<VecYPR> referenceRenderData;
+
     //buttons to show state
     private Button rollValueLabel;
     private Button rollSlopeLabel;
     private Button rollHandleXLenLabel;
+
     private Button yOffsetValueLabel;
     private Button yOffsetSlopeLabel;
     private Button yOffsetHandleXLenLabel;
+
     private Button zOffsetValueLabel;
     private Button zOffsetSlopeLabel;
     private Button zOffsetHandleXLenLabel;
+
     private TextField rollValueInput;
     private TextField rollSlopeInput;
     private TextField rollHandleXLenInput;
+
     private TextField yOffsetValueInput;
     private TextField yOffsetSlopeInput;
     private TextField yOffsetHandleXLenInput;
+
     private TextField zOffsetValueInput;
     private TextField zOffsetSlopeInput;
     private TextField zOffsetHandleXLenInput;
+
     private Slider ArcLenFactorSlider;
+
     private Button insertOrDeletePointButton;
     private Button editLeftButton;
     private Button resetAllButton;
+
     private Button rollOffsetTypeButton;
     private Button railInfoLabel;
+
     private CheckBox rollEffectTileCB;
     private CheckBox railBlockNormalCB;
     private CheckBox degreeModeCB;
     private CheckBox offsetVertByNormalCB;
+
 //    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
