@@ -20,6 +20,7 @@ item.immersiverailroading:item_golden_spike.name=Golden Spike
 item.immersiverailroading:item_radio_control_card.name=Train Radio-control Card
 item.immersiverailroading:item_switch_key.name=Switch Key
 item.immersiverailroading:item_track_exchanger.name=Track Exchanger
+item.immersiverailroading:item_wireless_remotecontrol.name=Wireless Remote Control
 
 tile.immersiverailroading:block_rail.name=Rail
 tile.immersiverailroading:block_rail_gag.name=Rail (Gag)
@@ -64,6 +65,10 @@ chat.immersiverailroading:switch_state.reset=The last-locked switch has been wir
 chat.immersiverailroading:switch_state.cant_reset=You haven't locked any switches with this key!
 chat.immersiverailroading:switch_state.already_reset=The last-locked switch is already unlocked!
 chat.immersiverailroading:multiblock.select=Select multiblock: %s
+chat.immersiverailroading:wireless.remotecontrol.link=Wireless Remotecontrol linked!
+chat.immersiverailroading:wireless.remotecontrol.relink=Wireless Remotecontrol relinked!
+chat.immersiverailroading:wireless.remotecontrol.unlink=Wireless Remotecontrol unlinked!
+chat.immersiverailroading:wireless.remotecontrol.cantlink=Locomotive does not have Wireless control equipment!
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle
@@ -141,6 +146,9 @@ gui.immersiverailroading:item.track_exchanger=Right-Click in air to open the sel
 gui.immersiverailroading:item.paint_brush.mode=Current mode: %s
 gui.immersiverailroading:item.paint_brush.description=Sneak-Right-Click to cycle modes
 gui.immersiverailroading:none=None
+
+gui.immersiverailroading:item.remote_control_linked=Linked to: %s
+gui.immersiverailroading:item.remote_control_not_linked=Not linked to any locomotive
 
 gui.immersiverailroading:track.type=Type:      %s
 gui.immersiverailroading:track.length=Length:    %s

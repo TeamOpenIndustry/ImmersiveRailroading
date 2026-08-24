@@ -4,10 +4,12 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
+import cam72cam.immersiverailroading.items.ItemWirelessRemoteControl;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.remotecontrol.RemoteControlData;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.MathUtil;
@@ -43,6 +45,10 @@ public abstract class Locomotive extends FreightTank {
 	@TagSync
 	@TagField("AIR_BRAKE")
 	private float trainBrake = 0;
+
+	@TagSync
+	@TagField("EMERGENCY")
+	private boolean emergency = false;
 
 	@TagSync
 	@TagField("HORN")
@@ -253,6 +259,8 @@ public abstract class Locomotive extends FreightTank {
 		super.onDragRelease(control);
 		if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
 			setControlPosition(control, 0.5f);
+		} else if (control.part.type.equals(ModelComponentType.EMERGENCY_X)) {
+			setEmergency(getControlPosition(control) > 0.5);
 		}
 	}
 
@@ -311,6 +319,25 @@ public abstract class Locomotive extends FreightTank {
 			}
 			return ClickResult.ACCEPTED;
 		}
+		if (player.getHeldItem(hand).is(IRItems.ITEM_WIRELESS_REMOTECONTROL ) && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+            if (getWorld().isClient) {
+                return ClickResult.ACCEPTED;
+            }
+            if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
+                ItemWirelessRemoteControl.Data data = new ItemWirelessRemoteControl.Data(player.getHeldItem(hand));
+                if (player.isCrouching()) {
+                    player.sendMessage(data.linked == null ? ChatText.WIRELESS_REMOTECONTROL_NOLINK.getMessage() : ChatText.WIRELESS_REMOTECONTROL_UNLINK.getMessage());
+                    data.linked = null;
+                } else {
+                    player.sendMessage(data.linked == null ? ChatText.WIRELESS_REMOTECONTROL_LINK.getMessage() : ChatText.WIRELESS_REMOTECONTROL_RELINK.getMessage());
+                    data.linked = this.getUUID();
+                }
+                data.write();
+            } else {
+                player.sendMessage(ChatText.WIRELESS_REMOTECONTROL_CANTLINK.getMessage(this.getDefinition().name()));;
+            }
+            return ClickResult.ACCEPTED;
+        }
 		return super.onClick(player, hand);
 	}
 
@@ -640,5 +667,32 @@ public abstract class Locomotive extends FreightTank {
 	public float ambientTemperature() {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;
+	}
+
+    public void setEmergency(boolean emergency) {
+    	if (emergency) {
+        	setThrottle(0);
+        	setTrainBrake(1);
+        	this.emergency = true;
+    	} else {
+    		this.emergency = false;
+    	}
+    }
+    
+    public boolean getEmergency() {
+    	return emergency;
+    }
+    
+	public RemoteControlData getRemoteControlData() {
+		RemoteControlData data = new RemoteControlData();	    
+	    data.throttle = getThrottle();
+	    data.brakePressure = getBrakePressure();
+	    data.indBrake = getIndependentBrake();
+	    data.reverser = getReverser();
+	    data.speed = getCurrentSpeed();
+	    data.emergency = getEmergency();
+	    data.horn = hornPull;
+
+	    return data;
 	}
 }

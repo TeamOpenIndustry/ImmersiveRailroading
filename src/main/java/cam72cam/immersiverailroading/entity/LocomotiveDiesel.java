@@ -57,6 +57,9 @@ public class LocomotiveDiesel extends Locomotive {
 	}
 	
 	public void setTurnedOn(boolean value) {
+		if (getEmergency() && value) {
+			return;
+		}
 		turnedOn = value;
 		setControlPositions(ModelComponentType.ENGINE_START_X, turnedOn ? 1 : 0);
 	}
@@ -283,13 +286,21 @@ public class LocomotiveDiesel extends Locomotive {
 	public void onDragRelease(Control<?> component) {
 		super.onDragRelease(component);
 		if (component.part.type == ModelComponentType.ENGINE_START_X) {
-			turnedOn = getDefinition().getModel().getControls().stream()
+			setTurnedOn(getDefinition().getModel().getControls().stream()
 					.filter(c -> c.part.type == ModelComponentType.ENGINE_START_X)
-					.allMatch(c -> getControlPosition(c) == 1);
+					.allMatch(c -> getControlPosition(c) == 1));
 		}
 		if (component.part.type == ModelComponentType.REVERSER_X) {
 			// Make sure reverser is sync'd
 			setControlPositions(ModelComponentType.REVERSER_X, getReverser()/-2 + 0.5f);
+		}
+	}
+	
+	@Override
+	public void setEmergency(boolean emergency) {
+		super.setEmergency(emergency);
+		if (emergency) {
+			setTurnedOn(false);
 		}
 	}
 }
