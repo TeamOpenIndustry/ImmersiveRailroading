@@ -65,7 +65,6 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     private final FlangeSound flangeSound;
     private final SwaySimulator sway;
 
-    // TODO rename
     private List<StockSound> customSounds = new ArrayList<>();
 
     public StockModel(DEFINITION def) throws Exception {
