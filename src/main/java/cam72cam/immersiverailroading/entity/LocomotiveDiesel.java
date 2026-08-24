@@ -196,9 +196,9 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 
 		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
-				.filter(x -> x.part.type == ModelComponentType.HORN_CONTROL_X)
-				.mapToDouble(this::getControlPosition)
-				.max();
+		                             .filter(x -> x.part.type == ModelComponentType.HORN_CONTROL_X)
+		                             .mapToDouble(this::getControlPosition)
+		                             .max();
 		if (control.isPresent() && control.getAsDouble() > 0) {
 			this.setHorn(10, hornPlayer);
 		}
@@ -284,8 +284,8 @@ public class LocomotiveDiesel extends Locomotive {
 		super.onDragRelease(component);
 		if (component.part.type == ModelComponentType.ENGINE_START_X) {
 			turnedOn = getDefinition().getModel().getControls().stream()
-					.filter(c -> c.part.type == ModelComponentType.ENGINE_START_X)
-					.allMatch(c -> getControlPosition(c) == 1);
+			                          .filter(c -> c.part.type == ModelComponentType.ENGINE_START_X)
+			                          .allMatch(c -> getControlPosition(c) == 1);
 		}
 		if (component.part.type == ModelComponentType.REVERSER_X) {
 			// Make sure reverser is sync'd

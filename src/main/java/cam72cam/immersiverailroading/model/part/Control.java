@@ -16,7 +16,7 @@ import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJGroup;
+import cam72cam.mod.model.common.mesh.ModelGroup;
 import cam72cam.mod.render.GlobalRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.text.TextColor;
@@ -124,11 +124,11 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
             this.rotations.put(Axis.Z, axis.getValue("Z").asFloat());
             this.center = part.center;
         } else {
-            OBJGroup rot = part.groups().stream()
-                    .filter(g -> Pattern.matches(rotpat, g.name))
-                    .findFirst().orElse(null);
-            if (rot != null && rot.normal != null) {
-                this.rotationPoint = rot.max.add(rot.min).scale(0.5);
+            ModelGroup rot = part.groups().stream()
+                                 .filter(g -> Pattern.matches(rotpat, g.name))
+                                 .findFirst().orElse(null);
+            if (rot != null && rot.normal() != null) {
+                this.rotationPoint = rot.max().add(rot.min()).scale(0.5);
                 String[] split = rot.name.split("_");
                 int idx = ArrayUtils.indexOf(split, "ROT");
                 if (idx != ArrayUtils.INDEX_NOT_FOUND) {
@@ -140,11 +140,14 @@ public class Control<T extends EntityMoveableRollingStock> extends Interactable<
                     }
                 }
 
-                rotations.put(Axis.X, (float) rot.normal.x);
-                rotations.put(Axis.Y, (float) rot.normal.y);
-                rotations.put(Axis.Z, (float) rot.normal.z);
+                rotations.put(Axis.X, (float) rot.normal().x);
+                rotations.put(Axis.Y, (float) rot.normal().y);
+                rotations.put(Axis.Z, (float) rot.normal().z);
 
-                List<Vec3d> nonRotGroups = part.groups().stream().filter(g -> !g.name.contains("_ROT")).map(g -> g.max.add(g.min).scale(0.5)).collect(Collectors.toList());
+                List<Vec3d> nonRotGroups = part.groups().stream()
+                                               .filter(g -> !g.name.contains("_ROT"))
+                                               .map(g -> g.max().add(g.min()).scale(0.5))
+                                               .toList();
                 this.center = nonRotGroups.isEmpty() ? part.center : nonRotGroups.stream().reduce(Vec3d.ZERO, Vec3d::add).scale(1.0 / nonRotGroups.size());
             } else {
                 this.center = part.center;
