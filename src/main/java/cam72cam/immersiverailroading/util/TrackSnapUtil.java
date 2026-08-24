@@ -262,21 +262,22 @@ public class TrackSnapUtil {
                 hit = snapped.subtract(pos);
             }
         } else {
-            pos = pos.up().up();
+            if(isPreview) {
+                pos = pos.up().up();
 
-            if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
-                if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
-                    pos = pos.down();
-                    hit = hit.add(0, -1, 0);
+                if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                        pos = pos.down();
+                        hit = hit.add(0, -1, 0);
+                    }
+                }
+                if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                        pos = pos.down();
+                        hit = hit.add(0, -1, 0);
+                    }
                 }
             }
-            if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
-                if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
-                    pos = pos.down();
-                    hit = hit.add(0, -1, 0);
-                }
-            }
-
             if(hit.y - Math.floor(hit.y) >= 0.5) hit = hit.add(0, 1, 0);
         }
 
