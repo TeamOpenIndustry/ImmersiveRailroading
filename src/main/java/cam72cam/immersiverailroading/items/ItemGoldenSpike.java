@@ -62,9 +62,6 @@ public class ItemGoldenSpike extends CustomItem {
 					float yaw = result.yaw();
 					boolean snapped = result.succeeded();
 
-					if (tr.isAboveRails()) {
-						tepos = tepos.down();
-					}
 					tr.setCustomInfo(new PlacementInfo(stack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z).add(pos).subtract(tepos), false, snapped));
 				}
 			}
