@@ -86,6 +86,7 @@ gui.immersiverailroading:label.pos_yaw_type=朝向类型
 gui.immersiverailroading:label.near=近端
 gui.immersiverailroading:label.far=远端
 gui.immersiverailroading:label.snap_pos=启用轨道吸附
+gui.immersiverailroading:label.snap_pos_offset=偏移
 gui.immersiverailroading:label.snap_height=吸附高度
 gui.immersiverailroading:label.snap_yaw=吸附水平朝向
 gui.immersiverailroading:label.snap_pitch=吸附坡度

@@ -25,12 +25,9 @@ import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
 public class TrackEndPointGui implements IScreen {
     private TileRailPreview te;
     private int targetGuiOpenType;
-    boolean unlockGuiTurnDegree;
+    private boolean unlockGuiTurnDegree;
     private final List<ItemStack> oreDict;
     private RailSettings.Mutable settings;
-
-//    private EndPointData.Mutable nearPointData;
-//    private EndPointData.Mutable farPointData;
 
     // Near/Far Label
     private Button nearLabel;
@@ -80,6 +77,16 @@ public class TrackEndPointGui implements IScreen {
     private CheckBox nearRollSnapCB;
     private CheckBox farRollSnapCB;
 
+    // Track Snapping Pos Offset
+    private Button nearSnapOffsetLabel;
+    private TextField nearSnapOffsetForwardInput;
+    private TextField nearSnapOffsetRightInput;
+    private TextField nearSnapOffsetUpInput;
+    private Button farSnapOffsetLabel;
+    private TextField farSnapOffsetForwardInput;
+    private TextField farSnapOffsetRightInput;
+    private TextField farSnapOffsetUpInput;
+
     private Button trackGuiButton;
 
     public TrackEndPointGui() {
@@ -97,8 +104,6 @@ public class TrackEndPointGui implements IScreen {
         ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
         targetGuiOpenType = data.guiOpenType;
         unlockGuiTurnDegree = data.unlockGuiTurnDegree;
-//        nearPointData = settings.nearPointData.mutable();
-//        farPointData = settings.farPointData.mutable();
 
         oreDict = new ArrayList<>();
         oreDict.add(ItemStack.EMPTY);
@@ -112,6 +117,18 @@ public class TrackEndPointGui implements IScreen {
         int left_xStart = -GUIHelpers.getScreenWidth() / 2;
         int right_xStart = GUIHelpers.getScreenWidth() / 2 - width + 30;
         int ytop = -GUIHelpers.getScreenHeight() / 4;
+
+        // TrackGui
+        trackGuiButton = new Button(screen, - width / 4, ytop, width / 2, height,
+                GuiText.TRACK_EXTRA_TO_MAIN.toString(), (_, _) -> {
+            targetGuiOpenType = 0;
+            onClose();
+            if (te != null) {
+                GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
+            } else {
+                GuiTypes.RAIL.open(MinecraftClient.getPlayer());
+            }
+        });
 
         // Near/Far Label
         nearLabel = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.LABEL_NEAR.toString(), (_, _) -> {});
@@ -317,21 +334,6 @@ public class TrackEndPointGui implements IScreen {
         // Bottom Page
         ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 7);
 
-        // TrackGui
-
-        trackGuiButton = new Button(screen, right_xStart + width / 2 - 30, ytop, width / 2, height,
-                GuiText.TRACK_EXTRA_TO_MAIN.toString(), (_, _) -> {
-            targetGuiOpenType = 0;
-            onClose();
-            if (te != null) {
-                GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
-            } else {
-                GuiTypes.RAIL.open(MinecraftClient.getPlayer());
-            }
-        });
-
-        ytop += height;
-
         // Pos Type
 
         nearPosTypeButton = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()), (hand, button) -> {
@@ -467,6 +469,164 @@ public class TrackEndPointGui implements IScreen {
             settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
         });
 
+        ytop += height;
+
+        // Snap Offset
+        nearSnapOffsetLabel = new Button(screen, left_xStart, ytop, 50, height, GuiText.LABEL_SNAP_POS_OFFSET.toString(), (hand, button) -> {
+            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = Vec3d.ZERO);
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+            nearSnapOffsetForwardInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().x);
+            nearSnapOffsetUpInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().y);
+            nearSnapOffsetRightInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().z);
+        });
+
+        nearSnapOffsetForwardInput = new TextField(screen, left_xStart + 50, ytop, 40, height);
+        nearSnapOffsetForwardInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().x);
+        nearSnapOffsetForwardInput.setValidator(s -> {
+            if (s == null || s.isEmpty()) {
+                return true;
+            }
+            float val;
+            try {
+                val = Float.parseFloat(s);
+            } catch (NumberFormatException e) {
+                return s.equals(".") || s.equals("-");
+            }
+            float max = 1f;
+            float min = -1f;
+            if (val >= min && val <= max) {
+                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(val, mutable.snapOffset.y, mutable.snapOffset.z));
+                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                return true;
+            }
+            return false;
+        });
+        nearSnapOffsetForwardInput.setFocused(true);
+
+        nearSnapOffsetUpInput = new TextField(screen, left_xStart + 50 + 40, ytop, 40, height);
+        nearSnapOffsetUpInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().y);
+        nearSnapOffsetUpInput.setValidator(s -> {
+            if (s == null || s.isEmpty()) {
+                return true;
+            }
+            float val;
+            try {
+                val = Float.parseFloat(s);
+            } catch (NumberFormatException e) {
+                return s.equals(".") || s.equals("-");
+            }
+            float max = 1f;
+            float min = -1f;
+            if (val >= min && val <= max) {
+                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, val, mutable.snapOffset.z));
+                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                return true;
+            }
+            return false;
+        });
+        nearSnapOffsetUpInput.setFocused(true);
+
+        nearSnapOffsetRightInput = new TextField(screen, left_xStart + 50 + 40 * 2, ytop, 40, height);
+        nearSnapOffsetRightInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().z);
+        nearSnapOffsetRightInput.setValidator(s -> {
+            if (s == null || s.isEmpty()) {
+                return true;
+            }
+            float val;
+            try {
+                val = Float.parseFloat(s);
+            } catch (NumberFormatException e) {
+                return s.equals(".") || s.equals("-");
+            }
+            float max = 1f;
+            float min = -1f;
+            if (val >= min && val <= max) {
+                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, mutable.snapOffset.y, val));
+                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                return true;
+            }
+            return false;
+        });
+        nearSnapOffsetRightInput.setFocused(true);
+
+        farSnapOffsetLabel = new Button(screen, right_xStart, ytop, 50, height, GuiText.LABEL_SNAP_POS_OFFSET.toString(), (hand, button) -> {
+            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = Vec3d.ZERO);
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+            farSnapOffsetForwardInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().x);
+            farSnapOffsetUpInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().y);
+            farSnapOffsetRightInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().z);
+        });
+
+        farSnapOffsetForwardInput = new TextField(screen, right_xStart + 50, ytop, 40, height);
+        farSnapOffsetForwardInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().x);
+        farSnapOffsetForwardInput.setValidator(s -> {
+            if (s == null || s.isEmpty()) {
+                return true;
+            }
+            float val;
+            try {
+                val = Float.parseFloat(s);
+            } catch (NumberFormatException e) {
+                return s.equals(".") || s.equals("-");
+            }
+            float max = 1f;
+            float min = -1f;
+            if (val >= min && val <= max) {
+                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(val, mutable.snapOffset.y, mutable.snapOffset.z));
+                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                return true;
+            }
+            return false;
+        });
+        farSnapOffsetForwardInput.setFocused(true);
+
+        farSnapOffsetUpInput = new TextField(screen, right_xStart + 50 + 40, ytop, 40, height);
+        farSnapOffsetUpInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().y);
+        farSnapOffsetUpInput.setValidator(s -> {
+            if (s == null || s.isEmpty()) {
+                return true;
+            }
+            float val;
+            try {
+                val = Float.parseFloat(s);
+            } catch (NumberFormatException e) {
+                return s.equals(".") || s.equals("-");
+            }
+            float max = 1f;
+            float min = -1f;
+            if (val >= min && val <= max) {
+                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, val, mutable.snapOffset.z));
+                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                return true;
+            }
+            return false;
+        });
+        farSnapOffsetUpInput.setFocused(true);
+
+        farSnapOffsetRightInput = new TextField(screen, right_xStart + 50 + 40 * 2, ytop, 40, height);
+        farSnapOffsetRightInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().z);
+        farSnapOffsetRightInput.setValidator(s -> {
+            if (s == null || s.isEmpty()) {
+                return true;
+            }
+            float val;
+            try {
+                val = Float.parseFloat(s);
+            } catch (NumberFormatException e) {
+                return s.equals(".") || s.equals("-");
+            }
+            float max = 1f;
+            float min = -1f;
+            if (val >= min && val <= max) {
+                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, mutable.snapOffset.y, val));
+                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                return true;
+            }
+            return false;
+        });
+        farSnapOffsetRightInput.setFocused(true);
+
+        // Other
         nearRadiusLabel.setEnabled(settings.type.isTransitionCurve());
         farRadiusLabel.setEnabled(settings.type.isTransitionCurve());
         nearRadiusInput.setEnabled(settings.type.isTransitionCurve());
@@ -545,6 +705,11 @@ public class TrackEndPointGui implements IScreen {
         nearYawSnapCB.setVisible(near);
         nearPitchSnapCB.setVisible(near);
         nearRollSnapCB.setVisible(near);
+
+        nearSnapOffsetLabel.setVisible(near);
+        nearSnapOffsetForwardInput.setVisible(near);
+        nearSnapOffsetRightInput.setVisible(near);
+        nearSnapOffsetUpInput.setVisible(near);
     }
 
     private void setFarSnapComponentsVisibility() {
@@ -553,6 +718,11 @@ public class TrackEndPointGui implements IScreen {
         farYawSnapCB.setVisible(far);
         farPitchSnapCB.setVisible(far);
         farRollSnapCB.setVisible(far);
+
+        farSnapOffsetLabel.setVisible(far);
+        farSnapOffsetForwardInput.setVisible(far);
+        farSnapOffsetRightInput.setVisible(far);
+        farSnapOffsetUpInput.setVisible(far);
     }
 
     @Override
