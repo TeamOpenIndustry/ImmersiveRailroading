@@ -32,7 +32,7 @@ public class NbtMigrators {
     }
 
     public static void migrateTrackType(TagCompound data) {
-        if (!data.hasKey("pickType")) {
+        if (!data.hasKey("pickType") && data.hasKey("type")) {
             TrackItems oldType = data.getEnum("type", TrackItems.class);
             data.setEnum("pickType", oldType);
         }
