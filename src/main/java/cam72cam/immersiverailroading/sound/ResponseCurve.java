@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class Curve {
+public class ResponseCurve {
     public final List<Point> points;
 
-    public Curve(DataBlock json) {
+    public ResponseCurve(DataBlock json) {
         this.points = new ArrayList<>();
         json.getBlocks("points").forEach(p -> points.add(new Point(p.getValue("x").asFloat(), p.getValue("y").asFloat())));
         points.sort(Comparator.comparing(p -> p.x));

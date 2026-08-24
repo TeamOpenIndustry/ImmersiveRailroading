@@ -13,7 +13,7 @@ import java.util.Map;
 public class ModifierChain {
     public final List<Modifier> modifiers;
 
-    public ModifierChain(DataBlock json, Map<String, Curve> curves) {
+    public ModifierChain(DataBlock json, Map<String, ResponseCurve> curves) {
         this.modifiers = new ArrayList<>();
 
         json.getBlocks("modifier").forEach(b -> {
@@ -23,7 +23,7 @@ public class ModifierChain {
             ControllerType controllerType = readout != null ? ControllerType.READOUT : ControllerType.CONTROL_GROUP;
             String controller = readout != null ? readout : b.getValue("control_group").asString();
 
-            Curve curve = curves.get(b.getValue("curve").asString());
+            ResponseCurve curve = curves.get(b.getValue("curve").asString());
 
             modifiers.add(new Modifier(type, controller, controllerType, curve));
         });
@@ -50,7 +50,7 @@ public class ModifierChain {
         }
     }
 
-    public record Modifier(ModifierType type, String controller, ControllerType controllerType, Curve curve) {
+    public record Modifier(ModifierType type, String controller, ControllerType controllerType, ResponseCurve curve) {
 
         public float get(EntityRollingStock stock) {
             float state = switch (controllerType) {

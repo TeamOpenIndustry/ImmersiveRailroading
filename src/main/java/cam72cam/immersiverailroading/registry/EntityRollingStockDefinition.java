@@ -617,10 +617,10 @@ public abstract class EntityRollingStockDefinition {
             soundFiles.put(name, soundFile);
         });
 
-        Map<String, Curve> curves = new HashMap<>();
+        Map<String, ResponseCurve> curves = new HashMap<>();
         if (data.getBlocks("curve") != null) {
             data.getBlocks("curve").forEach(c -> {
-                Curve curve = new Curve(c);
+                ResponseCurve curve = new ResponseCurve(c);
                 String name = c.getValue("name").asString();
                 curves.put(name, curve);
             });
