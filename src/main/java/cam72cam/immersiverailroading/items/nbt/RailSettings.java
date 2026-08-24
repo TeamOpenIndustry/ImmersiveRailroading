@@ -309,6 +309,7 @@ public class RailSettings {
                     d -> {
                         TagCompound railData = d.get(fieldName);
                         NbtMigrators.migrateTrackAlignment(railData);
+                        NbtMigrators.migrateTrackType(railData);
                         try {
                             return new Mutable(d.get(fieldName)).immutable();
                         } catch (SerializationException e) {

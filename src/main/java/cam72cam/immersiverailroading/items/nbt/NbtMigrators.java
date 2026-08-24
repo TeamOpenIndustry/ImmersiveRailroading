@@ -1,15 +1,12 @@
 package cam72cam.immersiverailroading.items.nbt;
 
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.mod.serialization.TagCompound;
 
 public class NbtMigrators {
     public static void migrateTrackAlignment(TagCompound data) {
         if (data.hasKey("pos_type")) {
-            if (!data.hasKey("pos_type")) {
-                return;
-            }
-
             TrackPositionType oldPosType = data.getEnum("pos_type", TrackPositionType.class);
 
             TagCompound nearEnd = data.get("nearPointData");
@@ -31,6 +28,13 @@ public class NbtMigrators {
             }
 
             data.remove("pos_type");
+        }
+    }
+
+    public static void migrateTrackType(TagCompound data) {
+        if (!data.hasKey("pickType") && data.hasKey("type")) {
+            TrackItems oldType = data.getEnum("type", TrackItems.class);
+            data.setEnum("pickType", oldType);
         }
     }
 }
