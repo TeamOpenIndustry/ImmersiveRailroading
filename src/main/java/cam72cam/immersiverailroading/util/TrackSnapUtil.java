@@ -2,10 +2,12 @@ package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackSmoothing;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
@@ -16,7 +18,7 @@ import cam72cam.mod.world.World;
 import java.util.*;
 
 public class TrackSnapUtil {
-    
+
     public static VecYPR getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
         RailSettings stackInfo = RailSettings.from(stack);
         EndPointData endPointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
@@ -65,6 +67,9 @@ public class TrackSnapUtil {
                                 && Math.abs(rail.getTrackGauges()[0] - stackInfo.gauge.value()) <= 1.0E-6) {
 
                             BuilderBase builder = rail.info.getBuilder(world);
+                            if(builder instanceof BuilderSwitch) {
+                                builder = rail.info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(world);
+                            }
                             List<VecYPR> renderData = builder.getRenderData();
 
                             if (!renderData.isEmpty()) {
