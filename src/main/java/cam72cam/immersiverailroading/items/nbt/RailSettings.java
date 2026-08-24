@@ -217,7 +217,6 @@ public class RailSettings {
             // Defaults
             gauge = Gauge.from(Gauge.STANDARD);
             type = TrackItems.STRAIGHT;
-            pickType = type;
             track = "default";
 
             nearPointData = new EndPointData(0);
@@ -242,6 +241,8 @@ public class RailSettings {
             transfertableEntrySpacing = 1;
 
             TagSerializer.deserialize(data, this);
+
+            pickType = type; // compat for existing tracks
         }
 
         public RailSettings immutable() {
