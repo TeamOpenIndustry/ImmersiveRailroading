@@ -24,6 +24,7 @@ public enum GuiText {
 	LABEL_NEAR("label.near"),
 	LABEL_FAR("label.far"),
 	LABEL_SNAP_POS("label.snap_pos"),
+	LABEL_SNAP_INVERTED("label.snap_inverted"),
 	LABEL_SNAP_POS_OFFSET("label.snap_pos_offset"),
 	LABEL_SNAP_HEIGHT("label.snap_height"),
 	LABEL_SNAP_YAW("label.snap_yaw"),

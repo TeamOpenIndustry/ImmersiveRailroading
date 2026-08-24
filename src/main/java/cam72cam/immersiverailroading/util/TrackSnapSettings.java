@@ -12,9 +12,10 @@ public record TrackSnapSettings(
         boolean snapYaw,
         boolean snapPitch,
         boolean snapRoll,
+        boolean inverted,
         Vec3d snapOffset){
     public TrackSnapSettings() {
-        this(true, true, true, false, false, Vec3d.ZERO);
+        this(true, true, true, false, false, false, Vec3d.ZERO);
     }
 
     public static class Mutable {
@@ -28,6 +29,8 @@ public record TrackSnapSettings(
         public boolean snapPitch;
         @TagField("snapRoll")
         public boolean snapRoll;
+        @TagField("inverted")
+        public boolean inverted;
         @TagField("snapOffset")
         public Vec3d snapOffset;
 
@@ -37,6 +40,7 @@ public record TrackSnapSettings(
             this.snapYaw = type.snapYaw();
             this.snapPitch = type.snapPitch();
             this.snapRoll = type.snapRoll();
+            this.inverted = type.inverted();
             this.snapOffset = type.snapOffset();
         }
 
@@ -48,6 +52,7 @@ public record TrackSnapSettings(
             this.snapYaw = type.snapYaw();
             this.snapPitch = type.snapPitch();
             this.snapRoll = type.snapRoll();
+            this.inverted = type.inverted();
             this.snapOffset = type.snapOffset();
 
             TagSerializer.deserialize(data, this);
@@ -60,6 +65,7 @@ public record TrackSnapSettings(
                     snapYaw,
                     snapPitch,
                     snapRoll,
+                    inverted,
                     snapOffset
             );
         }

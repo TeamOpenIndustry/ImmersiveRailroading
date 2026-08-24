@@ -174,6 +174,7 @@ public class TrackSnapUtil {
             snapped = TrackSnapUtil.getNeighborNode(player, world, pos, hit, stack, isNear);
             if (snapped != null) {
                 succeeded = true;
+
                 Vec3d snapOffset = pointData.trackSnapSettings().snapOffset();
                 if(snapOffset != Vec3d.ZERO) { // Though using Vec3d, xyz are still controlled separately lol
                     VecYPR wrongYawSnapped = new VecYPR(snapped, VecUtil.toWrongYaw(snapped.getYaw()), snapped.getPitch(), snapped.getRoll());
@@ -181,6 +182,10 @@ public class TrackSnapUtil {
                     Vec3d right = wrongYawSnapped.toMatrix3().right().normalize().scale(-snapOffset.z);
                     Vec3d up = wrongYawSnapped.toMatrix3().up().normalize().scale(snapOffset.y);
                     snapped = snapped.add(forward).add(right).add(up);
+                }
+
+                if(pointData.trackSnapSettings().inverted()) {
+                    snapped = new VecYPR(snapped, (snapped.getYaw() + 180) % 360, -snapped.getPitch(), -snapped.getRoll());
                 }
 
                 if(Math.abs(Math.round(snapped.y) - snapped.y) < 1e-4) {

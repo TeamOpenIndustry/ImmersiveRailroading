@@ -68,6 +68,8 @@ public class TrackEndPointGui implements IScreen {
     // Track Snapping
     private CheckBox nearPosSnapCB;
     private CheckBox farPosSnapCB;
+    private CheckBox nearInvertSnapCB;
+    private CheckBox farInvertSnapCB;
     private CheckBox nearHeightSnapCB;
     private CheckBox farHeightSnapCB;
     private CheckBox nearYawSnapCB;
@@ -423,6 +425,18 @@ public class TrackEndPointGui implements IScreen {
             setFarSnapComponentsVisibility();
         });
 
+        nearInvertSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_INVERTED.toString(), settings.nearPointData.trackSnapSettings().inverted(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.inverted = self.isChecked());
+            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+            setNearSnapComponentsVisibility();
+        });
+
+        farInvertSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_INVERTED.toString(), settings.farPointData.trackSnapSettings().inverted(), (hand, self) -> {
+            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.inverted = self.isChecked());
+            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+            setFarSnapComponentsVisibility();
+        });
+
         ytop += height;
 
         nearHeightSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.nearPointData.trackSnapSettings().snapHeight(), (hand, self) -> {
@@ -705,6 +719,7 @@ public class TrackEndPointGui implements IScreen {
         nearYawSnapCB.setVisible(near);
         nearPitchSnapCB.setVisible(near);
         nearRollSnapCB.setVisible(near);
+        nearInvertSnapCB.setVisible(near);
 
         nearSnapOffsetLabel.setVisible(near);
         nearSnapOffsetForwardInput.setVisible(near);
@@ -718,6 +733,7 @@ public class TrackEndPointGui implements IScreen {
         farYawSnapCB.setVisible(far);
         farPitchSnapCB.setVisible(far);
         farRollSnapCB.setVisible(far);
+        farInvertSnapCB.setVisible(far);
 
         farSnapOffsetLabel.setVisible(far);
         farSnapOffsetForwardInput.setVisible(far);
