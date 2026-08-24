@@ -521,14 +521,12 @@ public abstract class EntityRollingStockDefinition {
         snowLayers = properties.getValue("snow_layers").asInteger();
 
         DataBlock sounds = data.getBlock("sounds");
-        // New
+
         Identifier file = sounds.getValue("file").asIdentifier();
         if (file != null) {
             loadSounds(file);
         }
 
-        // Legacy
-        // TODO make optional
         wheel_sound = sounds.getValue("wheels").asIdentifier();
         clackFront = clackRear = sounds.getValue("clack").asIdentifier();
         clackFront = sounds.getValue("clack_front").asIdentifier(clackFront);
@@ -609,17 +607,8 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
-    // TODO maybe move?
     public void loadSounds(Identifier file) throws IOException {
-        DataBlock data;
-        InputStream fileStream = file.getResourceStream();
-        if (file.getPath().endsWith(".caml")) {
-            data = CAML.parse(fileStream);
-        } else {
-            data = JSON.parse(fileStream);
-        }
-
-        data = transformData(data);
+        DataBlock data = withImports(DataBlock.load(file));
 
         Map<String, SoundFile> soundFiles = new HashMap<>();
         data.getBlocks("sounds").forEach(s -> {
