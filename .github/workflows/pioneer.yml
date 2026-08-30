@@ -1,0 +1,41 @@
+name: Immersive Railroading Build Pipeline
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch: [
+          1.21.4-neoforge
+        ]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+      - name: keyscan
+        run: mkdir -p ~/.ssh/ && ssh-keyscan -t rsa teamopenindustry.cc >> ~/.ssh/known_hosts
+      - name: Install deps
+        run: sudo apt install -y pngquant findutils xvfb
+      - name: Setup Universal Mod Core (and helpers)
+        env:
+          BRANCH: ${{ matrix.branch }}
+        run: java -jar UMCSetup.jar ${BRANCH} https
+      - name: Gradle compile
+        run: ./gradlew classes
+      - name: Process images
+        run: find src/main/resources/assets/immersiverailroading/ | grep png | xargs -I foo pngquant -s1 -f --ext .png foo
+      - name: Gradle build
+        run: ./gradlew build
+      - name: Gradle publish
+        env:
+          MAVENCI_PASS: ${{ secrets.MAVENCI_PASS }}
+        run: ./gradlew publish
+      - uses: actions/upload-artifact@v6
+        with:
+          name: Immersive Railroading ${{matrix.branch}}
+          path: build/libs/ImmersiveRailroading-${{matrix.branch}}-*
