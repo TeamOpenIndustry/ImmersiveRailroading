@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.gui.components.ListSelector;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.ItemTrackExchanger;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.*;
@@ -144,6 +145,15 @@ public class TrackExchangerGui implements IScreen {
 	@Override
 	public void onClose() {
 		new ItemTrackExchangerUpdatePacket(this.track, this.railBed, this.gauge).sendToServer();
+
+		//Also update client Item or dsync will probably happen
+		ItemStack stack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
+		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
+		data.track = track;
+		data.railBed = railBed;
+		data.gauge = gauge;
+		data.write();
+		MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, stack);
 	}
 
 	@Override
