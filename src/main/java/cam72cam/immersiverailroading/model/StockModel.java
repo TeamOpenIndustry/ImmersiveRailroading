@@ -15,6 +15,7 @@ import cam72cam.immersiverailroading.model.part.*;
 import cam72cam.immersiverailroading.model.part.TrackFollower.TrackFollowers;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
+import cam72cam.immersiverailroading.sound.StockSound;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.model.common.ModelLoader;
 import cam72cam.mod.model.common.mesh.Model;
@@ -67,6 +68,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     private final PartSound slidingSound;
     private final FlangeSound flangeSound;
     private final SwaySimulator sway;
+
+    private List<StockSound> customSounds = new ArrayList<>();
 
     public StockModel(DEFINITION def) throws Exception {
         this.model = ModelLoader.load(def.modelLoc, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds,
@@ -159,6 +162,10 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         slidingSound = new PartSound(new SoundDefinition(def.sliding_sound), true, 40, ConfigSound.SoundCategories.RollingStock::sliding);
         flangeSound = new FlangeSound(def.flange_sound, true, 40);
         sway = new SwaySimulator();
+
+        if (def.customSounds != null) {
+            this.customSounds = def.customSounds;
+        }
     }
 
     public ModelState addEffectRoll(ModelState state) {
@@ -269,6 +276,9 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         slidingSound.effects(stock, stock.sliding ? Math.min(1, adjust*4) : 0);
         flangeSound.effects(stock);
         sway.effects(stock);
+
+        // TODO how to handle stock that is off??
+        customSounds.forEach(s -> s.play(stock));
     }
 
     public final void onClientRemoved(EntityMoveableRollingStock stock) {
@@ -286,6 +296,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         slidingSound.removed(stock);
         flangeSound.removed(stock);
         sway.removed(stock);
+
+        customSounds.forEach(s -> s.removed(stock));
     }
 
     private int lod_level = LOD_LARGE;

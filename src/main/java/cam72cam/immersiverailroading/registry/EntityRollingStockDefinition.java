@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.CouplerType;
+import cam72cam.immersiverailroading.sound.*;
 import cam72cam.immersiverailroading.util.floor.NavMesh;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.util.*;
@@ -108,6 +109,8 @@ public abstract class EntityRollingStockDefinition {
     public List<AnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
     public Map<String, DataBlock> widgetConfig;
+
+    public List<StockSound> customSounds;
 
     public NavMesh navMesh;
 
@@ -521,6 +524,12 @@ public abstract class EntityRollingStockDefinition {
         snowLayers = properties.getValue("snow_layers").asInteger();
 
         DataBlock sounds = data.getBlock("sounds");
+
+        Identifier file = sounds.getValue("file").asIdentifier();
+        if (file != null) {
+            loadSounds(file);
+        }
+
         wheel_sound = sounds.getValue("wheels").asIdentifier();
         clackFront = clackRear = sounds.getValue("clack").asIdentifier();
         clackFront = sounds.getValue("clack_front").asIdentifier(clackFront);
@@ -598,6 +607,55 @@ public abstract class EntityRollingStockDefinition {
         DataBlock widgets = data.getBlock("widgets");
         if (widgets != null) {
             widgetConfig = widgets.getBlockMap();
+        }
+    }
+
+    public void loadSounds(Identifier file) throws IOException {
+        DataBlock data = withImports(DataBlock.load(file));
+
+        Map<String, SoundFile> soundFiles = new HashMap<>();
+        data.getBlocks("sounds").forEach(s -> {
+            SoundFile soundFile = new SoundFile(s);
+            String name = s.getValue("name").asString();
+            soundFiles.put(name, soundFile);
+        });
+
+        Map<String, ResponseCurve> curves = new HashMap<>();
+        if (data.getBlocks("curve") != null) {
+            data.getBlocks("curve").forEach(c -> {
+                ResponseCurve curve = new ResponseCurve(c);
+                String name = c.getValue("name").asString();
+                curves.put(name, curve);
+            });
+        }
+
+        Map<String, ModifierChain> modifierChains = new HashMap<>();
+        if (data.getBlocks("modifier_chain") != null) {
+            data.getBlocks("modifier_chain").forEach(m -> {
+                ModifierChain modifierChain = new ModifierChain(m, curves);
+                String name = m.getValue("name").asString();
+                modifierChains.put(name, modifierChain);
+            });
+        }
+
+        customSounds = new ArrayList<>();
+        if (data.getBlocks("loop") != null) {
+            data.getBlocks("loop").forEach(l -> {
+                SoundFile soundFile = soundFiles.get(l.getValue("sound").asString());
+                ModifierChain modifierChain = modifierChains.get(l.getValue("modifier_chain").asString());
+
+                StockSound def = new LoopedSound(l, soundFile, modifierChain);
+                customSounds.add(def);
+            });
+        }
+
+        if (data.getBlocks("oneshot") != null) {
+            data.getBlocks("oneshot").forEach(o -> {
+                SoundFile soundFile = soundFiles.get(o.getValue("sound").asString());
+
+                StockSound def = new OneShotSounds(o, soundFile);
+                customSounds.add(def);
+            });
         }
     }
 
