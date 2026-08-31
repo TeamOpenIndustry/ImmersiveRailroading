@@ -213,6 +213,7 @@ public class CubicCurve {
     }
 
     public static boolean isCubicParabolaInputValid(double startRadius, double endRadius, double angleDeg) {
+        if(startRadius == endRadius) return true;
         if(Math.abs(startRadius) < 1e-6 && Math.abs(endRadius) < 1e-6) return false;
         if(Math.abs(startRadius) < 1e-6 && endRadius > 0.5) return CubicCurve.isCubicParabolaValid(angleDeg);
         if(startRadius > 0.5 && Math.abs(endRadius) < 1e-6) return CubicCurve.isCubicParabolaValid(angleDeg);
