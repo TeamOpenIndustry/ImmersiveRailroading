@@ -641,10 +641,6 @@ public class TrackEndPointGui implements IScreen {
         farSnapOffsetRightInput.setFocused(true);
 
         // Other
-        nearRadiusLabel.setEnabled(settings.type.isTransitionCurve());
-        farRadiusLabel.setEnabled(settings.type.isTransitionCurve());
-        nearRadiusInput.setEnabled(settings.type.isTransitionCurve());
-        farRadiusInput.setEnabled(settings.type.isTransitionCurve());
 
         nearPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
         farPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
