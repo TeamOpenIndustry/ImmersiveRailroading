@@ -57,9 +57,9 @@ public class OneShotSounds implements StockSound {
     public void play(EntityMoveableRollingStock stock) {
         if (emitterPos == null) {
             if (emitter != null) {
-                StockModel<?, ?> model = stock.getDefinition().getModel();
-                Optional<String> name = model.groups().stream().filter(f -> f.contains(emitter)).findFirst();
-                name.ifPresent(n -> emitterPos = model.centerOfGroups(Collections.singletonList(n)));
+                StockModel<?, ?> stockModel = stock.getDefinition().getModel();
+                Optional<String> name = stockModel.model.groups().stream().filter(f -> f.contains(emitter)).findFirst();
+                name.ifPresent(n -> emitterPos = stockModel.model.centerOfGroups(Collections.singletonList(n)));
             } else {
                 emitterPos = new Vec3d(0, 0, 0);
             }
