@@ -1,4 +1,4 @@
-name: Immersive Railroading Build Pipeline
+name: Immersive Railroading Pioneer Build Pipeline
 
 on: [workflow_dispatch]
 
