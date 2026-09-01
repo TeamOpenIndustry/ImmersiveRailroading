@@ -130,12 +130,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
                     crossingHeight = Math.min(crossingHeight, clamp);
                 }
 
-                double relHeight = faceSample % 1;
-                if(faceSample == 1) relHeight = 1;// seems we don't need to handle error?
-
-                if (faceSample < 0) {
-                    relHeight += 1;
-                }
+                double relHeight = faceSample - Math.floor(faceSample);
 
                 if(rollEffectTile) { // bedHeight will be the same as railHeight in this case
                     int offsetInt;
@@ -208,7 +203,6 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			}
 			Vec3d avgTopPosition = topPositionSum.scale(1d / positionCount);
 
-			// put
 			if(avgTopNormal.y < 0) averageBedHeight = -averageBedHeight;
 			bedHeights.put(gapPos, averageBedHeight);
 			railHeights.put(gapPos, averageBedHeight);
