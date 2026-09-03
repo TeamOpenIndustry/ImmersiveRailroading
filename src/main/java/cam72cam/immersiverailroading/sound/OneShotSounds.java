@@ -175,6 +175,8 @@ public class OneShotSounds implements StockSound {
             sound.stop();
         }
         entitySounds.remove(stock.getUUID());
+        oldVals.remove(stock.getUUID());
+        lastPlayed.remove(stock.getUUID());
     }
 
     private enum TriggerCondition {

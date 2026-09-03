@@ -186,6 +186,7 @@ public class LoopedSound implements StockSound {
             sound.stop();
         }
         entitySounds.remove(stock.getUUID());
+        oldVals.remove(stock.getUUID());
     }
 
     private enum LoopCondition {
