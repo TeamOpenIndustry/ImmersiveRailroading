@@ -30,13 +30,19 @@ public class PlacementInfo {
 	public static int segmentation() {
 		return MathUtil.clamp(Config.ConfigBalance.AnglePlacementSegmentation, 1, 90);
 	}
+	
+	public PlacementInfo(ItemStack stack, float yawHead, Vec3d hit, boolean isNear, boolean overrideYaw) {
 
-	public static float getYaw(float yawHead, float posYaw, TrackYawAlignmentType posYawType, boolean overrideYaw) {
-		float yaw;
+		RailSettings settings = RailSettings.from(stack);
+		TrackPositionType posType = isNear ? settings.nearPointData.posType() : settings.farPointData.posType();
+		TrackYawAlignmentType posYawType = isNear ? settings.nearPointData.posYawType() : settings.farPointData.posYawType();
+		float posYaw = isNear ? settings.nearPointData.posYaw() : settings.farPointData.posYaw();
+
+		yawHead = ((- yawHead % 360) + 360) % 360;
 		if(overrideYaw) {
-			yaw = yawHead;
+			this.yaw = yawHead;
 		} else if(posYawType == TrackYawAlignmentType.ANGLE_SEGMENTATION) {
-			yaw = ((int)((yawHead + 90 / (segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
+			this.yaw = ((int)((yawHead + 90 / (segmentation() * 2f)) * segmentation())) / 90 * 90 / (segmentation() * 1f);
 		} else {
 			float base = posYaw;
 			float base2 = 90 - base;
@@ -49,21 +55,8 @@ public class PlacementInfo {
 			float cand2 = ((base2 + 90 * Math.round(diff2 / 90)) % 360 + 360) % 360;
 			float dist2 = Math.min(Math.abs(cand2 - yawHead), 360 - Math.abs(cand2 - yawHead));
 
-			yaw = (dist1 <= dist2) ? cand1 : cand2;
+			this.yaw = (dist1 <= dist2) ? cand1 : cand2;
 		}
-		return yaw;
-	}
-	
-	public PlacementInfo(ItemStack stack, float yawHead, Vec3d hit, boolean isNear, boolean overrideYaw) {
-
-		RailSettings settings = RailSettings.from(stack);
-		TrackPositionType posType = isNear ? settings.nearPointData.posType() : settings.farPointData.posType();
-		TrackYawAlignmentType posYawType = isNear ? settings.nearPointData.posYawType() : settings.farPointData.posYawType();
-		float posYaw = isNear ? settings.nearPointData.posYaw() : settings.farPointData.posYaw();
-
-		yawHead = ((- yawHead % 360) + 360) % 360;
-
-		this.yaw = getYaw(yawHead, posYaw, posYawType, overrideYaw);
 
 		TrackDirection direction = settings.direction;
 		if (direction == TrackDirection.NONE) {

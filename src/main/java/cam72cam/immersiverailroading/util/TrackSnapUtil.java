@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackSmoothing;
-import cam72cam.immersiverailroading.library.TrackYawAlignmentType;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase;
@@ -204,8 +203,6 @@ public class TrackSnapUtil {
 
                 if (pointData.trackSnapSettings().snapYaw()) {
                     yaw = snapped.getYaw();
-                } else {
-                    yaw = PlacementInfo.getYaw(yaw, pointData.posYaw(), pointData.posYawType(), false);
                 }
 
                 if (pointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
