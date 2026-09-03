@@ -104,4 +104,9 @@ public class VecYPR extends Vec3d {
         result.children.addAll(this.children);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Pos:(%s, %s, %s), YPR:(%s, %s, %s)", this.x, this.y, this.z, this.yaw, this.pitch, this.roll);
+    }
 }
