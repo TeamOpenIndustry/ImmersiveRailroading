@@ -1,6 +1,5 @@
 package cam72cam.immersiverailroading.tile;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -8,6 +7,7 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.track.IIterableTrack;
+import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.BlockEntityTickable;
@@ -22,7 +22,6 @@ import cam72cam.mod.util.Facing;
 public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
 	private RailInfo info;
-	private boolean shouldBreakDirect = true;
 
 	@TagField
 	private ItemStack item;
@@ -170,19 +169,8 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	private void offsetPosition() {
-		RailSettings settings = RailSettings.from(item);
-		PlacementInfo placementInfoOffset = placementInfo.offset(settings.nearPointData.offset());
-		PlacementInfo customInfoOffset = customInfo == null ? null : customInfo.offset(settings.farPointData.offset());
-
-		// Found edge case: when placementInfo.placementPosition.y == -1, offset + bedThickness is 1, track is not flat,
-		// built tracks will be broken, so we change isAboveRails here. TODO: do we have a better way to avoid unexpected breaking?
-		if (Math.abs(settings.nearPointData.offset().y + settings.trackFaceTransSetting.bedThickness() - 1) < 1e-4 &&
-				((customInfoOffset != null && customInfoOffset.placementPosition.y != placementInfoOffset.placementPosition.y) ||
-						(customInfoOffset == null && settings.type == TrackItems.SLOPE))) {
-			shouldBreakDirect = false;
-		} else {
-			shouldBreakDirect = true;
-		}
+		PlacementInfo placementInfoOffset = placementInfo.offset(RailSettings.from(item).nearPointData.offset());
+		PlacementInfo customInfoOffset = customInfo == null ? null : customInfo.offset(RailSettings.from(item).farPointData.offset());
 
 		info = new RailInfo(item, placementInfoOffset, customInfoOffset);
 	}
@@ -211,7 +199,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		if (entityPlayer != null && entityPlayer.isCrouching()) {
 			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
-				return isAboveRails() && shouldBreakDirect && Config.ConfigDebug.breakTilePreview;
+				return isAboveRails();
 			}
 			return false;
 		}

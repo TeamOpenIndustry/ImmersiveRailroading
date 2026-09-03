@@ -103,7 +103,7 @@ public class RailRender {
 		RenderState railRenderState = state.clone();
 		Vec3d off = info.placementInfo.placementPosition;
 		if(originPlacementPos != null) {
-			railRenderState.translate(0, -originPlacementPos.y, 0);//TODO: is this enough? current rail is right but renderOverlay is not
+			railRenderState.translate(0, -originPlacementPos.y, 0);//TODO: is this enough?
 		}
 
 		MinecraftClient.startProfiler("rail");

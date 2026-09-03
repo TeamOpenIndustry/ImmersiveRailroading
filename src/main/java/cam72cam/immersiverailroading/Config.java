@@ -268,9 +268,6 @@ public class Config {
 		@Comment("Keep rolling stock loaded even when it is not moving")
 		public static boolean keepStockLoaded = true;
 
-		@Comment("Break blueprint preview block after building it")
-		public static boolean breakTilePreview = true;
-
 		@Comment("Exclude unattached wagons from chunk loading when keepStockLoaded is true")
 		public static boolean excludeStandaloneWagons = false;
 
