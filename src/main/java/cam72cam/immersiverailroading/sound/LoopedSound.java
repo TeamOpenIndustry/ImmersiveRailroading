@@ -33,7 +33,7 @@ public class LoopedSound implements StockSound {
 
     private Vec3d emitterPos;
 
-    private float oldVal = -1;
+    private final Map<UUID, Float> oldVals = new HashMap<>();
 
     private final Random random = new Random();
 
@@ -71,6 +71,13 @@ public class LoopedSound implements StockSound {
             }
         }
 
+        float newVal = switch (controllerType) {
+            case READOUT -> Readouts.valueOf(controller.toUpperCase()).getValue(stock);
+            case CONTROL_GROUP -> stock.getControlPosition(controller);
+        };
+
+        float oldVal = oldVals.getOrDefault(stock.getUUID(), newVal);
+
 
         Map<ISound, Float> sounds = entitySounds.get(stock.getUUID());
         if (sounds == null) {
@@ -107,11 +114,6 @@ public class LoopedSound implements StockSound {
             }
         }
 
-        float newVal = switch (controllerType) {
-            case READOUT -> Readouts.valueOf(controller.toUpperCase()).getValue(stock);
-            case CONTROL_GROUP -> stock.getControlPosition(controller);
-        };
-
         Vec3d soundPosition = stock.getModelMatrix().apply(emitterPos);
 
         boolean isAnyPlaying = false;
@@ -128,7 +130,7 @@ public class LoopedSound implements StockSound {
         }
 
         if (condition.check(oldVal, newVal, rangeStart, rangeEnd)) {
-            oldVal = newVal;
+            oldVals.put(stock.getUUID(), newVal);
 
             ModCore.info("Playing Sound at %s. Player position: %s", soundPosition, player.getPosition());
 
@@ -162,7 +164,7 @@ public class LoopedSound implements StockSound {
                 toBePlayed.play(soundPosition);
             }
         } else {
-            oldVal = newVal;
+            oldVals.put(stock.getUUID(), newVal);
 
             for (ISound sound : sounds.keySet()) {
                 if (sound.isPlaying()) {
@@ -184,6 +186,7 @@ public class LoopedSound implements StockSound {
             sound.stop();
         }
         entitySounds.remove(stock.getUUID());
+        oldVals.remove(stock.getUUID());
     }
 
     private enum LoopCondition {

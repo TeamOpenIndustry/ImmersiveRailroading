@@ -31,8 +31,8 @@ public class OneShotSounds implements StockSound {
 
     private Vec3d emitterPos;
 
-    private float oldVal = -1;
-    private long lastPlayed = -1;
+    private final Map<UUID, Float> oldVals = new HashMap<>();
+    private final Map<UUID, Long> lastPlayed = new HashMap<>();
 
     private final Random random = new Random();
 
@@ -64,6 +64,14 @@ public class OneShotSounds implements StockSound {
                 emitterPos = new Vec3d(0, 0, 0);
             }
         }
+
+        float newVal = switch (controllerType) {
+            case READOUT -> Readouts.valueOf(controller.toUpperCase()).getValue(stock);
+            case CONTROL_GROUP -> stock.getControlPosition(controller);
+        };
+
+        float oldVal = oldVals.getOrDefault(stock.getUUID(), newVal);
+        long lastPlayedMS = this.lastPlayed.getOrDefault(stock.getUUID(), -1L);
 
 
         Map<ISound, Float> sounds = entitySounds.get(stock.getUUID());
@@ -112,17 +120,11 @@ public class OneShotSounds implements StockSound {
             }
         }
 
-        float newVal = switch (controllerType) {
-            case READOUT -> Readouts.valueOf(controller.toUpperCase()).getValue(stock);
-            case CONTROL_GROUP -> stock.getControlPosition(controller);
-        };
-
         if (condition.check(trigger, oldVal, newVal)) {
-            oldVal = newVal;
-
+            oldVals.put(stock.getUUID(), newVal);
             long now = System.nanoTime();
-            float deltaSeconds = (now - lastPlayed) / 1_000_000_000f;
-            if (lastPlayed != -1 && deltaSeconds <= timer) {
+            float deltaSeconds = (now - lastPlayedMS) / 1_000_000_000f;
+            if (lastPlayedMS != -1 && deltaSeconds <= timer) {
                 return;
             }
 
@@ -154,10 +156,10 @@ public class OneShotSounds implements StockSound {
 
             if (!isAnyPlaying) {
                 toBePlayed.play(soundPosition);
-                lastPlayed = System.nanoTime();
+                this.lastPlayed.put(stock.getUUID(), System.nanoTime());
             }
         } else {
-            oldVal = newVal;
+            oldVals.put(stock.getUUID(), newVal);
         }
     }
 
@@ -173,6 +175,8 @@ public class OneShotSounds implements StockSound {
             sound.stop();
         }
         entitySounds.remove(stock.getUUID());
+        oldVals.remove(stock.getUUID());
+        lastPlayed.remove(stock.getUUID());
     }
 
     private enum TriggerCondition {
