@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackSmoothing;
+import cam72cam.immersiverailroading.library.TrackYawAlignmentType;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase;
@@ -180,11 +181,6 @@ public class TrackSnapUtil {
             if (snapped != null) {
                 succeeded = true;
 
-                double EPS = 1e-3;
-                if (Math.abs(Math.round(snapped.y) - snapped.y) < EPS) { // we don't want to see something like 0.99985
-                    snapped = new VecYPR(snapped.x, Math.round(snapped.y), snapped.z, snapped.getYaw(), snapped.getPitch(), snapped.getRoll());
-                }
-
                 Vec3d snapOffset = pointData.trackSnapSettings().snapOffset();
                 if(snapOffset != Vec3d.ZERO) { // Though using Vec3d, xyz are still controlled separately lol
                     VecYPR wrongYawSnapped = new VecYPR(snapped, VecUtil.toWrongYaw(snapped.getYaw()), snapped.getPitch(), snapped.getRoll());
@@ -198,8 +194,9 @@ public class TrackSnapUtil {
                     snapped = new VecYPR(snapped, (snapped.getYaw() + 180) % 360, -snapped.getPitch(), -snapped.getRoll());
                 }
 
-                if(Math.abs(Math.round(snapped.y) - snapped.y) < 1e-4) {
-                    snapped = snapped.add(new Vec3d(0, -snapped.y + Math.round(snapped.y), 0));
+                double EPS = 1e-3;
+                if (Math.abs(Math.round(snapped.y) - snapped.y) < EPS) { // we don't want to see something like 0.99985
+                    snapped = new VecYPR(snapped.x, Math.round(snapped.y), snapped.z, snapped.getYaw(), snapped.getPitch(), snapped.getRoll());
                 }
 
                 pos = new Vec3i(snapped.x, snapped.y, snapped.z);
@@ -207,6 +204,8 @@ public class TrackSnapUtil {
 
                 if (pointData.trackSnapSettings().snapYaw()) {
                     yaw = snapped.getYaw();
+                } else {
+                    yaw = PlacementInfo.getYaw(yaw, pointData.posYaw(), pointData.posYawType(), false);
                 }
 
                 if (pointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {

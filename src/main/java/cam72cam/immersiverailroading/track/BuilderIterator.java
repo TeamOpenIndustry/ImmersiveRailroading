@@ -131,6 +131,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
                 }
 
                 double relHeight = faceSample - Math.floor(faceSample);
+				if(faceSample == 1) relHeight = 1; // edge case
 
                 if(rollEffectTile) { // bedHeight will be the same as railHeight in this case
                     int offsetInt;
