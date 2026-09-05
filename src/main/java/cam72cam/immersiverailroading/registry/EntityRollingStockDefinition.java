@@ -106,6 +106,9 @@ public abstract class EntityRollingStockDefinition {
     public double rollingResistanceCoefficient;
     public double directFrictionCoefficient;
 
+    public Identifier script;
+    public List<String> addScripts;
+
     public List<AnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
     public Map<String, DataBlock> widgetConfig;
@@ -440,6 +443,14 @@ public abstract class EntityRollingStockDefinition {
         DataBlock tex_variants = data.getBlock("tex_variants");
         if (tex_variants != null) {
             tex_variants.getValueMap().forEach((key, value) -> textureNames.put(value.asString(), key));
+        }
+
+        script = data.getValue("script").asIdentifier();
+
+        addScripts = new ArrayList<>();
+        List<DataBlock.Value> scripts = data.getValues("add_scripts");
+        if (scripts != null) {
+            scripts.forEach(s -> addScripts.add(s.asString()));
         }
 
         try {

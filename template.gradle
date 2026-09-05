@@ -20,7 +20,15 @@ base.archivesName = archive_base_name
 
 //DEPENDENCIES//
 
+dependencies {
+    umcShade files('libs/luaj-jse-3.0.2.jar')
+}
+
 apply from: 'ImmersiveRailroadingIntegration/dependencies.gradle'
+
+shadowJar {
+    relocate 'org.luaj', "${project.group}.shade.org.luaj"
+}
 
 //JAR//
 
