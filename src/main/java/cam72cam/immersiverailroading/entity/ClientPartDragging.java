@@ -14,7 +14,6 @@ import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.input.Mouse;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.net.Packet;
-import cam72cam.mod.net.PacketDirection;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.world.World;
 

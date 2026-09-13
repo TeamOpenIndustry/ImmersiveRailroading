@@ -1,10 +1,14 @@
 package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackSmoothing;
+import cam72cam.immersiverailroading.library.TrackYawAlignmentType;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase;
+import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
@@ -15,6 +19,7 @@ import cam72cam.mod.world.World;
 import java.util.*;
 
 public class TrackSnapUtil {
+
     public static VecYPR getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
         RailSettings stackInfo = RailSettings.from(stack);
         EndPointData endPointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
@@ -63,6 +68,9 @@ public class TrackSnapUtil {
                                 && Math.abs(rail.getTrackGauges()[0] - stackInfo.gauge.value()) <= 1.0E-6) {
 
                             BuilderBase builder = rail.info.getBuilder(world);
+                            if(builder instanceof BuilderSwitch) {
+                                builder = rail.info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(world);
+                            }
                             List<VecYPR> renderData = builder.getRenderData();
 
                             if (!renderData.isEmpty()) {
@@ -160,7 +168,7 @@ public class TrackSnapUtil {
 
     //TODO: keep stack info so that we wont lost it after applying snapping
 
-    public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
+    public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear, boolean isPreview) {
         RailSettings stackInfo = RailSettings.from(stack);
         boolean succeeded = false;
         float yaw = player.getRotationYawHead();
@@ -173,8 +181,22 @@ public class TrackSnapUtil {
             if (snapped != null) {
                 succeeded = true;
 
-                if(Math.abs(Math.round(snapped.y) - snapped.y) < 1e-4) {
-                    snapped = snapped.add(new Vec3d(0, -snapped.y + Math.round(snapped.y), 0));
+                Vec3d snapOffset = pointData.trackSnapSettings().snapOffset();
+                if(snapOffset != Vec3d.ZERO) { // Though using Vec3d, xyz are still controlled separately lol
+                    VecYPR wrongYawSnapped = new VecYPR(snapped, VecUtil.toWrongYaw(snapped.getYaw()), snapped.getPitch(), snapped.getRoll());
+                    Vec3d forward = wrongYawSnapped.toMatrix3().forward().normalize().scale(snapOffset.x);
+                    Vec3d right = wrongYawSnapped.toMatrix3().right().normalize().scale(-snapOffset.z);
+                    Vec3d up = wrongYawSnapped.toMatrix3().up().normalize().scale(snapOffset.y);
+                    snapped = snapped.add(forward).add(right).add(up);
+                }
+
+                if(pointData.trackSnapSettings().inverted()) {
+                    snapped = new VecYPR(snapped, (snapped.getYaw() + 180) % 360, -snapped.getPitch(), -snapped.getRoll());
+                }
+
+                double EPS = 1e-3;
+                if (Math.abs(Math.round(snapped.y) - snapped.y) < EPS) { // we don't want to see something like 0.99985
+                    snapped = new VecYPR(snapped.x, Math.round(snapped.y), snapped.z, snapped.getYaw(), snapped.getPitch(), snapped.getRoll());
                 }
 
                 pos = new Vec3i(snapped.x, snapped.y, snapped.z);
@@ -182,11 +204,41 @@ public class TrackSnapUtil {
 
                 if (pointData.trackSnapSettings().snapYaw()) {
                     yaw = snapped.getYaw();
+                } else {
+                    yaw = PlacementInfo.getYaw(yaw, pointData.posYaw(), pointData.posYawType(), false);
+                }
+
+                if (pointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
+                    double newRoll = stackInfo.rollAndOffsetInfo.degreeMode()
+                            ? snapped.getRoll()
+                            : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
+                    if (!isNear) newRoll = -newRoll;
+
+                    RollAndOffsetInfo.Mutable rollMutable = stackInfo.rollAndOffsetInfo.mutable();
+                    rollMutable.tryDeltaValue(isNear ? 0.0 : 1.0, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
+                    stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollMutable.immutable());
                 }
 
                 if (pointData.trackSnapSettings().snapHeight()) {
-                    Vec3d offset = new Vec3d(0, Math.abs(hit.y) > 1e-4 ? hit.y : 0, 0);
-                    EndPointData updated = pointData.with(mutable -> mutable.offset = offset);
+                    Vec3d offset = new Vec3d(0, hit.y, 0);
+                    if(stackInfo.rollAndOffsetInfo != null) {// Must be done after roll is confirmed
+                        RollAndOffsetInfo.RollAndVertOffsetAlignType type = stackInfo.rollAndOffsetInfo.rollOffsetType();
+                        double rawRoll = stackInfo.rollAndOffsetInfo.getRawRoll(isNear ? 0.0 : 1.0);
+                        if(!isNear) rawRoll = -rawRoll;
+                        double rollOffset = stackInfo.rollAndOffsetInfo.degreeMode()
+                                ? Math.sin(Math.toRadians(rawRoll)) * Gauge.STANDARD * stackInfo.gauge.scale()
+                                : rawRoll * 0.01 * stackInfo.gauge.scale();
+                        if(!isNear) rollOffset = -rollOffset;
+
+                        if(type == RollAndOffsetInfo.RollAndVertOffsetAlignType.LEFT) {
+                            offset = offset.add(0, rollOffset / 2, 0);
+                        } else if(type == RollAndOffsetInfo.RollAndVertOffsetAlignType.RIGHT) {
+                            offset = offset.subtract(0, rollOffset / 2, 0);
+                        }
+                    }
+
+                    Vec3d finalOffset = offset;
+                    EndPointData updated = pointData.with(mutable -> mutable.offset = finalOffset);
 
                     pointData = updated;
                     stackInfo = isNear
@@ -206,32 +258,49 @@ public class TrackSnapUtil {
                             : stackInfo.with(mutable -> mutable.farPointData = updated);
                 }
 
-                if (pointData.trackSnapSettings().snapRoll() && stackInfo.rollAndOffsetInfo != null) {
-                    double newRoll = stackInfo.rollAndOffsetInfo.degreeMode()
-                            ? snapped.getRoll()
-                            : stackInfo.gauge.value() * 100 * Math.sin(Math.toRadians(snapped.getRoll()));
-                    if (!isNear) newRoll = -newRoll;
-
-                    RollAndOffsetInfo.Mutable rollMutable = stackInfo.rollAndOffsetInfo.mutable();
-                    double index = isNear ? 0.0 : 1.0;
-                    rollMutable.tryDeltaValue(index, newRoll, RollAndOffsetInfo.ExtraInfoType.ROLL);
-                    stackInfo = stackInfo.with(mutable -> mutable.rollAndOffsetInfo = rollMutable.immutable());
-                }
-
                 stackInfo.write(stack);
             }
         }
 
         if (succeeded) {
-            pos = new Vec3i(snapped);
-            hit = snapped.subtract(pos);
+            if(!isPreview) {
+                pos = new Vec3i(snapped);
+                hit = snapped.subtract(pos);
+            } else {// This logic is strongly bind to TilePreview
+                pos = new Vec3i(snapped);
+                pos = pos.up().up();
+
+                if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                        pos = pos.down();
+                    }
+                }
+                if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                        pos = pos.down();
+                    }
+                }
+
+                hit = snapped.subtract(pos);
+            }
         } else {
-            pos = pos.up();
-            if (BlockUtil.canBeReplaced(world, pos.down(), true)) {
-                if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
-                    pos = pos.down();
+            if(isPreview) {
+                pos = pos.up().up();
+
+                if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                        pos = pos.down();
+                        hit = hit.add(0, -1, 0);
+                    }
+                }
+                if (BlockUtil.canBeReplaced(world, pos.down(), false)) {
+                    if (!BlockUtil.isIRRail(world, pos.down()) || world.getBlockEntity(pos.down(), TileRailBase.class).getRailHeight() <= 0.5) {
+                        pos = pos.down();
+                        hit = hit.add(0, -1, 0);
+                    }
                 }
             }
+            if(hit.y - Math.floor(hit.y) >= 0.5) hit = hit.add(0, 1, 0);
         }
 
         return new SnappedResult(pos, hit, yaw, succeeded);

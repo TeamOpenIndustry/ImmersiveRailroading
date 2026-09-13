@@ -3,8 +3,10 @@ package cam72cam.immersiverailroading.render.rail;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.track.TrackBase;
 import cam72cam.immersiverailroading.util.RailInfo;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
+import cam72cam.mod.math.Plane;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
@@ -16,13 +18,19 @@ public class RailBaseRender {
 		if (!info.settings.railBed.isEmpty()) {
 			for (TrackBase base : tracks) {
 				Vec3i basePos = base.getPos();
-				float height = base.getBedHeight();
-				if (base.isScaleModel()) {
-					height += 0.1f * (float) info.settings.gauge.scale();
-				}
+				float bedHeight = base.getBedHeight();
+				Plane bedFace = base.getBedFace();
+
+				if (bedFace != null) bedHeight = 1;
+				Matrix4 matrix4;
+				if(bedHeight > 0) matrix4 = new Matrix4().scale(1, bedHeight, 1);
+				else if(bedHeight == 0) matrix4 = new Matrix4().scale(1, 1e-3, 1);
+				else matrix4 = new Matrix4().translate(0, -bedHeight, 0).scale(1, 1 + bedHeight, 1);
+
 				model.addItemBlock(info.settings.railBed, new Matrix4()
 						.translate(basePos.x, basePos.y, basePos.z)
-						.scale(1, height, 1)
+						.multiply(matrix4),
+                        bedFace != null ? bedFace.offset(new Vec3d(basePos)) : null
 				);
 			}
 		}

@@ -13,7 +13,7 @@ public record PosRollOffset(Vec3d point, double roll, double yOffset, double zOf
         return points;
     }
 
-    public static List<Double> getRolls(List<PosRollOffset> posRollOffset) {
+    public static List<Double> getRawRolls(List<PosRollOffset> posRollOffset) {
         List<Double> points = new ArrayList<>();
         for (PosRollOffset rollOffset : posRollOffset) points.add(rollOffset.roll);
         return points;

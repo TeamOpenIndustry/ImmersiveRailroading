@@ -4,8 +4,8 @@ import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJGroup;
-import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.mod.model.common.mesh.Model;
+import cam72cam.mod.model.common.mesh.ModelGroup;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -23,12 +23,12 @@ public class ModelComponent {
     public final Vec3d max;
     public final Vec3d center;
     public final boolean wooden;
-    private final OBJModel model;
+    private final Model model;
 
-    public final List<ModelGroup> groups;
+    public final List<ModelGroupData> groups;
 
     public static final Pattern lcgPattern = Pattern.compile("_LCG_([^_]+)");
-    public static class ModelGroup {
+    public static class ModelGroupData {
         public final String modelID;
         public final String LCG;
         public final boolean linvert;
@@ -36,7 +36,7 @@ public class ModelComponent {
         public final boolean fullbright;
         public final boolean transparent;
 
-        public ModelGroup(String modelID) {
+        public ModelGroupData(String modelID) {
             Matcher m = lcgPattern.matcher(modelID);
             LCG = m.find() ? m.group(1) : null;
 
@@ -70,16 +70,16 @@ public class ModelComponent {
         }
     }
 
-    public ModelComponent(ModelComponentType type, ModelPosition pos, Integer id, OBJModel model, Set<String> modelIDs) {
+    public ModelComponent(ModelComponentType type, ModelPosition pos, Integer id, Model model, Set<String> modelIDs) {
         this.type = type;
         this.pos = pos;
         this.id = id;
         this.modelIDs = modelIDs;
-        this.groups = modelIDs.stream().map(ModelGroup::new).collect(Collectors.toList());
+        this.groups = modelIDs.stream().map(ModelGroupData::new).collect(Collectors.toList());
         this.key = String.join(" ", modelIDs);
         this.model = model;
-        min = model.minOfGroup(this.modelIDs);
-        max = model.maxOfGroup(this.modelIDs);
+        min = model.minOfGroups(this.modelIDs);
+        max = model.maxOfGroups(this.modelIDs);
         center = new Vec3d((min.x + max.x)/2, (min.y + max.y)/2, (min.z + max.z)/2);
         wooden = modelIDs.stream().anyMatch(g -> g.contains("WOOD"));
 
@@ -108,12 +108,12 @@ public class ModelComponent {
     }
 
     public static Vec3d center(List<ModelComponent> components) {
-        double minX = components.get(0).min.x;
-        double minY = components.get(0).min.y;
-        double minZ = components.get(0).min.z;
-        double maxX = components.get(0).max.x;
-        double maxY = components.get(0).max.y;
-        double maxZ = components.get(0).max.z;
+        double minX = components.getFirst().min.x;
+        double minY = components.getFirst().min.y;
+        double minZ = components.getFirst().min.z;
+        double maxX = components.getFirst().max.x;
+        double maxY = components.getFirst().max.y;
+        double maxZ = components.getFirst().max.z;
 
         for (ModelComponent rc : components) {
             minX = Math.min(minX, rc.min.x);
@@ -130,7 +130,7 @@ public class ModelComponent {
         return stock.getModelMatrix().apply(pos);
     }
 
-    public List<OBJGroup> groups() {
-        return modelIDs.stream().map(model.groups::get).collect(Collectors.toList());
+    public List<ModelGroup> groups() {
+        return modelIDs.stream().map(model.getGroups()::get).collect(Collectors.toList());
     }
 }

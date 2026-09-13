@@ -28,53 +28,69 @@ import java.util.List;
 
 //Advanced settings for the track
 public class TrackExtraGui implements IScreen {
+    private int targetGuiOpenType;
+    private boolean unlockGuiTurnDegree;
+
     private double rollMax;
     private double yOffsetMax;
     private double zOffsetMax;
+
     Color curveColor;
     Color pointColor;
     Color handlePointColor;
     Color handleLineColor;
     Color arrowColor;
+
     private TileRailPreview te;
     private RailSettings.Mutable settings;
     private RollAndOffsetInfo.Mutable rollAndOffsetInfoCache;
-    private int targetGuiOpenType;
-    private boolean unlockGuiTurnDegree;
+
     private boolean edited;
     private boolean editLeft;
     private final double length;
+
     private final RailInfo referenceInfo;//Only for calculating length and rendering
     private final List<VecYPR> referenceRenderData;
+
     //buttons to show state
     private Button rollValueLabel;
     private Button rollSlopeLabel;
     private Button rollHandleXLenLabel;
+
     private Button yOffsetValueLabel;
     private Button yOffsetSlopeLabel;
     private Button yOffsetHandleXLenLabel;
+
     private Button zOffsetValueLabel;
     private Button zOffsetSlopeLabel;
     private Button zOffsetHandleXLenLabel;
+
     private TextField rollValueInput;
     private TextField rollSlopeInput;
     private TextField rollHandleXLenInput;
+
     private TextField yOffsetValueInput;
     private TextField yOffsetSlopeInput;
     private TextField yOffsetHandleXLenInput;
+
     private TextField zOffsetValueInput;
     private TextField zOffsetSlopeInput;
     private TextField zOffsetHandleXLenInput;
+
     private Slider ArcLenFactorSlider;
+
     private Button insertOrDeletePointButton;
     private Button editLeftButton;
     private Button resetAllButton;
+
     private Button rollOffsetTypeButton;
     private Button railInfoLabel;
+
     private CheckBox rollEffectTileCB;
     private CheckBox railBlockNormalCB;
     private CheckBox degreeModeCB;
     private CheckBox offsetVertByNormalCB;
+
 //    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
@@ -110,7 +126,7 @@ public class TrackExtraGui implements IScreen {
 
         //Common mode:unit:centimeter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 centimeters
         //Degree mode:degree
-        rollMax = rollAndOffsetInfoCache.degreeMode ? 45 : 60;//180 for Degree mode later
+        rollMax = 30;
         yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
@@ -210,7 +226,7 @@ public class TrackExtraGui implements IScreen {
                                             }
                                         });
 
-        railBlockNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85, ytop + 1,
+        railBlockNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 65, ytop + 1,
                                   GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.railBlockNormal,
                                   (_, self) -> {
                                       if(rollAndOffsetInfoCache.rollEffectTile) {
@@ -224,14 +240,12 @@ public class TrackExtraGui implements IScreen {
                                           self.setChecked(false);
                                       }
                                   });
-        railBlockNormalCB.setVisible(false);//modifiable vanilla block model later
 
         degreeModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2, ytop + 1,
                                            GuiText.SELECTOR_DEGREE_MODE.toString(), rollAndOffsetInfoCache.degreeMode,
                                            (_, self) -> {
                                                edited = true;
                                                rollAndOffsetInfoCache.degreeMode = self.isChecked();
-                                               rollMax = rollAndOffsetInfoCache.degreeMode ? 45 : 60;//180 for degree mode later
                                            });
 
         offsetVertByNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 12,
@@ -568,7 +582,7 @@ public class TrackExtraGui implements IScreen {
         BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
         rollGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, rollYScale, 1, 0.05f, 0.05f, 0);
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, rollYScale);
-        rollGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getRoll(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
+        rollGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getRawRoll(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
         //yOffset Graph
         state.translate(0, height * 3 + 5, 0);

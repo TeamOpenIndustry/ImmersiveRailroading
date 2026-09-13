@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.*;
 
 import java.util.function.Consumer;
@@ -10,9 +11,11 @@ public record TrackSnapSettings(
         boolean snapHeight,
         boolean snapYaw,
         boolean snapPitch,
-        boolean snapRoll){
+        boolean snapRoll,
+        boolean inverted,
+        Vec3d snapOffset){
     public TrackSnapSettings() {
-        this(true, true, true, false, false);
+        this(true, true, true, false, false, false, Vec3d.ZERO);
     }
 
     public static class Mutable {
@@ -26,6 +29,10 @@ public record TrackSnapSettings(
         public boolean snapPitch;
         @TagField("snapRoll")
         public boolean snapRoll;
+        @TagField("inverted")
+        public boolean inverted;
+        @TagField("snapOffset")
+        public Vec3d snapOffset;
 
         public Mutable(TrackSnapSettings type) {
             this.snapPos = type.snapPos();
@@ -33,6 +40,8 @@ public record TrackSnapSettings(
             this.snapYaw = type.snapYaw();
             this.snapPitch = type.snapPitch();
             this.snapRoll = type.snapRoll();
+            this.inverted = type.inverted();
+            this.snapOffset = type.snapOffset();
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -43,6 +52,8 @@ public record TrackSnapSettings(
             this.snapYaw = type.snapYaw();
             this.snapPitch = type.snapPitch();
             this.snapRoll = type.snapRoll();
+            this.inverted = type.inverted();
+            this.snapOffset = type.snapOffset();
 
             TagSerializer.deserialize(data, this);
         }
@@ -53,7 +64,9 @@ public record TrackSnapSettings(
                     snapHeight,
                     snapYaw,
                     snapPitch,
-                    snapRoll
+                    snapRoll,
+                    inverted,
+                    snapOffset
             );
         }
     }

@@ -30,14 +30,20 @@ public class BuilderCubicParabola extends BuilderCubicCurve{
         CubicCurve curve;
         float nearRadius = info.settings.nearPointData.radius();
         float farRadius = info.settings.farPointData.radius();
-        if(Math.abs(farRadius) < 1e-6){
+        if(nearRadius == farRadius) {
+            curve = CubicCurve.circleClassic(nearRadius, info.settings.degrees, 0, 1).apply(mat);
+            double height = info.customInfo.placementPosition.y - info.placementInfo.placementPosition.y;
+            curve = new CubicCurve(curve.p1, curve.ctrl1, curve.ctrl2.add(0, height, 0), curve.p2.add(0, height, 0), 0, 1)
+                    .linearize(info.settings.smoothing, info.settings.nearPointData, info.settings.farPointData);
+
+        } else if(Math.abs(farRadius) < 1e-6){ // Fallback: Arc
             curve = CubicCurve.cubicParabolaByAngle(nearRadius, info.settings.degrees, false, 0, 1).apply(mat);
         } else if(Math.abs(nearRadius) < 1e-6) {
             curve = CubicCurve.cubicParabolaByAngle(farRadius, info.settings.degrees, true, 0, 1).apply(mat);
         } else if(nearRadius > 0.5 && farRadius > 0.5){
             if(Math.abs(nearRadius - farRadius) < 1e-6) curve = CubicCurve.circleClassic(nearRadius, info.settings.degrees, 0, 1);// Fallback: Turn
             else curve = CubicCurve.cubicParabolaByAngle(nearRadius, farRadius, info.settings.degrees, 0, 1).apply(mat);
-        } else {// Fallback: Straight
+        } else { // Fallback: Straight
             curve = new CubicCurve(
                     Vec3d.ZERO,
                     VecUtil.fromYaw(info.settings.length * 0.25, info.placementInfo.yaw),

@@ -93,16 +93,16 @@ public class DefinitionManager {
     public static void initDefinitions() {
         if (definitions != null) {
             for (EntityRollingStockDefinition def : definitions.values()) {
-                if (def.model != null) {
-                    def.model.free();
+                if (def.stockModel.model != null) {
+                    def.stockModel.model.free();
                 }
             }
         }
 
         if (tracks != null) {
             for (TrackDefinition def : tracks.values()) {
-                for (TrackModel model : def.models) {
-                    model.free();
+                for (TrackModel trackModel : def.models) {
+                    trackModel.model.free();
                 }
             }
         }

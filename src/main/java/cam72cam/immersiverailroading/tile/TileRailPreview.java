@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.tile;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiTypes;
@@ -7,7 +8,6 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.track.IIterableTrack;
-import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.BlockEntityTickable;
@@ -22,6 +22,7 @@ import cam72cam.mod.util.Facing;
 public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
 	private RailInfo info;
+	private boolean shouldBreakDirect = true;
 
 	@TagField
 	private ItemStack item;
@@ -30,7 +31,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@TagField
 	private PlacementInfo customInfo;
 	@TagField
-	private boolean isAboveRails = false;
+	private boolean isAboveRails = false;//TODO: use Vec3i to replace this
 
 	public ItemStack getItem() {
 		return this.item;
@@ -39,7 +40,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setup(ItemStack stack, PlacementInfo info) {
 		this.item = stack.copy();
 		this.placementInfo = info;
-		this.isAboveRails = BlockUtil.isIRRail(getWorld(), getPos().down()) && getWorld().getBlockEntity(getPos().down(), TileRailBase.class).getRailHeight() < 0.5;
+		this.isAboveRails = placementInfo.placementPosition.y < 0;
 		this.markDirty();
 	}
 
@@ -145,7 +146,7 @@ public class TileRailPreview extends BlockEntityTickable {
 
 	@Override
 	public IBoundingBox getRenderBoundingBox() {
-		return IBoundingBox.INFINITE;
+		return IBoundingBox.INFINITE;// TODO: return real bounding of curve
 	}
 
 	public RailInfo getRailRenderInfo() {// Not only for render, but also for build!
@@ -153,6 +154,10 @@ public class TileRailPreview extends BlockEntityTickable {
 			offsetPosition();
 		}
 		return info;
+	}
+
+	public Vec3d getOriginPlacementInfoPos() {
+		return placementInfo.placementPosition;
 	}
 
 	@Override
@@ -165,15 +170,26 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	private void offsetPosition() {
-		PlacementInfo placementInfoOffset = placementInfo.offset(RailSettings.from(item).nearPointData.offset());
-		PlacementInfo customInfoOffset = customInfo == null ? null : customInfo.offset(RailSettings.from(item).farPointData.offset());
+		RailSettings settings = RailSettings.from(item);
+		PlacementInfo placementInfoOffset = placementInfo.offset(settings.nearPointData.offset());
+		PlacementInfo customInfoOffset = customInfo == null ? null : customInfo.offset(settings.farPointData.offset());
+
+		// Found edge case: when placementInfo.placementPosition.y == -1, offset + bedThickness is 1, track is not flat,
+		// built tracks will be broken, so we change isAboveRails here. TODO: do we have a better way to avoid unexpected breaking?
+		if (Math.abs(settings.nearPointData.offset().y + settings.trackFaceTransSetting.bedThickness() - 1) < 1e-4 &&
+				((customInfoOffset != null && customInfoOffset.placementPosition.y != placementInfoOffset.placementPosition.y) ||
+						(customInfoOffset == null && settings.type == TrackItems.SLOPE))) {
+			shouldBreakDirect = false;
+		} else {
+			shouldBreakDirect = true;
+		}
 
 		info = new RailInfo(item, placementInfoOffset, customInfoOffset);
 	}
 
 	public boolean isMulti() {
 		if (getRailRenderInfo().getBuilder(getWorld()) instanceof IIterableTrack) {
-			return ((IIterableTrack)getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
+			return ((IIterableTrack) getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
 		}
 		return false;
 	}
@@ -193,9 +209,9 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer != null && entityPlayer.isCrouching()) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, isAboveRails() ? getPos().down() : getPos())) {
+			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
-				return isAboveRails();
+				return isAboveRails() && shouldBreakDirect && Config.ConfigDebug.breakTilePreview;
 			}
 			return false;
 		}

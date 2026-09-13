@@ -6,30 +6,33 @@ import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.util.TrackFaceTransSetting;
 import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.mod.model.common.ModelLoader;
+import cam72cam.mod.model.common.mesh.Model;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.obj.OBJRender;
+import cam72cam.mod.render.common.ModelRenderer;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 
 public class TrackExchangerModel implements ItemRender.IItemModel {
-	private static OBJModel MODEL;
+	private static Model MODEL;
 
 	@Override
 	public StandardModel getModel(World world, ItemStack stack) {
 		if(MODEL == null){
 			try {
-				MODEL = new OBJModel(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"), -0.05f, null);
+				MODEL = ModelLoader.load(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"));
 			} catch (Exception e) {
-				e.printStackTrace();
+				ModCore.catching(e);
 			}
 		}
 		return new StandardModel().addCustom((state, pt) -> TrackExchangerModel.render(stack, world, state));
@@ -38,7 +41,23 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 	public static void render(ItemStack stack, World world, RenderState state) {
 		ItemTrackExchanger.Data data = new ItemTrackExchanger.Data(stack);
 		RailInfo info = new RailInfo(
-                new RailSettings(data.gauge, data.track, TrackItems.STRAIGHT, TrackItems.STRAIGHT, 18, 0, 1, TrackSmoothing.BOTH, new EndPointData(0), new EndPointData(10), null, null, TrackDirection.NONE, data.railBed, ItemStack.EMPTY, false, false, 1, 1),
+                new RailSettings(
+						data.gauge,
+						data.track,
+						TrackItems.STRAIGHT, TrackItems.STRAIGHT,
+						18,
+						0,
+						1,
+						TrackSmoothing.BOTH,
+						new EndPointData(0), new EndPointData(10),
+						null, null,
+						TrackDirection.NONE,
+						new TrackFaceTransSetting(),
+						data.railBed, ItemStack.EMPTY,
+						false,
+						false,
+						1, 1
+				),
 				new PlacementInfo(Vec3d.ZERO, TrackDirection.NONE, 0, Vec3d.ZERO),
 				null,
 				SwitchState.NONE,
@@ -59,8 +78,8 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			}
 		}
 
-		try (OBJRender.Binding vbo = MODEL.binder().bind(state)) {
-			vbo.draw();
+		try (ModelRenderer.Binding bound = ModelRenderer.getRendererFor(MODEL).bind(state)) {
+			bound.enqueueOpaque();
 		}
 
 		state.lighting(false);

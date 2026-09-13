@@ -9,7 +9,7 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.obj.OBJRender;
+import cam72cam.mod.render.common.ModelRenderer;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
@@ -32,7 +32,7 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             return;
         }
 
-        StockModel<?, ?> model = data.def.getModel();
+        StockModel<?, ?> stockModel = data.def.getModel();
         ArrayList<String> groups = new ArrayList<>();
 
         for (ModelComponentType r : data.componentType.render) {
@@ -40,7 +40,7 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             if (comp == null || r == ModelComponentType.CARGO_FILL_X || r == ModelComponentType.CARGO_FILL_POS_X) {
                 continue;
             }
-            groups.addAll(comp.get(0).modelIDs);
+            groups.addAll(comp.getFirst().modelIDs);
         }
 
         if (groups.isEmpty()) {
@@ -48,9 +48,9 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
             return;
         }
 
-        Vec3d center = model.centerOfGroups(groups);
-        double width = model.heightOfGroups(groups);
-        double length = model.lengthOfGroups(groups);
+        Vec3d center = stockModel.model.centerOfGroups(groups);
+        double width = stockModel.model.heightOfGroups(groups);
+        double length = stockModel.model.lengthOfGroups(groups);
         double scale = 1;
         if (width != 0 || length != 0) {
             scale = 0.95 / Math.max(width, length);
@@ -65,8 +65,8 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
                 .scale(scale, scale, scale)
                 .translate(-center.x, -center.y, -center.z);
 
-        try (OBJRender.Binding vbo = model.binder().bind(state)) {
-            vbo.draw(groups);
+        try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(stockModel.model).bind(state)) {
+            vbo.enqueueOpaque(groups);
         }
     }
 }

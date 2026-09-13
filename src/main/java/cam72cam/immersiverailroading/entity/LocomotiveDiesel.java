@@ -199,9 +199,9 @@ public class LocomotiveDiesel extends Locomotive {
 		}
 
 		OptionalDouble control = this.getDefinition().getModel().getControls().stream()
-				.filter(x -> x.part.type == ModelComponentType.HORN_CONTROL_X)
-				.mapToDouble(this::getControlPosition)
-				.max();
+		                             .filter(x -> x.part.type == ModelComponentType.HORN_CONTROL_X)
+		                             .mapToDouble(this::getControlPosition)
+		                             .max();
 		if (control.isPresent() && control.getAsDouble() > 0) {
 			this.setHorn(10, hornPlayer);
 		}
