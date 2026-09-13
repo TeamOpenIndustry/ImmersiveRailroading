@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.remotecontrol;
+package cam72cam.immersiverailroading.remote_control;
 
 import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.serialization.TagField;

@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.net;
 
 import java.util.UUID;
 
-import cam72cam.immersiverailroading.remotecontrol.WirelessRemotecontrolServer;
+import cam72cam.immersiverailroading.remote_control.WirelessRemoteControlServer;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.serialization.StrictTagMapper;
@@ -22,7 +22,7 @@ public class RemoteControlActivePacket extends Packet {
 	@Override
 	protected void handle() {
 		Player player = getPlayer();
-		WirelessRemotecontrolServer.setActive(player.getUUID(), loco);
+		WirelessRemoteControlServer.setActive(player.getUUID(), loco);
 	}
 
 }

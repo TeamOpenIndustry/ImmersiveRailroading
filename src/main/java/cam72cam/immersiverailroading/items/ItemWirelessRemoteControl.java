@@ -41,9 +41,9 @@ public class ItemWirelessRemoteControl extends CustomItem {
     @Override
     public List<String> getTooltip(ItemStack stack) {
         Data d = new Data(stack);
-        return List.of(d.linked == null ?
-                GuiText.REMOTE_CONTROL_NOT_LINKED_TOOLTIP.toString() :
-                    GuiText.REMOTE_CONTROL_LINKED_TOOLTIP.toString(d.linked));
+        return List.of(d.linked == null
+					   ? GuiText.REMOTE_CONTROL_NOT_LINKED_TOOLTIP.toString()
+					   : GuiText.REMOTE_CONTROL_LINKED_TOOLTIP.toString(d.linked));
     }
 
 	public static class Data extends ItemDataSerializer {

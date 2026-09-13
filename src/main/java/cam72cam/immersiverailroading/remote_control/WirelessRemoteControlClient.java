@@ -1,26 +1,36 @@
-package cam72cam.immersiverailroading.remotecontrol;
+package cam72cam.immersiverailroading.remote_control;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.gui.overlay.RemoteOverlay;
 import cam72cam.immersiverailroading.items.ItemWirelessRemoteControl;
 import cam72cam.immersiverailroading.net.RemoteControlActivePacket;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.resource.Identifier;
 
-public class WirelessRemotecontrolClient {
+public class WirelessRemoteControlClient {
 	private static UUID loco = null;
 	private static RemoteControlData cachedData = null;
     public static RemoteOverlay remoteGui;
-	
-	private WirelessRemotecontrolClient() {
-	}
-	
 
+	private WirelessRemoteControlClient() {
+	}
+
+    public static void init() {
+        try {
+            WirelessRemoteControlClient.remoteGui = RemoteOverlay.parse(new Identifier(ImmersiveRailroading.MODID, "gui/default/fbg.caml"));
+        } catch (IOException e) {
+            ModCore.catching(e);
+        }
+    }
 
     public static void onClientTick() {
         if (!MinecraftClient.isReady()) {

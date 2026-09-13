@@ -1,7 +1,7 @@
 package cam72cam.immersiverailroading.net;
 
-import cam72cam.immersiverailroading.remotecontrol.RemoteControlData;
-import cam72cam.immersiverailroading.remotecontrol.WirelessRemotecontrolClient;
+import cam72cam.immersiverailroading.remote_control.RemoteControlData;
+import cam72cam.immersiverailroading.remote_control.WirelessRemoteControlClient;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.serialization.TagField;
 
@@ -18,6 +18,6 @@ public class RemoteControlServerPacket extends Packet {
 
     @Override
     protected void handle() {
-    	WirelessRemotecontrolClient.updateData(data);
+    	WirelessRemoteControlClient.updateData(data);
     }
 }

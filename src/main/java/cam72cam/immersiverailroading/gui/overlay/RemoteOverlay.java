@@ -9,11 +9,10 @@ import java.util.UUID;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.net.RemoteControlClientPacket;
-import cam72cam.immersiverailroading.remotecontrol.RemoteControlData;
-import cam72cam.immersiverailroading.remotecontrol.WirelessRemotecontrolClient;
+import cam72cam.immersiverailroading.remote_control.RemoteControlData;
+import cam72cam.immersiverailroading.remote_control.WirelessRemoteControlClient;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.util.MathUtil;
-import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
@@ -26,7 +25,7 @@ import cam72cam.mod.resource.Identifier;
 import util.Matrix4;
 
 public class RemoteOverlay extends GuiBuilder {
-	private List<RemoteOverlay> elements;
+	private final List<RemoteOverlay> elements;
 	
 	private static RemoteOverlay target = null;
     private static RemoteOverlay scrollTarget = null;
@@ -198,22 +197,15 @@ public class RemoteOverlay extends GuiBuilder {
 	
 	private String getStat(RemoteControlData data, Stat stat, Integer digit) {
 		String format = Stat.formats[digit != null ? digit : 0];
-		switch(stat) {
-			case SPEED:
-				Speed speed = data.speed;
-				switch (ConfigGraphics.speedUnit) {
-	                case mph:
-	                    return String.format(format, Math.abs(speed.imperial()));
-	                case ms:
-	                    return String.format(format, Math.abs(speed.metersPerSecond()));
-	                case kmh:
-	                    return String.format(format, Math.abs(speed.metric()));
-	            }
-            case UNITS_SPEED:
-                return ConfigGraphics.speedUnit.toUnitString();
-			default:
-				return "not valid";
-		}
+        return switch (stat) {
+            case SPEED -> switch (ConfigGraphics.speedUnit) {
+                case mph -> String.format(format, Math.abs(data.speed.imperial()));
+                case ms -> String.format(format, Math.abs(data.speed.metersPerSecond()));
+                case kmh -> String.format(format, Math.abs(data.speed.metric()));
+            };
+            case UNITS_SPEED -> ConfigGraphics.speedUnit.toUnitString();
+            default -> "Invalid";
+        };
 	}
 	
 	private RemoteOverlay find(RemoteControlData data, Matrix4 matrix, int maxx, int maxy, int x, int y) {
@@ -382,12 +374,12 @@ public class RemoteOverlay extends GuiBuilder {
     }
 	
 	private void sendRemoteControlChange(float value) {
-	    UUID activeLoco = WirelessRemotecontrolClient.getLoco();
+	    UUID activeLoco = WirelessRemoteControlClient.getLoco();
 	    if (activeLoco == null || readout == null) {
 	        return;
 	    }
 	    new RemoteControlClientPacket(activeLoco, readout, value).sendToServer();
-	    WirelessRemotecontrolClient.applyLocalReadoutUpdate(readout, value);
+	    WirelessRemoteControlClient.applyLocalReadoutUpdate(readout, value);
 	}
 
 }

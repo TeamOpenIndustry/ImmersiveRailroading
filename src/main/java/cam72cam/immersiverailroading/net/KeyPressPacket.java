@@ -45,19 +45,18 @@ public class KeyPressPacket extends Packet {
 	protected void handle() {
 		Player player = getPlayer();
 
-		// Player controls with Wireless Remote Control
 		if (loco != null) {
+			// Player controls with Wireless Remote Control
 			handleRemoteControl(player);
-		}
-		// Player is in the Locomotive
-		else if (player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+		} else if (player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+			// Player is in the Locomotive
 			player.getRiding().as(EntityRollingStock.class).handleKeyPress(player, type, disableIndependentThrottle);
 		}
 	}
 	
 	private void handleRemoteControl(Player player) {
 		Locomotive stock = getWorld().getEntity(loco, Locomotive.class); 
-		if (stock != null && stock instanceof Locomotive && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+		if (stock != null && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
 			ItemStack held = player.getHeldItem(Player.Hand.SECONDARY); 
 			ItemWirelessRemoteControl.Data data = new ItemWirelessRemoteControl.Data(held);
 			if (loco.equals(data.linked)) {
