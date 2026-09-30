@@ -64,6 +64,7 @@ chat.immersiverailroading:switch_state.reset=The last-locked switch has been wir
 chat.immersiverailroading:switch_state.cant_reset=You haven't locked any switches with this key!
 chat.immersiverailroading:switch_state.already_reset=The last-locked switch is already unlocked!
 chat.immersiverailroading:multiblock.select=Select multiblock: %s
+chat.immersiverailroading:track_end_info=Track End Information：%s
 
 gui.immersiverailroading:label.brake=Brake
 gui.immersiverailroading:label.throttle=Throttle

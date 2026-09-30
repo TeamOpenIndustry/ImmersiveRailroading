@@ -64,6 +64,7 @@ chat.immersiverailroading:switch_state.reset=最后使用此钥匙锁定的道�
 chat.immersiverailroading:switch_state.cant_reset=此钥匙尚未与任何道岔绑定!
 chat.immersiverailroading:switch_state.already_reset=最后使用此钥匙锁定的道岔已被解锁!
 chat.immersiverailroading:multiblock.select=已选择多方块结构：%s
+chat.immersiverailroading:track_end_info=轨道末端信息：%s
 
 gui.immersiverailroading:label.brake=制动
 gui.immersiverailroading:label.throttle=节流阀
