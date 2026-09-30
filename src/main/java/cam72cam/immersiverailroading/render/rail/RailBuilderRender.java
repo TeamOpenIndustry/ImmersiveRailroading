@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.render.rail;
 
 import cam72cam.immersiverailroading.model.TrackModel;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
-import cam72cam.immersiverailroading.render.ExpireableMap;
+import cam72cam.mod.util.collection.ExpireableMap;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.immersiverailroading.util.RailInfo;

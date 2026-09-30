@@ -5,7 +5,7 @@ import cam72cam.immersiverailroading.entity.LocomotiveDiesel;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
 import cam72cam.immersiverailroading.library.ControllerType;
 import cam72cam.immersiverailroading.model.StockModel;
-import cam72cam.immersiverailroading.render.ExpireableMap;
+import cam72cam.mod.util.collection.ExpireableMap;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
