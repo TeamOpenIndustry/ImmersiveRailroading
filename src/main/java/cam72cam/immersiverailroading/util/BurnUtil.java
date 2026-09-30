@@ -5,11 +5,22 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.ItemStackHandler;
 
 public class BurnUtil {
 
 	public static int getBurnTime(ItemStack stack) {
 		return stack.getBurnTime();
+	}
+
+	public static void burn(ItemStackHandler holder, int slot, ItemStack stack) {
+		if (stack.getCount() == 1 && stack.getRemainder() != ItemStack.EMPTY) {
+			stack = stack.getRemainder();
+			stack.setCount(1);
+		} else {
+			stack.setCount(stack.getCount() - 1);
+		}
+		holder.set(slot, stack);
 	}
 
 	public static int getBurnTime(Fluid fluid) {
@@ -28,4 +39,5 @@ public class BurnUtil {
 		}
 		return values;
 	}
+
 }
