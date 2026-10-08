@@ -13,14 +13,15 @@ public class BurnUtil {
 		return stack.getBurnTime();
 	}
 
-	public static void burn(ItemStackHandler holder, int slot, ItemStack stack) {
+	public static void consume(ItemStackHandler holder, int slot, ItemStack stack) {
 		if (stack.getCount() == 1 && stack.getRemainder() != ItemStack.EMPTY) {
 			stack = stack.getRemainder();
 			stack.setCount(1);
 		} else {
 			stack.setCount(stack.getCount() - 1);
 		}
-		holder.set(slot, stack);
+		//We want to insert it back rather than vanishing anyway
+		holder.setUnchecked(slot, stack);
 	}
 
 	public static int getBurnTime(Fluid fluid) {
@@ -29,6 +30,7 @@ public class BurnUtil {
 		}
 		return 0;
 	}
+
 	public static List<Fluid> burnableFluids() {
 		List<Fluid> values = new ArrayList<>();
 		for (String name : ConfigBalance.dieselFuels.keySet()) {
