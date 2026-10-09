@@ -5,11 +5,23 @@ import java.util.List;
 import cam72cam.immersiverailroading.Config.ConfigBalance;
 import cam72cam.mod.fluid.Fluid;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.item.ItemStackHandler;
 
 public class BurnUtil {
 
 	public static int getBurnTime(ItemStack stack) {
 		return stack.getBurnTime();
+	}
+
+	public static void consume(ItemStackHandler holder, int slot, ItemStack stack) {
+		if (stack.getCount() == 1 && stack.getRemainder() != ItemStack.EMPTY) {
+			stack = stack.getRemainder();
+			stack.setCount(1);
+		} else {
+			stack.setCount(stack.getCount() - 1);
+		}
+		//We want to insert it back rather than vanishing anyway
+		holder.setUnchecked(slot, stack);
 	}
 
 	public static int getBurnTime(Fluid fluid) {
@@ -18,6 +30,7 @@ public class BurnUtil {
 		}
 		return 0;
 	}
+
 	public static List<Fluid> burnableFluids() {
 		List<Fluid> values = new ArrayList<>();
 		for (String name : ConfigBalance.dieselFuels.keySet()) {
@@ -28,4 +41,5 @@ public class BurnUtil {
 		}
 		return values;
 	}
+
 }
