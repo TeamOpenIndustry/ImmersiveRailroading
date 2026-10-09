@@ -69,14 +69,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 	@TagSync
 	@TagField(value = "CoupledFront", mapper = StrictTagMapper.class)
-	private UUID coupledFront = null;
+	public UUID coupledFront = null;
 	@TagSync
 	@TagField("frontCouplerEngaged")
 	private boolean frontCouplerEngaged = true;
 
 	@TagSync
 	@TagField(value = "CoupledBack", mapper = StrictTagMapper.class)
-	private UUID coupledBack = null;
+	public UUID coupledBack = null;
 	@TagSync
 	@TagField("backCouplerEngaged")
 	private boolean backCouplerEngaged = true;
