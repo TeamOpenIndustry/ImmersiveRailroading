@@ -39,33 +39,33 @@ public class GuiBuilder {
     private final Horizontal screen_x;
     private final Vertical screen_y;
 
-    private final Identifier image;
-    private final int width;
-    private final int height;
+    protected final Identifier image;
+    protected final int width;
+    protected final int height;
 
-    private final String text;
-    private final float textHeight;
+    protected final String text;
+    protected final float textHeight;
 
-    private final Readouts readout;
+    protected final Readouts readout;
     private final String control;
     private final String setting;
     private final String texture_variant;
-    private final Float setting_default;
+    protected final Float setting_default;
     private final boolean global;
-    private final boolean invert;
-    private final boolean translucent;
-    private final boolean toggle;
-    private final ClampMode clamp;
-    private final float tlx;
-    private final float tly;
-    private final float rotx;
-    private final float roty;
-    private final float rotdeg;
-    private final float rotoff;
-    private final Float scalex;
-    private final Float scaley;
+    protected final boolean invert;
+    protected final boolean translucent;
+    protected final boolean toggle;
+    protected final ClampMode clamp;
+    protected final float tlx;
+    protected final float tly;
+    protected final float rotx;
+    protected final float roty;
+    protected final float rotdeg;
+    protected final float rotoff;
+    protected final Float scalex;
+    protected final Float scaley;
 
-    private final Map<Float, Integer> colors = new HashMap<>();
+    protected final Map<Float, Integer> colors = new HashMap<>();
     private final EntityRollingStockDefinition.ControlSoundsDefinition sound;
 
     private final List<GuiBuilder> elements;
@@ -107,7 +107,7 @@ public class GuiBuilder {
         }
     }
 
-    private enum ClampMode {
+    protected enum ClampMode {
         NONE, FLOOR, CEIL;
         public static ClampMode from(String value) {
             if (value != null) {
@@ -257,7 +257,7 @@ public class GuiBuilder {
         return new GuiBuilder(DataBlock.load(overlay));
     }
 
-    private void applyPosition(Matrix4 matrix, int maxx, int maxy) {
+    protected void applyPosition(Matrix4 matrix, int maxx, int maxy) {
         matrix.translate(this.x, this.y, 0);
 
         switch (screen_x) {
@@ -314,7 +314,7 @@ public class GuiBuilder {
         return value;
     }
 
-    private void applyValue(Matrix4 matrix, float value) {
+    protected void applyValue(Matrix4 matrix, float value) {
         if (tlx != 0 || tly != 0) {
             matrix.translate(tlx * value, tly * value, 0);
         }
@@ -448,6 +448,7 @@ public class GuiBuilder {
                     case WHISTLE:
                     case HORN:
                     case ENGINE:
+                    case EMERGENCY:
                         break;
                     default:
                         return null;
@@ -475,7 +476,7 @@ public class GuiBuilder {
         return tlx != 0 || tly != 0 || rotdeg != 0 || scalex != null || scaley != null || toggle;
     }
 
-    private void onMouseClick(EntityRollingStock stock) {
+    protected void onMouseClick(EntityRollingStock stock) {
         if (sound != null) {
             sound.effects(stock, true, getValue(stock), MinecraftClient.getPlayer().getPosition());
         }

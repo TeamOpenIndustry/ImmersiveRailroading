@@ -34,6 +34,7 @@ public enum Readouts {
     CARGO_FILL,
     ENGINE_RPM,
     TENDER_FEED,
+    EMERGENCY,
     ;
 
     public float getValue(EntityRollingStock stock) {
@@ -116,6 +117,8 @@ public enum Readouts {
                 stock instanceof LocomotiveDiesel diesel ? diesel.getRelativeRPM() : 0;
             case TENDER_FEED ->
                     stock instanceof LocomotiveSteam steam && steam.isAutoFeedEnabled() ? 1 : 0;
+            case EMERGENCY -> stock instanceof Locomotive loco && loco.getEmergency() ? 1 : 0;
+            default -> 0;
         };
     }
 
@@ -199,6 +202,11 @@ public enum Readouts {
                 if (stock instanceof LocomotiveSteam steam) {
                     steam.setAutoFeed(value > 0.9);
                 }
+            }
+            case EMERGENCY -> {
+            	if (stock instanceof Locomotive loco) {
+            		loco.setEmergency(value >= 0.5);
+            	}
             }
         }
     }

@@ -11,6 +11,9 @@ import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
+import cam72cam.immersiverailroading.remote_control.RemoteControlData;
+import cam72cam.immersiverailroading.remote_control.WirelessRemoteControlClient;
+import cam72cam.immersiverailroading.remote_control.WirelessRemoteControlServer;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.render.block.RailBaseModel;
 import cam72cam.immersiverailroading.render.item.*;
@@ -41,6 +44,7 @@ import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.text.Command;
 
+import java.util.UUID;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -87,9 +91,13 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(GuiBuilder.ControlChangePacket::new, PacketDirection.ClientToServer);
 				Packet.register(ItemPaintBrush.PaintBrushPacket::new, PacketDirection.ClientToServer);
 				Packet.register(AugmentFilterGUI.AugmentFilterChangePacket::new, PacketDirection.ClientToServer);
+				Packet.register(RemoteControlServerPacket::new, PacketDirection.ServerToClient);
+				Packet.register(RemoteControlClientPacket::new, PacketDirection.ClientToServer);
+				Packet.register(RemoteControlActivePacket::new, PacketDirection.ClientToServer);
 
 				ServerChronoState.register();
-
+				WirelessRemoteControlServer.init();
+				
 				IRBlocks.register();
 				IRItems.register();
 				GuiTypes.register();
@@ -146,6 +154,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ItemRender.register(IRItems.ITEM_RADIO_CONTROL_CARD, new Identifier(MODID, "items/radio_card"));
 				ItemRender.register(IRItems.ITEM_MANUAL, new Identifier(MODID, "items/engineerslexicon"));
 				ItemRender.register(IRItems.ITEM_TRACK_EXCHANGER, new TrackExchangerModel());
+				ItemRender.register(IRItems.ITEM_WIRELESS_REMOTECONTROL, ObjItemRender.getModelFor(new Identifier(MODID, "models/item/wireless_remotecontrol/wireless_remotecontrol.obj"), new Vec3d(0.5, 0.5, 0.5), 1));
 
 				IEntityRender<EntityMoveableRollingStock> stockRender = new IEntityRender<EntityMoveableRollingStock>() {
 					@Override
@@ -172,8 +181,14 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				EntityRenderer.register(Tender.class, stockRender);
 				EntityRenderer.register(HandCar.class, stockRender);
 
-
-				Function<KeyTypes, Runnable> onKeyPress = type -> () -> new KeyPressPacket(type).sendToServer();
+				Function<KeyTypes, Runnable> onKeyPress = type -> () -> {
+					UUID target = WirelessRemoteControlClient.getLoco();
+					if (target != null) {
+						new KeyPressPacket(type, target).sendToServer(); // Remote control
+					} else if (MinecraftClient.getPlayer().getRiding() instanceof EntityRollingStock) {
+						new KeyPressPacket(type).sendToServer();
+					}
+				};
 				Keyboard.registerKey("ir_keys.increase_throttle", KeyCode.NUMPAD8, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_UP));
 				Keyboard.registerKey("ir_keys.zero_throttle", KeyCode.NUMPAD5, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_ZERO));
 				Keyboard.registerKey("ir_keys.decrease_throttle", KeyCode.NUMPAD2, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.THROTTLE_DOWN));
@@ -198,7 +213,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
 
-				GlobalRender.registerOverlay((state, pt) -> {
+				GlobalRender.registerOverlay((state, _) -> {
 					Entity riding = MinecraftClient.getPlayer().getRiding();
 					if (!(riding instanceof EntityRollingStock)) {
 						return;
@@ -208,17 +223,40 @@ public class ImmersiveRailroading extends ModCore.Mod {
 						stock.getDefinition().getOverlay().render(state, stock);
 					}
 				});
+				
+				// Remote Overlay
+				WirelessRemoteControlClient.init();
+		        GlobalRender.registerOverlay((state, _) -> {
+		            UUID activeLoco = WirelessRemoteControlClient.getLoco();
+		            if (activeLoco == null || WirelessRemoteControlClient.remoteGui == null) {
+		                return;
+		            }
+		            RemoteControlData data = WirelessRemoteControlClient.getData();
+		            if(data == null) {
+		                return;
+		            }
+		            WirelessRemoteControlClient.remoteGui.render(state, data);
+		        });
 
 				ClientEvents.MOUSE_GUI.subscribe(evt -> {
 					if (!MinecraftClient.isReady()) {
 						return true;
 					}
+					
+					// Remote control
+					UUID activeLoco = WirelessRemoteControlClient.getLoco();
+				    if (activeLoco != null) {
+				        RemoteControlData data = WirelessRemoteControlClient.getData();
+				        if (data != null) {
+				            return WirelessRemoteControlClient.remoteGui.click(evt, data);
+				        }
+				    }
+
 					Entity riding = MinecraftClient.getPlayer().getRiding();
-					if (!(riding instanceof EntityRollingStock)) {
+					if (!(riding instanceof EntityRollingStock stock)) {
 						return true;
 					}
-					EntityRollingStock stock = (EntityRollingStock) riding;
-					if (stock.getDefinition().getOverlay() != null) {
+                    if (stock.getDefinition().getOverlay() != null) {
 						return stock.getDefinition().getOverlay().click(evt, stock);
 					}
 					return true;
@@ -226,9 +264,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 				ClientEvents.TICK.subscribe(GuiBuilder::onClientTick);
 				ClientEvents.TICK.subscribe(EntityRollingStockDefinition.ControlSoundsDefinition::cleanupStoppedSounds);
-
+				ClientEvents.TICK.subscribe(WirelessRemoteControlClient::onClientTick);
+	                                         
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
-
+	
 				ClientPartDragging.register();
 				break;
 			case RELOAD:
