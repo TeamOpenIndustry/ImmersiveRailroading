@@ -1,4 +1,4 @@
-# Immersive Railroading 1.11.0 Release Candidate
+# Immersive Railroading 1.11.0
 
 After almost three years of waiting, Immersive Railroading 1.11.0 is finally here.
 
