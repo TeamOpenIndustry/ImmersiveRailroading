@@ -282,14 +282,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public final UUID getCoupledUUID(CouplerType coupler) {
-		switch (coupler) {
-		case FRONT:
-			return coupledFront;
-		case BACK:
-			return coupledBack;
-		default:
-			return null;
-		}
+        return switch (coupler) {
+            case FRONT -> coupledFront;
+            case BACK -> coupledBack;
+        };
 	}
 	
 	public EntityCoupleableRollingStock getCoupled(CouplerType coupler) {
@@ -315,14 +311,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		if (coupler == null) {
 			return false;
 		}
-		switch (coupler) {
-		case FRONT:
-			return frontCouplerEngaged;
-		case BACK:
-			return backCouplerEngaged;
-		default:
-			return false;
-		}
+        return switch (coupler) {
+            case FRONT -> frontCouplerEngaged;
+            case BACK -> backCouplerEngaged;
+        };
 	}
 	
 	public void setCouplerEngaged(CouplerType coupler, boolean engaged) {
@@ -386,13 +378,13 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 
 	public final List<EntityCoupleableRollingStock> getTrain(boolean followDisengaged) {
-		List<EntityCoupleableRollingStock> train = new ArrayList<EntityCoupleableRollingStock>();
+		List<EntityCoupleableRollingStock> train = new ArrayList<>();
 		this.mapTrain(this, followDisengaged, train::add);
 		return train;
 	}
 	
 	public final void mapTrain(EntityCoupleableRollingStock prev, boolean followDisengaged, Consumer<EntityCoupleableRollingStock> fn) {
-		this.mapTrain(prev, true, followDisengaged, (EntityCoupleableRollingStock e, Boolean b) -> fn.accept(e));
+		this.mapTrain(prev, true, followDisengaged, (EntityCoupleableRollingStock e, Boolean _) -> fn.accept(e));
 	}
 	
 	public final void mapTrain(EntityCoupleableRollingStock prev, boolean direction, boolean followDisengaged, BiConsumer<EntityCoupleableRollingStock, Boolean> fn) {
@@ -400,23 +392,16 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			fn.accept(stock.stock, stock.direction);
 		}
 	}
-	
 
-	public static class DirectionalStock {
-		public final EntityCoupleableRollingStock prev;
-		public final EntityCoupleableRollingStock stock;
-		public final boolean direction;
 
-		public DirectionalStock(EntityCoupleableRollingStock prev, EntityCoupleableRollingStock stock, boolean direction) {
-			this.prev = prev;
-			this.stock = stock;
-			this.direction = direction;
-		}
+	public record DirectionalStock(EntityCoupleableRollingStock prev,
+								   EntityCoupleableRollingStock stock,
+	                               boolean direction) {
 	}
 	
 	public Collection<DirectionalStock> getDirectionalTrain(boolean followDisengaged) {
-		HashSet<UUID> trainMap = new HashSet<UUID>();
-		List<DirectionalStock> trainList = new ArrayList<DirectionalStock>();
+		HashSet<UUID> trainMap = new HashSet<>();
+		List<DirectionalStock> trainList = new ArrayList<>();
 		
 		Function<DirectionalStock, DirectionalStock> next = (DirectionalStock current) -> {
 			for (CouplerType coupler : CouplerType.values()) {
