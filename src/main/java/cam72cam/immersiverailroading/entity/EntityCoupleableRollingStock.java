@@ -344,6 +344,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			}
 			break;
 		}
+		if (!engaged) {
+			//Disengaged, break already exist connection
+			EntityCoupleableRollingStock coupled = getCoupled(coupler);
+			if (coupled != null) {
+				coupled.setCoupledUUID(coupler.opposite(), null);
+			}
+			this.setCoupledUUID(coupler, null);
+		}
 	}
 
 	/*
