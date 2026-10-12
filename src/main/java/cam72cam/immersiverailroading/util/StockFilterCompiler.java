@@ -42,7 +42,8 @@ public class StockFilterCompiler {
         // stock:[definition name]
         PREFIXES.put("stock", (stock, content) -> {
             String definitionFileName = stock.getDefinitionID().split("/")[2];
-            return definitionFileName.substring(0, definitionFileName.length() - 5).equals(content);
+            String stockName = stock.getDefinition().name;
+            return definitionFileName.substring(0, definitionFileName.length() - 5).equals(content) || stockName.equals(content);
         });
         // works:[locomotive works]
         PREFIXES.put("works", (stock, content) -> stock instanceof Locomotive && ((Locomotive) stock).getDefinition().works.equals(content));
