@@ -13,8 +13,8 @@ public class TrackEdge {
     }
 
     public enum EdgeType {
-        NORMAL,  // single 内部相邻点，或两端严格重合
-        GAP      // 搜索判定为连通，但存在几何空隙
+        NORMAL,  // single内部相邻点
+        GAP      // 连接2个single的节点
     }
 
     @Override

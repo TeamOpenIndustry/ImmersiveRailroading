@@ -207,7 +207,7 @@ public class WorldData {
     public static void unload(World world, File levelDirectory) {
         ImmersiveRailroading.info("Unload Level %s / %s", levelDirectory.toString(), world.getId());
         synchronized (LOADED) {
-            LOADED.remove(world);
+            LOADED.remove(world);//todo 客户端的unload没有覆盖到或者没生效
         }
     }
 
@@ -304,8 +304,6 @@ public class WorldData {
         TrackNode node = isNear ? startNode : endNode;
         addNode(node);
 
-        // 自身 yaw 指向 single 内部：
-        // start 端离开 single 用 backward，end 端离开 single 用 forward
         boolean forward = !isNear;
         TrackNode other = node.getConn(world, forward);
         if (other == null || other.id.equals(node.id)) return;
@@ -350,6 +348,8 @@ public class WorldData {
 
             addNode(otherStartNode);
             addNode(otherEndNode);
+            addEdge(other.id, otherStartNode.id, TrackEdge.EdgeType.NORMAL);
+            addEdge(other.id, otherEndNode.id, TrackEdge.EdgeType.NORMAL);
 
             if (gapLen < 1e-9) {
                 addEdge(other.id, otherStartNode.id, TrackEdge.EdgeType.NORMAL);

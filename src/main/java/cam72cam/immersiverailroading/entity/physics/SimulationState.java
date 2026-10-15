@@ -270,10 +270,12 @@ public class SimulationState {
             IRPathingData rear = new IRPathingData(config.world, positionRear, 0);
 
             if (lastFrontEdge != null) {
-                front.advanceTo(lastFrontEdge, lastFrontT, 0);
+                double t = OffWorldMovementTrack.projectOntoEdge(lastFrontEdge, positionFront, config.world);
+                if (t >= 0) front.advanceTo(lastFrontEdge, t, 0);
             }
             if (lastRearEdge != null) {
-                rear.advanceTo(lastRearEdge, lastRearT, 0);
+                double t = OffWorldMovementTrack.projectOntoEdge(lastRearEdge, positionRear, config.world);
+                if (t >= 0) rear.advanceTo(lastRearEdge, t, 0);
             }
 
             Vec3d frontStart = front.getTopoPos();
