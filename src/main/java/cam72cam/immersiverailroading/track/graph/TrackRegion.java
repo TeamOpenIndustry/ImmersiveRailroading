@@ -10,8 +10,6 @@ public class TrackRegion {
     public final long regionPos;// addition, not necessary
 
     public final Map<Vec3i, TrackMultiGeometrySegment> trackBlocks;// fake final
-    // key: gag region-relative pos, value: parent track block region-relative pos list
-    public final HashMap<Vec3i, List<Vec3i>> trackBlockParents;
 
     boolean needsWriteToDisk;
     boolean dirty;
@@ -19,7 +17,6 @@ public class TrackRegion {
     public TrackRegion(long regionPos) {
         this.regionPos = regionPos;
         this.trackBlocks = new HashMap<>();
-        this.trackBlockParents = new HashMap<>();
     }
 
     public Vec3i toBlockPos(Vec3i regionBlockPos) {
@@ -41,7 +38,6 @@ public class TrackRegion {
 
         int size = buffer.getInt();
         trackBlocks = new HashMap<>(size);
-        trackBlockParents = new HashMap<>(size);
         for (int i = 0; i < size; i++) {
             int x = buffer.getInt();
             int y = buffer.getInt();
@@ -51,10 +47,7 @@ public class TrackRegion {
             trackBlocks.put(regionBlockPos, segment);
 
             for (Vec3i offset : segment.getPositionsCache()) {
-                Vec3i gagPos = TrackRegionUtil.toRegionBlockPos(regionBlockPos.add(offset));
-                List<Vec3i> parents = trackBlockParents.getOrDefault(gagPos, new ArrayList<>());
-                parents.add(regionBlockPos);
-                trackBlockParents.put(gagPos, parents);
+                Vec3i gagPos = regionBlockPos.add(offset);
             }
         }
     }
@@ -108,16 +101,6 @@ public class TrackRegion {
             if (removed == null) {
                 return false;
             }
-            for (Vec3i offset : removed.getPositionsCache()) {
-                Vec3i gagPos = TrackRegionUtil.toRegionBlockPos(relPos.add(offset));
-                List<Vec3i> parents = trackBlockParents.get(gagPos);
-                if (parents != null) {
-                    parents.remove(relPos);
-                    if (parents.isEmpty()) {
-                        trackBlockParents.remove(gagPos);
-                    }
-                }
-            }
             needsWriteToDisk = true;
             dirty = true;
             return true;
@@ -128,14 +111,6 @@ public class TrackRegion {
         synchronized (trackBlocks) {
             Vec3i relBlockPos = TrackRegionUtil.toRegionBlockPos(pos);
             trackBlocks.put(relBlockPos, block);
-
-            for (Vec3i offset : block.getPositionsCache()) {
-                Vec3i gagPos = TrackRegionUtil.toRegionBlockPos(relBlockPos.add(offset));
-                List<Vec3i> parents = trackBlockParents.getOrDefault(gagPos, new ArrayList<>());
-                parents.add(relBlockPos);
-                trackBlockParents.put(gagPos, parents);
-            }
-
             needsWriteToDisk = true;
             dirty = true;
         }

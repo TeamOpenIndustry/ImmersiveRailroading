@@ -7,17 +7,20 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class OffWorldMovementTrack {
     private static final int MAX_ITERATIONS = 64;
+    private static final double EPS = 1e-6;
 
     public static void getNextPosition(IRPathingData current, Vec3d motion, double gauge, World world) {
         WorldData data = WorldData.get(world);
         if (data == null) return;
 
         double motionDist = motion.length();
-        if (motionDist < 1e-6) return;
+        if (motionDist < EPS) return;
 
         if (current.getTopoEdge() == null) {
             if (!initCurrent(current, world, gauge)) return;
@@ -25,7 +28,7 @@ public class OffWorldMovementTrack {
 
         double[] posOut = new double[4];
 
-        for (int iter = 0; iter < MAX_ITERATIONS && motionDist > 1e-6; iter++) {
+        for (int iter = 0; iter < MAX_ITERATIONS && motionDist > EPS; iter++) {
             TrackEdge edge = current.getTopoEdge();
             if (edge == null) return;
 
@@ -36,7 +39,7 @@ public class OffWorldMovementTrack {
             double edgeDist = edgeDistance(edge, from, to, world);
 
             // 零长度边（几何重合的 GAP）：不消耗 motionDist，直接切到下一条边
-            if (edgeDist < 1e-9) {
+            if (edgeDist < EPS) {
                 // 优先从 edge.to 侧（假设 motion 顺边方向）；挑不到再从 edge.from 侧（motion 反向）
                 TrackEdge next = pickNextEdgeFrom(data, edge.to, motion, world);
                 if (next == null) {
@@ -53,7 +56,7 @@ public class OffWorldMovementTrack {
 
                 double nextDist = edgeDistance(next, nFrom, nTo, world);
                 double startRoll;
-                if (nextDist < 1e-9) {
+                if (nextDist < EPS) {
                     startRoll = posOut[3];
                 } else {
                     Vec3d nextDir = edgeDirection(next, nFrom, nTo, world);
@@ -112,7 +115,7 @@ public class OffWorldMovementTrack {
 
             double nextDist = edgeDistance(next, nFrom, nTo, world);
             double startRoll;
-            if (nextDist < 1e-9) {
+            if (nextDist < EPS) {
                 startRoll = posOut[3];
             } else {
                 Vec3d nextDir = edgeDirection(next, nFrom, nTo, world);
@@ -184,7 +187,7 @@ public class OffWorldMovementTrack {
         Vec3d offset = singleOffset(from, world);
         VecYPR a = points.get(i);
         double rawRoll;
-        if (frac < 1e-9 || i >= lastIdx) {
+        if (frac < EPS || i >= lastIdx) {
             out[0] = a.x + offset.x;
             out[1] = a.y + offset.y;
             out[2] = a.z + offset.z;
@@ -211,7 +214,7 @@ public class OffWorldMovementTrack {
             double dy = (to.point.y + hTo) - (from.point.y + hFrom);
             double dz = to.point.z - from.point.z;
             double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            if (len < 1e-9) return new Vec3d(0, 0, 1);
+            if (len < EPS) return new Vec3d(0, 0, 1);
             return new Vec3d(dx / len, dy / len, dz / len);
         }
 
@@ -230,7 +233,7 @@ public class OffWorldMovementTrack {
         double dy = b.y - a.y;
         double dz = b.z - a.z;
         double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (len < 1e-9) return new Vec3d(0, 0, 1);
+        if (len < EPS) return new Vec3d(0, 0, 1);
         return new Vec3d(dx / len, dy / len, dz / len);
     }
 
@@ -255,7 +258,7 @@ public class OffWorldMovementTrack {
 
             double eDist = edgeDistance(e, eFrom, eTo, world);
             Vec3d dir;
-            if (eDist < 1e-9) {
+            if (eDist < EPS) {
                 // 零长度边：方向由它的后继边决定，避免假向量污染 cos
                 TrackEdge inner = pickNextEdgeFrom(data, e.to, motion, world, depth + 1);
                 if (inner == null) continue;
@@ -286,11 +289,33 @@ public class OffWorldMovementTrack {
         double maxRadius = Math.max(gauge * 2, 2);
         double maxRadiusSq = maxRadius * maxRadius;
 
+        int hori = Math.max((int)(gauge * 2), 1);
+        int vert = 1;
+
+        Vec3i posBlock = new Vec3i(pos);
+        Set<TrackEdge> candidates = new HashSet<>();
+
+        // 收集 pos 附近所有方块涉及的 region
+        Set<Long> regionsToCheck = new HashSet<>();
+        for (int x = -hori; x <= hori; x++) {
+            for (int y = -vert; y <= vert; y++) {
+                for (int z = -hori; z <= hori; z++) {
+                    Vec3i scan = posBlock.add(x, y, z);
+                    regionsToCheck.add(TrackRegionUtil.vecToRegion(scan));
+                }
+            }
+        }
+
+        for (long r : regionsToCheck) {
+            Set<TrackEdge> list = data.edgesByRegion.get(r);
+            if (list != null) candidates.addAll(list);
+        }
+
         TrackEdge bestEdge = null;
         double bestT = 0;
         double bestDistSq = Double.MAX_VALUE;
 
-        for (TrackEdge edge : data.edges) {//todo
+        for (TrackEdge edge : candidates) {
             TrackNode from = data.nodes.get(edge.from);
             TrackNode to = data.nodes.get(edge.to);
             if (from == null || to == null) continue;
@@ -300,10 +325,10 @@ public class OffWorldMovementTrack {
 
             double[] out = new double[4];
             positionAt(edge, from, to, t, world, out);
-            double dx = out[0] - pos.x;
-            double dy = out[1] - pos.y;
-            double dz = out[2] - pos.z;
-            double d2 = dx * dx + dy * dy + dz * dz;
+            double ddx = out[0] - pos.x;
+            double ddy = out[1] - pos.y;
+            double ddz = out[2] - pos.z;
+            double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
             if (d2 < bestDistSq) {
                 bestDistSq = d2;
                 bestEdge = edge;
@@ -346,7 +371,7 @@ public class OffWorldMovementTrack {
             double ayy = by - ay;
             double az = to.point.z - from.point.z;
             double abLen2 = ax * ax + ayy * ayy + az * az;
-            if (abLen2 < 1e-9) return -1;
+            if (abLen2 < EPS) return -1;
             double t = ((pos.x - from.point.x) * ax + (pos.y - ay) * ayy + (pos.z - from.point.z) * az) / abLen2;
             t = Math.max(0, Math.min(1, t));
             double cx = from.point.x + ax * t - pos.x;
@@ -378,7 +403,7 @@ public class OffWorldMovementTrack {
             double bx = pb.x + offset.x, by = pb.y + offset.y, bz = pb.z + offset.z;
             double dx = bx - ax, dy = by - ay, dz = bz - az;
             double segLen2 = dx * dx + dy * dy + dz * dz;
-            if (segLen2 < 1e-9) continue;
+            if (segLen2 < EPS) continue;
             double tt = ((pos.x - ax) * dx + (pos.y - ay) * dy + (pos.z - az) * dz) / segLen2;
             if (tt < 0) tt = 0;
             if (tt > 1) tt = 1;
