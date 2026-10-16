@@ -258,6 +258,16 @@ public class Config {
 		public static int megabytesReservedPerStockLoadingThread = 1024;
 	}
 
+	@Name("region")
+	public static class ConfigRegion {
+		public static int refreshIntervalTicks = 20;
+		public static double vehicleRadiusMin = 64;
+		public static double vehicleRadiusPerSpeed = 1.0;
+		public static double vehicleLookAheadFactor = 3;
+		public static double playerRadius = 256;
+		public static int unloadDelayTicks = 600;
+	}
+
 	@Name("debug")
 	public static class ConfigDebug {
 

@@ -1,6 +1,8 @@
 package cam72cam.immersiverailroading.net;
 
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.track.graph.TrackRegion;
+import cam72cam.immersiverailroading.track.graph.TrackRegionUtil;
 import cam72cam.immersiverailroading.track.graph.WorldData;
 import cam72cam.mod.net.Packet;
 import cam72cam.mod.serialization.TagField;
@@ -37,6 +39,7 @@ public class TrackRegionPacket extends Packet {
         if (raw == null || raw.length == 0) {
             synchronized (data.regions) {
                 data.regions.remove(id);
+                ImmersiveRailroading.info("region %s,%s unloaded", TrackRegionUtil.regionX(id), TrackRegionUtil.regionZ(id));
             }
             return;
         }
@@ -44,6 +47,7 @@ public class TrackRegionPacket extends Packet {
         TrackRegion region = new TrackRegion(id, ByteBuffer.wrap(raw), world);
         synchronized (data.regions) {
             data.regions.put(id, region);
+            ImmersiveRailroading.info("region %s,%s loaded", TrackRegionUtil.regionX(id), TrackRegionUtil.regionZ(id));
         }
 
         data.rebuildTopologyAround(id);

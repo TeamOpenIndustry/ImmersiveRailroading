@@ -183,6 +183,114 @@ public class VolumetricCurveRenderer {
         }
 
         renderGaps(world, state);
+        // renderWireFrame 里在 renderGaps(world, state); 之前或之后加：
+
+        renderRegionBounds(world, state);
+    }
+
+    public static void renderRegionBounds(World world, RenderState state) {
+        WorldData data = WorldData.get(world);
+        if (data == null) return;
+
+        Vec3d playerPosition = MinecraftClient.getPlayer().getPosition();
+
+        for (long regionId : data.regions.keySet()) {
+            int rx = TrackRegionUtil.regionX(regionId);
+            int rz = TrackRegionUtil.regionZ(regionId);
+            int minX = rx << 9;
+            int minZ = rz << 9;
+            int maxX = minX + 512;
+            int maxZ = minZ + 512;
+
+            double centerX = minX + 256;
+            double centerZ = minZ + 256;
+            double dx = playerPosition.x - centerX;
+            double dz = playerPosition.z - centerZ;
+            if (dx * dx + dz * dz > 1024 * 1024) continue;
+
+            int y0 = 0;
+            int y1 = 256;
+
+            Vec3d[] corners = {
+                    new Vec3d(minX, y0, minZ),
+                    new Vec3d(maxX, y0, minZ),
+                    new Vec3d(maxX, y0, maxZ),
+                    new Vec3d(minX, y0, maxZ),
+                    new Vec3d(minX, y1, minZ),
+                    new Vec3d(maxX, y1, minZ),
+                    new Vec3d(maxX, y1, maxZ),
+                    new Vec3d(minX, y1, maxZ),
+            };
+
+            int[][] edges = {
+                    {0, 1}, {1, 2}, {2, 3}, {3, 0},
+                    {4, 5}, {5, 6}, {6, 7}, {7, 4},
+                    {0, 4}, {1, 5}, {2, 6}, {3, 7},
+            };
+
+            DirectDraw draw = new DirectDraw();
+
+            // 外框
+            for (int[] e : edges) {
+                appendLineQuad(draw, corners[e[0]], corners[e[1]], Color.YELLOW, 1 / 4f);
+            }
+
+            // 网格间距
+            final int step = 16;
+
+            // 底面 y=y0 与顶面 y=y1
+            for (int y : new int[]{y0, y1}) {
+                for (int x = minX + step; x < maxX; x += step) {
+                    appendLineQuad(draw,
+                            new Vec3d(x, y, minZ),
+                            new Vec3d(x, y, maxZ),
+                            Color.YELLOW, 1 / 16f);
+                }
+                for (int z = minZ + step; z < maxZ; z += step) {
+                    appendLineQuad(draw,
+                            new Vec3d(minX, y, z),
+                            new Vec3d(maxX, y, z),
+                            Color.YELLOW, 1 / 16f);
+                }
+            }
+
+            // 四个侧面
+            // x = minX 和 x = maxX 面：沿 z 与 y 布网格
+            for (int x : new int[]{minX, maxX}) {
+                for (int z = minZ + step; z < maxZ; z += step) {
+                    appendLineQuad(draw,
+                            new Vec3d(x, y0, z),
+                            new Vec3d(x, y1, z),
+                            Color.YELLOW, 1 / 16f);
+                }
+                for (int y = y0 + step; y < y1; y += step) {
+                    appendLineQuad(draw,
+                            new Vec3d(x, y, minZ),
+                            new Vec3d(x, y, maxZ),
+                            Color.YELLOW, 1 / 16f);
+                }
+            }
+
+            // z = minZ 和 z = maxZ 面：沿 x 与 y 布网格
+            for (int z : new int[]{minZ, maxZ}) {
+                for (int x = minX + step; x < maxX; x += step) {
+                    appendLineQuad(draw,
+                            new Vec3d(x, y0, z),
+                            new Vec3d(x, y1, z),
+                            Color.YELLOW, 1 / 16f);
+                }
+                for (int y = y0 + step; y < y1; y += step) {
+                    appendLineQuad(draw,
+                            new Vec3d(minX, y, z),
+                            new Vec3d(maxX, y, z),
+                            Color.YELLOW, 1 / 16f);
+                }
+            }
+
+            draw.draw(state.clone().texture(Texture.wrap(lineImg))
+                    .alpha_test(false)
+                    .blend(new BlendMode(BlendMode.GL_SRC_ALPHA, BlendMode.GL_ONE_MINUS_SRC_ALPHA)));
+        }
     }
 
     public static void renderGaps(World world, RenderState state) {

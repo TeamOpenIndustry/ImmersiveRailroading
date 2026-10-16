@@ -147,11 +147,11 @@ public class TrackRegionUtil {
         return (x << 32) | (z & 0xFFFFFFFFL);
     }
 
-    static int regionX(long region) {
+    public static int regionX(long region) {
         return (int) (region >> 32);
     }
 
-    static int regionZ(long region) {
+    public static int regionZ(long region) {
         return (int) region;
     }
 }

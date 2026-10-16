@@ -1,13 +1,14 @@
 package cam72cam.immersiverailroading.track.graph;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.net.TrackRegionPacket;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.world.World;
-import net.minecraft.util.math.Vec3d;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,22 +19,23 @@ import static cam72cam.immersiverailroading.track.graph.TrackRegionUtil.vecToReg
 public class WorldData {
     private final World world;
     private final File directory;
-    public final Map<Long, TrackRegion> regions;//todo 客户端如何申请获取某处的region，另外现在还没做unload region，做了会需要处理很多问题
+    public final Map<Long, TrackRegion> regions;
 
     private final static Map<World, WorldData> LOADED = new HashMap<>();
 
-    // 拓扑层 todo 这三个东西虽然还不完全确定，不过应该也大差不差，不会少于这些
+    // 拓扑层
     public final Map<TrackNodeId, TrackNode> nodes = new HashMap<>();
-    final Map<TrackNodeId, List<TrackEdge>> outgoing = new HashMap<>();// 为了更新node时能及时更新相关边
+    final Map<TrackNodeId, List<TrackEdge>> outgoing = new HashMap<>();
     public final Set<TrackEdge> edges = new HashSet<>();
 
-    public final Map<Long, Set<TrackEdge>> edgesByRegion = new HashMap<>();// 边的region索引，先不放region里了方便管理
+    public final Map<Long, Set<TrackEdge>> edgesByRegion = new HashMap<>();
 
     // 按 region 分桶的占位方块索引
-    // 外层 key: region id
-    // 内层 key: 占位方块绝对坐标
-    // 内层 value: 覆盖该方块的 parent 方块绝对坐标列表
     public final Map<Long, Map<Vec3i, List<Vec3i>>> trackBlockParentsByRegion = new HashMap<>();
+
+    // region 生命周期
+    private final Map<Long, Integer> regionCooldown = new HashMap<>();
+    private int regionRefreshCounter = 0;
 
     private WorldData(World world, File worldDirectory) {
         this.world = world;
@@ -60,6 +62,7 @@ public class WorldData {
                         TrackRegion region = new TrackRegion(id, TrackRegionUtil.readBuffer(file), world);
                         synchronized (regions) {
                             regions.put(id, region);
+                            ImmersiveRailroading.info("region %s,%s loaded", TrackRegionUtil.regionX(id), TrackRegionUtil.regionZ(id));
                         }
                     } catch (IOException | NumberFormatException e) {
                         throw new RuntimeException(e);
@@ -81,7 +84,6 @@ public class WorldData {
     }
 
     public static WorldData getOrCreate(World world) {
-        // client only
         return LOADED.computeIfAbsent(world, w -> new WorldData(w, null));
     }
 
@@ -102,6 +104,7 @@ public class WorldData {
             if (region == null && create) {
                 region = new TrackRegion(id);
                 regions.put(id, region);
+                ImmersiveRailroading.info("region %s,%s loaded", TrackRegionUtil.regionX(id), TrackRegionUtil.regionZ(id));
             }
             return region;
         }
@@ -117,6 +120,7 @@ public class WorldData {
 
     public void setTrackBlock(Vec3i pos, TrackMultiGeometrySegment block) {
         long regionId = vecToRegion(pos);
+        ensureRegionLoaded(regionId);
         TrackRegion region = getRegionById(regionId, true);
 
         TrackMultiGeometrySegment old = region.getTrackBlock(pos);
@@ -213,7 +217,6 @@ public class WorldData {
                 File file = regionFile(entry.getKey());
 
                 if (region.isEmpty()) {
-                    // remove from disk and ram
                     if (file.exists() && !file.delete()) {
                         throw new RuntimeException(String.format("Unable to delete empty region file %s!", file));
                     }
@@ -260,7 +263,7 @@ public class WorldData {
     public static void unload(World world, File levelDirectory) {
         ImmersiveRailroading.info("Unload Level %s / %s", levelDirectory.toString(), world.getId());
         synchronized (LOADED) {
-            LOADED.remove(world);//todo 客户端的unload没有覆盖到或者没生效
+            LOADED.remove(world);
         }
     }
 
@@ -271,22 +274,18 @@ public class WorldData {
         }
     }
 
-    private final Map<Player, Set<Long>> playerRegionMap = new HashMap<>();//todo: sync
+    private final Map<Player, Set<Long>> playerRegionMap = new HashMap<>();
     private void tick() {
         if (world.isServer) {
             List<Player> players = world.getEntities(Player.class);
 
-            // cull players who have left this world
             List<Player> removedPlayers = new ArrayList<>(playerRegionMap.keySet());
             removedPlayers.removeAll(players);
             for (Player removedPlayer : removedPlayers) {
                 playerRegionMap.remove(removedPlayer);
             }
 
-            // This assumes the client *never* culls the region map
-            // Also, this does not work for client pathing super large switches... probably fine for now?
             for (Player player : players) {
-                // Should we wait for at least one tick existed?
                 Set<Long> sentRegions = playerRegionMap.computeIfAbsent(player, p -> new HashSet<>());
                 Set<Long> trackingRegions = new HashSet<>();
                 int radius = 16;
@@ -315,10 +314,179 @@ public class WorldData {
             for (TrackRegion region : regions.values()) {
                 region.dirty = false;
             }
+
+            // region 生命周期刷新
+            if (++regionRefreshCounter >= Config.ConfigRegion.refreshIntervalTicks) {
+                regionRefreshCounter = 0;
+                refreshRegions();
+            }
         }
     }
 
-    //todo 拓扑层草稿代码，简单情况已经初步实现，需要继续完善
+    // =============== region 生命周期 ===============
+
+    private void refreshRegions() {
+        Set<Long> required = computeRequiredRegions();
+
+        for (long r : required) {
+            ensureRegionLoaded(r);
+        }
+
+        for (long r : new ArrayList<>(regions.keySet())) {
+            if (required.contains(r)) {
+                regionCooldown.put(r, Config.ConfigRegion.unloadDelayTicks);
+            } else {
+                int cd = regionCooldown.getOrDefault(r, 0) - Config.ConfigRegion.refreshIntervalTicks;
+                if (cd <= 0) {
+                    unloadRegion(r);
+                    regionCooldown.remove(r);
+                } else {
+                    regionCooldown.put(r, cd);
+                }
+            }
+        }
+    }
+
+    private Set<Long> computeRequiredRegions() {
+        Set<Long> required = new HashSet<>();
+
+        for (Player player : world.getEntities(Player.class)) {
+            required.addAll(regionsInRadius(player.getPosition(), Config.ConfigRegion.playerRadius));
+        }
+
+        for (VehicleRef ref : vehicleRefs.values()) {
+            double speed = ref.velocity.length();
+            double radius = Config.ConfigRegion.vehicleRadiusMin
+                    + speed * Config.ConfigRegion.vehicleRadiusPerSpeed;
+
+            required.addAll(regionsInRadius(ref.pos, radius));
+
+            if (speed > 0.1) {
+                double ahead = speed * Config.ConfigRegion.vehicleLookAheadFactor
+                        * Config.ConfigRegion.refreshIntervalTicks / 20.0;
+                Vec3d dir = ref.velocity.scale(1.0 / speed);
+                required.addAll(regionsInRadius(ref.pos.add(dir.scale(ahead)), radius));
+            }
+        }
+
+        return required;
+    }
+
+    private Set<Long> regionsInRadius(Vec3d center, double radius) {
+        int blockRadius = (int) Math.ceil(radius);
+        int cx = (int) Math.floor(center.x);
+        int cz = (int) Math.floor(center.z);
+        int minRX = (cx - blockRadius) >> 9;
+        int maxRX = (cx + blockRadius) >> 9;
+        int minRZ = (cz - blockRadius) >> 9;
+        int maxRZ = (cz + blockRadius) >> 9;
+
+        Set<Long> result = new HashSet<>();
+        for (int rx = minRX; rx <= maxRX; rx++) {
+            for (int rz = minRZ; rz <= maxRZ; rz++) {
+                result.add(((long) rx << 32) | (rz & 0xFFFFFFFFL));
+            }
+        }
+        return result;
+    }
+
+    private void ensureRegionLoaded(long r) {
+        if (regions.containsKey(r)) return;
+        if (directory == null) return;   // 客户端不加载磁盘
+
+        File f = regionFile(r);
+        if (!f.exists()) {
+            return;
+        }
+
+        try {
+            TrackRegion region = new TrackRegion(r, TrackRegionUtil.readBuffer(f), world);
+            synchronized (regions) {
+                regions.put(r, region);
+                ImmersiveRailroading.info("region %s,%s loaded", TrackRegionUtil.regionX(r), TrackRegionUtil.regionZ(r));
+            }
+
+            // 1. parent 索引
+            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+                Vec3i parentAbs = region.toBlockPos(e.getKey());
+                addTrackBlockToParents(parentAbs, e.getValue());
+            }
+
+            // 2. 建 R 自身拓扑（含 R → 邻接 的 GAP）
+            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+                Vec3i parentAbs = region.toBlockPos(e.getKey());
+                buildTopologyFor(parentAbs, e.getValue());
+            }
+
+            // 3. 触发邻接重新发现 R（建立 邻接 → R 的 GAP）
+            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+                Vec3i parentAbs = region.toBlockPos(e.getKey());
+                researchNeighbors(parentAbs);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void unloadRegion(long r) {
+        TrackRegion region = regions.get(r);
+        if (region == null) return;
+
+        // 1. 清拓扑：from 或 to 在 r 里的所有边和节点
+        clearTopologyInRegion(r);
+
+        // 2. 清 parent 索引
+        trackBlockParentsByRegion.remove(r);
+
+        // 3. 需要持久化的写盘
+        if (region.needsWriteToDisk && directory != null) {
+            try {
+                File file = regionFile(r);
+                if (region.isEmpty()) {
+                    if (file.exists() && !file.delete()) {
+                        ImmersiveRailroading.warn("Unable to delete empty region file %s", file);
+                    }
+                } else {
+                    TrackRegionUtil.writeBuffer(file, region.write());
+                    region.needsWriteToDisk = false;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // 4. 移除
+        regions.remove(r);
+        ImmersiveRailroading.info("region %s,%s unloaded", TrackRegionUtil.regionX(r), TrackRegionUtil.regionZ(r));
+    }
+
+    private void clearTopologyInRegion(long regionId) {
+        Set<TrackNodeId> regionNodes = new HashSet<>();
+        for (TrackNodeId id : nodes.keySet()) {
+            if (id.regionPos == regionId) regionNodes.add(id);
+        }
+        if (regionNodes.isEmpty()) return;
+
+        Set<TrackEdge> toRemove = new HashSet<>();
+        for (TrackNodeId id : regionNodes) {
+            List<TrackEdge> out = outgoing.get(id);
+            if (out != null) toRemove.addAll(out);
+        }
+        for (List<TrackEdge> list : outgoing.values()) {
+            for (TrackEdge e : list) {
+                if (regionNodes.contains(e.to)) toRemove.add(e);
+            }
+        }
+
+        for (TrackEdge e : toRemove) removeEdge(e);
+        for (TrackNodeId id : regionNodes) {
+            nodes.remove(id);
+            outgoing.remove(id);
+        }
+    }
+
+    // =============== 拓扑构建 ===============
+
     protected void buildTopologyFor(Vec3i absPos, TrackMultiGeometrySegment block) {
         for (int pathIndex = 0; pathIndex < block.paths.size(); pathIndex++) {
             Map<Gauge, TrackSingleGeometrySegment> branch = block.paths.get(pathIndex);
@@ -327,17 +495,14 @@ public class WorldData {
                 int lastIdx = single.pointsCache.size() - 1;
 
                 if (lastIdx > 0) {
-                    // start 节点：自身 yaw 指向 single 内部，离开 single 要用 backward
                     TrackNode startNode = new TrackNode(single, 0, world, absPos);
                     addNode(startNode);
                     searchAndAddGap(single, false);
 
-                    // end 节点：自身 yaw 仍指向 single 内部（从 start 到 end 方向），离开 single 要用 forward
                     TrackNode endNode = new TrackNode(single, lastIdx, world, absPos);
                     addNode(endNode);
                     searchAndAddGap(single, true);
 
-                    // single 内部双向 NORMAL 边
                     addEdge(startNode.id, endNode.id, TrackEdge.EdgeType.NORMAL);
                     addEdge(endNode.id, startNode.id, TrackEdge.EdgeType.NORMAL);
                 }
@@ -345,7 +510,7 @@ public class WorldData {
         }
     }
 
-    private void searchAndAddGap(TrackSingleGeometrySegment single, boolean isNear) {//todo 还没加上point只有1个点的支持，之后加，当然调用方也是
+    private void searchAndAddGap(TrackSingleGeometrySegment single, boolean isNear) {
         int lastIdx = single.pointsCache.size() - 1;
         if (lastIdx <= 0) return;
 
@@ -370,10 +535,9 @@ public class WorldData {
             TrackNode otherStartNode = new TrackNode(other.trackSingleGeometrySegment, 0, world, otherAbsPos);
             TrackNode otherEndNode = new TrackNode(other.trackSingleGeometrySegment, otherLastIdx, world, otherAbsPos);
 
-            Vec3d gapDir = other.point.subtract(node.point).internal();
+            Vec3d gapDir = other.point.subtract(node.point);
             double gapLen = gapDir.length();
             if (gapLen < 1e-6) {
-                // gap 两端重合，用 node 所在 single 的端点邻点方向代替
                 List<VecYPR> nodePoints = node.trackSingleGeometrySegment.pointsCache;
                 VecYPR a;
                 VecYPR b;
@@ -435,7 +599,6 @@ public class WorldData {
             edge.coveringRegions.addAll(regionsForParent(fromAbs));
             edge.coveringRegions.addAll(regionsForParent(toAbs));
         } else {
-            // NORMAL：两端同 single，用一端即可
             edge.coveringRegions.addAll(regionsForParent(fromAbs));
         }
 
@@ -466,25 +629,18 @@ public class WorldData {
         }
         if (affected.isEmpty()) return;
 
-        // 收集所有涉及这些节点的边：出边 + 指向它们的所有入边
         Set<TrackEdge> toRemove = new HashSet<>();
         for (TrackNodeId id : affected) {
             List<TrackEdge> out = outgoing.get(id);
-            if (out != null) {
-                toRemove.addAll(out);
-            }
+            if (out != null) toRemove.addAll(out);
         }
         for (List<TrackEdge> list : outgoing.values()) {
             for (TrackEdge e : list) {
-                if (affected.contains(e.to)) {
-                    toRemove.add(e);
-                }
+                if (affected.contains(e.to)) toRemove.add(e);
             }
         }
 
-        for (TrackEdge e : toRemove) {
-            removeEdge(e);
-        }
+        for (TrackEdge e : toRemove) removeEdge(e);
 
         for (TrackNodeId id : affected) {
             nodes.remove(id);
@@ -505,7 +661,6 @@ public class WorldData {
         }
     }
 
-    //下面3个目前是客户端only
     public void rebuildTopologyAround(long regionId) {
         int rx = TrackRegionUtil.regionX(regionId);
         int rz = TrackRegionUtil.regionZ(regionId);
@@ -521,7 +676,6 @@ public class WorldData {
     }
 
     protected void rebuildTopologyForRegion(TrackRegion region) {
-        // 清掉本 region 的节点
         Set<TrackNodeId> regionNodes = new HashSet<>();
         for (TrackNodeId id : nodes.keySet()) {
             if (id.regionPos == region.regionPos) {
@@ -529,7 +683,6 @@ public class WorldData {
             }
         }
         for (TrackNodeId id : regionNodes) {
-            // 清掉以它为一端的出边和指向它的入边
             List<TrackEdge> out = outgoing.get(id);
             if (out != null) {
                 for (TrackEdge e : new ArrayList<>(out)) {
@@ -547,7 +700,6 @@ public class WorldData {
             outgoing.remove(id);
         }
 
-        // 重建
         buildTopologyForRegion(region);
     }
 
@@ -604,5 +756,20 @@ public class WorldData {
             regions.add(TrackRegionUtil.vecToRegion(parentAbs));
         }
         return regions;
+    }
+
+    // =============== 车辆引用 ===============
+
+    public static class VehicleRef {
+        public final Vec3d pos;
+        public final Vec3d velocity;
+        public VehicleRef(Vec3d pos, Vec3d velocity) { this.pos = pos; this.velocity = velocity; }
+    }
+
+    private final Map<UUID, VehicleRef> vehicleRefs = new HashMap<>();
+
+    public void updateVehicleRefs(Map<UUID, VehicleRef> refs) {
+        vehicleRefs.clear();
+        vehicleRefs.putAll(refs);
     }
 }

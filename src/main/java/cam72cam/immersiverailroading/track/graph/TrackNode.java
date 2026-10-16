@@ -13,12 +13,6 @@ import java.util.Map;
 
 public class TrackNode {
     public final TrackNodeId id;
-    // 运行时缓存，不参与持久化
-    //todo 持久化，
-    // 另外上级trackBlock相关更新了怎么办？
-    // 不过其实建立连接应当是由那边发起并且维护的这样才靠谱，那么我们还需要edge吗，还是拓展trackBlock那边呢
-    // 我们目前认为应当由于region持有拓扑
-    // 目前先不持久化拓扑层，等结构稳定后再看
     private final long regionPos;// addition, not necessary
     private final Vec3i regionBlockPos;// addition, not necessary
 

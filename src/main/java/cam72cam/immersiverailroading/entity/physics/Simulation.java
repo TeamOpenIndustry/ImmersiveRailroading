@@ -7,6 +7,7 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.track.graph.WorldData;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -348,6 +349,13 @@ public class Simulation {
 
         // calculate new velocities
         Consist.iterate(stateMap, nextStateMap, blocksAlreadyBroken);
+
+        // push car pos to worldData todo
+        Map<UUID, WorldData.VehicleRef> refs = new HashMap<>();
+        for (EntityCoupleableRollingStock stock : loaded) {
+            refs.put(stock.getUUID(), new WorldData.VehicleRef(stock.getPosition(), stock.getVelocity()));
+        }
+        WorldData.get(world).updateVehicleRefs(refs);
 
         long totalTimeMs = System.currentTimeMillis() - startTimeMs;
         if (totalTimeMs > Config.ConfigDebug.physicsWarnThresholdMs) {
