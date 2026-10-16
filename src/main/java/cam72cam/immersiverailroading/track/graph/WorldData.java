@@ -481,22 +481,52 @@ public class WorldData {
     }
 
     private void researchNeighbors(Vec3i newAbsPos) {
-        double radius = 4.0;
-        double radiusSq = radius * radius;
+        TrackMultiGeometrySegment newBlock = getTrackBlock(newAbsPos);
+        if (newBlock == null) return;
+        if (newBlock.paths.isEmpty()) return;
 
-        List<TrackNode> nearbyEndpoints = new ArrayList<>();
-        for (TrackNode n : nodes.values()) {
-            int lastIdx = n.trackSingleGeometrySegment.pointsCache.size() - 1;
-            if (n.index != 0 && n.index != lastIdx) continue;
-            Vec3i absPos = TrackRegionUtil.toBlockPos(n.id.regionPos, n.id.regionBlockPos);
-            if (new Vec3d(newAbsPos.internal()).squareDistanceTo(new Vec3d(absPos.internal())) > radiusSq) continue;
-            nearbyEndpoints.add(n);
+        // 用轨距决定外扩半径，和 getConn 一致
+        double gaugeScale = newBlock.paths.get(0).values().iterator().next().gauge.scale();
+        int hori = Math.max((int) (gaugeScale * 2), 1);
+        int vert = 1;
+
+        Set<TrackMultiGeometrySegment> nearbyBlocks = new LinkedHashSet<>();
+
+        // 遍历新块几何覆盖的每个方块（positionsCache 是相对 newAbsPos 的偏移）
+        for (Vec3i rel : newBlock.getPositionsCache()) {
+            Vec3i coverAbs = newAbsPos.add(rel);
+            for (int x = -hori; x <= hori; x++) {
+                for (int y = -vert; y <= vert; y++) {
+                    for (int z = -hori; z <= hori; z++) {
+                        Vec3i scan = coverAbs.add(x, y, z);
+                        TrackRegion region = getRegion(scan, false);
+                        if (region == null) continue;
+
+                        List<Vec3i> parents = region.trackBlockParents.get(
+                                TrackRegionUtil.toRegionBlockPos(scan));
+                        if (parents == null) continue;
+
+                        for (Vec3i parentRelPos : parents) {
+                            Vec3i absPos = region.toBlockPos(parentRelPos);
+                            TrackMultiGeometrySegment block = getTrackBlock(absPos);
+                            if (block != null) {
+                                nearbyBlocks.add(block);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        for (TrackNode n : nearbyEndpoints) {
-            TrackSingleGeometrySegment single = n.trackSingleGeometrySegment;
-            boolean isNear = (n.index == 0);
-            searchAndAddGap(single, isNear);
+        // 先收集完再处理，避免遍历过程中修改 nodes/edges 影响集合
+        for (TrackMultiGeometrySegment block : nearbyBlocks) {
+            for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
+                for (TrackSingleGeometrySegment single : branch.values()) {
+                    if (single.pointsCache.size() <= 1) continue;
+                    searchAndAddGap(single, true);
+                    searchAndAddGap(single, false);
+                }
+            }
         }
     }
 }

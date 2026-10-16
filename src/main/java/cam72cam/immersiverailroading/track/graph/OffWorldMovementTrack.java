@@ -20,7 +20,7 @@ public class OffWorldMovementTrack {
         if (motionDist < 1e-6) return;
 
         if (current.getTopoEdge() == null) {
-            if (!initCurrent(current, world, motion, gauge)) return;
+            if (!initCurrent(current, world, gauge)) return;
         }
 
         double[] posOut = new double[4];
@@ -278,7 +278,7 @@ public class OffWorldMovementTrack {
 
     // ==================== 初始化 ====================
 
-    public static boolean initCurrent(IRPathingData current, World world, Vec3d motion, double gauge) {
+    public static boolean initCurrent(IRPathingData current, World world, double gauge) {
         WorldData data = WorldData.get(world);
         if (data == null) return false;
 
@@ -290,7 +290,7 @@ public class OffWorldMovementTrack {
         double bestT = 0;
         double bestDistSq = Double.MAX_VALUE;
 
-        for (TrackEdge edge : data.edges) {
+        for (TrackEdge edge : data.edges) {//todo
             TrackNode from = data.nodes.get(edge.from);
             TrackNode to = data.nodes.get(edge.to);
             if (from == null || to == null) continue;
