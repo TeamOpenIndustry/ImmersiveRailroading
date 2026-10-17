@@ -77,16 +77,19 @@ public class TrackNode {
                                 double maxDist = seg.gauge.value();
                                 for (int i = 0; i < points.size(); i++) {
                                     // 跳过 turnStart（岔尖由 hub↔turnStart GAP 专门处理）
-                                    if (seg.switchIdex > 0 && i == 0) continue;
+//                                    if (seg.switchIdex > 0 && i == 0) continue;
 
                                     VecYPR cand = points.get(i)
-                                            .add(new Vec3d(parentPos))
+                                            .add(new Vec3d(seg.getBlockPos()))
                                             .add(seg.getAndUpdateBuilder(world).info.placementInfo.placementPosition);
 
                                     double d = cand.distanceTo(this.point);
                                     if (d >= maxDist) continue;
 
                                     if (d < 1e-3) {
+                                        if (seg == this.trackSingleGeometrySegment && i == this.index) {
+                                            continue;
+                                        }
                                         return new TrackNode(seg, i, world);
                                     }
 

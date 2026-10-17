@@ -142,29 +142,40 @@ public class WorldData {
     }
 
     private void addTrackBlockToParents(Vec3i parentAbs, TrackMultiGeometrySegment block) {
-        for (Vec3i offset : block.getPositionsCache()) {
-            Vec3i occupiedAbs = parentAbs.add(offset);
-            long r = TrackRegionUtil.vecToRegion(occupiedAbs);
-            trackBlockParentsByRegion
-                    .computeIfAbsent(r, k -> new HashMap<>())
-                    .computeIfAbsent(occupiedAbs, k -> new ArrayList<>())
-                    .add(parentAbs);
+        // 遍历道岔/普通轨道的所有 path
+        for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
+            for (TrackSingleGeometrySegment single : branch.values()) {
+                Vec3i basePos = single.getBlockPos();
+                for (Vec3i offset : single.positionsCache) {
+                    Vec3i occupiedAbs = basePos.add(offset);
+                    long r = TrackRegionUtil.vecToRegion(occupiedAbs);
+                    trackBlockParentsByRegion
+                            .computeIfAbsent(r, k -> new HashMap<>())
+                            .computeIfAbsent(occupiedAbs, k -> new ArrayList<>())
+                            .add(parentAbs); // 索引里存的是父方块坐标
+                }
+            }
         }
     }
 
     private void removeTrackBlockFromParents(Vec3i parentAbs, TrackMultiGeometrySegment block) {
-        for (Vec3i offset : block.getPositionsCache()) {
-            Vec3i occupiedAbs = parentAbs.add(offset);
-            long r = TrackRegionUtil.vecToRegion(occupiedAbs);
-            Map<Vec3i, List<Vec3i>> regionMap = trackBlockParentsByRegion.get(r);
-            if (regionMap == null) continue;
+        for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
+            for (TrackSingleGeometrySegment single : branch.values()) {
+                Vec3i basePos = single.getBlockPos();
+                for (Vec3i offset : single.positionsCache) {
+                    Vec3i occupiedAbs = basePos.add(offset);
+                    long r = TrackRegionUtil.vecToRegion(occupiedAbs);
+                    Map<Vec3i, List<Vec3i>> regionMap = trackBlockParentsByRegion.get(r);
+                    if (regionMap == null) continue;
 
-            List<Vec3i> parents = regionMap.get(occupiedAbs);
-            if (parents != null) {
-                parents.remove(parentAbs);
-                if (parents.isEmpty()) regionMap.remove(occupiedAbs);
+                    List<Vec3i> parents = regionMap.get(occupiedAbs);
+                    if (parents != null) {
+                        parents.remove(parentAbs);
+                        if (parents.isEmpty()) regionMap.remove(occupiedAbs);
+                    }
+                    if (regionMap.isEmpty()) trackBlockParentsByRegion.remove(r);
+                }
             }
-            if (regionMap.isEmpty()) trackBlockParentsByRegion.remove(r);
         }
     }
 
@@ -468,7 +479,13 @@ public class WorldData {
     private void clearTopologyInRegion(long regionId) {
         Set<TrackNodeId> regionNodes = new HashSet<>();
         for (TrackNodeId id : nodes.keySet()) {
-            if (id.regionPos == regionId) regionNodes.add(id);
+            TrackNode node = nodes.get(id);
+            if (node == null) continue;
+
+            Vec3i parentAbs = node.trackSingleGeometrySegment.parentAbsPos;
+            if (TrackRegionUtil.vecToRegion(parentAbs) == regionId) {
+                regionNodes.add(id);
+            }
         }
         if (regionNodes.isEmpty()) return;
 
@@ -579,8 +596,6 @@ public class WorldData {
         int lastIdx = single.pointsCache.size() - 1;
         if (lastIdx <= 0) return;
 
-        Vec3i absPos = single.getBlockPos();
-
         TrackNode startNode = new TrackNode(single, 0, world);
         TrackNode endNode = new TrackNode(single, lastIdx, world);
 
@@ -589,6 +604,10 @@ public class WorldData {
 
         boolean forward = !isNear;
         TrackNode other = node.getConn(world, forward);
+        if (other == null && single.switchIdex > 0 && !isNear) {
+            other = node.getConn(world, false);
+        }
+
         if (other == null || other.id.equals(node.id)) return;
 
         addNode(other);
@@ -596,7 +615,6 @@ public class WorldData {
 
         int otherLastIdx = other.trackSingleGeometrySegment.pointsCache.size() - 1;
         if (other.index != 0 && other.index != otherLastIdx) {
-            Vec3i otherAbsPos = TrackRegionUtil.toBlockPos(other.id.regionPos, other.id.regionBlockPos);
             TrackNode otherStartNode = new TrackNode(other.trackSingleGeometrySegment, 0, world);
             TrackNode otherEndNode = new TrackNode(other.trackSingleGeometrySegment, otherLastIdx, world);
 
@@ -658,13 +676,16 @@ public class WorldData {
 
         outgoing.computeIfAbsent(from, k -> new ArrayList<>()).add(edge);
 
-        Vec3i fromAbs = TrackRegionUtil.toBlockPos(from.regionPos, from.regionBlockPos);
+        TrackNode fromNode = nodes.get(from);
+        TrackNode toNode = nodes.get(to);
+        if (fromNode == null || toNode == null) return;
+
+        Vec3i fromParentAbs = fromNode.trackSingleGeometrySegment.parentAbsPos;
+        edge.coveringRegions.addAll(regionsForParent(fromParentAbs));
+
         if (type == TrackEdge.EdgeType.GAP) {
-            Vec3i toAbs = TrackRegionUtil.toBlockPos(to.regionPos, to.regionBlockPos);
-            edge.coveringRegions.addAll(regionsForParent(fromAbs));
-            edge.coveringRegions.addAll(regionsForParent(toAbs));
-        } else {
-            edge.coveringRegions.addAll(regionsForParent(fromAbs));
+            Vec3i toParentAbs = toNode.trackSingleGeometrySegment.parentAbsPos;
+            edge.coveringRegions.addAll(regionsForParent(toParentAbs));
         }
 
         for (long r : edge.coveringRegions) {
@@ -688,7 +709,12 @@ public class WorldData {
     protected void removeTopologyFor(long regionId, Vec3i relBlockPos) {
         Set<TrackNodeId> affected = new HashSet<>();
         for (TrackNodeId id : nodes.keySet()) {
-            if (id.regionPos == regionId && id.regionBlockPos.equals(relBlockPos)) {
+            TrackNode node = nodes.get(id);
+            if (node == null) continue;
+
+            Vec3i parentAbs = node.trackSingleGeometrySegment.parentAbsPos;
+            if (TrackRegionUtil.vecToRegion(parentAbs) == regionId
+                    && TrackRegionUtil.toRegionBlockPos(parentAbs).equals(relBlockPos)) {
                 affected.add(id);
             }
         }
@@ -764,7 +790,11 @@ public class WorldData {
     protected void rebuildTopologyForRegion(TrackRegion region) {
         Set<TrackNodeId> regionNodes = new HashSet<>();
         for (TrackNodeId id : nodes.keySet()) {
-            if (id.regionPos == region.regionPos) {
+            TrackNode node = nodes.get(id);
+            if (node == null) continue;
+
+            Vec3i parentAbs = node.trackSingleGeometrySegment.parentAbsPos;
+            if (TrackRegionUtil.vecToRegion(parentAbs) == region.regionPos) {
                 regionNodes.add(id);
             }
         }

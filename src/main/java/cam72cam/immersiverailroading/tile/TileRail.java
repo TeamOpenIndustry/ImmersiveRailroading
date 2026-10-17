@@ -74,6 +74,12 @@ public class TileRail extends TileRailBase {
 			info = info.with(b -> b.switchState = state);
 			this.markDirty();
 
+			TileRail parent = getParentTileWithoutDamage();
+			if(parent != null) {
+				parent.info = parent.info.with(b -> b.switchState = state);
+				parent.markAllDirty();
+			}
+
 			TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(getParentWithoutDamage());
 			if (seg != null) seg.updateSwitchSate(state);
 		}
@@ -180,7 +186,11 @@ public class TileRail extends TileRailBase {
 				&& parent.info.settings.type == TrackItems.SWITCH
 		) {
 			if(info.isLegacySwitchTurn) {
-//				WorldData.get(getWorld()).removeTrackBlock(getPos());
+				WorldData data = WorldData.get(getWorld());
+				if (data != null && data.getTrackBlock(getPos()) != null) {
+					data.removeTrackBlock(getPos());
+					data.setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
+				}
 			}
 
 			if(parent.subInfos == null) {
