@@ -137,7 +137,7 @@ public class WorldData {
         region.setTrackBlock(pos, block);
         addTrackBlockToParents(pos, block);
 
-        buildTopologyFor(pos, block);
+        buildTopologyFor(block);
         researchNeighbors(pos);
     }
 
@@ -366,6 +366,7 @@ public class WorldData {
     private Set<Long> computeRequiredRegions() {
         Set<Long> required = new HashSet<>();
 
+        // 1. 基础玩家/车辆范围
         for (Player player : world.getEntities(Player.class)) {
             required.addAll(regionsInRadius(player.getPosition(), Config.ConfigRegion.playerRadius));
         }
@@ -382,6 +383,27 @@ public class WorldData {
                         * Config.ConfigRegion.refreshIntervalTicks / 20.0;
                 Vec3d dir = ref.velocity.scale(1.0 / speed);
                 required.addAll(regionsInRadius(ref.pos.add(dir.scale(ahead)), radius));
+            }
+        }
+
+        Queue<Long> toCheck = new LinkedList<>(required);
+        while (!toCheck.isEmpty()) {
+            long r = toCheck.poll();
+            TrackRegion region = regions.get(r);
+            if (region == null) continue;
+
+            for (TrackMultiGeometrySegment block : region.trackBlocks.values()) {
+                for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
+                    for (TrackSingleGeometrySegment single : branch.values()) {
+                        long absR = TrackRegionUtil.vecToRegion(single.getBlockPos());
+                        long parentR = TrackRegionUtil.vecToRegion(single.parentAbsPos);
+
+                        if (absR != parentR) {
+                            if (absR != r && required.add(absR)) toCheck.add(absR);
+                            if (parentR != r && required.add(parentR)) toCheck.add(parentR);
+                        }
+                    }
+                }
             }
         }
 
@@ -406,7 +428,7 @@ public class WorldData {
         return result;
     }
 
-    private void ensureRegionLoaded(long r) {
+    void ensureRegionLoaded(long r) {
         if (regions.containsKey(r)) return;
         if (directory == null) return;   // 客户端不加载磁盘
 
@@ -431,7 +453,7 @@ public class WorldData {
             // 2. 建 R 自身拓扑（含 R → 邻接 的 GAP）
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
                 Vec3i parentAbs = region.toBlockPos(e.getKey());
-                buildTopologyFor(parentAbs, e.getValue());
+                buildTopologyFor(e.getValue());
             }
 
             // 3. 触发邻接重新发现 R（建立 邻接 → R 的 GAP）
@@ -509,7 +531,7 @@ public class WorldData {
 
     // =============== 拓扑构建 ===============
 
-    protected void buildTopologyFor(Vec3i absPos, TrackMultiGeometrySegment block) {
+    protected void buildTopologyFor(TrackMultiGeometrySegment block) {
         if (block.type == TrackItems.SWITCH && block.paths.size() >= 2) {
             buildSwitchTopology(block);
             return;
@@ -680,12 +702,14 @@ public class WorldData {
         TrackNode toNode = nodes.get(to);
         if (fromNode == null || toNode == null) return;
 
-        Vec3i fromParentAbs = fromNode.trackSingleGeometrySegment.parentAbsPos;
-        edge.coveringRegions.addAll(regionsForParent(fromParentAbs));
+        TrackSingleGeometrySegment fromSeg = fromNode.trackSingleGeometrySegment;
+        edge.coveringRegions.add(TrackRegionUtil.vecToRegion(fromSeg.absPos));
+        edge.coveringRegions.add(TrackRegionUtil.vecToRegion(fromSeg.parentAbsPos));
 
         if (type == TrackEdge.EdgeType.GAP) {
-            Vec3i toParentAbs = toNode.trackSingleGeometrySegment.parentAbsPos;
-            edge.coveringRegions.addAll(regionsForParent(toParentAbs));
+            TrackSingleGeometrySegment toSeg = toNode.trackSingleGeometrySegment;
+            edge.coveringRegions.add(TrackRegionUtil.vecToRegion(toSeg.absPos));
+            edge.coveringRegions.add(TrackRegionUtil.vecToRegion(toSeg.parentAbsPos));
         }
 
         for (long r : edge.coveringRegions) {
@@ -763,7 +787,7 @@ public class WorldData {
     protected void buildTopologyForRegion(TrackRegion region) {
         for (Map.Entry<Vec3i, TrackMultiGeometrySegment> entry : region.trackBlocks.entrySet()) {
             Vec3i absPos = region.toBlockPos(entry.getKey());
-            buildTopologyFor(absPos, entry.getValue());
+            buildTopologyFor(entry.getValue());
         }
     }
 
@@ -895,20 +919,6 @@ public class WorldData {
                 }
             }
         }
-    }
-
-    private Set<Long> regionsForParent(Vec3i parentAbs) {
-        TrackMultiGeometrySegment block = getTrackBlock(parentAbs);
-        Set<Long> regions = new HashSet<>();
-        if (block != null) {
-            for (Vec3i offset : block.getPositionsCache()) {
-                regions.add(TrackRegionUtil.vecToRegion(parentAbs.add(offset)));
-            }
-        }
-        if (regions.isEmpty()) {
-            regions.add(TrackRegionUtil.vecToRegion(parentAbs));
-        }
-        return regions;
     }
 
     // =============== 车辆引用 ===============

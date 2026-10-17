@@ -67,6 +67,10 @@ public class TrackNode {
                         if (parentPos.equals(selfBlock)) continue;
 
                         TrackMultiGeometrySegment trackBlock = data.getTrackBlock(parentPos);
+                        if (trackBlock == null) {
+                            data.ensureRegionLoaded(TrackRegionUtil.vecToRegion(parentPos));
+                            trackBlock = data.getTrackBlock(parentPos);
+                        }
                         if (trackBlock == null) continue;
 
                         // 改：扫所有 path，不再只扫 getFirst()
