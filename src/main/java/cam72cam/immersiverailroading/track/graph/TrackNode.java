@@ -1,13 +1,11 @@
 package cam72cam.immersiverailroading.track.graph;
 
-import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -21,9 +19,12 @@ public class TrackNode {
 
     public final VecYPR point;
 
-    public TrackNode(TrackSingleGeometrySegment segment, int index, World world, Vec3i pos) {
+    public TrackNode(TrackSingleGeometrySegment segment, int index, World world) {
+        // 强制使用 segment 自身的真实坐标
+        Vec3i pos = segment.getBlockPos();
         this.regionPos = TrackRegionUtil.vecToRegion(pos);
         this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(pos);
+
         this.trackSingleGeometrySegment = segment;
         this.index = index;
         this.point = segment.pointsCache.get(index)
@@ -32,27 +33,8 @@ public class TrackNode {
         this.id = new TrackNodeId(regionPos, regionBlockPos, trackSingleGeometrySegment.switchIdex, trackSingleGeometrySegment.gauge, index);
     }
 
-    public TrackNode(TrackSingleGeometrySegment segment, boolean isStart, World world, Vec3i pos) {
-        this(segment, isStart ? 0 : segment.pointsCache.size() - 1, world, pos);
-    }
-
-    public int getSwitchState(World world) {
-        return WorldData.get(world).getTrackBlock(TrackRegionUtil.toBlockPos(regionPos, regionBlockPos)).switchState;
-    }
-
-//    public TrackNode(ByteBuffer buffer, World world, Vec3i pos) {
-//
-//    }
-
-    public TrackNode offset(int indexOffset, World world) {
-        List<VecYPR> points = trackSingleGeometrySegment.pointsCache;
-        int newIndex = index + indexOffset;
-        if(newIndex >= 0 && newIndex < points.size()) {
-            return new TrackNode(trackSingleGeometrySegment, newIndex, world, TrackRegionUtil.toBlockPos(regionPos, regionBlockPos));
-        } else {
-            ImmersiveRailroading.error("invalid trackSingleGeometrySegment index %s: value out of boundary (%s)", newIndex, points.size());
-            return this;
-        }
+    public TrackNode(TrackSingleGeometrySegment segment, boolean isStart, World world) {
+        this(segment, isStart ? 0 : segment.pointsCache.size() - 1, world);
     }
 
     public TrackNode getConn(World world, boolean forward) {
@@ -72,6 +54,8 @@ public class TrackNode {
         Vec3d forwardVec = forwardVector(this.point);
         Vec3d coneVec = forward ? forwardVec : forwardVec.scale(-1);
 
+        Vec3i selfBlock = TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
+
         for (int x = -hori; x <= hori; x++) {
             for (int y = -vert; y <= vert; y++) {
                 for (int z = -hori; z <= hori; z++) {
@@ -80,50 +64,57 @@ public class TrackNode {
                     if (parents == null) continue;
 
                     for (Vec3i parentPos : parents) {
-                        if (parentPos.equals(TrackRegionUtil.toBlockPos(regionPos, regionBlockPos))) continue;
+                        if (parentPos.equals(selfBlock)) continue;
 
                         TrackMultiGeometrySegment trackBlock = data.getTrackBlock(parentPos);
                         if (trackBlock == null) continue;
 
-                        for (Map.Entry<Gauge, TrackSingleGeometrySegment> single : trackBlock.paths.getFirst().entrySet()) {
-                            List<VecYPR> points = single.getValue().pointsCache;
-                            double maxDist = single.getValue().gauge.value();
-                            for (int i = 0; i < points.size(); i++) {
-                                VecYPR cand = points.get(i)
-                                        .add(new Vec3d(parentPos))
-                                        .add(single.getValue().getAndUpdateBuilder(world).info.placementInfo.placementPosition);
+                        // 改：扫所有 path，不再只扫 getFirst()
+                        for (Map<Gauge, TrackSingleGeometrySegment> branch : trackBlock.paths) {
+                            for (Map.Entry<Gauge, TrackSingleGeometrySegment> single : branch.entrySet()) {
+                                TrackSingleGeometrySegment seg = single.getValue();
+                                List<VecYPR> points = seg.pointsCache;
+                                double maxDist = seg.gauge.value();
+                                for (int i = 0; i < points.size(); i++) {
+                                    // 跳过 turnStart（岔尖由 hub↔turnStart GAP 专门处理）
+                                    if (seg.switchIdex > 0 && i == 0) continue;
 
-                                double d = cand.distanceTo(this.point);
-                                if (d >= maxDist) continue;
+                                    VecYPR cand = points.get(i)
+                                            .add(new Vec3d(parentPos))
+                                            .add(seg.getAndUpdateBuilder(world).info.placementInfo.placementPosition);
 
-                                if (d < 1e-3) {
-                                    return new TrackNode(single.getValue(), i, world, parentPos);
-                                }
+                                    double d = cand.distanceTo(this.point);
+                                    if (d >= maxDist) continue;
 
-                                Vec3d offset = new Vec3d(
-                                        cand.x - this.point.x,
-                                        cand.y - this.point.y,
-                                        cand.z - this.point.z
-                                );
-                                double dist = offset.length();
-                                if (dist > 1e-4) {
-                                    Vec3d dir = offset.scale(1.0 / dist);
-                                    if (dir.dotProduct(coneVec) < cosCone) continue;
-                                }
+                                    if (d < 1e-3) {
+                                        return new TrackNode(seg, i, world);
+                                    }
 
-                                Vec3d candForward = forwardVector(cand);
-                                double dotFF = forwardVec.dotProduct(candForward);
-                                double absDot = Math.max(0.0, Math.min(1.0, Math.abs(dotFF)));
-                                double angleRad = Math.acos(absDot);
-                                if (angleRad > maxAngleRad) continue;
+                                    Vec3d offset = new Vec3d(
+                                            cand.x - this.point.x,
+                                            cand.y - this.point.y,
+                                            cand.z - this.point.z
+                                    );
+                                    double dist = offset.length();
+                                    if (dist > 1e-4) {
+                                        Vec3d dir = offset.scale(1.0 / dist);
+                                        if (dir.dotProduct(coneVec) < cosCone) continue;
+                                    }
 
-                                double distNorm  = d / maxDist;
-                                double angleNorm = angleRad / maxAngleRad;
-                                double score = 0.7 * distNorm + 0.3 * angleNorm;
+                                    Vec3d candForward = forwardVector(cand);
+                                    double dotFF = forwardVec.dotProduct(candForward);
+                                    double absDot = Math.max(0.0, Math.min(1.0, Math.abs(dotFF)));
+                                    double angleRad = Math.acos(absDot);
+                                    if (angleRad > maxAngleRad) continue;
 
-                                if (score < bestScore) {
-                                    bestScore = score;
-                                    best = new TrackNode(single.getValue(), i, world, parentPos);
+                                    double distNorm  = d / maxDist;
+                                    double angleNorm = angleRad / maxAngleRad;
+                                    double score = 0.7 * distNorm + 0.3 * angleNorm;
+
+                                    if (score < bestScore) {
+                                        bestScore = score;
+                                        best = new TrackNode(seg, i, world);
+                                    }
                                 }
                             }
                         }

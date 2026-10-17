@@ -73,6 +73,9 @@ public class TileRail extends TileRailBase {
 		if (state != info.switchState) {
 			info = info.with(b -> b.switchState = state);
 			this.markDirty();
+
+			TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(getParentWithoutDamage());
+			if (seg != null) seg.updateSwitchSate(state);
 		}
 	}
 
@@ -171,13 +174,13 @@ public class TileRail extends TileRailBase {
 			}
 		}
 
-		TileRail parent = getParentTile();
+		TileRail parent = getParentTileWithoutDamage();
 		if(getWorld().isServer && info != null && parent != null
 				&& (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.CUSTOM)
 				&& parent.info.settings.type == TrackItems.SWITCH
 		) {
 			if(info.isLegacySwitchTurn) {
-				WorldData.get(getWorld()).removeTrackBlock(getPos());
+//				WorldData.get(getWorld()).removeTrackBlock(getPos());
 			}
 
 			if(parent.subInfos == null) {
@@ -348,7 +351,7 @@ public class TileRail extends TileRailBase {
 	public void load(TagCompound nbt) {
 		super.load(nbt);
 		if (getWorld().isServer) {
-			if(WorldData.get(getWorld()).getTrackBlock(getPos()) == null && !info.isLegacySwitchTurn) {
+			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlock(getPos()) == null && !info.isLegacySwitchTurn) {
 				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(this, getWorld());
 				WorldData.get(getWorld()).setTrackBlock(getPos(), trackBlock);
 			}

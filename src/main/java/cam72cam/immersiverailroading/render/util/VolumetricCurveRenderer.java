@@ -1,7 +1,6 @@
 package cam72cam.immersiverailroading.render.util;
 
 import cam72cam.immersiverailroading.library.Gauge;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.immersiverailroading.render.rail.RailRender;
 import cam72cam.immersiverailroading.track.CubicCurve;
@@ -25,7 +24,6 @@ import java.util.Map;
 import static cam72cam.immersiverailroading.render.util.FlatCurveRenderer.lineImg;
 
 public class VolumetricCurveRenderer {
-    private static ExpireableMap<String, RailInfo> infoCache = new ExpireableMap<>();
 
     public static void drawBlockWireFrame(Vec3d pos, RenderState state, Color color, double size, double lineWidth) {
         DirectDraw draw = new DirectDraw();
@@ -142,14 +140,6 @@ public class VolumetricCurveRenderer {
                         Vec3i blockPos = single.getValue().getBlockPos();
 
                         RailInfo info = single.getValue().getAndUpdateBuilder(world).info;
-
-                        String key = info.uniqueID + info.placementInfo.placementPosition;
-                        RailInfo cached = infoCache.get(key);
-                        if (cached != null) {
-                            info = cached;
-                        } else {
-                            infoCache.put(key, info);
-                        }
 
                         RenderState currentState = state.clone();
 
@@ -275,6 +265,7 @@ public class VolumetricCurveRenderer {
     }
 
     public static void renderGaps(World world, RenderState state) {
+        WorldData data = WorldData.get(world);
         for (TrackEdge trackEdge : WorldData.get(world).edges) {
             if(trackEdge.edgeType == TrackEdge.EdgeType.GAP) {
                 TrackNode from = WorldData.get(world).nodes.get(trackEdge.from);
@@ -286,27 +277,6 @@ public class VolumetricCurveRenderer {
                 renderCurve(conn, Color.ORANGE, 1/16f, state.clone().translate(0, 1 + 1/32f, 0));
             }
         }
-    }
-
-    public static void renderMouseOver(Player player, ItemStack stack, Vec3i vec3i, Vec3d vec3d, RenderState state, float partialTicks) {
-        state.translate(GlobalRender.getCameraPos(partialTicks).scale(-1));
-        renderWireFrame(state, partialTicks);
-    }
-
-    public static void renderDebug(RailInfo info, RenderState state) {
-        state.lighting(false);
-        RailRender renderer = RailRender.get(info);
-        Vec3d off = info.placementInfo.placementPosition;
-
-        MinecraftClient.startProfiler("rail");
-        renderer.renderRailModel(state);
-        MinecraftClient.endProfiler();
-
-        state.translate(-off.x, -off.y, -off.z);
-
-        MinecraftClient.startProfiler("base");
-        renderer.renderRailBase(state);
-        MinecraftClient.endProfiler();
     }
 
     public static void renderCurve(List<VecYPR> points, Color color, double width, RenderState state) {

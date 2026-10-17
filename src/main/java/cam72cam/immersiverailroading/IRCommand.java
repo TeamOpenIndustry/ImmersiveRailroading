@@ -98,11 +98,11 @@ public class IRCommand extends Command {
 					int z = Integer.parseInt(args[3]);
 					TrackMultiGeometrySegment trackBlock = WorldData.get(player.get().getWorld()).getTrackBlock(new Vec3i(x, y, z));
 					for(Map.Entry<Gauge, TrackSingleGeometrySegment> single : trackBlock.paths.getFirst().entrySet()){
-						TrackNode node = new TrackNode(single.getValue(), true, player.get().getWorld(), new Vec3i(x, y, z));
+						TrackNode node = new TrackNode(single.getValue(), true, player.get().getWorld());
 						TrackNode next = node.getConn(player.get().getWorld(), false);
 						sender.accept(PlayerMessage.direct("node:" + node.point + " next:" + (next == null ? "null" : next.point)));
 
-						TrackNode node2 = new TrackNode(single.getValue(), false, player.get().getWorld(), new Vec3i(x, y, z));
+						TrackNode node2 = new TrackNode(single.getValue(), false, player.get().getWorld());
 						TrackNode next2 = node2.getConn(player.get().getWorld(), true);
 						sender.accept(PlayerMessage.direct("node2:" + node2.point + " next2:" + (next2 == null ? "null" : next2.point)));
 					}

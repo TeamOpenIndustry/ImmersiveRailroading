@@ -22,9 +22,10 @@ import java.util.HashSet;
 import java.util.List;
 
 public class TrackSingleGeometrySegment {
-    // for switch, this is necessary
-    private final long regionPos;
-    private final Vec3i regionBlockPos;
+    // 物理绝对坐标（对于转弯，这是子方块位置；普通段就是自己）
+    public final Vec3i absPos;
+    // 拓扑归属坐标（永远指向所在的 TrackMultiGeometrySegment 的中心坐标，用于防误删）
+    public final Vec3i parentAbsPos;
 
     public final Gauge gauge;
     public final int switchIdex;
@@ -42,21 +43,18 @@ public class TrackSingleGeometrySegment {
     private BuilderCubicCurve builderCache;
     private World builderWorldCache;
 
-    //todo table变换如何实现好?变换中加offset，切断一切gap，变换完后才建边？
-
-    public TrackSingleGeometrySegment(TileRail trackBlock, World world, int switchIndex, Gauge gauge) {// todo: switch, gauge
+    public TrackSingleGeometrySegment(TileRail trackBlock, World world, int switchIndex, Gauge gauge) {
         if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 1) {
-            this.regionPos = TrackRegionUtil.vecToRegion(trackBlock.subInfoPos.get(0));
-            this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(trackBlock.subInfoPos.get(0));
+            this.absPos = trackBlock.subInfoPos.get(0);
         } else {
-            this.regionPos = TrackRegionUtil.vecToRegion(trackBlock.getPos());
-            this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(trackBlock.getPos());
+            this.absPos = trackBlock.getPos();
         }
+        // 记录父方块坐标，用于 topo 精准清理
+        this.parentAbsPos = trackBlock.getPos();
 
         this.gauge = gauge;
         this.switchIdex = switchIndex;
-        this.yaw = trackBlock.info.placementInfo.yaw;
-        this.placementPosition = trackBlock.info.placementInfo.placementPosition;
+
         BuilderCubicCurve builder;
         if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 0) { // legacy switch straight way
             builder = (BuilderCubicCurve) trackBlock.info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(world, trackBlock.getPos());
@@ -70,28 +68,32 @@ public class TrackSingleGeometrySegment {
             builder = (BuilderCubicCurve) trackBlock.info.getBuilder(world, trackBlock.getPos());
         }
 
+        this.yaw = builder.info.placementInfo.yaw;
+        this.placementPosition = builder.info.placementInfo.placementPosition;
         this.baseCurve = builder.getCurve();
-        this.rollAndOffsetInfo = trackBlock.info.settings.rollAndOffsetInfo;
-        this.referenceTrack = trackBlock.info.settings.track;
-        this.facePivotType = trackBlock.info.settings.trackFaceTransSetting.facePivotType();
-        this.facePivotOffset = trackBlock.info.settings.trackFaceTransSetting.facePivotOffset();
+        this.rollAndOffsetInfo = builder.info.settings.rollAndOffsetInfo;
+        this.referenceTrack = builder.info.settings.track;
+        this.facePivotType = builder.info.settings.trackFaceTransSetting.facePivotType();
+        this.facePivotOffset = builder.info.settings.trackFaceTransSetting.facePivotOffset();
 
         this.positionsCache = builder.positionsCache;
         this.pointsCache = builder.getPath(0.25 * gauge.scale());
     }
 
     public Vec3i getBlockPos() {
-        return TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
+        return absPos;
     }
 
-    public TrackSingleGeometrySegment(ByteBuffer buffer, World world, long regionPos, Vec3i regionBlockPos) {
-        this.regionPos = regionPos;
-        this.regionBlockPos = regionBlockPos;
-
+    public TrackSingleGeometrySegment(ByteBuffer buffer, World world) {
         int version = buffer.getInt(); // version
         if (version != 1) {
             throw new RuntimeException(String.format("Invalid single track geometry segment data version %d", version));
         }
+
+        // 读取绝对坐标
+        this.absPos = new Vec3i(buffer.getInt(), buffer.getInt(), buffer.getInt());
+        // 读取父方块坐标
+        this.parentAbsPos = new Vec3i(buffer.getInt(), buffer.getInt(), buffer.getInt());
 
         double x,y,z;
 
@@ -187,6 +189,8 @@ public class TrackSingleGeometrySegment {
         int bytes = 0;
 
         bytes += Integer.BYTES; // version
+        bytes += Integer.BYTES * 3; // absPos x,y,z
+        bytes += Integer.BYTES * 3; // parentAbsPos x,y,z
         bytes += Integer.BYTES; // switch index
         bytes += Double.BYTES; // gauge
         bytes += TrackRegionUtil.sizeString(referenceTrack); // referenceTrack
@@ -218,6 +222,16 @@ public class TrackSingleGeometrySegment {
 
     public void write(ByteBuffer buffer) {
         buffer.putInt(1); // version
+
+        // 写入绝对坐标
+        buffer.putInt(absPos.x);
+        buffer.putInt(absPos.y);
+        buffer.putInt(absPos.z);
+        // 写入父方块坐标
+        buffer.putInt(parentAbsPos.x);
+        buffer.putInt(parentAbsPos.y);
+        buffer.putInt(parentAbsPos.z);
+
         buffer.putInt(switchIdex); // switch index
         buffer.putDouble(gauge.value()); // gauge
         TrackRegionUtil.writeString(referenceTrack, buffer);// referenceTrack
@@ -281,7 +295,7 @@ public class TrackSingleGeometrySegment {
         }
     }
 
-    public BuilderCubicCurve getAndUpdateBuilder(World world) { // we can get renderData the same as origin
+    public BuilderCubicCurve getAndUpdateBuilder(World world) {
         if (builderCache != null && builderWorldCache == world) {
             return builderCache;
         }
@@ -302,7 +316,8 @@ public class TrackSingleGeometrySegment {
                 new PlacementInfo(baseCurve.p1, TrackDirection.NONE, yaw, baseCurve.ctrl1).offset(placementPosition),
                 new PlacementInfo(baseCurve.p2, TrackDirection.NONE, yaw, baseCurve.ctrl2).offset(placementPosition)
         );
-        builderCache = new BuilderCubicCurve(info, world, TrackRegionUtil.toBlockPos(regionPos, regionBlockPos), false);
+        // 使用 absPos
+        builderCache = new BuilderCubicCurve(info, world, absPos, false);
         builderWorldCache = world;
         return builderCache;
     }

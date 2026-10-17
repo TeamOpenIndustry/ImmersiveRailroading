@@ -277,6 +277,10 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void setParent(Vec3i pos) {
 		this.parent = pos.subtract(this.getPos());
 	}
+
+	public Vec3i getParentWithoutDamage() {
+		return parentCache.get(parent);
+	}
 	
 	public boolean isFlexible() {
 		return this.flexible || !(this instanceof TileRail);
@@ -387,6 +391,17 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 	public TagCompound getReplaced() {
 		return replaced;
+	}
+
+	public TileRail getParentTileWithoutDamage() {
+		if (this.getParentWithoutDamage() == null) {
+			return null;
+		}
+		TileRail te = getWorld().getBlockEntity(this.getParent(), TileRail.class);
+		if (te == null || te.info == null) {
+			return null;
+		}
+		return te;
 	}
 
 	public TileRailBase getReplacedTile() {

@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.track.graph;
 
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.thirdparty.trackapi.IRPathingData;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.util.RailInfo;
@@ -40,10 +41,9 @@ public class OffWorldMovementTrack {
 
             // 零长度边（几何重合的 GAP）：不消耗 motionDist，直接切到下一条边
             if (edgeDist < EPS) {
-                // 优先从 edge.to 侧（假设 motion 顺边方向）；挑不到再从 edge.from 侧（motion 反向）
-                TrackEdge next = pickNextEdgeFrom(data, edge.to, motion, world);
+                TrackEdge next = pickNextEdgeFrom(data, edge, edge.to, motion, world);
                 if (next == null) {
-                    next = pickNextEdgeFrom(data, edge.from, motion, world);
+                    next = pickNextEdgeFrom(data, edge, edge.from, motion, world);
                 }
                 if (next == null) return;
 
@@ -103,7 +103,7 @@ public class OffWorldMovementTrack {
 
             // 从到达端挑下一条边
             TrackNodeId endNodeId = towardTo ? edge.to : edge.from;
-            TrackEdge next = pickNextEdgeFrom(data, endNodeId, motion, world);
+            TrackEdge next = pickNextEdgeFrom(data, edge, endNodeId, motion, world);
             if (next == null) return;
 
             TrackNode nFrom = data.nodes.get(next.from);
@@ -239,12 +239,21 @@ public class OffWorldMovementTrack {
 
     // ==================== 选下一条边 ====================
 
-    private static TrackEdge pickNextEdgeFrom(WorldData data, TrackNodeId endNodeId, Vec3d motion, World world) {
-        return pickNextEdgeFrom(data, endNodeId, motion, world, 0);
+    private static TrackEdge pickNextEdgeFrom(WorldData data, TrackEdge incoming, TrackNodeId endNodeId,
+                                              Vec3d motion, World world) {
+        return pickNextEdgeFrom(data, incoming, endNodeId, motion, world, 0);
     }
 
-    private static TrackEdge pickNextEdgeFrom(WorldData data, TrackNodeId endNodeId, Vec3d motion, World world, int depth) {
+    private static TrackEdge pickNextEdgeFrom(WorldData data, TrackEdge incoming, TrackNodeId endNodeId,
+                                              Vec3d motion, World world, int depth) {
         if (depth > 8) return null;
+
+        WorldData.SwitchInfo si = data.switchByHub.get(endNodeId);
+        if (si != null) return pickFromHub(data, incoming, si);
+
+        si = data.switchByTurn.get(endNodeId);
+        if (si != null) return pickFromTurnStart(data, incoming, endNodeId, si);
+
         List<TrackEdge> candidates = data.outgoing.get(endNodeId);
         if (candidates == null || candidates.isEmpty()) return null;
 
@@ -252,6 +261,8 @@ public class OffWorldMovementTrack {
         double bestCos = 0.0;
 
         for (TrackEdge e : candidates) {
+            if (e.equals(incoming)) continue;
+
             TrackNode eFrom = data.nodes.get(e.from);
             TrackNode eTo = data.nodes.get(e.to);
             if (eFrom == null || eTo == null) continue;
@@ -259,8 +270,7 @@ public class OffWorldMovementTrack {
             double eDist = edgeDistance(e, eFrom, eTo, world);
             Vec3d dir;
             if (eDist < EPS) {
-                // 零长度边：方向由它的后继边决定，避免假向量污染 cos
-                TrackEdge inner = pickNextEdgeFrom(data, e.to, motion, world, depth + 1);
+                TrackEdge inner = pickNextEdgeFrom(data, e, e.to, motion, world, depth + 1);
                 if (inner == null) continue;
                 TrackNode innerFrom = data.nodes.get(inner.from);
                 TrackNode innerTo = data.nodes.get(inner.to);
@@ -277,6 +287,88 @@ public class OffWorldMovementTrack {
             }
         }
         return best;
+    }
+
+    private static TrackEdge pickFromHub(WorldData data, TrackEdge incoming, WorldData.SwitchInfo si) {
+        List<TrackEdge> cands = data.outgoing.get(si.hub);
+        if (cands == null) return null;
+
+        TrackNodeId cameFrom = incoming.to.equals(si.hub) ? incoming.from : incoming.to;
+
+        if (incoming.edgeType == TrackEdge.EdgeType.NORMAL && cameFrom.equals(si.straightEnd)) {
+            return pickExternalGapFromHub(cands, incoming, si);
+        }
+        if (incoming.edgeType == TrackEdge.EdgeType.GAP) {
+            for (WorldData.SwitchInfo.Branch b : si.turns) {
+                if (cameFrom.equals(b.start)) {
+                    return pickExternalGapFromHub(cands, incoming, si);
+                }
+            }
+        }
+
+        int branchIdx = branchIndexFromState(si.segment.switchState);
+        if (branchIdx <= 0) {
+            for (TrackEdge e : cands) {
+                if (e.equals(incoming)) continue;
+                if (e.edgeType == TrackEdge.EdgeType.NORMAL && e.to.equals(si.straightEnd)) return e;
+            }
+            return null;
+        }
+
+        int turnIdx = branchIdx - 1;
+        if (turnIdx < 0 || turnIdx >= si.turns.size()) return null;
+        TrackNodeId targetStart = si.turns.get(turnIdx).start;
+
+        for (TrackEdge e : cands) {
+            if (e.equals(incoming)) continue;
+            if (e.edgeType == TrackEdge.EdgeType.GAP && e.to.equals(targetStart)) return e;
+        }
+        return null;
+    }
+
+    private static TrackEdge pickExternalGapFromHub(List<TrackEdge> cands, TrackEdge incoming,
+                                                    WorldData.SwitchInfo si) {
+        for (TrackEdge e : cands) {
+            if (e.equals(incoming)) continue;
+            if (e.edgeType != TrackEdge.EdgeType.GAP) continue;
+
+            boolean isTie = false;
+            for (WorldData.SwitchInfo.Branch b : si.turns) {
+                if (e.to.equals(b.start)) { isTie = true; break; }
+            }
+            if (isTie) continue;
+            return e;
+        }
+        return null;
+    }
+
+    private static TrackEdge pickFromTurnStart(WorldData data, TrackEdge incoming, TrackNodeId turnStartId,
+                                               WorldData.SwitchInfo si) {
+        List<TrackEdge> cands = data.outgoing.get(turnStartId);
+        if (cands == null) return null;
+
+        TrackNodeId cameFrom = incoming.to.equals(turnStartId) ? incoming.from : incoming.to;
+        boolean fromTie = incoming.edgeType == TrackEdge.EdgeType.GAP && cameFrom.equals(si.hub);
+
+        if (fromTie) {
+            for (TrackEdge e : cands) {
+                if (e.equals(incoming)) continue;
+                if (e.edgeType == TrackEdge.EdgeType.NORMAL) return e;
+            }
+        } else {
+            for (TrackEdge e : cands) {
+                if (e.equals(incoming)) continue;
+                if (e.edgeType == TrackEdge.EdgeType.GAP && e.to.equals(si.hub)) return e;
+            }
+        }
+        return null;
+    }
+
+    private static int branchIndexFromState(int switchStateOrdinal) {
+        if (switchStateOrdinal == SwitchState.NONE.ordinal()
+                || switchStateOrdinal == SwitchState.STRAIGHT.ordinal()) return 0;
+        if (switchStateOrdinal == SwitchState.TURN.ordinal()) return 1;
+        return switchStateOrdinal;
     }
 
     // ==================== 初始化 ====================
@@ -443,7 +535,7 @@ public class OffWorldMovementTrack {
 
     private static Vec3d singleOffset(TrackNode node, World world) {
         TrackSingleGeometrySegment single = node.trackSingleGeometrySegment;
-        Vec3i parentPos = TrackRegionUtil.toBlockPos(node.id.regionPos, node.id.regionBlockPos);
+        Vec3i parentPos = single.getBlockPos();
         RailInfo info = single.getAndUpdateBuilder(world).info;
         Vec3d pp = info.placementInfo.placementPosition;
         double h = info.getTrackHeight() * single.gauge.scale();

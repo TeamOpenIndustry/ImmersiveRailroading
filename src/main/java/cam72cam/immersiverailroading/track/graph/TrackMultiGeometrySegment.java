@@ -78,7 +78,7 @@ public class TrackMultiGeometrySegment {
             Map<Gauge, TrackSingleGeometrySegment> branch = new HashMap<>();
             for(int j = 0; j < segmentCount; j++) {
                 Gauge gauge = Gauge.from(buffer.getDouble()); // segment gauge
-                branch.put(gauge, new TrackSingleGeometrySegment(buffer, world, regionPos, regionBlockPos)); // single segment
+                branch.put(gauge, new TrackSingleGeometrySegment(buffer, world)); // single segment
             }
             paths.add(branch);
         }
@@ -126,7 +126,11 @@ public class TrackMultiGeometrySegment {
         List<Vec3i> positionCache = new ArrayList<>();
         for(Map<Gauge, TrackSingleGeometrySegment> branch : paths) {
             for(Map.Entry<Gauge, TrackSingleGeometrySegment> entry : branch.entrySet()) {
-                positionCache.addAll(entry.getValue().positionsCache);
+                TrackSingleGeometrySegment single = entry.getValue();
+                Vec3i offsetToParent = single.getBlockPos().subtract(this.getBlockPos());
+                for (Vec3i p : single.positionsCache) {
+                    positionCache.add(offsetToParent.add(p));
+                }
             }
         }
         return positionCache;

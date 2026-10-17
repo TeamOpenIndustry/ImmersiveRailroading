@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.track.graph;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.TrackRegionPacket;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.mod.entity.Player;
@@ -36,6 +37,10 @@ public class WorldData {
     // region 生命周期
     private final Map<Long, Integer> regionCooldown = new HashMap<>();
     private int regionRefreshCounter = 0;
+
+    // switch
+    final Map<TrackNodeId, SwitchInfo> switchByHub = new HashMap<>();
+    final Map<TrackNodeId, SwitchInfo> switchByTurn = new HashMap<>();
 
     private WorldData(World world, File worldDirectory) {
         this.world = world;
@@ -488,6 +493,11 @@ public class WorldData {
     // =============== 拓扑构建 ===============
 
     protected void buildTopologyFor(Vec3i absPos, TrackMultiGeometrySegment block) {
+        if (block.type == TrackItems.SWITCH && block.paths.size() >= 2) {
+            buildSwitchTopology(block);
+            return;
+        }
+
         for (int pathIndex = 0; pathIndex < block.paths.size(); pathIndex++) {
             Map<Gauge, TrackSingleGeometrySegment> branch = block.paths.get(pathIndex);
             for (Map.Entry<Gauge, TrackSingleGeometrySegment> entry : branch.entrySet()) {
@@ -495,11 +505,11 @@ public class WorldData {
                 int lastIdx = single.pointsCache.size() - 1;
 
                 if (lastIdx > 0) {
-                    TrackNode startNode = new TrackNode(single, 0, world, absPos);
+                    TrackNode startNode = new TrackNode(single, 0, world);
                     addNode(startNode);
                     searchAndAddGap(single, false);
 
-                    TrackNode endNode = new TrackNode(single, lastIdx, world, absPos);
+                    TrackNode endNode = new TrackNode(single, lastIdx, world);
                     addNode(endNode);
                     searchAndAddGap(single, true);
 
@@ -510,14 +520,69 @@ public class WorldData {
         }
     }
 
+    private void buildSwitchTopology(TrackMultiGeometrySegment block) {
+        Map<Gauge, TrackSingleGeometrySegment> straightBranch = block.paths.get(0);
+
+        for (Map.Entry<Gauge, TrackSingleGeometrySegment> e : straightBranch.entrySet()) {
+            Gauge gauge = e.getKey();
+            TrackSingleGeometrySegment straight = e.getValue();
+            int sLast = straight.pointsCache.size() - 1;
+            if (sLast <= 0) continue;
+
+            TrackNode hub = new TrackNode(straight, 0, world);
+            TrackNode straightEnd = new TrackNode(straight, sLast, world);
+            addNode(hub);
+            addNode(straightEnd);
+
+            addEdge(hub.id, straightEnd.id, TrackEdge.EdgeType.NORMAL);
+            addEdge(straightEnd.id, hub.id, TrackEdge.EdgeType.NORMAL);
+
+            List<SwitchInfo.Branch> turns = new ArrayList<>();
+
+            for (int pathIndex = 1; pathIndex < block.paths.size(); pathIndex++) {
+                TrackSingleGeometrySegment turn = block.paths.get(pathIndex).get(gauge);
+                if (turn == null) continue;
+                int tLast = turn.pointsCache.size() - 1;
+                if (tLast <= 0) continue;
+
+                TrackNode turnStart = new TrackNode(turn, 0, world);
+                TrackNode turnEnd = new TrackNode(turn, tLast, world);
+                addNode(turnStart);
+                addNode(turnEnd);
+
+                addEdge(turnStart.id, turnEnd.id, TrackEdge.EdgeType.NORMAL);
+                addEdge(turnEnd.id, turnStart.id, TrackEdge.EdgeType.NORMAL);
+
+                // 岔尖 GAP：hub ↔ turnStart
+                addEdge(hub.id, turnStart.id, TrackEdge.EdgeType.GAP);
+                addEdge(turnStart.id, hub.id, TrackEdge.EdgeType.GAP);
+
+                turns.add(new SwitchInfo.Branch(turnStart.id, turnEnd.id));
+
+                // 转弯腿出口的外部 GAP（turnStart 不跑）
+                searchAndAddGap(turn, false);
+            }
+
+            SwitchInfo si = new SwitchInfo(hub.id, straightEnd.id, turns, block);
+            switchByHub.put(hub.id, si);
+            for (SwitchInfo.Branch b : turns) {
+                switchByTurn.put(b.start, si);
+            }
+
+            // 直行腿两端外部 GAP
+            searchAndAddGap(straight, false);
+            searchAndAddGap(straight, true);
+        }
+    }
+
     private void searchAndAddGap(TrackSingleGeometrySegment single, boolean isNear) {
         int lastIdx = single.pointsCache.size() - 1;
         if (lastIdx <= 0) return;
 
         Vec3i absPos = single.getBlockPos();
 
-        TrackNode startNode = new TrackNode(single, 0, world, absPos);
-        TrackNode endNode = new TrackNode(single, lastIdx, world, absPos);
+        TrackNode startNode = new TrackNode(single, 0, world);
+        TrackNode endNode = new TrackNode(single, lastIdx, world);
 
         TrackNode node = isNear ? startNode : endNode;
         addNode(node);
@@ -532,8 +597,8 @@ public class WorldData {
         int otherLastIdx = other.trackSingleGeometrySegment.pointsCache.size() - 1;
         if (other.index != 0 && other.index != otherLastIdx) {
             Vec3i otherAbsPos = TrackRegionUtil.toBlockPos(other.id.regionPos, other.id.regionBlockPos);
-            TrackNode otherStartNode = new TrackNode(other.trackSingleGeometrySegment, 0, world, otherAbsPos);
-            TrackNode otherEndNode = new TrackNode(other.trackSingleGeometrySegment, otherLastIdx, world, otherAbsPos);
+            TrackNode otherStartNode = new TrackNode(other.trackSingleGeometrySegment, 0, world);
+            TrackNode otherEndNode = new TrackNode(other.trackSingleGeometrySegment, otherLastIdx, world);
 
             Vec3d gapDir = other.point.subtract(node.point);
             double gapLen = gapDir.length();
@@ -640,6 +705,27 @@ public class WorldData {
             }
         }
 
+        // 清理 switch 索引
+        Set<SwitchInfo> removedSwitches = new HashSet<>();
+        for (SwitchInfo si : switchByHub.values()) {
+            boolean hit = affected.contains(si.hub) || affected.contains(si.straightEnd);
+            if (!hit) {
+                for (SwitchInfo.Branch b : si.turns) {
+                    if (affected.contains(b.start) || affected.contains(b.end)) {
+                        hit = true;
+                        break;
+                    }
+                }
+            }
+            if (hit) removedSwitches.add(si);
+        }
+        for (SwitchInfo si : removedSwitches) {
+            switchByHub.remove(si.hub);
+            for (SwitchInfo.Branch b : si.turns) {
+                switchByTurn.remove(b.start);
+            }
+        }
+
         for (TrackEdge e : toRemove) removeEdge(e);
 
         for (TrackNodeId id : affected) {
@@ -700,6 +786,27 @@ public class WorldData {
             outgoing.remove(id);
         }
 
+        // 同上 switch 清理逻辑，用 regionNodes 替代 affected
+        Set<SwitchInfo> removedSwitches = new HashSet<>();
+        for (SwitchInfo si : switchByHub.values()) {
+            boolean hit = regionNodes.contains(si.hub) || regionNodes.contains(si.straightEnd);
+            if (!hit) {
+                for (SwitchInfo.Branch b : si.turns) {
+                    if (regionNodes.contains(b.start) || regionNodes.contains(b.end)) {
+                        hit = true;
+                        break;
+                    }
+                }
+            }
+            if (hit) removedSwitches.add(si);
+        }
+        for (SwitchInfo si : removedSwitches) {
+            switchByHub.remove(si.hub);
+            for (SwitchInfo.Branch b : si.turns) {
+                switchByTurn.remove(b.start);
+            }
+        }
+
         buildTopologyForRegion(region);
     }
 
@@ -734,11 +841,27 @@ public class WorldData {
         }
 
         for (TrackMultiGeometrySegment block : nearbyBlocks) {
-            for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
-                for (TrackSingleGeometrySegment single : branch.values()) {
-                    if (single.pointsCache.size() <= 1) continue;
-                    searchAndAddGap(single, true);
-                    searchAndAddGap(single, false);
+            if (block.type == TrackItems.SWITCH && block.paths.size() >= 2) {
+                // 直行腿两端都跑
+                for (TrackSingleGeometrySegment straight : block.paths.get(0).values()) {
+                    if (straight.pointsCache.size() <= 1) continue;
+                    searchAndAddGap(straight, true);
+                    searchAndAddGap(straight, false);
+                }
+                // 转弯腿只跑 turnEnd 端，turnStart 由 hub↔turnStart 岔尖 GAP 专门处理
+                for (int pi = 1; pi < block.paths.size(); pi++) {
+                    for (TrackSingleGeometrySegment turn : block.paths.get(pi).values()) {
+                        if (turn.pointsCache.size() <= 1) continue;
+                        searchAndAddGap(turn, false);
+                    }
+                }
+            } else {
+                for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
+                    for (TrackSingleGeometrySegment single : branch.values()) {
+                        if (single.pointsCache.size() <= 1) continue;
+                        searchAndAddGap(single, true);
+                        searchAndAddGap(single, false);
+                    }
                 }
             }
         }
@@ -771,5 +894,29 @@ public class WorldData {
     public void updateVehicleRefs(Map<UUID, VehicleRef> refs) {
         vehicleRefs.clear();
         vehicleRefs.putAll(refs);
+    }
+
+    public static class SwitchInfo {
+        public static class Branch {
+            public final TrackNodeId start;
+            public final TrackNodeId end;
+            public Branch(TrackNodeId start, TrackNodeId end) {
+                this.start = start;
+                this.end = end;
+            }
+        }
+
+        public final TrackNodeId hub;
+        public final TrackNodeId straightEnd;
+        public final List<Branch> turns;
+        public final TrackMultiGeometrySegment segment;
+
+        public SwitchInfo(TrackNodeId hub, TrackNodeId straightEnd,
+                          List<Branch> turns, TrackMultiGeometrySegment segment) {
+            this.hub = hub;
+            this.straightEnd = straightEnd;
+            this.turns = turns;
+            this.segment = segment;
+        }
     }
 }
