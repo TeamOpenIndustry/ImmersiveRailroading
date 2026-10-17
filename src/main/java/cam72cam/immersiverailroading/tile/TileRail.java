@@ -29,6 +29,12 @@ public class TileRail extends TileRailBase {
 	@TagField("info")
 	public RailInfo info;
 
+	@TagField(value = "subInfos", mapper = RailInfo.subInfosMapper.class)
+	public List<RailInfo> subInfos;// todo also upload track to parent when update
+
+	@TagField(value = "subInfoPos", mapper = Vec3iListMapper.class)
+	public List<Vec3i> subInfoPos;
+
 	@TagField("buildTimeMs")
 	private long buildTimeMs;
 
@@ -161,6 +167,31 @@ public class TileRail extends TileRailBase {
 				for(EntityCoupleableRollingStock stock : ents) {
 					stock.states.forEach(state -> state.dirty = true);
 					Simulation.forceQuickUpdates = true;
+				}
+			}
+		}
+
+		TileRail parent = getParentTile();
+		if(getWorld().isServer && info != null && parent != null
+				&& (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.CUSTOM)
+				&& parent.info.settings.type == TrackItems.SWITCH
+		) {
+			if(info.isLegacySwitchTurn) {
+				WorldData.get(getWorld()).removeTrackBlock(getPos());
+			}
+
+			if(parent.subInfos == null) {
+				parent.subInfos = new ArrayList<>();
+				parent.subInfoPos = new ArrayList<>();
+			}
+			if(parent.subInfos.isEmpty()) {
+				Vec3d parentFirstPos = new Vec3d(parent.getPos()).add(parent.info.placementInfo.placementPosition);
+				Vec3d firstPos = new Vec3d(getPos()).add(info.placementInfo.placementPosition);
+				if(parentFirstPos.distanceTo(firstPos) < 0.25 * info.settings.gauge.scale()) {
+					parent.subInfos.add(info);
+					parent.subInfoPos.add(getPos());
+					if(!info.isLegacySwitchTurn) info = info.with(mutable -> mutable.isLegacySwitchTurn = true);
+					WorldData.get(getWorld()).setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
 				}
 			}
 		}
@@ -317,10 +348,41 @@ public class TileRail extends TileRailBase {
 	public void load(TagCompound nbt) {
 		super.load(nbt);
 		if (getWorld().isServer) {
-			if(WorldData.get(getWorld()).getTrackBlock(getPos()) == null) {
+			if(WorldData.get(getWorld()).getTrackBlock(getPos()) == null && !info.isLegacySwitchTurn) {
 				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(this, getWorld());
 				WorldData.get(getWorld()).setTrackBlock(getPos(), trackBlock);
 			}
+		}
+	}
+
+	public static class Vec3iListMapper implements cam72cam.mod.serialization.TagMapper<List<Vec3i>> {
+		public TagAccessor<List<Vec3i>> apply(Class<List<Vec3i>> t, String fieldname, TagField tag) {
+			return new TagAccessor<>(
+					(nbt, list) -> {
+						if(list == null){
+							nbt.remove(fieldname);
+							return;
+						}
+						TagCompound vec3iListTag = new TagCompound();
+						for (int i = 0; i < list.size(); i++) {
+							vec3iListTag.setVec3i(i + "", list.get(i));
+						}
+						vec3iListTag.setInteger("amount", list.size());
+						nbt.set(fieldname,vec3iListTag);
+					},
+					nbt -> {
+						if(!nbt.hasKey(fieldname)){
+							return null;
+						}
+						TagCompound vec3iListTag = nbt.get(fieldname);
+						int amount = vec3iListTag.getInteger("amount");
+						List<Vec3i> list = new ArrayList<>();
+						for (int i = 0; i < amount; i++) {
+							list.add(vec3iListTag.getVec3i(i + ""));
+						}
+						return list;
+					}
+			);
 		}
 	}
 }

@@ -54,7 +54,7 @@ public class TrackRegionUtil {
                 MappedByteBuffer raw = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
 
                 // Read number of input bytes
-                int decompressedBytes = raw.getInt();
+                int decompressedBytes = raw.getInt();//todo 中途崩溃文件损坏？
                 // Buffer to hold the decompressed data
                 ByteBuffer decompressed = ByteBuffer.allocate(decompressedBytes);
 

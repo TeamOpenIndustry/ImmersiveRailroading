@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.track.graph;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
@@ -13,15 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 public class TrackMultiGeometrySegment {
-    // todo 这些可有可无的冗余东西addition也许在之后拓扑层能缩短调用链简化代码微微提高效率？要么不做，要么至少要做到能溯源到上级方便获得上级的数据？
-    //  不过考虑到加的东西很少，就先留着，等完成后如果确实没什么用还是删了
     private final long regionPos;// addition, not necessary
     private final Vec3i regionBlockPos;// addition, not necessary
 
     private final long buildTime;
     public final List<Map<Gauge, TrackSingleGeometrySegment>> paths;
-    protected  int switchState;
-    private int tableIndex;
+    protected int switchState;
+
+    public final TrackItems type; // for table and switch
 
     public Vec3i getBlockPos() {
         return TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
@@ -39,9 +39,15 @@ public class TrackMultiGeometrySegment {
         branch.put(trackBlock.info.settings.gauge, segment);
         paths.add(branch);
 
-//        tableIndex = ;
-        //todo: DO NOT use isSwitchForced()! it may cause crash!
-//        switchState = trackBlock.isSwitchForced() ? trackBlock.info.switchForced.ordinal() : trackBlock.info.switchState.ordinal();
+        if(trackBlock.info.settings.type == TrackItems.SWITCH && trackBlock.subInfos != null && !trackBlock.subInfos.isEmpty()) {
+            TrackSingleGeometrySegment turn = new TrackSingleGeometrySegment(trackBlock, world, 1, trackBlock.info.settings.gauge);
+            Map<Gauge, TrackSingleGeometrySegment> turnBranch = new HashMap<>();
+            turnBranch.put(trackBlock.info.settings.gauge, turn);
+            paths.add(turnBranch);
+        }
+
+        type = trackBlock.info.settings.type;
+        switchState = trackBlock.info.switchState.ordinal();
     }
 
     public void updateSwitchSate(SwitchState switchState) {
@@ -63,7 +69,7 @@ public class TrackMultiGeometrySegment {
 
         buildTime = buffer.getLong(); // buildTime
         switchState = buffer.getInt(); // switch state
-        tableIndex = buffer.getInt(); // table state
+        type = TrackItems.byOrder(buffer.getInt()); // type
 
         paths = new ArrayList<>();
         int branchCount = buffer.getInt(); // branch count
@@ -84,7 +90,7 @@ public class TrackMultiGeometrySegment {
         bytes += Integer.BYTES; // version
         bytes += Long.BYTES; // buildTime
         bytes += Integer.BYTES; // switch state
-        bytes += Integer.BYTES; // table state
+        bytes += Integer.BYTES; // type
 
         bytes += Integer.BYTES; // branch count
         for(int i = 0; i < paths.size(); i ++) {
@@ -103,7 +109,7 @@ public class TrackMultiGeometrySegment {
         buffer.putInt(1); // version
         buffer.putLong(buildTime); // buildTime
         buffer.putInt(switchState); // switch state
-        buffer.putInt(tableIndex); // table state
+        buffer.putInt(type.getOrder()); // type
 
         buffer.putInt(paths.size()); // branch count
         for(int i = 0; i < paths.size(); i ++) {

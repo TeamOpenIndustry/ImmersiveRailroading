@@ -22,18 +22,19 @@ import java.util.HashSet;
 import java.util.List;
 
 public class TrackSingleGeometrySegment {
-    private final long regionPos;// addition, not necessary
-    private final Vec3i regionBlockPos;// addition, not necessary
+    // for switch, this is necessary
+    private final long regionPos;
+    private final Vec3i regionBlockPos;
 
-    protected final Gauge gauge;
-    protected final int switchIdex;
-    protected final float yaw;
-    protected final Vec3d placementPosition;
+    public final Gauge gauge;
+    public final int switchIdex;
+    public final float yaw;
+    public final Vec3d placementPosition;
     public final CubicCurve baseCurve;
-    protected final RollAndOffsetInfo rollAndOffsetInfo;
-    protected final String referenceTrack;// for path piece height
-    protected final TrackFaceTransSetting.FacePivotType facePivotType;
-    protected final Vec3d facePivotOffset;
+    public final RollAndOffsetInfo rollAndOffsetInfo;
+    public final String referenceTrack;// for path piece height
+    public final TrackFaceTransSetting.FacePivotType facePivotType;
+    public final Vec3d facePivotOffset;
 
     public final HashSet<Vec3i> positionsCache;
     public final List<VecYPR> pointsCache;
@@ -41,17 +42,26 @@ public class TrackSingleGeometrySegment {
     private BuilderCubicCurve builderCache;
     private World builderWorldCache;
 
+    //todo table变换如何实现好?变换中加offset，切断一切gap，变换完后才建边？
+
     public TrackSingleGeometrySegment(TileRail trackBlock, World world, int switchIndex, Gauge gauge) {// todo: switch, gauge
-        this.regionPos = TrackRegionUtil.vecToRegion(trackBlock.getPos());
-        this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(trackBlock.getPos());
+        if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 1) {
+            this.regionPos = TrackRegionUtil.vecToRegion(trackBlock.subInfoPos.get(0));
+            this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(trackBlock.subInfoPos.get(0));
+        } else {
+            this.regionPos = TrackRegionUtil.vecToRegion(trackBlock.getPos());
+            this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(trackBlock.getPos());
+        }
 
         this.gauge = gauge;
         this.switchIdex = switchIndex;
         this.yaw = trackBlock.info.placementInfo.yaw;
         this.placementPosition = trackBlock.info.placementInfo.placementPosition;
         BuilderCubicCurve builder;
-        if(trackBlock.info.settings.type == TrackItems.SWITCH) { // legacy switch straight way
+        if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 0) { // legacy switch straight way
             builder = (BuilderCubicCurve) trackBlock.info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(world, trackBlock.getPos());
+        } else if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 1) {
+            builder = (BuilderCubicCurve) trackBlock.subInfos.get(0).getBuilder(world, trackBlock.subInfoPos.get(0));
         } else if(trackBlock.info.settings.type == TrackItems.TURNTABLE) {
             builder = (BuilderCubicCurve) trackBlock.info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(world, trackBlock.getPos());
         } else if(trackBlock.info.settings.type == TrackItems.TRANSFERTABLE) {
@@ -68,11 +78,6 @@ public class TrackSingleGeometrySegment {
 
         this.positionsCache = builder.positionsCache;
         this.pointsCache = builder.getPath(0.25 * gauge.scale());
-//        BuilderCubicCurve test0 = new BuilderCubicCurve(trackBlock.info, world, pos, false);
-//        BuilderCubicCurve test1 = getBuilder(world, pos);
-//        CubicCurve curve0 = test0.getCurve();
-//        CubicCurve curve1 = test1.getCurve();
-//        int a = 1;
     }
 
     public Vec3i getBlockPos() {

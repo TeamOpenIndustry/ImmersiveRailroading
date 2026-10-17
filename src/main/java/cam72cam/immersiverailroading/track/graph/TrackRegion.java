@@ -45,10 +45,6 @@ public class TrackRegion {
             Vec3i regionBlockPos = new Vec3i(x, y, z);
             TrackMultiGeometrySegment segment = new TrackMultiGeometrySegment(buffer, world, regionPos, regionBlockPos);
             trackBlocks.put(regionBlockPos, segment);
-
-            for (Vec3i offset : segment.getPositionsCache()) {
-                Vec3i gagPos = regionBlockPos.add(offset);
-            }
         }
     }
 
