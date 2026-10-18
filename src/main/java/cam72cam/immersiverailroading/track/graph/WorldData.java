@@ -34,6 +34,13 @@ public class WorldData {
     // 按 region 分桶的占位方块索引
     public final Map<Long, Map<Vec3i, List<Vec3i>>> trackBlockParentsByRegion = new HashMap<>();
 
+    // 按 parentAbsPos 所在 region 分桶的 node id 辅助索引
+    private final Map<Long, Set<TrackNodeId>> nodeIdsByRegion = new HashMap<>();
+    // 按 to 节点 parentAbsPos 所在 region 分桶的反向索引（哪些 from 有边指向该 region）
+    private final Map<Long, Set<TrackNodeId>> outgoingByToRegion = new HashMap<>();
+    // 按 si.segment 所在 region 分桶的 switch hub 索引
+    private final Map<Long, Set<TrackNodeId>> switchHubIdsByRegion = new HashMap<>();
+
     // region 生命周期
     private final Map<Long, Integer> regionCooldown = new HashMap<>();
     private int regionRefreshCounter = 0;
@@ -142,7 +149,6 @@ public class WorldData {
     }
 
     private void addTrackBlockToParents(Vec3i parentAbs, TrackMultiGeometrySegment block) {
-        // 遍历道岔/普通轨道的所有 path
         for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
             for (TrackSingleGeometrySegment single : branch.values()) {
                 Vec3i basePos = single.getBlockPos();
@@ -152,7 +158,7 @@ public class WorldData {
                     trackBlockParentsByRegion
                             .computeIfAbsent(r, k -> new HashMap<>())
                             .computeIfAbsent(occupiedAbs, k -> new ArrayList<>())
-                            .add(parentAbs); // 索引里存的是父方块坐标
+                            .add(parentAbs);
                 }
             }
         }
@@ -331,7 +337,6 @@ public class WorldData {
                 region.dirty = false;
             }
 
-            // region 生命周期刷新
             if (++regionRefreshCounter >= Config.ConfigRegion.refreshIntervalTicks) {
                 regionRefreshCounter = 0;
                 refreshRegions();
@@ -366,7 +371,6 @@ public class WorldData {
     private Set<Long> computeRequiredRegions() {
         Set<Long> required = new HashSet<>();
 
-        // 1. 基础玩家/车辆范围
         for (Player player : world.getEntities(Player.class)) {
             required.addAll(regionsInRadius(player.getPosition(), Config.ConfigRegion.playerRadius));
         }
@@ -430,7 +434,7 @@ public class WorldData {
 
     void ensureRegionLoaded(long r) {
         if (regions.containsKey(r)) return;
-        if (directory == null) return;   // 客户端不加载磁盘
+        if (directory == null) return;
 
         File f = regionFile(r);
         if (!f.exists()) {
@@ -444,19 +448,15 @@ public class WorldData {
                 ImmersiveRailroading.info("region %s,%s loaded", TrackRegionUtil.regionX(r), TrackRegionUtil.regionZ(r));
             }
 
-            // 1. parent 索引
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
                 Vec3i parentAbs = region.toBlockPos(e.getKey());
                 addTrackBlockToParents(parentAbs, e.getValue());
             }
 
-            // 2. 建 R 自身拓扑（含 R → 邻接 的 GAP）
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-                Vec3i parentAbs = region.toBlockPos(e.getKey());
                 buildTopologyFor(e.getValue());
             }
 
-            // 3. 触发邻接重新发现 R（建立 邻接 → R 的 GAP）
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
                 Vec3i parentAbs = region.toBlockPos(e.getKey());
                 researchNeighbors(parentAbs);
@@ -470,13 +470,10 @@ public class WorldData {
         TrackRegion region = regions.get(r);
         if (region == null) return;
 
-        // 1. 清拓扑：from 或 to 在 r 里的所有边和节点
         clearTopologyInRegion(r);
 
-        // 2. 清 parent 索引
         trackBlockParentsByRegion.remove(r);
 
-        // 3. 需要持久化的写盘
         if (region.needsWriteToDisk && directory != null) {
             try {
                 File file = regionFile(r);
@@ -493,38 +490,38 @@ public class WorldData {
             }
         }
 
-        // 4. 移除
         regions.remove(r);
         ImmersiveRailroading.info("region %s,%s unloaded", TrackRegionUtil.regionX(r), TrackRegionUtil.regionZ(r));
     }
 
     private void clearTopologyInRegion(long regionId) {
-        Set<TrackNodeId> regionNodes = new HashSet<>();
-        for (TrackNodeId id : nodes.keySet()) {
-            TrackNode node = nodes.get(id);
-            if (node == null) continue;
-
-            Vec3i parentAbs = node.trackSingleGeometrySegment.parentAbsPos;
-            if (TrackRegionUtil.vecToRegion(parentAbs) == regionId) {
-                regionNodes.add(id);
-            }
-        }
-        if (regionNodes.isEmpty()) return;
+        Set<TrackNodeId> regionNodes = nodeIdsByRegion.get(regionId);
+        if (regionNodes == null || regionNodes.isEmpty()) return;
+        Set<TrackNodeId> regionNodesCopy = new HashSet<>(regionNodes);
 
         Set<TrackEdge> toRemove = new HashSet<>();
-        for (TrackNodeId id : regionNodes) {
+        for (TrackNodeId id : regionNodesCopy) {
             List<TrackEdge> out = outgoing.get(id);
             if (out != null) toRemove.addAll(out);
         }
-        for (List<TrackEdge> list : outgoing.values()) {
-            for (TrackEdge e : list) {
-                if (regionNodes.contains(e.to)) toRemove.add(e);
+
+        Set<TrackNodeId> fromIds = outgoingByToRegion.get(regionId);
+        if (fromIds != null) {
+            for (TrackNodeId fromId : fromIds) {
+                List<TrackEdge> list = outgoing.get(fromId);
+                if (list == null) continue;
+                for (TrackEdge e : list) {
+                    if (regionNodesCopy.contains(e.to)) toRemove.add(e);
+                }
             }
         }
 
+        removeSwitchesInRegion(regionId, null);
+
         for (TrackEdge e : toRemove) removeEdge(e);
-        for (TrackNodeId id : regionNodes) {
-            nodes.remove(id);
+
+        for (TrackNodeId id : regionNodesCopy) {
+            removeNode(id);
             outgoing.remove(id);
         }
     }
@@ -561,6 +558,7 @@ public class WorldData {
 
     private void buildSwitchTopology(TrackMultiGeometrySegment block) {
         Map<Gauge, TrackSingleGeometrySegment> straightBranch = block.paths.get(0);
+        long siRegion = TrackRegionUtil.vecToRegion(block.getBlockPos());
 
         for (Map.Entry<Gauge, TrackSingleGeometrySegment> e : straightBranch.entrySet()) {
             Gauge gauge = e.getKey();
@@ -592,23 +590,21 @@ public class WorldData {
                 addEdge(turnStart.id, turnEnd.id, TrackEdge.EdgeType.NORMAL);
                 addEdge(turnEnd.id, turnStart.id, TrackEdge.EdgeType.NORMAL);
 
-                // 岔尖 GAP：hub ↔ turnStart
                 addEdge(hub.id, turnStart.id, TrackEdge.EdgeType.GAP);
                 addEdge(turnStart.id, hub.id, TrackEdge.EdgeType.GAP);
 
                 turns.add(new SwitchInfo.Branch(turnStart.id, turnEnd.id));
 
-                // 转弯腿出口的外部 GAP（turnStart 不跑）
                 searchAndAddGap(turn, false);
             }
 
             SwitchInfo si = new SwitchInfo(hub.id, straightEnd.id, turns, block);
             switchByHub.put(hub.id, si);
+            switchHubIdsByRegion.computeIfAbsent(siRegion, k -> new HashSet<>()).add(hub.id);
             for (SwitchInfo.Branch b : turns) {
                 switchByTurn.put(b.start, si);
             }
 
-            // 直行腿两端外部 GAP
             searchAndAddGap(straight, false);
             searchAndAddGap(straight, true);
         }
@@ -688,7 +684,22 @@ public class WorldData {
     }
 
     private void addNode(TrackNode node) {
-        nodes.putIfAbsent(node.id, node);
+        if (nodes.putIfAbsent(node.id, node) == null) {
+            long r = TrackRegionUtil.vecToRegion(node.trackSingleGeometrySegment.parentAbsPos);
+            nodeIdsByRegion.computeIfAbsent(r, k -> new HashSet<>()).add(node.id);
+        }
+    }
+
+    private void removeNode(TrackNodeId id) {
+        TrackNode node = nodes.remove(id);
+        if (node != null) {
+            long r = TrackRegionUtil.vecToRegion(node.trackSingleGeometrySegment.parentAbsPos);
+            Set<TrackNodeId> set = nodeIdsByRegion.get(r);
+            if (set != null) {
+                set.remove(id);
+                if (set.isEmpty()) nodeIdsByRegion.remove(r);
+            }
+        }
     }
 
     private void addEdge(TrackNodeId from, TrackNodeId to, TrackEdge.EdgeType type) {
@@ -701,6 +712,9 @@ public class WorldData {
         TrackNode fromNode = nodes.get(from);
         TrackNode toNode = nodes.get(to);
         if (fromNode == null || toNode == null) return;
+
+        long toRegion = TrackRegionUtil.vecToRegion(toNode.trackSingleGeometrySegment.parentAbsPos);
+        outgoingByToRegion.computeIfAbsent(toRegion, k -> new HashSet<>()).add(from);
 
         TrackSingleGeometrySegment fromSeg = fromNode.trackSingleGeometrySegment;
         edge.coveringRegions.add(TrackRegionUtil.vecToRegion(fromSeg.absPos));
@@ -723,6 +737,31 @@ public class WorldData {
         List<TrackEdge> list = outgoing.get(edge.from);
         if (list != null) list.remove(edge);
 
+        TrackNode toNode = nodes.get(edge.to);
+        if (toNode != null) {
+            long toRegion = TrackRegionUtil.vecToRegion(toNode.trackSingleGeometrySegment.parentAbsPos);
+            Set<TrackNodeId> set = outgoingByToRegion.get(toRegion);
+            if (set != null) {
+                // 只有该 from 不再有边指向 toRegion 时才移除
+                List<TrackEdge> fromList = outgoing.get(edge.from);
+                boolean stillHas = false;
+                if (fromList != null) {
+                    for (TrackEdge e : fromList) {
+                        TrackNode eTo = nodes.get(e.to);
+                        if (eTo == null) continue;
+                        if (TrackRegionUtil.vecToRegion(eTo.trackSingleGeometrySegment.parentAbsPos) == toRegion) {
+                            stillHas = true;
+                            break;
+                        }
+                    }
+                }
+                if (!stillHas) {
+                    set.remove(edge.from);
+                    if (set.isEmpty()) outgoingByToRegion.remove(toRegion);
+                }
+            }
+        }
+
         for (long r : edge.coveringRegions) {
             Set<TrackEdge> set = edgesByRegion.get(r);
             if (set != null) set.remove(edge);
@@ -730,15 +769,47 @@ public class WorldData {
         edge.coveringRegions.clear();
     }
 
+    private void removeSwitchesInRegion(long regionId, Vec3i relBlockPosOrNull) {
+        Set<TrackNodeId> hubIds = switchHubIdsByRegion.get(regionId);
+        if (hubIds == null) return;
+
+        List<TrackNodeId> toRemove = new ArrayList<>();
+        for (TrackNodeId hubId : hubIds) {
+            SwitchInfo si = switchByHub.get(hubId);
+            if (si == null) {
+                toRemove.add(hubId);
+                continue;
+            }
+            if (relBlockPosOrNull != null) {
+                Vec3i segPos = si.segment.getBlockPos();
+                if (!TrackRegionUtil.toRegionBlockPos(segPos).equals(relBlockPosOrNull)) continue;
+            }
+            toRemove.add(hubId);
+        }
+
+        for (TrackNodeId hubId : toRemove) {
+            hubIds.remove(hubId);
+            SwitchInfo si = switchByHub.remove(hubId);
+            if (si != null) {
+                for (SwitchInfo.Branch b : si.turns) {
+                    switchByTurn.remove(b.start);
+                }
+            }
+        }
+
+        if (hubIds.isEmpty()) switchHubIdsByRegion.remove(regionId);
+    }
+
     protected void removeTopologyFor(long regionId, Vec3i relBlockPos) {
+        Set<TrackNodeId> regionNodes = nodeIdsByRegion.get(regionId);
+        if (regionNodes == null) return;
+
         Set<TrackNodeId> affected = new HashSet<>();
-        for (TrackNodeId id : nodes.keySet()) {
+        for (TrackNodeId id : regionNodes) {
             TrackNode node = nodes.get(id);
             if (node == null) continue;
-
             Vec3i parentAbs = node.trackSingleGeometrySegment.parentAbsPos;
-            if (TrackRegionUtil.vecToRegion(parentAbs) == regionId
-                    && TrackRegionUtil.toRegionBlockPos(parentAbs).equals(relBlockPos)) {
+            if (TrackRegionUtil.toRegionBlockPos(parentAbs).equals(relBlockPos)) {
                 affected.add(id);
             }
         }
@@ -749,44 +820,30 @@ public class WorldData {
             List<TrackEdge> out = outgoing.get(id);
             if (out != null) toRemove.addAll(out);
         }
-        for (List<TrackEdge> list : outgoing.values()) {
-            for (TrackEdge e : list) {
-                if (affected.contains(e.to)) toRemove.add(e);
+
+        Set<TrackNodeId> fromIds = outgoingByToRegion.get(regionId);
+        if (fromIds != null) {
+            for (TrackNodeId fromId : fromIds) {
+                List<TrackEdge> list = outgoing.get(fromId);
+                if (list == null) continue;
+                for (TrackEdge e : list) {
+                    if (affected.contains(e.to)) toRemove.add(e);
+                }
             }
         }
 
-        // 清理 switch 索引
-        Set<SwitchInfo> removedSwitches = new HashSet<>();
-        for (SwitchInfo si : switchByHub.values()) {
-            boolean hit = affected.contains(si.hub) || affected.contains(si.straightEnd);
-            if (!hit) {
-                for (SwitchInfo.Branch b : si.turns) {
-                    if (affected.contains(b.start) || affected.contains(b.end)) {
-                        hit = true;
-                        break;
-                    }
-                }
-            }
-            if (hit) removedSwitches.add(si);
-        }
-        for (SwitchInfo si : removedSwitches) {
-            switchByHub.remove(si.hub);
-            for (SwitchInfo.Branch b : si.turns) {
-                switchByTurn.remove(b.start);
-            }
-        }
+        removeSwitchesInRegion(regionId, relBlockPos);
 
         for (TrackEdge e : toRemove) removeEdge(e);
 
         for (TrackNodeId id : affected) {
-            nodes.remove(id);
+            removeNode(id);
             outgoing.remove(id);
         }
     }
 
     protected void buildTopologyForRegion(TrackRegion region) {
         for (Map.Entry<Vec3i, TrackMultiGeometrySegment> entry : region.trackBlocks.entrySet()) {
-            Vec3i absPos = region.toBlockPos(entry.getKey());
             buildTopologyFor(entry.getValue());
         }
     }
@@ -795,73 +852,6 @@ public class WorldData {
         for (TrackRegion region : regions.values()) {
             buildTopologyForRegion(region);
         }
-    }
-
-    public void rebuildTopologyAround(long regionId) {
-        int rx = TrackRegionUtil.regionX(regionId);
-        int rz = TrackRegionUtil.regionZ(regionId);
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                long id = ((long) (rx + dx) << 32) | ((rz + dz) & 0xFFFFFFFFL);
-                TrackRegion region = regions.get(id);
-                if (region != null) {
-                    rebuildTopologyForRegion(region);
-                }
-            }
-        }
-    }
-
-    protected void rebuildTopologyForRegion(TrackRegion region) {
-        Set<TrackNodeId> regionNodes = new HashSet<>();
-        for (TrackNodeId id : nodes.keySet()) {
-            TrackNode node = nodes.get(id);
-            if (node == null) continue;
-
-            Vec3i parentAbs = node.trackSingleGeometrySegment.parentAbsPos;
-            if (TrackRegionUtil.vecToRegion(parentAbs) == region.regionPos) {
-                regionNodes.add(id);
-            }
-        }
-        for (TrackNodeId id : regionNodes) {
-            List<TrackEdge> out = outgoing.get(id);
-            if (out != null) {
-                for (TrackEdge e : new ArrayList<>(out)) {
-                    removeEdge(e);
-                }
-            }
-            for (List<TrackEdge> list : outgoing.values()) {
-                for (TrackEdge e : new ArrayList<>(list)) {
-                    if (e.to.equals(id)) {
-                        removeEdge(e);
-                    }
-                }
-            }
-            nodes.remove(id);
-            outgoing.remove(id);
-        }
-
-        // 同上 switch 清理逻辑，用 regionNodes 替代 affected
-        Set<SwitchInfo> removedSwitches = new HashSet<>();
-        for (SwitchInfo si : switchByHub.values()) {
-            boolean hit = regionNodes.contains(si.hub) || regionNodes.contains(si.straightEnd);
-            if (!hit) {
-                for (SwitchInfo.Branch b : si.turns) {
-                    if (regionNodes.contains(b.start) || regionNodes.contains(b.end)) {
-                        hit = true;
-                        break;
-                    }
-                }
-            }
-            if (hit) removedSwitches.add(si);
-        }
-        for (SwitchInfo si : removedSwitches) {
-            switchByHub.remove(si.hub);
-            for (SwitchInfo.Branch b : si.turns) {
-                switchByTurn.remove(b.start);
-            }
-        }
-
-        buildTopologyForRegion(region);
     }
 
     private void researchNeighbors(Vec3i newAbsPos) {
@@ -874,6 +864,7 @@ public class WorldData {
         int vert = 1;
 
         Set<TrackMultiGeometrySegment> nearbyBlocks = new LinkedHashSet<>();
+        Set<Vec3i> scanned = new HashSet<>();
 
         for (Vec3i rel : newBlock.getPositionsCache()) {
             Vec3i coverAbs = newAbsPos.add(rel);
@@ -881,6 +872,8 @@ public class WorldData {
                 for (int y = -vert; y <= vert; y++) {
                     for (int z = -hori; z <= hori; z++) {
                         Vec3i scan = coverAbs.add(x, y, z);
+                        if (!scanned.add(scan)) continue;
+
                         List<Vec3i> parents = getParentsAt(scan);
                         if (parents == null) continue;
                         for (Vec3i parentAbs : parents) {
@@ -896,13 +889,11 @@ public class WorldData {
 
         for (TrackMultiGeometrySegment block : nearbyBlocks) {
             if (block.type == TrackItems.SWITCH && block.paths.size() >= 2) {
-                // 直行腿两端都跑
                 for (TrackSingleGeometrySegment straight : block.paths.get(0).values()) {
                     if (straight.pointsCache.size() <= 1) continue;
                     searchAndAddGap(straight, true);
                     searchAndAddGap(straight, false);
                 }
-                // 转弯腿只跑 turnEnd 端，turnStart 由 hub↔turnStart 岔尖 GAP 专门处理
                 for (int pi = 1; pi < block.paths.size(); pi++) {
                     for (TrackSingleGeometrySegment turn : block.paths.get(pi).values()) {
                         if (turn.pointsCache.size() <= 1) continue;
@@ -920,8 +911,6 @@ public class WorldData {
             }
         }
     }
-
-    // =============== 车辆引用 ===============
 
     public static class VehicleRef {
         public final Vec3d pos;
@@ -957,6 +946,47 @@ public class WorldData {
             this.straightEnd = straightEnd;
             this.turns = turns;
             this.segment = segment;
+        }
+    }
+
+    public void clientUnloadRegion(long id) {
+        synchronized (regions) {
+            if (!regions.containsKey(id)) return;
+            // clearTopologyInRegion 内部会通过 outgoingByToRegion 反向索引，
+            // 把邻居指向本 region 的所有边一并清掉，不留幽灵边
+            clearTopologyInRegion(id);
+            trackBlockParentsByRegion.remove(id);
+            regions.remove(id);
+        }
+        ImmersiveRailroading.info("region %s,%s unloaded",
+                TrackRegionUtil.regionX(id), TrackRegionUtil.regionZ(id));
+    }
+
+    public void clientLoadRegion(long id, TrackRegion region) {
+        synchronized (regions) {
+            // 覆盖写入：先清旧拓扑再放新数据
+            if (regions.containsKey(id)) {
+                clearTopologyInRegion(id);
+                trackBlockParentsByRegion.remove(id);
+            }
+            regions.put(id, region);
+        }
+        ImmersiveRailroading.info("region %s,%s loaded",
+                TrackRegionUtil.regionX(id), TrackRegionUtil.regionZ(id));
+
+        // 1. parent 占位索引（必须先建，searchAndAddGap 依赖它扫邻居）
+        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+            addTrackBlockToParents(region.toBlockPos(e.getKey()), e.getValue());
+        }
+
+        // 2. 建本 region 自身的 NORMAL 边 + 内部 GAP 边
+        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+            buildTopologyFor(e.getValue());
+        }
+
+        // 3. 唤醒邻居（不清邻居节点，只让邻居跑 searchAndAddGap 补 GAP 边）
+        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+            researchNeighbors(region.toBlockPos(e.getKey()));
         }
     }
 }

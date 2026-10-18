@@ -23,6 +23,8 @@ public class TrackMultiGeometrySegment {
 
     public final TrackItems type; // for table and switch
 
+    private List<Vec3i> cachedPositions;
+
     public Vec3i getBlockPos() {
         return TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
     }
@@ -123,6 +125,7 @@ public class TrackMultiGeometrySegment {
     }
 
     public List<Vec3i> getPositionsCache() {
+        if (cachedPositions != null) return cachedPositions;
         List<Vec3i> positionCache = new ArrayList<>();
         for(Map<Gauge, TrackSingleGeometrySegment> branch : paths) {
             for(Map.Entry<Gauge, TrackSingleGeometrySegment> entry : branch.entrySet()) {
@@ -133,6 +136,7 @@ public class TrackMultiGeometrySegment {
                 }
             }
         }
-        return positionCache;
+        cachedPositions = positionCache;
+        return cachedPositions;
     }
 }
