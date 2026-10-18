@@ -48,11 +48,13 @@ public class TrackNode {
         TrackNode best = null;
         double bestScore = Double.MAX_VALUE;
 
+        // 允许的最大连线夹角（30 度）
         final double maxAngleRad = Math.toRadians(30);
         final double cosCone = Math.cos(maxAngleRad);
 
+        // A 节点的搜索方向（向前或向后）
         Vec3d forwardVec = forwardVector(this.point);
-        Vec3d coneVec = forward ? forwardVec : forwardVec.scale(-1);
+        Vec3d searchVec = forward ? forwardVec : forwardVec.scale(-1);
 
         Vec3i selfBlock = TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
 
@@ -73,23 +75,23 @@ public class TrackNode {
                         }
                         if (trackBlock == null) continue;
 
-                        // 改：扫所有 path，不再只扫 getFirst()
                         for (Map<Gauge, TrackSingleGeometrySegment> branch : trackBlock.paths) {
                             for (Map.Entry<Gauge, TrackSingleGeometrySegment> single : branch.entrySet()) {
                                 TrackSingleGeometrySegment seg = single.getValue();
                                 List<VecYPR> points = seg.pointsCache;
                                 double maxDist = seg.gauge.value();
-                                for (int i = 0; i < points.size(); i++) {
-                                    // 跳过 turnStart（岔尖由 hub↔turnStart GAP 专门处理）
-//                                    if (seg.switchIdex > 0 && i == 0) continue;
+                                int lastIdx = points.size() - 1;
 
+                                for (int i = 0; i < points.size(); i++) {
                                     VecYPR cand = points.get(i)
                                             .add(new Vec3d(seg.getBlockPos()))
                                             .add(seg.getAndUpdateBuilder(world).info.placementInfo.placementPosition);
 
+                                    // 1. 距离门槛过滤（仅作为硬拦截）
                                     double d = cand.distanceTo(this.point);
                                     if (d >= maxDist) continue;
 
+                                    // 2. 重合节点直接返回（排除自己）
                                     if (d < 1e-3) {
                                         if (seg == this.trackSingleGeometrySegment && i == this.index) {
                                             continue;
@@ -97,29 +99,46 @@ public class TrackNode {
                                         return new TrackNode(seg, i, world);
                                     }
 
+                                    // 3. 计算两点连线方向
                                     Vec3d offset = new Vec3d(
                                             cand.x - this.point.x,
                                             cand.y - this.point.y,
                                             cand.z - this.point.z
                                     );
                                     double dist = offset.length();
-                                    if (dist > 1e-4) {
-                                        Vec3d dir = offset.scale(1.0 / dist);
-                                        if (dir.dotProduct(coneVec) < cosCone) continue;
+                                    Vec3d lineDir = offset.scale(1.0 / dist);
+
+                                    // 4. 评估 A 端夹角：连线方向与 A 的搜索方向的夹角
+                                    double dotLineA = lineDir.dotProduct(searchVec);
+                                    if (dotLineA < cosCone) continue;
+                                    double angleA = Math.acos(Math.max(-1.0, Math.min(1.0, dotLineA)));
+
+                                    // 5. 评估 B 端夹角：连线方向与 B 端“迎向”切线方向的夹角
+                                    Vec3d candForward = forwardVector(cand);
+                                    Vec3d candFacing;
+                                    if (i == 0) {
+                                        candFacing = candForward;
+                                    } else if (i == lastIdx) {
+                                        candFacing = candForward.scale(-1);
+                                    } else {
+                                        candFacing = (candForward.dotProduct(lineDir) > 0) ? candForward : candForward.scale(-1);
                                     }
 
-                                    Vec3d candForward = forwardVector(cand);
-                                    double dotFF = forwardVec.dotProduct(candForward);
-                                    double absDot = Math.max(0.0, Math.min(1.0, Math.abs(dotFF)));
-                                    double angleRad = Math.acos(absDot);
-                                    if (angleRad > maxAngleRad) continue;
+                                    double dotLineB = lineDir.dotProduct(candFacing);
+                                    if ((i == 0 || i == lastIdx) && dotLineB < cosCone) {
+                                        continue;
+                                    }
+                                    double angleB = Math.acos(Math.max(-1.0, Math.min(1.0, dotLineB)));
 
-                                    double distNorm  = d / maxDist;
-                                    double angleNorm = angleRad / maxAngleRad;
-                                    double score = 0.7 * distNorm + 0.3 * angleNorm;
+                                    // 6. 综合评分
+                                    // 姿态偏差（主项）
+                                    double angleScore = angleA + angleB;
+                                    // 距离归一化，乘以微小系数，作为平局决胜项（0.05 rad ≈ 2.87°）
+                                    double distNorm = d / maxDist;
+                                    double finalScore = angleScore + distNorm * 0.05;
 
-                                    if (score < bestScore) {
-                                        bestScore = score;
+                                    if (finalScore < bestScore) {
+                                        bestScore = finalScore;
                                         best = new TrackNode(seg, i, world);
                                     }
                                 }
