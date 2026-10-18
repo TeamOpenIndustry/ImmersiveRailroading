@@ -2,12 +2,13 @@ package cam72cam.immersiverailroading.script.modules;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
-import cam72cam.immersiverailroading.script.LuaFunction;
-import cam72cam.immersiverailroading.script.LuaModule;
 import cam72cam.immersiverailroading.script.library.ILuaEvent;
 import cam72cam.mod.ModCore;
+import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
+import org.luaj.vm2.lib.LuaFunction;
+import org.luaj.vm2.lib.LuaModule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,57 +24,70 @@ public class EventModule implements LuaModule {
         }
     }
 
-    @LuaFunction(module = "Events")
-    public void registerEvent(LuaValue name, LuaValue func) {
+    @LuaFunction
+    public LuaValue registerEvent(LuaValue name, LuaValue func) {
         if (func.isfunction()) {
             event.getLuaEventCallbacks().computeIfAbsent(name.tojstring(), k -> new ArrayList<>()).add(func);
         } else {
             ModCore.warn("registerEvent called with non-function for event: " + name.tojstring());
         }
+        return LuaValue.NIL;
     }
 
-    @LuaFunction(module = "Events")
-    public void triggerEvent(LuaValue... args) {
-        if (args == null || args.length == 0) {
+    @LuaFunction
+    public Varargs triggerEvent(Varargs args) {
+        if (args == null || args.narg() == 0) {
             ModCore.warn("[Lua] Events.triggerEvent() called without an event name");
-            return;
+            return LuaValue.NIL;
         }
-        String funcName = args[0].tojstring();
+        String funcName = args.arg1().tojstring();
         if (funcName.equals("onTick") || funcName.equals("onControlGroupChange")) {
             ModCore.error("[Lua] Cannot call \"onTick\" or \"onControlGroupChange\" manually. Please use another name for your event!");
-            return;
+            return LuaValue.NIL;
         }
-        Varargs varargs = LuaValue.varargsOf(Arrays.copyOfRange(args, 1, args.length));
+        Varargs varargs = args.subargs(2);
 
         if (stock != null) {
             stock.mapTrain(stock, false, stock -> ((EntityScriptableRollingStock) stock).triggerEvent(funcName, varargs));
         } else {
             event.triggerEvent(funcName, varargs);
         }
+        return LuaValue.NIL;
     }
 
-    @LuaFunction(module = "Events")
-    public void triggerCouplerEvent(LuaValue... args) {
+    @LuaFunction
+    public Varargs triggerCouplerEvent(Varargs args) {
         if (stock == null) {
-            return;
+            return LuaValue.NIL;
         }
-        if (args == null || args.length < 2) {
+        if (args == null || args.narg() < 2) {
             ModCore.warn("[Lua] Events.triggerCouplerEvent(name, coupler, ...) needs at least an event name and a coupler side");
-            return;
+            return LuaValue.NIL;
         }
-        String functionName = args[0].tojstring();
+        String functionName = args.arg1().tojstring();
         EntityCoupleableRollingStock.CouplerType coupler;
         try {
-            coupler = EntityCoupleableRollingStock.CouplerType.valueOf(args[1].tojstring().toUpperCase());
+            coupler = EntityCoupleableRollingStock.CouplerType.valueOf(args.arg(2).tojstring().toUpperCase());
         } catch (IllegalArgumentException e) {
-            ModCore.warn("[Lua] Events.triggerCouplerEvent: unknown coupler '%s'", args[1].tojstring());
-            return;
+            ModCore.warn("[Lua] Events.triggerCouplerEvent: unknown coupler '%s'", args.arg(2).tojstring());
+            return LuaValue.NIL;
         }
 
         EntityScriptableRollingStock coupled = (EntityScriptableRollingStock) stock.getCoupled(coupler);
         if (coupled == null) {
-            return;
+            return LuaValue.NIL;
         }
-        coupled.triggerEvent(functionName, LuaValue.varargsOf(Arrays.copyOfRange(args, 2, args.length)));
+        coupled.triggerEvent(functionName, args.subargs(3));
+        return LuaValue.NIL;
+    }
+
+    @Override
+    public void init(LuaTable self, LuaValue name, LuaValue env) {
+
+    }
+
+    @Override
+    public String name() {
+        return "Events";
     }
 }

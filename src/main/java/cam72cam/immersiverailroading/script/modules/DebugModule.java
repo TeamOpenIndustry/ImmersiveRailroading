@@ -1,30 +1,39 @@
 package cam72cam.immersiverailroading.script.modules;
 
-import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
-import cam72cam.immersiverailroading.script.LuaFunction;
-import cam72cam.immersiverailroading.script.LuaModule;
 import cam72cam.mod.ModCore;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.text.PlayerMessage;
+import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.lib.LuaFunction;
+import org.luaj.vm2.lib.LuaModule;
 
 public class DebugModule implements LuaModule {
 
     public DebugModule() {}
 
-    @LuaFunction(module = "Debug")
-    public void printToInfoLog(LuaValue arg) {
+    @LuaFunction
+    public LuaValue printToInfoLog(LuaValue arg) {
         ModCore.info(arg.tojstring());
+        return LuaValue.NIL;
     }
 
-    @LuaFunction(module = "Debug")
-    public void printToWarnLog(LuaValue arg) {
+    @LuaFunction
+    public LuaValue printToWarnLog(LuaValue arg) {
         ModCore.warn(arg.tojstring());
+        return LuaValue.NIL;
     }
 
-    @LuaFunction(module = "Debug")
-    public void printToErrorLog(LuaValue arg) {
+    @LuaFunction
+    public LuaValue printToErrorLog(LuaValue arg) {
         ModCore.error(arg.tojstring());
+        return LuaValue.NIL;
     }
 
+    @Override
+    public void init(LuaTable self, LuaValue name, LuaValue env) {
+    }
+
+    @Override
+    public String name() {
+        return "Debug";
+    }
 }

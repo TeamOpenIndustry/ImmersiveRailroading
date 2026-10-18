@@ -1,51 +1,61 @@
 package cam72cam.immersiverailroading.script.modules;
 
-import cam72cam.immersiverailroading.script.LuaFunction;
-import cam72cam.immersiverailroading.script.LuaModule;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.lib.LuaFunction;
+import org.luaj.vm2.lib.LuaModule;
 import util.Matrix4;
 
 public class ScriptVectorUtil {
     public static class VectorLibrary implements LuaModule {
         public VectorLibrary() {}
 
-        @LuaFunction(module = "VecUtil")
-        private LuaValue add(LuaValue vec1, LuaValue vec2) {
+        @Override
+        public String name() {
+            return "VecUtil";
+        }
+
+        @Override
+        public void init(LuaTable self, LuaValue name, LuaValue env) {
+
+        }
+
+        @LuaFunction
+        public LuaValue add(LuaValue vec1, LuaValue vec2) {
             vec1.set("x", vec1.get("x").add(vec2.get("x")));
             vec1.set("y", vec1.get("y").add(vec2.get("y")));
             vec1.set("z", vec1.get("z").add(vec2.get("z")));
             return vec1;
         }
 
-        @LuaFunction(module = "VecUtil")
-        private LuaValue scale(LuaValue vec, LuaValue mul) {
+        @LuaFunction
+        public LuaValue scale(LuaValue vec, LuaValue mul) {
             vec.set("x", vec.get("x").mul(mul));
             vec.set("y", vec.get("y").mul(mul));
             vec.set("z", vec.get("z").mul(mul));
             return vec;
         }
 
-        @LuaFunction(module = "VecUtil")
-        private LuaValue length(LuaValue vec) {
+        @LuaFunction
+        public LuaValue length(LuaValue vec) {
             double x = vec.get("x").todouble();
             double y = vec.get("y").todouble();
             double z = vec.get("z").todouble();
             return LuaValue.valueOf(Math.sqrt(x * x + y * y + z * z));
         }
 
-        @LuaFunction(module = "VecUtil")
-        private LuaValue lengthSquared(LuaValue vec) {
+        @LuaFunction
+        public LuaValue lengthSquared(LuaValue vec) {
             double x = vec.get("x").todouble();
             double y = vec.get("y").todouble();
             double z = vec.get("z").todouble();
             return LuaValue.valueOf(x * x + y * y + z * z);
         }
 
-        @LuaFunction(module = "VecUtil")
-        private LuaValue applyMatrix(LuaValue matrix, LuaValue vec) {
+        @LuaFunction
+        public LuaValue applyMatrix(LuaValue matrix, LuaValue vec) {
             Matrix4 matrix4 = convertToMatrix4((LuaTable) matrix);
             Vec3d vec3d = convertToVec3d(vec);
             return constructVec3Table(matrix4.apply(vec3d));
