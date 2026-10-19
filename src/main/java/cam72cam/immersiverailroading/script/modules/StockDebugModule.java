@@ -3,8 +3,8 @@ package cam72cam.immersiverailroading.script.modules;
 import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.text.PlayerMessage;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.lib.LuaFunction;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.lib.LuaFunction;
 
 public class StockDebugModule extends DebugModule {
     private final EntityScriptableRollingStock stock;

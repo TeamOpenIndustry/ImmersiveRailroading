@@ -2,10 +2,10 @@ package cam72cam.immersiverailroading.script.modules;
 
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.lib.LuaFunction;
-import org.luaj.vm2.lib.LuaModule;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.lib.LuaModule;
 import util.Matrix4;
 
 public class ScriptVectorUtil {

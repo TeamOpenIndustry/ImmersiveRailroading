@@ -11,13 +11,13 @@ import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.serialization.TagField;
-import org.luaj.vm2.Globals;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.Varargs;
-import org.luaj.vm2.lib.LuaFunction;
-import org.luaj.vm2.lib.LuaModule;
-import org.luaj.vm2.lib.jse.JsePlatform;
+import de.poizzy.luaj.Globals;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.Varargs;
+import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.lib.LuaModule;
+import de.poizzy.luaj.lib.jse.JsePlatform;
 
 import java.util.*;
 
@@ -79,6 +79,7 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
 
         // Load compiled scripts
         LuaValue preload = environment.get("package").get("preload");
+        LuaValue entry = null;
         for (EntityRollingStockDefinition.ScriptDefinition def : getDefinition().scripts) {
             LuaValue chunk;
             try {
@@ -89,9 +90,12 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
             }
 
             switch (def.type) {
-                case MAIN -> chunk.call();
-                case MODULE -> preload.set(def.name, chunk);
+                case MAIN -> entry = chunk;
+                case MODULE -> preload.set(def.name.replace(".lua", ""), chunk);
             }
+        }
+        if (entry != null) {
+            entry.call();
         }
     }
 

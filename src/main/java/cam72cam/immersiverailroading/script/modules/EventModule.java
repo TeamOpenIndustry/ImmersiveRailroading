@@ -4,11 +4,11 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
 import cam72cam.immersiverailroading.script.library.ILuaEvent;
 import cam72cam.mod.ModCore;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.Varargs;
-import org.luaj.vm2.lib.LuaFunction;
-import org.luaj.vm2.lib.LuaModule;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.Varargs;
+import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.lib.LuaModule;
 
 import java.util.ArrayList;
 import java.util.Arrays;

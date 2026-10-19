@@ -2,11 +2,11 @@ package cam72cam.immersiverailroading.script.modules;
 
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.resource.Identifier;
-import org.luaj.vm2.LuaError;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.lib.LuaFunction;
-import org.luaj.vm2.lib.LuaModule;
+import de.poizzy.luaj.LuaError;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.lib.LuaModule;
 
 import java.io.IOException;
 import java.util.List;

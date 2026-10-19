@@ -9,14 +9,14 @@ import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.lib.LuaFunction;
-import org.luaj.vm2.lib.LuaModule;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.lib.LuaModule;
 
 import java.util.*;
 
-import static org.luaj.vm2.LuaValue.*;
+import static de.poizzy.luaj.LuaValue.*;
 
 public class IRModule implements LuaModule {
     private final EntityScriptableRollingStock stock;
