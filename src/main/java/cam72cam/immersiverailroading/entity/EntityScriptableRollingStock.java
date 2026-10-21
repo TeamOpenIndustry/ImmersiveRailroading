@@ -15,7 +15,7 @@ import de.poizzy.luaj.Globals;
 import de.poizzy.luaj.LuaTable;
 import de.poizzy.luaj.LuaValue;
 import de.poizzy.luaj.Varargs;
-import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.annotations.LuaFunction;
 import de.poizzy.luaj.lib.LuaModule;
 import de.poizzy.luaj.lib.jse.JsePlatform;
 
@@ -119,11 +119,6 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
     }
 
     public class Global implements LuaModule {
-
-        @Override
-        public void init(LuaTable self, LuaValue name, LuaValue env) {
-
-        }
 
         @Override
         public String name() {

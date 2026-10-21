@@ -5,7 +5,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 import de.poizzy.luaj.LuaTable;
 import de.poizzy.luaj.LuaValue;
-import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.annotations.LuaFunction;
 import de.poizzy.luaj.lib.LuaModule;
 
 public class WorldModule implements LuaModule {
@@ -14,11 +14,6 @@ public class WorldModule implements LuaModule {
     @Override
     public String name() {
         return "World";
-    }
-
-    @Override
-    public void init(LuaTable self, LuaValue name, LuaValue env) {
-
     }
 
     public WorldModule(World world) {

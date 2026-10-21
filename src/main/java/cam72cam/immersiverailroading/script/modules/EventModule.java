@@ -7,7 +7,7 @@ import cam72cam.mod.ModCore;
 import de.poizzy.luaj.LuaTable;
 import de.poizzy.luaj.LuaValue;
 import de.poizzy.luaj.Varargs;
-import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.annotations.LuaFunction;
 import de.poizzy.luaj.lib.LuaModule;
 
 import java.util.ArrayList;
@@ -79,11 +79,6 @@ public class EventModule implements LuaModule {
         }
         coupled.triggerEvent(functionName, args.subargs(3));
         return LuaValue.NIL;
-    }
-
-    @Override
-    public void init(LuaTable self, LuaValue name, LuaValue env) {
-
     }
 
     @Override

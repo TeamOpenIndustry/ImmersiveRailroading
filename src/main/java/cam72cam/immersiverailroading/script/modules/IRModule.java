@@ -11,7 +11,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
 import de.poizzy.luaj.LuaTable;
 import de.poizzy.luaj.LuaValue;
-import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.annotations.LuaFunction;
 import de.poizzy.luaj.lib.LuaModule;
 
 import java.util.*;
@@ -28,11 +28,6 @@ public class IRModule implements LuaModule {
     @Override
     public String name() {
         return "IR";
-    }
-
-    @Override
-    public void init(LuaTable self, LuaValue name, LuaValue env) {
-
     }
 
     @LuaFunction

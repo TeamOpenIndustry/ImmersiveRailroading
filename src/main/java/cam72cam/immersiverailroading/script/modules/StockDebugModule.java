@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.text.PlayerMessage;
 import de.poizzy.luaj.LuaValue;
-import de.poizzy.luaj.lib.LuaFunction;
+import de.poizzy.luaj.annotations.LuaFunction;
 
 public class StockDebugModule extends DebugModule {
     private final EntityScriptableRollingStock stock;
