@@ -16,6 +16,8 @@ import de.poizzy.luaj.LuaTable;
 import de.poizzy.luaj.LuaValue;
 import de.poizzy.luaj.Varargs;
 import de.poizzy.luaj.annotations.LuaFunction;
+import de.poizzy.luaj.function.ThreeArgFunction;
+import de.poizzy.luaj.function.TwoArgFunction;
 import de.poizzy.luaj.lib.LuaModule;
 import de.poizzy.luaj.lib.jse.JsePlatform;
 
@@ -30,7 +32,6 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
      */
     public final Map<String, List<LuaValue>> luaEventCallbacks = new HashMap<>();
 
-    @TagSync
     @TagField(value = "luaTagField", mapper = LuaSerialization.LuaMapper.class)
     private Map<String, LuaValue> tagFields = new HashMap<>();
 
@@ -128,6 +129,25 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
         @LuaFunction
         public LuaValue getName() {
             return LuaValue.valueOf(getDefinition().name());
+        }
+
+        @Override
+        public void init(LuaTable self, LuaValue name, LuaValue env) {
+            LuaTable t = new LuaTable();
+            LuaTable meta = new LuaTable();
+
+            meta.set(LuaValue.INDEX, new TwoArgFunction((s, key) -> {
+                LuaValue v = tagFields.get(key.tojstring());
+                return v != null ? v : LuaValue.NIL;
+            }));
+
+            meta.set(LuaValue.NEWINDEX, new ThreeArgFunction((s, key, value) -> {
+                tagFields.put(key.tojstring(), value);
+                return LuaValue.NIL;
+            }));
+
+            t.setmetatable(meta);
+            env.set("_TagField", t);
         }
 
         @LuaFunction
