@@ -72,10 +72,10 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
         environment.load(new EventModule(this));
         environment.load(new IRModule(this));
         environment.load(new MarkupModule());
-        environment.load(new ScriptVectorUtil.VectorLibrary());
         environment.load(new StockDebugModule(this));
         environment.load(new WorldModule(this.getWorld()));
         environment.load(new Global());
+        environment.load(new VectorModule());
 
         // Load compiled scripts
         LuaValue preload = environment.get("package").get("preload");
@@ -159,18 +159,6 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
             schedule.computeIfAbsent(fireAt, _ -> new ArrayList<>(2)).add(runnable);
 
             return LuaValue.NIL;
-        }
-
-        @LuaFunction
-        public LuaValue timeToCall(LuaValue ms) {
-            long elapsed = System.nanoTime() - ms.tolong();
-            ModCore.info("Execution took %.3f microseconds", elapsed / 1_000.0);
-            return LuaValue.NIL;
-        }
-
-        @LuaFunction
-        public LuaValue time() {
-            return LuaValue.valueOf(System.nanoTime());
         }
     }
 }
