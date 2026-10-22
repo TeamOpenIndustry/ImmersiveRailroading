@@ -20,15 +20,15 @@ base.archivesName = archive_base_name
 
 //DEPENDENCIES//
 
+repositories {
+    maven {url = 'https://jitpack.io' }
+}
+
 dependencies {
-    umcShade files('libs/luaj-jse-3.0.2.jar')
+    umcShade 'com.github.poizzy:luaj-IR:v3.1.1'
 }
 
 apply from: 'ImmersiveRailroadingIntegration/dependencies.gradle'
-
-shadowJar {
-    relocate 'org.luaj', "${project.group}.shade.org.luaj"
-}
 
 //JAR//
 

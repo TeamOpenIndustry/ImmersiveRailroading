@@ -1,11 +1,11 @@
-package cam72cam.immersiverailroading.script.library;
+package cam72cam.immersiverailroading.util;
 
 import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
 
 import java.util.Arrays;
 import java.util.List;

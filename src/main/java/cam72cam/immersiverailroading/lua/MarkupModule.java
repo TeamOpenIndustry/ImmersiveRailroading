@@ -1,12 +1,12 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
-import cam72cam.immersiverailroading.script.LuaFunction;
-import cam72cam.immersiverailroading.script.LuaModule;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.mod.resource.Identifier;
-import org.luaj.vm2.LuaError;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
+import de.poizzy.luaj.LuaError;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.annotations.LuaFunction;
+import de.poizzy.luaj.lib.LuaModule;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,8 +15,13 @@ import java.util.Map;
 public class MarkupModule implements LuaModule {
     public MarkupModule() {}
 
-    @LuaFunction(module = "Markup")
-    private LuaValue read(LuaValue fileIdentifier) {
+    @Override
+    public String name() {
+        return "Markup";
+    }
+
+    @LuaFunction
+    public LuaValue read(LuaValue fileIdentifier) {
         Identifier location = new Identifier(fileIdentifier.tojstring());
         try {
             DataBlock block = DataBlock.load(location);

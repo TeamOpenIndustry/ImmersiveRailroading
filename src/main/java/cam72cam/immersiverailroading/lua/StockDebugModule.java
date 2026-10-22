@@ -1,10 +1,10 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
 import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
-import cam72cam.immersiverailroading.script.LuaFunction;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.text.PlayerMessage;
-import org.luaj.vm2.LuaValue;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.annotations.LuaFunction;
 
 public class StockDebugModule extends DebugModule {
     private final EntityScriptableRollingStock stock;
@@ -13,10 +13,11 @@ public class StockDebugModule extends DebugModule {
         this.stock = stock;
     }
 
-    @LuaFunction(module = "Debug")
-    public void printToPassengerDialog(LuaValue arg) {
+    @LuaFunction
+    public LuaValue printToPassengerDialog(LuaValue arg) {
         stock.getPassengers().stream().filter(Entity::isPlayer)
                 .map(Entity::asPlayer)
                 .forEach(player -> player.sendMessage(PlayerMessage.direct(arg.tojstring())));
+        return LuaValue.NIL;
     }
 }

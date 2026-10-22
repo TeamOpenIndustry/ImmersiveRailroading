@@ -1,25 +1,6 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
-import cam72cam.immersiverailroading.script.LuaFunction;
-import cam72cam.immersiverailroading.script.LuaModule;
-import cam72cam.immersiverailroading.tile.TileRailBase;
-import cam72cam.mod.ModCore;
-import cam72cam.mod.entity.Player;
-import cam72cam.mod.text.PlayerMessage;
-import cam72cam.mod.world.World;
-import org.luaj.vm2.LuaValue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.stream.Collectors;
-
-public class AugmentModule implements LuaModule {
+public class AugmentModule {
 //    /**
 //     * Weak set of every live AugmentModule. A single static {@link World#onTick} listener walks this
 //     * set instead of every instance registering its own listener — UMC's {@code World#onTick} has no

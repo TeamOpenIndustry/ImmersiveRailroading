@@ -1,8 +1,8 @@
-package cam72cam.immersiverailroading.script.library;
+package cam72cam.immersiverailroading.util;
 
 import cam72cam.mod.ModCore;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.Varargs;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.Varargs;
 
 import java.util.List;
 import java.util.Map;

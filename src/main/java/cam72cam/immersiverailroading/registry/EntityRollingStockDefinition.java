@@ -28,6 +28,8 @@ import cam72cam.mod.serialization.TagMapped;
 import cam72cam.mod.sound.ISound;
 import cam72cam.mod.text.TextUtil;
 import cam72cam.mod.world.World;
+import de.poizzy.luaj.Prototype;
+import de.poizzy.luaj.compiler.LuaC;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -107,6 +109,7 @@ public abstract class EntityRollingStockDefinition {
 
     public Identifier script;
     public List<String> addScripts;
+    public List<ScriptDefinition> scripts;
 
     public List<AnimationDefinition> animations;
     public Map<String, Float> cgDefaults;
@@ -313,6 +316,29 @@ public abstract class EntityRollingStockDefinition {
         }
     }
 
+    public class ScriptDefinition {
+        public final String name;
+        public final Prototype compiledScript;
+        public final ScriptType type;
+
+
+        public ScriptDefinition(Identifier location, ScriptType type) {
+            this.type = type;
+            this.name = new File(location.getPath()).getName();
+
+            try (InputStream input = location.getResourceStream()) {
+                this.compiledScript = LuaC.instance.compile(input, name);
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("An error occurred while compiling script %s of stock %s", name, defID), e);
+            }
+        }
+    }
+
+    public enum ScriptType {
+        MAIN,
+        MODULE
+    }
+
     public EntityRollingStockDefinition(Class<? extends EntityRollingStock> type, String defID, DataBlock data) throws Exception {
         this.type = type;
         this.defID = defID;
@@ -442,12 +468,22 @@ public abstract class EntityRollingStockDefinition {
             tex_variants.getValueMap().forEach((key, value) -> textureNames.put(value.asString(), key));
         }
 
-        script = data.getValue("script").asIdentifier();
+        Identifier mainScript = data.getValue("script").asIdentifier();
+        if (mainScript != null && mainScript.canLoad()) {
+            scripts = new ArrayList<>();
+            scripts.add(new ScriptDefinition(mainScript, ScriptType.MAIN));
+        }
 
-        addScripts = new ArrayList<>();
-        List<DataBlock.Value> scripts = data.getValues("add_scripts");
+
         if (scripts != null) {
-            scripts.forEach(s -> addScripts.add(s.asString()));
+            List<DataBlock.Value> modules = data.getValues("add_scripts");
+            if (modules != null) {
+                modules.forEach(l -> {
+                    String relative = l.asString();
+                    Identifier location = mainScript.getRelative(relative);
+                    scripts.add(new ScriptDefinition(location, ScriptType.MODULE));
+                });
+            }
         }
 
         try {

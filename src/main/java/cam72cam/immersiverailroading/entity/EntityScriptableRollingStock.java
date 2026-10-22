@@ -4,22 +4,26 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
-import cam72cam.immersiverailroading.script.*;
-import cam72cam.immersiverailroading.script.library.ILuaEvent;
-import cam72cam.immersiverailroading.script.library.LuaSerialization;
-import cam72cam.immersiverailroading.script.modules.*;
+import cam72cam.immersiverailroading.lua.*;
+import cam72cam.immersiverailroading.util.ILuaEvent;
+import cam72cam.immersiverailroading.util.LuaSerialization;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.entity.Player;
-import cam72cam.mod.entity.sync.TagSync;
-import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.TagField;
-import org.luaj.vm2.LuaValue;
+import de.poizzy.luaj.Globals;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.Varargs;
+import de.poizzy.luaj.annotations.LuaFunction;
+import de.poizzy.luaj.function.ThreeArgFunction;
+import de.poizzy.luaj.function.TwoArgFunction;
+import de.poizzy.luaj.lib.LuaModule;
+import de.poizzy.luaj.lib.jse.JsePlatform;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class EntityScriptableRollingStock extends EntityCoupleableRollingStock implements ILuaEvent {
-    private LuaContext context;
+    public Globals environment;
     private Boolean hasOwnScript;
 
     /**
@@ -27,10 +31,6 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
      */
     public final Map<String, List<LuaValue>> luaEventCallbacks = new HashMap<>();
 
-    /**
-     * Used by {@link LuaContext}
-     */
-    @TagSync
     @TagField(value = "luaTagField", mapper = LuaSerialization.LuaMapper.class)
     private Map<String, LuaValue> tagFields = new HashMap<>();
 
@@ -44,11 +44,11 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
     public void onTick() {
         super.onTick();
 
-        if (getWorld().isClient || Config.ConfigPerformance.disableLuaScript || !hasOwnScript()) {
+        if (getWorld().isClient || Config.ConfigPerformance.disableLuaScript || getDefinition().scripts == null) {
             return;
         }
 
-        ensureContext();
+        loadLuaEnv();
 
         if (!schedule.isEmpty()) {
             List<Runnable> due = schedule.remove((long) getTickCount());
@@ -60,6 +60,43 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
         }
 
         triggerEvent("onTick");
+    }
+
+    private void loadLuaEnv() {
+        if (environment != null) {
+            return;
+        }
+
+        environment = JsePlatform.standardGlobals();
+        environment.load(new DebugModule());
+        environment.load(new EventModule(this));
+        environment.load(new IRModule(this));
+        environment.load(new MarkupModule());
+        environment.load(new StockDebugModule(this));
+        environment.load(new WorldModule(this.getWorld()));
+        environment.load(new Global());
+        environment.load(new VectorModule());
+
+        // Load compiled scripts
+        LuaValue preload = environment.get("package").get("preload");
+        LuaValue entry = null;
+        for (EntityRollingStockDefinition.ScriptDefinition def : getDefinition().scripts) {
+            LuaValue chunk;
+            try {
+                chunk = environment.loader.load(def.compiledScript, def.name, environment);
+            } catch (Exception e) {
+                ModCore.catching(e, "An error occurred while binding script %s", def.name);
+                continue;
+            }
+
+            switch (def.type) {
+                case MAIN -> entry = chunk;
+                case MODULE -> preload.set(def.name.replace(".lua", ""), chunk);
+            }
+        }
+        if (entry != null) {
+            entry.call();
+        }
     }
 
     @Override
@@ -81,77 +118,66 @@ public abstract class EntityScriptableRollingStock extends EntityCoupleableRolli
         super.handleKeyPress(source, key, disableIndependentThrottle);
     }
 
-    private void registerModules() {
-        context.registerLibrary(new ScriptVectorUtil.VectorLibrary());
-        context.registerLibrary(new MarkupModule());
+    public class Global implements LuaModule {
 
-        context.registerLibrary(new IRModule(this));
-        context.registerLibrary(new WorldModule(getWorld()));
-        context.registerLibrary(new StockDebugModule(this));
-        context.registerLibrary(new EventModule(this));
-    }
-
-    private void loadLuaScript() {
-        Identifier script = getDefinition().script;
-
-        List<String> modules = getDefinition().addScripts;
-        if (modules != null && !modules.isEmpty() && script != null) {
-            context.loadModules(modules, script);
+        @Override
+        public String name() {
+            return "_G";
         }
 
-        if (script != null && script.canLoad()) {
-            context.loadScript(script);
+        @LuaFunction
+        public LuaValue getName() {
+            return LuaValue.valueOf(getDefinition().name());
         }
-    }
 
-    private boolean hasOwnScript() {
-        if (hasOwnScript == null) {
-            EntityRollingStockDefinition def = getDefinition();
-            if (def == null) {
-                return false;
+        @Override
+        public void init(LuaTable self, LuaValue name, LuaValue env) {
+            LuaTable t = new LuaTable();
+            LuaTable meta = new LuaTable();
+
+            meta.set(LuaValue.INDEX, new TwoArgFunction((s, key) -> {
+                LuaValue v = tagFields.get(key.tojstring());
+                return v != null ? v : LuaValue.NIL;
+            }));
+
+            meta.set(LuaValue.NEWINDEX, new ThreeArgFunction((s, key, value) -> {
+                tagFields.put(key.tojstring(), value);
+                return LuaValue.NIL;
+            }));
+
+            t.setmetatable(meta);
+            env.set("_TagField", t);
+        }
+
+        @LuaFunction
+        public Varargs print(Varargs str) {
+            List<String> args = new ArrayList<>();
+            for (int i = 1; i <= str.narg(); i++) {
+                args.add(str.arg(i).tojstring());
             }
-            hasOwnScript = def.script != null && def.script.canLoad();
+
+            String formatedArgs = String.join("    ", args);
+            ModCore.info("[Lua, %s] %s", getDefinition().name(), formatedArgs);
+            return LuaValue.NIL;
         }
-        return hasOwnScript;
-    }
 
-    private void ensureContext() {
-        if (context != null) {
-            return;
+        @LuaFunction
+        public LuaValue wait(LuaValue sec, LuaValue func) {
+            float seconds = sec.tofloat();
+            int delayTicks = Math.max(1, Math.round(seconds * 20));
+            long fireAt = (long) getTickCount() + delayTicks;
+
+            Runnable runnable = () -> {
+                try {
+                    func.call();
+                } catch (Exception e) {
+                    ModCore.error("[Lua] Error while executing scheduled wait function: " + e.getMessage());
+                }
+            };
+
+            schedule.computeIfAbsent(fireAt, _ -> new ArrayList<>(2)).add(runnable);
+
+            return LuaValue.NIL;
         }
-        context = LuaContext.create(this);
-        registerModules();
-        loadLuaScript();
-        context.refreshSerialization(tagFields);
-    }
-
-    @LuaFunction(module = "")
-    private LuaValue getName() {
-        return LuaValue.valueOf(getDefinition().name());
-    }
-
-    @LuaFunction(module = "")
-    public void print(LuaValue... str) {
-        List<String> args = Arrays.stream(str).map(LuaValue::tojstring).collect(Collectors.toList());
-        String formatedArgs = String.join("    ", args);
-        ModCore.info("[Lua, %s] %s", getDefinition().name(), formatedArgs);
-    }
-
-
-    @LuaFunction(module = "Utils")
-    public void wait(LuaValue sec, LuaValue func) {
-        float seconds = sec.tofloat();
-        int delayTicks = Math.max(1, Math.round(seconds * 20));
-        long fireAt = (long) getTickCount() + delayTicks;
-
-        Runnable runnable = () -> {
-            try {
-                func.call();
-            } catch (Exception e) {
-                ModCore.error("[Lua] Error while executing scheduled wait function: " + e.getMessage());
-            }
-        };
-
-        schedule.computeIfAbsent(fireAt, _ -> new ArrayList<>(2)).add(runnable);
     }
 }

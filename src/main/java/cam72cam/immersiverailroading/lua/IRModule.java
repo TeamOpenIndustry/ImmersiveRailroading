@@ -1,73 +1,92 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.gui.overlay.Readouts;
+import cam72cam.immersiverailroading.library.unit.PressureDisplayType;
+import cam72cam.immersiverailroading.library.unit.SpeedDisplayType;
+import cam72cam.immersiverailroading.library.unit.TemperatureDisplayType;
 import cam72cam.immersiverailroading.net.SoundPacket;
-import cam72cam.immersiverailroading.script.LuaFunction;
-import cam72cam.immersiverailroading.script.LuaModule;
-import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
-import org.luaj.vm2.LuaTable;
-import org.luaj.vm2.LuaValue;
+import de.poizzy.luaj.LuaTable;
+import de.poizzy.luaj.LuaValue;
+import de.poizzy.luaj.annotations.LuaFunction;
+import de.poizzy.luaj.lib.LuaModule;
 
 import java.util.*;
 
+import static de.poizzy.luaj.LuaValue.*;
+
 public class IRModule implements LuaModule {
     private final EntityScriptableRollingStock stock;
+    private LuaValue env;
 
     public IRModule(EntityScriptableRollingStock stock) {
         this.stock = stock;
     }
 
-    @LuaFunction(module = "IR")
-    public void setCG(LuaValue ctrl, LuaValue value) {
+    @Override
+    public String name() {
+        return "IR";
+    }
+
+    @Override
+    public void init(LuaTable self, LuaValue name, LuaValue env) {
+        this.env = env;
+    }
+
+    @LuaFunction
+    public LuaValue setCG(LuaValue ctrl, LuaValue value) {
         String control = ctrl.tojstring();
         float val = value.tofloat();
 
         stock.setControlPosition(control, val);
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getCG(LuaValue control) {
         float pos = stock.getControlPosition(control.tojstring());
         return LuaValue.valueOf(pos);
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getPaint() {
         return LuaValue.valueOf(stock.getTexture());
     }
 
-    @LuaFunction(module = "IR")
-    public void setPaint(LuaValue textureName) {
+    @LuaFunction
+    public LuaValue setPaint(LuaValue textureName) {
         stock.setTexture(textureName.tojstring());
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getReadout(LuaValue readout) {
         Readouts readouts = Readouts.valueOf(readout.tojstring().toUpperCase());
         float value = readouts.getValue(stock);
         return LuaValue.valueOf(value);
     }
 
-    @LuaFunction(module = "IR")
-    public void couplerEngaged(LuaValue position, LuaValue engaged) {
+    @LuaFunction
+    public LuaValue couplerEngaged(LuaValue position, LuaValue engaged) {
         EntityCoupleableRollingStock.CouplerType type = EntityCoupleableRollingStock.CouplerType.valueOf(position.tojstring().toUpperCase());
         stock.setCouplerEngaged(type, engaged.toboolean());
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
-    public void setThrottle(LuaValue value) {
+    @LuaFunction
+    public LuaValue setThrottle(LuaValue value) {
         if (stock instanceof Locomotive) {
             ((Locomotive) stock).setThrottle(value.tofloat());
         }
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getThrottle() {
         if (stock instanceof Locomotive) {
             return LuaValue.valueOf(((Locomotive) stock).getThrottle());
@@ -75,14 +94,15 @@ public class IRModule implements LuaModule {
         return LuaValue.valueOf(0);
     }
 
-    @LuaFunction(module = "IR")
-    public void setReverser(LuaValue value) {
+    @LuaFunction
+    public LuaValue setReverser(LuaValue value) {
         if (stock instanceof Locomotive) {
             ((Locomotive) stock).setReverser(value.tofloat());
         }
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getReverser() {
         if (stock instanceof Locomotive) {
             return LuaValue.valueOf(((Locomotive) stock).getReverser());
@@ -90,15 +110,16 @@ public class IRModule implements LuaModule {
         return LuaValue.valueOf(0);
     }
 
-    @LuaFunction(module = "IR")
-    public void setTrainBrake(LuaValue value) {
+    @LuaFunction
+    public LuaValue setTrainBrake(LuaValue value) {
         if (stock instanceof Locomotive) {
            ((Locomotive) stock).setTrainBrake(value.tofloat());
         }
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
-    protected LuaValue getTrainBrake() {
+    @LuaFunction
+    public LuaValue getTrainBrake() {
         if (stock instanceof Locomotive) {
             float brake = ((Locomotive) stock).getTrainBrake();
             return LuaValue.valueOf(brake);
@@ -107,32 +128,35 @@ public class IRModule implements LuaModule {
         return (LuaValue.valueOf(0));
     }
 
-    @LuaFunction(module = "IR")
-    public void setIndependentBrake(LuaValue value) {
+    @LuaFunction
+    public LuaValue setIndependentBrake(LuaValue value) {
         stock.setIndependentBrake(value.tofloat());
+        return NIL;
     }
 
-    @LuaFunction(module = "IR", name = "getIndependentBrake")
+    @LuaFunction(name = "getIndependentBrake")
     public LuaValue getIndependentBrakeLua() {
         return LuaValue.valueOf(stock.getIndependentBrake());
     }
 
-    @LuaFunction(module = "IR")
-    public void setGlobal(LuaValue control, LuaValue value) {
+    @LuaFunction
+    public LuaValue setGlobal(LuaValue control, LuaValue value) {
         stock.mapTrain(stock, false, stock -> stock.setControlPosition(control.tojstring(), value.tofloat()));
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
-    public void setTag(LuaValue tag) {
+    @LuaFunction
+    public LuaValue setTag(LuaValue tag) {
         stock.setEntityTag(tag.tojstring());
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
-    public LuaValue getTag(LuaValue tag) {
+    @LuaFunction
+    public LuaValue getTag() {
         return LuaValue.valueOf(stock.tag);
     }
 
-    @LuaFunction(module = "IR", name = "getTrain")
+    @LuaFunction
     public LuaTable getTrainConsist() {
         List<EntityCoupleableRollingStock> train = stock.getTrain();
 
@@ -151,7 +175,7 @@ public class IRModule implements LuaModule {
         return consist;
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue isTurnedOn() {
         if (stock instanceof LocomotiveDiesel diesel) {
             return LuaValue.valueOf(diesel.isTurnedOn());
@@ -159,34 +183,30 @@ public class IRModule implements LuaModule {
         return LuaValue.valueOf(false);
     }
 
-    @LuaFunction(module = "IR")
-    public void engineStartStop(LuaValue bool) {
+    @LuaFunction
+    public LuaValue engineStartStop(LuaValue bool) {
        if (stock instanceof LocomotiveDiesel) {
            ((LocomotiveDiesel) stock).setTurnedOn(bool.toboolean());
        }
+       return NIL;
     }
 
-    @LuaFunction(module = "IR")
-    public void newParticle() {
+    public LuaValue newParticle() {
         // Currently Disabled
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getStockPosition() {
-        return ScriptVectorUtil.constructVec3Table(stock.getPosition());
+        return VectorModule.convertToLua(stock.getPosition(), env);
     }
 
-    @LuaFunction(module = "IR")
-    public LuaValue getStockMatrix() {
-        return ScriptVectorUtil.constructMatrix4Table(stock.getModelMatrix());
-    }
+//    @LuaFunction
+//    public LuaValue getStockMatrix() {
+//        return ScriptVectorUtil.constructMatrix4Table(stock.getModelMatrix());
+//    }
 
-    @LuaFunction(module = "IR")
-    public LuaValue newVector(LuaValue x, LuaValue y, LuaValue z) {
-        return ScriptVectorUtil.constructVec3Table(x, y, z);
-    }
-
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaTable getCoupled(LuaValue type) {
         LuaTable table = new LuaTable();
         String sType = type.tojstring();
@@ -204,16 +224,16 @@ public class IRModule implements LuaModule {
         return table;
     }
 
-    @LuaFunction(module = "IR", name = "isBuilt")
-    public LuaValue isBuiltLua() {
+    @LuaFunction
+    public LuaValue isBuilt() {
         return LuaValue.valueOf(stock.isBuilt());
     }
 
-    @LuaFunction(module = "IR")
-    public void playSound(LuaValue identifier, LuaValue luaPos, LuaValue volume) {
+    @LuaFunction
+    public LuaValue playSound(LuaValue identifier, LuaValue luaPos, LuaValue volume) {
         Vec3d pos;
         if (luaPos != LuaValue.NIL) {
-            Vec3d objPos = ScriptVectorUtil.convertToVec3d(luaPos);
+            Vec3d objPos = VectorModule.convertToJava(luaPos);
             pos = stock.getPosition().add(objPos);
         } else {
             pos = stock.getPosition();
@@ -227,13 +247,14 @@ public class IRModule implements LuaModule {
 
         if (!sound.canLoad()) {
             ModCore.error("[Lua] Sound file %s does not exist! Not playing sound.", sound.toString());
-            return;
+            return NIL;
         }
 
         new SoundPacket(sound, pos, stock.getVelocity(), volume.tofloat(), 1, 10, ConfigSound.SoundCategories.controls(), SoundPacket.PacketSoundCategory.SCRIPTED).sendToObserving(stock);
+        return NIL;
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getObjectPos(LuaValue name) {
         Optional<String> object = stock.getDefinition().getModel().model.groups().stream().filter(s -> s.contains(name.toString())).findFirst();
 
@@ -242,15 +263,15 @@ public class IRModule implements LuaModule {
         }
 
         Vec3d center = stock.getDefinition().getModel().model.centerOfGroups(Collections.singletonList(object.get()));
-        return ScriptVectorUtil.constructVec3Table(center);
+        return VectorModule.convertToLua(center, env);
     }
 
-    @LuaFunction(module = "IR", name = "getPassengerCount")
+    @LuaFunction
     public LuaValue getPassengerCountLua() {
         return LuaValue.valueOf(stock.getPassengerCount());
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue isStockFlipped() {
         Collection<EntityCoupleableRollingStock.DirectionalStock> train = stock.getDirectionalTrain(false);
 
@@ -265,52 +286,60 @@ public class IRModule implements LuaModule {
         return LuaValue.valueOf(flipped);
     }
 
-    @LuaFunction(module = "IR")
-    public LuaValue getSpeedKmh() {
-        Speed speed = stock.getCurrentSpeed();
-        return LuaValue.valueOf(speed.metric());
+    @LuaFunction
+    public LuaValue getSpeed(LuaValue unit) {
+        double kmh = stock.getCurrentSpeed().metric();
+        if (unit.isnil()) {
+            return LuaValue.valueOf(kmh);
+        }
+        SpeedDisplayType type = SpeedDisplayType.valueOf(unit.tojstring());
+        return LuaValue.valueOf(type.convertFromKmh(kmh));
     }
 
-    @LuaFunction(module = "IR")
-    public LuaValue getSpeedMph() {
-        Speed speed = stock.getCurrentSpeed();
-        return LuaValue.valueOf(speed.imperial());
-    }
-
-    @LuaFunction(module = "IR")
-    public LuaValue getTemperature() {
-        if (stock instanceof LocomotiveSteam) {
-            float temp = ((LocomotiveSteam) stock).getBoilerTemperature();
-            return LuaValue.valueOf(temp);
-        } else if (stock instanceof LocomotiveDiesel) {
-            float temp = ((LocomotiveDiesel) stock).getEngineTemperature();
-            return LuaValue.valueOf(temp);
+    @LuaFunction
+    public LuaValue getTemperature(LuaValue unit) {
+        float temp;
+        switch (stock) {
+            case LocomotiveSteam steam -> temp = steam.getBoilerTemperature();
+            case LocomotiveDiesel diesel -> temp = diesel.getEngineTemperature();
+            default -> temp = 0;
         }
 
-        return LuaValue.valueOf(0);
-    }
-
-    @LuaFunction(module = "IR", name = "getBoilerPressure")
-    public LuaValue getBoilerPressureLua() {
-        if (stock instanceof LocomotiveSteam) {
-            float pressure = ((LocomotiveSteam) stock).getBoilerPressure();
-            return LuaValue.valueOf(pressure);
+        if (unit.isnil()) {
+            return valueOf(temp);
         }
 
-        return LuaValue.valueOf(0);
+        TemperatureDisplayType type = TemperatureDisplayType.valueOf(unit.tojstring());
+        return valueOf(type.convertFromCelcius(temp));
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
+    public LuaValue getBoilerPressure(LuaValue unit) {
+        float pressure = 0.0f;
+        if (stock instanceof LocomotiveSteam steam) {
+            pressure = steam.getBoilerPressure();
+        }
+
+        if (unit.isnil()) {
+            return valueOf(pressure);
+        }
+
+        PressureDisplayType type = PressureDisplayType.valueOf(unit.tojstring());
+
+        return valueOf(type.convertFromPSI(pressure));
+    }
+
+    @LuaFunction
     public LuaValue isSliding() {
         return LuaValue.valueOf(stock.isSliding());
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getBrakePressure() {
         return LuaValue.valueOf(stock.getBrakePressure());
     }
 
-    @LuaFunction(module = "IR")
+    @LuaFunction
     public LuaValue getWeight() {
         return LuaValue.valueOf(stock.getWeight());
     }
