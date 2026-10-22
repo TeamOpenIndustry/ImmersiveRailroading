@@ -256,6 +256,9 @@ public class Config {
 
 		@Comment("How many MB of memory to reserve for stock loading per thread, higher numbers = safer but slower")
 		public static int megabytesReservedPerStockLoadingThread = 1024;
+
+		@Comment("Disables the Lua script implementation")
+		public static boolean disableLuaScript = false;
 	}
 
 	@Name("debug")

@@ -20,6 +20,14 @@ base.archivesName = archive_base_name
 
 //DEPENDENCIES//
 
+repositories {
+    maven {url = 'https://jitpack.io' }
+}
+
+dependencies {
+    umcShade 'com.github.poizzy:luaj-IR:v3.1.1'
+}
+
 apply from: 'ImmersiveRailroadingIntegration/dependencies.gradle'
 
 //JAR//
