@@ -1,17 +1,15 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
-import cam72cam.immersiverailroading.script.library.ILuaEvent;
+import cam72cam.immersiverailroading.util.ILuaEvent;
 import cam72cam.mod.ModCore;
-import de.poizzy.luaj.LuaTable;
 import de.poizzy.luaj.LuaValue;
 import de.poizzy.luaj.Varargs;
 import de.poizzy.luaj.annotations.LuaFunction;
 import de.poizzy.luaj.lib.LuaModule;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class EventModule implements LuaModule {
     private EntityScriptableRollingStock stock;

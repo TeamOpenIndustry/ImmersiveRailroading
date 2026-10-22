@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
 import cam72cam.immersiverailroading.entity.EntityScriptableRollingStock;
 import cam72cam.mod.entity.Entity;

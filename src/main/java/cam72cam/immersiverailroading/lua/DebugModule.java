@@ -1,7 +1,6 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
 import cam72cam.mod.ModCore;
-import de.poizzy.luaj.LuaTable;
 import de.poizzy.luaj.LuaValue;
 import de.poizzy.luaj.annotations.LuaFunction;
 import de.poizzy.luaj.lib.LuaModule;

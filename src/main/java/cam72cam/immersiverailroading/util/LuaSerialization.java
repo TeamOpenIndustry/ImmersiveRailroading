@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.script.library;
+package cam72cam.immersiverailroading.util;
 
 import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;

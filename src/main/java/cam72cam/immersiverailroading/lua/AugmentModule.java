@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
 public class AugmentModule {
 //    /**

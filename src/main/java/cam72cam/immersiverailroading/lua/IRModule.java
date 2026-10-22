@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.script.modules;
+package cam72cam.immersiverailroading.lua;
 
 import cam72cam.immersiverailroading.ConfigSound;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
@@ -8,7 +8,6 @@ import cam72cam.immersiverailroading.library.unit.PressureDisplayType;
 import cam72cam.immersiverailroading.library.unit.SpeedDisplayType;
 import cam72cam.immersiverailroading.library.unit.TemperatureDisplayType;
 import cam72cam.immersiverailroading.net.SoundPacket;
-import cam72cam.immersiverailroading.util.Speed;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.resource.Identifier;
