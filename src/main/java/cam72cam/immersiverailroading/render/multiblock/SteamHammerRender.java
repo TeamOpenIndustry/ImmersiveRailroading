@@ -40,19 +40,19 @@ public class SteamHammerRender implements IMultiblockRender {
 		//state.scale(2, 2, 2);
 		state.translate(0.5, 0, 0.5);
 		state.rotate(te.getRotation(), 0, 1, 0);
-		try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(state)) {
-			vbo.enqueueOpaque(rest);
-			double dist;
-			if (mb != null && mb.hasPower()) {
-				if (te.getCraftProgress() != 0) {
-					dist = -(Math.abs((te.getRenderTicks() + partialTicks) % 10 - 5)) / 4f;
-				} else {
-					dist = -(Math.abs((te.getRenderTicks() + partialTicks) % 30 - 15)) / 14f;
-				}
+
+		ModelRenderer renderer = ModelRenderer.getRendererFor(model);
+		renderer.enqueueOpaque(state, rest);
+		double dist;
+		if (mb != null && mb.hasPower()) {
+			if (te.getCraftProgress() != 0) {
+				dist = -(Math.abs((te.getRenderTicks() + partialTicks) % 10 - 5)) / 4f;
 			} else {
-				dist = 0;
+				dist = -(Math.abs((te.getRenderTicks() + partialTicks) % 30 - 15)) / 14f;
 			}
-			vbo.enqueueOpaque(hammer, s -> s.translate(0, dist, 0));
+		} else {
+			dist = 0;
 		}
+		renderer.enqueueOpaque(state.translate(0, dist, 0), hammer);
 	}
 }

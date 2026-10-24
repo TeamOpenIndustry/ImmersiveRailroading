@@ -335,25 +335,23 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
         }
 
         ModelConfig cfg = new ModelConfig().variant(stock.getTexture()).lod(lod_level);
-        try (
-                ModelRenderer.Binding bound = ModelRenderer.getRendererFor(this.model).bind(cfg, state);
-        ) {
-            double backup = stock.distanceTraveled;
+        ModelRenderer renderer = ModelRenderer.getRendererFor(this.model);
 
-            if (!stock.isSliding()) {
-                stock.distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
-            }
-            stock.distanceTraveled /= stock.gauge.scale();
-
-
-            base.render(bound, stock, available, partialTicks);
-
-            stock.distanceTraveled = backup;
+        double backup = stock.distanceTraveled;
+        if (!stock.isSliding()) {
+            stock.distanceTraveled = stock.distanceTraveled + stock.getCurrentSpeed().minecraft() * stock.getTickSkew() * partialTicks * 1.1;
         }
+        stock.distanceTraveled /= stock.gauge.scale();
+
+        base.render(renderer, cfg, state, stock, available, partialTicks);
+
+        stock.distanceTraveled = backup;
+        ModelRenderer.endModel();
     }
 
     public void postRenderEntity(EntityMoveableRollingStock stock, RenderState state, float partialTicks) {
         postRender((ENTITY) stock, state, partialTicks);
+        ModelRenderer.endModel();
     }
 
     // TODO invert -> reinvert sway

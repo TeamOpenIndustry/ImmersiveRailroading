@@ -78,9 +78,8 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			}
 		}
 
-		try (ModelRenderer.Binding bound = ModelRenderer.getRendererFor(MODEL).bind(state)) {
-			bound.enqueueOpaque();
-		}
+		ModelRenderer.getRendererFor(MODEL).enqueueOpaque(state);
+		ModelRenderer.endModel();
 
 		state.lighting(false);
 		state.scale(0.01, 0.01, 0.01);

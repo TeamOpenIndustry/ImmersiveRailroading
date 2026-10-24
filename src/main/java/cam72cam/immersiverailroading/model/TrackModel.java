@@ -9,6 +9,7 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.model.common.ModelLoader;
 import cam72cam.mod.model.common.mesh.Model;
 import cam72cam.mod.model.common.mesh.ModelSetBuilder;
+import cam72cam.mod.render.common.IGeomDrawable;
 import cam72cam.mod.resource.Identifier;
 import trackapi.lib.Gauges;
 import util.Matrix4;
@@ -159,7 +160,7 @@ public class TrackModel {
         }
     }
 
-    public Model getModel(RailInfo info, List<VecYPR> data) {
+    public IGeomDrawable getModel(RailInfo info, List<VecYPR> data) {
         ModelSetBuilder builder = ModelSetBuilder.of(this.model);
 
         if(info.settings.type.isTable()){
@@ -175,17 +176,17 @@ public class TrackModel {
             renderPiece(info, data.get(i), builder, groups);
         }
 
-        return builder.build();
+        return builder.buildDrawable(false);
     }
 
-    private Model renderTable(RailInfo info, List<VecYPR> data, ModelSetBuilder builder) {
+    private IGeomDrawable renderTable(RailInfo info, List<VecYPR> data, ModelSetBuilder builder) {
         Map<TrackModelPart, List<String>> groupNames = this.groupNamesMapper.values().stream().findFirst().get();
 
         for (VecYPR piece : data) {
             renderPiece(info, piece, builder, groupNames);
         }
 
-        return builder.build();
+        return builder.buildDrawable(true);
     }
 
     private void renderPiece(RailInfo info, VecYPR piece, ModelSetBuilder builder, Map<TrackModelPart, List<String>> groupNames) {

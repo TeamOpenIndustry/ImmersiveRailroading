@@ -49,22 +49,22 @@ public class BoilerRollerRender implements IMultiblockRender {
 		state.rotate(te.getRotation() - 90, 0, 1, 0);
 		state.translate(-3.5, 0, -2.5);
 
-		try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(state)) {
-			vbo.enqueueOpaque(base);
+		ModelRenderer renderer = ModelRenderer.getRendererFor(model);
+		renderer.enqueueOpaque(state, base);
 
-			int index = (int) ((100 - tmb.getCraftProgress()) / 6.25);
-			index = Math.clamp(index, 0, 16);
-			if (tmb.hasOutput()) {
-				vbo.enqueueOpaque(product);
-			} else {
-				boolean hasInput = tmb.hasInput();
-				if (hasInput && (index == 0 || tmb.getCraftProgress() == 0)) {
-					//Have input and not started crafting/just started crafting
-					vbo.enqueueOpaque(raw);
-				} else if (hasInput) {
-					vbo.enqueueOpaque(segments.get(index));
-				}
+		int index = (int) ((100 - tmb.getCraftProgress()) / 6.25);
+		index = Math.clamp(index, 0, 16);
+		if (tmb.hasOutput()) {
+			renderer.enqueueOpaque(state, product);
+		} else {
+			boolean hasInput = tmb.hasInput();
+			if (hasInput && (index == 0 || tmb.getCraftProgress() == 0)) {
+				//Have input and not started crafting/just started crafting
+				renderer.enqueueOpaque(state, raw);
+			} else if (hasInput) {
+				renderer.enqueueOpaque(state, segments.get(index));
 			}
 		}
+		ModelRenderer.endModel();
 	}
 }

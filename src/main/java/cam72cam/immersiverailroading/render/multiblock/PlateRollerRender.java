@@ -23,8 +23,7 @@ public class PlateRollerRender implements IMultiblockRender {
 		state.translate(0.5, 0, 0.5);
 		state.rotate(te.getRotation() - 90, 0, 1, 0);
 		state.translate(-2.25, 0, 0.5);
-		try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(state)) {
-			vbo.enqueueOpaque();
-		}
+		ModelRenderer.getRendererFor(model).enqueueOpaque(state);
+		ModelRenderer.endModel();
 	}
 }

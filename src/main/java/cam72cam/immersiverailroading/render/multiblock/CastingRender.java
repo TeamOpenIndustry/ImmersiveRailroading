@@ -44,16 +44,16 @@ public class CastingRender implements IMultiblockRender {
 		state.translate(0.5, 0, 0.5);
 		state.rotate(te.getRotation() - 90, 0, 1, 0);
 		state.translate(-2.5, -3, 6.5);
-		try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(state)) {
-			CastingInstance tmb = (CastingInstance) te.getMultiblock();
-			if (tmb.isPouring()) {
-				vbo.enqueueOpaque(flowing_steel);
-			}
-			double steelLevel = tmb.getSteelLevel() * 4.5;
-			if (steelLevel != 0) {
-				vbo.enqueueOpaque(steel_level, s -> s.translate(0, steelLevel, 0));
-			}
-			vbo.enqueueOpaque(rest);
+		ModelRenderer renderer = ModelRenderer.getRendererFor(model);
+		CastingInstance tmb = (CastingInstance) te.getMultiblock();
+		renderer.enqueueOpaque(state, rest);
+		if (tmb.isPouring()) {
+			renderer.enqueueOpaque(state, flowing_steel);
 		}
+		double steelLevel = tmb.getSteelLevel() * 4.5;
+		if (steelLevel != 0) {
+			renderer.enqueueOpaque(state.translate(0, steelLevel, 0), steel_level);
+		}
+		ModelRenderer.endModel();
 	}
 }

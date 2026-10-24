@@ -144,9 +144,7 @@ public class CargoItems {
                                 s.scale(data.gauge.scale(), data.gauge.scale(), data.gauge.scale());
                                 ModelConfig cfg = new ModelConfig().variant(data.texture);
                                 ModelRenderer renderer = ModelRenderer.getRendererFor(data.def.getModel().model);
-                                try (ModelRenderer.Binding binder = renderer.bind(cfg, s)) {
-                                    binder.enqueueTransparent(data.def.itemGroups);
-                                }
+                                renderer.enqueueOpaque(cfg, s, data.def.itemGroups);
                             });
                             renderSlot++;
                             continue;
@@ -172,9 +170,7 @@ public class CargoItems {
                                 s.translate(0, -componentOffset, 0);
                                 ModelConfig cfg = new ModelConfig().variant(data.texture);
                                 ModelRenderer renderer = ModelRenderer.getRendererFor(data.def.getModel().model);
-                                try (ModelRenderer.Binding binder = renderer.bind(cfg, s)) {
-                                    binder.enqueueTransparent(data.def.itemGroups);
-                                }
+                                renderer.enqueueOpaque(cfg, s, data.def.itemGroups);
                             });
                             renderSlot++;
                             continue;

@@ -38,9 +38,8 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 				.rotate(-90, 0, 1, 0)
 				.scale(scale, scale, scale);
 		ModelConfig cfg = new ModelConfig().variant(data.texture);
-		try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(data.def.getModel().model).bind(cfg, state)) {
-			vbo.enqueueTransparent(data.def.itemGroups);
-		}
+		ModelRenderer.getRendererFor(data.def.getModel().model).enqueueOpaque(cfg, state, data.def.itemGroups);
+		ModelRenderer.endModel();
 	}
 
 	@Override
@@ -73,16 +72,14 @@ public class StockItemModel implements ItemRender.ISpriteItemModel {
 			state.scale(scale, scale, scale / (modelLength / 2));
 			state.rotate(85, 0, 1, 0);
 
-			ModelConfig cfg = new ModelConfig().synchronous().lod(StockModel.LOD_SMALL);
+			ModelConfig cfg = new ModelConfig().synchronous().waitForModelLoad().lod(StockModel.LOD_SMALL);
 			if (ConfigGraphics.stockItemVariants) {
 				cfg.variant(data.texture);
 			}
 
 			Model model = def.getModel().model;
-			try (ModelRenderer.Binding vbo =
-						 ModelRenderer.getRendererFor(model).bind(cfg, state, true)) {
-				vbo.enqueueTransparent(def.itemGroups);
-			}
+			ModelRenderer.getRendererFor(model).enqueueTransparent(cfg, state, def.itemGroups);
+			ModelRenderer.endModel();
 			model.free();
 		});
 	}

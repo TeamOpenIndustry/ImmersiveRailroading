@@ -64,9 +64,7 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
                 .translate(0.5, 0.5, 0.5)
                 .scale(scale, scale, scale)
                 .translate(-center.x, -center.y, -center.z);
-
-        try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(stockModel.model).bind(state)) {
-            vbo.enqueueOpaque(groups);
-        }
+        ModelRenderer.getRendererFor(stockModel.model).enqueueOpaque(state, groups);
+        ModelRenderer.endModel();
     }
 }

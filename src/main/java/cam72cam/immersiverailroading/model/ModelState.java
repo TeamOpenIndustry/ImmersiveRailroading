@@ -4,6 +4,7 @@ import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
+import cam72cam.mod.render.common.ModelConfig;
 import cam72cam.mod.render.common.ModelRenderer;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
@@ -11,6 +12,7 @@ import util.Matrix4;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class ModelState {
@@ -268,7 +270,8 @@ public class ModelState {
         }
     }
 
-    public void render(ModelRenderer.Binding binding, EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
+    public void render(ModelRenderer renderer, ModelConfig config, RenderState state,
+                       EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
         // Get all groups that we can render from components that are available
         List<ModelComponent.ModelGroupData> groups = new ArrayList<>();
 
@@ -303,16 +306,18 @@ public class ModelState {
         GroupState next = new GroupState();
         List<String> currentGroups = new ArrayList<>(groups.size());
 
-        Consumer<RenderState> currentModifier = state -> {
+        Supplier<RenderState> currentModifier = () -> {
+            RenderState s = state.clone();
             if (matrix != null) {
-                state.model_view().multiply(matrix);
+                s.model_view().multiply(matrix);
             }
             if (current.matrix != null) {
-                state.model_view().multiply(current.matrix);
+                s.model_view().multiply(current.matrix);
             }
             if (current.blockLight != null && current.skyLight != null) {
-                state.lightmap(current.blockLight, current.skyLight);
+                s.lightmap(current.blockLight, current.skyLight);
             }
+            return s;
         };
 
         for (ModelComponent.ModelGroupData group : groups) {
@@ -358,9 +363,9 @@ public class ModelState {
             // Flush
             if (!currentGroups.isEmpty()) {
                 if (current.transparent) {
-                    binding.enqueueTransparent(currentGroups, currentModifier);
+                    renderer.enqueueTransparent(currentModifier.get(), currentGroups);
                 } else {
-                    binding.enqueueOpaque(currentGroups, currentModifier);
+                    renderer.enqueueOpaque(currentModifier.get(), currentGroups);
                 }
             }
 
@@ -373,14 +378,14 @@ public class ModelState {
         // Flush
         if (!currentGroups.isEmpty()) {
             if (current.transparent) {
-                binding.enqueueTransparent(currentGroups, currentModifier);
+                renderer.enqueueTransparent(currentModifier.get(), currentGroups);
             } else {
-                binding.enqueueOpaque(currentGroups, currentModifier);
+                renderer.enqueueOpaque(currentModifier.get(), currentGroups);
             }
         }
 
         for (ModelState child : children) {
-            child.render(binding, stock, available, partialTicks);
+            child.render(renderer, config, state, stock, available, partialTicks);
         }
     }
 }

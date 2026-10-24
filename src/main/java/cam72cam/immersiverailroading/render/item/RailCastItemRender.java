@@ -40,9 +40,8 @@ public class RailCastItemRender implements ItemRender.IItemModel {
 			state.rotate(90, 1, 0, 0);
 			state.translate(0, -1, 1);
 			state.translate(-0.5, 0.6, 0.6);
-			try (ModelRenderer.Binding bound = ModelRenderer.getRendererFor(model).bind(state)) {
-				bound.enqueueOpaque(groups);
-			}
+			ModelRenderer.getRendererFor(model).enqueueOpaque(state, groups);
+			ModelRenderer.endModel();
 		});
 	}
 

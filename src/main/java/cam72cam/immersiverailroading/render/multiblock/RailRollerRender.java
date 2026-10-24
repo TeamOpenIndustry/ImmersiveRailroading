@@ -44,23 +44,24 @@ public class RailRollerRender implements IMultiblockRender {
 		state.translate(0.5, 0, 0.5);
 		state.rotate(te.getRotation() - 90, 0, 1, 0);
 		state.translate(-1.5, 0, 0.5);
-		try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(state)) {
-			RailRollerInstance tmb = (RailRollerInstance) te.getMultiblock();
-			int progress = tmb.getCraftProgress();
+		ModelRenderer renderer = ModelRenderer.getRendererFor(model);
+		renderer.enqueueOpaque(state, rest);
+		renderer.enqueueOpaque(state, input);
 
-			if (progress != 0) {
-				vbo.enqueueOpaque(input, s -> {
-					s.translate(0, 0, -(100 - progress) / 10.0);
-					s.scale(1, 1, Math.max(0.25, Math.sqrt(progress / 100.0)));
-				});
-			}
-			if (progress != 0) {
-				vbo.enqueueOpaque(output, s -> s.translate(0, 0, (progress) / 10.0));
-			} else if (tmb.outputFull()) {
-				vbo.enqueueOpaque(output);
-			}
+		RailRollerInstance tmb = (RailRollerInstance) te.getMultiblock();
+		int progress = tmb.getCraftProgress();
 
-			vbo.enqueueOpaque(rest);
+		if (progress != 0) {
+			renderer.enqueueOpaque(state.clone()
+										.translate(0, 0, -(100 - progress) / 10.0)
+										.scale(1, 1, Math.max(0.25, Math.sqrt(progress / 100.0))),
+								   input);
 		}
+		if (progress != 0) {
+			renderer.enqueueOpaque(state.translate(0, 0, (progress) / 10.0), output);
+		} else if (tmb.outputFull()) {
+			renderer.enqueueOpaque(state, output);
+		}
+		ModelRenderer.endModel();
 	}
 }
