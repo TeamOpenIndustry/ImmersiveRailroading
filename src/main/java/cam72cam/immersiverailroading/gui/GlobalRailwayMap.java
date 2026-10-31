@@ -569,53 +569,71 @@ public class GlobalRailwayMap implements IScreen {
                                    double panX, double panZ,
                                    double minX, double maxX, double minZ, double maxZ, double yScale, Color color) {
         List<VecYPR> points = single.pointsCache;
-        Vec3d offset = offsetCache.get(single);
-        BuilderCubicCurve builder = null;
 
         if (points != null && points.size() >= 2) {
-            if (offset == null) {
-                offset = computeOffset(single);
-                offsetCache.put(single, offset);
-            }
+            // 直接由 gauge 推算偏移，不再走 getAndUpdateBuilder
+            Vec3d offset = computeOffset(single);
             double ox = offset.x, oz = offset.z;
-            for (int i = 0; i < points.size() - 1; i++) {
-                VecYPR a = points.get(i); VecYPR b = points.get(i + 1);
-                double ax = a.x + ox, az = a.z + oz; double bx = b.x + ox, bz = b.z + oz;
-                if (!segmentVisible(ax, az, bx, bz, minX, maxX, minZ, maxZ)) continue;
-                fr.drawLine(new Vec3d(ax - panX, az - panZ, 0), new Vec3d(bx - panX, bz - panZ, 0), color, zoom, yScale, 1);
+            int last = points.size() - 1;
+
+            // 原始采样间距 ≈ 0.25 * gauge.scale()，据此算步长
+            int step = computePointStep(single.gauge.scale(), zoom);
+
+            int i = 0;
+            while (i < last) {
+                int next = Math.min(i + step, last);   // 保证首(0)与尾(last)一定被绘制
+                VecYPR a = points.get(i), b = points.get(next);
+                double ax = a.x + ox, az = a.z + oz;
+                double bx = b.x + ox, bz = b.z + oz;
+                if (segmentVisible(ax, az, bx, bz, minX, maxX, minZ, maxZ)) {
+                    fr.drawLine(new Vec3d(ax - panX, az - panZ, 0),
+                            new Vec3d(bx - panX, bz - panZ, 0),
+                            color, zoom, yScale, 1);
+                }
+                i = next;
             }
             return;
         }
 
-        try {
-            builder = single.getAndUpdateBuilder(world);
-            if (offset == null) {
-                offset = new Vec3d(single.getBlockPos()).add(builder.info.placementInfo.placementPosition);
-                offsetCache.put(single, offset);
+        // 兜底：pointsCache 异常缺失时直接用 baseCurve，不再调 getAndUpdateBuilder
+        CubicCurve curve = single.baseCurve;
+        if (curve == null) return;
+        Vec3d offset = computeOffset(single);
+        double ox = offset.x, oz = offset.z;
+
+        int N = (int) Math.max(4, Math.min(64, Math.round(16 * zoom)));
+        Vec3d prev = curve.position(0);
+        for (int i = 1; i <= N; i++) {
+            Vec3d curr = curve.position((double) i / N);
+            double ax = prev.x + ox, az = prev.z + oz;
+            double bx = curr.x + ox, bz = curr.z + oz;
+            if (segmentVisible(ax, az, bx, bz, minX, maxX, minZ, maxZ)) {
+                fr.drawLine(new Vec3d(ax - panX, az - panZ, 0),
+                        new Vec3d(bx - panX, bz - panZ, 0),
+                        COLOR_TRACK_FB, zoom, yScale, 1);
             }
-            CubicCurve curve = builder.getCurve();
-            if (curve == null) return;
-            double ox = offset.x, oz = offset.z;
-            final int N = 32;
-            Vec3d prev = curve.position(0);
-            for (int i = 1; i <= N; i++) {
-                Vec3d curr = curve.position((double) i / N);
-                double ax = prev.x + ox, az = prev.z + oz; double bx = curr.x + ox, bz = curr.z + oz;
-                if (segmentVisible(ax, az, bx, bz, minX, maxX, minZ, maxZ)) {
-                    fr.drawLine(new Vec3d(ax - panX, az - panZ, 0), new Vec3d(bx - panX, bz - panZ, 0), COLOR_TRACK_FB, zoom, yScale, 1);
-                }
-                prev = curr;
-            }
-        } catch (Exception ignore) {}
+            prev = curr;
+        }
     }
 
+    /**
+     * 由原始点间距 (≈ 0.25 * gauge.scale()) 与当前 zoom 计算需要跳过多少点再画一段。
+     * 目标是每段在屏幕上至少覆盖 TARGET_PX 像素。
+     */
+    private int computePointStep(double gaugeScale, double zoom) {
+        double spacing = 0.25 * gaugeScale;
+        if (spacing < 1e-9) return 1;
+        final double TARGET_PX = 3.0;
+        double screenPx = spacing * zoom;
+        if (screenPx >= TARGET_PX) return 1;
+        return Math.max(1, (int) Math.ceil(TARGET_PX / screenPx));
+    }
+
+    /**
+     * 计算局部坐标系原点的世界坐标。不再调用 getAndUpdateBuilder。
+     */
     private Vec3d computeOffset(TrackSingleGeometrySegment single) {
-        try {
-            BuilderCubicCurve builder = single.getAndUpdateBuilder(world);
-            return new Vec3d(single.getBlockPos()).add(builder.info.placementInfo.placementPosition);
-        } catch (Exception e) {
-            return new Vec3d(single.getBlockPos());
-        }
+        return new Vec3d(single.getBlockPos()).add(single.placementPosition);
     }
 
     private void drawPlayerMarker(RenderState state, int width, int height) {
