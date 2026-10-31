@@ -53,7 +53,7 @@ public class VolumetricCurveRenderer {
         for (Map.Entry<Long, TrackRegion> region : data.regions.entrySet()) {
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> segmentEntry : region.getValue().trackBlocks.entrySet()) {
                 TrackMultiGeometrySegment segment = segmentEntry.getValue();
-                Vec3d segmentPos = new Vec3d(segment.getBlockPos());
+                Vec3d segmentPos = new Vec3d(segment.getAbsPos());
                 double ddx = playerPosition.x - segmentPos.x;
                 double ddy = playerPosition.y - segmentPos.y;
                 double ddz = playerPosition.z - segmentPos.z;
@@ -66,7 +66,7 @@ public class VolumetricCurveRenderer {
                         RailInfo info = builder.info;
                         CubicCurve curve = builder.getCurve();
 
-                        Vec3d blockOffset = new Vec3d(single.getBlockPos()).add(info.placementInfo.placementPosition);
+                        Vec3d blockOffset = new Vec3d(single.getAbsPos()).add(info.placementInfo.placementPosition);
 
                         // 1. 方块线框（黄色）
                         Vec3d wireCenter = blockOffset

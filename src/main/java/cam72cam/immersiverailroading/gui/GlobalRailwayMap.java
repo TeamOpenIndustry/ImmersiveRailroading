@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.net.offline.TrackRegionRequestPacket;
 import cam72cam.immersiverailroading.net.offline.VehicleRequestPacket;
 import cam72cam.immersiverailroading.render.util.Color;
 import cam72cam.immersiverailroading.render.util.FlatCurveRenderer;
-import cam72cam.immersiverailroading.track.BuilderCubicCurve;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.track.graph.*;
@@ -169,7 +168,7 @@ public class GlobalRailwayMap implements IScreen {
     private void drawSwitchUI(int width, int height) {
         if (selectedSwitch == null) return;
 
-        Vec3i pos = selectedSwitch.getBlockPos();
+        Vec3i pos = selectedSwitch.getAbsPos();
         int sx = (int) (width / 2.0 + (pos.x - panX) * zoom);
         int sy = (int) (height / 2.0 + (pos.z - panZ) * zoom);
 
@@ -263,7 +262,7 @@ public class GlobalRailwayMap implements IScreen {
                     if (isMouseInSwitchBtn(evt.x, evt.y)) {
                         SwitchState target = selectedSwitch.circleSwitchState();
                         selectedSwitch.updateSwitchSate(target); // 客户端立即更新
-                        new SwitchChangePacket(world, selectedSwitch.getBlockPos(), target, false).sendToServer();
+                        new SwitchChangePacket(world, selectedSwitch.getAbsPos(), target, false).sendToServer();
                         return false;
                     }
 
@@ -271,7 +270,7 @@ public class GlobalRailwayMap implements IScreen {
                     if (isMouseInSyncBtn(evt.x, evt.y)) {
                         SwitchState target = selectedSwitch.circleSwitchState();
                         selectedSwitch.updateSwitchSate(target);
-                        new SwitchChangePacket(world, selectedSwitch.getBlockPos(), target, true).sendToServer();
+                        new SwitchChangePacket(world, selectedSwitch.getAbsPos(), target, true).sendToServer();
                         return false;
                     }
                 }
@@ -439,7 +438,7 @@ public class GlobalRailwayMap implements IScreen {
     private boolean isMouseInSwitchBtn(int mx, int my) {
         if (selectedSwitch == null) return false;
         int width = GUIHelpers.getScreenWidth(), height = GUIHelpers.getScreenHeight();
-        Vec3i pos = selectedSwitch.getBlockPos();
+        Vec3i pos = selectedSwitch.getAbsPos();
         int sx = (int) (width / 2.0 + (pos.x - panX) * zoom);
         int sy = (int) (height / 2.0 + (pos.z - panZ) * zoom);
         int btnX = sx + 15, btnY = sy - 15;
@@ -449,7 +448,7 @@ public class GlobalRailwayMap implements IScreen {
     private boolean isMouseInSyncBtn(int mx, int my) {
         if (selectedSwitch == null) return false;
         int width = GUIHelpers.getScreenWidth(), height = GUIHelpers.getScreenHeight();
-        Vec3i pos = selectedSwitch.getBlockPos();
+        Vec3i pos = selectedSwitch.getAbsPos();
         int sx = (int) (width / 2.0 + (pos.x - panX) * zoom);
         int sy = (int) (height / 2.0 + (pos.z - panZ) * zoom);
         int btn2X = sx + 15 + 70 + 4;
@@ -460,7 +459,7 @@ public class GlobalRailwayMap implements IScreen {
     private boolean isMouseInCloseBtn(int mx, int my) {
         if (selectedSwitch == null) return false;
         int width = GUIHelpers.getScreenWidth(), height = GUIHelpers.getScreenHeight();
-        Vec3i pos = selectedSwitch.getBlockPos();
+        Vec3i pos = selectedSwitch.getAbsPos();
         int sx = (int) (width / 2.0 + (pos.x - panX) * zoom);
         int sy = (int) (height / 2.0 + (pos.z - panZ) * zoom);
         int closeX = sx + 15 + 70 + 4 + 70 + 4;
@@ -480,7 +479,7 @@ public class GlobalRailwayMap implements IScreen {
                 for (Map<Gauge, TrackSingleGeometrySegment> branch : seg.paths) {
                     for (TrackSingleGeometrySegment single : branch.values()) {
                         diagTrackCount++;
-                        Vec3i bp = single.getBlockPos();
+                        Vec3i bp = single.getAbsPos();
                         diagTrackMinX = Math.min(diagTrackMinX, bp.x); diagTrackMaxX = Math.max(diagTrackMaxX, bp.x);
                         diagTrackMinZ = Math.min(diagTrackMinZ, bp.z); diagTrackMaxZ = Math.max(diagTrackMaxZ, bp.z);
                         List<VecYPR> points = single.pointsCache;
@@ -572,7 +571,7 @@ public class GlobalRailwayMap implements IScreen {
 
         if (points != null && points.size() >= 2) {
             // 直接由 gauge 推算偏移，不再走 getAndUpdateBuilder
-            Vec3d offset = computeOffset(single);
+            Vec3d offset = new Vec3d(single.getAbsPos()).add(single.placementPosition);
             double ox = offset.x, oz = offset.z;
             int last = points.size() - 1;
 
@@ -598,7 +597,7 @@ public class GlobalRailwayMap implements IScreen {
         // 兜底：pointsCache 异常缺失时直接用 baseCurve，不再调 getAndUpdateBuilder
         CubicCurve curve = single.baseCurve;
         if (curve == null) return;
-        Vec3d offset = computeOffset(single);
+        Vec3d offset = new Vec3d(single.getAbsPos()).add(single.placementPosition);
         double ox = offset.x, oz = offset.z;
 
         int N = (int) Math.max(4, Math.min(64, Math.round(16 * zoom)));
@@ -627,13 +626,6 @@ public class GlobalRailwayMap implements IScreen {
         double screenPx = spacing * zoom;
         if (screenPx >= TARGET_PX) return 1;
         return Math.max(1, (int) Math.ceil(TARGET_PX / screenPx));
-    }
-
-    /**
-     * 计算局部坐标系原点的世界坐标。不再调用 getAndUpdateBuilder。
-     */
-    private Vec3d computeOffset(TrackSingleGeometrySegment single) {
-        return new Vec3d(single.getBlockPos()).add(single.placementPosition);
     }
 
     private void drawPlayerMarker(RenderState state, int width, int height) {

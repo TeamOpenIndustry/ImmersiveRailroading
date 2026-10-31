@@ -136,7 +136,7 @@ public class TrackSingleGeometrySegment {
         this.pointsCache = builderCache.getPath(0.25 * gauge.scale());
     }
 
-    public Vec3i getBlockPos() {
+    public Vec3i getAbsPos() {
         return absPos;
     }
 

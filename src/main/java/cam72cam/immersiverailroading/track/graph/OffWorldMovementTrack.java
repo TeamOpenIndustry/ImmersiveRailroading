@@ -558,7 +558,7 @@ public class OffWorldMovementTrack {
 
     private static Vec3d singleOffset(TrackNode node, World world) {
         TrackSingleGeometrySegment single = node.trackSingleGeometrySegment;
-        Vec3i parentPos = single.getBlockPos();
+        Vec3i parentPos = single.getAbsPos();
         RailInfo info = single.getAndUpdateBuilder(world).info;
         Vec3d pp = info.placementInfo.placementPosition;
         double h = info.getTrackHeight() * single.gauge.scale();

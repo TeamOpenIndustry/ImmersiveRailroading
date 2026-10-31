@@ -36,7 +36,7 @@ public class RailInfo {
 	public final String uniqueID;
 	public final boolean itemHeld;
 
-	public final boolean isLegacySwitchTurn;
+	public final boolean isSwitchTurnBranch;
 
 
 	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
@@ -47,7 +47,7 @@ public class RailInfo {
 		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld, false);
 	}
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, boolean isLegacySwitchTurn) {
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, boolean isSwitchTurnBranch) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 			//#1566: Use customInfo to adjust slope height
@@ -64,7 +64,7 @@ public class RailInfo {
 		this.tablePos = tablePos;
 		this.itemHeld = itemHeld;
 		this.uniqueID = generateID();
-		this.isLegacySwitchTurn = isLegacySwitchTurn;
+		this.isSwitchTurnBranch = isSwitchTurnBranch;
 	}
 	private String generateID() {
 		Object[] props = new Object [] {
@@ -152,8 +152,8 @@ public class RailInfo {
 		public SwitchState switchForced;
 		@TagField("tablePos")
 		public double tablePos;
-		@TagField("isLegacySwitchTurn")
-		public boolean isLegacySwitchTurn;
+		@TagField("isSwitchTurnBranch")
+		public boolean isSwitchTurnBranch;
 
 		// Not serialized
 		public boolean itemHeld;
@@ -166,7 +166,7 @@ public class RailInfo {
 			this.switchForced = info.switchForced;
 			this.tablePos = info.tablePos;
 			this.itemHeld = info.itemHeld;
-			this.isLegacySwitchTurn = info.isLegacySwitchTurn;
+			this.isSwitchTurnBranch = info.isSwitchTurnBranch;
 		}
 
 		private Mutable(TagCompound data) throws SerializationException {
@@ -186,7 +186,7 @@ public class RailInfo {
 					switchForced,
 					tablePos,
 					itemHeld,
-					isLegacySwitchTurn
+					isSwitchTurnBranch
 			);
 		}
 	}

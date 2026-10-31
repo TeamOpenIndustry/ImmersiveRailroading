@@ -966,7 +966,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			tileSwitch.info =  tileSwitch.info.with(b -> b.switchForced = newForcedState);
 
 			TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(tileSwitch.getPos());
-			if (seg != null) seg.updateSwitchSate(newForcedState);
+			if (seg != null) {
+				seg.updateSwitchSate(newForcedState);// different from setSwitchState, this will also be called by client
+			}
 		}
 	}
 
@@ -1098,6 +1100,12 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				tileRail.setBuildTimeMs(System.currentTimeMillis());
 				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(tileRail, getWorld());
 				WorldData.get(getWorld()).setTrackBlock(tileRail.getPos(), trackBlock);
+				if(tileRail.info.isSwitchTurnBranch) { // also update parent if is switch
+					TileRail switchParent = tileRail.getParentTileWithoutDamage();
+					if(switchParent != null && switchParent.subInfos != null && !switchParent.subInfos.isEmpty()) {
+						switchParent.subInfos.set(0, tileRail.info);
+					}
+				}
 			}
 			return true;
 		}

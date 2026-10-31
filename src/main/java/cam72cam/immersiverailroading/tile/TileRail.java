@@ -21,7 +21,6 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.serialization.TagMapper;
-import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,10 +87,17 @@ public class TileRail extends TileRailBase {
 			TileRail parent = getParentTileWithoutDamage();
 			if(parent != null) {
 				parent.info = parent.info.with(b -> b.switchState = state);
+				if(parent.subInfos != null && !parent.subInfos.isEmpty()) {
+					parent.subInfos.set(0, info);
+				}
 				parent.markAllDirty();
 
 				TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(getParentWithoutDamage());
-				if (seg != null) seg.updateSwitchSate(state);
+				if (seg != null) {
+					seg.updateSwitchSate(state);
+				}
+				// notice that client side will not execute so we need a packet, or make map get latest chunk instead is enough?
+//				new SwitchChangePacket(getWorld(), parent.getPos(), state, false).sendToAllAround(getWorld(), new Vec3d(parent.getPos()), 32 * 16);
 			}
 		}
 	}
@@ -181,11 +187,6 @@ public class TileRail extends TileRailBase {
 				}
 			}
 
-			TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(getParentWithoutDamage());
-			if (seg != null) {
-				seg.updateTablePos(getWorld(), info.tablePos);
-			}
-
 			if(shouldUpdate){
 				this.markDirty();
 				int maxRange = Math.max(info.settings.length, info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount);
@@ -195,6 +196,11 @@ public class TileRail extends TileRailBase {
 					stock.onMovingTableUntilTick = getWorld().getTicks() + 5;
 					Simulation.forceQuickUpdates = true;
 				}
+
+				TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(getParentWithoutDamage());
+				if (seg != null) {
+					seg.updateTablePos(getWorld(), info.tablePos);
+				}
 			}
 		}
 
@@ -203,7 +209,7 @@ public class TileRail extends TileRailBase {
 				&& (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.CUSTOM)
 				&& parent.info.settings.type == TrackItems.SWITCH
 		) {
-			if(info.isLegacySwitchTurn) {
+			if(info.isSwitchTurnBranch) {
 				WorldData data = WorldData.get(getWorld());
 				if (data != null && data.getTrackBlock(getPos()) != null) {
 					data.removeTrackBlock(getPos());
@@ -221,7 +227,7 @@ public class TileRail extends TileRailBase {
 				if(parentFirstPos.distanceTo(firstPos) < 0.25 * info.settings.gauge.scale()) {
 					parent.subInfos.add(info);
 					parent.subInfoPos.add(getPos());
-					if(!info.isLegacySwitchTurn) info = info.with(mutable -> mutable.isLegacySwitchTurn = true);
+					if(!info.isSwitchTurnBranch) info = info.with(mutable -> mutable.isSwitchTurnBranch = true);
 					WorldData.get(getWorld()).setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
 				}
 			}
@@ -379,7 +385,7 @@ public class TileRail extends TileRailBase {
 	public void load(TagCompound nbt) {
 		super.load(nbt);
 		if (getWorld().isServer) {
-			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlock(getPos()) == null && !info.isLegacySwitchTurn) {
+			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlock(getPos()) == null && !info.isSwitchTurnBranch) {
 				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(this, getWorld());
 				WorldData.get(getWorld()).setTrackBlock(getPos(), trackBlock);
 			}

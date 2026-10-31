@@ -262,7 +262,7 @@ public class WorldData {
     private void addTrackBlockToParents(Vec3i parentAbs, TrackMultiGeometrySegment block) {
         for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
             for (TrackSingleGeometrySegment single : branch.values()) {
-                Vec3i basePos = single.getBlockPos();
+                Vec3i basePos = single.getAbsPos();
                 for (Vec3i offset : single.positionsCache) {
                     Vec3i occupiedAbs = basePos.add(offset);
                     long r = TrackRegionUtil.vecToRegion(occupiedAbs);
@@ -278,7 +278,7 @@ public class WorldData {
     private void removeTrackBlockFromParents(Vec3i parentAbs, TrackMultiGeometrySegment block) {
         for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
             for (TrackSingleGeometrySegment single : branch.values()) {
-                Vec3i basePos = single.getBlockPos();
+                Vec3i basePos = single.getAbsPos();
                 for (Vec3i offset : single.positionsCache) {
                     Vec3i occupiedAbs = basePos.add(offset);
                     long r = TrackRegionUtil.vecToRegion(occupiedAbs);
@@ -610,7 +610,7 @@ public class WorldData {
             for (TrackMultiGeometrySegment block : region.trackBlocks.values()) {
                 for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
                     for (TrackSingleGeometrySegment single : branch.values()) {
-                        long absR = TrackRegionUtil.vecToRegion(single.getBlockPos());
+                        long absR = TrackRegionUtil.vecToRegion(single.getAbsPos());
                         long parentR = TrackRegionUtil.vecToRegion(single.parentAbsPos);
 
                         if (absR != parentR) {
@@ -780,7 +780,7 @@ public class WorldData {
 
     private void buildSwitchTopology(TrackMultiGeometrySegment block) {
         Map<Gauge, TrackSingleGeometrySegment> straightBranch = block.paths.get(0);
-        long siRegion = TrackRegionUtil.vecToRegion(block.getBlockPos());
+        long siRegion = TrackRegionUtil.vecToRegion(block.getAbsPos());
 
         for (Map.Entry<Gauge, TrackSingleGeometrySegment> e : straightBranch.entrySet()) {
             Gauge gauge = e.getKey();
@@ -1017,7 +1017,7 @@ public class WorldData {
                 continue;
             }
             if (relBlockPosOrNull != null) {
-                Vec3i segPos = si.segment.getBlockPos();
+                Vec3i segPos = si.segment.getAbsPos();
                 if (!TrackRegionUtil.toRegionBlockPos(segPos).equals(relBlockPosOrNull)) continue;
             }
             toRemove.add(hubId);

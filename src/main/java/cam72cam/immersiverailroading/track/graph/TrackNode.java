@@ -22,7 +22,7 @@ public class TrackNode {
 
     public TrackNode(TrackSingleGeometrySegment segment, int index, World world) {
         // 强制使用 segment 自身的真实坐标
-        Vec3i pos = segment.getBlockPos();
+        Vec3i pos = segment.getAbsPos();
         this.regionPos = TrackRegionUtil.vecToRegion(pos);
         this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(pos);
 
@@ -88,8 +88,9 @@ public class TrackNode {
 
                                 for (int i = 0; i < points.size(); i++) {
                                     VecYPR cand = points.get(i)
-                                            .add(new Vec3d(seg.getBlockPos()))
-                                            .add(seg.getAndUpdateBuilder(world).info.placementInfo.placementPosition);
+                                            .add(new Vec3d(seg.getAbsPos()))
+                                            .add(seg.getAndUpdateBuilder(world).info.placementInfo.placementPosition)
+                                            .add(new Vec3d(0, seg.getAndUpdateBuilder(world).info.getTrackHeight() * seg.gauge.scale(), 0));
 
                                     // 1. 距离门槛过滤（仅作为硬拦截）
                                     double d = cand.distanceTo(this.point);

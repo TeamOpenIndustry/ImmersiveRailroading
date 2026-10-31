@@ -26,7 +26,7 @@ public class TrackMultiGeometrySegment {
 
     private List<Vec3i> cachedPositions;
 
-    public Vec3i getBlockPos() {
+    public Vec3i getAbsPos() {
         return TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
     }
 
@@ -166,7 +166,7 @@ public class TrackMultiGeometrySegment {
         for(Map<Gauge, TrackSingleGeometrySegment> branch : paths) {
             for(Map.Entry<Gauge, TrackSingleGeometrySegment> entry : branch.entrySet()) {
                 TrackSingleGeometrySegment single = entry.getValue();
-                Vec3i offsetToParent = single.getBlockPos().subtract(this.getBlockPos());
+                Vec3i offsetToParent = single.getAbsPos().subtract(this.getAbsPos());
                 for (Vec3i p : single.positionsCache) {
                     positionCache.add(offsetToParent.add(p));
                 }

@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.cutter.BlockCutHelper;
 import cam72cam.mod.math.Plane;
@@ -33,6 +34,7 @@ public class RailBaseModel {
 
 		StandardModel model = new StandardModel();
 		if (te instanceof TileRail && ((TileRail) te).info != null) {
+			if(((TileRail) te).info.isSwitchTurnBranch) return null;
 			model.addCustom((state, pt) -> {
 				RailInfo info = ((TileRail) te).info;
                 if (info.settings.type == TrackItems.SWITCH) {
@@ -49,6 +51,13 @@ public class RailBaseModel {
 
 				RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition));
 			});
+			if (((TileRail) te).info.settings.type == TrackItems.SWITCH && ((TileRail) te).subInfos != null && !((TileRail) te).subInfos.isEmpty()) {
+				model.addCustom((state, pt) -> {
+					RailInfo info = ((TileRail) te).subInfos.getFirst();
+					Vec3i delta = ((TileRail) te).subInfoPos.getFirst().subtract(te.getPos());
+					RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition.add(delta)));
+				});
+			}
 		}
 
 		Matrix4 bedblockMatrix4;
