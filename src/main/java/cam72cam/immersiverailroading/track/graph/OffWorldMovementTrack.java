@@ -55,7 +55,6 @@ public class OffWorldMovementTrack {
 
             double edgeDist = edgeDistance(edge, from, to, world);
 
-            // 零长度边（几何重合的 GAP）：不消耗 motionDist，直接切到下一条边
             if (edgeDist < EPS) {
                 TrackEdge next = pickNextEdgeFrom(data, edge, edge.to, motion, world);
                 if (next == null) {
@@ -85,7 +84,6 @@ public class OffWorldMovementTrack {
                 continue;
             }
 
-            // 由 motion 与边方向的点积决定 t 增还是减
             Vec3d edgeDir = edgeDirection(edge, from, to, world);
             double dot = edgeDir.x * motion.x + edgeDir.y * motion.y + edgeDir.z * motion.z;
             boolean towardTo = dot >= 0;
@@ -97,7 +95,6 @@ public class OffWorldMovementTrack {
 
             double distToEnd = edgeDist * Math.abs(tTarget - t);
 
-            // 走不完当前边：直接推进 t 后退出
             if (motionDist < distToEnd) {
                 double tDelta = motionDist / edgeDist;
                 double newT = towardTo ? t + tDelta : t - tDelta;
@@ -110,14 +107,12 @@ public class OffWorldMovementTrack {
                 return;
             }
 
-            // 走到边尾
             motionDist -= distToEnd;
             positionAt(edge, from, to, tTarget, world, posOut);
             double endRoll = towardTo ? posOut[3] : -posOut[3];
             current.advanceTo(edge, tTarget, endRoll);
             current.advanceTo(new Vec3d(posOut[0], posOut[1], posOut[2]), endRoll);
 
-            // 从到达端挑下一条边
             TrackNodeId endNodeId = towardTo ? edge.to : edge.from;
             TrackEdge next = pickNextEdgeFrom(data, edge, endNodeId, motion, world);
             if (next == null) return;
@@ -143,8 +138,6 @@ public class OffWorldMovementTrack {
             current.advanceTo(new Vec3d(posOut[0], posOut[1], posOut[2]), startRoll);
         }
     }
-
-    // ==================== 边几何 ====================
 
     private static double edgeDistance(TrackEdge edge, TrackNode from, TrackNode to, World world) {
         if (edge.edgeType == TrackEdge.EdgeType.GAP) {
@@ -259,16 +252,13 @@ public class OffWorldMovementTrack {
         if (depth > 8) return null;
 
         WorldData.SwitchInfo si = data.switchByHub.get(endNodeId);
-        if (si != null) return pickFromHub(data, incoming, si);
-
-        si = data.switchByTurn.get(endNodeId);
-        if (si != null) return pickFromTurnStart(data, incoming, endNodeId, si);
+        if (si != null) return pickFromHub(data, incoming, endNodeId, si);
 
         List<TrackEdge> candidates = data.outgoing.get(endNodeId);
         if (candidates == null || candidates.isEmpty()) return null;
 
         TrackEdge best = null;
-        double bestCos = 0.0;
+        double bestCos = -1 - EPS;
 
         for (TrackEdge e : candidates) {
             if (e.equals(incoming)) continue;
@@ -299,86 +289,53 @@ public class OffWorldMovementTrack {
         return best;
     }
 
-    private static TrackEdge pickFromHub(WorldData data, TrackEdge incoming, WorldData.SwitchInfo si) {
-        List<TrackEdge> cands = data.outgoing.get(si.hub);
+    /**
+     * 岔心逻辑：
+     *  - 车从分支来（straightEnd 或 turnStart）→ 直接出外部（不判 switchState，车已经在分支上）
+     *  - 车从外部 GAP 来 → 按 switchState 选分支
+     */
+    private static TrackEdge pickFromHub(WorldData data, TrackEdge incoming, TrackNodeId hubId,
+                                         WorldData.SwitchInfo si) {
+        TrackNodeId cameFrom = incoming.to.equals(hubId) ? incoming.from : incoming.to;
+
+        boolean fromBranch = cameFrom.equals(si.straightEnd) || si.turnStarts.contains(cameFrom);
+        if (fromBranch) {
+            return pickExternalFromHub(data, hubId, incoming, si);
+        }
+
+        SwitchState state = si.getState(data);
+        TrackNodeId target;
+        if (state == SwitchState.STRAIGHT || state == SwitchState.NONE) {
+            target = si.straightEnd;
+        } else {
+            int idx = (state == SwitchState.TURN)
+                    ? 0
+                    : state.ordinal() - SwitchState.TURN.ordinal();
+            if (idx < 0 || idx >= si.turnStarts.size()) return null;
+            target = si.turnStarts.get(idx);
+        }
+
+        List<TrackEdge> cands = data.outgoing.get(hubId);
         if (cands == null) return null;
-
-        TrackNodeId cameFrom = incoming.to.equals(si.hub) ? incoming.from : incoming.to;
-
-        if (incoming.edgeType == TrackEdge.EdgeType.NORMAL && cameFrom.equals(si.straightEnd)) {
-            return pickExternalGapFromHub(cands, incoming, si);
-        }
-        if (incoming.edgeType == TrackEdge.EdgeType.GAP) {
-            for (WorldData.SwitchInfo.Branch b : si.turns) {
-                if (cameFrom.equals(b.start)) {
-                    return pickExternalGapFromHub(cands, incoming, si);
-                }
-            }
-        }
-
-        int branchIdx = branchIndexFromState(si.segment.getSwitchState());
-        if (branchIdx <= 0) {
-            for (TrackEdge e : cands) {
-                if (e.equals(incoming)) continue;
-                if (e.edgeType == TrackEdge.EdgeType.NORMAL && e.to.equals(si.straightEnd)) return e;
-            }
-            return null;
-        }
-
-        int turnIdx = branchIdx - 1;
-        if (turnIdx < 0 || turnIdx >= si.turns.size()) return null;
-        TrackNodeId targetStart = si.turns.get(turnIdx).start;
-
         for (TrackEdge e : cands) {
             if (e.equals(incoming)) continue;
-            if (e.edgeType == TrackEdge.EdgeType.GAP && e.to.equals(targetStart)) return e;
+            if (e.to.equals(target)) return e;
         }
         return null;
     }
 
-    private static TrackEdge pickExternalGapFromHub(List<TrackEdge> cands, TrackEdge incoming,
-                                                    WorldData.SwitchInfo si) {
+    /** 车从分支来出外部：hub 的 outgoing 里，跳过 NORMAL 和 tie GAP，返回外部 GAP */
+    private static TrackEdge pickExternalFromHub(WorldData data, TrackNodeId hubId,
+                                                 TrackEdge incoming, WorldData.SwitchInfo si) {
+        List<TrackEdge> cands = data.outgoing.get(hubId);
+        if (cands == null) return null;
         for (TrackEdge e : cands) {
             if (e.equals(incoming)) continue;
             if (e.edgeType != TrackEdge.EdgeType.GAP) continue;
-
-            boolean isTie = false;
-            for (WorldData.SwitchInfo.Branch b : si.turns) {
-                if (e.to.equals(b.start)) { isTie = true; break; }
-            }
-            if (isTie) continue;
+            if (si.turnStarts.contains(e.to)) continue;
             return e;
         }
         return null;
-    }
-
-    private static TrackEdge pickFromTurnStart(WorldData data, TrackEdge incoming, TrackNodeId turnStartId,
-                                               WorldData.SwitchInfo si) {
-        List<TrackEdge> cands = data.outgoing.get(turnStartId);
-        if (cands == null) return null;
-
-        TrackNodeId cameFrom = incoming.to.equals(turnStartId) ? incoming.from : incoming.to;
-        boolean fromTie = incoming.edgeType == TrackEdge.EdgeType.GAP && cameFrom.equals(si.hub);
-
-        if (fromTie) {
-            for (TrackEdge e : cands) {
-                if (e.equals(incoming)) continue;
-                if (e.edgeType == TrackEdge.EdgeType.NORMAL) return e;
-            }
-        } else {
-            for (TrackEdge e : cands) {
-                if (e.equals(incoming)) continue;
-                if (e.edgeType == TrackEdge.EdgeType.GAP && e.to.equals(si.hub)) return e;
-            }
-        }
-        return null;
-    }
-
-    private static int branchIndexFromState(int switchStateOrdinal) {
-        if (switchStateOrdinal == SwitchState.NONE.ordinal()
-                || switchStateOrdinal == SwitchState.STRAIGHT.ordinal()) return 0;
-        if (switchStateOrdinal == SwitchState.TURN.ordinal()) return 1;
-        return switchStateOrdinal;
     }
 
     // ==================== 初始化 ====================
@@ -397,7 +354,6 @@ public class OffWorldMovementTrack {
         Vec3i posBlock = new Vec3i(pos);
         Set<TrackEdge> candidates = new HashSet<>();
 
-        // 收集 pos 附近所有方块涉及的 region
         Set<Long> regionsToCheck = new HashSet<>();
         for (int x = -hori; x <= hori; x++) {
             for (int y = -vert; y <= vert; y++) {

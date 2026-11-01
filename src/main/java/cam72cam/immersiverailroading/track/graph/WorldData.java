@@ -26,56 +26,40 @@ public class WorldData {
     private final File directory;
     private final Map<Long, TrackRegion> regions;
 
-    /**
-     * only for read, DO NOT EDIT!
-     * **/
     public Map<Long, TrackRegion> getRegions() {
         return regions;
     }
 
     private final static Map<World, WorldData> LOADED = new HashMap<>();
 
-    // 拓扑层
     public final Map<TrackNodeId, TrackNode> nodes = new HashMap<>();
     protected final Map<TrackNodeId, List<TrackEdge>> outgoing = new HashMap<>();
     public final Set<TrackEdge> edges = new HashSet<>();
 
     protected final Map<Long, Set<TrackEdge>> edgesByRegion = new HashMap<>();
 
-    // 按 region 分桶的占位方块索引
     public final Map<Long, Map<Vec3i, List<Vec3i>>> trackBlockParentsByRegion = new HashMap<>();
 
-    // 按 parentAbsPos 所在 region 分桶的 node id 辅助索引
     private final Map<Long, Set<TrackNodeId>> nodeIdsByRegion = new HashMap<>();
-    // 按 to 节点 parentAbsPos 所在 region 分桶的反向索引（哪些 from 有边指向该 region）
     private final Map<Long, Set<TrackNodeId>> outgoingByToRegion = new HashMap<>();
-    // 按 si.segment 所在 region 分桶的 switch hub 索引
     private final Map<Long, Set<TrackNodeId>> switchHubIdsByRegion = new HashMap<>();
 
-    // region 生命周期
     private final Map<Long, Integer> regionCooldown = new HashMap<>();
     private int regionRefreshCounter = 0;
 
-    // switch
+    // 仅保留 hub 一个 map
     protected final Map<TrackNodeId, SwitchInfo> switchByHub = new HashMap<>();
-    protected final Map<TrackNodeId, SwitchInfo> switchByTurn = new HashMap<>();
 
     // =============== 增量同步 ===============
 
-    /**
-     * 单个增量操作。regionBlockPos 使用 region 内坐标（512 内），
-     * 序列化时复用 TrackMultiGeometrySegment 的 write/sizeBytes。
-     */
     public static class DeltaOp {
         public enum Kind { PUT, REMOVE, SWITCH_STATE }
 
         public final Kind kind;
         public final Vec3i regionBlockPos;
 
-        /** PUT 用 */
         public final TrackMultiGeometrySegment block;
 
-        /** SWITCH_STATE 用 */
         public final SwitchState switchState;
         public final boolean offline;
         public final long currentTime;
@@ -107,14 +91,10 @@ public class WorldData {
         }
     }
 
-    /** 每个 tick 内按 region 聚合的待发增量。同 pos 后写覆盖先写。 */
     private final Map<Long, Map<Vec3i, DeltaOp>> pendingDeltas = new HashMap<>();
-
-    /** 显式请求全量重发的 region（兜底通道，替代旧的 dirty 广播） */
     private final Set<Long> pendingFullSync = new HashSet<>();
 
-    /** 外部可调用的兜底全量重发接口 */
-    public void requestFullSync(long regionId) { //只是预留！一般也不会用到
+    public void requestFullSync(long regionId) {
         synchronized (pendingFullSync) {
             pendingFullSync.add(regionId);
         }
@@ -127,10 +107,6 @@ public class WorldData {
         }
     }
 
-    /**
-     * DeltaOp 序列化。放在 WorldData（同包）里以便访问 TrackMultiGeometrySegment 的
-     * write/sizeBytes/构造，TrackRegionDeltaPacket 只调用这两个静态方法。
-     */
     public static byte[] serializeDeltaOps(List<DeltaOp> ops) {
         int size = Integer.BYTES;
         for (DeltaOp op : ops) {
@@ -223,8 +199,6 @@ public class WorldData {
                             regions.put(id, region);
                         }
                     } catch (Exception e) {
-                        // 【修复】：不再抛出 RuntimeException 导致游戏崩溃
-                        // 而是把坏掉的区域文件重命名隔离，并打印错误
                         ImmersiveRailroading.error("Track region file %s is corrupted! Renaming to .corrupted", file.getName());
                         ImmersiveRailroading.catching(e);
                         File badFile = new File(file.getParentFile(), file.getName() + ".corrupted");
@@ -300,11 +274,10 @@ public class WorldData {
         }
     }
 
-    /** 客户端收到 SWITCH_STATE delta 后调用。不重建拓扑、不碰 region 全量。 */
     public void clientApplySwitchStateDelta(long regionId, Vec3i regionBlockPos, SwitchState state, boolean offline, long currentTime) {
         if (!world.isClient) return;
-        TrackRegion region = getRegionById(regionId, false);  // 不创建
-        if (region == null) return;                          // 客户端没加载，等首见全量
+        TrackRegion region = getRegionById(regionId, false);
+        if (region == null) return;
         TrackMultiGeometrySegment seg = region.getTrackBlock(region.toBlockPos(regionBlockPos));
         if (seg != null) {
             seg.updateSwitchSate(state, offline, currentTime);
@@ -343,7 +316,6 @@ public class WorldData {
             researchNeighbors(pos);
         }
 
-        // 服务端才入队；客户端 apply 增量时不会再回传
         if (world.isServer) {
             queueDelta(regionId, DeltaOp.put(TrackRegionUtil.toRegionBlockPos(pos), block));
         }
@@ -448,11 +420,9 @@ public class WorldData {
                 }
 
                 try {
-                    // 【修复】：先写临时文件
                     File tmpFile = new File(file.getParentFile(), file.getName() + ".tmp");
                     TrackRegionUtil.writeBuffer(tmpFile, region.write());
 
-                    // 【修复】：原子移动替换
                     try {
                         java.nio.file.Files.move(tmpFile.toPath(), file.toPath(),
                                 java.nio.file.StandardCopyOption.REPLACE_EXISTING,
@@ -504,8 +474,6 @@ public class WorldData {
         }
     }
 
-    // =============== 服务端 tick：全量 + 增量 ===============
-
     private final Map<Player, Set<Long>> playerRegionMap = new HashMap<>();
 
     private void tick() {
@@ -519,10 +487,9 @@ public class WorldData {
         removedPlayers.removeAll(players);
         for (Player removedPlayer : removedPlayers) {
             playerRegionMap.remove(removedPlayer);
-            playerMapViewRegions.remove(removedPlayer); // 【新增】
+            playerMapViewRegions.remove(removedPlayer);
         }
 
-        // 1. 首见全量 / 卸载空包
         for (Player player : players) {
             Set<Long> sentRegions = playerRegionMap.computeIfAbsent(player, p -> new HashSet<>());
             Set<Long> trackingRegions = new HashSet<>();
@@ -533,13 +500,11 @@ public class WorldData {
                 }
             }
 
-            // 【新增】：合并地图请求的 Region，并清理过期的
             Map<Long, Long> mapView = activeMapView(player);
             if (mapView != null) {
                 trackingRegions.addAll(mapView.keySet());
             }
 
-            // 处理移除：如果 sentRegions 里有，但 trackingRegions 里没了，发空包
             Set<Long> leftRegions = new HashSet<>(sentRegions);
             leftRegions.removeAll(trackingRegions);
             for (Long leftRegion : leftRegions) {
@@ -550,7 +515,6 @@ public class WorldData {
             for (Long trackingRegion : trackingRegions) {
                 TrackRegion region = regions.get(trackingRegion);
 
-                // 【关键修复】：如果是地图请求的，且内存里没有，立即从磁盘加载！
                 if (region == null && mapView != null && mapView.containsKey(trackingRegion)) {
                     ensureRegionLoaded(trackingRegion);
                     region = regions.get(trackingRegion);
@@ -564,7 +528,6 @@ public class WorldData {
                     continue;
                 }
 
-                // 首见才发全量；dirty 广播已移除
                 if (!sentRegions.contains(trackingRegion)) {
                     sentRegions.add(trackingRegion);
                     new TrackRegionPacket(world, trackingRegion, region).sendToPlayer(player);
@@ -572,13 +535,9 @@ public class WorldData {
             }
         }
 
-        // 2. 增量 flush（首见之后，保证客户端已收到基础全量）
         flushDeltas();
-
-        // 3. 显式全量兜底请求
         flushFullSyncRequests();
 
-        // 4. region 生命周期
         if (++regionRefreshCounter >= Config.ConfigRegion.refreshIntervalTicks) {
             regionRefreshCounter = 0;
             refreshRegions();
@@ -600,13 +559,11 @@ public class WorldData {
             Map<Vec3i, DeltaOp> ops = entry.getValue();
             if (ops.isEmpty()) continue;
 
-            // region 已卸载：客户端会被首见逻辑走全量，增量直接丢弃
             if (!regions.containsKey(regionId)) continue;
 
             List<DeltaOp> opList = new ArrayList<>(ops.values());
 
             for (Map.Entry<Player, Set<Long>> e : playerRegionMap.entrySet()) {
-                // 只发给已同步过该 region 的玩家；未同步者等首见全量
                 if (e.getValue().contains(regionId)) {
                     new TrackRegionDeltaPacket(world, regionId, opList).sendToPlayer(e.getKey());
                 }
@@ -634,8 +591,6 @@ public class WorldData {
             }
         }
     }
-
-    // =============== region 生命周期 ===============
 
     private void refreshRegions() {
         Set<Long> required = computeRequiredRegions();
@@ -665,7 +620,6 @@ public class WorldData {
         for (Player player : world.getEntities(Player.class)) {
             required.addAll(regionsInRadius(player.getPosition(), Config.ConfigRegion.playerRadius));
 
-            // 【新增】：把地图界面的请求也算作“需要”
             Map<Long, Long> mapView = activeMapView(player);
             if (mapView != null) {
                 required.addAll(mapView.keySet());
@@ -768,14 +722,11 @@ public class WorldData {
 
         clearTopologyInRegion(r);
 
-        // 只移除本 region 内 parent 的所有占位索引；
-        // 其他 region 的 parent 跨越到本 region 的占位索引必须保留，否则 region 重载后跨 region 索引丢失
         for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
             Vec3i parentAbs = region.toBlockPos(e.getKey());
             removeTrackBlockFromParents(parentAbs, e.getValue());
         }
 
-        // 该 region 已卸载，丢弃积压的增量与兜底请求，避免发给已不在追踪集合的客户端
         synchronized (pendingDeltas) {
             pendingDeltas.remove(r);
         }
@@ -864,6 +815,16 @@ public class WorldData {
         }
     }
 
+    /**
+     * 道岔拓扑：
+     *   hub ─── NORMAL ─── straightEnd
+     *    ⇅ tie GAP
+     *  turnStart ── NORMAL ── turnEnd
+     *
+     * 只有 hub 参与 switchByHub（岔心是唯一需要 switchState 决策的节点）。
+     * turnStart 只有两条方向相反的边（turnEnd / hub），普通 cos 处理零歧义。
+     * turnStart 不允许外接（不给它调 searchAndAddGap）。
+     */
     private void buildSwitchTopology(TrackMultiGeometrySegment block) {
         Map<Gauge, TrackSingleGeometrySegment> straightBranch = block.paths.get(0);
         long siRegion = TrackRegionUtil.vecToRegion(block.getAbsPos());
@@ -882,7 +843,7 @@ public class WorldData {
             addEdge(hub.id, straightEnd.id, TrackEdge.EdgeType.NORMAL);
             addEdge(straightEnd.id, hub.id, TrackEdge.EdgeType.NORMAL);
 
-            List<SwitchInfo.Branch> turns = new ArrayList<>();
+            List<TrackNodeId> turnStarts = new ArrayList<>();
 
             for (int pathIndex = 1; pathIndex < block.paths.size(); pathIndex++) {
                 TrackSingleGeometrySegment turn = block.paths.get(pathIndex).get(gauge);
@@ -898,23 +859,21 @@ public class WorldData {
                 addEdge(turnStart.id, turnEnd.id, TrackEdge.EdgeType.NORMAL);
                 addEdge(turnEnd.id, turnStart.id, TrackEdge.EdgeType.NORMAL);
 
+                // tie GAP：hub ↔ turnStart（道岔切换点）
                 addEdge(hub.id, turnStart.id, TrackEdge.EdgeType.GAP);
                 addEdge(turnStart.id, hub.id, TrackEdge.EdgeType.GAP);
 
-                turns.add(new SwitchInfo.Branch(turnStart.id, turnEnd.id));
+                turnStarts.add(turnStart.id);
 
+                // turnStart 不外接；只给 turnEnd 向外接
                 searchAndAddGap(turn, false);
             }
 
-            SwitchInfo si = new SwitchInfo(hub.id, straightEnd.id, turns, block);
-            switchByHub.put(hub.id, si);
+            switchByHub.put(hub.id, new SwitchInfo(straightEnd.id, turnStarts, block.getAbsPos()));
             switchHubIdsByRegion.computeIfAbsent(siRegion, k -> new HashSet<>()).add(hub.id);
-            for (SwitchInfo.Branch b : turns) {
-                switchByTurn.put(b.start, si);
-            }
 
-            searchAndAddGap(straight, false);
-            searchAndAddGap(straight, true);
+            searchAndAddGap(straight, false);   // straightEnd 外接
+            searchAndAddGap(straight, true);    // hub 外接
         }
     }
 
@@ -1033,7 +992,6 @@ public class WorldData {
             edge.coveringRegions.add(TrackRegionUtil.vecToRegion(toSeg.absPos));
             edge.coveringRegions.add(TrackRegionUtil.vecToRegion(toSeg.parentAbsPos));
 
-            // 比较极端的情况：GAP 边中间穿过的 region 也加入覆盖，避免 initCurrent 在长 GAP 中点吸附失败
             Vec3d fp = new Vec3d(fromNode.point.x, fromNode.point.y, fromNode.point.z);
             Vec3d tp = new Vec3d(toNode.point.x,   toNode.point.y,   toNode.point.z);
             double len = fp.distanceTo(tp);
@@ -1103,20 +1061,14 @@ public class WorldData {
                 continue;
             }
             if (relBlockPosOrNull != null) {
-                Vec3i segPos = si.segment.getAbsPos();
-                if (!TrackRegionUtil.toRegionBlockPos(segPos).equals(relBlockPosOrNull)) continue;
+                if (!TrackRegionUtil.toRegionBlockPos(si.blockPos).equals(relBlockPosOrNull)) continue;
             }
             toRemove.add(hubId);
         }
 
         for (TrackNodeId hubId : toRemove) {
             hubIds.remove(hubId);
-            SwitchInfo si = switchByHub.remove(hubId);
-            if (si != null) {
-                for (SwitchInfo.Branch b : si.turns) {
-                    switchByTurn.remove(b.start);
-                }
-            }
+            switchByHub.remove(hubId);
         }
 
         if (hubIds.isEmpty()) switchHubIdsByRegion.remove(regionId);
@@ -1199,7 +1151,6 @@ public class WorldData {
                         List<Vec3i> parents = getParentsAt(scan);
                         if (parents == null) continue;
                         for (Vec3i parentAbs : parents) {
-                            if(parents.equals(newAbsPos)) continue;
                             TrackMultiGeometrySegment block = getTrackBlockLoaded(parentAbs);
                             if (block != null) {
                                 nearbyBlocks.add(block);
@@ -1248,27 +1199,27 @@ public class WorldData {
         vehicleRefs.putAll(refs);
     }
 
+    /**
+     * 道岔信息。只有 hub（岔心）需要，因为只有岔心是 3 条边（直轨、tie GAP、外部 GAP）的三岔口。
+     * 直轨远端用 straightEnd 标识，弯轨起点用 turnStarts 标识。
+     * blockPos 用于动态查最新 switchState，避免 segment 引用 stale。
+     */
     public static class SwitchInfo {
-        public static class Branch {
-            public final TrackNodeId start;
-            public final TrackNodeId end;
-            public Branch(TrackNodeId start, TrackNodeId end) {
-                this.start = start;
-                this.end = end;
-            }
+        public final TrackNodeId straightEnd;
+        public final List<TrackNodeId> turnStarts;
+        public final Vec3i blockPos;
+
+        public SwitchInfo(TrackNodeId straightEnd,
+                          List<TrackNodeId> turnStarts,
+                          Vec3i blockPos) {
+            this.straightEnd = straightEnd;
+            this.turnStarts = turnStarts;
+            this.blockPos = blockPos;
         }
 
-        public final TrackNodeId hub;
-        public final TrackNodeId straightEnd;
-        public final List<Branch> turns;
-        public final TrackMultiGeometrySegment segment;
-
-        public SwitchInfo(TrackNodeId hub, TrackNodeId straightEnd,
-                          List<Branch> turns, TrackMultiGeometrySegment segment) {
-            this.hub = hub;
-            this.straightEnd = straightEnd;
-            this.turns = turns;
-            this.segment = segment;
+        public SwitchState getState(WorldData data) {
+            TrackMultiGeometrySegment b = data.getTrackBlockLoaded(blockPos);
+            return b != null ? b.getSwitchStateEnum() : SwitchState.STRAIGHT;
         }
     }
 
@@ -1292,32 +1243,27 @@ public class WorldData {
             regions.put(id, region);
         }
 
-        // 1. parent 占位索引（必须先建，searchAndAddGap 依赖它扫邻居）
         for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
             addTrackBlockToParents(region.toBlockPos(e.getKey()), e.getValue());
         }
 
         if(!Config.ConfigRegion.clientBuildTopo) return;
 
-        // 2. 建本 region 自身的 NORMAL 边 + 内部 GAP 边
         for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
             buildTopologyFor(e.getValue());
         }
 
-        // 3. 唤醒邻居（不清邻居节点，只让邻居跑 searchAndAddGap 补 GAP 边）
         for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
             researchNeighbors(region.toBlockPos(e.getKey()));
         }
     }
 
-    // 记录玩家地图界面的请求 <Player, <RegionId, 过期时间>>
     private final Map<Player, Map<Long, Long>> playerMapViewRegions = new HashMap<>();
 
     public void handleClientMapRequest(Player player, List<Long> requestRegions) {
         if (!world.isServer) return;
 
         if (requestRegions == null || requestRegions.isEmpty()) {
-            // 客户端关闭地图，直接清理请求记录
             playerMapViewRegions.remove(player);
             return;
         }
@@ -1338,7 +1284,6 @@ public class WorldData {
         return mapView.isEmpty() ? null : mapView;
     }
 
-    // 供地图渲染使用的纯坐标缓存
     public List<Vec3d> clientMapVehicles = new ArrayList<>();
 
     public void updateClientVehicles(List<Vec3d> vehicles) {
@@ -1351,7 +1296,6 @@ public class WorldData {
         if (!world.isServer) return;
 
         List<Vec3d> found = new ArrayList<>();
-        // 这里为了稳妥，可以查 EntityMoveableRollingStock（或 EntityRollingStock）
         for (VehicleRef ref : vehicleRefs.values()) {
             if (ref.pos.x >= minX && ref.pos.x <= maxX && ref.pos.z >= minZ && ref.pos.z <= maxZ) {
                 found.add(ref.pos);
