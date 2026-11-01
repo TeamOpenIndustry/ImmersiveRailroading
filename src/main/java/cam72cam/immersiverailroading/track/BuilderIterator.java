@@ -362,10 +362,18 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			renderScale *= 1.005f;
 		}
 
+		int branchIndex = info.switchBranchIndex;
+		boolean isSwitch = branchIndex >= 1;
+		boolean isStraight = branchIndex == 1;
 		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
-		int switchSize = 0;
+		boolean doOffset = isSwitch && (switchStraight != isStraight);
+		int switchSize = points.size() / 2;
 		TrackDirection direction = info.placementInfo.direction;
-		if (switchStraight ) {
+		TrackDirection effectiveDirection = direction;
+		if (isStraight && !switchStraight) {
+			effectiveDirection = direction == TrackDirection.RIGHT ? TrackDirection.LEFT : TrackDirection.RIGHT;
+		}
+		if (doOffset) {
 			for (int i = 0; i < points.size(); i++) {
 				VecYPR cur = points.get(i);
 				Vec3d flatPos = VecUtil.rotateYaw(cur, -info.placementInfo.yaw);
@@ -375,6 +383,7 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 			}
 		}
+		boolean applyMatrixCorrection = !(switchStraight && isStraight);
 
 		boolean correctPartRailOrientation = true;
 		List<Matrix3> correctLeftOrientation = new ArrayList<>();
@@ -445,13 +454,13 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			VecYPR cur = points.get(i);
 			VecYPR switchPos = cur;
 			boolean disableSwitchRailCorrection = false;
-			if (switchStraight ) {
+			if (doOffset) {
 				double switchOffset = 1 - (i / (double)switchSize);
 				if (switchOffset > 0) {
 					double dist = 0.2 * switchOffset * scale * info.getTrackModel().spacing;
-					Vec3d offset = VecUtil.fromYaw(dist, cur.getYaw() + 90 + info.placementInfo.direction.toYaw());
+					Vec3d offset = VecUtil.fromYaw(dist, cur.getYaw() + 90 + effectiveDirection.toYaw());
 					double offsetAngle = Math.toDegrees(0.2/switchSize); // This line took a whole page of scribbled math
-					if (direction == TrackDirection.RIGHT)  {
+					if (effectiveDirection == TrackDirection.RIGHT)  {
 						offsetAngle = -offsetAngle;
 					}
 					switchPos = new VecYPR(cur.add(offset), cur.getYaw() + (float)offsetAngle, cur.getPitch(), cur.getRoll());
@@ -479,17 +488,17 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			//Merge situation when angle == 0
 			VecYPR vec = new VecYPR(cur, renderScale, TrackModelPart.RAIL_BASE);
 			//TODO: a track model part which doesnt roll with rails(maybe be something like "RAIL_BASE_NOROLL")
-            float leftLen = (1 - angle / 180);
-            float rightLen = (1 + angle / 180);
-            if (direction == TrackDirection.RIGHT) {
-                if (correctPartRailOrientation) {//correct rail part
+			float leftLen = (1 - angle / 180);
+			float rightLen = (1 + angle / 180);
+			if (effectiveDirection == TrackDirection.RIGHT) {
+				if (correctPartRailOrientation && applyMatrixCorrection) {//correct rail part
 					cur = cur.withMatrix3(correctLeftOrientation.get(i));
 					if(!disableSwitchRailCorrection) switchPos = switchPos.withMatrix3(correctRightOrientation.get(i));
 				}
 				vec.addChild(new VecYPR(switchPos, leftLen * renderScale, TrackModelPart.RAIL_LEFT));
 				vec.addChild(new VecYPR(cur, rightLen * renderScale, TrackModelPart.RAIL_RIGHT));
 			} else {
-                if (correctPartRailOrientation) {//correct rail part
+				if (correctPartRailOrientation && applyMatrixCorrection) {//correct rail part
 					if(!disableSwitchRailCorrection) switchPos = switchPos.withMatrix3(correctLeftOrientation.get(i));
 					cur = cur.withMatrix3(correctRightOrientation.get(i));
 				}

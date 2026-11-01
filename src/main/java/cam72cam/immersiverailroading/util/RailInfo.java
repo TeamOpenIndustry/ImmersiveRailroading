@@ -36,18 +36,21 @@ public class RailInfo {
 	public final String uniqueID;
 	public final boolean itemHeld;
 
-	public final boolean isSwitchTurnBranch;
+	public final int switchBranchIndex; // for compat, 0 = normal, 1 = switch parent branch, >2 = turn branches
 
+	// only used for submitting some switch branch information, clear it after using!
+	public List<RailInfo> builderBranchBridge;
+	public List<Vec3i> builderBranchPosBridge;
 
 	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
-		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false, false);
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false, 0);
 	}
 
 	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
-		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld, false);
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld, 0);
 	}
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, boolean isSwitchTurnBranch) {
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, int switchBranchIndex) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 			//#1566: Use customInfo to adjust slope height
@@ -64,7 +67,7 @@ public class RailInfo {
 		this.tablePos = tablePos;
 		this.itemHeld = itemHeld;
 		this.uniqueID = generateID();
-		this.isSwitchTurnBranch = isSwitchTurnBranch;
+		this.switchBranchIndex = switchBranchIndex;
 	}
 	private String generateID() {
 		Object[] props = new Object [] {
@@ -87,7 +90,8 @@ public class RailInfo {
 				this.placementInfo.yaw,
 				this.placementInfo.direction,
 				this.customInfo.yaw,
-				this.customInfo.direction
+				this.customInfo.direction,
+				this.switchBranchIndex
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition)
@@ -152,8 +156,8 @@ public class RailInfo {
 		public SwitchState switchForced;
 		@TagField("tablePos")
 		public double tablePos;
-		@TagField("isSwitchTurnBranch")
-		public boolean isSwitchTurnBranch;
+		@TagField("switchBranchIndex")
+		public int switchBranchIndex;
 
 		// Not serialized
 		public boolean itemHeld;
@@ -166,7 +170,7 @@ public class RailInfo {
 			this.switchForced = info.switchForced;
 			this.tablePos = info.tablePos;
 			this.itemHeld = info.itemHeld;
-			this.isSwitchTurnBranch = info.isSwitchTurnBranch;
+			this.switchBranchIndex = info.switchBranchIndex;
 		}
 
 		private Mutable(TagCompound data) throws SerializationException {
@@ -186,7 +190,7 @@ public class RailInfo {
 					switchForced,
 					tablePos,
 					itemHeld,
-					isSwitchTurnBranch
+					switchBranchIndex
 			);
 		}
 	}
