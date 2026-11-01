@@ -12,7 +12,7 @@ import java.util.List;
 
 public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 
-	private BuilderIterator turnBuilder;
+	private BuilderCubicCurve turnBuilder;
 	private BuilderStraight straightBuilder;
 	private BuilderStraight realStraightBuilder;
 	private final BuilderStraight straightBuilderReal;
@@ -26,7 +26,7 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		RailInfo straightInfo = info.with(mutable -> mutable.switchBranchIndex = 1);
 
 		{
-			turnBuilder = (BuilderIterator) turnInfo.getBuilder(world, pos);
+			turnBuilder = (BuilderCubicCurve) turnInfo.getBuilder(world, pos);
 			straightBuilder = new BuilderStraight(straightInfo, world, pos, true);
 			realStraightBuilder = new BuilderStraight(straightInfo, world, pos, true);
 
@@ -122,7 +122,11 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		straightBuilder.info.builderBranchBridge = new ArrayList<>();
 		straightBuilder.info.builderBranchPosBridge = new ArrayList<>();
 		straightBuilder.info.builderBranchBridge.add(turnBuilder.info);
-		straightBuilder.info.builderBranchPosBridge.add(turnBuilder.getParentPos().subtract(straightBuilder.getParentPos()));
+		if(turnBuilder.getSubBuilders() != null) {
+			straightBuilder.info.builderBranchPosBridge.add(turnBuilder.getSubBuilders().getFirst().getParentPos().subtract(straightBuilder.getParentPos()));
+		} else {
+			straightBuilder.info.builderBranchPosBridge.add(turnBuilder.getParentPos().subtract(straightBuilder.getParentPos()));
+		}
 		straightBuilder.build();
 		straightBuilder.info.builderBranchBridge = null;
 		straightBuilder.info.builderBranchPosBridge = null;

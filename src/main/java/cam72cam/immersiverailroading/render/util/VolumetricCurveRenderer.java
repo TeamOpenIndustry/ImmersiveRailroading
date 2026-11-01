@@ -98,9 +98,6 @@ public class VolumetricCurveRenderer {
             if(from.point.distanceTo(to.point) < 0.05) {
                 t = t.add(0, 0.1, 0);
             }
-            if(from.equals(to)) {
-                int a = 1;
-            }
             appendLineQuad(draw, f, t, Color.ORANGE, 1 / 16f);
         }
 

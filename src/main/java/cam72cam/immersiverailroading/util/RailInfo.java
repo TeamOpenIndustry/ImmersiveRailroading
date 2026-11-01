@@ -38,7 +38,7 @@ public class RailInfo {
 
 	public final int switchBranchIndex; // for compat, 0 = normal, 1 = switch parent branch, >2 = turn branches
 
-	// only used for submitting some switch branch information, clear it after using!
+	// hack: only used for submitting some switch branch information, clear it after using!
 	public List<RailInfo> builderBranchBridge;
 	public List<Vec3i> builderBranchPosBridge;
 
