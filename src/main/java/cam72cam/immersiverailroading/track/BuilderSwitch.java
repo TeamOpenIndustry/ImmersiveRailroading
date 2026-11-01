@@ -123,7 +123,9 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 		straightBuilder.info.builderBranchPosBridge = new ArrayList<>();
 		straightBuilder.info.builderBranchBridge.add(turnBuilder.info);
 		if(turnBuilder.getSubBuilders() != null) {
-			straightBuilder.info.builderBranchPosBridge.add(turnBuilder.getSubBuilders().getFirst().getParentPos().subtract(straightBuilder.getParentPos()));
+			BuilderCubicCurve subBuilder = (BuilderCubicCurve) turnBuilder.getSubBuilders().getFirst();
+			subBuilder.info = subBuilder.info.with(mutable -> mutable.switchBranchIndex = 2);
+			straightBuilder.info.builderBranchPosBridge.add(subBuilder.getParentPos().subtract(straightBuilder.getParentPos()));
 		} else {
 			straightBuilder.info.builderBranchPosBridge.add(turnBuilder.getParentPos().subtract(straightBuilder.getParentPos()));
 		}
