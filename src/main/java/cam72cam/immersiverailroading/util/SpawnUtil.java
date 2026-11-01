@@ -2,7 +2,6 @@ package cam72cam.immersiverailroading.util;
 
 import java.util.List;
 
-import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
@@ -37,11 +36,11 @@ public class SpawnUtil {
 			trackGauge = initte.getTrackGauges()[0];
 		} else if (ConfigDebug.offWorldPathing) {
 			WorldData wd = WorldData.get(worldIn);
-			TrackMultiGeometrySegment seg = wd != null ? wd.getTrackBlock(pos) : null;
-			if (seg == null || seg.paths.isEmpty() || seg.paths.get(0).isEmpty()) {
+			TrackMultiGeometrySegment seg = wd != null ? wd.getTrackBlockLoaded(pos) : null;
+			if (seg == null || seg.getPaths().isEmpty() || seg.getPaths().get(0).isEmpty()) {// todo
 				return ClickResult.REJECTED;
 			}
-			trackGauge = seg.paths.get(0).keySet().iterator().next().value();
+			trackGauge = seg.getPaths().get(0).keySet().iterator().next().value();
 		} else {
 			return ClickResult.REJECTED;
 		}

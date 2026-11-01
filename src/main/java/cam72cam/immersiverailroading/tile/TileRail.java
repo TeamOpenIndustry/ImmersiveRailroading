@@ -90,14 +90,10 @@ public class TileRail extends TileRailBase {
 				if(parent.subInfos != null && !parent.subInfos.isEmpty()) {
 					parent.subInfos.set(0, info);
 				}
+				long currentTime = System.currentTimeMillis();
+				parent.setBuildTimeMs(currentTime);
 				parent.markAllDirty();
-
-				TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(getParentWithoutDamage());
-				if (seg != null) {
-					seg.updateSwitchSate(state);
-				}
-				// notice that client side will not execute so we need a packet, or make map get latest chunk instead is enough?
-//				new SwitchChangePacket(getWorld(), parent.getPos(), state, false).sendToAllAround(getWorld(), new Vec3d(parent.getPos()), 32 * 16);
+				WorldData.get(getWorld()).updateSwitchState(parent.getPos(), state, false, currentTime);
 			}
 		}
 	}
@@ -197,10 +193,9 @@ public class TileRail extends TileRailBase {
 					Simulation.forceQuickUpdates = true;
 				}
 
-				TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(getParentWithoutDamage());
-				if (seg != null) {
-					seg.updateTablePos(getWorld(), info.tablePos);
-				}
+				long currentTime = System.currentTimeMillis();
+				setBuildTimeMs(currentTime);
+				WorldData.get(getWorld()).updateTablePos(getPos(), info.tablePos, true, currentTime);
 			}
 		}
 
@@ -211,7 +206,7 @@ public class TileRail extends TileRailBase {
 		) {
 			if(info.isSwitchTurnBranch) {
 				WorldData data = WorldData.get(getWorld());
-				if (data != null && data.getTrackBlock(getPos()) != null) {
+				if (data != null && data.getTrackBlockLoaded(getPos()) != null) {
 					data.removeTrackBlock(getPos());
 					data.setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
 				}
@@ -385,7 +380,7 @@ public class TileRail extends TileRailBase {
 	public void load(TagCompound nbt) {
 		super.load(nbt);
 		if (getWorld().isServer) {
-			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlock(getPos()) == null && !info.isSwitchTurnBranch) {
+			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlockLoaded(getPos()) == null && !info.isSwitchTurnBranch) {
 				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(this, getWorld());
 				WorldData.get(getWorld()).setTrackBlock(getPos(), trackBlock);
 			}

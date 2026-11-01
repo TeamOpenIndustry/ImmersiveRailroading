@@ -50,7 +50,7 @@ public class VolumetricCurveRenderer {
         int playerRz = TrackRegionUtil.regionZ(currentRegionId);
 
         // 全量遍历所有 Region
-        for (Map.Entry<Long, TrackRegion> region : data.regions.entrySet()) {
+        for (Map.Entry<Long, TrackRegion> region : data.getRegions().entrySet()) {
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> segmentEntry : region.getValue().trackBlocks.entrySet()) {
                 TrackMultiGeometrySegment segment = segmentEntry.getValue();
                 Vec3d segmentPos = new Vec3d(segment.getAbsPos());
@@ -59,7 +59,7 @@ public class VolumetricCurveRenderer {
                 double ddz = playerPosition.z - segmentPos.z;
                 if (ddx * ddx + ddy * ddy + ddz * ddz > maxBlockDistSq) continue;
 
-                for (Map<Gauge, TrackSingleGeometrySegment> branch : segment.paths) {
+                for (Map<Gauge, TrackSingleGeometrySegment> branch : segment.getPaths()) {
                     for (Map.Entry<Gauge, TrackSingleGeometrySegment> singleEntry : branch.entrySet()) {
                         TrackSingleGeometrySegment single = singleEntry.getValue();
                         BuilderCubicCurve builder = single.getAndUpdateBuilder(world);
@@ -106,7 +106,7 @@ public class VolumetricCurveRenderer {
         DirectDraw regionDraw = new DirectDraw();
         boolean anyRegion = false;
 
-        for (long regionId : data.regions.keySet()) {
+        for (long regionId : data.getRegions().keySet()) {
             int rx = TrackRegionUtil.regionX(regionId);
             int rz = TrackRegionUtil.regionZ(regionId);
 

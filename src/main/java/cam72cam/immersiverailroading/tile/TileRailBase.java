@@ -964,11 +964,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (tileSwitch != null && newForcedState != tileSwitch.info.switchForced) {
 			tileSwitch.info =  tileSwitch.info.with(b -> b.switchForced = newForcedState);
-
-			TrackMultiGeometrySegment seg = WorldData.get(getWorld()).getTrackBlock(tileSwitch.getPos());
-			if (seg != null) {
-				seg.updateSwitchSate(newForcedState);// different from setSwitchState, this will also be called by client
-			}
+			long currentTime = System.currentTimeMillis();
+			tileSwitch.setBuildTimeMs(currentTime);
+			WorldData.get(getWorld()).updateSwitchState(tileSwitch.getPos(), newForcedState, false, currentTime);
 		}
 	}
 

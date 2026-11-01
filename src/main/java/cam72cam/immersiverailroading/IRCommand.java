@@ -96,8 +96,8 @@ public class IRCommand extends Command {
 					int x = Integer.parseInt(args[1]);
 					int y = Integer.parseInt(args[2]);
 					int z = Integer.parseInt(args[3]);
-					TrackMultiGeometrySegment trackBlock = WorldData.get(player.get().getWorld()).getTrackBlock(new Vec3i(x, y, z));
-					for(Map.Entry<Gauge, TrackSingleGeometrySegment> single : trackBlock.paths.getFirst().entrySet()){
+					TrackMultiGeometrySegment trackBlock = WorldData.get(player.get().getWorld()).getTrackBlockLoaded(new Vec3i(x, y, z));
+					for(Map.Entry<Gauge, TrackSingleGeometrySegment> single : trackBlock.getPaths().getFirst().entrySet()){
 						TrackNode node = new TrackNode(single.getValue(), true, player.get().getWorld());
 						TrackNode next = node.getConn(player.get().getWorld(), false);
 						sender.accept(PlayerMessage.direct("node:" + node.point + " next:" + (next == null ? "null" : next.point)));
@@ -122,7 +122,7 @@ public class IRCommand extends Command {
 					int y = Integer.parseInt(args[2]);
 					int z = Integer.parseInt(args[3]);
 					Vec3i pos = new Vec3i(x, y, z);
-					TrackMultiGeometrySegment trackBlock = WorldData.get(MinecraftClient.getPlayer().getWorld()).getTrackBlock(pos);
+					TrackMultiGeometrySegment trackBlock = WorldData.get(MinecraftClient.getPlayer().getWorld()).getTrackBlockLoaded(pos);
 					if(trackBlock != null) {
 						sender.accept(PlayerMessage.direct("succeed"));
 						return true;

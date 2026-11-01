@@ -46,10 +46,10 @@ public class TrackRegionDeltaPacket extends Packet {
         List<WorldData.DeltaOp> ops = WorldData.deserializeDeltaOps(raw, world, id);
         for (WorldData.DeltaOp op : ops) {
             Vec3i absPos = TrackRegionUtil.toBlockPos(id, op.regionBlockPos);
-            if (op.kind == WorldData.DeltaOp.Kind.PUT) {
-                data.setTrackBlock(absPos, op.block);
-            } else {
-                data.removeTrackBlock(absPos);
+            switch (op.kind) {
+                case PUT -> data.setTrackBlock(absPos, op.block);
+                case REMOVE -> data.removeTrackBlock(absPos);
+                case SWITCH_STATE -> data.clientApplySwitchStateDelta(id, op.regionBlockPos, op.switchState, op.offline, op.currentTime);
             }
         }
     }

@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.track.graph;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.offline.TrackRegionDeltaPacket;
 import cam72cam.immersiverailroading.net.offline.TrackRegionPacket;
@@ -23,16 +24,23 @@ import static cam72cam.immersiverailroading.track.graph.TrackRegionUtil.vecToReg
 public class WorldData {
     private final World world;
     private final File directory;
-    public final Map<Long, TrackRegion> regions;
+    private final Map<Long, TrackRegion> regions;
+
+    /**
+     * only for read, DO NOT EDIT!
+     * **/
+    public Map<Long, TrackRegion> getRegions() {
+        return regions;
+    }
 
     private final static Map<World, WorldData> LOADED = new HashMap<>();
 
     // 拓扑层
     public final Map<TrackNodeId, TrackNode> nodes = new HashMap<>();
-    final Map<TrackNodeId, List<TrackEdge>> outgoing = new HashMap<>();
+    protected final Map<TrackNodeId, List<TrackEdge>> outgoing = new HashMap<>();
     public final Set<TrackEdge> edges = new HashSet<>();
 
-    public final Map<Long, Set<TrackEdge>> edgesByRegion = new HashMap<>();
+    protected final Map<Long, Set<TrackEdge>> edgesByRegion = new HashMap<>();
 
     // 按 region 分桶的占位方块索引
     public final Map<Long, Map<Vec3i, List<Vec3i>>> trackBlockParentsByRegion = new HashMap<>();
@@ -49,8 +57,8 @@ public class WorldData {
     private int regionRefreshCounter = 0;
 
     // switch
-    final Map<TrackNodeId, SwitchInfo> switchByHub = new HashMap<>();
-    final Map<TrackNodeId, SwitchInfo> switchByTurn = new HashMap<>();
+    protected final Map<TrackNodeId, SwitchInfo> switchByHub = new HashMap<>();
+    protected final Map<TrackNodeId, SwitchInfo> switchByTurn = new HashMap<>();
 
     // =============== 增量同步 ===============
 
@@ -59,25 +67,43 @@ public class WorldData {
      * 序列化时复用 TrackMultiGeometrySegment 的 write/sizeBytes。
      */
     public static class DeltaOp {
-        public enum Kind { PUT, REMOVE }
+        public enum Kind { PUT, REMOVE, SWITCH_STATE }
 
         public final Kind kind;
         public final Vec3i regionBlockPos;
-        /** REMOVE 时为 null */
+
+        /** PUT 用 */
         public final TrackMultiGeometrySegment block;
 
-        public DeltaOp(Kind kind, Vec3i regionBlockPos, TrackMultiGeometrySegment block) {
+        /** SWITCH_STATE 用 */
+        public final SwitchState switchState;
+        public final boolean offline;
+        public final long currentTime;
+
+        private DeltaOp(Kind kind, Vec3i pos,
+                        TrackMultiGeometrySegment block,
+                        SwitchState switchState, boolean offline, long currentTime) {
             this.kind = kind;
-            this.regionBlockPos = regionBlockPos;
+            this.regionBlockPos = pos;
             this.block = block;
+            this.switchState = switchState;
+            this.offline = offline;
+            this.currentTime = currentTime;
         }
 
         public static DeltaOp put(Vec3i regionBlockPos, TrackMultiGeometrySegment block) {
-            return new DeltaOp(Kind.PUT, regionBlockPos, block);
+            return new DeltaOp(Kind.PUT, regionBlockPos, block, null, false, 0);
         }
 
         public static DeltaOp remove(Vec3i regionBlockPos) {
-            return new DeltaOp(Kind.REMOVE, regionBlockPos, null);
+            return new DeltaOp(Kind.REMOVE, regionBlockPos, null, null, false, 0);
+        }
+
+        public static DeltaOp switchState(Vec3i regionBlockPos,
+                                          SwitchState switchState,
+                                          boolean offline,
+                                          long currentTime) {
+            return new DeltaOp(Kind.SWITCH_STATE, regionBlockPos, null, switchState, offline, currentTime);
         }
     }
 
@@ -88,7 +114,7 @@ public class WorldData {
     private final Set<Long> pendingFullSync = new HashSet<>();
 
     /** 外部可调用的兜底全量重发接口 */
-    public void requestFullSync(long regionId) {
+    public void requestFullSync(long regionId) { //只是预留！一般也不会用到
         synchronized (pendingFullSync) {
             pendingFullSync.add(regionId);
         }
@@ -109,8 +135,10 @@ public class WorldData {
         int size = Integer.BYTES;
         for (DeltaOp op : ops) {
             size += Byte.BYTES + 3 * Integer.BYTES;
-            if (op.kind == DeltaOp.Kind.PUT) {
-                size += op.block.sizeBytes();
+            switch (op.kind) {
+                case PUT:          size += op.block.sizeBytes(); break;
+                case SWITCH_STATE: size += Integer.BYTES + Byte.BYTES + Long.BYTES; break;
+                case REMOVE:       break;
             }
         }
         ByteBuffer buf = ByteBuffer.allocate(size);
@@ -120,8 +148,17 @@ public class WorldData {
             buf.putInt(op.regionBlockPos.x);
             buf.putInt(op.regionBlockPos.y);
             buf.putInt(op.regionBlockPos.z);
-            if (op.kind == DeltaOp.Kind.PUT) {
-                op.block.write(buf);
+            switch (op.kind) {
+                case PUT:
+                    op.block.write(buf);
+                    break;
+                case SWITCH_STATE:
+                    buf.putInt(op.switchState.ordinal());
+                    buf.put((byte) (op.offline ? 1 : 0));
+                    buf.putLong(op.currentTime);
+                    break;
+                case REMOVE:
+                    break;
             }
         }
         return buf.array();
@@ -133,13 +170,25 @@ public class WorldData {
         List<DeltaOp> ops = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             DeltaOp.Kind kind = DeltaOp.Kind.values()[buf.get() & 0xFF];
-            Vec3i regionBlockPos = new Vec3i(buf.getInt(), buf.getInt(), buf.getInt());
-            if (kind == DeltaOp.Kind.PUT) {
-                TrackMultiGeometrySegment block =
-                        new TrackMultiGeometrySegment(buf, world, regionId, regionBlockPos);
-                ops.add(new DeltaOp(kind, regionBlockPos, block));
-            } else {
-                ops.add(new DeltaOp(kind, regionBlockPos, null));
+            Vec3i pos = new Vec3i(buf.getInt(), buf.getInt(), buf.getInt());
+            switch (kind) {
+                case PUT: {
+                    TrackMultiGeometrySegment block =
+                            new TrackMultiGeometrySegment(buf, world, regionId, pos);
+                    ops.add(DeltaOp.put(pos, block));
+                    break;
+                }
+                case SWITCH_STATE: {
+                    SwitchState state = SwitchState.values()[buf.getInt()];
+                    boolean offline = buf.get() != 0;
+                    long currentTime = buf.getLong();
+                    ops.add(DeltaOp.switchState(pos, state, offline, currentTime));
+                    break;
+                }
+                case REMOVE: {
+                    ops.add(DeltaOp.remove(pos));
+                    break;
+                }
             }
         }
         return ops;
@@ -228,12 +277,51 @@ public class WorldData {
         }
     }
 
-    public TrackMultiGeometrySegment getTrackBlock(Vec3i pos) {
+    public TrackMultiGeometrySegment getTrackBlockLoaded(Vec3i pos) {
         TrackRegion region = getRegion(pos, false);
         if (region != null) {
             return region.getTrackBlock(pos);
         }
         return null;
+    }
+
+    public void updateSwitchState(Vec3i pos, SwitchState switchState, boolean offline, long currentTime) {
+        long regionId = vecToRegion(pos);
+        ensureRegionLoaded(regionId);
+        TrackRegion region = getRegionById(regionId, true);
+
+        TrackMultiGeometrySegment seg = region.getTrackBlock(pos);
+        if (seg != null) {
+            seg.updateSwitchSate(switchState, offline, currentTime);
+        }
+
+        if (world.isServer) {
+            queueDelta(regionId, DeltaOp.switchState(TrackRegionUtil.toRegionBlockPos(pos), switchState, offline, currentTime));
+        }
+    }
+
+    /** 客户端收到 SWITCH_STATE delta 后调用。不重建拓扑、不碰 region 全量。 */
+    public void clientApplySwitchStateDelta(long regionId, Vec3i regionBlockPos, SwitchState state, boolean offline, long currentTime) {
+        if (!world.isClient) return;
+        TrackRegion region = getRegionById(regionId, false);  // 不创建
+        if (region == null) return;                          // 客户端没加载，等首见全量
+        TrackMultiGeometrySegment seg = region.getTrackBlock(region.toBlockPos(regionBlockPos));
+        if (seg != null) {
+            seg.updateSwitchSate(state, offline, currentTime);
+        }
+    }
+
+    public void updateTablePos(Vec3i pos, double tablePos, boolean offline, long currentTime) {
+        long regionId = vecToRegion(pos);
+        ensureRegionLoaded(regionId);
+        TrackRegion region = getRegionById(regionId, true);
+
+        TrackMultiGeometrySegment seg = region.getTrackBlock(pos);
+        if (seg != null) {
+            seg.updateTablePos(tablePos, offline, currentTime);
+        }
+
+        setTrackBlock(pos, seg);
     }
 
     public void setTrackBlock(Vec3i pos, TrackMultiGeometrySegment block) {
@@ -250,8 +338,10 @@ public class WorldData {
         region.setTrackBlock(pos, block);
         addTrackBlockToParents(pos, block);
 
-        buildTopologyFor(block);
-        researchNeighbors(pos);
+        if (world.isServer || Config.ConfigRegion.clientBuildTopo) {
+            buildTopologyFor(block);
+            researchNeighbors(pos);
+        }
 
         // 服务端才入队；客户端 apply 增量时不会再回传
         if (world.isServer) {
@@ -323,10 +413,6 @@ public class WorldData {
             queueDelta(regionId, DeltaOp.remove(TrackRegionUtil.toRegionBlockPos(pos)));
         }
         return true;
-    }
-
-    public Collection<TrackRegion> getRegions() {
-        return regions.values();
     }
 
     private void saveInternal() {
@@ -448,7 +534,7 @@ public class WorldData {
             }
 
             // 【新增】：合并地图请求的 Region，并清理过期的
-            Map<Long, Integer> mapView = playerMapViewRegions.get(player);
+            Map<Long, Long> mapView = activeMapView(player);
             if (mapView != null) {
                 trackingRegions.addAll(mapView.keySet());
             }
@@ -580,7 +666,7 @@ public class WorldData {
             required.addAll(regionsInRadius(player.getPosition(), Config.ConfigRegion.playerRadius));
 
             // 【新增】：把地图界面的请求也算作“需要”
-            Map<Long, Integer> mapView = playerMapViewRegions.get(player);
+            Map<Long, Long> mapView = activeMapView(player);
             if (mapView != null) {
                 required.addAll(mapView.keySet());
             }
@@ -1091,7 +1177,7 @@ public class WorldData {
     }
 
     private void researchNeighbors(Vec3i newAbsPos) {
-        TrackMultiGeometrySegment newBlock = getTrackBlock(newAbsPos);
+        TrackMultiGeometrySegment newBlock = getTrackBlockLoaded(newAbsPos);
         if (newBlock == null) return;
         if (newBlock.paths.isEmpty()) return;
 
@@ -1113,7 +1199,7 @@ public class WorldData {
                         List<Vec3i> parents = getParentsAt(scan);
                         if (parents == null) continue;
                         for (Vec3i parentAbs : parents) {
-                            TrackMultiGeometrySegment block = getTrackBlock(parentAbs);
+                            TrackMultiGeometrySegment block = getTrackBlockLoaded(parentAbs);
                             if (block != null) {
                                 nearbyBlocks.add(block);
                             }
@@ -1210,6 +1296,8 @@ public class WorldData {
             addTrackBlockToParents(region.toBlockPos(e.getKey()), e.getValue());
         }
 
+        if(!Config.ConfigRegion.clientBuildTopo) return;
+
         // 2. 建本 region 自身的 NORMAL 边 + 内部 GAP 边
         for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
             buildTopologyFor(e.getValue());
@@ -1222,7 +1310,7 @@ public class WorldData {
     }
 
     // 记录玩家地图界面的请求 <Player, <RegionId, 过期时间>>
-    private final Map<Player, Map<Long, Integer>> playerMapViewRegions = new HashMap<>();
+    private final Map<Player, Map<Long, Long>> playerMapViewRegions = new HashMap<>();
 
     public void handleClientMapRequest(Player player, List<Long> requestRegions) {
         if (!world.isServer) return;
@@ -1233,12 +1321,20 @@ public class WorldData {
             return;
         }
 
-        // 更新请求记录（不需要 serverTick 过期了，纯靠关闭包清理）
-        Map<Long, Integer> viewRegions = playerMapViewRegions.computeIfAbsent(player, p -> new HashMap<>());
-        viewRegions.clear();
+        long currentTick = world.getTicks();
+        Map<Long, Long> viewRegions = playerMapViewRegions.computeIfAbsent(player, p -> new HashMap<>());
         for (Long id : requestRegions) {
-            viewRegions.put(id, 1); // 值随便填，只要存在就行
+            viewRegions.put(id, currentTick + Config.ConfigRegion.unloadDelayTicks);
         }
+        viewRegions.entrySet().removeIf(e -> e.getValue() < currentTick);
+    }
+
+    private Map<Long, Long> activeMapView(Player player) {
+        long currentTick = world.getTicks();
+        Map<Long, Long> mapView = playerMapViewRegions.get(player);
+        if (mapView == null) return null;
+        mapView.entrySet().removeIf(e -> e.getValue() < currentTick);
+        return mapView.isEmpty() ? null : mapView;
     }
 
     // 供地图渲染使用的纯坐标缓存
