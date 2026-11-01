@@ -150,7 +150,7 @@ public class GlobalRailwayMap implements IScreen {
         int width  = GUIHelpers.getScreenWidth();
         int height = GUIHelpers.getScreenHeight();
 
-        GUIHelpers.drawRect(0, 0, width, height, 0xFF14141E);
+        GUIHelpers.drawRect(0, 0, width, height, 0xCC14141E);
 
         RenderState mapState = state.clone().translate(width / 2.0, height / 2.0, 0);
 

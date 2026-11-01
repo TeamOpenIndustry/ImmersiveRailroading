@@ -11,7 +11,7 @@ public class TrackRegion {
 
     public final Map<Vec3i, TrackMultiGeometrySegment> trackBlocks;// fake final
 
-    boolean needsWriteToDisk;
+    protected boolean needsWriteToDisk;
 
     public TrackRegion(long regionPos) {
         this.regionPos = regionPos;
