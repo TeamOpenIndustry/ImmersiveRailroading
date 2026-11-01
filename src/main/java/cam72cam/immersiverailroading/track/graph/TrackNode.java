@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.track.graph;
 
 import cam72cam.immersiverailroading.library.Gauge;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -14,6 +15,7 @@ public class TrackNode {
     public final TrackNodeId id;
     private final long regionPos;// addition, not necessary
     private final Vec3i regionBlockPos;// addition, not necessary
+    private final Vec3i absPos; //test
 
     public final TrackSingleGeometrySegment trackSingleGeometrySegment;
     public final int index;
@@ -25,12 +27,14 @@ public class TrackNode {
         Vec3i pos = segment.getAbsPos();
         this.regionPos = TrackRegionUtil.vecToRegion(pos);
         this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(pos);
+        absPos = pos;
 
         this.trackSingleGeometrySegment = segment;
         this.index = index;
         this.point = segment.pointsCache.get(index)
                 .add(new Vec3d(pos))
-                .add(segment.getAndUpdateBuilder(world).info.placementInfo.placementPosition);
+                .add(segment.getAndUpdateBuilder(world).info.placementInfo.placementPosition)
+                .add(new Vec3d(0, segment.getAndUpdateBuilder(world).info.getTrackHeight() * segment.gauge.scale(), 0));
         this.id = new TrackNodeId(regionPos, regionBlockPos, trackSingleGeometrySegment.switchIdex, trackSingleGeometrySegment.gauge, index);
     }
 
@@ -52,6 +56,8 @@ public class TrackNode {
         // 允许的最大连线夹角（30 度）
         final double maxAngleRad = Math.toRadians(30);
         final double cosCone = Math.cos(maxAngleRad);
+        // hub 放宽到 45 度
+        final double cosConeHub = Math.cos(Math.toRadians(45));
 
         // A 节点的搜索方向（向前或向后）
         Vec3d forwardVec = forwardVector(this.point);
@@ -76,7 +82,8 @@ public class TrackNode {
                         }
                         if (trackBlock == null) continue;
 
-                        for (Map<Gauge, TrackSingleGeometrySegment> branch : trackBlock.getPaths()) {
+                        for (int switchIndex = 0; switchIndex < trackBlock.getPaths().size(); switchIndex ++) {
+                            Map<Gauge, TrackSingleGeometrySegment> branch = trackBlock.getPaths().get(switchIndex);
                             for (Map.Entry<Gauge, TrackSingleGeometrySegment> single : branch.entrySet()) {
                                 TrackSingleGeometrySegment seg = single.getValue();
 
@@ -93,8 +100,12 @@ public class TrackNode {
                                             .add(new Vec3d(0, seg.getAndUpdateBuilder(world).info.getTrackHeight() * seg.gauge.scale(), 0));
 
                                     // 1. 距离门槛过滤（仅作为硬拦截）
+                                    if(trackBlock.type == TrackItems.SWITCH) {
+                                        int a = 1;
+                                    }
                                     double d = cand.distanceTo(this.point);
                                     if (d >= maxDist) continue;
+                                    if (i == 0 && trackBlock.type == TrackItems.SWITCH && switchIndex > 0) continue;//唯一不可外部连接的点：switch的turn start
 
                                     // 2. 重合节点直接返回（排除自己）
                                     if (d < 1e-3) {
@@ -103,6 +114,13 @@ public class TrackNode {
                                         }
                                         return new TrackNode(seg, i, world);
                                     }
+
+                                    // 识别 hub：SWITCH 的 straight 分支 index 0
+                                    boolean isSwitchHub = switchIndex == 0
+                                            && trackBlock.type == TrackItems.SWITCH
+                                            && i == 0;
+                                    // hub 放宽到 45°，普通点保持 30°
+                                    double coneCos = isSwitchHub ? cosConeHub : cosCone;
 
                                     // 3. 计算两点连线方向
                                     Vec3d offset = new Vec3d(
@@ -115,7 +133,7 @@ public class TrackNode {
 
                                     // 4. 评估 A 端夹角：连线方向与 A 的搜索方向的夹角
                                     double dotLineA = lineDir.dotProduct(searchVec);
-                                    if (dotLineA < cosCone) continue;
+                                    if (dotLineA < coneCos) continue;
                                     double angleA = Math.acos(Math.max(-1.0, Math.min(1.0, dotLineA)));
 
                                     // 5. 评估 B 端夹角：连线方向与 B 端“迎向”切线方向的夹角
@@ -130,10 +148,15 @@ public class TrackNode {
                                     }
 
                                     double dotLineB = lineDir.dotProduct(candFacing);
-                                    if ((i == 0 || i == lastIdx) && dotLineB < cosCone) {
+                                    if ((i == 0 || i == lastIdx) && dotLineB < coneCos) {
                                         continue;
                                     }
                                     double angleB = Math.acos(Math.max(-1.0, Math.min(1.0, dotLineB)));
+
+                                    // 【新增】角度过滤已通过，若被连接方是道岔 hub 则直接选中
+                                    if (isSwitchHub) {
+                                        return new TrackNode(seg, i, world);
+                                    }
 
                                     // 6. 综合评分
                                     // 姿态偏差（主项）

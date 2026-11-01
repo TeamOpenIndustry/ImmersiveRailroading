@@ -95,6 +95,12 @@ public class VolumetricCurveRenderer {
 
             Vec3d f = new Vec3d(from.point.x, from.point.y, from.point.z).add(GAP_Y_OFFSET);
             Vec3d t = new Vec3d(to.point.x, to.point.y, to.point.z).add(GAP_Y_OFFSET);
+            if(from.point.distanceTo(to.point) < 0.05) {
+                t = t.add(0, 0.1, 0);
+            }
+            if(from.equals(to)) {
+                int a = 1;
+            }
             appendLineQuad(draw, f, t, Color.ORANGE, 1 / 16f);
         }
 

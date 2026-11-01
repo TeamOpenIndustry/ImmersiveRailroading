@@ -148,12 +148,10 @@ public class OffWorldMovementTrack {
 
     private static double edgeDistance(TrackEdge edge, TrackNode from, TrackNode to, World world) {
         if (edge.edgeType == TrackEdge.EdgeType.GAP) {
-            double hFrom = trackHeight(from, world);
-            double hTo = trackHeight(to, world);
             double dx = to.point.x - from.point.x;
-            double dy = (to.point.y + hTo) - (from.point.y + hFrom);
+            double dy = to.point.y - from.point.y;
             double dz = to.point.z - from.point.z;
-            return Math.sqrt(dx * dx + dy * dy + dz * dz);
+            return Math.sqrt(dx*dx + dy*dy + dz*dz);
         }
 
         List<VecYPR> points = from.trackSingleGeometrySegment.pointsCache;
@@ -176,12 +174,8 @@ public class OffWorldMovementTrack {
 
     private static void positionAt(TrackEdge edge, TrackNode from, TrackNode to, double t, World world, double[] out) {
         if (edge.edgeType == TrackEdge.EdgeType.GAP) {
-            double hFrom = trackHeight(from, world);
-            double hTo = trackHeight(to, world);
-            double h = hFrom * (1 - t) + hTo * t;
-
             out[0] = from.point.x * (1 - t) + to.point.x * t;
-            out[1] = from.point.y * (1 - t) + to.point.y * t + h;
+            out[1] = from.point.y * (1 - t) + to.point.y * t;
             out[2] = from.point.z * (1 - t) + to.point.z * t;
 
             double fromRollSign = (from.index == 0) ? -1.0 : 1.0;
@@ -478,10 +472,8 @@ public class OffWorldMovementTrack {
         double maxDistSq = maxDist * maxDist;
 
         if (edge.edgeType == TrackEdge.EdgeType.GAP) {
-            double hFrom = trackHeight(from, world);
-            double hTo = trackHeight(to, world);
-            double ay = from.point.y + hFrom;
-            double by = to.point.y + hTo;
+            double ay = from.point.y;
+            double by = to.point.y;
             double ax = to.point.x - from.point.x;
             double ayy = by - ay;
             double az = to.point.z - from.point.z;
@@ -490,7 +482,7 @@ public class OffWorldMovementTrack {
             double t = ((pos.x - from.point.x) * ax + (pos.y - ay) * ayy + (pos.z - from.point.z) * az) / abLen2;
             t = Math.max(0, Math.min(1, t));
             double cx = from.point.x + ax * t - pos.x;
-            double cy = ay + ayy * t - pos.y;
+            double cy = from.point.y + ayy * t - pos.y;
             double cz = from.point.z + az * t - pos.z;
             if (cx * cx + cy * cy + cz * cz > maxDistSq) return -1;
             return t;

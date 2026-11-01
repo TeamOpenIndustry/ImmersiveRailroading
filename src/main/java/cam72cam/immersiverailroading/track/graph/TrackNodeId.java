@@ -10,11 +10,14 @@ public final class TrackNodeId {
     public final Gauge gauge;              // paths.get(pathIndex) 里的 key
     public final int pointIndex;           // single.pointsCache 里的下标
 
+    public final Vec3i absPos;
+
     private final int cachedHash;
 
     public TrackNodeId(long regionPos, Vec3i regionBlockPos, int pathIndex, Gauge gauge, int pointIndex) {
         this.regionPos = regionPos;
         this.regionBlockPos = regionBlockPos;
+        absPos = TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
         this.pathIndex = pathIndex;
         this.gauge = gauge;
         this.pointIndex = pointIndex;
