@@ -73,6 +73,11 @@ public abstract class BuilderBase {
 
 				if(track instanceof TrackRail) {
 					TileRail tileRail = (TileRail) track.placeTrack(true);
+					if(info.settings.type == TrackItems.SWITCH && info.builderBranchBridge != null) {
+						tileRail.subInfos = info.builderBranchBridge;
+						tileRail.subInfoPos = new ArrayList<>();
+						tileRail.subInfoPos.add(tileRail.getPos().add(info.builderBranchPosBridge.getFirst()));
+					}
 					tileRail.markDirty();
 					tileRail.setBuildTimeMs(System.currentTimeMillis());
 					WorldData.get(world).setTrackBlock(

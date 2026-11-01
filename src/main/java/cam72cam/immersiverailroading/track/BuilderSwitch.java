@@ -20,8 +20,10 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	public BuilderSwitch(RailInfo info, World world, Vec3i pos) {
 		super(info, world, pos);
 		
-		RailInfo turnInfo = info.withSettings(b -> b.type = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM);
-		RailInfo straightInfo = info;
+		RailInfo turnInfo = info
+				.withSettings(b -> b.type = info.customInfo.placementPosition.equals(info.placementInfo.placementPosition) ? TrackItems.TURN : TrackItems.CUSTOM)
+				.with(mutable -> mutable.switchBranchIndex = 2);
+		RailInfo straightInfo = info.with(mutable -> mutable.switchBranchIndex = 1);
 
 		{
 			turnBuilder = (BuilderIterator) turnInfo.getBuilder(world, pos);
@@ -116,7 +118,14 @@ public class BuilderSwitch extends BuilderBase implements IIterableTrack {
 	
 	@Override
 	public void build() {
+		// information bridge... we have no other way to do this?
+		straightBuilder.info.builderBranchBridge = new ArrayList<>();
+		straightBuilder.info.builderBranchPosBridge = new ArrayList<>();
+		straightBuilder.info.builderBranchBridge.add(turnBuilder.info);
+		straightBuilder.info.builderBranchPosBridge.add(turnBuilder.getParentPos().subtract(straightBuilder.getParentPos()));
 		straightBuilder.build();
+		straightBuilder.info.builderBranchBridge = null;
+		straightBuilder.info.builderBranchPosBridge = null;
 		turnBuilder.build();
 	}
 	

@@ -34,7 +34,7 @@ public class RailBaseModel {
 
 		StandardModel model = new StandardModel();
 		if (te instanceof TileRail && ((TileRail) te).info != null) {
-			if(((TileRail) te).info.isSwitchTurnBranch) return null;
+			if(((TileRail) te).info.switchBranchIndex > 1) return null;
 			model.addCustom((state, pt) -> {
 				RailInfo info = ((TileRail) te).info;
                 if (info.settings.type == TrackItems.SWITCH) {
