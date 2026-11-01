@@ -78,10 +78,16 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				CommonEvents.WorldData.SAVE.subscribe(WorldData::save);
 				CommonEvents.WorldData.LOAD.subscribe(WorldData::load);
 				CommonEvents.WorldData.UNLOAD.subscribe(WorldData::unload);
+				CommonEvents.World.UNLOAD.subscribe(netWorld -> {
+					World world = World.get(netWorld);
+					if (world != null && world.isClient) {
+						WorldData.unload(world, null);
+					}
+				});
 				World.onTick(WorldData::tick);
 
-				CommonEvents.WorldData.SAVE.subscribe(VehiclePersistence::save);     // 新增
-				CommonEvents.WorldData.LOAD.subscribe(VehiclePersistence::load);     // 新增
+				CommonEvents.WorldData.SAVE.subscribe(VehiclePersistence::save);
+				CommonEvents.WorldData.LOAD.subscribe(VehiclePersistence::load);
 
 				EntityRegistry.register(ImmersiveRailroading.instance, CarFreight::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, CarPassenger::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
@@ -123,7 +129,6 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 					@Override
 					public boolean shouldPool(CustomEntity self) {
-						// 只有 IR 的车才进池子
 						return self instanceof EntityCoupleableRollingStock;
 					}
 

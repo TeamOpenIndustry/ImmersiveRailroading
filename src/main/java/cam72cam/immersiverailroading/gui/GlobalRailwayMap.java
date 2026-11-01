@@ -99,9 +99,9 @@ public class GlobalRailwayMap implements IScreen {
         if (currentInstance == this) currentInstance = null;
         dragging = false;
         offsetCache.clear();
-        if (world != null) {
-            new TrackRegionRequestPacket(world, Collections.emptyList()).sendToServer();
-        }
+//        if (world != null) {
+//            new TrackRegionRequestPacket(world, Collections.emptyList()).sendToServer();
+//        }
     }
 
     public static void onClientTick() {
@@ -260,16 +260,16 @@ public class GlobalRailwayMap implements IScreen {
 
                     // 第一个按钮：内存切换 (online = false)
                     if (isMouseInSwitchBtn(evt.x, evt.y)) {
-                        SwitchState target = selectedSwitch.circleSwitchState();
-                        selectedSwitch.updateSwitchSate(target); // 客户端立即更新
+                        SwitchState target = selectedSwitch.nextSwitchState();
+//                        selectedSwitch.updateSwitchSate(world, target, true, System.currentTimeMillis()); // 客户端立即更新
                         new SwitchChangePacket(world, selectedSwitch.getAbsPos(), target, false).sendToServer();
                         return false;
                     }
 
                     // 第二个按钮：实体强制切换 (online = true)
                     if (isMouseInSyncBtn(evt.x, evt.y)) {
-                        SwitchState target = selectedSwitch.circleSwitchState();
-                        selectedSwitch.updateSwitchSate(target);
+                        SwitchState target = selectedSwitch.nextSwitchState();
+//                        selectedSwitch.updateSwitchSate(world, target, false,  System.currentTimeMillis());
                         new SwitchChangePacket(world, selectedSwitch.getAbsPos(), target, true).sendToServer();
                         return false;
                     }
@@ -342,7 +342,7 @@ public class GlobalRailwayMap implements IScreen {
                             if (d2 < radiusSq && d2 < closestDistSq) {
                                 // 获取占用该方块的所有父级轨道
                                 for (Vec3i parentAbs : entry.getValue()) {
-                                    TrackMultiGeometrySegment seg = data.getTrackBlock(parentAbs);
+                                    TrackMultiGeometrySegment seg = data.getTrackBlockLoaded(parentAbs);
                                     // 只要父级是道岔，就命中
                                     if (seg != null && seg.type == TrackItems.SWITCH) {
                                         closestDistSq = d2;
@@ -473,10 +473,10 @@ public class GlobalRailwayMap implements IScreen {
         diagTrackMaxX = -Double.MAX_VALUE; diagTrackMaxZ = -Double.MAX_VALUE;
 
         if (data == null) return;
-        diagRegionCount = data.regions.size();
-        for (TrackRegion region : data.regions.values()) {
+        diagRegionCount = data.getRegions().size();
+        for (TrackRegion region : data.getRegions().values()) {
             for (TrackMultiGeometrySegment seg : region.trackBlocks.values()) {
-                for (Map<Gauge, TrackSingleGeometrySegment> branch : seg.paths) {
+                for (Map<Gauge, TrackSingleGeometrySegment> branch : seg.getPaths()) {
                     for (TrackSingleGeometrySegment single : branch.values()) {
                         diagTrackCount++;
                         Vec3i bp = single.getAbsPos();
@@ -533,7 +533,7 @@ public class GlobalRailwayMap implements IScreen {
         double minZ = panZ - halfH, maxZ = panZ + halfH;
         double yScale = -zoom;
 
-        for (Map.Entry<Long, TrackRegion> entry : data.regions.entrySet()) {
+        for (Map.Entry<Long, TrackRegion> entry : data.getRegions().entrySet()) {
             long regionId = entry.getKey();
             int rx = TrackRegionUtil.regionX(regionId);
             int rz = TrackRegionUtil.regionZ(regionId);
@@ -546,7 +546,7 @@ public class GlobalRailwayMap implements IScreen {
             fr.drawLine(new Vec3d(rMinX - panX, rMaxZ - panZ, 0), new Vec3d(rMinX - panX, rMinZ - panZ, 0), COLOR_REGION, zoom, yScale, 1.0);
         }
 
-        for (TrackRegion region : data.regions.values()) {
+        for (TrackRegion region : data.getRegions().values()) {
             for (TrackMultiGeometrySegment segment : region.trackBlocks.values()) {
                 Color currentColor = COLOR_TRACK;
                 if (segment == hoveredSwitch) {
@@ -555,7 +555,7 @@ public class GlobalRailwayMap implements IScreen {
                     currentColor = COLOR_SWITCH_SELECT;
                 }
 
-                for (Map<Gauge, TrackSingleGeometrySegment> branch : segment.paths) {
+                for (Map<Gauge, TrackSingleGeometrySegment> branch : segment.getPaths()) {
                     for (TrackSingleGeometrySegment single : branch.values()) {
                         drawSingleSegment(fr, single, panX, panZ, minX, maxX, minZ, maxZ, yScale, currentColor);
                     }

@@ -46,11 +46,6 @@ public class SwitchChangePacket extends Packet {
         }
 
         WorldData data = WorldData.get(world);
-        if (data == null) return;
-
-        TrackMultiGeometrySegment seg = data.getTrackBlock(pos);
-        if (seg != null && seg.type == TrackItems.SWITCH) {
-            seg.updateSwitchSate(targetState);
-        }
+        if (data != null) data.updateSwitchState(pos, targetState, true, System.currentTimeMillis());
     }
 }

@@ -283,6 +283,9 @@ public class Config {
 		@Comment("Ticks an unneeded region stays loaded before being unloaded (cooldown to avoid thrashing)")
 		@Range(min = 100, max = 6000)
 		public static int unloadDelayTicks = 600;
+
+		@Comment("Debug option, do not change this if you don't know what you are doing")
+		public static boolean clientBuildTopo = false;
 	}
 
 	@Name("debug")

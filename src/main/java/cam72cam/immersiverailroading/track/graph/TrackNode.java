@@ -69,14 +69,14 @@ public class TrackNode {
                     for (Vec3i parentPos : new ArrayList<>(parents)) { // we have to copy to avoid CME!
                         if (parentPos.equals(selfBlock)) continue;
 
-                        TrackMultiGeometrySegment trackBlock = data.getTrackBlock(parentPos);
+                        TrackMultiGeometrySegment trackBlock = data.getTrackBlockLoaded(parentPos);
                         if (trackBlock == null) {
                             data.ensureRegionLoaded(TrackRegionUtil.vecToRegion(parentPos));
-                            trackBlock = data.getTrackBlock(parentPos);
+                            trackBlock = data.getTrackBlockLoaded(parentPos);
                         }
                         if (trackBlock == null) continue;
 
-                        for (Map<Gauge, TrackSingleGeometrySegment> branch : trackBlock.paths) {
+                        for (Map<Gauge, TrackSingleGeometrySegment> branch : trackBlock.getPaths()) {
                             for (Map.Entry<Gauge, TrackSingleGeometrySegment> single : branch.entrySet()) {
                                 TrackSingleGeometrySegment seg = single.getValue();
 

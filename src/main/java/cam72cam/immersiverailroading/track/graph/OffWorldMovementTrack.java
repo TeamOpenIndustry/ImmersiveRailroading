@@ -27,7 +27,7 @@ public class OffWorldMovementTrack {
                 TrackEdge edge = current.getTopoEdge();
                 if(edge.edgeType == TrackEdge.EdgeType.NORMAL) {
                     Vec3i trackBlockPos = TrackRegionUtil.toBlockPos(edge.from.regionPos, edge.from.regionBlockPos);
-                    TrackMultiGeometrySegment segment = WorldData.get(world).getTrackBlock(trackBlockPos);
+                    TrackMultiGeometrySegment segment = WorldData.get(world).getTrackBlockLoaded(trackBlockPos);
                     if(segment != null && segment.type == TrackItems.TURNTABLE) {
                         Vec3d next = positionOnEdge(edge, current.getTopoT(), world);
                         current.advanceTo(next);//special

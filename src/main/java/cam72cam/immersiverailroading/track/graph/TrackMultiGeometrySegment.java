@@ -17,10 +17,11 @@ public class TrackMultiGeometrySegment {
     private final long regionPos;
     private final Vec3i regionBlockPos;
 
-    private final long buildTime;
-    public final List<Map<Gauge, TrackSingleGeometrySegment>> paths;
+    private long buildTime;
+    protected final List<Map<Gauge, TrackSingleGeometrySegment>> paths;
     private int switchState;
     private double tablePos;
+    private long lastOnlineBuildTime;
 
     public final TrackItems type;
 
@@ -30,11 +31,16 @@ public class TrackMultiGeometrySegment {
         return TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
     }
 
+    public List<Map<Gauge, TrackSingleGeometrySegment>> getPaths() {
+        return paths;
+    }
+
     public TrackMultiGeometrySegment(TileRail trackBlock, World world) {
         this.regionPos = TrackRegionUtil.vecToRegion(trackBlock.getPos());
         this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(trackBlock.getPos());
 
         buildTime = trackBlock.getBuildTimeMs();
+        lastOnlineBuildTime = buildTime;
 
         TrackSingleGeometrySegment segment = new TrackSingleGeometrySegment(trackBlock, world, 0, trackBlock.info.settings.gauge);
         paths = new ArrayList<>();
@@ -58,28 +64,25 @@ public class TrackMultiGeometrySegment {
         return switchState;
     }
 
-    public void updateSwitchSate(SwitchState switchState) {
-        this.switchState = switchState.ordinal();
-    }
-
-    // 获取当前的 SwitchState 枚举
     public SwitchState getSwitchStateEnum() {
         return SwitchState.values()[this.switchState];
     }
 
-    // 循环切换道岔状态：STRAIGHT <-> TURN
-    public SwitchState circleSwitchState() {
-        SwitchState current = getSwitchStateEnum();
-        if (current == SwitchState.STRAIGHT) {
-            return SwitchState.TURN;
-        } else if (current == SwitchState.TURN) {
-            return SwitchState.STRAIGHT;
+    public SwitchState nextSwitchState() {
+        return SwitchState.values()[( getSwitchStateEnum().ordinal() + 1 ) % SwitchState.values().length];
+    }
+
+    protected void updateSwitchSate(SwitchState switchState, boolean offline, long currentTime) {
+        this.switchState = switchState.ordinal();
+        if(!offline) {
+            this.buildTime = currentTime;
+            this.lastOnlineBuildTime = currentTime;
         } else {
-            return SwitchState.STRAIGHT; // NONE -> STRAIGHT
+            this.buildTime = currentTime;
         }
     }
 
-    public void updateTablePos(World world, double tablePos) {
+    protected void updateTablePos(double tablePos, boolean offline, long currentTime) {
         if(tablePos == this.tablePos) return;
         this.tablePos = tablePos;
         for(Map<Gauge, TrackSingleGeometrySegment> branch : paths) {
@@ -88,7 +91,12 @@ public class TrackMultiGeometrySegment {
                 single.updateForTable(tablePos, type);
             }
         }
-        WorldData.get(world).setTrackBlock(TrackRegionUtil.toBlockPos(regionPos, regionBlockPos), this);
+        if(!offline) {
+            this.buildTime = currentTime;
+            this.lastOnlineBuildTime = currentTime;
+        } else {
+            this.buildTime = currentTime;
+        }
     }
 
     public TrackMultiGeometrySegment(ByteBuffer buffer, World world, long regionPos, Vec3i regionBlockPos) {
@@ -101,6 +109,7 @@ public class TrackMultiGeometrySegment {
         }
 
         buildTime = buffer.getLong();
+        lastOnlineBuildTime = buffer.getLong();
         switchState = buffer.getInt();
         tablePos = buffer.getDouble();
         type = TrackItems.byOrder(buffer.getInt());
@@ -125,6 +134,7 @@ public class TrackMultiGeometrySegment {
 
         bytes += Integer.BYTES;    // version
         bytes += Long.BYTES;       // buildTime
+        bytes += Long.BYTES;       // lastOnlineBuildTime
         bytes += Integer.BYTES;    // switchState
         bytes += Double.BYTES;     // tablePos
         bytes += Integer.BYTES;    // type
@@ -143,11 +153,12 @@ public class TrackMultiGeometrySegment {
     }
 
     public void write(ByteBuffer buffer) {
-        buffer.putInt(1);            // version
-        buffer.putLong(buildTime);   // buildTime
-        buffer.putInt(switchState);  // switchState
-        buffer.putDouble(tablePos);  // tablePos
-        buffer.putInt(type.getOrder()); // type
+        buffer.putInt(1);              // version
+        buffer.putLong(buildTime);           // buildTime
+        buffer.putLong(lastOnlineBuildTime); // buildTime
+        buffer.putInt(switchState);          // switchState
+        buffer.putDouble(tablePos);          // tablePos
+        buffer.putInt(type.getOrder());      // type
 
         buffer.putInt(paths.size());
         for(int i = 0; i < paths.size(); i ++) {
