@@ -1199,6 +1199,7 @@ public class WorldData {
                         List<Vec3i> parents = getParentsAt(scan);
                         if (parents == null) continue;
                         for (Vec3i parentAbs : parents) {
+                            if(parents.equals(newAbsPos)) continue;
                             TrackMultiGeometrySegment block = getTrackBlockLoaded(parentAbs);
                             if (block != null) {
                                 nearbyBlocks.add(block);
