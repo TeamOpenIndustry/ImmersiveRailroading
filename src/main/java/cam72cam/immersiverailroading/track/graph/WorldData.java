@@ -267,6 +267,7 @@ public class WorldData {
         TrackMultiGeometrySegment seg = region.getTrackBlock(pos);
         if (seg != null) {
             seg.updateSwitchSate(switchState, offline, currentTime);
+            region.needsWriteToDisk = true;
         }
 
         if (world.isServer) {
