@@ -55,7 +55,7 @@ public class TrackSingleGeometrySegment {
         this.switchIdex = switchIndex;
 
         BuilderCubicCurve builder;
-        if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 0) { // legacy switch straight way
+        if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 0) { // switch straight way
             builder = (BuilderCubicCurve) trackBlock.info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(world, trackBlock.getPos());
         } else if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 1) {
             builder = (BuilderCubicCurve) trackBlock.subInfos.get(0).getBuilder(world, trackBlock.subInfoPos.get(0));
@@ -74,7 +74,7 @@ public class TrackSingleGeometrySegment {
             ).with(mutable -> {
                 mutable.placementInfo = mutable.placementInfo.withYaw(VecUtil.toWrongYaw(mutable.placementInfo.facing().getAngle() + 180));
             }).getBuilder(world, trackBlock.getPos());
-        } else{ // common way and legacy switch non-straight way
+        } else{ // common way
             builder = (BuilderCubicCurve) trackBlock.info.getBuilder(world, trackBlock.getPos());
         }
 
