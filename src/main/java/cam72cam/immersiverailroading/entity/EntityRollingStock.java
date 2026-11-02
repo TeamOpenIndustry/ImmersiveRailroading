@@ -345,6 +345,10 @@ public class EntityRollingStock extends CustomEntity implements ITickable, IClic
 		return control.part.type != ModelComponentType.INDEPENDENT_BRAKE_X || player.hasPermission(Permissions.BRAKE_CONTROL);
 	}
 
+	public void setEntityTag(String tag) {
+		this.tag = tag;
+	}
+
 
 	private static class ControlPositionMapper implements TagMapper<Map<String, Pair<Boolean, Float>>> {
 		@Override
