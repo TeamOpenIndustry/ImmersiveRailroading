@@ -29,8 +29,6 @@ public class VolumetricCurveRenderer {
     private static final BlendMode BLEND_ALPHA =
             new BlendMode(BlendMode.GL_SRC_ALPHA, BlendMode.GL_ONE_MINUS_SRC_ALPHA);
 
-    // ==================== 主入口（唯一外部接口） ====================
-
     public static void renderWireFrame(RenderState state, float partialTicks) {
         World world = MinecraftClient.getPlayer().getWorld();
         Vec3d playerPosition = MinecraftClient.getPlayer().getPosition();
@@ -68,16 +66,16 @@ public class VolumetricCurveRenderer {
 
                         Vec3d blockOffset = new Vec3d(single.getAbsPos()).add(info.placementInfo.placementPosition);
 
-                        // 1. 方块线框（黄色）
+                        // blocks
                         Vec3d wireCenter = blockOffset
                                 .add(info.placementInfo.placementPosition.scale(-1))
                                 .add(0.5, 0.5, 0.5);
                         appendBlockWireFrame(draw, new VecYPR(wireCenter, 0), Color.YELLOW, 1, 1 / 16f);
 
-                        // 2. 曲线（绿色）
+                        // curves
                         appendCurve(draw, single.pointsCache, blockOffset.add(CURVE_Y_OFFSET), Color.LIME, 1 / 16f);
 
-                        // 3. 控制柄（品红/青色/红色）
+                        // handlers
                         appendHandles(draw, curve, blockOffset.add(HANDLE_TOP_OFFSET),
                                 Color.MAGENTA, Color.CYAN, Color.RED, 1 / 16f, 1 / 4f);
                     }
@@ -85,7 +83,7 @@ public class VolumetricCurveRenderer {
             }
         }
 
-        // 4. GAP 边（橙色）- 全量
+        // gap
         for (TrackEdge edge : data.edges) {
             if (edge.edgeType != TrackEdge.EdgeType.GAP) continue;
 
@@ -105,7 +103,7 @@ public class VolumetricCurveRenderer {
                 .alpha_test(false)
                 .blend(BLEND_ALPHA));
 
-        // 5. Region 边界框（全量，满足条件的画 16x16 网格）
+        // region
         DirectDraw regionDraw = new DirectDraw();
         boolean anyRegion = false;
 
@@ -113,7 +111,6 @@ public class VolumetricCurveRenderer {
             int rx = TrackRegionUtil.regionX(regionId);
             int rz = TrackRegionUtil.regionZ(regionId);
 
-            // 判断是否在玩家所在 Region 的 16x16 范围内（即 X/Z 各 ±8）
             boolean detailed = Math.abs(rx - playerRx) <= 8 && Math.abs(rz - playerRz) <= 8;
 
             int minX = rx << 9;
@@ -131,8 +128,6 @@ public class VolumetricCurveRenderer {
                     .blend(BLEND_ALPHA));
         }
     }
-
-    // ==================== 私有绘制原语 ====================
 
     private static void appendBlockWireFrame(DirectDraw draw, VecYPR pos, Color color, double size, double lineWidth) {
         double inset = size * 0.002;
@@ -268,14 +263,13 @@ public class VolumetricCurveRenderer {
                 {0, 4}, {1, 5}, {2, 6}, {3, 7},
         };
 
-        // 外框全量绘制
         for (int[] e : edges) {
             appendLineQuad(draw, corners[e[0]], corners[e[1]], Color.YELLOW, 1 / 2f);
         }
 
         if (!detailed) return;
 
-        // 网格步长改为 32（512 / 32 = 16，即 16x16 网格）
+        // 16 x 16 chunk grid
         final int step = 32;
         double gridWidth = 1 / 16f;
 

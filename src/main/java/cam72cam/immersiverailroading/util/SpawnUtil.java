@@ -30,14 +30,23 @@ public class SpawnUtil {
 	public static ClickResult placeStock(Player player, Player.Hand hand, World worldIn, Vec3i pos, EntityRollingStockDefinition def, List<ItemComponentType> list) {
 		ItemRollingStock.Data data = new ItemRollingStock.Data(player.getHeldItem(hand));
 
-		ITrack initte = ITrack.get(worldIn, new Vec3d(pos).add(0, 0.7, 0), true);
+		ITrack initte = ConfigDebug.offWorldPathing ? null : ITrack.get(worldIn, new Vec3d(pos).add(0, 0.7, 0), true);
 		double trackGauge;
 		if (initte != null) {
 			trackGauge = initte.getTrackGauges()[0];
 		} else if (ConfigDebug.offWorldPathing) {
 			WorldData wd = WorldData.get(worldIn);
-			TrackMultiGeometrySegment seg = wd != null ? wd.getTrackBlockLoaded(pos) : null;
-			if (seg == null || seg.getPaths().isEmpty() || seg.getPaths().get(0).isEmpty()) {// todo
+			if (wd == null) return ClickResult.REJECTED;
+
+			TrackMultiGeometrySegment seg = null;
+			List<Vec3i> parents = wd.getParentsAt(pos);
+			if (parents != null) {
+				for (Vec3i parentAbs : parents) {
+					seg = wd.getTrackBlockLoaded(parentAbs);
+					if (seg != null) break;
+				}
+			}
+			if (seg == null || seg.getPaths().isEmpty() || seg.getPaths().get(0).isEmpty()) {
 				return ClickResult.REJECTED;
 			}
 			trackGauge = seg.getPaths().get(0).keySet().iterator().next().value();

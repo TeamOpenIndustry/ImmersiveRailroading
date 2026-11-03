@@ -240,8 +240,6 @@ public class OffWorldMovementTrack {
         return new Vec3d(dx / len, dy / len, dz / len);
     }
 
-    // ==================== 选下一条边 ====================
-
     private static TrackEdge pickNextEdgeFrom(WorldData data, TrackEdge incoming, TrackNodeId endNodeId,
                                               Vec3d motion, World world) {
         return pickNextEdgeFrom(data, incoming, endNodeId, motion, world, 0);
@@ -289,7 +287,7 @@ public class OffWorldMovementTrack {
         return best;
     }
 
-    /**
+    /*
      * 岔心逻辑：
      *  - 车从分支来（straightEnd 或 turnStart）→ 直接出外部（不判 switchState，车已经在分支上）
      *  - 车从外部 GAP 来 → 按 switchState 选分支
@@ -324,7 +322,7 @@ public class OffWorldMovementTrack {
         return null;
     }
 
-    /** 车从分支来出外部：hub 的 outgoing 里，跳过 NORMAL 和 tie GAP，返回外部 GAP */
+    /* 车从分支来出外部：hub 的 outgoing 里，跳过 NORMAL 和 tie GAP，返回外部 GAP */
     private static TrackEdge pickExternalFromHub(WorldData data, TrackNodeId hubId,
                                                  TrackEdge incoming, WorldData.SwitchInfo si) {
         List<TrackEdge> cands = data.outgoing.get(hubId);
@@ -338,9 +336,7 @@ public class OffWorldMovementTrack {
         return null;
     }
 
-    // ==================== 初始化 ====================
-
-    public static boolean initCurrent(IRPathingData current, World world, double gauge) {
+    public static boolean initCurrent(IRPathingData current, World world, double gauge) { // todo: 持久化车位置的topo
         WorldData data = WorldData.get(world);
         if (data == null) return false;
 
@@ -415,8 +411,6 @@ public class OffWorldMovementTrack {
         return true;
     }
 
-    // ==================== 投影 ====================
-
     public static double projectOntoEdge(TrackEdge edge, Vec3d pos, World world) {
         WorldData data = WorldData.get(world);
         if (data == null) return -1;
@@ -490,8 +484,6 @@ public class OffWorldMovementTrack {
         if (t > 1) t = 1;
         return t;
     }
-
-    // ==================== 工具 ====================
 
     public static Vec3d positionOnEdge(TrackEdge edge, double t, World world) {
         WorldData data = WorldData.get(world);

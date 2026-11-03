@@ -60,10 +60,6 @@ public class TrackMultiGeometrySegment {
         tablePos = trackBlock.info.tablePos;
     }
 
-    public int getSwitchState() {
-        return switchState;
-    }
-
     public SwitchState getSwitchStateEnum() {
         return SwitchState.values()[this.switchState];
     }

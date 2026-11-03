@@ -146,10 +146,8 @@ public class TrackSingleGeometrySegment {
             throw new RuntimeException(String.format("Invalid single track geometry segment data version %d", version));
         }
 
-        // 读取绝对坐标
-        this.absPos = new Vec3i(buffer.getInt(), buffer.getInt(), buffer.getInt());
-        // 读取父方块坐标
-        this.parentAbsPos = new Vec3i(buffer.getInt(), buffer.getInt(), buffer.getInt());
+        this.absPos = new Vec3i(buffer.getInt(), buffer.getInt(), buffer.getInt()); // absPos xyz
+        this.parentAbsPos = new Vec3i(buffer.getInt(), buffer.getInt(), buffer.getInt());// parentAbsPos xyz
 
         double x,y,z;
 
@@ -245,8 +243,8 @@ public class TrackSingleGeometrySegment {
         int bytes = 0;
 
         bytes += Integer.BYTES; // version
-        bytes += Integer.BYTES * 3; // absPos x,y,z
-        bytes += Integer.BYTES * 3; // parentAbsPos x,y,z
+        bytes += Integer.BYTES * 3; // absPos xyz
+        bytes += Integer.BYTES * 3; // parentAbsPos xyz
         bytes += Integer.BYTES; // switch index
         bytes += Double.BYTES; // gauge
         bytes += TrackRegionUtil.sizeString(referenceTrack); // referenceTrack
@@ -279,11 +277,11 @@ public class TrackSingleGeometrySegment {
     public void write(ByteBuffer buffer) {
         buffer.putInt(1); // version
 
-        // 写入绝对坐标
+        // absPos xyz
         buffer.putInt(absPos.x);
         buffer.putInt(absPos.y);
         buffer.putInt(absPos.z);
-        // 写入父方块坐标
+        // parentAbsPos xyz
         buffer.putInt(parentAbsPos.x);
         buffer.putInt(parentAbsPos.y);
         buffer.putInt(parentAbsPos.z);
@@ -365,14 +363,13 @@ public class TrackSingleGeometrySegment {
                 TrackDirection.NONE, new TrackFaceTransSetting(0.1f, facePivotType, facePivotOffset),
                 Fuzzy.DIRT.example(), ItemStack.EMPTY,
                 false, false,
-                0, 0//todo
+                0, 0
         );
         RailInfo info = new RailInfo(
                 settings,
                 new PlacementInfo(baseCurve.p1, TrackDirection.NONE, yaw, baseCurve.ctrl1).offset(placementPosition),
                 new PlacementInfo(baseCurve.p2, TrackDirection.NONE, yaw, baseCurve.ctrl2).offset(placementPosition)
         );
-        // 使用 absPos
         builderCache = new BuilderCubicCurve(info, world, absPos, false);
         builderWorldCache = world;
         return builderCache;
@@ -395,7 +392,7 @@ public class TrackSingleGeometrySegment {
                 TrackDirection.NONE, new TrackFaceTransSetting(0.1f, facePivotType, facePivotOffset),
                 Fuzzy.DIRT.example(), ItemStack.EMPTY,
                 false, false,
-                0, 0//todo
+                0, 0
         );
         RailInfo info = new RailInfo(
                 settings,
