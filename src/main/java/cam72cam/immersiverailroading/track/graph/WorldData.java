@@ -13,6 +13,7 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.world.World;
+import org.lwjgl.Sys;
 
 import java.io.File;
 import java.io.IOException;
@@ -255,6 +256,14 @@ public class WorldData {
             return region.getTrackBlock(pos);
         }
         return null;
+
+    }
+
+    public TrackMultiGeometrySegment getTrackBlockEnsured(Vec3i pos) {
+        long regionId = vecToRegion(pos);
+        ensureRegionLoaded(regionId);
+        TrackRegion region = getRegionById(regionId, true);
+        return region.getTrackBlock(pos);
     }
 
     public void updateSwitchState(Vec3i pos, SwitchState switchState, boolean offline, long currentTime) {
@@ -625,38 +634,15 @@ public class WorldData {
             }
         }
 
+        // 3 x 3
         for (VehicleRef ref : vehicleRefs.values()) {
-            double speed = ref.velocity.length();
-            double radius = Config.ConfigRegion.vehicleRadiusMin
-                    + speed * Config.ConfigRegion.vehicleRadiusPerSpeed;
+            long regionId = TrackRegionUtil.vecToRegion(new Vec3i(ref.pos));
+            int rx = TrackRegionUtil.regionX(regionId);
+            int rz = TrackRegionUtil.regionZ(regionId);
 
-            required.addAll(regionsInRadius(ref.pos, radius));
-
-            if (speed > 0.1) {
-                double ahead = speed * Config.ConfigRegion.vehicleLookAheadFactor
-                        * Config.ConfigRegion.refreshIntervalTicks / 20.0;
-                Vec3d dir = ref.velocity.scale(1.0 / speed);
-                required.addAll(regionsInRadius(ref.pos.add(dir.scale(ahead)), radius));
-            }
-        }
-
-        Queue<Long> toCheck = new LinkedList<>(required);
-        while (!toCheck.isEmpty()) {
-            long r = toCheck.poll();
-            TrackRegion region = regions.get(r);
-            if (region == null) continue;
-
-            for (TrackMultiGeometrySegment block : region.trackBlocks.values()) {
-                for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
-                    for (TrackSingleGeometrySegment single : branch.values()) {
-                        long absR = TrackRegionUtil.vecToRegion(single.getAbsPos());
-                        long parentR = TrackRegionUtil.vecToRegion(single.parentAbsPos);
-
-                        if (absR != parentR) {
-                            if (absR != r && required.add(absR)) toCheck.add(absR);
-                            if (parentR != r && required.add(parentR)) toCheck.add(parentR);
-                        }
-                    }
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    required.add(((long) (rx + dx) << 32) | ((rz + dz) & 0xFFFFFFFFL));
                 }
             }
         }
@@ -682,7 +668,7 @@ public class WorldData {
         return result;
     }
 
-    void ensureRegionLoaded(long r) {
+    protected void ensureRegionLoaded(long r) {
         if (regions.containsKey(r)) return;
         if (directory == null) return;
 
@@ -695,6 +681,7 @@ public class WorldData {
             TrackRegion region = new TrackRegion(r, TrackRegionUtil.readBuffer(f), world);
             synchronized (regions) {
                 regions.put(r, region);
+                System.out.println("loading chunk " + TrackRegionUtil.regionX(r) + ", " + TrackRegionUtil.regionZ(r));
             }
 
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
@@ -1217,7 +1204,7 @@ public class WorldData {
         }
 
         public SwitchState getState(WorldData data) {
-            TrackMultiGeometrySegment b = data.getTrackBlockLoaded(blockPos);
+            TrackMultiGeometrySegment b = data.getTrackBlockEnsured(blockPos);
             return b != null ? b.getSwitchStateEnum() : SwitchState.STRAIGHT;
         }
     }

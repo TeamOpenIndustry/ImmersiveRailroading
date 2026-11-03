@@ -74,11 +74,12 @@ public class TrackNode {
                     for (Vec3i parentPos : new ArrayList<>(parents)) { // we have to copy to avoid CME!
                         if (parentPos.equals(selfBlock)) continue;
 
+                        // we should not use ensure here to avoid chain loading, trains should do it themselves, right?
                         TrackMultiGeometrySegment trackBlock = data.getTrackBlockLoaded(parentPos);
-                        if (trackBlock == null) {
-                            data.ensureRegionLoaded(TrackRegionUtil.vecToRegion(parentPos));
-                            trackBlock = data.getTrackBlockLoaded(parentPos);
-                        }
+//                        if (trackBlock == null) {
+//                            data.ensureRegionLoaded(TrackRegionUtil.vecToRegion(parentPos));
+//                            trackBlock = data.getTrackBlockLoaded(parentPos);
+//                        }
                         if (trackBlock == null) continue;
 
                         for (int switchIndex = 0; switchIndex < trackBlock.getPaths().size(); switchIndex ++) {

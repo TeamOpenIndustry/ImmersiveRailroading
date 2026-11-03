@@ -210,7 +210,7 @@ public class TileRail extends TileRailBase {
 		) {
 			if(info.switchBranchIndex > 1) {
 				WorldData data = WorldData.get(getWorld());
-				if (data != null && data.getTrackBlockLoaded(getPos()) != null) {
+				if (data != null && data.getTrackBlockEnsured(getPos()) != null) {
 					data.removeTrackBlock(getPos());
 					data.setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
 				}
@@ -384,7 +384,7 @@ public class TileRail extends TileRailBase {
 	public void load(TagCompound nbt) {
 		super.load(nbt);
 		if (getWorld().isServer) {
-			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlockLoaded(getPos()) == null && info.switchBranchIndex <= 1) {
+			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlockEnsured(getPos()) == null && info.switchBranchIndex <= 1) {
 				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(this, getWorld());
 				WorldData.get(getWorld()).setTrackBlock(getPos(), trackBlock);
 			}

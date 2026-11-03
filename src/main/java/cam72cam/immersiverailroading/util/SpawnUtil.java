@@ -42,7 +42,7 @@ public class SpawnUtil {
 			List<Vec3i> parents = wd.getParentsAt(pos);
 			if (parents != null) {
 				for (Vec3i parentAbs : parents) {
-					seg = wd.getTrackBlockLoaded(parentAbs);
+					seg = wd.getTrackBlockEnsured(parentAbs);
 					if (seg != null) break;
 				}
 			}

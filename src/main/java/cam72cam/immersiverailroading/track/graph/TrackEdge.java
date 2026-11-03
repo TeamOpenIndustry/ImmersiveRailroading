@@ -16,8 +16,8 @@ public class TrackEdge {
     }
 
     public enum EdgeType {
-        NORMAL,  // single内部相邻点
-        GAP      // 连接2个single的节点
+        NORMAL,
+        GAP
     }
 
     @Override

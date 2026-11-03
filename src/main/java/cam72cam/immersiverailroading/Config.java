@@ -264,18 +264,6 @@ public class Config {
 		@Range(min = 10, max = 200)
 		public static int refreshIntervalTicks = 20;
 
-		@Comment("Minimum radius (in blocks) around a vehicle that stays loaded, regardless of speed")
-		@Range(min = 16, max = 512)
-		public static double vehicleRadiusMin = 64;
-
-		@Comment("Extra load radius (in blocks) per unit of vehicle speed, on top of vehicleRadiusMin")
-		@Range(min = 1, max = 16)
-		public static double vehicleRadiusPerSpeed = 1.0;
-
-		@Comment("How far ahead (as a factor of speed * refresh interval) to preload regions in the vehicle's direction of travel")
-		@Range(min = 1, max = 20)
-		public static double vehicleLookAheadFactor = 3;
-
 		@Comment("Radius (in blocks) around each player that stays loaded")
 		@Range(min = 64, max = 1024)
 		public static double playerRadius = 256;
@@ -299,7 +287,7 @@ public class Config {
 		public static boolean keepStockLoaded = true;
 
 		@Comment("Train will run without chunk loading")
-		public static boolean offWorldPathing = false;
+		public static boolean offWorldPathing = true;
 
 		@Comment("Enable offline entity pool to save chunks (requires game restart for full effect)")
 		public static boolean enableEntityPool = true;

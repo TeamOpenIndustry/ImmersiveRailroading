@@ -14,6 +14,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.net.SoundPacket;
+import cam72cam.immersiverailroading.track.graph.TrackEdge;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
@@ -90,6 +91,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
     public Vec3i lastKnownFront = null;
 	@TagField("lastKnownRear")
 	public Vec3i lastKnownRear = null;
+
+//	@TagField(value = "lastFrontEdge", mapper = )
+//	public TrackEdge lastFrontEdge;
+//	@TagField(value = "lasRearEdge", mapper = )
+//	public TrackEdge lastRearEdge;
+//	@TagField("lastFrontT")
+//	private double lastFrontT;
+//	@TagField("lastRearT")
+//	private double lastRearT;
 
 	@TagField("slackFront")
 	@TagSync
