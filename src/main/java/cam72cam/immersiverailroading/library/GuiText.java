@@ -132,6 +132,9 @@ public enum GuiText {
 	ON("overlay.on"),
 	OFF("overlay.off"),
 	NONE("none"),
+
+	GLOBAL_TRACK_MAP_SWITCHSTATE_BYBLOCK("global_track_map.switchstate.byblock"),
+	GLOBAL_TRACK_MAP_SWITCHSTATE_OFFLINE("global_track_map.switchstate.offline")
 	;
 
 	private final String value;

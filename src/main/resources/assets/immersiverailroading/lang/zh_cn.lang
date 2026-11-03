@@ -196,6 +196,9 @@ gui.immersiverailroading:label.excluded_tag=排除的标签：
 gui.immersiverailroading:overlay.on=开
 gui.immersiverailroading:overlay.off=关
 
+gui.immersiverailroading:global_track_map.switchstate.byblock=通过方块: %s
+gui.immersiverailroading:global_track_map.switchstate.offline=离线: %s
+
 immersiverailroading:gauge.brunel=布鲁内尔轨
 immersiverailroading:gauge.standard=标准轨
 immersiverailroading:gauge.narrow=窄轨
@@ -377,6 +380,7 @@ ir_keys.bell=鸣警铃
 ir_keys.dead_mans_switch=失能开关
 ir_keys.start_stop_engine=启动/停止发动机
 ir_keys.config=配置菜单
+ir_keys.global_map=世界地图
 
 # Default pack's train name. Translation is optional.
 immersiverailroading:entity.locomotives.a1_peppercorn=A1 Peppercorn

@@ -18,10 +18,25 @@ public record TrackFaceTransSetting(
     }
 
     public enum FacePivotType {
-        RAIL_FACE_CENTER,
-        CURVE_CENTER,
-        CUSTOM,
+        RAIL_FACE_CENTER(0),
+        CURVE_CENTER(1),
+        CUSTOM(2),
         ;
+
+        FacePivotType(int order){
+            this.order = order;
+        }
+
+        private final int order;
+
+        public static FacePivotType byOrder(int order) {
+            for (FacePivotType type : values()) {
+                if (type.order == order) {
+                    return type;
+                }
+            }
+            return RAIL_FACE_CENTER;
+        }
 
         @Override
         public String toString() {

@@ -36,12 +36,21 @@ public class RailInfo {
 	public final String uniqueID;
 	public final boolean itemHeld;
 
+	public final int switchBranchIndex; // for compat, 0 = normal, 1 = switch parent branch, >2 = turn branches
+
+	// hack: only used for submitting some switch branch information, clear it after using!
+	public List<RailInfo> builderBranchBridge;
+	public List<Vec3i> builderBranchPosBridge;
 
 	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
-		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false);
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false, 0);
 	}
 
 	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld, 0);
+	}
+
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, int switchBranchIndex) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 			//#1566: Use customInfo to adjust slope height
@@ -58,6 +67,7 @@ public class RailInfo {
 		this.tablePos = tablePos;
 		this.itemHeld = itemHeld;
 		this.uniqueID = generateID();
+		this.switchBranchIndex = switchBranchIndex;
 	}
 	private String generateID() {
 		Object[] props = new Object [] {
@@ -80,7 +90,8 @@ public class RailInfo {
 				this.placementInfo.yaw,
 				this.placementInfo.direction,
 				this.customInfo.yaw,
-				this.customInfo.direction
+				this.customInfo.direction,
+				this.switchBranchIndex
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition)
@@ -117,6 +128,10 @@ public class RailInfo {
 		this(RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
 	}
 
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
+		this(settings, placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+	}
+
 	public RailInfo withSettings(Consumer<RailSettings.Mutable> mod) {
 		return with(b -> b.settings = b.settings.with(mod));
 	}
@@ -141,6 +156,8 @@ public class RailInfo {
 		public SwitchState switchForced;
 		@TagField("tablePos")
 		public double tablePos;
+		@TagField("switchBranchIndex")
+		public int switchBranchIndex;
 
 		// Not serialized
 		public boolean itemHeld;
@@ -153,6 +170,7 @@ public class RailInfo {
 			this.switchForced = info.switchForced;
 			this.tablePos = info.tablePos;
 			this.itemHeld = info.itemHeld;
+			this.switchBranchIndex = info.switchBranchIndex;
 		}
 
 		private Mutable(TagCompound data) throws SerializationException {
@@ -171,7 +189,8 @@ public class RailInfo {
 					switchState,
 					switchForced,
 					tablePos,
-					itemHeld
+					itemHeld,
+					switchBranchIndex
 			);
 		}
 	}
@@ -448,6 +467,47 @@ public class RailInfo {
 					1, 1
 			);
 			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
+		}
+	}
+
+	public static class subInfosMapper implements cam72cam.mod.serialization.TagMapper<List<RailInfo>> {
+		@Override
+		public TagAccessor<List<RailInfo>> apply(Class<List<RailInfo>> type, String fieldName, TagField tag) {
+			return new TagAccessor<>(
+					(nbt, infos) -> {
+						if(infos != null && !infos.isEmpty()) {
+							TagCompound infoNBT = new TagCompound();
+							infoNBT.setInteger("count", infos.size());
+							for (int i = 0; i < infos.size(); i++) {
+								TagCompound infoTag = new TagCompound();
+                                try {
+                                    TagSerializer.serialize(infoTag, new Mutable(infos.get(i)));
+									infoNBT.set("subinfo_" + i, infoTag);
+                                } catch (SerializationException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+							nbt.set(fieldName, infoNBT);
+						} else {
+							nbt.remove(fieldName);
+						}
+					},
+					(nbt, world) -> {
+						List<RailInfo> infos = new ArrayList<>();
+						if (nbt.hasKey(fieldName)) {
+							TagCompound infoNBT = nbt.get(fieldName);
+							int count = infoNBT.getInteger("count");
+							for (int i = 0; i < count; i++) {
+                                try {
+                                    infos.add(new Mutable(infoNBT.get("subinfo_" + i)).immutable());
+                                } catch (SerializationException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+						}
+						return infos;
+					}
+			);
 		}
 	}
 }

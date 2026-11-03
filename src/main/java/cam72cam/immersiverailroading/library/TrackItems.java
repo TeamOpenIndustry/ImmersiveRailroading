@@ -111,4 +111,13 @@ public enum TrackItems {
 	public int getOrder() {
 		return this.order;
 	}
+
+	public static TrackItems byOrder(int order) {
+		for (TrackItems type : values()) {
+			if (type.order == order) {
+				return type;
+			}
+		}
+		return STRAIGHT;
+	}
 }

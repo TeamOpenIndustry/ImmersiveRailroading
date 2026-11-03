@@ -7,6 +7,9 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.track.graph.WorldData;
+import cam72cam.mod.entity.EntityPool;
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -48,9 +51,13 @@ public class Simulation {
             simulateTick(i);
         }
 
-        boolean sendPackets = world.getTicks() % (Config.ConfigDebug.physicsFutureTicks / 2) == 0;
+        long now = world.getTicks();
+        boolean lowFreqDue = now % (Config.ConfigDebug.physicsFutureTicks / 2) == 0;
+        boolean anyMovingTable = loaded != null && loaded.stream()
+                .anyMatch(s -> now < s.onMovingTableUntilTick);
+
+        List<Player> players = (lowFreqDue || anyMovingTable) ? world.getEntities(Player.class) : null;
         double syncDistanceSq = ImmersiveRailroading.ENTITY_SYNC_DISTANCE * ImmersiveRailroading.ENTITY_SYNC_DISTANCE;
-        List<Player> players = sendPackets ? world.getEntities(Player.class) : null;
 
         // Apply new states
         for (EntityCoupleableRollingStock stock : loaded) {
@@ -59,7 +66,13 @@ public class Simulation {
                 state.dirty = false;
             }
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
-            if (sendPackets && players.stream().anyMatch(player -> player.getPosition().distanceToSquared(stock.getPosition()) < syncDistanceSq)) {
+
+            if (players == null) {
+                continue;
+            }
+            boolean onMovingTable = now < stock.onMovingTableUntilTick;
+            if ((lowFreqDue || onMovingTable)
+                    && players.stream().anyMatch(player -> player.getPosition().distanceToSquared(stock.getPosition()) < syncDistanceSq)) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }
         }
@@ -84,6 +97,24 @@ public class Simulation {
             // We should only need to do this when stock is no longer at rest or changes dirty flag
             int lastCount = loaded == null ? 0 : loaded.size();
             loaded = world.getEntities(EntityCoupleableRollingStock.class);
+            // merge pool vehicles (if pool is closed, but we need to load data, we also need to do this)
+//            if (Config.ConfigDebug.enableEntityPool) {
+            List<EntityCoupleableRollingStock> offlinePool = EntityPool.get(world).getAllEntities().stream()
+                    .map(ModdedEntity::getSelf)
+                    .filter(Objects::nonNull) // 确保 self 已初始化
+                    .filter(s -> s instanceof EntityCoupleableRollingStock)
+                    .map(s -> (EntityCoupleableRollingStock) s)
+                    .collect(Collectors.toList());
+
+            for (EntityCoupleableRollingStock stock : offlinePool) {
+                if (!stock.isAddedToChunk() && !stock.isDead()) {
+                    if (!loaded.contains(stock)) {
+                        loaded.add(stock);
+                    }
+                }
+            }
+//            }
+
             boolean newChunksLoaded = lastCount != loaded.size();
 
             for (EntityCoupleableRollingStock stock : loaded) {
@@ -113,21 +144,17 @@ public class Simulation {
                     continue;
                 }
 
-                // Keep it loaded
-                world.keepLoaded(new Vec3i(state.position));
+                boolean offline = !stock.isAddedToChunk();
+                if (!offline || Config.ConfigDebug.offlineVehicleLoadChunks) {
+                    world.keepLoaded(new Vec3i(state.position));
 
-                if (state.consist.positions == null) {
-                    continue;
-                }
-
-                // Load interacting stock locations
-                // We could in the future do a HashSet<Consist> and reduce the calls to the world.
-                for (Vec3i pos : state.consist.positions) {
-                    if (!world.isBlockLoaded(pos)) {
-                        ImmersiveRailroading.debug("Loading chunk at position %s", pos);
-                        // Load the chunk, entities should be directly injected into the world
-                        world.getBlock(pos);
-                        newChunksLoaded = true;
+                    if (state.consist.positions != null) {
+                        for (Vec3i pos : state.consist.positions) {
+                            if (!world.isBlockLoaded(pos)) {
+                                world.getBlock(pos);
+                                newChunksLoaded = true;
+                            }
+                        }
                     }
                 }
             }
@@ -348,6 +375,12 @@ public class Simulation {
 
         // calculate new velocities
         Consist.iterate(stateMap, nextStateMap, blocksAlreadyBroken);
+
+        Map<UUID, WorldData.VehicleRef> refs = new HashMap<>();
+        for (EntityCoupleableRollingStock stock : loaded) {
+            refs.put(stock.getUUID(), new WorldData.VehicleRef(stock.getPosition(), stock.getVelocity()));
+        }
+        WorldData.get(world).updateVehicleRefs(refs);
 
         long totalTimeMs = System.currentTimeMillis() - startTimeMs;
         if (totalTimeMs > Config.ConfigDebug.physicsWarnThresholdMs) {

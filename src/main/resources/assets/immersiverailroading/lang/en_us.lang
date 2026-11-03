@@ -204,6 +204,9 @@ gui.immersiverailroading:label.excluded_tag=Excluded Tags:
 gui.immersiverailroading:overlay.on=On
 gui.immersiverailroading:overlay.off=Off
 
+gui.immersiverailroading:global_track_map.switchstate.byblock=By Block: %s
+gui.immersiverailroading:global_track_map.switchstate.offline=Offline: %s
+
 immersiverailroading:gauge.brunel=Brunel
 immersiverailroading:gauge.standard=Standard
 immersiverailroading:gauge.narrow=Narrow
@@ -386,6 +389,7 @@ ir_keys.bell=Sound Bell
 ir_keys.dead_mans_switch=Deadman's Switch
 ir_keys.start_stop_engine=Start/Stop engine
 ir_keys.config=Config
+ir_keys.global_map=World Map
 
 # Default pack's train name
 immersiverailroading:entity.locomotives.a1_peppercorn=A1 Peppercorn

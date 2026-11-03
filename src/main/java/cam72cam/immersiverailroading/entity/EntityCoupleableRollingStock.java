@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.physics.Consist;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
@@ -201,12 +202,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		hadElectricalPower = hasElectricalPower();
 
-		if (this.getCurrentState() != null && !this.getCurrentState().atRest || ConfigDebug.keepStockLoaded) {
-			//Then exclude stocks not linked to any locomotive
-            if (!ConfigDebug.excludeStandaloneWagons || this.linkedToLocomotive) {
-                keepLoaded();
-            }
-        }
+		if (isAddedToChunk()
+				&& (this.getCurrentState() != null && !this.getCurrentState().atRest || ConfigDebug.keepStockLoaded)) {
+			if (!ConfigDebug.excludeStandaloneWagons || this.linkedToLocomotive) {
+				keepLoaded();
+			}
+		}
 
 		slackFrontPercent = 0;
 		slackRearPercent = 0;
@@ -240,6 +241,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public void keepLoaded() {
+		if (!isAddedToChunk() && !Config.ConfigDebug.offlineVehicleLoadChunks) {
+			return;
+		}
+
 		World world = getWorld();
 		world.keepLoaded(getBlockPosition());
 		if (getCurrentState() != null && !getCurrentState().atRest) {

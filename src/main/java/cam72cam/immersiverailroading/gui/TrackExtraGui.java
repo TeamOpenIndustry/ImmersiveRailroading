@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.gui.util.BezierRenderer;
-import cam72cam.immersiverailroading.gui.util.Color;
+import cam72cam.immersiverailroading.render.util.FlatCurveRenderer;
+import cam72cam.immersiverailroading.render.util.Color;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -130,9 +130,9 @@ public class TrackExtraGui implements IScreen {
         yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
-        curveColor = Color.CHARTREUSE;      // GREEN curve
+        curveColor = Color.LIME;      // GREEN curve
         pointColor = Color.RED;      // RED point
-        handlePointColor = Color.BLUE;      // BLUE handle point
+        handlePointColor = Color.CYAN;      // BLUE handle point
         handleLineColor = Color.MAGENTA;      // MAGENTA handle line
         arrowColor = Color.YELLOW;      //YELLOW arrow point
 
@@ -579,21 +579,21 @@ public class TrackExtraGui implements IScreen {
         //If choose HIGH or LOW, half of the the roll graph will flip, need to flip it on graph?
         //roll Graph
         state.translate(5, height + 5 + height * 1.5, 0);
-        BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
+        FlatCurveRenderer rollGraph = new FlatCurveRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
         rollGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, rollYScale, 1, 0.05f, 0.05f, 0);
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, rollYScale);
         rollGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getRawRoll(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
         //yOffset Graph
         state.translate(0, height * 3 + 5, 0);
-        BezierRenderer yOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
+        FlatCurveRenderer yOffsetGraph = new FlatCurveRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
         yOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, yOffsetYScale, 1, 0.05f, 0.05f, 0);
         yOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, yOffsetYScale);
         yOffsetGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getYOffset(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
 
         //zOffset Graph
         state.translate(0, height * 3 + 5, 0);
-        BezierRenderer zOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
+        FlatCurveRenderer zOffsetGraph = new FlatCurveRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
         zOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, zOffsetYScale, 1, 0.05f, 0.05f, 0);
         zOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, zOffsetYScale);
         zOffsetGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getZOffset(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, zOffsetYScale);
