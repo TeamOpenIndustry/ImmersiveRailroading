@@ -246,8 +246,7 @@ public class LocomotiveSteam extends Locomotive {
 					remainingTime = (int) (BurnUtil.getBurnTime(stack) /gauge.scale() * (Config.ConfigBalance.locoSteamFuelEfficiency / 100.0));
 					burnTime.put(slot, remainingTime);
 					burnMax.put(slot, remainingTime);
-					stack.setCount(stack.getCount()-1);
-					this.cargoItems.set(slot, stack);
+					BurnUtil.consume(this.cargoItems, slot, stack);
 				} else {
 					burnTime.put(slot, remainingTime - 1);
 				}
