@@ -21,7 +21,7 @@ public class VehicleSyncPacket extends Packet {
         if (vehicles == null || vehicles.isEmpty()) {
             this.raw = new byte[0];
         } else {
-            // 每条车辆数据: X (8 bytes) + Y (8) + Z (8) = 24 bytes
+            // only vehicle pos data yet
             ByteBuffer buf = ByteBuffer.allocate(vehicles.size() * 24);
             for (Vec3d v : vehicles) {
                 buf.putDouble(v.x);

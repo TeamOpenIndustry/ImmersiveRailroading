@@ -12,7 +12,7 @@
         }
     },
     "integration": {
-        "repo": "git@github.com:TeamOpenIndustry/ImmersiveRailroadingIntegration.git",
+        "repo": "https://github.com/TeamOpenIndustry/ImmersiveRailroadingIntegration.git",
         "branch": "%s",
         "path": "ImmersiveRailroadingIntegration"
     },

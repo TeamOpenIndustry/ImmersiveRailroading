@@ -23,8 +23,7 @@ public class TrackNode {
     public final VecYPR point;
 
     public TrackNode(TrackSingleGeometrySegment segment, int index, World world) {
-        // 强制使用 segment 自身的真实坐标
-        Vec3i pos = segment.getAbsPos();
+        Vec3i pos = segment.getAbsPos(); // use single absPos
         this.regionPos = TrackRegionUtil.vecToRegion(pos);
         this.regionBlockPos = TrackRegionUtil.toRegionBlockPos(pos);
         absPos = pos;
@@ -53,13 +52,13 @@ public class TrackNode {
         TrackNode best = null;
         double bestScore = Double.MAX_VALUE;
 
-        // 允许的最大连线夹角（30 度）
+        // 30 degrees for normal tracks
         final double maxAngleRad = Math.toRadians(30);
         final double cosCone = Math.cos(maxAngleRad);
-        // hub 放宽到 45 度
+        // 45 degrees for switch hub
         final double cosConeHub = Math.cos(Math.toRadians(45));
 
-        // A 节点的搜索方向（向前或向后）
+        // search dir
         Vec3d forwardVec = forwardVector(this.point);
         Vec3d searchVec = forward ? forwardVec : forwardVec.scale(-1);
 
@@ -99,7 +98,7 @@ public class TrackNode {
                                             .add(seg.getAndUpdateBuilder(world).info.placementInfo.placementPosition)
                                             .add(new Vec3d(0, seg.getAndUpdateBuilder(world).info.getTrackHeight() * seg.gauge.scale(), 0));
 
-                                    // 1. 距离门槛过滤（仅作为硬拦截）
+                                    // dist threshold
                                     if(trackBlock.type == TrackItems.SWITCH) {
                                         int a = 1;
                                     }
@@ -107,22 +106,22 @@ public class TrackNode {
                                     if (d >= maxDist) continue;
                                     if (i == 0 && trackBlock.type == TrackItems.SWITCH && switchIndex > 0) continue;//唯一不可外部连接的点：switch的turn start
 
-                                    // 2. 重合节点直接返回（排除自己）
-                                    if (d < 1e-3) {
+                                    // exclude self and snap to very close node
+                                    if (d < 1e-2) {
                                         if (seg == this.trackSingleGeometrySegment && i == this.index) {
                                             continue;
                                         }
                                         return new TrackNode(seg, i, world);
                                     }
 
-                                    // 识别 hub：SWITCH 的 straight 分支 index 0
+                                    // switch hub: index 0
                                     boolean isSwitchHub = switchIndex == 0
                                             && trackBlock.type == TrackItems.SWITCH
                                             && i == 0;
-                                    // hub 放宽到 45°，普通点保持 30°
+                                    // switch hub: 45°, normal: 30°
                                     double coneCos = isSwitchHub ? cosConeHub : cosCone;
 
-                                    // 3. 计算两点连线方向
+                                    // gap dir
                                     Vec3d offset = new Vec3d(
                                             cand.x - this.point.x,
                                             cand.y - this.point.y,
@@ -131,12 +130,12 @@ public class TrackNode {
                                     double dist = offset.length();
                                     Vec3d lineDir = offset.scale(1.0 / dist);
 
-                                    // 4. 评估 A 端夹角：连线方向与 A 的搜索方向的夹角
+                                    // angleA: angle between start track A and gap dir
                                     double dotLineA = lineDir.dotProduct(searchVec);
                                     if (dotLineA < coneCos) continue;
                                     double angleA = Math.acos(Math.max(-1.0, Math.min(1.0, dotLineA)));
 
-                                    // 5. 评估 B 端夹角：连线方向与 B 端“迎向”切线方向的夹角
+                                    // agnleB: anglr between gap dir and B track
                                     Vec3d candForward = forwardVector(cand);
                                     Vec3d candFacing;
                                     if (i == 0) {
@@ -153,15 +152,15 @@ public class TrackNode {
                                     }
                                     double angleB = Math.acos(Math.max(-1.0, Math.min(1.0, dotLineB)));
 
-                                    // 【新增】角度过滤已通过，若被连接方是道岔 hub 则直接选中
+                                    // if angle test is passed, accept it if is switch hub
                                     if (isSwitchHub) {
                                         return new TrackNode(seg, i, world);
                                     }
 
-                                    // 6. 综合评分
-                                    // 姿态偏差（主项）
+                                    // score:
+                                    // first: orient
                                     double angleScore = angleA + angleB;
-                                    // 距离归一化，乘以微小系数，作为平局决胜项（0.05 rad ≈ 2.87°）
+                                    // dist should affect score more when orients are close, less if not
                                     double distNorm = d / maxDist;
                                     double finalScore = angleScore + distNorm * 0.05;
 

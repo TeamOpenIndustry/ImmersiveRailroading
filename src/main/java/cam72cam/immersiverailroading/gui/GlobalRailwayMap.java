@@ -9,7 +9,6 @@ import cam72cam.immersiverailroading.net.offline.TrackRegionRequestPacket;
 import cam72cam.immersiverailroading.net.offline.VehicleRequestPacket;
 import cam72cam.immersiverailroading.render.util.Color;
 import cam72cam.immersiverailroading.render.util.FlatCurveRenderer;
-import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.track.graph.*;
 import cam72cam.mod.MinecraftClient;
@@ -24,7 +23,6 @@ import cam72cam.mod.world.World;
 import util.Matrix4;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +40,7 @@ public class GlobalRailwayMap implements IScreen {
     private static final Color COLOR_PLAYER     = new Color(0.30, 0.60, 1.00, 1.0);
     private static final Color COLOR_VEHICLE    = new Color(1.00, 0.30, 0.30, 1.0);
 
-    // 道岔交互颜色
+    // switch
     private static final Color COLOR_SWITCH_HOVER  = new Color(1.0, 0.8, 0.2, 1.0);
     private static final Color COLOR_SWITCH_SELECT = new Color(0.2, 1.0, 1.0, 1.0);
     private static final int COLOR_BTN_BG          = 0xFF333333;
@@ -67,16 +65,14 @@ public class GlobalRailwayMap implements IScreen {
 
     private int tickCounter = 0;
 
-    // 交互状态
+    // switch interaction
     private TrackMultiGeometrySegment hoveredSwitch = null;
     private TrackMultiGeometrySegment selectedSwitch = null;
     private Vec3d teleportPos = null;
 
-    // 用于 UI 绘制的鼠标坐标缓存（因为 draw 时无法直接获取实时鼠标）
+    // mouse pos cache
     private int lastMouseX = 0;
     private int lastMouseY = 0;
-
-    // ================================================================
 
     @Override
     public void init(IScreenBuilder builder) {
@@ -99,9 +95,6 @@ public class GlobalRailwayMap implements IScreen {
         if (currentInstance == this) currentInstance = null;
         dragging = false;
         offsetCache.clear();
-//        if (world != null) {
-//            new TrackRegionRequestPacket(world, Collections.emptyList()).sendToServer();
-//        }
     }
 
     public static void onClientTick() {
@@ -172,9 +165,8 @@ public class GlobalRailwayMap implements IScreen {
         int sx = (int) (width / 2.0 + (pos.x - panX) * zoom);
         int sy = (int) (height / 2.0 + (pos.z - panZ) * zoom);
 
-        // 按钮布局：第一个按钮在 sx+15，第二个在第一个右边+4，关闭按钮在第二个右边+4
         int btnY = sy - 15;
-        int btnW = 70; // 保持第一个按钮的宽度
+        int btnW = 70;
         int btnH = 16;
         int gap = 4;
         int closeW = 16;
@@ -186,19 +178,19 @@ public class GlobalRailwayMap implements IScreen {
         Matrix4 m = new Matrix4();
         String currentStateStr = selectedSwitch.getSwitchStateEnum().toString();
 
-        // 1. 第一个按钮 (Offline / 内存切换)
+        // button 1 offline
         boolean hoverBtn1 = lastMouseX >= btn1X && lastMouseX <= btn1X + btnW && lastMouseY >= btnY && lastMouseY <= btnY + btnH;
         GUIHelpers.drawRect(btn1X, btnY, btnW, btnH, hoverBtn1 ? COLOR_BTN_HOVER : COLOR_BTN_BG);
         String text1 = GuiText.GLOBAL_TRACK_MAP_SWITCHSTATE_OFFLINE.toString(currentStateStr);
         GUIHelpers.drawCenteredString(text1, btn1X + btnW / 2, btnY + 4, COLOR_BTN_TEXT, m);
 
-        // 2. 第二个按钮 (ByBlock / 实体强制切换)
+        // button 2 online
         boolean hoverBtn2 = lastMouseX >= btn2X && lastMouseX <= btn2X + btnW && lastMouseY >= btnY && lastMouseY <= btnY + btnH;
         GUIHelpers.drawRect(btn2X, btnY, btnW, btnH, hoverBtn2 ? COLOR_BTN_HOVER : COLOR_BTN_BG);
         String text2 = GuiText.GLOBAL_TRACK_MAP_SWITCHSTATE_BYBLOCK.toString(currentStateStr);
         GUIHelpers.drawCenteredString(text2, btn2X + btnW / 2, btnY + 4, COLOR_BTN_TEXT, m);
 
-        // 3. 关闭按钮
+        // close
         boolean hoverClose = lastMouseX >= closeX && lastMouseX <= closeX + closeW && lastMouseY >= btnY && lastMouseY <= btnY + btnH;
         GUIHelpers.drawRect(closeX, btnY, closeW, btnH, hoverClose ? COLOR_BTN_CLOSE_HOVER : COLOR_BTN_CLOSE);
         GUIHelpers.drawCenteredString("X", closeX + closeW / 2, btnY + 4, COLOR_BTN_TEXT, m);
@@ -234,7 +226,7 @@ public class GlobalRailwayMap implements IScreen {
         double cx = width / 2.0;
         double cy = height / 2.0;
 
-        // 更新鼠标缓存坐标
+        // update
         lastMouseX = evt.x;
         lastMouseY = evt.y;
 
@@ -250,32 +242,27 @@ public class GlobalRailwayMap implements IScreen {
             case CLICK: {
                 boolean isLeftClick = (evt.button == 0);
 
-                // 优先处理道岔 UI 按钮点击
                 if (selectedSwitch != null && isLeftClick) {
-                    // 关闭按钮
+                    // close
                     if (isMouseInCloseBtn(evt.x, evt.y)) {
                         selectedSwitch = null;
                         return false;
                     }
 
-                    // 第一个按钮：内存切换 (online = false)
                     if (isMouseInSwitchBtn(evt.x, evt.y)) {
                         SwitchState target = selectedSwitch.nextSwitchState();
-//                        selectedSwitch.updateSwitchSate(world, target, true, System.currentTimeMillis()); // 客户端立即更新
                         new SwitchChangePacket(world, selectedSwitch.getAbsPos(), target, false).sendToServer();
                         return false;
                     }
 
-                    // 第二个按钮：实体强制切换 (online = true)
                     if (isMouseInSyncBtn(evt.x, evt.y)) {
                         SwitchState target = selectedSwitch.nextSwitchState();
-//                        selectedSwitch.updateSwitchSate(world, target, false,  System.currentTimeMillis());
                         new SwitchChangePacket(world, selectedSwitch.getAbsPos(), target, true).sendToServer();
                         return false;
                     }
                 }
 
-                // 传送 UI 按钮点击
+                // teleport button
                 if (teleportPos != null && isLeftClick) {
                     if (isMouseInTeleportCloseBtn(evt.x, evt.y)) {
                         teleportPos = null;
@@ -287,14 +274,14 @@ public class GlobalRailwayMap implements IScreen {
                     }
                 }
 
-                // 2. 处理点击选中道岔
+                // handle selected switch
                 if (hoveredSwitch != null && isLeftClick) {
                     selectedSwitch = hoveredSwitch;
                     teleportPos = null;
                     return false;
                 }
 
-                // 3. 否则进入地图拖拽
+                // map drag
                 if (isLeftClick) {
                     selectedSwitch = null;
                     dragging = true;
@@ -310,11 +297,11 @@ public class GlobalRailwayMap implements IScreen {
                     return false;
                 }
 
-                // 悬停探测
+                // button zoom
                 double mouseWorldX = panX + (evt.x - cx) / zoom;
                 double mouseWorldZ = panZ + (evt.y - cy) / zoom;
 
-                // 屏幕 15 像素对应的世界距离半径（平方）
+                // switch active dist
                 double radiusWorld = 15.0 / zoom;
                 double radiusSq = radiusWorld * radiusWorld;
 
@@ -322,28 +309,21 @@ public class GlobalRailwayMap implements IScreen {
                 double closestDistSq = Double.MAX_VALUE;
 
                 if (data != null) {
-                    // 1. 算出鼠标所在位置的 Region ID
+                    // mouse Region ID
                     long regionId = TrackRegionUtil.vecToRegion(new Vec3i((int)Math.floor(mouseWorldX), 0, (int)Math.floor(mouseWorldZ)));
-
-                    // 2. 直接获取该 Region 的占位方块索引
                     Map<Vec3i, List<Vec3i>> regionMap = data.trackBlockParentsByRegion.get(regionId);
 
                     if (regionMap != null) {
-                        // 3. 遍历该 Region 里的所有占位方块
                         for (Map.Entry<Vec3i, List<Vec3i>> entry : regionMap.entrySet()) {
                             Vec3i blockPos = entry.getKey();
 
-                            // 计算鼠标距离该方块中心的平面距离 (XZ)
                             double dx = blockPos.x + 0.5 - mouseWorldX;
                             double dz = blockPos.z + 0.5 - mouseWorldZ;
                             double d2 = dx * dx + dz * dz;
 
-                            // 4. 如果在鼠标附近且比之前的更近
                             if (d2 < radiusSq && d2 < closestDistSq) {
-                                // 获取占用该方块的所有父级轨道
                                 for (Vec3i parentAbs : entry.getValue()) {
                                     TrackMultiGeometrySegment seg = data.getTrackBlockLoaded(parentAbs);
-                                    // 只要父级是道岔，就命中
                                     if (seg != null && seg.type == TrackItems.SWITCH) {
                                         closestDistSq = d2;
                                         hoveredSwitch = seg;
@@ -360,7 +340,7 @@ public class GlobalRailwayMap implements IScreen {
                     dragging = false;
                     double dx = evt.x - dragStartScreenX;
                     double dy = evt.y - dragStartScreenY;
-                    // 位移 < 4px 视为点击（而非拖拽），在该点放置传送标记
+                    // considerate movement < 4px as click instead of drag
                     if (dx * dx + dy * dy <= 16) {
                         double wx = dragStartPanX + (dragStartScreenX - cx) / zoom;
                         double wz = dragStartPanZ + (dragStartScreenY - cy) / zoom;
@@ -380,12 +360,12 @@ public class GlobalRailwayMap implements IScreen {
         int sx = (int) (width / 2.0 + (teleportPos.x - panX) * zoom);
         int sy = (int) (height / 2.0 + (teleportPos.z - panZ) * zoom);
 
-        // 传送点标记（小十字）
+        // teleport center
         GUIHelpers.drawRect(sx - 5, sy, 11, 1, 0xFF33FFFF);
         GUIHelpers.drawRect(sx, sy - 5, 1, 11, 0xFF33FFFF);
 
         int btnY = sy - 15;
-        int btnW = 70;   // 与道岔按钮一致
+        int btnW = 70;
         int btnH = 16;
         int gap = 4;
         int closeW = 16;
@@ -395,13 +375,13 @@ public class GlobalRailwayMap implements IScreen {
 
         Matrix4 m = new Matrix4();
 
-        // 传送按钮
+        // teleport button
         boolean hoverBtn = lastMouseX >= btnX && lastMouseX <= btnX + btnW
                 && lastMouseY >= btnY && lastMouseY <= btnY + btnH;
         GUIHelpers.drawRect(btnX, btnY, btnW, btnH, hoverBtn ? COLOR_BTN_HOVER : COLOR_BTN_BG);
         GUIHelpers.drawCenteredString("Teleport", btnX + btnW / 2, btnY + 4, COLOR_BTN_TEXT, m);
 
-        // 关闭按钮
+        // close
         boolean hoverClose = lastMouseX >= closeX && lastMouseX <= closeX + closeW
                 && lastMouseY >= btnY && lastMouseY <= btnY + btnH;
         GUIHelpers.drawRect(closeX, btnY, closeW, btnH, hoverClose ? COLOR_BTN_CLOSE_HOVER : COLOR_BTN_CLOSE);
@@ -426,7 +406,6 @@ public class GlobalRailwayMap implements IScreen {
         return mx >= closeX && mx <= closeX + 16 && my >= btnY && my <= btnY + 16;
     }
 
-    /** 通过聊天栏执行 /tp 指令（暂用命令实现） */
     private void doTeleport() {
         if (teleportPos == null) return;
         int x = (int) Math.floor(teleportPos.x);
@@ -557,30 +536,35 @@ public class GlobalRailwayMap implements IScreen {
 
                 for (Map<Gauge, TrackSingleGeometrySegment> branch : segment.getPaths()) {
                     for (TrackSingleGeometrySegment single : branch.values()) {
-                        drawSingleSegment(fr, single, panX, panZ, minX, maxX, minZ, maxZ, yScale, currentColor);
+                        drawSingleSegment(fr, single, segment.type.isTable(), panX, panZ, minX, maxX, minZ, maxZ, yScale, currentColor);
                     }
                 }
             }
         }
     }
 
-    private void drawSingleSegment(FlatCurveRenderer fr, TrackSingleGeometrySegment single,
+    private void drawSingleSegment(FlatCurveRenderer fr, TrackSingleGeometrySegment single, boolean isTable,
                                    double panX, double panZ,
                                    double minX, double maxX, double minZ, double maxZ, double yScale, Color color) {
         List<VecYPR> points = single.pointsCache;
 
-        if (points != null && points.size() >= 2) {
-            // 直接由 gauge 推算偏移，不再走 getAndUpdateBuilder
-            Vec3d offset = new Vec3d(single.getAbsPos()).add(single.placementPosition);
+        if (points != null) {
+            Vec3d offset;
+            if(isTable) {
+                offset = new Vec3d(single.getAbsPos()).add(single.getAndUpdateBuilder(
+                        MinecraftClient.getPlayer().getWorld()).info.placementInfo.placementPosition);
+            } else {
+                offset = new Vec3d(single.getAbsPos()).add(single.placementPosition);
+            }
+
             double ox = offset.x, oz = offset.z;
             int last = points.size() - 1;
 
-            // 原始采样间距 ≈ 0.25 * gauge.scale()，据此算步长
             int step = computePointStep(single.gauge.scale(), zoom);
 
             int i = 0;
             while (i < last) {
-                int next = Math.min(i + step, last);   // 保证首(0)与尾(last)一定被绘制
+                int next = Math.min(i + step, last);
                 VecYPR a = points.get(i), b = points.get(next);
                 double ax = a.x + ox, az = a.z + oz;
                 double bx = b.x + ox, bz = b.z + oz;
@@ -591,34 +575,9 @@ public class GlobalRailwayMap implements IScreen {
                 }
                 i = next;
             }
-            return;
-        }
-
-        // 兜底：pointsCache 异常缺失时直接用 baseCurve，不再调 getAndUpdateBuilder
-        CubicCurve curve = single.baseCurve;
-        if (curve == null) return;
-        Vec3d offset = new Vec3d(single.getAbsPos()).add(single.placementPosition);
-        double ox = offset.x, oz = offset.z;
-
-        int N = (int) Math.max(4, Math.min(64, Math.round(16 * zoom)));
-        Vec3d prev = curve.position(0);
-        for (int i = 1; i <= N; i++) {
-            Vec3d curr = curve.position((double) i / N);
-            double ax = prev.x + ox, az = prev.z + oz;
-            double bx = curr.x + ox, bz = curr.z + oz;
-            if (segmentVisible(ax, az, bx, bz, minX, maxX, minZ, maxZ)) {
-                fr.drawLine(new Vec3d(ax - panX, az - panZ, 0),
-                        new Vec3d(bx - panX, bz - panZ, 0),
-                        COLOR_TRACK_FB, zoom, yScale, 1);
-            }
-            prev = curr;
         }
     }
 
-    /**
-     * 由原始点间距 (≈ 0.25 * gauge.scale()) 与当前 zoom 计算需要跳过多少点再画一段。
-     * 目标是每段在屏幕上至少覆盖 TARGET_PX 像素。
-     */
     private int computePointStep(double gaugeScale, double zoom) {
         double spacing = 0.25 * gaugeScale;
         if (spacing < 1e-9) return 1;
@@ -655,7 +614,7 @@ public class GlobalRailwayMap implements IScreen {
         Matrix4 m = new Matrix4();
         int y = 10;
 
-        // 光标对应的世界坐标（与 MOVE 里 mouseWorldX/Z 的换算保持一致）
+        // mouse to world pos
         double cursorWorldX = panX + (lastMouseX - width / 2.0) / zoom;
         double cursorWorldZ = panZ + (lastMouseY - height / 2.0) / zoom;
 

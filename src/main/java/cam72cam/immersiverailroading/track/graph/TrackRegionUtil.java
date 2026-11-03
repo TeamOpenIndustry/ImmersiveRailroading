@@ -78,47 +78,6 @@ public class TrackRegionUtil {
         }
     }
 
-    static int sizeItemStack(ItemStack stack) {
-        if (stack == null) {
-            return Integer.BYTES;
-        }
-
-        // TODO this is wasteful
-        try {
-            return Integer.BYTES + stack.toTag().toBytes().length;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static void writeItemStack(ItemStack stack, ByteBuffer buffer) {
-        if (stack == null) {
-            buffer.putInt(0);
-            ImmersiveRailroading.error("empty ItemStack!");
-            return;
-        }
-        try {
-            byte[] bytes = stack.toTag().toBytes();
-            buffer.putInt(bytes.length);
-            buffer.put(bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static ItemStack readItemStack(ByteBuffer buffer) {
-        byte[] bytes = new byte[buffer.getInt()];
-        if (bytes.length == 0) {
-            return null;
-        }
-        buffer.get(bytes);
-        try {
-            return new ItemStack(new TagCompound(bytes));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     static int sizeString(String str) {
         // TODO This is wasteful
         return Integer.BYTES + str.getBytes(StandardCharsets.UTF_8).length;

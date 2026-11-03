@@ -376,7 +376,6 @@ public class Simulation {
         // calculate new velocities
         Consist.iterate(stateMap, nextStateMap, blocksAlreadyBroken);
 
-        // push car pos to worldData todo
         Map<UUID, WorldData.VehicleRef> refs = new HashMap<>();
         for (EntityCoupleableRollingStock stock : loaded) {
             refs.put(stock.getUUID(), new WorldData.VehicleRef(stock.getPosition(), stock.getVelocity()));

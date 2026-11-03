@@ -3,7 +3,6 @@ package cam72cam.immersiverailroading.track.graph;
 import java.util.HashSet;
 import java.util.Set;
 
-// todo 暂时采用单向边，如果有需要可以考虑单边加方向标记
 public class TrackEdge {
     public final TrackNodeId from;
     public final TrackNodeId to;

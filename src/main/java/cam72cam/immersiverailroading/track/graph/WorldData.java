@@ -46,8 +46,6 @@ public class WorldData {
 
     private final Map<Long, Integer> regionCooldown = new HashMap<>();
     private int regionRefreshCounter = 0;
-
-    // 仅保留 hub 一个 map
     protected final Map<TrackNodeId, SwitchInfo> switchByHub = new HashMap<>();
 
     // =============== 增量同步 ===============
