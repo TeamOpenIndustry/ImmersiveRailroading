@@ -27,30 +27,39 @@ public class WorldData {
     private final File directory;
     private final Map<Long, TrackRegion> regions;
 
-    public Map<Long, TrackRegion> getRegions() {
-        return regions;
-    }
-
     private final static Map<World, WorldData> LOADED = new HashMap<>();
 
+    //topo
     public final Map<TrackNodeId, TrackNode> nodes = new HashMap<>();
     protected final Map<TrackNodeId, List<TrackEdge>> outgoing = new HashMap<>();
     public final Set<TrackEdge> edges = new HashSet<>();
 
-    protected final Map<Long, Set<TrackEdge>> edgesByRegion = new HashMap<>();
-
     public final Map<Long, Map<Vec3i, List<Vec3i>>> trackBlockParentsByRegion = new HashMap<>();
+
+    protected final Map<Long, Set<TrackEdge>> edgesByRegion = new HashMap<>();
+    protected final Map<TrackNodeId, SwitchInfo> switchByHub = new HashMap<>();
 
     private final Map<Long, Set<TrackNodeId>> nodeIdsByRegion = new HashMap<>();
     private final Map<Long, Set<TrackNodeId>> outgoingByToRegion = new HashMap<>();
     private final Map<Long, Set<TrackNodeId>> switchHubIdsByRegion = new HashMap<>();
 
+    // region load/unload frequency
     private final Map<Long, Integer> regionCooldown = new HashMap<>();
     private int regionRefreshCounter = 0;
-    protected final Map<TrackNodeId, SwitchInfo> switchByHub = new HashMap<>();
 
-    // =============== 增量同步 ===============
+    // region delta sync
+    private final Map<Long, Map<Vec3i, DeltaOp>> pendingDeltas = new HashMap<>();
+    private final Set<Long> pendingFullSync = new HashSet<>();
 
+    // player subscribe
+    private final Map<Player, Set<Long>> playerRegionMap = new HashMap<>();
+    private final Map<Player, Map<Long, Long>> playerMapViewRegions = new HashMap<>();
+
+    // trains
+    private final Map<UUID, VehicleRef> vehicleRefs = new HashMap<>();
+    public List<Vec3d> clientMapVehicles = new ArrayList<>();
+
+    // internal class
     public static class DeltaOp {
         public enum Kind { PUT, REMOVE, SWITCH_STATE }
 
@@ -90,22 +99,126 @@ public class WorldData {
         }
     }
 
-    private final Map<Long, Map<Vec3i, DeltaOp>> pendingDeltas = new HashMap<>();
-    private final Set<Long> pendingFullSync = new HashSet<>();
+    public static class VehicleRef {
+        public final Vec3d pos;
+        public final Vec3d velocity;
+        public VehicleRef(Vec3d pos, Vec3d velocity) { this.pos = pos; this.velocity = velocity; }
+    }
 
-    public void requestFullSync(long regionId) {
-        synchronized (pendingFullSync) {
-            pendingFullSync.add(regionId);
+    /**
+     * 道岔信息。只有 hub（岔心）需要，因为只有岔心是 3 条边（直轨、tie GAP、外部 GAP）的三岔口。
+     * 直轨远端用 straightEnd 标识，弯轨起点用 turnStarts 标识。
+     * blockPos 用于动态查最新 switchState，避免 segment 引用 stale。
+     */
+    public static class SwitchInfo {
+        public final TrackNodeId straightEnd;
+        public final List<TrackNodeId> turnStarts;
+        public final Vec3i blockPos;
+
+        public SwitchInfo(TrackNodeId straightEnd,
+                          List<TrackNodeId> turnStarts,
+                          Vec3i blockPos) {
+            this.straightEnd = straightEnd;
+            this.turnStarts = turnStarts;
+            this.blockPos = blockPos;
+        }
+
+        public SwitchState getState(WorldData data) {
+            TrackMultiGeometrySegment b = data.getTrackBlockEnsured(blockPos);
+            return b != null ? b.getSwitchStateEnum() : SwitchState.STRAIGHT;
         }
     }
 
-    private void queueDelta(long regionId, DeltaOp op) {
-        synchronized (pendingDeltas) {
-            pendingDeltas.computeIfAbsent(regionId, k -> new HashMap<>())
-                    .put(op.regionBlockPos, op);
+    // construction
+    private WorldData(World world, File worldDirectory) {
+        this.world = world;
+        this.directory = worldDirectory;
+        this.regions = new HashMap<>();
+
+        if (worldDirectory != null && worldDirectory.exists()) {
+            File[] files = worldDirectory.listFiles();
+            if (files != null) {
+                Arrays.stream(files).parallel().forEach(file -> {
+                    String name = file.getName();
+                    if (!name.endsWith(".irr")) {
+                        return;
+                    }
+                    String baseName = name.substring(0, name.length() - 4);
+                    String[] parts = baseName.split("\\.");
+                    if (parts.length != 3 || !parts[0].equals("r")) {
+                        return;
+                    }
+                    try {
+                        int x = Integer.parseInt(parts[1]);
+                        int z = Integer.parseInt(parts[2]);
+                        long id = ((long) x << 32) | (z & 0xFFFFFFFFL);
+                        TrackRegion region = new TrackRegion(id, TrackRegionUtil.readBuffer(file), world);
+                        synchronized (regions) {
+                            regions.put(id, region);
+                        }
+                    } catch (Exception e) {
+                        ImmersiveRailroading.error("Track region file %s is corrupted! Renaming to .corrupted", file.getName());
+                        ImmersiveRailroading.catching(e);
+                        File badFile = new File(file.getParentFile(), file.getName() + ".corrupted");
+                        if (badFile.exists()) badFile.delete();
+                        file.renameTo(badFile);
+                    }
+                });
+            }
+        }
+
+        for (TrackRegion region : regions.values()) {
+            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+                Vec3i parentAbs = region.toBlockPos(e.getKey());
+                addTrackBlockToParents(parentAbs, e.getValue());
+            }
         }
     }
 
+    // data static life
+    public static WorldData get(World world) {
+        return LOADED.get(world);
+    }
+
+    public static WorldData getOrCreate(World world) {
+        return LOADED.computeIfAbsent(world, w -> new WorldData(w, null));
+    }
+
+    public static void save(World world, File levelDirectory) {
+        synchronized (LOADED) {
+            if (LOADED.containsKey(world)) {
+                LOADED.get(world).saveInternal();
+            }
+        }
+    }
+
+    public static void load(World world, File levelDirectory) {
+        synchronized (LOADED) {
+            if (LOADED.containsKey(world)) {
+                ImmersiveRailroading.warn("World %s / %s already loaded!  This is a bug!",
+                        levelDirectory.toString(), world.getId());
+            }
+            WorldData data = new WorldData(world, new File(levelDirectory, "immersiverailroading" + world.getId()));
+            LOADED.put(world, data);
+
+            data.buildAll();
+        }
+    }
+
+    public static void unload(World world, File levelDirectory) {
+        synchronized (LOADED) {
+            LOADED.remove(world);
+        }
+    }
+
+    public static void tick(World world) {
+        WorldData data = get(world);
+        if (data != null) {
+            data.tick();
+        }
+    }
+
+    // delta operation packet serialize/deserialize
     public static byte[] serializeDeltaOps(List<DeltaOp> ops) {
         int size = Integer.BYTES;
         for (DeltaOp op : ops) {
@@ -169,59 +282,9 @@ public class WorldData {
         return ops;
     }
 
-    // =============== 构造 / 加载 / 保存 ===============
-
-    private WorldData(World world, File worldDirectory) {
-        this.world = world;
-        this.directory = worldDirectory;
-        this.regions = new HashMap<>();
-
-        if (worldDirectory != null && worldDirectory.exists()) {
-            File[] files = worldDirectory.listFiles();
-            if (files != null) {
-                Arrays.stream(files).parallel().forEach(file -> {
-                    String name = file.getName();
-                    if (!name.endsWith(".irr")) {
-                        return;
-                    }
-                    String baseName = name.substring(0, name.length() - 4);
-                    String[] parts = baseName.split("\\.");
-                    if (parts.length != 3 || !parts[0].equals("r")) {
-                        return;
-                    }
-                    try {
-                        int x = Integer.parseInt(parts[1]);
-                        int z = Integer.parseInt(parts[2]);
-                        long id = ((long) x << 32) | (z & 0xFFFFFFFFL);
-                        TrackRegion region = new TrackRegion(id, TrackRegionUtil.readBuffer(file), world);
-                        synchronized (regions) {
-                            regions.put(id, region);
-                        }
-                    } catch (Exception e) {
-                        ImmersiveRailroading.error("Track region file %s is corrupted! Renaming to .corrupted", file.getName());
-                        ImmersiveRailroading.catching(e);
-                        File badFile = new File(file.getParentFile(), file.getName() + ".corrupted");
-                        if (badFile.exists()) badFile.delete();
-                        file.renameTo(badFile);
-                    }
-                });
-            }
-        }
-
-        for (TrackRegion region : regions.values()) {
-            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-                Vec3i parentAbs = region.toBlockPos(e.getKey());
-                addTrackBlockToParents(parentAbs, e.getValue());
-            }
-        }
-    }
-
-    public static WorldData get(World world) {
-        return LOADED.get(world);
-    }
-
-    public static WorldData getOrCreate(World world) {
-        return LOADED.computeIfAbsent(world, w -> new WorldData(w, null));
+    // region getter
+    public Map<Long, TrackRegion> getRegions() {
+        return regions;
     }
 
     public boolean hasRegion(long id) {
@@ -250,13 +313,13 @@ public class WorldData {
         }
     }
 
+    // trackMultiGeometrySegment read/write
     public TrackMultiGeometrySegment getTrackBlockLoaded(Vec3i pos) {
         TrackRegion region = getRegion(pos, false);
         if (region != null) {
             return region.getTrackBlock(pos);
         }
         return null;
-
     }
 
     public TrackMultiGeometrySegment getTrackBlockEnsured(Vec3i pos) {
@@ -264,6 +327,52 @@ public class WorldData {
         ensureRegionLoaded(regionId);
         TrackRegion region = getRegionById(regionId, true);
         return region.getTrackBlock(pos);
+    }
+
+    public void setTrackBlock(Vec3i pos, TrackMultiGeometrySegment block) {
+        long regionId = vecToRegion(pos);
+        ensureRegionLoaded(regionId);
+        TrackRegion region = getRegionById(regionId, true);
+
+        TrackMultiGeometrySegment old = region.getTrackBlock(pos);
+        if (old != null) {
+            removeTrackBlockFromParents(pos, old);
+            removeTopologyFor(regionId, TrackRegionUtil.toRegionBlockPos(pos));
+        }
+
+        region.setTrackBlock(pos, block);
+        addTrackBlockToParents(pos, block);
+
+        if (world.isServer || Config.ConfigRegion.clientBuildTopo) {
+            buildTopologyFor(block);
+            researchNeighbors(pos);
+        }
+
+        if (world.isServer) {
+            queueDelta(regionId, DeltaOp.put(TrackRegionUtil.toRegionBlockPos(pos), block));
+        }
+    }
+
+    public boolean removeTrackBlock(Vec3i pos) {
+        long regionId = vecToRegion(pos);
+        TrackRegion region = getRegionById(regionId, false);
+        if (region == null) {
+            return false;
+        }
+        TrackMultiGeometrySegment old = region.getTrackBlock(pos);
+        if (!region.removeTrackBlock(pos)) {
+            return false;
+        }
+
+        if (old != null) {
+            removeTrackBlockFromParents(pos, old);
+        }
+        removeTopologyFor(regionId, TrackRegionUtil.toRegionBlockPos(pos));
+
+        if (world.isServer) {
+            queueDelta(regionId, DeltaOp.remove(TrackRegionUtil.toRegionBlockPos(pos)));
+        }
+        return true;
     }
 
     public void updateSwitchState(Vec3i pos, SwitchState switchState, boolean offline, long currentTime) {
@@ -305,30 +414,7 @@ public class WorldData {
         setTrackBlock(pos, seg);
     }
 
-    public void setTrackBlock(Vec3i pos, TrackMultiGeometrySegment block) {
-        long regionId = vecToRegion(pos);
-        ensureRegionLoaded(regionId);
-        TrackRegion region = getRegionById(regionId, true);
-
-        TrackMultiGeometrySegment old = region.getTrackBlock(pos);
-        if (old != null) {
-            removeTrackBlockFromParents(pos, old);
-            removeTopologyFor(regionId, TrackRegionUtil.toRegionBlockPos(pos));
-        }
-
-        region.setTrackBlock(pos, block);
-        addTrackBlockToParents(pos, block);
-
-        if (world.isServer || Config.ConfigRegion.clientBuildTopo) {
-            buildTopologyFor(block);
-            researchNeighbors(pos);
-        }
-
-        if (world.isServer) {
-            queueDelta(regionId, DeltaOp.put(TrackRegionUtil.toRegionBlockPos(pos), block));
-        }
-    }
-
+    // rail_gag parent index
     private void addTrackBlockToParents(Vec3i parentAbs, TrackMultiGeometrySegment block) {
         for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
             for (TrackSingleGeometrySegment single : branch.values()) {
@@ -373,28 +459,7 @@ public class WorldData {
         return regionMap.get(absBlock);
     }
 
-    public boolean removeTrackBlock(Vec3i pos) {
-        long regionId = vecToRegion(pos);
-        TrackRegion region = getRegionById(regionId, false);
-        if (region == null) {
-            return false;
-        }
-        TrackMultiGeometrySegment old = region.getTrackBlock(pos);
-        if (!region.removeTrackBlock(pos)) {
-            return false;
-        }
-
-        if (old != null) {
-            removeTrackBlockFromParents(pos, old);
-        }
-        removeTopologyFor(regionId, TrackRegionUtil.toRegionBlockPos(pos));
-
-        if (world.isServer) {
-            queueDelta(regionId, DeltaOp.remove(TrackRegionUtil.toRegionBlockPos(pos)));
-        }
-        return true;
-    }
-
+    // data save
     private void saveInternal() {
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
@@ -448,42 +513,112 @@ public class WorldData {
         }
     }
 
-    public static void save(World world, File levelDirectory) {
-        synchronized (LOADED) {
-            if (LOADED.containsKey(world)) {
-                LOADED.get(world).saveInternal();
+    // region load/unload
+    protected void ensureRegionLoaded(long r) {
+        if (regions.containsKey(r)) return;
+        if (directory == null) return;
+
+        File f = regionFile(r);
+        if (!f.exists()) {
+            return;
+        }
+
+        try {
+            TrackRegion region = new TrackRegion(r, TrackRegionUtil.readBuffer(f), world);
+            synchronized (regions) {
+                regions.put(r, region);
+                System.out.println("loading chunk " + TrackRegionUtil.regionX(r) + ", " + TrackRegionUtil.regionZ(r));
+            }
+
+            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+                Vec3i parentAbs = region.toBlockPos(e.getKey());
+                addTrackBlockToParents(parentAbs, e.getValue());
+            }
+
+            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+                buildTopologyFor(e.getValue());
+            }
+
+            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+                Vec3i parentAbs = region.toBlockPos(e.getKey());
+                researchNeighbors(parentAbs);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void unloadRegion(long r) {
+        TrackRegion region = regions.get(r);
+        if (region == null) return;
+
+        clearTopologyInRegion(r);
+
+        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+            Vec3i parentAbs = region.toBlockPos(e.getKey());
+            removeTrackBlockFromParents(parentAbs, e.getValue());
+        }
+
+        synchronized (pendingDeltas) {
+            pendingDeltas.remove(r);
+        }
+        synchronized (pendingFullSync) {
+            pendingFullSync.remove(r);
+        }
+
+        if (region.needsWriteToDisk && directory != null) {
+            try {
+                File file = regionFile(r);
+                if (region.isEmpty()) {
+                    if (file.exists() && !file.delete()) {
+                        ImmersiveRailroading.warn("Unable to delete empty region file %s", file);
+                    }
+                } else {
+                    TrackRegionUtil.writeBuffer(file, region.write());
+                    region.needsWriteToDisk = false;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
+
+        regions.remove(r);
     }
 
-    public static void load(World world, File levelDirectory) {
-        synchronized (LOADED) {
-            if (LOADED.containsKey(world)) {
-                ImmersiveRailroading.warn("World %s / %s already loaded!  This is a bug!",
-                        levelDirectory.toString(), world.getId());
+    public void clientUnloadRegion(long id) {
+        synchronized (regions) {
+            if (!regions.containsKey(id)) return;
+            clearTopologyInRegion(id);
+            trackBlockParentsByRegion.remove(id);
+            regions.remove(id);
+        }
+    }
+
+    public void clientLoadRegion(long id, TrackRegion region) {
+        synchronized (regions) {
+            if (regions.containsKey(id)) {
+                clearTopologyInRegion(id);
+                trackBlockParentsByRegion.remove(id);
             }
-            WorldData data = new WorldData(world, new File(levelDirectory, "immersiverailroading" + world.getId()));
-            LOADED.put(world, data);
+            regions.put(id, region);
+        }
 
-            data.buildAll();
+        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+            addTrackBlockToParents(region.toBlockPos(e.getKey()), e.getValue());
+        }
+
+        if(!Config.ConfigRegion.clientBuildTopo) return;
+
+        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+            buildTopologyFor(e.getValue());
+        }
+
+        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
+            researchNeighbors(region.toBlockPos(e.getKey()));
         }
     }
 
-    public static void unload(World world, File levelDirectory) {
-        synchronized (LOADED) {
-            LOADED.remove(world);
-        }
-    }
-
-    public static void tick(World world) {
-        WorldData data = get(world);
-        if (data != null) {
-            data.tick();
-        }
-    }
-
-    private final Map<Player, Set<Long>> playerRegionMap = new HashMap<>();
-
+    // server tick（subscribe / delta sending / region life refresh）
     private void tick() {
         if (!world.isServer) {
             return;
@@ -668,110 +803,18 @@ public class WorldData {
         return result;
     }
 
-    protected void ensureRegionLoaded(long r) {
-        if (regions.containsKey(r)) return;
-        if (directory == null) return;
-
-        File f = regionFile(r);
-        if (!f.exists()) {
-            return;
-        }
-
-        try {
-            TrackRegion region = new TrackRegion(r, TrackRegionUtil.readBuffer(f), world);
-            synchronized (regions) {
-                regions.put(r, region);
-                System.out.println("loading chunk " + TrackRegionUtil.regionX(r) + ", " + TrackRegionUtil.regionZ(r));
-            }
-
-            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-                Vec3i parentAbs = region.toBlockPos(e.getKey());
-                addTrackBlockToParents(parentAbs, e.getValue());
-            }
-
-            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-                buildTopologyFor(e.getValue());
-            }
-
-            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-                Vec3i parentAbs = region.toBlockPos(e.getKey());
-                researchNeighbors(parentAbs);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    // topo building
+    public void buildAll() {
+        for (TrackRegion region : regions.values()) {
+            buildTopologyForRegion(region);
         }
     }
 
-    private void unloadRegion(long r) {
-        TrackRegion region = regions.get(r);
-        if (region == null) return;
-
-        clearTopologyInRegion(r);
-
-        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-            Vec3i parentAbs = region.toBlockPos(e.getKey());
-            removeTrackBlockFromParents(parentAbs, e.getValue());
-        }
-
-        synchronized (pendingDeltas) {
-            pendingDeltas.remove(r);
-        }
-        synchronized (pendingFullSync) {
-            pendingFullSync.remove(r);
-        }
-
-        if (region.needsWriteToDisk && directory != null) {
-            try {
-                File file = regionFile(r);
-                if (region.isEmpty()) {
-                    if (file.exists() && !file.delete()) {
-                        ImmersiveRailroading.warn("Unable to delete empty region file %s", file);
-                    }
-                } else {
-                    TrackRegionUtil.writeBuffer(file, region.write());
-                    region.needsWriteToDisk = false;
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        regions.remove(r);
-    }
-
-    private void clearTopologyInRegion(long regionId) {
-        Set<TrackNodeId> regionNodes = nodeIdsByRegion.get(regionId);
-        if (regionNodes == null || regionNodes.isEmpty()) return;
-        Set<TrackNodeId> regionNodesCopy = new HashSet<>(regionNodes);
-
-        Set<TrackEdge> toRemove = new HashSet<>();
-        for (TrackNodeId id : regionNodesCopy) {
-            List<TrackEdge> out = outgoing.get(id);
-            if (out != null) toRemove.addAll(out);
-        }
-
-        Set<TrackNodeId> fromIds = outgoingByToRegion.get(regionId);
-        if (fromIds != null) {
-            for (TrackNodeId fromId : fromIds) {
-                List<TrackEdge> list = outgoing.get(fromId);
-                if (list == null) continue;
-                for (TrackEdge e : list) {
-                    if (regionNodesCopy.contains(e.to)) toRemove.add(e);
-                }
-            }
-        }
-
-        removeSwitchesInRegion(regionId, null);
-
-        for (TrackEdge e : toRemove) removeEdge(e);
-
-        for (TrackNodeId id : regionNodesCopy) {
-            removeNode(id);
-            outgoing.remove(id);
+    protected void buildTopologyForRegion(TrackRegion region) {
+        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> entry : region.trackBlocks.entrySet()) {
+            buildTopologyFor(entry.getValue());
         }
     }
-
-    // =============== 拓扑构建 ===============
 
     protected void buildTopologyFor(TrackMultiGeometrySegment block) {
         if (block.type == TrackItems.SWITCH && block.paths.size() >= 2) {
@@ -917,22 +960,11 @@ public class WorldData {
                 return;
             }
 
+            // there will be T shape here, offworld pathing will decide which way to go
             addNode(otherStartNode);
             addNode(otherEndNode);
             addEdge(other.id, otherStartNode.id, TrackEdge.EdgeType.NORMAL);
             addEdge(other.id, otherEndNode.id, TrackEdge.EdgeType.NORMAL);
-
-            if (gapLen < 1e-9) {
-                addEdge(other.id, otherStartNode.id, TrackEdge.EdgeType.NORMAL);
-                return;
-            }
-
-            double cos = localDir.dotProduct(gapDir) / (localDir.length() * gapLen);
-            if (cos > 0) {
-                addEdge(other.id, otherEndNode.id, TrackEdge.EdgeType.NORMAL);
-            } else {
-                addEdge(other.id, otherStartNode.id, TrackEdge.EdgeType.NORMAL);
-            }
         }
     }
 
@@ -1102,18 +1134,39 @@ public class WorldData {
         }
     }
 
-    protected void buildTopologyForRegion(TrackRegion region) {
-        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> entry : region.trackBlocks.entrySet()) {
-            buildTopologyFor(entry.getValue());
+    private void clearTopologyInRegion(long regionId) {
+        Set<TrackNodeId> regionNodes = nodeIdsByRegion.get(regionId);
+        if (regionNodes == null || regionNodes.isEmpty()) return;
+        Set<TrackNodeId> regionNodesCopy = new HashSet<>(regionNodes);
+
+        Set<TrackEdge> toRemove = new HashSet<>();
+        for (TrackNodeId id : regionNodesCopy) {
+            List<TrackEdge> out = outgoing.get(id);
+            if (out != null) toRemove.addAll(out);
+        }
+
+        Set<TrackNodeId> fromIds = outgoingByToRegion.get(regionId);
+        if (fromIds != null) {
+            for (TrackNodeId fromId : fromIds) {
+                List<TrackEdge> list = outgoing.get(fromId);
+                if (list == null) continue;
+                for (TrackEdge e : list) {
+                    if (regionNodesCopy.contains(e.to)) toRemove.add(e);
+                }
+            }
+        }
+
+        removeSwitchesInRegion(regionId, null);
+
+        for (TrackEdge e : toRemove) removeEdge(e);
+
+        for (TrackNodeId id : regionNodesCopy) {
+            removeNode(id);
+            outgoing.remove(id);
         }
     }
 
-    public void buildAll() {
-        for (TrackRegion region : regions.values()) {
-            buildTopologyForRegion(region);
-        }
-    }
-
+    // neighbor connection
     private void researchNeighbors(Vec3i newAbsPos) {
         TrackMultiGeometrySegment newBlock = getTrackBlockLoaded(newAbsPos);
         if (newBlock == null) return;
@@ -1172,79 +1225,25 @@ public class WorldData {
         }
     }
 
-    public static class VehicleRef {
-        public final Vec3d pos;
-        public final Vec3d velocity;
-        public VehicleRef(Vec3d pos, Vec3d velocity) { this.pos = pos; this.velocity = velocity; }
+    // delta sync queue
+    public void requestFullSync(long regionId) {
+        synchronized (pendingFullSync) {
+            pendingFullSync.add(regionId);
+        }
     }
 
-    private final Map<UUID, VehicleRef> vehicleRefs = new HashMap<>();
+    private void queueDelta(long regionId, DeltaOp op) {
+        synchronized (pendingDeltas) {
+            pendingDeltas.computeIfAbsent(regionId, k -> new HashMap<>())
+                    .put(op.regionBlockPos, op);
+        }
+    }
 
+    // vehicle / map subscribe
     public void updateVehicleRefs(Map<UUID, VehicleRef> refs) {
         vehicleRefs.clear();
         vehicleRefs.putAll(refs);
     }
-
-    /**
-     * 道岔信息。只有 hub（岔心）需要，因为只有岔心是 3 条边（直轨、tie GAP、外部 GAP）的三岔口。
-     * 直轨远端用 straightEnd 标识，弯轨起点用 turnStarts 标识。
-     * blockPos 用于动态查最新 switchState，避免 segment 引用 stale。
-     */
-    public static class SwitchInfo {
-        public final TrackNodeId straightEnd;
-        public final List<TrackNodeId> turnStarts;
-        public final Vec3i blockPos;
-
-        public SwitchInfo(TrackNodeId straightEnd,
-                          List<TrackNodeId> turnStarts,
-                          Vec3i blockPos) {
-            this.straightEnd = straightEnd;
-            this.turnStarts = turnStarts;
-            this.blockPos = blockPos;
-        }
-
-        public SwitchState getState(WorldData data) {
-            TrackMultiGeometrySegment b = data.getTrackBlockEnsured(blockPos);
-            return b != null ? b.getSwitchStateEnum() : SwitchState.STRAIGHT;
-        }
-    }
-
-    // =============== 客户端 region 加载 / 卸载 ===============
-
-    public void clientUnloadRegion(long id) {
-        synchronized (regions) {
-            if (!regions.containsKey(id)) return;
-            clearTopologyInRegion(id);
-            trackBlockParentsByRegion.remove(id);
-            regions.remove(id);
-        }
-    }
-
-    public void clientLoadRegion(long id, TrackRegion region) {
-        synchronized (regions) {
-            if (regions.containsKey(id)) {
-                clearTopologyInRegion(id);
-                trackBlockParentsByRegion.remove(id);
-            }
-            regions.put(id, region);
-        }
-
-        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-            addTrackBlockToParents(region.toBlockPos(e.getKey()), e.getValue());
-        }
-
-        if(!Config.ConfigRegion.clientBuildTopo) return;
-
-        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-            buildTopologyFor(e.getValue());
-        }
-
-        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-            researchNeighbors(region.toBlockPos(e.getKey()));
-        }
-    }
-
-    private final Map<Player, Map<Long, Long>> playerMapViewRegions = new HashMap<>();
 
     public void handleClientMapRequest(Player player, List<Long> requestRegions) {
         if (!world.isServer) return;
@@ -1269,8 +1268,6 @@ public class WorldData {
         mapView.entrySet().removeIf(e -> e.getValue() < currentTick);
         return mapView.isEmpty() ? null : mapView;
     }
-
-    public List<Vec3d> clientMapVehicles = new ArrayList<>();
 
     public void updateClientVehicles(List<Vec3d> vehicles) {
         if (!world.isClient) return;
