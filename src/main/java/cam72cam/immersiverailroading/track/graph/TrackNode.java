@@ -179,10 +179,7 @@ public class TrackNode {
         return best;
     }
 
-    // 3D 前向：由 yaw + pitch 决定，roll 不参与
-    // 3D 前向：VecYPR 的 yaw 是 IR 约定，先转成 MC yaw；pitch 不参与 roll
     private static Vec3d forwardVector(VecYPR p) {
-        // IR yaw -> MC yaw（和 TrackSnapUtil 里的 yawHead 转换一致）
         float mcYaw = ((540 - p.getYaw()) % 360 + 540) % 360;
         double yawRad = Math.toRadians(mcYaw);
         double pitchRad = Math.toRadians(p.getPitch());

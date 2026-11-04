@@ -47,10 +47,10 @@ public class SimulationState {
     public UUID interactingFront;
     public UUID interactingRear;
 
-    private TrackEdge lastFrontEdge;
-    private double lastFrontT;
-    private TrackEdge lastRearEdge;
-    private double lastRearT;
+    public TrackEdge lastFrontEdge;
+    public double lastFrontT;
+    public TrackEdge lastRearEdge;
+    public double lastRearT;
 
     public float brakePressure;
 
@@ -195,6 +195,11 @@ public class SimulationState {
         brakePressure = stock.getBrakePressure();
 
         config = new Configuration(stock);
+
+        this.lastFrontEdge = stock.lastFrontEdge;
+        this.lastFrontT = stock.lastFrontT;
+        this.lastRearEdge = stock.lastRearEdge;
+        this.lastRearT = stock.lastRearT;
 
         bounds = config.bounds.apply(this);
 

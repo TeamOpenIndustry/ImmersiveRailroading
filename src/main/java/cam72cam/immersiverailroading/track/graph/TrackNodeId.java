@@ -2,49 +2,90 @@ package cam72cam.immersiverailroading.track.graph;
 
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.mod.math.Vec3i;
+import cam72cam.mod.serialization.SerializationException;
+import cam72cam.mod.serialization.TagCompound;
+import cam72cam.mod.serialization.TagField;
+import cam72cam.mod.serialization.TagMapped;
+import cam72cam.mod.serialization.TagMapper;
+import cam72cam.mod.serialization.TagSerializer;
 
-public final class TrackNodeId {
-    public final long regionPos;
-    public final Vec3i regionBlockPos;
-    public final int pathIndex;
-    public final Gauge gauge;
-    public final int pointIndex;
+import java.util.Objects;
 
-    private final int cachedHash;
-
-    public TrackNodeId(long regionPos, Vec3i regionBlockPos, int pathIndex, Gauge gauge, int pointIndex) {
-        this.regionPos = regionPos;
-        this.regionBlockPos = regionBlockPos;
-        this.pathIndex = pathIndex;
-        this.gauge = gauge;
-        this.pointIndex = pointIndex;
-        this.cachedHash = computeHash();
+@TagMapped(TrackNodeId.Mapper.class)
+public record TrackNodeId(
+        long regionPos,
+        Vec3i regionBlockPos,
+        int pathIndex,
+        Gauge gauge,
+        int pointIndex
+) {
+    public TrackNodeId {
+        Objects.requireNonNull(regionBlockPos, "regionBlockPos");
+        Objects.requireNonNull(gauge, "gauge");
     }
 
-    private int computeHash() {
-        int h = Long.hashCode(regionPos);
-        h = 31 * h + regionBlockPos.x;
-        h = 31 * h + regionBlockPos.y;
-        h = 31 * h + regionBlockPos.z;
-        h = 31 * h + pathIndex;
-        h = 31 * h + gauge.hashCode();
-        h = 31 * h + pointIndex;
-        return h;
+    public Mutable mutable() {
+        return new Mutable(this);
     }
 
-    @Override
-    public int hashCode() {
-        return cachedHash;
+    public static class Mutable {
+        @TagField
+        public long regionPos;
+        @TagField
+        public Vec3i regionBlockPos;
+        @TagField
+        public int pathIndex;
+        @TagField
+        public Gauge gauge;
+        @TagField
+        public int pointIndex;
+
+        private Mutable(TrackNodeId id) {
+            this.regionPos = id.regionPos();
+            this.regionBlockPos = id.regionBlockPos();
+            this.pathIndex = id.pathIndex();
+            this.gauge = id.gauge();
+            this.pointIndex = id.pointIndex();
+        }
+
+        public Mutable(TagCompound data) throws SerializationException {
+            TagSerializer.deserialize(data, this);
+        }
+
+        public TrackNodeId immutable() {
+            return new TrackNodeId(regionPos, regionBlockPos, pathIndex, gauge, pointIndex);
+        }
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof TrackNodeId)) return false;
-        TrackNodeId o = (TrackNodeId) obj;
-        return regionPos == o.regionPos
-                && regionBlockPos.equals(o.regionBlockPos)
-                && pathIndex == o.pathIndex
-                && gauge == o.gauge
-                && pointIndex == o.pointIndex;
+    public static class Mapper implements TagMapper<TrackNodeId> {
+        @Override
+        public TagAccessor<TrackNodeId> apply(Class<TrackNodeId> type, String fieldName, TagField tag)
+                throws SerializationException {
+            return new TagAccessor<>(
+                    (nbt, o) -> {
+                        if (o == null) {
+                            nbt.remove(fieldName);
+                            return;
+                        }
+                        TagCompound target = new TagCompound();
+                        try {
+                            TagSerializer.serialize(target, o.mutable());
+                        } catch (SerializationException e) {
+                            throw new RuntimeException(e);
+                        }
+                        nbt.set(fieldName, target);
+                    },
+                    nbt -> {
+                        if (!nbt.hasKey(fieldName)) {
+                            return null;
+                        }
+                        try {
+                            return new Mutable(nbt.get(fieldName)).immutable();
+                        } catch (SerializationException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+            );
+        }
     }
 }

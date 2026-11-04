@@ -391,12 +391,20 @@ public class Simulation {
 
 
 
-
+    private static final Map<World, Boolean> LAST_OFF_WORLD_PATHING = new WeakHashMap<>();
 
     public static void simulate(World world) {
         // 100KM/h ~= 28m/s which means non-loaded stationary stock may be phased through at that speed
         // I'm OK with that for now
         // We might want to chunk-load ahead of the train just to be safe?
+
+        boolean current = Config.ConfigDebug.offWorldPathing;
+        Boolean last = LAST_OFF_WORLD_PATHING.put(world, current);
+
+        // off -> non-off, clear all topo for stocks
+        if (last != null && last && !current) {
+            clearTopology(world);
+        }
 
         if (world.getTicks() % 5 != 0) {
             // Only re-check every 5 ticks
@@ -412,5 +420,32 @@ public class Simulation {
 
     public static double calculateRoll(double frontRoll, double rearRoll) {//TODO: multi bogey support?
         return (frontRoll + rearRoll) / 2;
+    }
+
+    private static void clearTopology(World world) {
+        Set<EntityCoupleableRollingStock> all =
+                new HashSet<>(world.getEntities(EntityCoupleableRollingStock.class));
+
+        EntityPool.get(world).getAllEntities().stream()
+                .map(ModdedEntity::getSelf)
+                .filter(Objects::nonNull)
+                .filter(s -> s instanceof EntityCoupleableRollingStock)
+                .map(s -> (EntityCoupleableRollingStock) s)
+                .forEach(all::add);
+
+        for (EntityCoupleableRollingStock stock : all) {
+            stock.lastFrontEdge = null;
+            stock.lastFrontT = -1;
+            stock.lastRearEdge = null;
+            stock.lastRearT = -1;
+
+            SimulationState state = stock.getCurrentState();
+            if (state != null) {
+                state.lastFrontEdge = null;
+                state.lastFrontT = -1;
+                state.lastRearEdge = null;
+                state.lastRearT = -1;
+            }
+        }
     }
 }

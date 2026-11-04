@@ -92,14 +92,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	@TagField("lastKnownRear")
 	public Vec3i lastKnownRear = null;
 
-//	@TagField(value = "lastFrontEdge", mapper = )
-//	public TrackEdge lastFrontEdge;
-//	@TagField(value = "lasRearEdge", mapper = )
-//	public TrackEdge lastRearEdge;
-//	@TagField("lastFrontT")
-//	private double lastFrontT;
-//	@TagField("lastRearT")
-//	private double lastRearT;
+	@TagField("lastFrontEdge")
+	public TrackEdge lastFrontEdge;
+	@TagField("lastRearEdge")
+	public TrackEdge lastRearEdge;
+	@TagField("lastFrontT")
+	public double lastFrontT;
+	@TagField("lastRearT")
+	public double lastRearT;
 
 	@TagField("slackFront")
 	@TagSync
@@ -227,6 +227,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			setCoupledUUID(CouplerType.FRONT, state.interactingFront);
 			setCoupledUUID(CouplerType.BACK, state.interactingRear);
 			consist = state.consist;
+
+			this.lastFrontEdge = state.lastFrontEdge;
+			this.lastFrontT = state.lastFrontT;
+			this.lastRearEdge = state.lastRearEdge;
+			this.lastRearT = state.lastRearT;
 
 			if (getCoupledUUID(CouplerType.FRONT) != null) {
 				EntityCoupleableRollingStock front = getCoupled(CouplerType.FRONT);

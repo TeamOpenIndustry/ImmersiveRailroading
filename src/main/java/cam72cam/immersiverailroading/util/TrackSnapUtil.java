@@ -191,7 +191,6 @@ public class TrackSnapUtil {
         float roll = 0;
         float rotationYawHead = (player.getRotationYawHead() + 360f) % 360f;
 
-        // 覆盖 pos 附近的 block（按引用去重，避免同 block 被多 region 重复收录）
         Set<TrackMultiGeometrySegment> nearbyBlocks = Collections.newSetFromMap(new IdentityHashMap<>());
         for (int x = -hori; x <= hori; x++) {
             for (int y = -vert; y <= vert; y++) {
