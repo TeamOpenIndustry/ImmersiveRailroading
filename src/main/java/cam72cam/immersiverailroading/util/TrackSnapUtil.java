@@ -1,15 +1,18 @@
 package cam72cam.immersiverailroading.util;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackSmoothing;
-import cam72cam.immersiverailroading.library.TrackYawAlignmentType;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.BuilderSwitch;
 import cam72cam.immersiverailroading.track.VecYPR;
+import cam72cam.immersiverailroading.track.graph.TrackMultiGeometrySegment;
+import cam72cam.immersiverailroading.track.graph.TrackSingleGeometrySegment;
+import cam72cam.immersiverailroading.track.graph.WorldData;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
@@ -20,7 +23,7 @@ import java.util.*;
 
 public class TrackSnapUtil {
 
-    public static VecYPR getNeighborNode(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
+    public static VecYPR getNeighborNodeByTile(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
         RailSettings stackInfo = RailSettings.from(stack);
         EndPointData endPointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
 
@@ -166,8 +169,144 @@ public class TrackSnapUtil {
         return null;
     }
 
-    //TODO: keep stack info so that we wont lost it after applying snapping
+    public static VecYPR getNeighborNodeOffline(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear) {
+        WorldData data = WorldData.get(world);
+        if (data == null) return null;
 
+        RailSettings stackInfo = RailSettings.from(stack);
+        EndPointData endPointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
+
+        Vec3d worldPos = new Vec3d(pos).add(hit);
+        Vec3d minPos = worldPos;
+        double min = Double.MAX_VALUE;
+
+        int hori = Math.max((int) (stackInfo.gauge.scale() * 2), 1);
+        int vert = 1;
+
+        boolean succeeded = false;
+
+        float yaw = player.getRotationYaw();
+        float yawHead = (540 - yaw) % 360;
+        float pitch = 0;
+        float roll = 0;
+        float rotationYawHead = (player.getRotationYawHead() + 360f) % 360f;
+
+        // 覆盖 pos 附近的 block（按引用去重，避免同 block 被多 region 重复收录）
+        Set<TrackMultiGeometrySegment> nearbyBlocks = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (int x = -hori; x <= hori; x++) {
+            for (int y = -vert; y <= vert; y++) {
+                for (int z = -hori; z <= hori; z++) {
+                    Vec3i scan = pos.add(x, y, z);
+                    List<Vec3i> parents = data.getParentsAt(scan);
+                    if (parents == null) continue;
+                    for (Vec3i parentAbs : parents) {
+                        TrackMultiGeometrySegment block = data.getTrackBlockLoaded(parentAbs);
+                        if (block != null) {
+                            nearbyBlocks.add(block);
+                        }
+                    }
+                }
+            }
+        }
+
+        double stackGauge = stackInfo.gauge.value();
+
+        for (TrackMultiGeometrySegment block : nearbyBlocks) {
+            for (Map<Gauge, TrackSingleGeometrySegment> branch : block.getPaths()) {
+                for (Map.Entry<Gauge, TrackSingleGeometrySegment> entry : branch.entrySet()) {
+                    Gauge gauge = entry.getKey();
+                    if (Math.abs(gauge.value() - stackGauge) > 1.0E-6) continue;
+
+                    TrackSingleGeometrySegment single = entry.getValue();
+                    List<VecYPR> points = single.pointsCache;
+                    if (points.isEmpty()) continue;
+
+                    Vec3i parentPos = single.getAbsPos();
+                    RailInfo info = single.getAndUpdateBuilder(world).info;
+                    Vec3d pp = info.placementInfo.placementPosition;
+                    Vec3d offset = new Vec3d(parentPos.x + pp.x, parentPos.y + pp.y, parentPos.z + pp.z);
+
+                    if (points.size() > 1) {
+                        VecYPR first = points.get(0);
+                        Vec3d p1 = first.add(offset);
+                        float yaw1 = first.getYaw();
+                        float pitch1 = first.getPitch();
+                        float roll1 = first.getRoll();
+                        double dist1 = p1.distanceTo(worldPos);
+
+                        if (dist1 < min ||
+                                (endPointData.trackSnapSettings().snapYaw()
+                                        && dist1 - 0.5 < min
+                                        && succeeded
+                                        && VecUtil.delta(yaw1, yawHead) < VecUtil.delta(yaw, yawHead))) {
+                            min = dist1;
+                            minPos = p1;
+                            yaw = yaw1;
+                            pitch = pitch1;
+                            roll = -roll1;
+                            succeeded = true;
+                        }
+
+                        VecYPR last = points.get(points.size() - 1);
+                        Vec3d p2 = last.add(offset);
+                        float yaw2 = last.getYaw();
+                        float pitch2 = last.getPitch();
+                        float roll2 = last.getRoll();
+                        double dist2 = p2.distanceTo(worldPos);
+
+                        if (dist2 < min ||
+                                (endPointData.trackSnapSettings().snapYaw()
+                                        && dist2 - 0.5 < min
+                                        && succeeded
+                                        && VecUtil.delta(yaw2, yawHead) < VecUtil.delta(yaw, yawHead))) {
+                            min = dist2;
+                            minPos = p2;
+                            yaw = yaw2 + 180;
+                            pitch = -pitch2;
+                            roll = roll2;
+                            succeeded = true;
+                        }
+                    } else {
+                        VecYPR dataPt = points.get(0);
+                        Vec3d p = dataPt.add(offset);
+                        float currentYaw = dataPt.getYaw();
+                        float currentPitch = dataPt.getPitch();
+                        float currentRoll = dataPt.getRoll();
+
+                        if (VecUtil.delta(currentYaw, rotationYawHead) > 90) {
+                            currentYaw += 180;
+                            currentRoll = -currentRoll;
+                        }
+
+                        double dist = p.distanceTo(worldPos);
+                        if (dist < min ||
+                                (endPointData.trackSnapSettings().snapYaw()
+                                        && dist - 0.5 < min
+                                        && succeeded
+                                        && VecUtil.delta(currentYaw, yawHead) < VecUtil.delta(yaw, yawHead))) {
+                            min = dist;
+                            minPos = p;
+                            yaw = currentYaw + 180;
+                            pitch = -currentPitch;
+                            roll = currentRoll;
+                            succeeded = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (min <= hori) {
+            yaw = endPointData.trackSnapSettings().snapYaw()
+                    ? (540 - yaw) % 360
+                    : rotationYawHead;
+            return new VecYPR(minPos, yaw, pitch, roll);
+        }
+
+        return null;
+    }
+
+    //TODO: keep stack info so that we wont lost it after applying snapping
     public static SnappedResult applySnapAndAdjust(Player player, World world, Vec3i pos, Vec3d hit, ItemStack stack, boolean isNear, boolean isPreview) {
         RailSettings stackInfo = RailSettings.from(stack);
         boolean succeeded = false;
@@ -177,7 +316,11 @@ public class TrackSnapUtil {
         EndPointData pointData = isNear ? stackInfo.nearPointData : stackInfo.farPointData;
 
         if (pointData.trackSnapSettings().snapPos()) {
-            snapped = TrackSnapUtil.getNeighborNode(player, world, pos, hit, stack, isNear);
+            if(Config.ConfigDebug.offWorldPathing) {
+                snapped = getNeighborNodeOffline(player, world, pos, hit, stack, isNear);
+            } else {
+                snapped = getNeighborNodeByTile(player, world, pos, hit, stack, isNear);
+            }
             if (snapped != null) {
                 succeeded = true;
 
