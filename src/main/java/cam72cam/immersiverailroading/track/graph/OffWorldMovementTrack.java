@@ -336,7 +336,7 @@ public class OffWorldMovementTrack {
         return null;
     }
 
-    public static boolean initCurrent(IRPathingData current, World world, double gauge) { // todo: 持久化车位置的topo
+    public static boolean initCurrent(IRPathingData current, World world, double gauge) {
         WorldData data = WorldData.get(world);
         if (data == null) return false;
 
