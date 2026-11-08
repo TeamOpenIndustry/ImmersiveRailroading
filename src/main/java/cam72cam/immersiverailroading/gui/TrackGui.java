@@ -603,6 +603,17 @@ public class TrackGui implements IScreen {
 		}
 	}
 
+//	public void refreshSetting() {
+//		//todo
+//		settings = ;
+//		onClose();
+//		if (te != null) {
+//			GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
+//		} else {
+//			GuiTypes.RAIL.open(MinecraftClient.getPlayer());
+//		}
+//	}
+
 	@Override
 	public void draw(IScreenBuilder builder, RenderState state) {
 		frame++;
@@ -620,7 +631,7 @@ public class TrackGui implements IScreen {
 						rendered.type = TrackItems.STRAIGHT;
 					}),
 					new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null),
-					null, SwitchState.NONE, SwitchState.NONE, 0, true);
+					null, SwitchState.NONE, SwitchState.NONE, 0, true, null);
 
 			double scale = GUIHelpers.getScreenWidth() / 12.0 * zoom;
 
@@ -659,7 +670,7 @@ public class TrackGui implements IScreen {
 						rendered.type = TrackItems.STRAIGHT;
 					}),
 					new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null),
-					null, SwitchState.NONE, SwitchState.NONE, 0, true);
+					null, SwitchState.NONE, SwitchState.NONE, 0, true, null);
 
 			double scale = GUIHelpers.getScreenWidth() / 15.0 * zoom;
 
@@ -714,7 +725,7 @@ public class TrackGui implements IScreen {
 					b.length = length;
 				}),
 				new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null),
-				null, SwitchState.NONE, SwitchState.NONE, tablePos, true);
+				null, SwitchState.NONE, SwitchState.NONE, tablePos, true, null);
 
 		int length = (int) info.settings.getValidSize();
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;

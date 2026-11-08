@@ -14,7 +14,8 @@ public enum TrackItems {
 	CUSTOM(9),
 	TRANSFERTABLE(8),
 	TURN_V2(3),// TODO: BuilderSwitch
-	CUBICPARABOLA(5);
+	CUBICPARABOLA(5),
+	MULTISWITCH(10);
 
 	private final int order;
 
@@ -25,6 +26,16 @@ public enum TrackItems {
 	@Override
 	public String toString() {
 	    return TextUtil.translate("track.immersiverailroading:class." + super.toString().toLowerCase(Locale.ROOT));
+	}
+
+	public boolean isSwitch() {
+		switch (this) {
+			case SWITCH:
+			case MULTISWITCH:
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	public boolean hasQuarters() {

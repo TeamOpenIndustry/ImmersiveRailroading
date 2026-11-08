@@ -45,21 +45,26 @@ public class TrackSingleGeometrySegment {
     public TrackSingleGeometrySegment(TileRail trackBlock, World world, int switchIndex, Gauge gauge) {
         if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 1) {
             this.absPos = trackBlock.subInfoPos.get(0);
-        } else {
+        } else if(trackBlock.info.settings.type == TrackItems.MULTISWITCH && switchIndex >= 1) {
+            this.absPos = trackBlock.subInfoPos.get(switchIndex - 1);
+        } else  {
             this.absPos = trackBlock.getPos();
         }
-        // 记录父方块坐标，用于 topo 精准清理
         this.parentAbsPos = trackBlock.getPos();
 
         this.gauge = gauge;
         this.switchIdex = switchIndex;
 
         BuilderCubicCurve builder;
-        if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 0) { // switch straight way
+        if (trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 0) { // switch straight way
             builder = (BuilderCubicCurve) trackBlock.info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(world, trackBlock.getPos());
-        } else if(trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 1) {
+        } else if (trackBlock.info.settings.type == TrackItems.MULTISWITCH && switchIndex == 0) { // multi switch main
+            builder = (BuilderCubicCurve) trackBlock.info.withSettings(mutable -> mutable.type = trackBlock.info.multiSwitchInfo.realShapeType()).getBuilder(world, trackBlock.getPos());
+        } else if (trackBlock.info.settings.type == TrackItems.SWITCH && switchIndex == 1) { // switch turn way
             builder = (BuilderCubicCurve) trackBlock.subInfos.get(0).getBuilder(world, trackBlock.subInfoPos.get(0));
-        } else if(trackBlock.info.settings.type == TrackItems.TURNTABLE) {
+        } else if (trackBlock.info.settings.type == TrackItems.MULTISWITCH && switchIndex >= 1) { // multi switch non-main
+            builder = (BuilderCubicCurve) trackBlock.subInfos.get(switchIndex - 1).getBuilder(world, trackBlock.subInfoPos.get(switchIndex - 1));
+        } else if (trackBlock.info.settings.type == TrackItems.TURNTABLE) {
             builder = (BuilderCubicCurve) trackBlock.info.withSettings(
                     mutable -> {
                         mutable.type = TrackItems.STRAIGHT;
@@ -68,13 +73,13 @@ public class TrackSingleGeometrySegment {
             ).with(mutable -> {
                 mutable.placementInfo = mutable.placementInfo.withYaw(VecUtil.toWrongYaw(mutable.placementInfo.facing().getAngle()) + 180);
             }).getBuilder(world, trackBlock.getPos());
-        } else if(trackBlock.info.settings.type == TrackItems.TRANSFERTABLE) {
+        } else if (trackBlock.info.settings.type == TrackItems.TRANSFERTABLE) {
             builder = (BuilderCubicCurve) trackBlock.info.withSettings(
                     mutable -> mutable.type = TrackItems.STRAIGHT
             ).with(mutable -> {
                 mutable.placementInfo = mutable.placementInfo.withYaw(VecUtil.toWrongYaw(mutable.placementInfo.facing().getAngle() + 180));
             }).getBuilder(world, trackBlock.getPos());
-        } else{ // common way
+        } else { // common way
             builder = (BuilderCubicCurve) trackBlock.info.getBuilder(world, trackBlock.getPos());
         }
 
@@ -368,7 +373,8 @@ public class TrackSingleGeometrySegment {
         RailInfo info = new RailInfo(
                 settings,
                 new PlacementInfo(baseCurve.p1, TrackDirection.NONE, yaw, baseCurve.ctrl1).offset(placementPosition),
-                new PlacementInfo(baseCurve.p2, TrackDirection.NONE, yaw, baseCurve.ctrl2).offset(placementPosition)
+                new PlacementInfo(baseCurve.p2, TrackDirection.NONE, yaw, baseCurve.ctrl2).offset(placementPosition),
+                null
         );
         builderCache = new BuilderCubicCurve(info, world, absPos, false);
         builderWorldCache = world;
@@ -397,7 +403,8 @@ public class TrackSingleGeometrySegment {
         RailInfo info = new RailInfo(
                 settings,
                 new PlacementInfo(rotated.p1, TrackDirection.NONE, newYaw, rotated.ctrl1).offset(newPlacement),
-                new PlacementInfo(rotated.p2, TrackDirection.NONE, newYaw, rotated.ctrl2).offset(newPlacement)
+                new PlacementInfo(rotated.p2, TrackDirection.NONE, newYaw, rotated.ctrl2).offset(newPlacement),
+                null
         );
         builderCache = new BuilderCubicCurve(info, world, absPos, false);
         builderWorldCache = world;

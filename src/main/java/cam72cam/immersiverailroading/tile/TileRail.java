@@ -30,20 +30,10 @@ public class TileRail extends TileRailBase {
 	public RailInfo info;
 
 	@TagField(value = "subInfos", mapper = RailInfo.subInfosMapper.class)
-	public List<RailInfo> subInfos;// todo also upload track to parent when update
+	public List<RailInfo> subInfos;
 
 	@TagField(value = "subInfoPos", mapper = Vec3iListMapper.class)
 	public List<Vec3i> subInfoPos;
-
-	//todo multi gauges support
-//	@TagField("subGaugeInfo")
-//	public RailInfo subGaugeInfo;
-//
-//	@TagField(value = "subGaugeInfos", mapper = RailInfo.subInfosMapper.class)
-//	public List<RailInfo> subGaugeInfos;
-//
-//	@TagField(value = "subGaugeInfoPos", mapper = Vec3iListMapper.class)
-//	public List<Vec3i> subGaugeInfoPos;
 
 	@TagField("buildTimeMs")
 	private long buildTimeMs;
@@ -88,7 +78,7 @@ public class TileRail extends TileRailBase {
 			if(parent != null) {
 				parent.info = parent.info.with(b -> b.switchState = state);
 				if(parent.subInfos != null && !parent.subInfos.isEmpty()) {
-					parent.subInfos.set(0, info);
+					parent.subInfos.set(info.switchBranchIndex - 2, info);
 				}
 				long currentTime = System.currentTimeMillis();
 				parent.setBuildTimeMs(currentTime);
@@ -205,7 +195,7 @@ public class TileRail extends TileRailBase {
 			if(info.switchBranchIndex == 0) info = info.with(mutable -> mutable.switchBranchIndex = 1);
 		}
 		if(getWorld().isServer && info != null && parent != null
-				&& (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.CUSTOM)
+				&& (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.CUSTOM) // legacy switch branch only
 				&& parent.info.settings.type == TrackItems.SWITCH
 		) {
 			if(info.switchBranchIndex > 1) {
@@ -230,6 +220,20 @@ public class TileRail extends TileRailBase {
 					WorldData.get(getWorld()).setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
 				}
 			}
+		}
+
+		if(getWorld().isServer && info != null && parent != null && info.settings.type.canRoll() && parent.info.settings.type == TrackItems.MULTISWITCH) {
+			if(info.switchBranchIndex > 1) {
+				WorldData data = WorldData.get(getWorld());
+				if (data != null && data.getTrackBlockEnsured(getPos()) != null) {
+					data.removeTrackBlock(getPos());
+					data.setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
+				}
+			}
+		}
+
+		if(getWorld().isServer) {
+			int a  =1 ;
 		}
 	}
 
@@ -294,10 +298,22 @@ public class TileRail extends TileRailBase {
 		}
 
 		if (tracks == null) {
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			if(info.settings.type == TrackItems.SWITCH) {
+				tracks = info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			} else if(info.settings.type == TrackItems.MULTISWITCH) {
+				tracks = info.withSettings(mutable -> mutable.type = info.multiSwitchInfo.realShapeType()).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			} else {
+				tracks = info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			}
 			// This is just terrible
 			Vec3i offset = getPos().subtract(tracks.get(0).getPos());
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			if(info.settings.type == TrackItems.SWITCH) {
+				tracks = info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			} else if(info.settings.type == TrackItems.MULTISWITCH) {
+				tracks = info.withSettings(mutable -> mutable.type = info.multiSwitchInfo.realShapeType()).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			} else {
+				tracks = info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			}
 		}
 
 

@@ -100,12 +100,9 @@ public class TrackNode {
                                             .add(new Vec3d(0, seg.getAndUpdateBuilder(world).info.getTrackHeight() * seg.gauge.scale(), 0));
 
                                     // dist threshold
-                                    if(trackBlock.type == TrackItems.SWITCH) {
-                                        int a = 1;
-                                    }
                                     double d = cand.distanceTo(this.point);
                                     if (d >= maxDist) continue;
-                                    if (i == 0 && trackBlock.type == TrackItems.SWITCH && switchIndex > 0) continue;//唯一不可外部连接的点：switch的turn start
+                                    if (i == 0 && trackBlock.type.isSwitch() && switchIndex > 0) continue;//唯一不可外部连接的点：switch的turn start
 
                                     // exclude self and snap to very close node
                                     if (d < 1e-2) {
@@ -117,7 +114,7 @@ public class TrackNode {
 
                                     // switch hub: index 0
                                     boolean isSwitchHub = switchIndex == 0
-                                            && trackBlock.type == TrackItems.SWITCH
+                                            && trackBlock.type.isSwitch()
                                             && i == 0;
                                     // switch hub: 45°, normal: 30°
                                     double coneCos = isSwitchHub ? cosConeHub : cosCone;

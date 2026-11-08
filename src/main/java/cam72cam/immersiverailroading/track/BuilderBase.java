@@ -78,6 +78,13 @@ public abstract class BuilderBase {
 						tileRail.subInfoPos = new ArrayList<>();
 						tileRail.subInfoPos.add(tileRail.getPos().add(info.builderBranchPosBridge.getFirst()));
 					}
+					if(info.settings.type == TrackItems.MULTISWITCH && info.builderBranchBridge != null) {
+						tileRail.subInfos = info.builderBranchBridge;
+						tileRail.subInfoPos = new ArrayList<>();
+						for(int i = 0; i < tileRail.subInfos.size(); i++) {
+							tileRail.subInfoPos.add(tileRail.getPos().add(info.builderBranchPosBridge.get(i)));
+						}
+					}
 					tileRail.markDirty();
 					tileRail.setBuildTimeMs(System.currentTimeMillis());
 					WorldData.get(world).setTrackBlock(

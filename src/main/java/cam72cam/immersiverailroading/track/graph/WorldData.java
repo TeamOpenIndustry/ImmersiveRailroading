@@ -817,7 +817,7 @@ public class WorldData {
     }
 
     protected void buildTopologyFor(TrackMultiGeometrySegment block) {
-        if (block.type == TrackItems.SWITCH && block.paths.size() >= 2) {
+        if (block.type.isSwitch() && block.paths.size() >= 2) {
             buildSwitchTopology(block);
             return;
         }
@@ -1201,7 +1201,7 @@ public class WorldData {
         }
 
         for (TrackMultiGeometrySegment block : nearbyBlocks) {
-            if (block.type == TrackItems.SWITCH && block.paths.size() >= 2) {
+            if (block.type.isSwitch() && block.paths.size() >= 2) {
                 for (TrackSingleGeometrySegment straight : block.paths.get(0).values()) {
                     if (straight.pointsCache.size() <= 1) continue;
                     searchAndAddGap(straight, true);

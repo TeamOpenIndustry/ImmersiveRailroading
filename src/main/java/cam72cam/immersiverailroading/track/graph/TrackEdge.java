@@ -49,13 +49,13 @@ public class TrackEdge {
     }
 
     public static class Mutable {
-        @TagField
+        @TagField("from")
         public TrackNodeId from;
-        @TagField
+        @TagField("to")
         public TrackNodeId to;
-        @TagField
+        @TagField("edgeType")
         public EdgeType edgeType;
-        @TagField(mapper = LongSetMapper.class)
+        @TagField(value = "coveringRegions", mapper = LongSetMapper.class)
         public Set<Long> coveringRegions;
 
         private Mutable(TrackEdge edge) {

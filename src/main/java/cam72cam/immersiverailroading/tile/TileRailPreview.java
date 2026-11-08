@@ -181,7 +181,7 @@ public class TileRailPreview extends BlockEntityTickable {
 			shouldBreakDirect = true;
 		}
 
-		info = new RailInfo(item, placementInfoOffset, customInfoOffset);
+		info = new RailInfo(item, placementInfoOffset, customInfoOffset, null); // todo
 	}
 
 	public boolean isMulti() {

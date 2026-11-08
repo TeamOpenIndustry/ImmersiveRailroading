@@ -324,7 +324,7 @@ public class GlobalRailwayMap implements IScreen {
                             if (d2 < radiusSq && d2 < closestDistSq) {
                                 for (Vec3i parentAbs : entry.getValue()) {
                                     TrackMultiGeometrySegment seg = data.getTrackBlockLoaded(parentAbs);
-                                    if (seg != null && seg.type == TrackItems.SWITCH) {
+                                    if (seg != null && seg.type.isSwitch()) {
                                         closestDistSq = d2;
                                         hoveredSwitch = seg;
                                     }

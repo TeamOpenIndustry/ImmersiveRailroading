@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
@@ -55,6 +56,7 @@ public class ItemTrackBlueprint extends CustomItem {
     public ClickResult onClickBlock(Player player, World world, Vec3i pos, Player.Hand hand, Facing facing, Vec3d hit) {
 		ItemStack stack = player.getHeldItem(hand);
 		RailSettings stackInfo = RailSettings.from(stack);
+		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(stack);
 
 		if (world.isServer && hand == Player.Hand.SECONDARY) {
 			ItemStack blockinfo = world.getItemStack(pos);
@@ -89,8 +91,18 @@ public class ItemTrackBlueprint extends CustomItem {
 
 		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z), true, snapped);
 		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
-		RailInfo info = new RailInfo(snappedStack, placementInfo, null);
-		info.build(player, pos);
+		if(RailSettings.from(snappedStack).type == TrackItems.SWITCH) {
+			RailInfo info = new RailInfo(snappedStack, placementInfo, null, null);
+			info.build(player, pos);
+		} else {
+			RailInfo info = new RailInfo(snappedStack, placementInfo, null, multiSwitchInfo);
+			info = info.withSettings(mutable -> {
+				mutable.type = TrackItems.MULTISWITCH;
+				mutable.pickType = mutable.type;
+			});
+			info.build(player, pos);
+		}
+
 		return ClickResult.ACCEPTED;
     }
 

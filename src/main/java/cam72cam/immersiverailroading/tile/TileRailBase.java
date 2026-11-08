@@ -996,7 +996,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 		if (cur instanceof TileRail curTR) {
-            if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
+            if (curTR.info.settings.type.isSwitch()) {
 				return curTR;
 			}
 		}
@@ -1101,7 +1101,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				if(tileRail.info.switchBranchIndex > 1) { // also update parent if is switch
 					TileRail switchParent = tileRail.getParentTileWithoutDamage();
 					if(switchParent != null && switchParent.subInfos != null && !switchParent.subInfos.isEmpty()) {
-						switchParent.subInfos.set(0, tileRail.info);
+						switchParent.subInfos.set(tileRail.info.switchBranchIndex - 2, tileRail.info);
 					}
 				}
 			}
@@ -1176,6 +1176,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 				SwitchState state = SwitchUtil.getSwitchState(switchTile);
 				if (state != SwitchState.NONE) {
+					state = SwitchUtil.getSwitchState(switchTile);
 					switchTile.setSwitchState(state);
 				}
 			}

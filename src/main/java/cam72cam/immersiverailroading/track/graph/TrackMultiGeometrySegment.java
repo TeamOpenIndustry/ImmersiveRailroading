@@ -53,9 +53,20 @@ public class TrackMultiGeometrySegment {
             Map<Gauge, TrackSingleGeometrySegment> turnBranch = new HashMap<>();
             turnBranch.put(trackBlock.info.settings.gauge, turn);
             paths.add(turnBranch);
+            type = TrackItems.SWITCH;
+        } else if (trackBlock.info.settings.type == TrackItems.MULTISWITCH && trackBlock.subInfos != null && !trackBlock.subInfos.isEmpty()) {
+            for(int i = 0; i < trackBlock.subInfos.size(); i++) {
+                TrackSingleGeometrySegment turn = new TrackSingleGeometrySegment(trackBlock, world, i + 1, trackBlock.info.settings.gauge);
+                Map<Gauge, TrackSingleGeometrySegment> turnBranch = new HashMap<>();
+                turnBranch.put(trackBlock.info.settings.gauge, turn);
+                paths.add(turnBranch);
+            }
+            type = TrackItems.MULTISWITCH;
+        } else {
+            type = trackBlock.info.settings.type;
         }
 
-        type = trackBlock.info.settings.type;
+
         switchState = trackBlock.info.switchState.ordinal();
         tablePos = trackBlock.info.tablePos;
     }

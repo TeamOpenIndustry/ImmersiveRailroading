@@ -365,8 +365,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		int branchIndex = info.switchBranchIndex;
 		boolean isSwitch = branchIndex >= 1;
 		boolean isStraight = branchIndex == 1;
-		boolean switchStraight = info.switchState == SwitchState.STRAIGHT;
+		boolean switchStraight = info.switchState != SwitchState.TURN;
 		boolean doOffset = isSwitch && (switchStraight != isStraight);
+
 		int switchSize = points.size() / 2;
 		TrackDirection direction = info.placementInfo.direction;
 		TrackDirection effectiveDirection = direction;

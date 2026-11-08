@@ -7,7 +7,11 @@ import java.util.Locale;
 public enum SwitchState {
 	NONE,
 	STRAIGHT,
-	TURN;
+	TURN,
+	TURN_BRANCH2,
+	TURN_BRANCH3,
+	TURN_BRANCH4,
+	;
 
 	@Override
 	public String toString() {

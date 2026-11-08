@@ -36,21 +36,25 @@ public class RailInfo {
 	public final String uniqueID;
 	public final boolean itemHeld;
 
-	public final int switchBranchIndex; // for compat, 0 = normal, 1 = switch parent branch, >2 = turn branches
+	// compat, 0 = normal, 1 = switch parent branch, >2 = turn branches
+	public final int switchBranchIndex;
 
-	// hack: only used for submitting some switch branch information, clear it after using!
+	// bridge: only used for submitting some switch branch information, clear it after using!
 	public List<RailInfo> builderBranchBridge;
 	public List<Vec3i> builderBranchPosBridge;
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
-		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false, 0);
+	// multi switch info
+	public final MultiSwitchInfo multiSwitchInfo;
+
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, MultiSwitchInfo multiSwitchInfo) {
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false, 0, multiSwitchInfo);
 	}
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
-		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld, 0);
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, MultiSwitchInfo multiSwitchInfo) {
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld, 0, multiSwitchInfo);
 	}
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, int switchBranchIndex) {
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, int switchBranchIndex, MultiSwitchInfo multiSwitchInfo) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 			//#1566: Use customInfo to adjust slope height
@@ -66,8 +70,9 @@ public class RailInfo {
 		this.switchForced = switchForced;
 		this.tablePos = tablePos;
 		this.itemHeld = itemHeld;
-		this.uniqueID = generateID();
 		this.switchBranchIndex = switchBranchIndex;
+		this.multiSwitchInfo = multiSwitchInfo;
+		this.uniqueID = generateID();
 	}
 	private String generateID() {
 		Object[] props = new Object [] {
@@ -121,15 +126,18 @@ public class RailInfo {
 		if(this.settings.pickRollAndOffsetInfo != null){
 			id += this.settings.pickRollAndOffsetInfo;
 		}
+		if(this.multiSwitchInfo != null) {
+			id += this.multiSwitchInfo;
+		}
 		return id;
 	}
 
-	public RailInfo(ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+	public RailInfo(ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo) {
+		this(RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0, multiSwitchInfo);
 	}
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(settings, placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo) {
+		this(settings, placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0, multiSwitchInfo);
 	}
 
 	public RailInfo withSettings(Consumer<RailSettings.Mutable> mod) {
@@ -158,6 +166,8 @@ public class RailInfo {
 		public double tablePos;
 		@TagField("switchBranchIndex")
 		public int switchBranchIndex;
+		@TagField("multiSwitchInfo")
+		public MultiSwitchInfo multiSwitchInfo;
 
 		// Not serialized
 		public boolean itemHeld;
@@ -171,12 +181,14 @@ public class RailInfo {
 			this.tablePos = info.tablePos;
 			this.itemHeld = info.itemHeld;
 			this.switchBranchIndex = info.switchBranchIndex;
+			this.multiSwitchInfo = info.multiSwitchInfo;
 		}
 
 		private Mutable(TagCompound data) throws SerializationException {
 			// Defaults
 			tablePos = 0;
 			itemHeld = false;
+			multiSwitchInfo = null;
 
 			TagSerializer.deserialize(data, this);
 		}
@@ -190,7 +202,8 @@ public class RailInfo {
 					switchForced,
 					tablePos,
 					itemHeld,
-					switchBranchIndex
+					switchBranchIndex,
+					multiSwitchInfo
 			);
 		}
 	}
@@ -233,6 +246,8 @@ public class RailInfo {
 			return new BuilderTransferTable(this, world, pos);
 		case CUSTOM:
 			return new BuilderCubicCurve(this, world, pos);
+		case MULTISWITCH:
+			return new BuilderMultiSwitch(this, world, pos);
 		}
 		return null;
 	}
@@ -466,7 +481,7 @@ public class RailInfo {
 					false,
 					1, 1
 			);
-			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
+			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos, null);
 		}
 	}
 

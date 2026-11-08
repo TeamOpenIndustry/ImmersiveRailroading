@@ -29,15 +29,15 @@ public record TrackNodeId(
     }
 
     public static class Mutable {
-        @TagField
+        @TagField("regionPos")
         public long regionPos;
-        @TagField
+        @TagField("regionBlockPos")
         public Vec3i regionBlockPos;
-        @TagField
+        @TagField("pathIndex")
         public int pathIndex;
-        @TagField
+        @TagField("gauge")
         public Gauge gauge;
-        @TagField
+        @TagField("pointIndex")
         public int pointIndex;
 
         private Mutable(TrackNodeId id) {
