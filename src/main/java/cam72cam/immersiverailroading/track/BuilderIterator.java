@@ -362,17 +362,44 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 			renderScale *= 1.005f;
 		}
 
+		// branchIndex 语义：
+		//   0  = 普通轨道（非道岔）
+		//   1  = straight
+		//   2  = turn1
+		//   3  = turn2（状态 TURN_BRANCH2 对应）
+		//   4  = turn3（状态 TURN_BRANCH3 对应）
+		//   5  = turn4（状态 TURN_BRANCH4 对应）
+		//
+		// 位置轴假设：所有分支按 switchBranchIndex 从 straight 一侧线性排列
+		//   straight=0, turn1=1, turn2=2, ..., turnN=N
+		// 非激活分支让路方向：
+		//   myPos < activePos → 在激活分支内侧，向 straight 方向偏
+		//   myPos > activePos → 在激活分支外侧，继续向外偏
+		//
+		// 该假设在"所有 turn 同方向（全 LEFT 或全 RIGHT）"时成立；
+		// 混合方向的多路道岔（部分左弯部分右弯）不在此模型覆盖范围内。
 		int branchIndex = info.switchBranchIndex;
 		boolean isSwitch = branchIndex >= 1;
-		boolean isStraight = branchIndex == 1;
-		boolean switchStraight = info.switchState != SwitchState.TURN;
-		boolean doOffset = isSwitch && (switchStraight != isStraight);
+
+		int activePos;
+		if (info.switchState == SwitchState.STRAIGHT || info.switchState == SwitchState.NONE) {
+			activePos = 0;
+		} else {
+			activePos = info.switchState.ordinal() - SwitchState.TURN.ordinal() + 1;
+		}
+		int myPos = branchIndex - 1;
+
+		boolean branchActive = isSwitch && myPos == activePos;
+		boolean doOffset = isSwitch && !branchActive;
 
 		int switchSize = points.size() / 2;
 		TrackDirection direction = info.placementInfo.direction;
 		TrackDirection effectiveDirection = direction;
-		if (isStraight && !switchStraight) {
-			effectiveDirection = direction == TrackDirection.RIGHT ? TrackDirection.LEFT : TrackDirection.RIGHT;
+		if (doOffset && myPos < activePos) {
+			// 在激活分支内侧，向 straight 方向让路
+			effectiveDirection = (direction == TrackDirection.RIGHT)
+					? TrackDirection.LEFT
+					: TrackDirection.RIGHT;
 		}
 		if (doOffset) {
 			for (int i = 0; i < points.size(); i++) {
@@ -384,7 +411,9 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 				}
 			}
 		}
-		boolean applyMatrixCorrection = !(switchStraight && isStraight);
+		// 保留旧行为：只有 straight 分支且在 straight 激活状态时豁免 rail part 修正
+		// （多路道岔的 turnK 激活时不豁免，避免引入新行为）
+		boolean applyMatrixCorrection = !(branchActive && branchIndex == 1);
 
 		boolean correctPartRailOrientation = true;
 		List<Matrix3> correctLeftOrientation = new ArrayList<>();
@@ -393,65 +422,65 @@ public abstract class BuilderIterator extends BuilderBase implements IIterableTr
 		Vec3d[] leftPos;
 		Vec3d[] rightPos;
 
-        if (points.size() < 2 || info.settings.rollAndOffsetInfo == null) {
-            correctPartRailOrientation = false;
-        } else {
-            double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
-            leftPos = new Vec3d[points.size()];
-            rightPos = new Vec3d[points.size()];
+		if (points.size() < 2 || info.settings.rollAndOffsetInfo == null) {
+			correctPartRailOrientation = false;
+		} else {
+			double length = points.size() * info.settings.gauge.scale() * info.getTrackModel().spacing;
+			leftPos = new Vec3d[points.size()];
+			rightPos = new Vec3d[points.size()];
 
 			// Pre-calculate rail part pos
-            for (int i = 0; i < points.size(); i++) {
-                VecYPR cur = points.get(i);
-                Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
-                Matrix3 o = cur.toMatrix3();
+			for (int i = 0; i < points.size(); i++) {
+				VecYPR cur = points.get(i);
+				Vec3d pos = new Vec3d(cur.x, cur.y, cur.z);
+				Matrix3 o = cur.toMatrix3();
 
-                leftPos[i] = pos.subtract(o.right().scale(info.settings.gauge.value() * 0.5));
-                rightPos[i] = pos.add(o.right().scale(info.settings.gauge.value() * 0.5));
-            }
+				leftPos[i] = pos.subtract(o.right().scale(info.settings.gauge.value() * 0.5));
+				rightPos[i] = pos.add(o.right().scale(info.settings.gauge.value() * 0.5));
+			}
 
 			//Start
-            Matrix3 startBase = points.getFirst().toMatrix3();
+			Matrix3 startBase = points.getFirst().toMatrix3();
 
-            float startLeftPitch =
-                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
-                            length, false, info.settings.gauge.value());
+			float startLeftPitch =
+					(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
+							length, false, info.settings.gauge.value());
 
-            float startRightPitch =
-                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
-                            length, true, info.settings.gauge.value());
+			float startRightPitch =
+					(float) info.settings.rollAndOffsetInfo.getRelRollSlopeStart(
+							length, true, info.settings.gauge.value());
 
 			// TODO: pitch fix only works best when pivot is on rail face yet, can we fix it?
-            correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
-            correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
+			correctLeftOrientation.add(startBase.copy().rotateLocalPitch(startLeftPitch));
+			correctRightOrientation.add(startBase.copy().rotateLocalPitch(startRightPitch));
 
 			//Mid
-            for (int i = 1; i < points.size() - 1; i++) {
-                Matrix3 leftOrientation = Matrix3.fromBasis(leftPos[i + 1].subtract(leftPos[i - 1]),
-                                                            points.get(i).subtract(leftPos[i]));
-                Matrix3 rightOrientation = Matrix3.fromBasis(rightPos[i + 1].subtract(rightPos[i - 1]),
-                                                             rightPos[i].subtract(points.get(i)));
+			for (int i = 1; i < points.size() - 1; i++) {
+				Matrix3 leftOrientation = Matrix3.fromBasis(leftPos[i + 1].subtract(leftPos[i - 1]),
+						points.get(i).subtract(leftPos[i]));
+				Matrix3 rightOrientation = Matrix3.fromBasis(rightPos[i + 1].subtract(rightPos[i - 1]),
+						rightPos[i].subtract(points.get(i)));
 
-                correctLeftOrientation.add(rightOrientation);//this is extremely wired but it seems the best way...
-                correctRightOrientation.add(leftOrientation);
-            }
+				correctLeftOrientation.add(rightOrientation);//this is extremely wired but it seems the best way...
+				correctRightOrientation.add(leftOrientation);
+			}
 
 			//End
-            Matrix3 endBase = points.getLast().toMatrix3();
+			Matrix3 endBase = points.getLast().toMatrix3();
 
-            float endLeftPitch =
-                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
-                            length, false, info.settings.gauge.value());
+			float endLeftPitch =
+					(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
+							length, false, info.settings.gauge.value());
 
-            float endRightPitch =
-                    (float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
-                            length, true, info.settings.gauge.value());
+			float endRightPitch =
+					(float) info.settings.rollAndOffsetInfo.getRelRollSlopeEnd(
+							length, true, info.settings.gauge.value());
 
-            correctLeftOrientation.add(endBase.copy().rotateLocalPitch(endLeftPitch));
-            correctRightOrientation.add(endBase.copy().rotateLocalPitch(endRightPitch));
-        }
+			correctLeftOrientation.add(endBase.copy().rotateLocalPitch(endLeftPitch));
+			correctRightOrientation.add(endBase.copy().rotateLocalPitch(endRightPitch));
+		}
 
-        for (int i = 0; i < points.size(); i++) {
+		for (int i = 0; i < points.size(); i++) {
 			VecYPR cur = points.get(i);
 			VecYPR switchPos = cur;
 			boolean disableSwitchRailCorrection = false;
