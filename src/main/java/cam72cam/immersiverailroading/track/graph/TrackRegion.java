@@ -11,7 +11,19 @@ public class TrackRegion {
 
     public final Map<Vec3i, TrackMultiGeometrySegment> trackBlocks;// fake final
 
-    protected boolean needsWriteToDisk;
+    private volatile boolean needsWriteToDisk;
+
+    public boolean needsWriteToDisk() {
+        return needsWriteToDisk;
+    }
+
+    public void markDirty() {
+        this.needsWriteToDisk = true;
+    }
+
+    public void clearDirty() {
+        this.needsWriteToDisk = false;
+    }
 
     public TrackRegion(long regionPos) {
         this.regionPos = regionPos;

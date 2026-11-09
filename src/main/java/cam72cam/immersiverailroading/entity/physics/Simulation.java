@@ -378,7 +378,7 @@ public class Simulation {
 
         Map<UUID, WorldData.VehicleRef> refs = new HashMap<>();
         for (EntityCoupleableRollingStock stock : loaded) {
-            refs.put(stock.getUUID(), new WorldData.VehicleRef(stock.getPosition(), stock.getVelocity()));
+            refs.put(stock.getUUID(), new WorldData.VehicleRef(stock.getPosition(), stock.getVelocity(), stock.lastFrontEdge, stock.lastRearEdge));
         }
         WorldData.get(world).updateVehicleRefs(refs);
 

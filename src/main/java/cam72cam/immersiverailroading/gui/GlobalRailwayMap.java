@@ -134,7 +134,7 @@ public class GlobalRailwayMap implements IScreen {
                 currentRegions.add(((long) x << 32) | (z & 0xFFFFFFFFL));
             }
         }
-        new TrackRegionRequestPacket(world, currentRegions).sendToServer();
+//        new TrackRegionRequestPacket(world, currentRegions).sendToServer();
         new VehicleRequestPacket(world, minX, minZ, maxX, maxZ).sendToServer();
     }
 

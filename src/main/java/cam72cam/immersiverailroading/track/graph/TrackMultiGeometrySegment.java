@@ -8,10 +8,7 @@ import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TrackMultiGeometrySegment {
     private final long regionPos;
@@ -24,8 +21,11 @@ public class TrackMultiGeometrySegment {
     private long lastOnlineBuildTime;
 
     public final TrackItems type;
+    private final Set<Vec3i> connectedMultiPositions = new HashSet<>();
 
     private List<Vec3i> cachedPositions;
+
+    private static final int VERSION = 1;
 
     public Vec3i getAbsPos() {
         return TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
@@ -111,7 +111,7 @@ public class TrackMultiGeometrySegment {
         this.regionBlockPos = regionBlockPos;
 
         int version = buffer.getInt();
-        if (version != 1) {
+        if (version < 1 || version > VERSION) {
             throw new RuntimeException(String.format("Invalid multi track geometry segment data version %d", version));
         }
 
@@ -133,6 +133,11 @@ public class TrackMultiGeometrySegment {
                 branch.put(gauge, single);
             }
             paths.add(branch);
+        }
+
+        int connectedCount = buffer.getInt();
+        for (int i = 0; i < connectedCount; i++) {
+            connectedMultiPositions.add(new Vec3i(buffer.getInt(), buffer.getInt(), buffer.getInt()));
         }
     }
 
@@ -156,6 +161,9 @@ public class TrackMultiGeometrySegment {
             }
         }
 
+        bytes += Integer.BYTES; // connect count
+        bytes += connectedMultiPositions.size() * 3 * Integer.BYTES;
+
         return bytes;
     }
 
@@ -176,6 +184,13 @@ public class TrackMultiGeometrySegment {
                 entry.getValue().write(buffer);
             }
         }
+
+        buffer.putInt(connectedMultiPositions.size());
+        for (Vec3i pos : connectedMultiPositions) {
+            buffer.putInt(pos.x);
+            buffer.putInt(pos.y);
+            buffer.putInt(pos.z);
+        }
     }
 
     public List<Vec3i> getPositionsCache() {
@@ -192,5 +207,17 @@ public class TrackMultiGeometrySegment {
         }
         cachedPositions = positionCache;
         return cachedPositions;
+    }
+
+    public boolean addConnectedMulti(Vec3i pos) {
+        return connectedMultiPositions.add(pos);
+    }
+
+    public boolean removeConnectedMulti(Vec3i pos) {
+        return connectedMultiPositions.remove(pos);
+    }
+
+    public Set<Vec3i> getConnectedMultiPositions() {
+        return Collections.unmodifiableSet(connectedMultiPositions);
     }
 }

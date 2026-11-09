@@ -102,7 +102,15 @@ public class WorldData {
     public static class VehicleRef {
         public final Vec3d pos;
         public final Vec3d velocity;
-        public VehicleRef(Vec3d pos, Vec3d velocity) { this.pos = pos; this.velocity = velocity; }
+        public final TrackEdge lastFrontEdge;
+        public final TrackEdge lastRearEdge;
+
+        public VehicleRef(Vec3d pos, Vec3d velocity, TrackEdge lastFrontEdge, TrackEdge lastRearEdge) {
+            this.pos = pos;
+            this.velocity = velocity;
+            this.lastFrontEdge = lastFrontEdge;
+            this.lastRearEdge = lastRearEdge;
+        }
     }
 
     /**
@@ -182,6 +190,14 @@ public class WorldData {
 
     public static WorldData getOrCreate(World world) {
         return LOADED.computeIfAbsent(world, w -> new WorldData(w, null));
+    }
+
+    private void markRegionDirty(Vec3i pos) {
+        long r = TrackRegionUtil.vecToRegion(pos);
+        TrackRegion region = getRegionById(r, false);
+        if (region != null) {
+            region.markDirty();
+        }
     }
 
     public static void save(World world, File levelDirectory) {
@@ -336,6 +352,18 @@ public class WorldData {
 
         TrackMultiGeometrySegment old = region.getTrackBlock(pos);
         if (old != null) {
+            // 【核心】：先清除所有旧的物理邻居连接，告诉他们我变了
+            for (Vec3i neighbor : old.getConnectedMultiPositions()) {
+                TrackMultiGeometrySegment nMulti = getTrackBlockLoaded(neighbor);
+                if (nMulti != null) {
+                    if (nMulti.removeConnectedMulti(pos)) {
+                        markRegionDirty(neighbor);
+                    }
+                }
+            }
+            old.getConnectedMultiPositions().clear();
+            markRegionDirty(pos);
+
             removeTrackBlockFromParents(pos, old);
             removeTopologyFor(regionId, TrackRegionUtil.toRegionBlockPos(pos));
         }
@@ -356,15 +384,24 @@ public class WorldData {
     public boolean removeTrackBlock(Vec3i pos) {
         long regionId = vecToRegion(pos);
         TrackRegion region = getRegionById(regionId, false);
-        if (region == null) {
-            return false;
-        }
+        if (region == null) return false;
+
         TrackMultiGeometrySegment old = region.getTrackBlock(pos);
-        if (!region.removeTrackBlock(pos)) {
-            return false;
-        }
+        if (!region.removeTrackBlock(pos)) return false;
 
         if (old != null) {
+            // 【核心】：拆除时，双向断开物理邻居
+            for (Vec3i neighbor : old.getConnectedMultiPositions()) {
+                TrackMultiGeometrySegment nMulti = getTrackBlockLoaded(neighbor);
+                if (nMulti != null) {
+                    if (nMulti.removeConnectedMulti(pos)) {
+                        markRegionDirty(neighbor);
+                    }
+                }
+            }
+            old.getConnectedMultiPositions().clear();
+            markRegionDirty(pos);
+
             removeTrackBlockFromParents(pos, old);
         }
         removeTopologyFor(regionId, TrackRegionUtil.toRegionBlockPos(pos));
@@ -383,7 +420,7 @@ public class WorldData {
         TrackMultiGeometrySegment seg = region.getTrackBlock(pos);
         if (seg != null) {
             seg.updateSwitchSate(switchState, offline, currentTime);
-            region.needsWriteToDisk = true;
+            region.markDirty();
         }
 
         if (world.isServer) {
@@ -478,7 +515,7 @@ public class WorldData {
                 Map.Entry<Long, TrackRegion> entry = iterator.next();
                 TrackRegion region = entry.getValue();
 
-                if (!region.needsWriteToDisk) {
+                if (!region.needsWriteToDisk()) {
                     continue;
                 }
 
@@ -505,7 +542,7 @@ public class WorldData {
                                 java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     }
 
-                    region.needsWriteToDisk = false;
+                    region.clearDirty();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -566,7 +603,7 @@ public class WorldData {
             pendingFullSync.remove(r);
         }
 
-        if (region.needsWriteToDisk && directory != null) {
+        if (region.needsWriteToDisk() && directory != null) {
             try {
                 File file = regionFile(r);
                 if (region.isEmpty()) {
@@ -575,7 +612,7 @@ public class WorldData {
                     }
                 } else {
                     TrackRegionUtil.writeBuffer(file, region.write());
-                    region.needsWriteToDisk = false;
+                    region.clearDirty();
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -769,20 +806,62 @@ public class WorldData {
             }
         }
 
-        // 3 x 3
         for (VehicleRef ref : vehicleRefs.values()) {
-            long regionId = TrackRegionUtil.vecToRegion(new Vec3i(ref.pos));
-            int rx = TrackRegionUtil.regionX(regionId);
-            int rz = TrackRegionUtil.regionZ(regionId);
+            required.add(TrackRegionUtil.vecToRegion(new Vec3i(ref.pos)));
+        }
 
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
-                    required.add(((long) (rx + dx) << 32) | ((rz + dz) & 0xFFFFFFFFL));
+        // 基于车辆所在的边，进行 N 层拓扑 BFS
+        int MAX_DEPTH = 2;
+        Queue<Vec3i> queue = new LinkedList<>();
+        Map<Vec3i, Integer> depths = new HashMap<>();
+
+        for (VehicleRef ref : vehicleRefs.values()) {
+            if (ref.lastFrontEdge != null) {
+                TrackNode fromNode = nodes.get(ref.lastFrontEdge.from);
+                TrackNode toNode = nodes.get(ref.lastFrontEdge.to);
+                if (fromNode != null && toNode != null) {
+                    addToBfs(fromNode.trackSingleGeometrySegment.parentAbsPos, queue, depths);
+                    addToBfs(toNode.trackSingleGeometrySegment.parentAbsPos, queue, depths);
+                }
+            }
+            if (ref.lastRearEdge != null) {
+                TrackNode fromNode = nodes.get(ref.lastRearEdge.from);
+                TrackNode toNode = nodes.get(ref.lastRearEdge.to);
+                if (fromNode != null && toNode != null) {
+                    addToBfs(fromNode.trackSingleGeometrySegment.parentAbsPos, queue, depths);
+                    addToBfs(toNode.trackSingleGeometrySegment.parentAbsPos, queue, depths);
+                }
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            Vec3i multiPos = queue.poll();
+            int currentDepth = depths.get(multiPos);
+
+            // 把当前 multi 的 region 加入加载列表
+            required.add(TrackRegionUtil.vecToRegion(multiPos));
+
+            if (currentDepth >= MAX_DEPTH) continue;
+
+            TrackMultiGeometrySegment multi = getTrackBlockLoaded(multiPos);
+            if (multi != null) {
+                for (Vec3i neighbor : multi.getConnectedMultiPositions()) {
+                    if (!depths.containsKey(neighbor)) {
+                        depths.put(neighbor, currentDepth + 1);
+                        queue.add(neighbor);
+                    }
                 }
             }
         }
 
         return required;
+    }
+
+    private void addToBfs(Vec3i pos, Queue<Vec3i> queue, Map<Vec3i, Integer> depths) {
+        if (!depths.containsKey(pos)) {
+            depths.put(pos, 0);
+            queue.add(pos);
+        }
     }
 
     private Set<Long> regionsInRadius(Vec3d center, double radius) {
@@ -989,14 +1068,28 @@ public class WorldData {
 
     private void addEdge(TrackNodeId from, TrackNodeId to, TrackEdge.EdgeType type) {
         if (from.equals(to)) return;
-        TrackEdge edge = new TrackEdge(from, to, type);
-        if (!edges.add(edge)) return;
-
-        outgoing.computeIfAbsent(from, k -> new ArrayList<>()).add(edge);
-
         TrackNode fromNode = nodes.get(from);
         TrackNode toNode = nodes.get(to);
         if (fromNode == null || toNode == null) return;
+
+        Vec3i fromParent = fromNode.trackSingleGeometrySegment.parentAbsPos;
+        Vec3i toParent = toNode.trackSingleGeometrySegment.parentAbsPos;
+
+        if (!fromParent.equals(toParent)) { // 提前到这里无条件加入了，但是真有可能发生!edges.add(edge)但是multi内存储连接缺失的情况吗？
+            TrackMultiGeometrySegment fromMulti = getTrackBlockLoaded(fromParent);
+            TrackMultiGeometrySegment toMulti = getTrackBlockLoaded(toParent);
+
+            if (fromMulti != null && fromMulti.addConnectedMulti(toParent)) {
+                markRegionDirty(fromParent);
+            }
+            if (toMulti != null && toMulti.addConnectedMulti(fromParent)) {
+                markRegionDirty(toParent);
+            }
+        }
+
+        TrackEdge edge = new TrackEdge(from, to, type);
+        if (!edges.add(edge)) return;
+        outgoing.computeIfAbsent(from, k -> new ArrayList<>()).add(edge);
 
         long toRegion = TrackRegionUtil.vecToRegion(toNode.trackSingleGeometrySegment.parentAbsPos);
         outgoingByToRegion.computeIfAbsent(toRegion, k -> new HashSet<>()).add(from);
@@ -1036,6 +1129,7 @@ public class WorldData {
         List<TrackEdge> list = outgoing.get(edge.from);
         if (list != null) list.remove(edge);
 
+        TrackNode fromNode = nodes.get(edge.from);
         TrackNode toNode = nodes.get(edge.to);
         if (toNode != null) {
             long toRegion = TrackRegionUtil.vecToRegion(toNode.trackSingleGeometrySegment.parentAbsPos);
