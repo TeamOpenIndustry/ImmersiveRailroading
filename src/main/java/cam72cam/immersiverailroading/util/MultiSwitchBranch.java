@@ -14,10 +14,12 @@ import cam72cam.mod.serialization.TagSerializer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 @TagMapped(MultiSwitchBranch.Mapper.class)
 public record MultiSwitchBranch(
         RailSettings settings,
+        PlacementInfo placementInfo,
         PlacementInfo customInfo
 ) {
     public Mutable mutable() {
@@ -27,11 +29,14 @@ public record MultiSwitchBranch(
     public static class Mutable {
         @TagField("settings")
         public RailSettings settings;
+        @TagField("placementInfo")
+        public PlacementInfo placementInfo;
         @TagField("customInfo")
         public PlacementInfo customInfo;
 
         private Mutable(MultiSwitchBranch branch) {
             this.settings = branch.settings();
+            this.placementInfo = branch.placementInfo();
             this.customInfo = branch.customInfo();
         }
 
@@ -41,8 +46,14 @@ public record MultiSwitchBranch(
         }
 
         public MultiSwitchBranch immutable() {
-            return new MultiSwitchBranch(settings, customInfo);
+            return new MultiSwitchBranch(settings, placementInfo, customInfo);
         }
+    }
+
+    public MultiSwitchBranch with(Consumer<MultiSwitchBranch.Mutable> mod) {
+        MultiSwitchBranch.Mutable mutable = mutable();
+        mod.accept(mutable);
+        return mutable.immutable();
     }
 
     public static class Mapper implements TagMapper<MultiSwitchBranch> {
@@ -138,6 +149,9 @@ public record MultiSwitchBranch(
                 this.settings.isGradeCrossing,
         };
         String id = Arrays.toString(props);
+        if (placementInfo != null) {
+            id += placementInfo;
+        }
         if (customInfo != null) {
             id += customInfo;
         }

@@ -16,6 +16,7 @@ import cam72cam.mod.serialization.TagSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @TagMapped(MultiSwitchInfo.Mapper.class)
 public record MultiSwitchInfo(
@@ -38,6 +39,20 @@ public record MultiSwitchInfo(
         } catch (SerializationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public MultiSwitchInfo with(Consumer<MultiSwitchInfo.Mutable> mod) {
+        MultiSwitchInfo.Mutable mutable = mutable();
+        mod.accept(mutable);
+        return mutable.immutable();
+    }
+
+    public MultiSwitchInfo writeBranchWith(Consumer<MultiSwitchBranch.Mutable> mod, int index) {
+        if(index < 0 || index >= multiSwitchBranches.size()) return this;
+        MultiSwitchBranch branch = multiSwitchBranches.get(index);
+        branch = branch.with(mod);
+        multiSwitchBranches.set(index, branch);
+        return this;
     }
 
     public Mutable mutable() {
@@ -92,8 +107,8 @@ public record MultiSwitchInfo(
                     1, 1
             );
             multiSwitchBranches = new ArrayList<>();
-            multiSwitchBranches.add(new MultiSwitchBranch(settings0, null));
-            multiSwitchBranches.add(new MultiSwitchBranch(settings1, null));
+            multiSwitchBranches.add(new MultiSwitchBranch(settings0, null, null));
+            multiSwitchBranches.add(new MultiSwitchBranch(settings1, null, null));
             realShapeType = TrackItems.STRAIGHT;
             TagSerializer.deserialize(data, this);
         }

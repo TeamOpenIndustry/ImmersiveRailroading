@@ -28,7 +28,12 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack {
 
         for(int i = 0; i < info.multiSwitchInfo.multiSwitchBranches().size(); i++) {
             MultiSwitchBranch branch = info.multiSwitchInfo.multiSwitchBranches().get(i);
-            RailInfo branchInfo = new RailInfo(branch.settings(), info.placementInfo, branch.customInfo(), null);
+            RailInfo branchInfo = new RailInfo(
+                    branch.settings(),
+                    branch.placementInfo() != null ? branch.placementInfo() : info.placementInfo,
+                    branch.customInfo(),
+                    null
+            );
             int finalI = i;
             branchInfo = branchInfo.with(mutable -> mutable.switchBranchIndex = finalI + 2);
             branchInfo = branchInfo.withSettings(mutable -> {

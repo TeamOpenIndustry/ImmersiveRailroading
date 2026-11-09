@@ -5,6 +5,7 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
@@ -95,6 +96,8 @@ public class ItemTrackBlueprint extends CustomItem {
 			RailInfo info = new RailInfo(snappedStack, placementInfo, null, null);
 			info.build(player, pos);
 		} else {
+			PlacementInfo finalPlacementInfo = placementInfo.withDirection(TrackDirection.LEFT);
+			multiSwitchInfo.writeBranchWith(mutable -> mutable.placementInfo = finalPlacementInfo, 1);
 			RailInfo info = new RailInfo(snappedStack, placementInfo, null, multiSwitchInfo);
 			info = info.withSettings(mutable -> {
 				mutable.type = TrackItems.MULTISWITCH;
