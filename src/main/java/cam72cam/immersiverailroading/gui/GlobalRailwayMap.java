@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.gui;
 
+import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -134,7 +135,7 @@ public class GlobalRailwayMap implements IScreen {
                 currentRegions.add(((long) x << 32) | (z & 0xFFFFFFFFL));
             }
         }
-//        new TrackRegionRequestPacket(world, currentRegions).sendToServer();
+        if(ConfigGraphics.requestServerTrackRegions) new TrackRegionRequestPacket(world, currentRegions).sendToServer();
         new VehicleRequestPacket(world, minX, minZ, maxX, maxZ).sendToServer();
     }
 
