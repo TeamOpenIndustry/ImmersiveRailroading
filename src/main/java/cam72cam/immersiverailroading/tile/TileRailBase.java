@@ -1143,12 +1143,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 			return stack;
 		}
 
-		if(parent.info.settings.rollAndOffsetInfo != null) {
+		if (parent.info.settings.rollAndOffsetInfo != null) { // newer data
 			parent.info.settings.with(mutable -> {
 				mutable.rollAndOffsetInfo = mutable.pickRollAndOffsetInfo;
 				mutable.type = mutable.pickType;
 			}).write(stack);
-		}else {
+			if(parent.info.multiSwitchInfo != null) parent.info.multiSwitchInfo.write(stack);
+		} else { // older data
 			parent.info.settings.with(mutable -> mutable.type = mutable.pickType).write(stack);
 		}
 
