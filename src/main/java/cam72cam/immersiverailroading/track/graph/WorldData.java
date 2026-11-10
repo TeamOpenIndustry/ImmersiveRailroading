@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.SwitchState;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.offline.TrackRegionDeltaPacket;
 import cam72cam.immersiverailroading.net.offline.TrackRegionPacket;
 import cam72cam.immersiverailroading.net.offline.VehicleSyncPacket;
@@ -13,7 +12,6 @@ import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.world.World;
-import org.lwjgl.Sys;
 
 import java.io.File;
 import java.io.IOException;
@@ -214,7 +212,8 @@ public class WorldData {
                 ImmersiveRailroading.warn("World %s / %s already loaded!  This is a bug!",
                         levelDirectory.toString(), world.getId());
             }
-            WorldData data = new WorldData(world, new File(levelDirectory, "immersiverailroading" + world.getId()));
+            String folderName = "immersiverailroading_" + world.getStringId().replace(":", "_");//todo 移到umc
+            WorldData data = new WorldData(world, new File(levelDirectory, folderName));
             LOADED.put(world, data);
 
             data.buildAll();
@@ -605,6 +604,13 @@ public class WorldData {
 
         if (region.needsWriteToDisk() && directory != null) {
             try {
+                if (!directory.exists()) {
+                    if (!directory.mkdirs()) {
+                        throw new RuntimeException(String.format(
+                                "Unable to create ImmersiveRailroading data directory %s!", directory));
+                    }
+                }
+
                 File file = regionFile(r);
                 if (region.isEmpty()) {
                     if (file.exists() && !file.delete()) {

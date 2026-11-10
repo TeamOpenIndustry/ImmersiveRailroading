@@ -42,8 +42,9 @@ public class VehiclePersistence {
         }, "IR-Vehicle-Save-ShutdownHook"));
     }
 
-    private static File dirFor(File levelDirectory, World world) {
-        return new File(levelDirectory, "immersiverailroading" + world.getId() + "/vehicles");
+    private static File dirFor(File levelDirectory, World world) { //todo 移到umc
+        String folderName = "immersiverailroading_" + world.getStringId().replace(':', '_');
+        return new File(new File(levelDirectory, folderName), "vehicles");
     }
 
     private static File fileFor(File levelDirectory, World world, int totalBuckets, int bucketId) {
