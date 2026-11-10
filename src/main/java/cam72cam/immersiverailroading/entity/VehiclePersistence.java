@@ -66,7 +66,7 @@ public class VehiclePersistence {
         Map<Integer, List<ModdedEntity>> buckets = new HashMap<>();
 
         for (ModdedEntity e : pool.getAllEntities()) {
-            int b = bucketFor(e.getPersistentID(), bucketCount);
+            int b = bucketFor(e.getUUID(), bucketCount);
             buckets.computeIfAbsent(b, k -> new ArrayList<>()).add(e);
         }
 
@@ -87,7 +87,7 @@ public class VehiclePersistence {
                     TagCompound root = new TagCompound();
                     Map<UUID, TagCompound> map = new HashMap<>();
                     for (ModdedEntity e : entities) {
-                        map.put(e.getPersistentID(), e.serializeToTagCompound());
+                        map.put(e.getUUID(), e.serializeToTagCompound());
                     }
                     root.setMap("vehicles", map, UUID::toString, tc -> tc);
 
