@@ -361,7 +361,7 @@ public class WorldData {
                     }
                 }
             }
-            old.getConnectedMultiPositions().clear();
+            old.clearConnectedMultiPositions();
             markRegionDirty(pos);
 
             removeTrackBlockFromParents(pos, old);
@@ -399,7 +399,7 @@ public class WorldData {
                     }
                 }
             }
-            old.getConnectedMultiPositions().clear();
+            old.clearConnectedMultiPositions();
             markRegionDirty(pos);
 
             removeTrackBlockFromParents(pos, old);

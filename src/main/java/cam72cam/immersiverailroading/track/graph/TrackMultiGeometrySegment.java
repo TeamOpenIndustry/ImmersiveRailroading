@@ -220,4 +220,8 @@ public class TrackMultiGeometrySegment {
     public Set<Vec3i> getConnectedMultiPositions() {
         return Collections.unmodifiableSet(connectedMultiPositions);
     }
+
+    public void clearConnectedMultiPositions() {
+        this.connectedMultiPositions.clear();
+    }
 }
