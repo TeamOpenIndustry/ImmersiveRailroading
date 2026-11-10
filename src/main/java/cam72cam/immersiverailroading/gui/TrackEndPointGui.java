@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.TrackSnapSettings;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
@@ -26,8 +27,10 @@ public class TrackEndPointGui implements IScreen {
     private TileRailPreview te;
     private int targetGuiOpenType;
     private boolean unlockGuiTurnDegree;
+    private int multiSwitchBranchSelected;
     private final List<ItemStack> oreDict;
     private RailSettings.Mutable settings;
+    private MultiSwitchInfo.Mutable multiSwitchInfo;
 
     // Near/Far Label
     private Button nearLabel;
@@ -103,9 +106,11 @@ public class TrackEndPointGui implements IScreen {
     private TrackEndPointGui(ItemStack stack) {
         stack = stack.copy();
         settings = RailSettings.from(stack).mutable();
+        multiSwitchInfo = MultiSwitchInfo.from(stack).mutable();
         ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
         targetGuiOpenType = data.guiOpenType;
         unlockGuiTurnDegree = data.unlockGuiTurnDegree;
+        multiSwitchBranchSelected = data.multiSwitchBranchSelected;
 
         oreDict = new ArrayList<>();
         oreDict.add(ItemStack.EMPTY);
@@ -658,19 +663,19 @@ public class TrackEndPointGui implements IScreen {
 
     public void onClose() {
         if (this.te != null) {
-            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
+            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
 
             // Update client data here in order to avoid networking lag
             ItemStack clientStack = te.getItem();
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
             te.setItem(clientStack, MinecraftClient.getPlayer());
         } else {
-            new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
+            new ItemRailUpdatePacket(settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
 
             ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
             MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
         }
     }

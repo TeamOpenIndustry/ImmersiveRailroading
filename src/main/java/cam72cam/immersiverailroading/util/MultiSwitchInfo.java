@@ -72,44 +72,7 @@ public record MultiSwitchInfo(
 
         public Mutable(TagCompound data) throws SerializationException {
             // Defaults
-            RailSettings settings0 = new RailSettings(
-                    Gauge.standard(),
-                    "default",
-                    TrackItems.TURN_V2, TrackItems.TURN_V2,
-                    10,
-                    90f,
-                    1,
-                    TrackSmoothing.NEITHER_V2,
-                    new EndPointData(0), new EndPointData(10),
-                    RollAndOffsetInfo.getDefault(), RollAndOffsetInfo.getDefault(),
-                    TrackDirection.LEFT,
-                    new TrackFaceTransSetting(),
-                    cam72cam.mod.item.ItemStack.EMPTY, cam72cam.mod.item.ItemStack.EMPTY,
-                    false,
-                    false,
-                    1, 1
-            );
-            RailSettings settings1 = new RailSettings(
-                    Gauge.standard(),
-                    "default",
-                    TrackItems.TURN_V2, TrackItems.TURN_V2,
-                    20,
-                    90f,
-                    1,
-                    TrackSmoothing.NEITHER_V2,
-                    new EndPointData(0), new EndPointData(10),
-                    RollAndOffsetInfo.getDefault(), RollAndOffsetInfo.getDefault(),
-                    TrackDirection.LEFT,
-                    new TrackFaceTransSetting(),
-                    cam72cam.mod.item.ItemStack.EMPTY, cam72cam.mod.item.ItemStack.EMPTY,
-                    false,
-                    false,
-                    1, 1
-            );
             multiSwitchBranches = new ArrayList<>();
-            multiSwitchBranches.add(new MultiSwitchBranch(settings0, null, null));
-            multiSwitchBranches.add(new MultiSwitchBranch(settings1, null, null));
-            realShapeType = TrackItems.STRAIGHT;
             TagSerializer.deserialize(data, this);
         }
 

@@ -85,27 +85,16 @@ public class ItemTrackBlueprint extends CustomItem {
 			if (te != null) {
 				PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z), true, snapped);
 				// For TilePreview, to update offset properly we need to use Vec3i PlacementInfo, TilePreview will handle offset itself!
-				te.setup(snappedStack, placementInfo);
+				te.setup(snappedStack, placementInfo, multiSwitchInfo);
 			}
 			return ClickResult.ACCEPTED;
 		}
 
 		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z), true, snapped);
 		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
-		if(RailSettings.from(snappedStack).type == TrackItems.SWITCH) {
-			RailInfo info = new RailInfo(snappedStack, placementInfo, null, null);
-			info.build(player, pos);
-		} else {
-			PlacementInfo finalPlacementInfo = placementInfo.withDirection(TrackDirection.LEFT);
-			multiSwitchInfo.writeBranchWith(mutable -> mutable.placementInfo = finalPlacementInfo, 1);
-			RailInfo info = new RailInfo(snappedStack, placementInfo, null, multiSwitchInfo);
-			info = info.withSettings(mutable -> {
-				mutable.type = TrackItems.MULTISWITCH;
-				mutable.pickType = mutable.type;
-			});
-			info.build(player, pos);
-		}
 
+		RailInfo info = new RailInfo(snappedStack, placementInfo, null, multiSwitchInfo);
+		info.build(player, pos);
 		return ClickResult.ACCEPTED;
     }
 
@@ -179,14 +168,18 @@ public class ItemTrackBlueprint extends CustomItem {
 		@TagField
 		public boolean unlockGuiTurnDegree;
 
+		@TagField
+		public int multiSwitchBranchSelected;
+
 		public Data(ItemStack stack) {
 			super(stack);
 		}
 
-		public static void writeTo(ItemStack stack, int targetGuiOpenType, boolean unlockGuiTurnDegree) {
+		public static void writeTo(ItemStack stack, int targetGuiOpenType, boolean unlockGuiTurnDegree, int multiSwitchBranchSelected) {
 			ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
 			data.guiOpenType = targetGuiOpenType;
 			data.unlockGuiTurnDegree = unlockGuiTurnDegree;
+			data.multiSwitchBranchSelected = multiSwitchBranchSelected;
 			data.write();
 		}
 	}

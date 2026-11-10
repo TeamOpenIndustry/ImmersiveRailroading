@@ -19,6 +19,10 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack {
 
     public BuilderMultiSwitch(RailInfo info, World world, Vec3i pos) {
         super(info, world, pos);
+        if(info.multiSwitchInfo == null || info.multiSwitchInfo.realShapeType() == null) {
+            ImmersiveRailroading.error("Invalid MultiSwitch!");
+            return;
+        }
 
         RailInfo mainInfo = info.with(mutable -> mutable.switchBranchIndex = 1);
 
@@ -30,7 +34,7 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack {
             MultiSwitchBranch branch = info.multiSwitchInfo.multiSwitchBranches().get(i);
             RailInfo branchInfo = new RailInfo(
                     branch.settings(),
-                    branch.placementInfo() != null ? branch.placementInfo() : info.placementInfo,
+                    branch.direction() == null ? info.placementInfo : info.placementInfo.withDirection(branch.direction()),
                     branch.customInfo(),
                     null
             );

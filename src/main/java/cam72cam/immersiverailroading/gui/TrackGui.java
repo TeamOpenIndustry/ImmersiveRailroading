@@ -37,8 +37,10 @@ public class TrackGui implements IScreen {
 
 	private TileRailPreview te;
 	private int targetGuiOpenType;
+	private int multiSwitchBranchSelected;
 	private final List<ItemStack> oreDict;
 	private RailSettings.Mutable settings;
+	private MultiSwitchInfo.Mutable multiSwitchInfo;
 
 	// Length / Radius
 	private TextField lengthInput;
@@ -91,6 +93,11 @@ public class TrackGui implements IScreen {
 	private CheckBox isPreviewCB;
 	private CheckBox isGradeCrossingCB;
 
+	// multiSwitch
+	private Button branchIndexButton;
+	private Button insertBranchButton;
+	private Button removeBranchButton;
+
 	// Other Gui
 	private Button trackExtraGuiButton;
 	private Button trackEndPointGuiButton;
@@ -110,9 +117,11 @@ public class TrackGui implements IScreen {
 	private TrackGui(ItemStack stack) {
 		stack = stack.copy();
 		settings = RailSettings.from(stack).mutable();
+		multiSwitchInfo = MultiSwitchInfo.from(stack).mutable();
 		ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
 		targetGuiOpenType = data.guiOpenType;
 		unlockGuiTurnDegree = data.unlockGuiTurnDegree;
+		multiSwitchBranchSelected = data.multiSwitchBranchSelected;
 
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
@@ -193,6 +202,7 @@ public class TrackGui implements IScreen {
 		typeSelector = new ListSelector<TrackItems>(screen, width, 100, height, settings.type,
 				Arrays.stream(TrackItems.values())
 						.filter(i -> i != TrackItems.CROSSING)
+						.filter(i -> i != TrackItems.MULTISWITCH)
 						.filter(i -> Config.ConfigBalance.EnableLegacyTrackSettingOption || i != TrackItems.TURN)
 						.sorted(Comparator.comparingInt(TrackItems::getOrder))
 						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
@@ -544,6 +554,26 @@ public class TrackGui implements IScreen {
 		});
 		bedThicknessInput.setFocused(true);
 
+		// multiSwitch
+		branchIndexButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, "" + multiSwitchBranchSelected) {
+			@Override
+			public void onClick(Player.Hand hand) {
+
+			}
+		};
+		insertBranchButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, "insert") {
+			@Override
+			public void onClick(Player.Hand hand) {
+
+			}
+		};
+		removeBranchButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, "remove") {
+			@Override
+			public void onClick(Player.Hand hand) {
+
+			}
+		};
+
 		zoomSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight() * 0.75 - height),
 										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, zoom, true) {
 			@Override
@@ -561,6 +591,9 @@ public class TrackGui implements IScreen {
 		trackSelector.setVisible(false);
 		railBedSelector.setVisible(false);
 		railBedFillSelector.setVisible(false);
+		branchIndexButton.setVisible(false);
+		insertBranchButton.setVisible(false);
+		removeBranchButton.setVisible(false);
 
 		trackEndPointGuiButton.setVisible(isVisible);
 		trackExtraGuiButton.setVisible(isVisible);
@@ -570,6 +603,9 @@ public class TrackGui implements IScreen {
 		trackFaceOffsetHeightInput.setVisible(isVisible);
 		bedThicknessLabel.setVisible(isVisible);
 		bedThicknessInput.setVisible(isVisible);
+		branchIndexButton.setVisible(isVisible);
+		insertBranchButton.setVisible(isVisible);
+		removeBranchButton.setVisible(isVisible);
 
 		zoomSlider.setVisible(isVisible);
 
@@ -585,34 +621,23 @@ public class TrackGui implements IScreen {
 	public void onClose() {
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
-				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
+				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
 
 				// Update client data here in order to avoid networking lag
 				ItemStack clientStack = te.getItem();
 				settings.immutable().write(clientStack);
-				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
 				te.setItem(clientStack, MinecraftClient.getPlayer());
 			} else {
-				new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
+				new ItemRailUpdatePacket(settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
 
 				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
 				settings.immutable().write(clientStack);
-				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
+				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
 				MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
 			}
 		}
 	}
-
-//	public void refreshSetting() {
-//		//todo
-//		settings = ;
-//		onClose();
-//		if (te != null) {
-//			GuiTypes.RAIL_PREVIEW.open(MinecraftClient.getPlayer(), te.getPos());
-//		} else {
-//			GuiTypes.RAIL.open(MinecraftClient.getPlayer());
-//		}
-//	}
 
 	@Override
 	public void draw(IScreenBuilder builder, RenderState state) {

@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.net;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3i;
@@ -18,20 +19,28 @@ public class ItemRailUpdatePacket extends Packet {
 	private int guiOpenType;
 	@TagField
 	public boolean unlockGuiTurnDegree;
+	@TagField
+	public int multiSwitchBranchSelected;
+	@TagField
+	public MultiSwitchInfo multiSwitchInfo;
 
 	public ItemRailUpdatePacket() { }
 
-	public ItemRailUpdatePacket(RailSettings settings, int guiOpenType, boolean unlockGuiTurnDegree) {
+	public ItemRailUpdatePacket(RailSettings settings, MultiSwitchInfo multiSwitchInfo, int guiOpenType, boolean unlockGuiTurnDegree, int multiSwitchBranchSelected) {
 		this.settings = settings;
+		this.multiSwitchInfo = multiSwitchInfo;
 		this.guiOpenType = guiOpenType;
 		this.unlockGuiTurnDegree = unlockGuiTurnDegree;
+		this.multiSwitchBranchSelected = multiSwitchBranchSelected;
 	}
 
-	public ItemRailUpdatePacket(Vec3i tilePreviewPos, RailSettings settings, int guiOpenType, boolean unlockGuiTurnDegree) {
+	public ItemRailUpdatePacket(Vec3i tilePreviewPos, RailSettings settings, MultiSwitchInfo multiSwitchInfo, int guiOpenType, boolean unlockGuiTurnDegree, int multiSwitchBranchSelected) {
 		this.pos = tilePreviewPos;
 		this.settings = settings;
+		this.multiSwitchInfo = multiSwitchInfo;
 		this.guiOpenType = guiOpenType;
 		this.unlockGuiTurnDegree = unlockGuiTurnDegree;
+		this.multiSwitchBranchSelected = multiSwitchBranchSelected;
 	}
 
 	@Override
@@ -41,14 +50,16 @@ public class ItemRailUpdatePacket extends Packet {
 			if (tile != null) {
 				ItemStack stack = tile.getItem();
 				settings.write(stack);
-				ItemTrackBlueprint.Data.writeTo(stack, guiOpenType, unlockGuiTurnDegree);
+				multiSwitchInfo.write(stack);
+				ItemTrackBlueprint.Data.writeTo(stack, guiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
 				tile.setItem(stack, getPlayer());
 			}
 		} else {
 			Player player = this.getPlayer();
 			ItemStack stack = player.getHeldItem(Player.Hand.PRIMARY);
 			settings.write(stack);
-			ItemTrackBlueprint.Data.writeTo(stack, guiOpenType, unlockGuiTurnDegree);
+			multiSwitchInfo.write(stack);
+			ItemTrackBlueprint.Data.writeTo(stack, guiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
 			player.setHeldItem(Player.Hand.PRIMARY, stack);
 		}
 	}

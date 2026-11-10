@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.track.IIterableTrack;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.BlockEntityTickable;
@@ -35,7 +36,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		return this.item;
 	}
 	
-	public void setup(ItemStack stack, PlacementInfo info) {
+	public void setup(ItemStack stack, PlacementInfo info, MultiSwitchInfo multiSwitchInfo) {
 		this.item = stack.copy();
 		this.placementInfo = info;
 		this.markDirty();

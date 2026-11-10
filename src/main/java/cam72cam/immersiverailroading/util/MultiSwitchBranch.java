@@ -2,6 +2,7 @@ package cam72cam.immersiverailroading.util;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
+import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.library.TrackPositionType;
 import cam72cam.mod.serialization.SerializationException;
@@ -19,7 +20,7 @@ import java.util.function.Consumer;
 @TagMapped(MultiSwitchBranch.Mapper.class)
 public record MultiSwitchBranch(
         RailSettings settings,
-        PlacementInfo placementInfo,
+        TrackDirection direction,
         PlacementInfo customInfo
 ) {
     public Mutable mutable() {
@@ -29,15 +30,15 @@ public record MultiSwitchBranch(
     public static class Mutable {
         @TagField("settings")
         public RailSettings settings;
-        @TagField("placementInfo")
-        public PlacementInfo placementInfo;
+        @TagField("direction")
+        public TrackDirection direction;
         @TagField("customInfo")
         public PlacementInfo customInfo;
 
         private Mutable(MultiSwitchBranch branch) {
-            this.settings = branch.settings();
-            this.placementInfo = branch.placementInfo();
-            this.customInfo = branch.customInfo();
+            this.settings = branch.settings;
+            this.direction = branch.direction;
+            this.customInfo = branch.customInfo;
         }
 
         public Mutable(TagCompound data) throws SerializationException {
@@ -46,7 +47,7 @@ public record MultiSwitchBranch(
         }
 
         public MultiSwitchBranch immutable() {
-            return new MultiSwitchBranch(settings, placementInfo, customInfo);
+            return new MultiSwitchBranch(settings, direction, customInfo);
         }
     }
 
@@ -149,8 +150,8 @@ public record MultiSwitchBranch(
                 this.settings.isGradeCrossing,
         };
         String id = Arrays.toString(props);
-        if (placementInfo != null) {
-            id += placementInfo;
+        if (direction != null) {
+            id += direction;
         }
         if (customInfo != null) {
             id += customInfo;
