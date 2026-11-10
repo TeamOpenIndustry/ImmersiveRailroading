@@ -12,7 +12,7 @@ import util.Matrix4;
 
 public class RailPreviewRender {
     public static StandardModel render(TileRailPreview te) {
-        RailInfo info = te.getRailRenderInfo();
+        RailInfo info = te.getRailInfo();
         if (info == null) {
             // Still loading...
             return null;

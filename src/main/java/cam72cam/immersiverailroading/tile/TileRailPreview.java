@@ -51,7 +51,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		}
 
 		if (!settings.isPreview) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(player, getPos().add(0, (int) Math.round(placementInfo.placementPosition.y),0))) {
+			if (this.getRailInfo() != null && this.getRailInfo().build(player, getPos().add(0, (int) Math.round(placementInfo.placementPosition.y),0))) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
 				if (placementInfo.placementPosition.y < 0) {
 					getWorld().breakBlock(this.getPos());
@@ -147,7 +147,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		return IBoundingBox.INFINITE;// TODO: return real bounding of curve
 	}
 
-	public RailInfo getRailRenderInfo() {// Not only for render, but also for build!
+	public RailInfo getRailInfo() {// Not only for render, but also for build!
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
 			offsetPosition();
 		}
@@ -186,8 +186,8 @@ public class TileRailPreview extends BlockEntityTickable {
 	}
 
 	public boolean isMulti() {
-		if (getRailRenderInfo().getBuilder(getWorld()) instanceof IIterableTrack) {
-			return ((IIterableTrack) getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
+		if (getRailInfo().getBuilder(getWorld()) instanceof IIterableTrack) {
+			return ((IIterableTrack) getRailInfo().getBuilder(getWorld())).getSubBuilders() != null;
 		}
 		return false;
 	}
@@ -207,7 +207,7 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer != null && entityPlayer.isCrouching()) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, getPos())) {
+			if (this.getRailInfo() != null && this.getRailInfo().build(entityPlayer, getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
 				return placementInfo.placementPosition.y < 0 && shouldBreakDirect && Config.ConfigDebug.breakTilePreview;
 			}

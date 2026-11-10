@@ -26,7 +26,7 @@ public class MultiPreviewRender {
     private static void render(RenderState state, float partialTicks) {
         state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(1, 1);
         for (TileRailPreview preview : previews.values()) {
-            List<BuilderBase> subBuilders = ((IIterableTrack) preview.getRailRenderInfo()
+            List<BuilderBase> subBuilders = ((IIterableTrack) preview.getRailInfo()
                                                                      .getBuilder(preview.getWorld(), preview.getPos()))
                                                                      .getSubBuilders();
             for (BuilderBase builder : subBuilders) {
