@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.library.SwitchState;
@@ -399,6 +400,10 @@ public class TileRail extends TileRailBase {
 	@Override
 	public void load(TagCompound nbt) {
 		super.load(nbt);
+		if (getWorld() == null) {
+			ImmersiveRailroading.error("Can't get umc world while loading TileRail at %s!", getPos());
+			return;
+		}
 		if (getWorld().isServer) {
 			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlockEnsured(getPos()) == null && info.switchBranchIndex <= 1) {
 				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(this, getWorld());
