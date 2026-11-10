@@ -11,6 +11,7 @@ public enum SwitchState {
 	TURN_BRANCH2,
 	TURN_BRANCH3,
 	TURN_BRANCH4,
+	TURN_BRANCH5,
 	;
 
 	@Override

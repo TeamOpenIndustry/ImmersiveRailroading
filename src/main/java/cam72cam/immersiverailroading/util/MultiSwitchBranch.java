@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 @TagMapped(MultiSwitchBranch.Mapper.class)
 public record MultiSwitchBranch(
         RailSettings settings,
-        TrackDirection direction,
         PlacementInfo customInfo
 ) {
     public Mutable mutable() {
@@ -30,14 +29,11 @@ public record MultiSwitchBranch(
     public static class Mutable {
         @TagField("settings")
         public RailSettings settings;
-        @TagField("direction")
-        public TrackDirection direction;
         @TagField("customInfo")
         public PlacementInfo customInfo;
 
         private Mutable(MultiSwitchBranch branch) {
             this.settings = branch.settings;
-            this.direction = branch.direction;
             this.customInfo = branch.customInfo;
         }
 
@@ -47,7 +43,7 @@ public record MultiSwitchBranch(
         }
 
         public MultiSwitchBranch immutable() {
-            return new MultiSwitchBranch(settings, direction, customInfo);
+            return new MultiSwitchBranch(settings, customInfo);
         }
     }
 
@@ -148,11 +144,9 @@ public record MultiSwitchBranch(
                 this.settings.track,
                 this.settings.smoothing,
                 this.settings.isGradeCrossing,
+                this.settings.direction
         };
         String id = Arrays.toString(props);
-        if (direction != null) {
-            id += direction;
-        }
         if (customInfo != null) {
             id += customInfo;
         }

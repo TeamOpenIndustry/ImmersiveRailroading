@@ -27,12 +27,15 @@ import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
 import static cam72cam.immersiverailroading.gui.components.GuiUtils.fitString;
 
 public class TrackGui implements IScreen {
+	private static final int MAX_BRANCHES = SwitchState.values().length - 2;
+
 	long frame;
 
 	private TileRailPreview te;
@@ -41,6 +44,7 @@ public class TrackGui implements IScreen {
 	private final List<ItemStack> oreDict;
 	private RailSettings.Mutable settings;
 	private MultiSwitchInfo.Mutable multiSwitchInfo;
+	private RailSettings.Mutable selectedWaySettings;
 
 	// Length / Radius
 	private TextField lengthInput;
@@ -53,6 +57,7 @@ public class TrackGui implements IScreen {
 	// Track Type
 	private Button typeButton;
 	private ListSelector<TrackItems> typeSelector;
+	private ListSelector<TrackItems> branchTypeSelector;
 
 	// Turn Angle
 	boolean unlockGuiTurnDegree;
@@ -110,8 +115,8 @@ public class TrackGui implements IScreen {
 	}
 
 	public TrackGui(TileRailPreview te) {
-        this(te.getItem());
-        this.te = te;
+		this(te.getItem());
+		this.te = te;
 	}
 
 	private TrackGui(ItemStack stack) {
@@ -122,6 +127,15 @@ public class TrackGui implements IScreen {
 		targetGuiOpenType = data.guiOpenType;
 		unlockGuiTurnDegree = data.unlockGuiTurnDegree;
 		multiSwitchBranchSelected = data.multiSwitchBranchSelected;
+
+		if (multiSwitchBranchSelected < 0) multiSwitchBranchSelected = 0;
+		if (multiSwitchBranchSelected > multiSwitchInfo.multiSwitchBranches.size()) {
+			multiSwitchBranchSelected = multiSwitchInfo.multiSwitchBranches.size();
+		}
+		if (multiSwitchInfo.realShapeType == null) {
+			multiSwitchInfo.realShapeType = settings.type == TrackItems.MULTISWITCH ? TrackItems.STRAIGHT : settings.type;
+		}
+		selectedWaySettings = settings;
 
 		oreDict = new ArrayList<>();
 		oreDict.add(ItemStack.EMPTY);
@@ -135,7 +149,106 @@ public class TrackGui implements IScreen {
 		return stack.getDisplayName();
 	}
 
+	private void updateSelectedWay(int i) {
+		if (i < 0) i = 0;
+		if (i > multiSwitchInfo.multiSwitchBranches.size()) i = multiSwitchInfo.multiSwitchBranches.size();
+		multiSwitchBranchSelected = i;
+		selectedWaySettings = i == 0 ? settings : multiSwitchInfo.multiSwitchBranches.get(i - 1).settings().mutable();
+		if (branchIndexButton != null) branchIndexButton.setText(branchLabel());
+	}
+
+	private void syncMultiSwitchInfo() {
+		if (multiSwitchBranchSelected <= 0) return;
+		int idx = multiSwitchBranchSelected - 1;
+		if (idx >= multiSwitchInfo.multiSwitchBranches.size()) return;
+		RailSettings merged = selectedWaySettings.immutable().with(m -> {
+			m.gauge = settings.gauge;
+			m.track = settings.track;
+			m.railBed = settings.railBed;
+			m.railBedFill = settings.railBedFill;
+			m.isPreview = settings.isPreview;
+			m.isGradeCrossing = settings.isGradeCrossing;
+		});
+		multiSwitchInfo.multiSwitchBranches.set(idx,
+				multiSwitchInfo.multiSwitchBranches.get(idx).with(m -> m.settings = merged));
+	}
+
+	private void propagateGlobalsToBranches() {
+		for (int i = 0; i < multiSwitchInfo.multiSwitchBranches.size(); i++) {
+			MultiSwitchBranch b = multiSwitchInfo.multiSwitchBranches.get(i);
+			MultiSwitchBranch updated = b.with(m -> m.settings = m.settings.with(s -> {
+				s.gauge = settings.gauge;
+				s.track = settings.track;
+				s.railBed = settings.railBed;
+				s.railBedFill = settings.railBedFill;
+				s.isPreview = settings.isPreview;
+				s.isGradeCrossing = settings.isGradeCrossing;
+			}));
+			multiSwitchInfo.multiSwitchBranches.set(i, updated);
+		}
+	}
+
+	private void applyLocal(Consumer<RailSettings.Mutable> mod) {
+		if (multiSwitchBranchSelected == 0) {
+			mod.accept(settings);
+		} else {
+			mod.accept(selectedWaySettings);
+			syncMultiSwitchInfo();
+		}
+	}
+
+	private void applyGlobal(Consumer<RailSettings.Mutable> mod) {
+		mod.accept(settings);
+	}
+
+	private TrackItems currentType() {
+		if (multiSwitchBranchSelected == 0 && settings.type == TrackItems.MULTISWITCH) {
+			return multiSwitchInfo.realShapeType != null ? multiSwitchInfo.realShapeType : TrackItems.STRAIGHT;
+		}
+		return selectedWaySettings.type;
+	}
+
+	private void setCurrentType(TrackItems option) {
+		if (multiSwitchBranchSelected == 0) {
+			if (settings.type == TrackItems.MULTISWITCH) {
+				multiSwitchInfo.realShapeType = option;
+			} else {
+				settings.type = option;
+				settings.pickType = option;
+			}
+		} else {
+			selectedWaySettings.type = option;
+			selectedWaySettings.pickType = option;
+			syncMultiSwitchInfo();
+		}
+	}
+
+	private MultiSwitchBranch createDefaultBranch() {
+		RailSettings base = settings.immutable();
+		TrackItems defaultType = multiSwitchInfo.realShapeType != null && multiSwitchInfo.realShapeType.canRoll()
+				? multiSwitchInfo.realShapeType
+				: (base.type.canRoll() ? base.type : TrackItems.STRAIGHT);
+		RailSettings branch = base.with(m -> {
+			m.type = defaultType;
+			m.pickType = defaultType;
+			m.length = Math.max(1, Math.min(base.length, 20));
+			m.degrees = 90;
+			m.curvosity = 1;
+			m.smoothing = TrackSmoothing.BOTH;
+			m.direction = TrackDirection.NONE;
+			m.trackFaceTransSetting = new TrackFaceTransSetting();
+			m.transfertableEntryCount = 1;
+			m.transfertableEntrySpacing = 1;
+		});
+		return new MultiSwitchBranch(branch, null);
+	}
+
+	private String branchLabel() {
+		return multiSwitchBranchSelected + "/" + multiSwitchInfo.multiSwitchBranches.size();
+	}
+
 	public void init(IScreenBuilder screen) {
+		updateSelectedWay(multiSwitchBranchSelected);
 
 		// Left pane
 		int width = 200;
@@ -143,35 +256,33 @@ public class TrackGui implements IScreen {
 		int xtop = -GUIHelpers.getScreenWidth() / 2;
 		int ytop = -GUIHelpers.getScreenHeight() / 4;
 
-		this.lengthLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, getLengthLabelType(settings));
+		this.lengthLabel = new Button(screen, xtop, ytop, width / 2 + 10, height, getLengthLabelType(currentType()));
 		this.lengthLabel.setEnabled(false);
 
-        this.lengthInput = new TextField(screen, xtop + width / 2 + 10, ytop, width / 2 - 10, height);
-        this.lengthInput.setText("" + settings.length);
-        this.lengthInput.setValidator(s -> {
-            if (s == null || s.isEmpty()) {
-                return true;
-            }
-            int val;
-            try {
-                val = Integer.parseInt(s);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-            int max = 1000;
-            if (settings.type.isTable()) {
-                max = settings.type == TrackItems.TURNTABLE
-                      ? BuilderTurnTable.maxLength(settings.gauge)
-                      : BuilderTransferTable.maxLength(settings.gauge);
-            }
-            if (val > 0 && val <= max) {
-                settings.length = val;
-                return true;
-            }
-            return false;
-        });
-        this.lengthInput.setFocused(true);
-		lengthInput.setEnabled(!settings.type.isTransitionCurve());
+		this.lengthInput = new TextField(screen, xtop + width / 2 + 10, ytop, width / 2 - 10, height);
+		this.lengthInput.setText("" + selectedWaySettings.length);
+		this.lengthInput.setValidator(s -> {
+			if (s == null || s.isEmpty()) return true;
+			int val;
+			try {
+				val = Integer.parseInt(s);
+			} catch (NumberFormatException e) {
+				return false;
+			}
+			int max = 1000;
+			if (multiSwitchBranchSelected == 0 && settings.type.isTable()) {
+				max = settings.type == TrackItems.TURNTABLE
+						? BuilderTurnTable.maxLength(settings.gauge)
+						: BuilderTransferTable.maxLength(settings.gauge);
+			}
+			if (val > 0 && val <= max) {
+				applyLocal(m -> m.length = val);
+				return true;
+			}
+			return false;
+		});
+		this.lengthInput.setFocused(true);
+		lengthInput.setEnabled(!currentType().isTransitionCurve());
 
 		ytop += height;
 
@@ -180,14 +291,13 @@ public class TrackGui implements IScreen {
 		) {
 			@Override
 			public void onClick(Gauge gauge) {
-				settings.gauge = gauge;
+				applyGlobal(m -> m.gauge = gauge);
 				gaugeButton.setText(GuiText.SELECTOR_GAUGE.toString(settings.gauge));
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
-							  ? BuilderTurnTable.maxLength(settings.gauge)
-							  : BuilderTransferTable.maxLength(settings.gauge);
-
-                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+							? BuilderTurnTable.maxLength(settings.gauge)
+							: BuilderTransferTable.maxLength(settings.gauge);
+					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max));
 				}
 			}
 		};
@@ -211,53 +321,54 @@ public class TrackGui implements IScreen {
 			public void onClick(TrackItems option) {
 				settings.type = option;
 				settings.pickType = option;
-
-				lengthLabel.setText(getLengthLabelType(settings));
-				lengthInput.setEnabled(!settings.type.isTransitionCurve());
-
-				typeButton.setText(GuiText.SELECTOR_TYPE.toString(settings.type));
-
-				degreesSlider.setVisible(settings.type.hasQuarters() && !unlockGuiTurnDegree);
-				degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
-				degreesInputTypeButton.setVisible(settings.type.hasQuarters());
-				degreesSlider.onSlider();
-
-				curvositySlider.setVisible(settings.type.hasCurvosity());
-				smoothingButton.setVisible(settings.type.hasSmoothing());
-				directionButton.setVisible(settings.type.hasDirection());
-
 				if (settings.type.isTable()) {
 					int max = settings.type == TrackItems.TURNTABLE
-							  ? BuilderTurnTable.maxLength(settings.gauge)
-							  : BuilderTransferTable.maxLength(settings.gauge);
-                    lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max)); // revalidate
+							? BuilderTurnTable.maxLength(settings.gauge)
+							: BuilderTransferTable.maxLength(settings.gauge);
+					lengthInput.setText("" + Math.min(Integer.parseInt(lengthInput.getText()), max));
 				}
-				transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
-				transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
+				refreshUI();
 			}
 		};
-		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(settings.type)) {
+
+		branchTypeSelector = new ListSelector<TrackItems>(screen, width, 100, height, currentType(),
+				Arrays.stream(TrackItems.values())
+						.filter(TrackItems::canRoll)
+						.sorted(Comparator.comparingInt(TrackItems::getOrder))
+						.collect(Collectors.toMap(TrackItems::toString, g -> g, (u, v) -> u, LinkedHashMap::new))
+		) {
+			@Override
+			public void onClick(TrackItems option) {
+				setCurrentType(option);
+				refreshUI();
+			}
+		};
+
+		typeButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_TYPE.toString(currentType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				showSelector(typeSelector);
+				showSelector(settings.type == TrackItems.MULTISWITCH ? branchTypeSelector : typeSelector);
 			}
 		};
 		ytop += height;
 
 		//Transfer table doesn't have these property so we can have them overlapped
-		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing)) {
+		smoothingButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_SMOOTHING.toString(selectedWaySettings.smoothing)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.smoothing = next(settings.smoothing, hand);
-				if(settings.smoothing == TrackSmoothing.NEITHER && !Config.ConfigBalance.EnableLegacyTrackSettingOption) {
-					settings.smoothing = next(settings.smoothing, hand);
-				}
-				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(settings.smoothing));
+				applyLocal(m -> {
+					TrackSmoothing nextVal = next(m.smoothing, hand);
+					if (nextVal == TrackSmoothing.NEITHER && !Config.ConfigBalance.EnableLegacyTrackSettingOption) {
+						nextVal = next(nextVal, hand);
+					}
+					m.smoothing = nextVal;
+				});
+				smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(selectedWaySettings.smoothing));
 			}
 		};
-		smoothingButton.setVisible(settings.type.hasSmoothing());
+		smoothingButton.setVisible(currentType().hasSmoothing());
 
-		transfertableEntryCountSlider = new Slider(screen, 25+xtop, ytop, "", 1, 71, settings.transfertableEntryCount, false) {
+		transfertableEntryCountSlider = new Slider(screen, 25 + xtop, ytop, "", 1, 71, settings.transfertableEntryCount, false) {
 			@Override
 			public void onSlider() {
 				settings.transfertableEntryCount = (int) this.getValue();
@@ -268,16 +379,16 @@ public class TrackGui implements IScreen {
 		transfertableEntryCountSlider.onSlider();
 		ytop += height;
 
-		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(settings.direction)) {
+		directionButton = new Button(screen, xtop, ytop, width, height, GuiText.SELECTOR_DIRECTION.toString(selectedWaySettings.direction)) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.direction = next(settings.direction, hand);
-				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(settings.direction));
+				applyLocal(m -> m.direction = next(m.direction, hand));
+				directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(selectedWaySettings.direction));
 			}
 		};
-		directionButton.setVisible(settings.type.hasDirection());
+		directionButton.setVisible(currentType().hasDirection());
 
-		transfertableEntrySpacingSlider = new Slider(screen, 25+xtop, ytop, "", 1, 15, settings.transfertableEntrySpacing, false) {
+		transfertableEntrySpacingSlider = new Slider(screen, 25 + xtop, ytop, "", 1, 15, settings.transfertableEntrySpacing, false) {
 			@Override
 			public void onSlider() {
 				settings.transfertableEntrySpacing = (int) this.getValue();
@@ -289,11 +400,9 @@ public class TrackGui implements IScreen {
 		ytop += height;
 
 		degreesInput = new TextField(screen, 25 + xtop, ytop, width - 50, height);
-		degreesInput.setText("" + settings.degrees);
+		degreesInput.setText("" + selectedWaySettings.degrees);
 		degreesInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
+			if (s == null || s.isEmpty()) return true;
 			float val;
 			try {
 				val = Float.parseFloat(s);
@@ -303,10 +412,11 @@ public class TrackGui implements IScreen {
 			float max = 90f;
 			float min = 1f;
 			if (val >= min && val <= max) {
-				if(settings.type.isTransitionCurve() && !CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
+				if (currentType().isTransitionCurve()
+						&& !CubicCurve.isCubicParabolaInputValid(selectedWaySettings.nearPointData.radius(), selectedWaySettings.farPointData.radius(), val)) {
 					return false;
 				}
-				settings.degrees = val;
+				applyLocal(m -> m.degrees = val);
 				degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
 				return true;
 			}
@@ -314,34 +424,39 @@ public class TrackGui implements IScreen {
 		});
 		degreesInput.setFocused(true);
 
-		this.degreesSlider = new Slider(screen, 25 + xtop,  ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, settings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
+		this.degreesSlider = new Slider(screen, 25 + xtop, ytop, "", 1, Config.ConfigBalance.AnglePlacementSegmentation, selectedWaySettings.degrees / 90 * Config.ConfigBalance.AnglePlacementSegmentation, false) {
 			@Override
 			public void onSlider() {
-				if(unlockGuiTurnDegree) {
-					while(settings.type.isTransitionCurve() && !CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), settings.degrees)) {
-						settings.degrees --;
-						if(Math.abs(settings.degrees) < 1e-6) {
-							settings.degrees = 0;
+				if (unlockGuiTurnDegree) {
+					float degrees = selectedWaySettings.degrees;
+					while (currentType().isTransitionCurve()
+							&& !CubicCurve.isCubicParabolaInputValid(selectedWaySettings.nearPointData.radius(), selectedWaySettings.farPointData.radius(), degrees)) {
+						degrees--;
+						if (Math.abs(degrees) < 1e-6) {
+							degrees = 0;
 							break;
 						}
 					}
-					degreesInput.setText("" + settings.degrees);
-					degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+					final float finalDegrees = degrees;
+					applyLocal(m -> m.degrees = finalDegrees);
+					degreesInput.setText("" + selectedWaySettings.degrees);
+					degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0 / Config.ConfigBalance.AnglePlacementSegmentation)));
 					return;
 				}
-				float val = degreesSlider.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
-				if(settings.type.isTransitionCurve()) {
+				float val = this.getValueInt() * (90F / Config.ConfigBalance.AnglePlacementSegmentation);
+				if (currentType().isTransitionCurve()) {
 					boolean shouldReset = false;
-					while(!CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), settings.farPointData.radius(), val)) {
+					while (!CubicCurve.isCubicParabolaInputValid(selectedWaySettings.nearPointData.radius(), selectedWaySettings.farPointData.radius(), val)) {
 						shouldReset = true;
 						val -= 90F / Config.ConfigBalance.AnglePlacementSegmentation;
-						if(Math.abs(val) < 1e-6) break;
+						if (Math.abs(val) < 1e-6) break;
 					}
-					if(shouldReset) degreesSlider.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
+					if (shouldReset) this.setValue(val / (90F / Config.ConfigBalance.AnglePlacementSegmentation));
 				}
-				settings.degrees = val;
-				degreesInput.setText("" + settings.degrees);
-				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0/Config.ConfigBalance.AnglePlacementSegmentation)));
+				final float finalVal = val;
+				applyLocal(m -> m.degrees = finalVal);
+				degreesInput.setText("" + selectedWaySettings.degrees);
+				degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(this.getValueInt() * (90.0 / Config.ConfigBalance.AnglePlacementSegmentation)));
 			}
 		};
 		degreesSlider.onSlider();
@@ -350,51 +465,46 @@ public class TrackGui implements IScreen {
 			@Override
 			public void onClick(Player.Hand hand) {
 				unlockGuiTurnDegree = !unlockGuiTurnDegree;
-				degreesInput.setVisible(unlockGuiTurnDegree);
-				degreesSlider.setVisible(!unlockGuiTurnDegree);
-				if(!unlockGuiTurnDegree) degreesSlider.onSlider();
+				degreesInput.setVisible(unlockGuiTurnDegree && currentType().hasQuarters());
+				degreesSlider.setVisible(!unlockGuiTurnDegree && currentType().hasQuarters());
+				if (!unlockGuiTurnDegree) degreesSlider.onSlider();
 			}
 		};
 
 		ytop += height;
 
-		this.curvositySlider = new Slider(screen, 25+xtop, ytop, "", 0.25, 1.5, settings.curvosity, true) {
+		this.curvositySlider = new Slider(screen, 25 + xtop, ytop, "", 0.25, 1.5, selectedWaySettings.curvosity, true) {
 			@Override
 			public void onSlider() {
-				settings.curvosity = (float) this.getValue();
-				curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", settings.curvosity)));
+				float val = (float) this.getValue();
+				applyLocal(m -> m.curvosity = val);
+				curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", selectedWaySettings.curvosity)));
 			}
 		};
 		curvositySlider.onSlider();
 		ytop += height;
 
-		directionButton.setVisible(settings.type.hasDirection());
+		directionButton.setVisible(currentType().hasDirection());
 
-		degreesSlider.setVisible(settings.type.hasQuarters() && !unlockGuiTurnDegree);
-		degreesInput.setVisible(settings.type.hasQuarters() && unlockGuiTurnDegree);
-		degreesInputTypeButton.setVisible(settings.type.hasQuarters());
+		degreesSlider.setVisible(currentType().hasQuarters() && !unlockGuiTurnDegree);
+		degreesInput.setVisible(currentType().hasQuarters() && unlockGuiTurnDegree);
+		degreesInputTypeButton.setVisible(currentType().hasQuarters());
 
-		curvositySlider.setVisible(settings.type.hasCurvosity());
-		smoothingButton.setVisible(settings.type.hasSmoothing());
+		curvositySlider.setVisible(currentType().hasCurvosity());
+		smoothingButton.setVisible(currentType().hasSmoothing());
 
-		transfertableEntryCountSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
-		transfertableEntrySpacingSlider.setVisible(settings.type == TrackItems.TRANSFERTABLE);
-
-
+		transfertableEntryCountSlider.setVisible(multiSwitchBranchSelected == 0 && settings.type == TrackItems.TRANSFERTABLE);
+		transfertableEntrySpacingSlider.setVisible(multiSwitchBranchSelected == 0 && settings.type == TrackItems.TRANSFERTABLE);
 
 		// Bottom Pane
-		//width = 200;
-		//height = 20;
-		//xtop = GUIHelpers.getScreenWidth() / 2 - width;
-		//ytop = -GUIHelpers.getScreenHeight() / 4;
 		ytop = (int) (GUIHelpers.getScreenHeight() * 0.75 - height * 5);
 
-		trackSelector = new ListSelector<TrackDefinition>(screen, width,  250, height,
+		trackSelector = new ListSelector<TrackDefinition>(screen, width, 250, height,
 				DefinitionManager.getTrack(settings.track),
 				DefinitionManager.getTracks().stream().collect(Collectors.toMap(t -> t.name, g -> g, (u, v) -> u, LinkedHashMap::new))) {
 			@Override
 			public void onClick(TrackDefinition track) {
-				settings.track = track.trackID;
+				applyGlobal(m -> m.track = track.trackID);
 				trackButton.setText(GuiText.SELECTOR_TRACK.toString(fitString(DefinitionManager.getTrack(settings.track).name, 24)));
 			}
 		};
@@ -411,7 +521,7 @@ public class TrackGui implements IScreen {
 		) {
 			@Override
 			public void onClick(ItemStack option) {
-				settings.railBed = option;
+				applyGlobal(m -> m.railBed = option);
 				bedTypeButton.setText(GuiText.SELECTOR_RAIL_BED.toString(getStackName(settings.railBed)));
 			}
 		};
@@ -428,7 +538,7 @@ public class TrackGui implements IScreen {
 		) {
 			@Override
 			public void onClick(ItemStack option) {
-				settings.railBedFill = option;
+				applyGlobal(m -> m.railBedFill = option);
 				bedFillButton.setText(GuiText.SELECTOR_RAIL_BED_FILL.toString(getStackName(settings.railBedFill)));
 			}
 		};
@@ -440,34 +550,33 @@ public class TrackGui implements IScreen {
 		};
 		ytop += height;
 
-		nearPosTypeButton = new Button(screen, xtop, ytop, width / 2, height, GuiText.SELECTOR_POSITION_NEAR.toString(settings.nearPointData.posType())) {
+		nearPosTypeButton = new Button(screen, xtop, ytop, width / 2, height, GuiText.SELECTOR_POSITION_NEAR.toString(selectedWaySettings.nearPointData.posType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posType = next(settings.nearPointData.posType(), hand));
-				nearPosTypeButton.setText(GuiText.SELECTOR_POSITION_NEAR.toString(settings.nearPointData.posType()));
+				applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.posType = next(n.posType, hand)));
+				nearPosTypeButton.setText(GuiText.SELECTOR_POSITION_NEAR.toString(selectedWaySettings.nearPointData.posType()));
 			}
 		};
-		farPosTypeButton = new Button(screen, xtop + width / 2, ytop, width / 2, height, GuiText.SELECTOR_POSITION_FAR.toString(settings.farPointData.posType())) {
+		farPosTypeButton = new Button(screen, xtop + width / 2, ytop, width / 2, height, GuiText.SELECTOR_POSITION_FAR.toString(selectedWaySettings.farPointData.posType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.farPointData = settings.farPointData.with(mutable -> mutable.posType = next(settings.farPointData.posType(), hand));
-				farPosTypeButton.setText(GuiText.SELECTOR_POSITION_FAR.toString(settings.farPointData.posType()));
+				applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.posType = next(n.posType, hand)));
+				farPosTypeButton.setText(GuiText.SELECTOR_POSITION_FAR.toString(selectedWaySettings.farPointData.posType()));
 			}
 		};
 		ytop += height;
 
-		isPreviewCB = new CheckBox(screen, xtop+2, ytop+2, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), settings.isPreview) {
+		isPreviewCB = new CheckBox(screen, xtop + 2, ytop + 2, GuiText.SELECTOR_PLACE_BLUEPRINT.toString(), settings.isPreview) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.isPreview = isPreviewCB.isChecked();
+				applyGlobal(m -> m.isPreview = isPreviewCB.isChecked());
 			}
 		};
-//		ytop += height;
 
-		isGradeCrossingCB = new CheckBox(screen, xtop+102, ytop+2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing) {
+		isGradeCrossingCB = new CheckBox(screen, xtop + 102, ytop + 2, GuiText.SELECTOR_GRADE_CROSSING.toString(), settings.isGradeCrossing) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.isGradeCrossing = isGradeCrossingCB.isChecked();
+				applyGlobal(m -> m.isGradeCrossing = isGradeCrossingCB.isChecked());
 			}
 		};
 		ytop += height;
@@ -498,32 +607,28 @@ public class TrackGui implements IScreen {
 			}
 		};
 
-		trackFaceTransTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 2, width / 2 + width / 4, height, GuiText.SELECTOR_TRACK_PIVOT_TYPE.toString(settings.trackFaceTransSetting.facePivotType())) {
+		trackFaceTransTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 2, width / 2 + width / 4, height, GuiText.SELECTOR_TRACK_PIVOT_TYPE.toString(selectedWaySettings.trackFaceTransSetting.facePivotType())) {
 			@Override
 			public void onClick(Player.Hand hand) {
-				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.facePivotType = next(settings.trackFaceTransSetting.facePivotType(), hand));
-				this.setText(GuiText.SELECTOR_TRACK_PIVOT_TYPE.toString(settings.trackFaceTransSetting.facePivotType()));
+				applyLocal(m -> m.trackFaceTransSetting = m.trackFaceTransSetting.with(t -> t.facePivotType = next(t.facePivotType, hand)));
+				this.setText(GuiText.SELECTOR_TRACK_PIVOT_TYPE.toString(selectedWaySettings.trackFaceTransSetting.facePivotType()));
 			}
 		};
 
 		trackFaceOffsetHeightLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 3, width / 2, height, GuiText.LABEL_TRACK_PIVOT_OFFSET.toString()) {};
 		trackFaceOffsetHeightLabel.setEnabled(false);
 		trackFaceOffsetHeightInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 3, width / 4, height);
-		trackFaceOffsetHeightInput.setText("" + (float) settings.trackFaceTransSetting.facePivotOffset().y);
+		trackFaceOffsetHeightInput.setText("" + (float) selectedWaySettings.trackFaceTransSetting.facePivotOffset().y);
 		trackFaceOffsetHeightInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
+			if (s == null || s.isEmpty()) return true;
 			float val;
 			try {
 				val = Float.parseFloat(s);
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			float max = 1f;
-			float min = 0f;
-			if (val >= min && val <= max) {
-				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.facePivotOffset = new Vec3d(0, val, 0));
+			if (val >= 0f && val <= 1f) {
+				applyLocal(m -> m.trackFaceTransSetting = m.trackFaceTransSetting.with(t -> t.facePivotOffset = new Vec3d(0, val, 0)));
 				return true;
 			}
 			return false;
@@ -533,21 +638,17 @@ public class TrackGui implements IScreen {
 		bedThicknessLabel = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 4, width / 2, height, GuiText.LABEL_BED_THICKNESS.toString()) {};
 		bedThicknessLabel.setEnabled(false);
 		bedThicknessInput = new TextField(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 + width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 4, width / 4, height);
-		bedThicknessInput.setText("" + (float) settings.trackFaceTransSetting.bedThickness());
+		bedThicknessInput.setText("" + (float) selectedWaySettings.trackFaceTransSetting.bedThickness());
 		bedThicknessInput.setValidator(s -> {
-			if (s == null || s.isEmpty()) {
-				return true;
-			}
+			if (s == null || s.isEmpty()) return true;
 			float val;
 			try {
 				val = Float.parseFloat(s);
 			} catch (NumberFormatException e) {
 				return false;
 			}
-			float max = 1f;
-			float min = 0f;
-			if (val >= min && val <= max) {
-				settings.trackFaceTransSetting = settings.trackFaceTransSetting.with(mutable -> mutable.bedThickness = val);
+			if (val >= 0f && val <= 1f) {
+				applyLocal(m -> m.trackFaceTransSetting = m.trackFaceTransSetting.with(t -> t.bedThickness = val));
 				return true;
 			}
 			return false;
@@ -555,27 +656,58 @@ public class TrackGui implements IScreen {
 		bedThicknessInput.setFocused(true);
 
 		// multiSwitch
-		branchIndexButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, "" + multiSwitchBranchSelected) {
+		branchIndexButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, branchLabel()) {
 			@Override
 			public void onClick(Player.Hand hand) {
-
+				syncMultiSwitchInfo();
+				int total = multiSwitchInfo.multiSwitchBranches.size() + 1;
+				int step = (hand == Player.Hand.PRIMARY) ? 1 : -1;
+				updateSelectedWay((multiSwitchBranchSelected + step + total) % total);
+				refreshUI();
 			}
 		};
 		insertBranchButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, "insert") {
 			@Override
 			public void onClick(Player.Hand hand) {
+				syncMultiSwitchInfo();
+				if (multiSwitchInfo.multiSwitchBranches.size() >= MAX_BRANCHES) return;
 
+				if (multiSwitchInfo.multiSwitchBranches.isEmpty() && settings.type != TrackItems.MULTISWITCH) {
+					if (!settings.type.canRoll()) return;
+					multiSwitchInfo.realShapeType = settings.type;
+					settings.type = TrackItems.MULTISWITCH;
+					settings.pickType = TrackItems.MULTISWITCH;
+				}
+
+				int insertIdx = multiSwitchBranchSelected;
+				multiSwitchInfo.multiSwitchBranches.add(insertIdx, createDefaultBranch());
+				updateSelectedWay(insertIdx + 1);
+				refreshUI();
 			}
 		};
 		removeBranchButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, "remove") {
 			@Override
 			public void onClick(Player.Hand hand) {
+				if (multiSwitchBranchSelected == 0) return;
+				if (multiSwitchInfo.multiSwitchBranches.isEmpty()) return;
+				int idx = multiSwitchBranchSelected - 1;
+				if (idx >= multiSwitchInfo.multiSwitchBranches.size()) return;
+				multiSwitchInfo.multiSwitchBranches.remove(idx);
 
+				if (multiSwitchInfo.multiSwitchBranches.isEmpty()) {
+					TrackItems restore = multiSwitchInfo.realShapeType != null ? multiSwitchInfo.realShapeType : TrackItems.STRAIGHT;
+					settings.type = restore;
+					settings.pickType = restore;
+					multiSwitchInfo.realShapeType = null;
+				}
+
+				updateSelectedWay(multiSwitchBranchSelected);
+				refreshUI();
 			}
 		};
 
 		zoomSlider = new Slider(screen, GUIHelpers.getScreenWidth() / 2 - 150, (int) (GUIHelpers.getScreenHeight() * 0.75 - height),
-										GuiText.SLIDER_ZOOM.toString(), 0.1, 2, zoom, true) {
+				GuiText.SLIDER_ZOOM.toString(), 0.1, 2, zoom, true) {
 			@Override
 			public void onSlider() {
 				zoom = this.getValue();
@@ -583,11 +715,53 @@ public class TrackGui implements IScreen {
 		};
 	}
 
+	private void refreshUI() {
+		TrackItems type = currentType();
+
+		lengthInput.setText("" + selectedWaySettings.length);
+		lengthLabel.setText(getLengthLabelType(type));
+		lengthInput.setEnabled(!type.isTransitionCurve());
+
+		typeButton.setText(GuiText.SELECTOR_TYPE.toString(type));
+
+		smoothingButton.setText(GuiText.SELECTOR_SMOOTHING.toString(selectedWaySettings.smoothing));
+		smoothingButton.setVisible(type.hasSmoothing());
+
+		directionButton.setText(GuiText.SELECTOR_DIRECTION.toString(selectedWaySettings.direction));
+		directionButton.setVisible(type.hasDirection());
+
+		curvositySlider.setValue(selectedWaySettings.curvosity);
+		curvositySlider.setText(GuiText.SELECTOR_CURVOSITY.toString(String.format("%.2f", selectedWaySettings.curvosity)));
+		curvositySlider.setVisible(type.hasCurvosity());
+
+		degreesSlider.setValue(selectedWaySettings.degrees / 90.0 * Config.ConfigBalance.AnglePlacementSegmentation);
+		degreesSlider.setText(GuiText.SELECTOR_QUARTERS.toString(selectedWaySettings.degrees));
+		degreesSlider.setVisible(type.hasQuarters() && !unlockGuiTurnDegree);
+
+		degreesInput.setText("" + selectedWaySettings.degrees);
+		degreesInput.setVisible(type.hasQuarters() && unlockGuiTurnDegree);
+		degreesInputTypeButton.setVisible(type.hasQuarters());
+
+		nearPosTypeButton.setText(GuiText.SELECTOR_POSITION_NEAR.toString(selectedWaySettings.nearPointData.posType()));
+		farPosTypeButton.setText(GuiText.SELECTOR_POSITION_FAR.toString(selectedWaySettings.farPointData.posType()));
+
+		trackFaceTransTypeButton.setText(GuiText.SELECTOR_TRACK_PIVOT_TYPE.toString(selectedWaySettings.trackFaceTransSetting.facePivotType()));
+		trackFaceOffsetHeightInput.setText("" + (float) selectedWaySettings.trackFaceTransSetting.facePivotOffset().y);
+		bedThicknessInput.setText("" + (float) selectedWaySettings.trackFaceTransSetting.bedThickness());
+
+		boolean isTransferMain = multiSwitchBranchSelected == 0 && settings.type == TrackItems.TRANSFERTABLE;
+		transfertableEntryCountSlider.setVisible(isTransferMain);
+		transfertableEntrySpacingSlider.setVisible(isTransferMain);
+
+		branchIndexButton.setText(branchLabel());
+	}
+
 	private void showSelector(ListSelector<?> selector) {
 		boolean isVisible = selector.isVisible();
 
 		gaugeSelector.setVisible(false);
 		typeSelector.setVisible(false);
+		branchTypeSelector.setVisible(false);
 		trackSelector.setVisible(false);
 		railBedSelector.setVisible(false);
 		railBedFillSelector.setVisible(false);
@@ -619,6 +793,9 @@ public class TrackGui implements IScreen {
 
 	@Override
 	public void onClose() {
+		syncMultiSwitchInfo();
+		propagateGlobalsToBranches();
+
 		if (!this.lengthInput.getText().isEmpty()) {
 			if (this.te != null) {
 				new ItemRailUpdatePacket(te.getPos(), settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
@@ -626,6 +803,7 @@ public class TrackGui implements IScreen {
 				// Update client data here in order to avoid networking lag
 				ItemStack clientStack = te.getItem();
 				settings.immutable().write(clientStack);
+				multiSwitchInfo.immutable().write(clientStack);
 				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
 				te.setItem(clientStack, MinecraftClient.getPlayer());
 			} else {
@@ -633,6 +811,7 @@ public class TrackGui implements IScreen {
 
 				ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
 				settings.immutable().write(clientStack);
+				multiSwitchInfo.immutable().write(clientStack);
 				ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
 				MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
 			}
@@ -750,7 +929,7 @@ public class TrackGui implements IScreen {
 					b.length = length;
 				}),
 				new PlacementInfo(new Vec3d(0.5, 0, 0.5), settings.direction, 0, null),
-				null, SwitchState.NONE, SwitchState.NONE, tablePos, true, null);
+				null, SwitchState.NONE, SwitchState.NONE, tablePos, true, multiSwitchInfo.immutable());
 
 		int length = (int) info.settings.getValidSize();
 		double scale = (GUIHelpers.getScreenWidth() / (length * 2.25)) * zoom;
@@ -791,8 +970,8 @@ public class TrackGui implements IScreen {
 		}
 	}
 
-	private static String getLengthLabelType(RailSettings.Mutable settings) {
-		switch (settings.type) {
+	private static String getLengthLabelType(TrackItems type) {
+		switch (type) {
 			case STRAIGHT:
 			case SLOPE:
 			case TRANSFERTABLE:
