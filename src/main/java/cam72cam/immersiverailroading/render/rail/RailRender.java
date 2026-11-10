@@ -110,6 +110,10 @@ public class RailRender {
 			if(originPlacementPos.y == 0 && !isMulti) {
 				state.translate(0, -1, 0);
 			}
+			if(!isMulti && (info.placementInfo.placementPosition.x != info.customInfo.placementPosition.x ||
+					info.placementInfo.placementPosition.z != info.customInfo.placementPosition.z)) {
+				state.translate(0, 1, 0);
+			}
 			if(isMulti) state.translate(0, -originPlacementPos.y, 0);
 			if(info.settings.type == TrackItems.TURNTABLE) railRenderState.translate(0, -1, 0);
 		}
