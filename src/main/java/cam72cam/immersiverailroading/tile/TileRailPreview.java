@@ -36,7 +36,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		return this.item;
 	}
 	
-	public void setup(ItemStack stack, PlacementInfo info, MultiSwitchInfo multiSwitchInfo) {
+	public void setup(ItemStack stack, PlacementInfo info) {
 		this.item = stack.copy();
 		this.placementInfo = info;
 		this.markDirty();
@@ -182,7 +182,7 @@ public class TileRailPreview extends BlockEntityTickable {
 			shouldBreakDirect = true;
 		}
 
-		info = new RailInfo(item, placementInfoOffset, customInfoOffset, null); // todo
+		info = new RailInfo(item, placementInfoOffset, customInfoOffset);
 	}
 
 	public boolean isMulti() {

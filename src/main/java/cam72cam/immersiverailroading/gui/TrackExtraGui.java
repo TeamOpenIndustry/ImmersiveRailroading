@@ -122,10 +122,10 @@ public class TrackExtraGui implements IScreen {
                 ? settings
                 : multiSwitchInfo.multiSwitchBranches.get(multiSwitchBranchSelected - 1).settings().mutable();
 
-        if(this.te != null) {//TODO:Switch and multiSwitch support
+        if(this.te != null) {
             referenceInfo = te.getRailInfo();
         }else {
-            referenceInfo = new RailInfo(stack, new PlacementInfo(Vec3d.ZERO, TrackDirection.LEFT, MinecraftClient.getPlayer().getRotationYawHead(), null), null, null); // todo
+            referenceInfo = new RailInfo(stack, new PlacementInfo(Vec3d.ZERO, TrackDirection.LEFT, MinecraftClient.getPlayer().getRotationYawHead(), null), null);
         }
         BuilderBase referenceInfoBuilder = referenceInfo.getBuilder(MinecraftClient.getPlayer().getWorld());
         referenceRenderData = referenceInfoBuilder.getRenderData();

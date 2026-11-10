@@ -132,8 +132,8 @@ public class RailInfo {
 		return id;
 	}
 
-	public RailInfo(ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo) {
-		this(RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0, multiSwitchInfo);
+	public RailInfo(ItemStack stack, PlacementInfo placementInfo, PlacementInfo customInfo) {
+		this(RailSettings.from(stack), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0, MultiSwitchInfo.from(stack));
 	}
 
 	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo) {

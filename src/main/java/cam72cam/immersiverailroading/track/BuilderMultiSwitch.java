@@ -87,20 +87,22 @@ public class BuilderMultiSwitch extends BuilderBase implements IIterableTrack {
 
     @Override
     public List<BuilderBase> getSubBuilders() {
-        List<BuilderBase> subTurns = null;
-        for(BuilderCubicCurve builder : nonMainBuilders) {
-            if(subTurns == null) subTurns = new ArrayList<>();
-            subTurns.addAll(builder.getSubBuilders());
+        List<BuilderBase> subTurns = new ArrayList<>();
+        for (BuilderCubicCurve builder : nonMainBuilders) {
+            List<BuilderBase> subs = builder.getSubBuilders();
+            if (subs != null) {
+                subTurns.addAll(subs);
+            }
         }
 
         List<BuilderBase> subStraights = mainBranchBuilder.getSubBuilders();
 
-        if (subTurns == null && subStraights == null) {
+        if (subTurns.isEmpty() && subStraights == null) {
             return null;
         }
 
         List<BuilderBase> res = new ArrayList<>();
-        if (subTurns == null) {
+        if (subTurns.isEmpty()) {
             res.addAll(nonMainBuilders);
         } else {
             res.addAll(subTurns);
