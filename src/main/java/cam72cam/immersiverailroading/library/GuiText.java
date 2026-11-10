@@ -83,6 +83,10 @@ public enum GuiText {
 	TRACK_DIRECTION("track.direction"),
 	TRACK_PLACE_BLUEPRINT_TRUE("track.place_blueprint_true"),
 	TRACK_PLACE_BLUEPRINT_FALSE("track.place_blueprint_false"),
+	TRACK_CURRENT_SWITCH_BRANCH("track.current_switch_branch"),
+	TRACK_INSERT_SWITCH_BRANCH("track.insert_switch_branch"),
+	TRACK_REMOVE_SWITCH_BRANCH("track.remove_switch_branch"),
+
 
 	TRACK_EXTRA_ARC_LEN_FACTOR("track.arc_len_factor"),
 	TRACK_EXTRA_ROLL_OFFSET_TYPE("track.roll_offset_type"),

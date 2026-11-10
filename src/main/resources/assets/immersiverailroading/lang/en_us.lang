@@ -166,6 +166,9 @@ gui.immersiverailroading:track.rail_bed=Bed:        %s
 gui.immersiverailroading:track.rail_bed_fill=Bed Fill:    %s
 gui.immersiverailroading:track.place_blueprint_true=Place:      Blueprint
 gui.immersiverailroading:track.place_blueprint_false=Place:      Track
+gui.immersiverailroading:track.current_switch_branch=Branch:%s/%s
+gui.immersiverailroading:track.insert_switch_branch=Insert
+gui.immersiverailroading:track.remove_switch_branch=Remove
 
 gui.immersiverailroading:track.arc_len_factor=Curve Percentage: %s
 gui.immersiverailroading:track.roll_offset_type=Roll Vertical Offset
@@ -227,6 +230,7 @@ track.immersiverailroading:class.cubicparabola=Transition
 track.immersiverailroading:class.turntable=Turn Table
 track.immersiverailroading:class.transfertable=Transfer Table
 track.immersiverailroading:class.switch=Switch
+track.immersiverailroading:class.multiswitch=Multi-Switch
 track.immersiverailroading:class.custom=Custom Curve
 
 track.immersiverailroading:position.fixed=Fixed
@@ -370,6 +374,9 @@ immersiverailroading:redstone_mode.disabled=Disabled
 immersiverailroading:switch_state.none=None
 immersiverailroading:switch_state.straight=Straight
 immersiverailroading:switch_state.turn=Diverge
+immersiverailroading:switch_state.turn_branch2=Diverge2
+immersiverailroading:switch_state.turn_branch3=Diverge3
+immersiverailroading:switch_state.turn_branch4=Diverge4
 
 key.categories.immersiverailroading=Immersive Railroading
 ir_keys.increase_throttle=Increase Throttle

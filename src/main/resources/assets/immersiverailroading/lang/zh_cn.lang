@@ -158,6 +158,9 @@ gui.immersiverailroading:track.rail_bed=道床：%s
 gui.immersiverailroading:track.rail_bed_fill=道床填方：%s
 gui.immersiverailroading:track.place_blueprint_true=放置轨道蓝图
 gui.immersiverailroading:track.place_blueprint_false=直接放置轨道
+gui.immersiverailroading:track.current_switch_branch=分支：%s/%s
+gui.immersiverailroading:track.insert_switch_branch=插入
+gui.immersiverailroading:track.remove_switch_branch=删除
 
 gui.immersiverailroading:track.arc_len_factor=曲线位置百分比：%s
 gui.immersiverailroading:track.roll_offset_type=超高垂直偏移方式
@@ -219,6 +222,7 @@ track.immersiverailroading:class.cubicparabola=缓和曲线
 track.immersiverailroading:class.turntable=转车台
 track.immersiverailroading:class.transfertable=移车台
 track.immersiverailroading:class.switch=道岔
+track.immersiverailroading:class.multiswitch=多路道岔
 track.immersiverailroading:class.custom=自定义曲线
 
 track.immersiverailroading:position.fixed=对齐方块
@@ -361,6 +365,9 @@ immersiverailroading:redstone_mode.disabled=停用
 immersiverailroading:switch_state.none=无
 immersiverailroading:switch_state.straight=直向
 immersiverailroading:switch_state.turn=侧向
+immersiverailroading:switch_state.turn_branch2=侧向2
+immersiverailroading:switch_state.turn_branch3=侧向3
+immersiverailroading:switch_state.turn_branch4=侧向4
 
 key.categories.immersiverailroading=沉浸铁路
 ir_keys.increase_throttle=增大节流阀

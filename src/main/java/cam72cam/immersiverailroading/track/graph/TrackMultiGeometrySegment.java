@@ -76,7 +76,9 @@ public class TrackMultiGeometrySegment {
     }
 
     public SwitchState nextSwitchState() {
-        return SwitchState.values()[( getSwitchStateEnum().ordinal() + 1 ) % SwitchState.values().length];
+        int maxOrder = paths.size() + 1;
+        int nextOrder = (getSwitchStateEnum().ordinal() + 1 ) % maxOrder;
+        return SwitchState.values()[nextOrder];
     }
 
     protected void updateSwitchSate(SwitchState switchState, boolean offline, long currentTime) {

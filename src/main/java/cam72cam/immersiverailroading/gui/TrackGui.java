@@ -244,7 +244,7 @@ public class TrackGui implements IScreen {
 	}
 
 	private String branchLabel() {
-		return multiSwitchBranchSelected + "/" + multiSwitchInfo.multiSwitchBranches.size();
+		return GuiText.TRACK_CURRENT_SWITCH_BRANCH.toString(multiSwitchBranchSelected, multiSwitchInfo.multiSwitchBranches.size());
 	}
 
 	public void init(IScreenBuilder screen) {
@@ -666,7 +666,7 @@ public class TrackGui implements IScreen {
 				refreshUI();
 			}
 		};
-		insertBranchButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, "insert") {
+		insertBranchButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 2, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, GuiText.TRACK_INSERT_SWITCH_BRANCH.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				syncMultiSwitchInfo();
@@ -685,7 +685,7 @@ public class TrackGui implements IScreen {
 				refreshUI();
 			}
 		};
-		removeBranchButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height, "remove") {
+		removeBranchButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width / 4, -GUIHelpers.getScreenHeight() / 4 + height * 5, width / 4, height,  GuiText.TRACK_REMOVE_SWITCH_BRANCH.toString()) {
 			@Override
 			public void onClick(Player.Hand hand) {
 				if (multiSwitchBranchSelected == 0) return;
