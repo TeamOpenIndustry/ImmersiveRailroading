@@ -193,6 +193,10 @@ public class Simulation {
                 }
                 SimulationState other = stateMap.get(otherID);
                 if (other == null) {
+                    if (Config.ConfigDebug.enableEntityPool && EntityPool.get(world).getEntity(otherID) != null) {
+                        continue;
+                    }
+
                     Vec3i otherPos = loaded.stream()
                             .filter(x -> x.getUUID().equals(myID)).findFirst()
                             .map(x -> isMyCouplerFront ? x.lastKnownFront : x.lastKnownRear).orElse(null);
