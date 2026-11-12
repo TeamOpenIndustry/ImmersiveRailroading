@@ -419,6 +419,32 @@ public class Simulation {
             forceQuickUpdates = false;
         }
 
+        List<EntityCoupleableRollingStock> currentLoaded = world.getEntities(EntityCoupleableRollingStock.class);
+        List<EntityCoupleableRollingStock> offline = EntityPool.get(world).getAllEntities().stream()
+                .map(ModdedEntity::getSelf)
+                .filter(s -> s instanceof EntityCoupleableRollingStock)
+                .map(s -> (EntityCoupleableRollingStock) s)
+                .filter(s -> !s.isAddedToChunk() && !s.isDead())
+                .collect(Collectors.toList());
+
+        // 如果 loaded 里同时有在线和离线，且它们之间有耦合关系，跳过
+        if (!offline.isEmpty() && !currentLoaded.isEmpty()) {
+            Set<UUID> offlineIds = offline.stream().map(EntityCoupleableRollingStock::getUUID).collect(Collectors.toSet());
+            boolean mixed = false;
+            for (EntityCoupleableRollingStock online : currentLoaded) {
+                UUID front = online.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.FRONT);
+                UUID rear = online.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.BACK);
+                if ((front != null && offlineIds.contains(front)) || (rear != null && offlineIds.contains(rear))) {
+                    mixed = true;
+                    break;
+                }
+            }
+            if (mixed) {
+                ImmersiveRailroading.info("Simulation skip: mixed online/offline consist detected");
+                return;
+            }
+        }
+
         new Simulation(world);
     }
 
