@@ -298,6 +298,14 @@ public class Config {
 		@Comment("Number of buckets to split vehicle data files (changes require reboot to take effect for saving)")
 		public static int vehicleBucketCount = 16;
 
+		@Comment("How far offline stock can be seen")
+		@Range(min = 128, max = 1024)
+		public static int offlineStockViewDistance = 256;
+
+		@Comment("How many tick offline stock visibility is refreshed")
+		@Range(min = 1, max = 40)
+		public static int offlineStockViewRefreshFreq = 20;
+
 		@Comment("Break blueprint preview block after building it")
 		public static boolean breakTilePreview = true;
 

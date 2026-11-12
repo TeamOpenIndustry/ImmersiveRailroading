@@ -134,17 +134,17 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 					@Override
 					public double getSpawnDistanceSq() {
-						return 128.0 * 128.0;
+						return Config.ConfigDebug.offlineStockViewDistance * Config.ConfigDebug.offlineStockViewDistance;
 					}
 
 					@Override
 					public double getDespawnDistanceSq() {
-						return 128.0 * 128.0;
+						return Config.ConfigDebug.offlineStockViewDistance * Config.ConfigDebug.offlineStockViewDistance;
 					}
 
 					@Override
 					public int getProximityInterval() {
-						return 20;
+						return Config.ConfigDebug.offlineStockViewRefreshFreq;
 					}
 
 					@Override
