@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.track.graph.WorldData;
+import cam72cam.mod.entity.CustomEntity;
 import cam72cam.mod.entity.EntityPool;
 import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
@@ -96,24 +97,20 @@ public class Simulation {
             // If this is too slow, we could hang onto the list of stock that is at rest.
             // We should only need to do this when stock is no longer at rest or changes dirty flag
             int lastCount = loaded == null ? 0 : loaded.size();
-            loaded = world.getEntities(EntityCoupleableRollingStock.class);
-            // merge pool vehicles (if pool is closed, but we need to load data, we also need to do this)
-//            if (Config.ConfigDebug.enableEntityPool) {
-            List<EntityCoupleableRollingStock> offlinePool = EntityPool.get(world).getAllEntities().stream()
-                    .map(ModdedEntity::getSelf)
-                    .filter(Objects::nonNull) // 确保 self 已初始化
-                    .filter(s -> s instanceof EntityCoupleableRollingStock)
-                    .map(s -> (EntityCoupleableRollingStock) s)
-                    .collect(Collectors.toList());
-
-            for (EntityCoupleableRollingStock stock : offlinePool) {
-                if (!stock.isAddedToChunk() && !stock.isDead()) {
-                    if (!loaded.contains(stock)) {
-                        loaded.add(stock);
-                    }
+            loaded = new ArrayList<>();
+            Set<UUID> pooledUuids = new HashSet<>();
+            for (ModdedEntity m : EntityPool.get(world).getAllEntities()) {
+                CustomEntity self = m.getSelf();
+                if (self instanceof EntityCoupleableRollingStock stock && !stock.isDead()) {
+                    loaded.add(stock);
+                    pooledUuids.add(stock.getUUID());
                 }
             }
-//            }
+            for (EntityCoupleableRollingStock stock : world.getEntities(EntityCoupleableRollingStock.class)) {
+                if (!pooledUuids.contains(stock.getUUID()) && !stock.isDead()) {
+                    loaded.add(stock);
+                }
+            }
 
             boolean newChunksLoaded = lastCount != loaded.size();
 
