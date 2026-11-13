@@ -36,12 +36,25 @@ public class RailInfo {
 	public final String uniqueID;
 	public final boolean itemHeld;
 
+	// compat, 0 = normal, 1 = switch parent branch, >2 = turn branches
+	public final int switchBranchIndex;
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos) {
-		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false);
+	// bridge: only used for submitting some switch branch information, clear it after using!
+	public List<RailInfo> builderBranchBridge;
+	public List<Vec3i> builderBranchPosBridge;
+
+	// multi switch info
+	public final MultiSwitchInfo multiSwitchInfo;
+
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, MultiSwitchInfo multiSwitchInfo) {
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, false, 0, multiSwitchInfo);
 	}
 
-	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld) {
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, MultiSwitchInfo multiSwitchInfo) {
+		this(settings, placementInfo, customInfo, switchState, switchForced, tablePos, itemHeld, 0, multiSwitchInfo);
+	}
+
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, SwitchState switchState, SwitchState switchForced, double tablePos, boolean itemHeld, int switchBranchIndex, MultiSwitchInfo multiSwitchInfo) {
 		if (customInfo == null) {
 			customInfo = placementInfo;
 			//#1566: Use customInfo to adjust slope height
@@ -57,6 +70,8 @@ public class RailInfo {
 		this.switchForced = switchForced;
 		this.tablePos = tablePos;
 		this.itemHeld = itemHeld;
+		this.switchBranchIndex = switchBranchIndex;
+		this.multiSwitchInfo = multiSwitchInfo;
 		this.uniqueID = generateID();
 	}
 	private String generateID() {
@@ -80,7 +95,8 @@ public class RailInfo {
 				this.placementInfo.yaw,
 				this.placementInfo.direction,
 				this.customInfo.yaw,
-				this.customInfo.direction
+				this.customInfo.direction,
+				this.switchBranchIndex
 		};
 		String id = Arrays.toString(props);
 		if (!placementInfo.placementPosition.equals(customInfo.placementPosition)
@@ -110,11 +126,18 @@ public class RailInfo {
 		if(this.settings.pickRollAndOffsetInfo != null){
 			id += this.settings.pickRollAndOffsetInfo;
 		}
+		if(this.multiSwitchInfo != null) {
+			id += this.multiSwitchInfo;
+		}
 		return id;
 	}
 
-	public RailInfo(ItemStack settings, PlacementInfo placementInfo, PlacementInfo customInfo) {
-		this(RailSettings.from(settings), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0);
+	public RailInfo(ItemStack stack, PlacementInfo placementInfo, PlacementInfo customInfo) {
+		this(RailSettings.from(stack), placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0, MultiSwitchInfo.from(stack));
+	}
+
+	public RailInfo(RailSettings settings, PlacementInfo placementInfo, PlacementInfo customInfo, MultiSwitchInfo multiSwitchInfo) {
+		this(settings, placementInfo, customInfo, SwitchState.NONE, SwitchState.NONE, 0, multiSwitchInfo);
 	}
 
 	public RailInfo withSettings(Consumer<RailSettings.Mutable> mod) {
@@ -141,6 +164,10 @@ public class RailInfo {
 		public SwitchState switchForced;
 		@TagField("tablePos")
 		public double tablePos;
+		@TagField("switchBranchIndex")
+		public int switchBranchIndex;
+		@TagField("multiSwitchInfo")
+		public MultiSwitchInfo multiSwitchInfo;
 
 		// Not serialized
 		public boolean itemHeld;
@@ -153,12 +180,15 @@ public class RailInfo {
 			this.switchForced = info.switchForced;
 			this.tablePos = info.tablePos;
 			this.itemHeld = info.itemHeld;
+			this.switchBranchIndex = info.switchBranchIndex;
+			this.multiSwitchInfo = info.multiSwitchInfo;
 		}
 
 		private Mutable(TagCompound data) throws SerializationException {
 			// Defaults
 			tablePos = 0;
 			itemHeld = false;
+			multiSwitchInfo = null;
 
 			TagSerializer.deserialize(data, this);
 		}
@@ -171,7 +201,9 @@ public class RailInfo {
 					switchState,
 					switchForced,
 					tablePos,
-					itemHeld
+					itemHeld,
+					switchBranchIndex,
+					multiSwitchInfo
 			);
 		}
 	}
@@ -214,6 +246,8 @@ public class RailInfo {
 			return new BuilderTransferTable(this, world, pos);
 		case CUSTOM:
 			return new BuilderCubicCurve(this, world, pos);
+		case MULTISWITCH:
+			return new BuilderMultiSwitch(this, world, pos);
 		}
 		return null;
 	}
@@ -447,7 +481,48 @@ public class RailInfo {
 					false,
 					1, 1
 			);
-			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos);
+			return new RailInfo(settings, placementInfo, null, switchState, switchForced, tablePos, null);
+		}
+	}
+
+	public static class subInfosMapper implements cam72cam.mod.serialization.TagMapper<List<RailInfo>> {
+		@Override
+		public TagAccessor<List<RailInfo>> apply(Class<List<RailInfo>> type, String fieldName, TagField tag) {
+			return new TagAccessor<>(
+					(nbt, infos) -> {
+						if(infos != null && !infos.isEmpty()) {
+							TagCompound infoNBT = new TagCompound();
+							infoNBT.setInteger("count", infos.size());
+							for (int i = 0; i < infos.size(); i++) {
+								TagCompound infoTag = new TagCompound();
+                                try {
+                                    TagSerializer.serialize(infoTag, new Mutable(infos.get(i)));
+									infoNBT.set("subinfo_" + i, infoTag);
+                                } catch (SerializationException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+							nbt.set(fieldName, infoNBT);
+						} else {
+							nbt.remove(fieldName);
+						}
+					},
+					(nbt, world) -> {
+						List<RailInfo> infos = new ArrayList<>();
+						if (nbt.hasKey(fieldName)) {
+							TagCompound infoNBT = nbt.get(fieldName);
+							int count = infoNBT.getInteger("count");
+							for (int i = 0; i < count; i++) {
+                                try {
+                                    infos.add(new Mutable(infoNBT.get("subinfo_" + i)).immutable());
+                                } catch (SerializationException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+						}
+						return infos;
+					}
+			);
 		}
 	}
 }

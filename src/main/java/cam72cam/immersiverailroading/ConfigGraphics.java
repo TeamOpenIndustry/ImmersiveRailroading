@@ -20,6 +20,9 @@ public class ConfigGraphics {
 
 	@Comment( "Self explanatory" )
 	public static boolean trainsOnTheBrain = true;
+
+	@Comment("Request server track regions for map")
+	public static boolean requestServerTrackRegions = true;
 	
 	@Comment("What unit to display speed in (kmh, ms, mph)")
 	public static SpeedDisplayType speedUnit = SpeedDisplayType.kmh;

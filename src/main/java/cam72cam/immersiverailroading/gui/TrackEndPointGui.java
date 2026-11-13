@@ -8,6 +8,7 @@ import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.CubicCurve;
 import cam72cam.immersiverailroading.util.EndPointData;
 import cam72cam.immersiverailroading.util.IRFuzzy;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.TrackSnapSettings;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
@@ -19,6 +20,7 @@ import cam72cam.mod.render.opengl.RenderState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static cam72cam.immersiverailroading.gui.ClickListHelper.next;
 
@@ -26,8 +28,11 @@ public class TrackEndPointGui implements IScreen {
     private TileRailPreview te;
     private int targetGuiOpenType;
     private boolean unlockGuiTurnDegree;
+    private int multiSwitchBranchSelected;
     private final List<ItemStack> oreDict;
     private RailSettings.Mutable settings;
+    private MultiSwitchInfo.Mutable multiSwitchInfo;
+    private RailSettings.Mutable selectedWaySettings;
 
     // Near/Far Label
     private Button nearLabel;
@@ -103,13 +108,63 @@ public class TrackEndPointGui implements IScreen {
     private TrackEndPointGui(ItemStack stack) {
         stack = stack.copy();
         settings = RailSettings.from(stack).mutable();
+        multiSwitchInfo = MultiSwitchInfo.from(stack).mutable();
         ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
         targetGuiOpenType = data.guiOpenType;
         unlockGuiTurnDegree = data.unlockGuiTurnDegree;
+        multiSwitchBranchSelected = data.multiSwitchBranchSelected;
+
+        if (multiSwitchBranchSelected < 0) multiSwitchBranchSelected = 0;
+        if (multiSwitchBranchSelected > multiSwitchInfo.multiSwitchBranches.size()) {
+            multiSwitchBranchSelected = multiSwitchInfo.multiSwitchBranches.size();
+        }
+        selectedWaySettings = multiSwitchBranchSelected == 0
+                ? settings
+                : multiSwitchInfo.multiSwitchBranches.get(multiSwitchBranchSelected - 1).settings().mutable();
 
         oreDict = new ArrayList<>();
         oreDict.add(ItemStack.EMPTY);
         oreDict.addAll(IRFuzzy.IR_RAIL_BED.enumerate());
+    }
+
+    private void applyLocal(Consumer<RailSettings.Mutable> mod) {
+        if (multiSwitchBranchSelected == 0) {
+            mod.accept(settings);
+        } else {
+            mod.accept(selectedWaySettings);
+            syncMultiSwitchInfo();
+        }
+    }
+
+    private void syncMultiSwitchInfo() {
+        if (multiSwitchBranchSelected <= 0) return;
+        int idx = multiSwitchBranchSelected - 1;
+        if (idx >= multiSwitchInfo.multiSwitchBranches.size()) return;
+        RailSettings merged = selectedWaySettings.immutable().with(m -> {
+            m.gauge = settings.gauge;
+            m.track = settings.track;
+            m.railBed = settings.railBed;
+            m.railBedFill = settings.railBedFill;
+            m.isPreview = settings.isPreview;
+            m.isGradeCrossing = settings.isGradeCrossing;
+        });
+        multiSwitchInfo.multiSwitchBranches.set(idx,
+                multiSwitchInfo.multiSwitchBranches.get(idx).with(m -> m.settings = merged));
+    }
+
+    private void propagateGlobalsToBranches() {
+        for (int i = 0; i < multiSwitchInfo.multiSwitchBranches.size(); i++) {
+            var b = multiSwitchInfo.multiSwitchBranches.get(i);
+            var updated = b.with(m -> m.settings = m.settings.with(s -> {
+                s.gauge = settings.gauge;
+                s.track = settings.track;
+                s.railBed = settings.railBed;
+                s.railBedFill = settings.railBedFill;
+                s.isPreview = settings.isPreview;
+                s.isGradeCrossing = settings.isGradeCrossing;
+            }));
+            multiSwitchInfo.multiSwitchBranches.set(i, updated);
+        }
     }
 
     @Override
@@ -152,7 +207,7 @@ public class TrackEndPointGui implements IScreen {
         farRadiusLabel.setTooltip(List.of(GuiText.LABEL_SWAP_RADIUS.toString()));
 
         nearRadiusInput = new TextField(screen, left_xStart + width / 2 + 20, ytop, width / 4, height);
-        nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
+        nearRadiusInput.setText("" + (int) selectedWaySettings.nearPointData.radius());
         nearRadiusInput.setValidator(s -> {
             if (s == null || s.length() == 0) {
                 return true;
@@ -164,18 +219,16 @@ public class TrackEndPointGui implements IScreen {
                 return s.equals("-");
             }
             int max = 1000;
-
-            if (val > -1e-6 && val <= max && CubicCurve.isCubicParabolaInputValid(val, settings.farPointData.radius(), settings.degrees)) {
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = val);
+            if (val > -1e-6 && val <= max && CubicCurve.isCubicParabolaInputValid(val, selectedWaySettings.farPointData.radius(), selectedWaySettings.degrees)) {
+                applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.radius = val));
                 return true;
             }
-
             return false;
         });
         nearRadiusInput.setFocused(true);
 
         farRadiusInput = new TextField(screen, right_xStart + width / 2 + 20, ytop, width / 4, height);
-        farRadiusInput.setText("" + (int) settings.farPointData.radius());
+        farRadiusInput.setText("" + (int) selectedWaySettings.farPointData.radius());
         farRadiusInput.setValidator(s -> {
             if (s == null || s.length() == 0) {
                 return true;
@@ -187,12 +240,10 @@ public class TrackEndPointGui implements IScreen {
                 return s.equals("-");
             }
             int max = 1000;
-
-            if (val > -1e-6 && val <= max && CubicCurve.isCubicParabolaInputValid(settings.nearPointData.radius(), val, settings.degrees)) {
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = val);
+            if (val > -1e-6 && val <= max && CubicCurve.isCubicParabolaInputValid(selectedWaySettings.nearPointData.radius(), val, selectedWaySettings.degrees)) {
+                applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.radius = val));
                 return true;
             }
-
             return false;
         });
         farRadiusInput.setFocused(true);
@@ -202,19 +253,19 @@ public class TrackEndPointGui implements IScreen {
         // Height Offset
 
         nearHeightOffsetLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_HEIGHT_OFFSET.toString(), (hand, button) -> {
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
-            nearHeightOffsetInput.setText("" + (float) settings.nearPointData.offset().y);
+            applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.offset = Vec3d.ZERO));
+            nearHeightOffsetInput.setText("" + (float) selectedWaySettings.nearPointData.offset().y);
         });
         nearHeightOffsetLabel.setTooltip(List.of(GuiText.LABEL_RESET_HEIGHT_OFFSET.toString()));
 
         farHeightOffsetLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_HEIGHT_OFFSET.toString(), (hand, button) -> {
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = Vec3d.ZERO);
-            farHeightOffsetInput.setText("" + (float) settings.farPointData.offset().y);
+            applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.offset = Vec3d.ZERO));
+            farHeightOffsetInput.setText("" + (float) selectedWaySettings.farPointData.offset().y);
         });
         farHeightOffsetLabel.setTooltip(List.of(GuiText.LABEL_RESET_HEIGHT_OFFSET.toString()));
 
         nearHeightOffsetInput = new TextField(screen, left_xStart + width / 2 + 20, ytop, width / 4, height);
-        nearHeightOffsetInput.setText("" + (float) settings.nearPointData.offset().y);
+        nearHeightOffsetInput.setText("" + (float) selectedWaySettings.nearPointData.offset().y);
         nearHeightOffsetInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -228,7 +279,7 @@ public class TrackEndPointGui implements IScreen {
             float max = 2f;
             float min = -2f;
             if (val >= min && val <= max) {
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.offset = new Vec3d(0, val, 0));
+                applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.offset = new Vec3d(0, val, 0)));
                 return true;
             }
             return false;
@@ -236,7 +287,7 @@ public class TrackEndPointGui implements IScreen {
         nearHeightOffsetInput.setFocused(true);
 
         farHeightOffsetInput = new TextField(screen, right_xStart + width / 2 + 20, ytop, width / 4, height);
-        farHeightOffsetInput.setText("" + (float) settings.farPointData.offset().y);
+        farHeightOffsetInput.setText("" + (float) selectedWaySettings.farPointData.offset().y);
         farHeightOffsetInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -250,7 +301,7 @@ public class TrackEndPointGui implements IScreen {
             float max = 2f;
             float min = -2f;
             if (val >= min && val <= max) {
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.offset = new Vec3d(0, val, 0));
+                applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.offset = new Vec3d(0, val, 0)));
                 return true;
             }
             return false;
@@ -262,19 +313,19 @@ public class TrackEndPointGui implements IScreen {
         // Pitch
 
         nearPitchLabel = new Button(screen, left_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_PITCH.toString(), (hand, button) -> {
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = 0);
-            nearPitchInput.setText("" + settings.nearPointData.pitch());
+            applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.pitch = 0));
+            nearPitchInput.setText("" + selectedWaySettings.nearPointData.pitch());
         });
         nearPitchLabel.setTooltip(List.of(GuiText.LABEL_RESET_PITCH.toString()));
 
         farPitchLabel = new Button(screen, right_xStart, ytop, width / 2 + 20, height, GuiText.LABEL_PITCH.toString(), (hand, button) -> {
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = 0);
-            farPitchInput.setText("" + settings.farPointData.pitch());
+            applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.pitch = 0));
+            farPitchInput.setText("" + selectedWaySettings.farPointData.pitch());
         });
         farPitchLabel.setTooltip(List.of(GuiText.LABEL_RESET_PITCH.toString()));
 
         nearPitchInput = new TextField(screen, left_xStart + width / 2 + 20, ytop, width / 4, height);
-        nearPitchInput.setText("" + settings.nearPointData.pitch());
+        nearPitchInput.setText("" + selectedWaySettings.nearPointData.pitch());
         nearPitchInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -285,10 +336,10 @@ public class TrackEndPointGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = settings.nearPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
+            float max = selectedWaySettings.nearPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
             float min = -max;
             if (val >= min && val <= max) {
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.pitch = val);
+                applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.pitch = val));
                 return true;
             }
             return false;
@@ -296,7 +347,7 @@ public class TrackEndPointGui implements IScreen {
         nearPitchInput.setFocused(true);
 
         farPitchInput = new TextField(screen, right_xStart + width / 2 + 20, ytop, width / 4, height);
-        farPitchInput.setText("" + settings.farPointData.pitch());
+        farPitchInput.setText("" + selectedWaySettings.farPointData.pitch());
         farPitchInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -307,10 +358,10 @@ public class TrackEndPointGui implements IScreen {
             } catch (NumberFormatException e) {
                 return s.equals(".") || s.equals("-");
             }
-            float max = settings.farPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
+            float max = selectedWaySettings.farPointData.pitchDegreeMode() ? 26.565f : 500;// Math.atan(500 / 1000) ≈ 26.5650
             float min = -max;
             if (val >= min && val <= max) {
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.pitch = val);
+                applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.pitch = val));
                 return true;
             }
             return false;
@@ -319,17 +370,17 @@ public class TrackEndPointGui implements IScreen {
 
         ytop += height;
 
-        nearPitchSettingButton = new Button(screen, left_xStart, ytop, width - 30, height, settings.nearPointData.getPitchSetting(), (hand, button) -> {
-            settings.nearPointData = circlePitchSetting(settings.nearPointData);
-            button.setText(settings.nearPointData.getPitchSetting());
-            nearPitchInput.setText("" + settings.nearPointData.pitch());
+        nearPitchSettingButton = new Button(screen, left_xStart, ytop, width - 30, height, selectedWaySettings.nearPointData.getPitchSetting(), (hand, button) -> {
+            applyLocal(m -> m.nearPointData = circlePitchSetting(m.nearPointData));
+            button.setText(selectedWaySettings.nearPointData.getPitchSetting());
+            nearPitchInput.setText("" + selectedWaySettings.nearPointData.pitch());
         });
         nearPitchSettingButton.setTooltip(List.of(GuiText.LABEL_PITCH_SETTING.toString()));
 
-        farPitchSettingButton = new Button(screen, right_xStart, ytop, width - 30, height, settings.farPointData.getPitchSetting(), (hand, button) -> {
-            settings.farPointData = circlePitchSetting(settings.farPointData);
-            button.setText(settings.farPointData.getPitchSetting());
-            farPitchInput.setText("" + settings.farPointData.pitch());
+        farPitchSettingButton = new Button(screen, right_xStart, ytop, width - 30, height, selectedWaySettings.farPointData.getPitchSetting(), (hand, button) -> {
+            applyLocal(m -> m.farPointData = circlePitchSetting(m.farPointData));
+            button.setText(selectedWaySettings.farPointData.getPitchSetting());
+            farPitchInput.setText("" + selectedWaySettings.farPointData.pitch());
         });
         farPitchSettingButton.setTooltip(List.of(GuiText.LABEL_PITCH_SETTING.toString()));
 
@@ -338,35 +389,35 @@ public class TrackEndPointGui implements IScreen {
 
         // Pos Type
 
-        nearPosTypeButton = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()), (hand, button) -> {
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posType = next(settings.nearPointData.posType(), hand));
-            button.setText(GuiText.SELECTOR_POSITION.toString(settings.nearPointData.posType()));
+        nearPosTypeButton = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(selectedWaySettings.nearPointData.posType()), (hand, button) -> {
+            applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.posType = next(n.posType, hand)));
+            button.setText(GuiText.SELECTOR_POSITION.toString(selectedWaySettings.nearPointData.posType()));
         });
-        farPosTypeButton = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(settings.farPointData.posType()), (hand, button) -> {
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.posType = next(settings.farPointData.posType(), hand));
-            button.setText(GuiText.SELECTOR_POSITION.toString(settings.farPointData.posType()));
+        farPosTypeButton = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_POSITION.toString(selectedWaySettings.farPointData.posType()), (hand, button) -> {
+            applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.posType = next(n.posType, hand)));
+            button.setText(GuiText.SELECTOR_POSITION.toString(selectedWaySettings.farPointData.posType()));
         });
 
         ytop += height;
 
-        nearPosYawAlignSelector = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_YAW_ALIGN.toString(settings.nearPointData.posYawType()), (hand, button) -> {
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
-            nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
-            button.setText(GuiText.SELECTOR_YAW_ALIGN.toString(settings.nearPointData.posYawType()));
+        nearPosYawAlignSelector = new Button(screen, left_xStart, ytop, width - 30, height, GuiText.SELECTOR_YAW_ALIGN.toString(selectedWaySettings.nearPointData.posYawType()), (hand, button) -> {
+            applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.posYawType = next(n.posYawType, hand)));
+            nearYawInput.setEnabled(selectedWaySettings.nearPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
+            button.setText(GuiText.SELECTOR_YAW_ALIGN.toString(selectedWaySettings.nearPointData.posYawType()));
         });
         nearPosYawAlignSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
 
-        farPosYawTypeSelector = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_YAW_ALIGN.toString(settings.farPointData.posYawType()), (hand, button) -> {
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.posYawType = next(mutable.posYawType, hand));
-            farYawInput.setEnabled(settings.farPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
-            button.setText(GuiText.SELECTOR_YAW_ALIGN.toString(settings.farPointData.posYawType()));
+        farPosYawTypeSelector = new Button(screen, right_xStart, ytop, width - 30, height, GuiText.SELECTOR_YAW_ALIGN.toString(selectedWaySettings.farPointData.posYawType()), (hand, button) -> {
+            applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.posYawType = next(n.posYawType, hand)));
+            farYawInput.setEnabled(selectedWaySettings.farPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
+            button.setText(GuiText.SELECTOR_YAW_ALIGN.toString(selectedWaySettings.farPointData.posYawType()));
         });
         farPosYawTypeSelector.setTooltip(List.of(GuiText.LABEL_POS_YAW_TYPE.toString()));
 
         ytop += height;
 
         nearYawInput = new TextField(screen, left_xStart, ytop, width - 30, height);
-        nearYawInput.setText("" + settings.nearPointData.posYaw());
+        nearYawInput.setText("" + selectedWaySettings.nearPointData.posYaw());
         nearYawInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -380,7 +431,7 @@ public class TrackEndPointGui implements IScreen {
             float max = 90;
             float min = 0;
             if (val >= min && val <= max) {
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.posYaw = val);
+                applyLocal(m -> m.nearPointData = m.nearPointData.with(n -> n.posYaw = val));
                 return true;
             }
             return false;
@@ -388,7 +439,7 @@ public class TrackEndPointGui implements IScreen {
         nearYawInput.setFocused(true);
 
         farYawInput = new TextField(screen, right_xStart, ytop, width - 30, height);
-        farYawInput.setText("" + settings.farPointData.posYaw());
+        farYawInput.setText("" + selectedWaySettings.farPointData.posYaw());
         farYawInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -402,7 +453,7 @@ public class TrackEndPointGui implements IScreen {
             float max = 90;
             float min = 0;
             if (val >= min && val <= max) {
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.posYaw = val);
+                applyLocal(m -> m.farPointData = m.farPointData.with(n -> n.posYaw = val));
                 return true;
             }
             return false;
@@ -413,89 +464,115 @@ public class TrackEndPointGui implements IScreen {
 
         // Track Snap
 
-        nearPosSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), settings.nearPointData.trackSnapSettings().snapPos(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPos = self.isChecked());
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        nearPosSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), selectedWaySettings.nearPointData.trackSnapSettings().snapPos(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPos = self.isChecked());
+                m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
             setNearSnapComponentsVisibility();
         });
 
-        farPosSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), settings.farPointData.trackSnapSettings().snapPos(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPos = self.isChecked());
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        farPosSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_POS.toString(), selectedWaySettings.farPointData.trackSnapSettings().snapPos(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapPos = self.isChecked());
+                m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
             setFarSnapComponentsVisibility();
         });
 
-        nearInvertSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_INVERTED.toString(), settings.nearPointData.trackSnapSettings().inverted(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.inverted = self.isChecked());
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        nearInvertSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_INVERTED.toString(), selectedWaySettings.nearPointData.trackSnapSettings().inverted(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.inverted = self.isChecked());
+                m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
             setNearSnapComponentsVisibility();
         });
 
-        farInvertSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_INVERTED.toString(), settings.farPointData.trackSnapSettings().inverted(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.inverted = self.isChecked());
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        farInvertSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_INVERTED.toString(), selectedWaySettings.farPointData.trackSnapSettings().inverted(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.inverted = self.isChecked());
+                m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
             setFarSnapComponentsVisibility();
         });
 
         ytop += height;
 
-        nearHeightSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.nearPointData.trackSnapSettings().snapHeight(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = self.isChecked());
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        nearHeightSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), selectedWaySettings.nearPointData.trackSnapSettings().snapHeight(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = self.isChecked());
+                m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
             setNearSnapComponentsVisibility();
         });
 
-        farHeightSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), settings.farPointData.trackSnapSettings().snapHeight(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = self.isChecked());
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        farHeightSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_HEIGHT.toString(), selectedWaySettings.farPointData.trackSnapSettings().snapHeight(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapHeight = self.isChecked());
+                m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
             setFarSnapComponentsVisibility();
         });
 
-        nearYawSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), settings.nearPointData.trackSnapSettings().snapYaw(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = self.isChecked());
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        nearYawSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), selectedWaySettings.nearPointData.trackSnapSettings().snapYaw(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = self.isChecked());
+                m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
         });
 
-        farYawSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), settings.farPointData.trackSnapSettings().snapYaw(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = self.isChecked());
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        farYawSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_YAW.toString(), selectedWaySettings.farPointData.trackSnapSettings().snapYaw(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapYaw = self.isChecked());
+                m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
         });
 
         ytop += height;
 
-        nearPitchSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), settings.nearPointData.trackSnapSettings().snapPitch(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = self.isChecked());
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        nearPitchSnapCB = new CheckBox(screen, left_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), selectedWaySettings.nearPointData.trackSnapSettings().snapPitch(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = self.isChecked());
+                m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
         });
 
-        farPitchSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), settings.farPointData.trackSnapSettings().snapPitch(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = self.isChecked());
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        farPitchSnapCB = new CheckBox(screen, right_xStart, ytop, GuiText.LABEL_SNAP_PITCH.toString(), selectedWaySettings.farPointData.trackSnapSettings().snapPitch(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapPitch = self.isChecked());
+                m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
         });
 
-        nearRollSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), settings.nearPointData.trackSnapSettings().snapRoll(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = self.isChecked());
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        nearRollSnapCB = new CheckBox(screen, left_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), selectedWaySettings.nearPointData.trackSnapSettings().snapRoll(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = self.isChecked());
+                m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
         });
 
-        farRollSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), settings.farPointData.trackSnapSettings().snapRoll(), (hand, self) -> {
-            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = self.isChecked());
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+        farRollSnapCB = new CheckBox(screen, right_xStart + width / 2 - 15, ytop, GuiText.LABEL_SNAP_ROLL.toString(), selectedWaySettings.farPointData.trackSnapSettings().snapRoll(), (hand, self) -> {
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapRoll = self.isChecked());
+                m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
         });
 
         ytop += height;
 
         // Snap Offset
         nearSnapOffsetLabel = new Button(screen, left_xStart, ytop, 50, height, GuiText.LABEL_SNAP_POS_OFFSET.toString(), (hand, button) -> {
-            TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = Vec3d.ZERO);
-            settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-            nearSnapOffsetForwardInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().x);
-            nearSnapOffsetUpInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().y);
-            nearSnapOffsetRightInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().z);
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = Vec3d.ZERO);
+                m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
+            nearSnapOffsetForwardInput.setText("" + (float) selectedWaySettings.nearPointData.trackSnapSettings().snapOffset().x);
+            nearSnapOffsetUpInput.setText("" + (float) selectedWaySettings.nearPointData.trackSnapSettings().snapOffset().y);
+            nearSnapOffsetRightInput.setText("" + (float) selectedWaySettings.nearPointData.trackSnapSettings().snapOffset().z);
         });
 
         nearSnapOffsetForwardInput = new TextField(screen, left_xStart + 50, ytop, 40, height);
-        nearSnapOffsetForwardInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().x);
+        nearSnapOffsetForwardInput.setText("" + (float) selectedWaySettings.nearPointData.trackSnapSettings().snapOffset().x);
         nearSnapOffsetForwardInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -509,8 +586,10 @@ public class TrackEndPointGui implements IScreen {
             float max = 1f;
             float min = -1f;
             if (val >= min && val <= max) {
-                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(val, mutable.snapOffset.y, mutable.snapOffset.z));
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                applyLocal(m -> {
+                    TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(val, mutable.snapOffset.y, mutable.snapOffset.z));
+                    m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+                });
                 return true;
             }
             return false;
@@ -518,7 +597,7 @@ public class TrackEndPointGui implements IScreen {
         nearSnapOffsetForwardInput.setFocused(true);
 
         nearSnapOffsetUpInput = new TextField(screen, left_xStart + 50 + 40, ytop, 40, height);
-        nearSnapOffsetUpInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().y);
+        nearSnapOffsetUpInput.setText("" + (float) selectedWaySettings.nearPointData.trackSnapSettings().snapOffset().y);
         nearSnapOffsetUpInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -532,8 +611,10 @@ public class TrackEndPointGui implements IScreen {
             float max = 1f;
             float min = -1f;
             if (val >= min && val <= max) {
-                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, val, mutable.snapOffset.z));
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                applyLocal(m -> {
+                    TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, val, mutable.snapOffset.z));
+                    m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+                });
                 return true;
             }
             return false;
@@ -541,7 +622,7 @@ public class TrackEndPointGui implements IScreen {
         nearSnapOffsetUpInput.setFocused(true);
 
         nearSnapOffsetRightInput = new TextField(screen, left_xStart + 50 + 40 * 2, ytop, 40, height);
-        nearSnapOffsetRightInput.setText("" + (float) settings.nearPointData.trackSnapSettings().snapOffset().z);
+        nearSnapOffsetRightInput.setText("" + (float) selectedWaySettings.nearPointData.trackSnapSettings().snapOffset().z);
         nearSnapOffsetRightInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -555,8 +636,10 @@ public class TrackEndPointGui implements IScreen {
             float max = 1f;
             float min = -1f;
             if (val >= min && val <= max) {
-                TrackSnapSettings trackSnapSettings = settings.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, mutable.snapOffset.y, val));
-                settings.nearPointData = settings.nearPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                applyLocal(m -> {
+                    TrackSnapSettings trackSnapSettings = m.nearPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, mutable.snapOffset.y, val));
+                    m.nearPointData = m.nearPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+                });
                 return true;
             }
             return false;
@@ -564,15 +647,17 @@ public class TrackEndPointGui implements IScreen {
         nearSnapOffsetRightInput.setFocused(true);
 
         farSnapOffsetLabel = new Button(screen, right_xStart, ytop, 50, height, GuiText.LABEL_SNAP_POS_OFFSET.toString(), (hand, button) -> {
-            TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = Vec3d.ZERO);
-            settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
-            farSnapOffsetForwardInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().x);
-            farSnapOffsetUpInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().y);
-            farSnapOffsetRightInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().z);
+            applyLocal(m -> {
+                TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = Vec3d.ZERO);
+                m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+            });
+            farSnapOffsetForwardInput.setText("" + (float) selectedWaySettings.farPointData.trackSnapSettings().snapOffset().x);
+            farSnapOffsetUpInput.setText("" + (float) selectedWaySettings.farPointData.trackSnapSettings().snapOffset().y);
+            farSnapOffsetRightInput.setText("" + (float) selectedWaySettings.farPointData.trackSnapSettings().snapOffset().z);
         });
 
         farSnapOffsetForwardInput = new TextField(screen, right_xStart + 50, ytop, 40, height);
-        farSnapOffsetForwardInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().x);
+        farSnapOffsetForwardInput.setText("" + (float) selectedWaySettings.farPointData.trackSnapSettings().snapOffset().x);
         farSnapOffsetForwardInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -586,8 +671,10 @@ public class TrackEndPointGui implements IScreen {
             float max = 1f;
             float min = -1f;
             if (val >= min && val <= max) {
-                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(val, mutable.snapOffset.y, mutable.snapOffset.z));
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                applyLocal(m -> {
+                    TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(val, mutable.snapOffset.y, mutable.snapOffset.z));
+                    m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+                });
                 return true;
             }
             return false;
@@ -595,7 +682,7 @@ public class TrackEndPointGui implements IScreen {
         farSnapOffsetForwardInput.setFocused(true);
 
         farSnapOffsetUpInput = new TextField(screen, right_xStart + 50 + 40, ytop, 40, height);
-        farSnapOffsetUpInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().y);
+        farSnapOffsetUpInput.setText("" + (float) selectedWaySettings.farPointData.trackSnapSettings().snapOffset().y);
         farSnapOffsetUpInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -609,8 +696,10 @@ public class TrackEndPointGui implements IScreen {
             float max = 1f;
             float min = -1f;
             if (val >= min && val <= max) {
-                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, val, mutable.snapOffset.z));
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                applyLocal(m -> {
+                    TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, val, mutable.snapOffset.z));
+                    m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+                });
                 return true;
             }
             return false;
@@ -618,7 +707,7 @@ public class TrackEndPointGui implements IScreen {
         farSnapOffsetUpInput.setFocused(true);
 
         farSnapOffsetRightInput = new TextField(screen, right_xStart + 50 + 40 * 2, ytop, 40, height);
-        farSnapOffsetRightInput.setText("" + (float) settings.farPointData.trackSnapSettings().snapOffset().z);
+        farSnapOffsetRightInput.setText("" + (float) selectedWaySettings.farPointData.trackSnapSettings().snapOffset().z);
         farSnapOffsetRightInput.setValidator(s -> {
             if (s == null || s.isEmpty()) {
                 return true;
@@ -632,8 +721,10 @@ public class TrackEndPointGui implements IScreen {
             float max = 1f;
             float min = -1f;
             if (val >= min && val <= max) {
-                TrackSnapSettings trackSnapSettings = settings.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, mutable.snapOffset.y, val));
-                settings.farPointData = settings.farPointData.with(mutable -> mutable.trackSnapSettings = trackSnapSettings);
+                applyLocal(m -> {
+                    TrackSnapSettings trackSnapSettings = m.farPointData.trackSnapSettings().with(mutable -> mutable.snapOffset = new Vec3d(mutable.snapOffset.x, mutable.snapOffset.y, val));
+                    m.farPointData = m.farPointData.with(n -> n.trackSnapSettings = trackSnapSettings);
+                });
                 return true;
             }
             return false;
@@ -642,35 +733,40 @@ public class TrackEndPointGui implements IScreen {
 
         // Other
 
-        nearPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
-        farPitchLabel.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
-        nearPitchInput.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
-        farPitchInput.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
-        nearPitchSettingButton.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
-        farPitchSettingButton.setEnabled(settings.type.hasSmoothing() && settings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        nearPitchLabel.setEnabled(selectedWaySettings.type.hasSmoothing() && selectedWaySettings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        farPitchLabel.setEnabled(selectedWaySettings.type.hasSmoothing() && selectedWaySettings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        nearPitchInput.setEnabled(selectedWaySettings.type.hasSmoothing() && selectedWaySettings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        farPitchInput.setEnabled(selectedWaySettings.type.hasSmoothing() && selectedWaySettings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        nearPitchSettingButton.setEnabled(selectedWaySettings.type.hasSmoothing() && selectedWaySettings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
+        farPitchSettingButton.setEnabled(selectedWaySettings.type.hasSmoothing() && selectedWaySettings.smoothing == TrackSmoothing.PITCH_SPECIFIED);
 
-        nearYawInput.setEnabled(settings.nearPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
-        farYawInput.setEnabled(settings.farPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
+        nearYawInput.setEnabled(selectedWaySettings.nearPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
+        farYawInput.setEnabled(selectedWaySettings.farPointData.posYawType() == TrackYawAlignmentType.ANGLE_SPECIFIED);
 
         setNearSnapComponentsVisibility();
         setFarSnapComponentsVisibility();
     }
 
     public void onClose() {
+        syncMultiSwitchInfo();
+        propagateGlobalsToBranches();
+
         if (this.te != null) {
-            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
+            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
 
             // Update client data here in order to avoid networking lag
             ItemStack clientStack = te.getItem();
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
+            multiSwitchInfo.immutable().write(clientStack);
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
             te.setItem(clientStack, MinecraftClient.getPlayer());
         } else {
-            new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
+            new ItemRailUpdatePacket(settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
 
             ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
+            multiSwitchInfo.immutable().write(clientStack);
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
             MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
         }
     }
@@ -700,17 +796,19 @@ public class TrackEndPointGui implements IScreen {
     }
 
     private void swapTransitionRadius() {
-        float temp = settings.farPointData.radius();
-        settings.farPointData = settings.farPointData.with(mutable -> mutable.radius = settings.nearPointData.radius());
-        settings.nearPointData = settings.nearPointData.with(mutable -> mutable.radius = temp);
-
-        settings.length = (int) temp;
-        nearRadiusInput.setText("" + (int) settings.nearPointData.radius());
-        farRadiusInput.setText("" + (int) settings.farPointData.radius());
+        float temp = selectedWaySettings.farPointData.radius();
+        float nearRadius = selectedWaySettings.nearPointData.radius();
+        applyLocal(m -> {
+            m.farPointData = m.farPointData.with(n -> n.radius = nearRadius);
+            m.nearPointData = m.nearPointData.with(n -> n.radius = temp);
+            m.length = (int) temp;
+        });
+        nearRadiusInput.setText("" + (int) selectedWaySettings.nearPointData.radius());
+        farRadiusInput.setText("" + (int) selectedWaySettings.farPointData.radius());
     }
 
     private void setNearSnapComponentsVisibility() {
-        boolean near = settings.nearPointData.trackSnapSettings().snapPos();
+        boolean near = selectedWaySettings.nearPointData.trackSnapSettings().snapPos();
         nearHeightSnapCB.setVisible(near);
         nearYawSnapCB.setVisible(near);
         nearPitchSnapCB.setVisible(near);
@@ -724,7 +822,7 @@ public class TrackEndPointGui implements IScreen {
     }
 
     private void setFarSnapComponentsVisibility() {
-        boolean far = settings.farPointData.trackSnapSettings().snapPos();
+        boolean far = selectedWaySettings.farPointData.trackSnapSettings().snapPos();
         farHeightSnapCB.setVisible(far);
         farYawSnapCB.setVisible(far);
         farPitchSnapCB.setVisible(far);

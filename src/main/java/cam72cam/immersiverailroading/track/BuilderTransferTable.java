@@ -27,6 +27,7 @@ public class BuilderTransferTable extends BuilderBase {
 
         Vec3i mainOffset = new Vec3i(-width / 2, 1, info.settings.length / 2);
         mainOffset = mainOffset.rotate(Rotation.from(info.placementInfo.facing()));
+        mainOffset = mainOffset.add(0, (int) info.placementInfo.placementPosition.y, 0);
 
         this.setParentPos(mainOffset.down());
         TrackRail main = new TrackRail(this, mainOffset.down());

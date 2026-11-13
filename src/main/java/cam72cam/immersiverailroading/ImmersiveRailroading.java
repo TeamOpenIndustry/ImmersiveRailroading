@@ -3,12 +3,14 @@ package cam72cam.immersiverailroading;
 import cam72cam.immersiverailroading.entity.*;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.gui.AugmentFilterGUI;
+import cam72cam.immersiverailroading.gui.GlobalRailwayMap;
 import cam72cam.immersiverailroading.gui.overlay.GuiBuilder;
 import cam72cam.immersiverailroading.items.ItemPaintBrush;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.StockModel;
 import cam72cam.immersiverailroading.multiblock.*;
 import cam72cam.immersiverailroading.net.*;
+import cam72cam.immersiverailroading.net.offline.*;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.remote_control.RemoteControlData;
@@ -25,14 +27,16 @@ import cam72cam.immersiverailroading.tile.TileMultiblock;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailGag;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
+import cam72cam.immersiverailroading.render.util.VolumetricCurveRenderer;
+import cam72cam.immersiverailroading.track.graph.WorldData;
 import cam72cam.immersiverailroading.util.IRFuzzy;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.ModEvent;
 import cam72cam.mod.config.ConfigFile;
-import cam72cam.mod.entity.Entity;
-import cam72cam.mod.entity.EntityRegistry;
+import cam72cam.mod.entity.*;
 import cam72cam.mod.event.ClientEvents;
+import cam72cam.mod.event.CommonEvents;
 import cam72cam.mod.input.Keyboard;
 import cam72cam.mod.input.Keyboard.KeyCode;
 import cam72cam.mod.math.Vec3d;
@@ -43,6 +47,7 @@ import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.sound.Audio;
 import cam72cam.mod.text.Command;
+import cam72cam.mod.world.World;
 
 import java.util.UUID;
 import java.util.Random;
@@ -70,6 +75,20 @@ public class ImmersiveRailroading extends ModCore.Mod {
 
 		switch (event) {
 			case CONSTRUCT:
+				CommonEvents.WorldData.SAVE.subscribe(WorldData::save);
+				CommonEvents.WorldData.LOAD.subscribe(WorldData::load);
+				CommonEvents.WorldData.UNLOAD.subscribe(WorldData::unload);
+				CommonEvents.World.UNLOAD.subscribe(netWorld -> {
+					World world = World.get(netWorld);
+					if (world != null && world.isClient) {
+						WorldData.unload(world, null);
+					}
+				});
+				World.onTick(WorldData::tick);
+
+				CommonEvents.WorldData.SAVE.subscribe(VehiclePersistence::save);
+				CommonEvents.WorldData.LOAD.subscribe(VehiclePersistence::load);
+
 				EntityRegistry.register(ImmersiveRailroading.instance, CarFreight::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, CarPassenger::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
 				EntityRegistry.register(ImmersiveRailroading.instance, CarTank::new, ImmersiveRailroading.ENTITY_SYNC_DISTANCE);
@@ -94,10 +113,52 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(RemoteControlServerPacket::new, PacketDirection.ServerToClient);
 				Packet.register(RemoteControlClientPacket::new, PacketDirection.ClientToServer);
 				Packet.register(RemoteControlActivePacket::new, PacketDirection.ClientToServer);
+				Packet.register(TrackRegionPacket::new, PacketDirection.ServerToClient);
+				Packet.register(TrackRegionDeltaPacket::new, PacketDirection.ServerToClient);
+				Packet.register(TrackRegionRequestPacket::new, PacketDirection.ClientToServer);
+				Packet.register(VehicleRequestPacket::new, PacketDirection.ClientToServer);
+				Packet.register(VehicleSyncPacket::new, PacketDirection.ServerToClient);
+				Packet.register(SwitchChangePacket::new, PacketDirection.ClientToServer);
 
 				ServerChronoState.register();
+				cam72cam.mod.entity.EntityPool.register(new cam72cam.mod.entity.IEntityPoolPolicy() {
+					@Override
+					public boolean isEnabled() {
+						return Config.ConfigDebug.enableEntityPool;
+					}
+
+					@Override
+					public boolean shouldPool(CustomEntity self) {
+						return self instanceof EntityCoupleableRollingStock;
+					}
+
+					@Override
+					public double getSpawnDistanceSq() {
+						return Config.ConfigDebug.offlineStockViewDistance * Config.ConfigDebug.offlineStockViewDistance;
+					}
+
+					@Override
+					public double getDespawnDistanceSq() {
+						int additional = 32;
+						return (Config.ConfigDebug.offlineStockViewDistance + additional)
+								* (Config.ConfigDebug.offlineStockViewDistance + additional);
+					}
+
+					@Override
+					public int getProximityInterval() {
+						return Config.ConfigDebug.offlineStockViewRefreshFreq;
+					}
+
+					@Override
+					public void onEntitySpawned(ModdedEntity e) {
+						CustomEntity self = e.getSelf();
+						if (self instanceof EntityCoupleableRollingStock stock) {
+							stock.keepLoaded();
+						}
+					}
+				});
 				WirelessRemoteControlServer.init();
-				
+
 				IRBlocks.register();
 				IRItems.register();
 				GuiTypes.register();
@@ -206,12 +267,20 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Keyboard.registerKey("ir_keys.start_stop_engine", KeyCode.ADD, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.START_STOP_ENGINE));
 				Keyboard.registerKey("ir_keys.bell", KeyCode.SUBTRACT, "key.categories." + ImmersiveRailroading.MODID, onKeyPress.apply(KeyTypes.BELL));
 				Keyboard.registerKey("ir_keys.config", KeyCode.DIVIDE, "key.categories." + ImmersiveRailroading.MODID, () -> GuiTypes.CONFIG.open(MinecraftClient.getPlayer()));
+				Keyboard.registerKey("ir_keys.global_map", KeyCode.M, "key.categories." + ImmersiveRailroading.MODID, () -> GuiTypes.GLOBAL_RAILWAY_MAP.open(MinecraftClient.getPlayer()));
 
 				Audio.setSoundChannels(ConfigSound.customAudioChannels);
 				break;
 			case SETUP:
 				GlobalRender.registerItemMouseover(IRItems.ITEM_TRACK_BLUEPRINT, TrackBlueprintItemModel::renderMouseover);
 				GlobalRender.registerItemMouseover(IRItems.ITEM_MANUAL, MBBlueprintRender::renderMouseover);
+				GlobalRender.registerRender((state, pt) -> {
+					if(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_GOLDEN_SPIKE) ||
+							MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_LARGE_WRENCH) ||
+							MinecraftClient.getPlayer().getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_GOLDEN_SPIKE) ||
+							MinecraftClient.getPlayer().getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_LARGE_WRENCH))
+						VolumetricCurveRenderer.renderWireFrame(state, pt);
+				});
 
 				GlobalRender.registerOverlay((state, _) -> {
 					Entity riding = MinecraftClient.getPlayer().getRiding();
@@ -223,7 +292,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 						stock.getDefinition().getOverlay().render(state, stock);
 					}
 				});
-				
+
 				// Remote Overlay
 				WirelessRemoteControlClient.init();
 		        GlobalRender.registerOverlay((state, _) -> {
@@ -239,10 +308,16 @@ public class ImmersiveRailroading extends ModCore.Mod {
 		        });
 
 				ClientEvents.MOUSE_GUI.subscribe(evt -> {
+					GlobalRailwayMap map = GlobalRailwayMap.current();
+					if (map == null) return true;
+					return map.handleMouse(evt);
+				});
+
+				ClientEvents.MOUSE_GUI.subscribe(evt -> {
 					if (!MinecraftClient.isReady()) {
 						return true;
 					}
-					
+
 					// Remote control
 					UUID activeLoco = WirelessRemoteControlClient.getLoco();
 				    if (activeLoco != null) {
@@ -265,9 +340,10 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				ClientEvents.TICK.subscribe(GuiBuilder::onClientTick);
 				ClientEvents.TICK.subscribe(EntityRollingStockDefinition.ControlSoundsDefinition::cleanupStoppedSounds);
 				ClientEvents.TICK.subscribe(WirelessRemoteControlClient::onClientTick);
-	                                         
+				ClientEvents.TICK.subscribe(GlobalRailwayMap::onClientTick);
+
 				Particles.SMOKE = Particle.register(SmokeParticle::new, SmokeParticle::renderAll);
-	
+
 				ClientPartDragging.register();
 				break;
 			case RELOAD:

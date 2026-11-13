@@ -7,6 +7,10 @@ import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.track.graph.WorldData;
+import cam72cam.mod.entity.CustomEntity;
+import cam72cam.mod.entity.EntityPool;
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -48,9 +52,13 @@ public class Simulation {
             simulateTick(i);
         }
 
-        boolean sendPackets = world.getTicks() % (Config.ConfigDebug.physicsFutureTicks / 2) == 0;
+        long now = world.getTicks();
+        boolean lowFreqDue = now % (Config.ConfigDebug.physicsFutureTicks / 2) == 0;
+        boolean anyMovingTable = loaded != null && loaded.stream()
+                .anyMatch(s -> now < s.onMovingTableUntilTick);
+
+        List<Player> players = (lowFreqDue || anyMovingTable) ? world.getEntities(Player.class) : null;
         double syncDistanceSq = ImmersiveRailroading.ENTITY_SYNC_DISTANCE * ImmersiveRailroading.ENTITY_SYNC_DISTANCE;
-        List<Player> players = sendPackets ? world.getEntities(Player.class) : null;
 
         // Apply new states
         for (EntityCoupleableRollingStock stock : loaded) {
@@ -59,7 +67,13 @@ public class Simulation {
                 state.dirty = false;
             }
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
-            if (sendPackets && players.stream().anyMatch(player -> player.getPosition().distanceToSquared(stock.getPosition()) < syncDistanceSq)) {
+
+            if (players == null) {
+                continue;
+            }
+            boolean onMovingTable = now < stock.onMovingTableUntilTick;
+            if ((lowFreqDue || onMovingTable)
+                    && players.stream().anyMatch(player -> player.getPosition().distanceToSquared(stock.getPosition()) < syncDistanceSq)) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }
         }
@@ -83,7 +97,21 @@ public class Simulation {
             // If this is too slow, we could hang onto the list of stock that is at rest.
             // We should only need to do this when stock is no longer at rest or changes dirty flag
             int lastCount = loaded == null ? 0 : loaded.size();
-            loaded = world.getEntities(EntityCoupleableRollingStock.class);
+            loaded = new ArrayList<>();
+            Set<UUID> pooledUuids = new HashSet<>();
+            for (ModdedEntity m : EntityPool.get(world).getAllEntities()) {
+                CustomEntity self = m.getSelf();
+                if (self instanceof EntityCoupleableRollingStock stock && !stock.isDead()) {
+                    loaded.add(stock);
+                    pooledUuids.add(stock.getUUID());
+                }
+            }
+            for (EntityCoupleableRollingStock stock : world.getEntities(EntityCoupleableRollingStock.class)) {
+                if (!pooledUuids.contains(stock.getUUID()) && !stock.isDead()) {
+                    loaded.add(stock);
+                }
+            }
+
             boolean newChunksLoaded = lastCount != loaded.size();
 
             for (EntityCoupleableRollingStock stock : loaded) {
@@ -113,21 +141,17 @@ public class Simulation {
                     continue;
                 }
 
-                // Keep it loaded
-                world.keepLoaded(new Vec3i(state.position));
+                boolean offline = !stock.isAddedToChunk();
+                if (!offline || Config.ConfigDebug.offlineVehicleLoadChunks) {
+                    world.keepLoaded(new Vec3i(state.position));
 
-                if (state.consist.positions == null) {
-                    continue;
-                }
-
-                // Load interacting stock locations
-                // We could in the future do a HashSet<Consist> and reduce the calls to the world.
-                for (Vec3i pos : state.consist.positions) {
-                    if (!world.isBlockLoaded(pos)) {
-                        ImmersiveRailroading.debug("Loading chunk at position %s", pos);
-                        // Load the chunk, entities should be directly injected into the world
-                        world.getBlock(pos);
-                        newChunksLoaded = true;
+                    if (state.consist.positions != null) {
+                        for (Vec3i pos : state.consist.positions) {
+                            if (!world.isBlockLoaded(pos)) {
+                                world.getBlock(pos);
+                                newChunksLoaded = true;
+                            }
+                        }
                     }
                 }
             }
@@ -166,6 +190,10 @@ public class Simulation {
                 }
                 SimulationState other = stateMap.get(otherID);
                 if (other == null) {
+                    if (Config.ConfigDebug.enableEntityPool && EntityPool.get(world).getEntity(otherID) != null) {
+                        continue;
+                    }
+
                     Vec3i otherPos = loaded.stream()
                             .filter(x -> x.getUUID().equals(myID)).findFirst()
                             .map(x -> isMyCouplerFront ? x.lastKnownFront : x.lastKnownRear).orElse(null);
@@ -349,6 +377,12 @@ public class Simulation {
         // calculate new velocities
         Consist.iterate(stateMap, nextStateMap, blocksAlreadyBroken);
 
+        Map<UUID, WorldData.VehicleRef> refs = new HashMap<>();
+        for (EntityCoupleableRollingStock stock : loaded) {
+            refs.put(stock.getUUID(), new WorldData.VehicleRef(stock.getPosition(), stock.getVelocity(), stock.lastFrontEdge, stock.lastRearEdge));
+        }
+        WorldData.get(world).updateVehicleRefs(refs);
+
         long totalTimeMs = System.currentTimeMillis() - startTimeMs;
         if (totalTimeMs > Config.ConfigDebug.physicsWarnThresholdMs) {
             ImmersiveRailroading.warn("Calculating Immersive Railroading Physics Iteration took %sms (%s, %s, %s)", totalTimeMs, calculatedStates, restStates, keptStates);
@@ -358,12 +392,20 @@ public class Simulation {
 
 
 
-
+    private static final Map<World, Boolean> LAST_OFF_WORLD_PATHING = new WeakHashMap<>();
 
     public static void simulate(World world) {
         // 100KM/h ~= 28m/s which means non-loaded stationary stock may be phased through at that speed
         // I'm OK with that for now
         // We might want to chunk-load ahead of the train just to be safe?
+
+        boolean current = Config.ConfigDebug.offWorldPathing;
+        Boolean last = LAST_OFF_WORLD_PATHING.put(world, current);
+
+        // off -> non-off, clear all topo for stocks
+        if (last != null && last && !current) {
+            clearTopology(world);
+        }
 
         if (world.getTicks() % 5 != 0) {
             // Only re-check every 5 ticks
@@ -379,5 +421,32 @@ public class Simulation {
 
     public static double calculateRoll(double frontRoll, double rearRoll) {//TODO: multi bogey support?
         return (frontRoll + rearRoll) / 2;
+    }
+
+    private static void clearTopology(World world) {
+        Set<EntityCoupleableRollingStock> all =
+                new HashSet<>(world.getEntities(EntityCoupleableRollingStock.class));
+
+        EntityPool.get(world).getAllEntities().stream()
+                .map(ModdedEntity::getSelf)
+                .filter(Objects::nonNull)
+                .filter(s -> s instanceof EntityCoupleableRollingStock)
+                .map(s -> (EntityCoupleableRollingStock) s)
+                .forEach(all::add);
+
+        for (EntityCoupleableRollingStock stock : all) {
+            stock.lastFrontEdge = null;
+            stock.lastFrontT = -1;
+            stock.lastRearEdge = null;
+            stock.lastRearT = -1;
+
+            SimulationState state = stock.getCurrentState();
+            if (state != null) {
+                state.lastFrontEdge = null;
+                state.lastFrontT = -1;
+                state.lastRearEdge = null;
+                state.lastRearT = -1;
+            }
+        }
     }
 }

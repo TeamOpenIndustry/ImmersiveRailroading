@@ -19,7 +19,7 @@ public class SwitchUtil {
 			return SwitchState.NONE;
 		}
 
-		if (rail.info.settings.type != TrackItems.TURN && rail.info.settings.type != TrackItems.CUSTOM) {
+		if (!rail.info.settings.type.canRoll()) {
 			return SwitchState.NONE;
 		}
 
@@ -27,11 +27,11 @@ public class SwitchUtil {
 		if (parent == null) {
 			return SwitchState.NONE;
 		}
-		if (parent.info.settings.type != TrackItems.SWITCH) {
+		if (!parent.info.settings.type.isSwitch()) {
 			return SwitchState.NONE;
 		}
 
-		if (position != null) {
+		if (position != null && parent.info.settings.type == TrackItems.SWITCH) {
 			IIterableTrack switchBuilder = (IIterableTrack) parent.info.getBuilder(rail.getWorld());
 			IIterableTrack turnBuilder = (IIterableTrack) rail.info.getBuilder(rail.getWorld());
 			double isOnStraight = switchBuilder.offsetFromTrack(parent.info, parent.getPos(), position);
@@ -44,6 +44,8 @@ public class SwitchUtil {
 					return SwitchState.STRAIGHT;
 				}
 			}
+		} else if (position != null && parent.info.settings.type == TrackItems.MULTISWITCH) {
+			return SwitchState.STRAIGHT; // what should we do?
 		}
 
 		if (parent.isSwitchForced()) {

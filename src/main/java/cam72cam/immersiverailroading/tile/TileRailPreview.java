@@ -2,12 +2,15 @@ package cam72cam.immersiverailroading.tile;
 
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
+import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiTypes;
 import cam72cam.immersiverailroading.library.TrackDirection;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.PreviewRenderPacket;
 import cam72cam.immersiverailroading.track.IIterableTrack;
+import cam72cam.immersiverailroading.util.MultiSwitchBranch;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.block.BlockEntityTickable;
@@ -18,6 +21,9 @@ import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.TagCompound;
 import cam72cam.mod.serialization.TagField;
 import cam72cam.mod.util.Facing;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TileRailPreview extends BlockEntityTickable {
 	private int ticksAlive;
@@ -30,8 +36,6 @@ public class TileRailPreview extends BlockEntityTickable {
 	private PlacementInfo placementInfo;
 	@TagField
 	private PlacementInfo customInfo;
-	@TagField
-	private boolean isAboveRails = false;//TODO: use Vec3i to replace this
 
 	public ItemStack getItem() {
 		return this.item;
@@ -40,7 +44,6 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setup(ItemStack stack, PlacementInfo info) {
 		this.item = stack.copy();
 		this.placementInfo = info;
-		this.isAboveRails = placementInfo.placementPosition.y < 0;
 		this.markDirty();
 	}
 
@@ -53,9 +56,9 @@ public class TileRailPreview extends BlockEntityTickable {
 		}
 
 		if (!settings.isPreview) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(player, isAboveRails() ? getPos().down() : getPos())) {
+			if (this.getRailInfo() != null && this.getRailInfo().build(player, getPos().add(0, (int) Math.round(placementInfo.placementPosition.y),0))) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
-				if (isAboveRails()) {
+				if (placementInfo.placementPosition.y < 0) {
 					getWorld().breakBlock(this.getPos());
 				}
 				return;
@@ -72,20 +75,40 @@ public class TileRailPreview extends BlockEntityTickable {
 	public void setCustomInfo(PlacementInfo info) {
 		this.customInfo = info;
 		if (customInfo != null) {
-			RailSettings settings = RailSettings.from(item);
-			if(settings.type == TrackItems.TURN || settings.type == TrackItems.TURN_V2
-				|| settings.type == TrackItems.STRAIGHT
-				|| settings.type == TrackItems.SLOPE){
+			int selectedOrder = new ItemTrackBlueprint.Data(item).multiSwitchBranchSelected;
+			RailSettings settings;
+			boolean isMultiSwitchMain = false;
+
+			if (selectedOrder == 0) {
+				settings = RailSettings.from(item);
+				if (settings.type == TrackItems.MULTISWITCH) {
+					MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+					TrackItems realType = multiSwitchInfo.realShapeType() != null ? multiSwitchInfo.realShapeType() : TrackItems.STRAIGHT;
+					settings = settings.with(mutable -> mutable.type = realType);
+					isMultiSwitchMain = true;
+				}
+			} else {
+				MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+				if (multiSwitchInfo.multiSwitchBranches() != null && selectedOrder <= multiSwitchInfo.multiSwitchBranches().size()) {
+					settings = multiSwitchInfo.multiSwitchBranches().get(selectedOrder - 1).settings();
+				} else {
+					return;
+				}
+			}
+
+			if (settings.type == TrackItems.TURN || settings.type == TrackItems.TURN_V2
+					|| settings.type == TrackItems.STRAIGHT
+					|| settings.type == TrackItems.SLOPE) {
 				Vec3d placeOffset = new Vec3d(
 						customInfo.placementPosition.x - placementInfo.placementPosition.x,
 						0,
 						customInfo.placementPosition.z - placementInfo.placementPosition.z
 				);
 				float yaw = settings.type == TrackItems.TURN || settings.type == TrackItems.TURN_V2
-							? placementInfo.yaw + ((settings.direction == TrackDirection.LEFT ? -1 : 1) * (Math.abs(settings.degrees) / 2)) //Calculate arc direction for turn
-							: placementInfo.yaw; //Simply use its yaw
+						? placementInfo.yaw + ((settings.direction == TrackDirection.LEFT ? -1 : 1) * (Math.abs(settings.degrees) / 2)) //Calculate arc direction for turn
+						: placementInfo.yaw; //Simply use its yaw
 				Vec3d unit = new Vec3d(0, 0, 1).rotateYaw(yaw);
-                int shadowLength = (int) Math.round(placeOffset.dotProduct(unit));
+				int shadowLength = (int) Math.round(placeOffset.dotProduct(unit));
 				int length;
 
 				switch (settings.type) {
@@ -94,8 +117,8 @@ public class TileRailPreview extends BlockEntityTickable {
 						//Transform it back to radius
 						double sin = Math.sin(Math.toRadians(settings.degrees / 2));
 						length = sin != 0d
-								 ? Math.max(1, (int) ((shadowLength / 2d) / sin)) + 1
-								 : 2;
+								? Math.max(1, (int) ((shadowLength / 2d) / sin)) + 1
+								: 2;
 						break;
 					case STRAIGHT:
 					case SLOPE:
@@ -106,7 +129,24 @@ public class TileRailPreview extends BlockEntityTickable {
 				settings = settings.with(b -> b.length = length);
 			}
 
-			settings.write(item);
+			if (selectedOrder == 0) {
+				RailSettings toWrite = isMultiSwitchMain
+						? settings.with(mutable -> mutable.type = TrackItems.MULTISWITCH)
+						: settings;
+				toWrite.write(item);
+			} else {
+				MultiSwitchInfo.Mutable multiSwitchInfo = MultiSwitchInfo.from(item).mutable();
+				if (multiSwitchInfo.multiSwitchBranches != null && selectedOrder <= multiSwitchInfo.multiSwitchBranches.size()) {
+					MultiSwitchBranch branch = multiSwitchInfo.multiSwitchBranches.get(selectedOrder - 1);
+					RailSettings finalSettings = settings;
+					PlacementInfo finalCustomInfo = this.customInfo;
+					multiSwitchInfo.multiSwitchBranches.set(selectedOrder - 1, branch.with(m -> {
+						m.settings = finalSettings;
+						m.customInfo = finalCustomInfo;
+					}));
+					multiSwitchInfo.immutable().write(item);
+				}
+			}
 		}
 		this.markDirty();
 	}
@@ -149,7 +189,7 @@ public class TileRailPreview extends BlockEntityTickable {
 		return IBoundingBox.INFINITE;// TODO: return real bounding of curve
 	}
 
-	public RailInfo getRailRenderInfo() {// Not only for render, but also for build!
+	public RailInfo getRailInfo() {// Not only for render, but also for build!
 		if (getWorld() != null && item != null && (info == null || info.settings == null)) {
 			offsetPosition();
 		}
@@ -174,6 +214,22 @@ public class TileRailPreview extends BlockEntityTickable {
 		PlacementInfo placementInfoOffset = placementInfo.offset(settings.nearPointData.offset());
 		PlacementInfo customInfoOffset = customInfo == null ? null : customInfo.offset(settings.farPointData.offset());
 
+		MultiSwitchInfo multiSwitchInfo = MultiSwitchInfo.from(item);
+		List<MultiSwitchBranch> branches = multiSwitchInfo.multiSwitchBranches();
+		if (branches != null && !branches.isEmpty()) {
+			List<MultiSwitchBranch> offsetBranches = new ArrayList<>(branches.size());
+			for (MultiSwitchBranch branch : branches) {
+				RailSettings branchSettings = branch.settings();
+				Vec3d farOffset = branchSettings != null && branchSettings.farPointData != null
+						? branchSettings.farPointData.offset()
+						: Vec3d.ZERO;
+				PlacementInfo branchCustom = branch.customInfo();
+				PlacementInfo branchCustomOffset = branchCustom == null ? null : branchCustom.offset(farOffset);
+				offsetBranches.add(branch.with(m -> m.customInfo = branchCustomOffset));
+			}
+			multiSwitchInfo = multiSwitchInfo.with(m -> m.multiSwitchBranches = offsetBranches);
+		}
+
 		// Found edge case: when placementInfo.placementPosition.y == -1, offset + bedThickness is 1, track is not flat,
 		// built tracks will be broken, so we change isAboveRails here. TODO: do we have a better way to avoid unexpected breaking?
 		if (Math.abs(settings.nearPointData.offset().y + settings.trackFaceTransSetting.bedThickness() - 1) < 1e-4 &&
@@ -185,11 +241,13 @@ public class TileRailPreview extends BlockEntityTickable {
 		}
 
 		info = new RailInfo(item, placementInfoOffset, customInfoOffset);
+		MultiSwitchInfo finalMultiSwitchInfo = multiSwitchInfo;
+		info = info.with(m -> m.multiSwitchInfo = finalMultiSwitchInfo);
 	}
 
 	public boolean isMulti() {
-		if (getRailRenderInfo().getBuilder(getWorld()) instanceof IIterableTrack) {
-			return ((IIterableTrack) getRailRenderInfo().getBuilder(getWorld())).getSubBuilders() != null;
+		if (getRailInfo().getBuilder(getWorld()) instanceof IIterableTrack) {
+			return ((IIterableTrack) getRailInfo().getBuilder(getWorld())).getSubBuilders() != null;
 		}
 		return false;
 	}
@@ -209,17 +267,13 @@ public class TileRailPreview extends BlockEntityTickable {
 	@Override
 	public boolean tryBreak(Player entityPlayer) {
 		if (entityPlayer != null && entityPlayer.isCrouching()) {
-			if (this.getRailRenderInfo() != null && this.getRailRenderInfo().build(entityPlayer, getPos())) {
+			if (this.getRailInfo() != null && this.getRailInfo().build(entityPlayer, getPos())) {
 				new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
-				return isAboveRails() && shouldBreakDirect && Config.ConfigDebug.breakTilePreview;
+				return placementInfo.placementPosition.y < 0 && shouldBreakDirect && Config.ConfigDebug.breakTilePreview;
 			}
 			return false;
 		}
 		new PreviewRenderPacket(this.getWorld(), this.getPos()).sendToAll();
 		return true;
-	}
-
-	public boolean isAboveRails() {
-		return isAboveRails;
 	}
 }

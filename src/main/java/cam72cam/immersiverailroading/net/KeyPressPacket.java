@@ -9,6 +9,8 @@ import cam72cam.immersiverailroading.items.ItemWirelessRemoteControl;
 import cam72cam.immersiverailroading.library.KeyTypes;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.entity.EntityPool;
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.net.Packet;
@@ -53,11 +55,17 @@ public class KeyPressPacket extends Packet {
 			player.getRiding().as(EntityRollingStock.class).handleKeyPress(player, type, disableIndependentThrottle);
 		}
 	}
-	
+
 	private void handleRemoteControl(Player player) {
-		Locomotive stock = getWorld().getEntity(loco, Locomotive.class); 
+		Locomotive stock = null;
+		ModdedEntity pooled = EntityPool.get(getWorld()).getEntity(loco);
+		if (pooled != null && pooled.getSelf() instanceof Locomotive l) {
+			stock = l;
+		} else {
+			stock = getWorld().getEntity(loco, Locomotive.class);
+		}
 		if (stock != null && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
-			ItemStack held = player.getHeldItem(Player.Hand.SECONDARY); 
+			ItemStack held = player.getHeldItem(Player.Hand.SECONDARY);
 			ItemWirelessRemoteControl.Data data = new ItemWirelessRemoteControl.Data(held);
 			if (loco.equals(data.linked)) {
 				stock.handleKeyPress(player, type, disableIndependentThrottle);

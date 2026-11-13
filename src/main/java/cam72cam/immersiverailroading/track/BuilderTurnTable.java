@@ -26,6 +26,7 @@ public class BuilderTurnTable extends BuilderBase {
 		
 		offset = new Vec3i(0, 1, info.settings.length);
 		offset = offset.rotate(Rotation.from(info.placementInfo.facing()));
+		offset = offset.add(0, (int) info.placementInfo.placementPosition.y, 0);
 		
 		double radius = info.settings.length;
 		

@@ -3,12 +3,15 @@ package cam72cam.immersiverailroading.tile;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.IRBlocks;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.track.TrackBase;
+import cam72cam.immersiverailroading.track.graph.TrackMultiGeometrySegment;
+import cam72cam.immersiverailroading.track.graph.WorldData;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
@@ -26,6 +29,15 @@ import java.util.List;
 public class TileRail extends TileRailBase {
 	@TagField("info")
 	public RailInfo info;
+
+	@TagField(value = "subInfos", mapper = RailInfo.subInfosMapper.class)
+	public List<RailInfo> subInfos;
+
+	@TagField(value = "subInfoPos", mapper = Vec3iListMapper.class)
+	public List<Vec3i> subInfoPos;
+
+	@TagField("buildTimeMs")
+	private long buildTimeMs;
 
 	@TagField("tableIndex")
 	private int tableIndex;
@@ -62,6 +74,18 @@ public class TileRail extends TileRailBase {
 		if (state != info.switchState) {
 			info = info.with(b -> b.switchState = state);
 			this.markDirty();
+
+			TileRail parent = getParentTileWithoutDamage();
+			if(parent != null) {
+				parent.info = parent.info.with(b -> b.switchState = state);
+				if(parent.subInfos != null && !parent.subInfos.isEmpty()) {
+					parent.subInfos.set(info.switchBranchIndex - 2, info);
+				}
+				long currentTime = System.currentTimeMillis();
+				parent.setBuildTimeMs(currentTime);
+				parent.markAllDirty();
+				WorldData.get(getWorld()).updateSwitchState(parent.getPos(), state, false, currentTime);
+			}
 		}
 	}
 
@@ -103,6 +127,14 @@ public class TileRail extends TileRailBase {
 		this.tableIndex = MathUtil.clamp(Math.round(Math.abs((float) offset.x) / this.info.settings.transfertableEntrySpacing), 0, info.settings.transfertableEntryCount - 1);
 	}
 
+	public void setBuildTimeMs(long buildTimeMs) {
+		this.buildTimeMs = buildTimeMs;
+	}
+
+	public long getBuildTimeMs() {
+		return buildTimeMs;
+	}
+
 	@Override
 	public void update() {
 		super.update();
@@ -141,15 +173,68 @@ public class TileRail extends TileRailBase {
 					shouldUpdate = true;
 				}
 			}
+
 			if(shouldUpdate){
 				this.markDirty();
 				int maxRange = Math.max(info.settings.length, info.settings.transfertableEntrySpacing * info.settings.transfertableEntryCount);
 				List<EntityCoupleableRollingStock> ents = getWorld().getEntities((EntityCoupleableRollingStock stock) -> stock.getPosition().distanceTo(new Vec3d(getPos())) < maxRange, EntityCoupleableRollingStock.class);
 				for(EntityCoupleableRollingStock stock : ents) {
 					stock.states.forEach(state -> state.dirty = true);
+					stock.onMovingTableUntilTick = getWorld().getTicks() + 5;
 					Simulation.forceQuickUpdates = true;
 				}
+
+				long currentTime = System.currentTimeMillis();
+				setBuildTimeMs(currentTime);
+				WorldData.get(getWorld()).updateTablePos(getPos(), info.tablePos, true, currentTime);
 			}
+		}
+
+		// convert old info
+		TileRail parent = getParentTileWithoutDamage();
+		if(getWorld().isServer && info != null && info.settings.type == TrackItems.SWITCH) {
+			if(info.switchBranchIndex == 0) info = info.with(mutable -> mutable.switchBranchIndex = 1);
+		}
+		if(getWorld().isServer && info != null && parent != null
+				&& (info.settings.type == TrackItems.TURN || info.settings.type == TrackItems.CUSTOM) // legacy switch branch only
+				&& parent.info.settings.type == TrackItems.SWITCH
+		) {
+			if(info.switchBranchIndex > 1) {
+				WorldData data = WorldData.get(getWorld());
+				if (data != null && data.getTrackBlockEnsured(getPos()) != null) {
+					data.removeTrackBlock(getPos());
+					data.setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
+				}
+			}
+
+			if(parent.subInfos == null) {
+				parent.subInfos = new ArrayList<>();
+				parent.subInfoPos = new ArrayList<>();
+			}
+			if(parent.subInfos.isEmpty()) {
+				Vec3d parentFirstPos = new Vec3d(parent.getPos()).add(parent.info.placementInfo.placementPosition);
+				Vec3d firstPos = new Vec3d(getPos()).add(info.placementInfo.placementPosition);
+				if(parentFirstPos.distanceTo(firstPos) < 0.25 * info.settings.gauge.scale()) {
+					parent.subInfos.add(info);
+					parent.subInfoPos.add(getPos());
+					if(info.switchBranchIndex == 0) info = info.with(mutable -> mutable.switchBranchIndex = 2);
+					WorldData.get(getWorld()).setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
+				}
+			}
+		}
+
+		if(getWorld().isServer && info != null && parent != null && info.settings.type.canRoll() && parent.info.settings.type == TrackItems.MULTISWITCH) {
+			if(info.switchBranchIndex > 1) {
+				WorldData data = WorldData.get(getWorld());
+				if (data != null && data.getTrackBlockEnsured(getPos()) != null) {
+					data.removeTrackBlock(getPos());
+					data.setTrackBlock(parent.getPos(), new TrackMultiGeometrySegment(parent, getWorld()));
+				}
+			}
+		}
+
+		if(getWorld().isServer) {
+			int a  =1 ;
 		}
 	}
 
@@ -214,10 +299,22 @@ public class TileRail extends TileRailBase {
 		}
 
 		if (tracks == null) {
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			if(info.settings.type == TrackItems.SWITCH) {
+				tracks = info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			} else if(info.settings.type == TrackItems.MULTISWITCH) {
+				tracks = info.withSettings(mutable -> mutable.type = info.multiSwitchInfo.realShapeType()).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			} else {
+				tracks = info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			}
 			// This is just terrible
 			Vec3i offset = getPos().subtract(tracks.get(0).getPos());
-			tracks = (info.settings.type == TrackItems.SWITCH ? info.withSettings(b -> b.type = TrackItems.STRAIGHT) : info).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			if(info.settings.type == TrackItems.SWITCH) {
+				tracks = info.withSettings(mutable -> mutable.type = TrackItems.STRAIGHT).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			} else if(info.settings.type == TrackItems.MULTISWITCH) {
+				tracks = info.withSettings(mutable -> mutable.type = info.multiSwitchInfo.realShapeType()).getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos().add(offset))).getTracksForFloating();
+			} else {
+				tracks = info.getBuilder(getWorld(), new Vec3i(info.placementInfo.placementPosition).add(getPos())).getTracksForFloating();
+			}
 		}
 
 
@@ -265,6 +362,7 @@ public class TileRail extends TileRailBase {
 	public void onBreak() {
 		this.spawnDrops();
 		super.onBreak();
+		WorldData.get(getWorld()).removeTrackBlock(getPos());
 	}
 
     @Override
@@ -297,5 +395,51 @@ public class TileRail extends TileRailBase {
 			return null;
 		}
 		return info.settings.railBed;
+	}
+
+	@Override
+	public void load(TagCompound nbt) {
+		super.load(nbt);
+		if (getWorld() == null) {
+			ImmersiveRailroading.error("Can't get umc world while loading TileRail at %s!", getPos());
+			return;
+		}
+		if (getWorld().isServer) {
+			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlockEnsured(getPos()) == null && info.switchBranchIndex <= 1) {
+				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(this, getWorld());
+				WorldData.get(getWorld()).setTrackBlock(getPos(), trackBlock);
+			}
+		}
+	}
+
+	public static class Vec3iListMapper implements cam72cam.mod.serialization.TagMapper<List<Vec3i>> {
+		public TagAccessor<List<Vec3i>> apply(Class<List<Vec3i>> t, String fieldname, TagField tag) {
+			return new TagAccessor<>(
+					(nbt, list) -> {
+						if(list == null){
+							nbt.remove(fieldname);
+							return;
+						}
+						TagCompound vec3iListTag = new TagCompound();
+						for (int i = 0; i < list.size(); i++) {
+							vec3iListTag.setVec3i(i + "", list.get(i));
+						}
+						vec3iListTag.setInteger("amount", list.size());
+						nbt.set(fieldname,vec3iListTag);
+					},
+					nbt -> {
+						if(!nbt.hasKey(fieldname)){
+							return null;
+						}
+						TagCompound vec3iListTag = nbt.get(fieldname);
+						int amount = vec3iListTag.getInteger("amount");
+						List<Vec3i> list = new ArrayList<>();
+						for (int i = 0; i < amount; i++) {
+							list.add(vec3iListTag.getVec3i(i + ""));
+						}
+						return list;
+					}
+			);
+		}
 	}
 }

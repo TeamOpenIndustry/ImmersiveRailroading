@@ -261,6 +261,24 @@ public class Config {
 		public static boolean disableLuaScript = false;
 	}
 
+	@Name("region")
+	public static class ConfigRegion { // are these ranges reasonable?
+		@Comment("How often (in ticks) to refresh the required region set and unload idle regions. Lower = more responsive, higher = less CPU")
+		@Range(min = 10, max = 200)
+		public static int refreshIntervalTicks = 20;
+
+		@Comment("Radius (in blocks) around each player that stays loaded")
+		@Range(min = 64, max = 1024)
+		public static double playerRadius = 256;
+
+		@Comment("Ticks an unneeded region stays loaded before being unloaded (cooldown to avoid thrashing)")
+		@Range(min = 100, max = 6000)
+		public static int unloadDelayTicks = 600;
+
+		@Comment("Debug option, do not change this if you don't know what you are doing")
+		public static boolean clientBuildTopo = false;
+	}
+
 	@Name("debug")
 	public static class ConfigDebug {
 
@@ -270,6 +288,26 @@ public class Config {
 
 		@Comment("Keep rolling stock loaded even when it is not moving")
 		public static boolean keepStockLoaded = true;
+
+		@Comment("Train will run without chunk loading")
+		public static boolean offWorldPathing = true;
+
+		@Comment("Enable offline entity pool to save chunks (requires game restart for full effect)")
+		public static boolean enableEntityPool = true;
+
+		@Comment("Offline Vehicle load chunks")
+		public static boolean offlineVehicleLoadChunks = false;
+
+		@Comment("Number of buckets to split vehicle data files (changes require reboot to take effect for saving)")
+		public static int vehicleBucketCount = 16;
+
+		@Comment("How far offline stock can be seen")
+		@Range(min = 128, max = 1024)
+		public static int offlineStockViewDistance = 256;
+
+		@Comment("How many tick offline stock visibility is refreshed")
+		@Range(min = 1, max = 40)
+		public static int offlineStockViewRefreshFreq = 20;
 
 		@Comment("Break blueprint preview block after building it")
 		public static boolean breakTilePreview = true;

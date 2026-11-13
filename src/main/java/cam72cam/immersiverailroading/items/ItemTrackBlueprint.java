@@ -5,6 +5,8 @@ import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.GuiTypes;
+import cam72cam.immersiverailroading.library.TrackDirection;
+import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.immersiverailroading.registry.TrackDefinition;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
@@ -89,6 +91,7 @@ public class ItemTrackBlueprint extends CustomItem {
 
 		PlacementInfo placementInfo = new PlacementInfo(snappedStack, yaw, new Vec3d(hit.x, Math.floor(hit.y), hit.z), true, snapped);
 		placementInfo = placementInfo.offset(RailSettings.from(snappedStack).nearPointData.offset());
+
 		RailInfo info = new RailInfo(snappedStack, placementInfo, null);
 		info.build(player, pos);
 		return ClickResult.ACCEPTED;
@@ -164,14 +167,18 @@ public class ItemTrackBlueprint extends CustomItem {
 		@TagField
 		public boolean unlockGuiTurnDegree;
 
+		@TagField
+		public int multiSwitchBranchSelected;
+
 		public Data(ItemStack stack) {
 			super(stack);
 		}
 
-		public static void writeTo(ItemStack stack, int targetGuiOpenType, boolean unlockGuiTurnDegree) {
+		public static void writeTo(ItemStack stack, int targetGuiOpenType, boolean unlockGuiTurnDegree, int multiSwitchBranchSelected) {
 			ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
 			data.guiOpenType = targetGuiOpenType;
 			data.unlockGuiTurnDegree = unlockGuiTurnDegree;
+			data.multiSwitchBranchSelected = multiSwitchBranchSelected;
 			data.write();
 		}
 	}

@@ -12,7 +12,7 @@ import util.Matrix4;
 
 public class RailPreviewRender {
     public static StandardModel render(TileRailPreview te) {
-        RailInfo info = te.getRailRenderInfo();
+        RailInfo info = te.getRailInfo();
         if (info == null) {
             // Still loading...
             return null;
@@ -21,15 +21,14 @@ public class RailPreviewRender {
         model.addCustom((state, pt) -> {
             MinecraftClient.startProfiler("tile_rail_preview");
             state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(1, 1);
-            if (te.isAboveRails()) {
-                state.translate(0, -1, 0);
-            }
+            state.translate(0, te.getOriginPlacementInfoPos().y, 0);
+
             // Move to specified position
             Vec3d placementPosition = info.placementInfo.placementPosition;
 
             state.translate(placementPosition.x, placementPosition.y, placementPosition.z);
             if (!te.isMulti()) {
-                RailRender.render(info, te.getOriginPlacementInfoPos(), te.getWorld(), te.isAboveRails() ? te.getPos().down() : te.getPos(), true, state);
+                RailRender.renderPreview(info, te.getOriginPlacementInfoPos(), false, te.getWorld(), te.getPos(), true, state);
             }
             MinecraftClient.endProfiler();
 		});

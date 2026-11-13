@@ -26,10 +26,8 @@ public class MultiPreviewRender {
     private static void render(RenderState state, float partialTicks) {
         state.blend(new BlendMode(BlendMode.GL_CONSTANT_ALPHA, BlendMode.GL_ONE).constantColor(1, 1, 1, 0.7f)).lightmap(1, 1);
         for (TileRailPreview preview : previews.values()) {
-            List<BuilderBase> subBuilders = ((IIterableTrack) preview.getRailRenderInfo()
-                                                                     .getBuilder(preview.getWorld(), preview.isAboveRails()
-                                                                                                     ? preview.getPos().down()
-                                                                                                     : preview.getPos()))
+            List<BuilderBase> subBuilders = ((IIterableTrack) preview.getRailInfo()
+                                                                     .getBuilder(preview.getWorld(), preview.getPos()))
                                                                      .getSubBuilders();
             for (BuilderBase builder : subBuilders) {
                 RailInfo info = builder.info;
@@ -38,9 +36,9 @@ public class MultiPreviewRender {
                 if (GlobalRender.getCameraPos(partialTicks).distanceTo(placementPosition) < GlobalRender.getRenderDistance() + 50) {
                     RenderState placementState = state.clone().translate(placementPosition);
 
-                    placementState.translate(0, -preview.getOriginPlacementInfoPos().y, 0);// TODO: is this enough?
+                    placementState.translate(0, -preview.getOriginPlacementInfoPos().y, 0);
 
-                    RailRender.render(info, null, preview.getWorld(), builder.pos, true, placementState);
+                    RailRender.renderPreview(info, preview.getOriginPlacementInfoPos().scale(-1), true, preview.getWorld(), preview.getPos(), true, placementState);
                 }
             }
         }
