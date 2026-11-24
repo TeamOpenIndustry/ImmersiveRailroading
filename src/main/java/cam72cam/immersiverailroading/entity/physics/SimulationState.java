@@ -470,7 +470,8 @@ public class SimulationState {
 
                 if (bogeyDelta.lengthSquared() > 1e-6) {
                     yaw = VecUtil.toWrongYaw(bogeyDelta);
-                    pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRearPos.distanceTo(nextFrontPos)));
+                    double horizDist = Math.sqrt(bogeyDelta.x * bogeyDelta.x + bogeyDelta.z * bogeyDelta.z);
+                    pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, horizDist));
                 }
 
                 roll = (float) Simulation.calculateRoll(rollFront, rollRear);
@@ -555,7 +556,8 @@ public class SimulationState {
                 Vec3d bogeyDelta = nextFrontPos.subtract(nextRearPos);
                 yaw = VecUtil.toWrongYaw(bogeyDelta);
                 roll = (float) Simulation.calculateRoll(rollFront, rollRear);
-                pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, nextRearPos.distanceTo(nextFrontPos)));
+                double horizDist = Math.sqrt(bogeyDelta.x * bogeyDelta.x + bogeyDelta.z * bogeyDelta.z);
+                pitch = (float) Math.toDegrees(FastMath.atan2(bogeyDelta.y, horizDist));
                 position = position.add(deltaCenter);
             }
 
