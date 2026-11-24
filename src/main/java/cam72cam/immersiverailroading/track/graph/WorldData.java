@@ -563,6 +563,7 @@ public class WorldData {
             TrackRegion region = new TrackRegion(r, TrackRegionUtil.readBuffer(f), world);
             synchronized (regions) {
                 regions.put(r, region);
+                regionCooldown.put(r, Config.ConfigRegion.unloadDelayTicks);
                 System.out.println("loading chunk " + TrackRegionUtil.regionX(r) + ", " + TrackRegionUtil.regionZ(r));
             }
 
@@ -1272,7 +1273,7 @@ public class WorldData {
         if (newBlock == null) return;
         if (newBlock.paths.isEmpty()) return;
 
-        double gaugeScale = newBlock.paths.get(0).values().iterator().next().gauge.scale();
+        double gaugeScale = newBlock.paths.get(0).values().iterator().next().gauge.scale();// well just use the first yet...
         int hori = Math.max((int) (gaugeScale * 2), 1);
         int vert = 1;
 
@@ -1302,15 +1303,15 @@ public class WorldData {
 
         for (TrackMultiGeometrySegment block : nearbyBlocks) {
             if (block.type.isSwitch() && block.paths.size() >= 2) {
-                for (TrackSingleGeometrySegment straight : block.paths.get(0).values()) {
-                    if (straight.pointsCache.size() <= 1) continue;
-                    searchAndAddGap(straight, true);
-                    searchAndAddGap(straight, false);
+                for (TrackSingleGeometrySegment mainBranch : block.paths.get(0).values()) {
+                    if (mainBranch.pointsCache.size() <= 1) continue;
+                    searchAndAddGap(mainBranch, true);
+                    searchAndAddGap(mainBranch, false);
                 }
                 for (int pi = 1; pi < block.paths.size(); pi++) {
-                    for (TrackSingleGeometrySegment turn : block.paths.get(pi).values()) {
-                        if (turn.pointsCache.size() <= 1) continue;
-                        searchAndAddGap(turn, false);
+                    for (TrackSingleGeometrySegment subBranch : block.paths.get(pi).values()) {
+                        if (subBranch.pointsCache.size() <= 1) continue;
+                        searchAndAddGap(subBranch, false);
                     }
                 }
             } else {
