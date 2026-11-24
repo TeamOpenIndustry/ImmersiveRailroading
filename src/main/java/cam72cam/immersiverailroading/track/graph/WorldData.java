@@ -578,7 +578,7 @@ public class WorldData {
 
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
                 Vec3i parentAbs = region.toBlockPos(e.getKey());
-                researchNeighbors(parentAbs);
+                researchCrossRegionNeighbors(region);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -658,7 +658,7 @@ public class WorldData {
         }
 
         for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-            researchNeighbors(region.toBlockPos(e.getKey()));
+            researchCrossRegionNeighbors(region);
         }
     }
 
@@ -1267,6 +1267,44 @@ public class WorldData {
         }
     }
 
+    private void researchCrossRegionNeighbors(TrackRegion region) {
+        Set<TrackMultiGeometrySegment> neighbors = new LinkedHashSet<>();
+        for (TrackMultiGeometrySegment block : region.trackBlocks.values()) {
+            for (Vec3i neighborPos : block.getConnectedMultiPositions()) {
+                if (TrackRegionUtil.vecToRegion(neighborPos) == region.regionPos) continue;
+                TrackMultiGeometrySegment neighbor = getTrackBlockLoaded(neighborPos);
+                if (neighbor != null) neighbors.add(neighbor);
+            }
+        }
+        researchBlocks(neighbors);
+    }
+
+    private void researchBlocks(Collection<TrackMultiGeometrySegment> blocks) {
+        for (TrackMultiGeometrySegment block : blocks) {
+            if (block.type.isSwitch() && block.paths.size() >= 2) {
+                for (TrackSingleGeometrySegment straight : block.paths.get(0).values()) {
+                    if (straight.pointsCache.size() <= 1) continue;
+                    searchAndAddGap(straight, true);
+                    searchAndAddGap(straight, false);
+                }
+                for (int pi = 1; pi < block.paths.size(); pi++) {
+                    for (TrackSingleGeometrySegment turn : block.paths.get(pi).values()) {
+                        if (turn.pointsCache.size() <= 1) continue;
+                        searchAndAddGap(turn, false);
+                    }
+                }
+            } else {
+                for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
+                    for (TrackSingleGeometrySegment single : branch.values()) {
+                        if (single.pointsCache.size() <= 1) continue;
+                        searchAndAddGap(single, true);
+                        searchAndAddGap(single, false);
+                    }
+                }
+            }
+        }
+    }
+
     // neighbor connection
     private void researchNeighbors(Vec3i newAbsPos) {
         TrackMultiGeometrySegment newBlock = getTrackBlockLoaded(newAbsPos);
@@ -1301,29 +1339,7 @@ public class WorldData {
             }
         }
 
-        for (TrackMultiGeometrySegment block : nearbyBlocks) {
-            if (block.type.isSwitch() && block.paths.size() >= 2) {
-                for (TrackSingleGeometrySegment mainBranch : block.paths.get(0).values()) {
-                    if (mainBranch.pointsCache.size() <= 1) continue;
-                    searchAndAddGap(mainBranch, true);
-                    searchAndAddGap(mainBranch, false);
-                }
-                for (int pi = 1; pi < block.paths.size(); pi++) {
-                    for (TrackSingleGeometrySegment subBranch : block.paths.get(pi).values()) {
-                        if (subBranch.pointsCache.size() <= 1) continue;
-                        searchAndAddGap(subBranch, false);
-                    }
-                }
-            } else {
-                for (Map<Gauge, TrackSingleGeometrySegment> branch : block.paths) {
-                    for (TrackSingleGeometrySegment single : branch.values()) {
-                        if (single.pointsCache.size() <= 1) continue;
-                        searchAndAddGap(single, true);
-                        searchAndAddGap(single, false);
-                    }
-                }
-            }
-        }
+        researchBlocks(nearbyBlocks);
     }
 
     // delta sync queue
