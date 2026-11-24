@@ -576,10 +576,7 @@ public class WorldData {
                 buildTopologyFor(e.getValue());
             }
 
-            for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-                Vec3i parentAbs = region.toBlockPos(e.getKey());
-                researchCrossRegionNeighbors(region);
-            }
+            researchCrossRegionNeighbors(region);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -657,9 +654,7 @@ public class WorldData {
             buildTopologyFor(e.getValue());
         }
 
-        for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
-            researchCrossRegionNeighbors(region);
-        }
+        researchCrossRegionNeighbors(region);
     }
 
     // server tick（subscribe / delta sending / region life refresh）
