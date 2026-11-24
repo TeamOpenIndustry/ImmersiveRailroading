@@ -271,8 +271,8 @@ public class SimulationState {
         Vec3d positionRear = couplerPositionRear = position.add(bogeyRear);
 
         if(Config.ConfigDebug.offWorldPathing) {
-            Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront - config.offsetFront, yawFront);
-            Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear - config.offsetRear, yawRear);
+            Vec3d couplerVecFront = VecUtil.fromWrongYawPitch(config.couplerDistanceFront - config.offsetFront, yawFront, pitch);
+            Vec3d couplerVecRear = VecUtil.fromWrongYawPitch(config.couplerDistanceRear - config.offsetRear, yawRear, pitch);
 
             IRPathingData front = new IRPathingData(config.world, positionFront, 0);
             IRPathingData rear = new IRPathingData(config.world, positionRear, 0);
@@ -307,10 +307,10 @@ public class SimulationState {
 
             // 【修复后的判断】：如果没有继承到拓扑，或者推演几乎没有产生位移（小于极微小阈值），走几何兜底
             if (front.getTopoEdge() == null || frontMovedSq < 1e-6) {
-                couplerPositionFront = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
+                couplerPositionFront = position.add(VecUtil.fromWrongYawPitch(config.couplerDistanceFront, yaw, pitch));
             }
             if (rear.getTopoEdge() == null || rearMovedSq < 1e-6) {
-                couplerPositionRear = position.add(VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw));
+                couplerPositionRear = position.add(VecUtil.fromWrongYawPitch(config.couplerDistanceRear, yaw, pitch));
             }
 
             return;
@@ -320,8 +320,8 @@ public class SimulationState {
         ITrack trackRear = MovementTrack.findTrack(config.world, positionRear, yaw, config.gauge.value());
 
         if (trackFront != null && trackRear != null) {
-            Vec3d couplerVecFront = VecUtil.fromWrongYaw(config.couplerDistanceFront - config.offsetFront, yawFront);
-            Vec3d couplerVecRear = VecUtil.fromWrongYaw(config.couplerDistanceRear - config.offsetRear, yawRear);
+            Vec3d couplerVecFront = VecUtil.fromWrongYawPitch((config.couplerDistanceFront - config.offsetFront), yawFront, pitch);
+            Vec3d couplerVecRear = VecUtil.fromWrongYawPitch((config.couplerDistanceRear - config.offsetRear), yawRear, pitch);
 
             IRPathingData front = new IRPathingData(positionFront, 0);
             IRPathingData rear = new IRPathingData(positionRear, 0);
@@ -331,10 +331,10 @@ public class SimulationState {
             couplerPositionRear = rear.getUMCPos();
         }
         if (Objects.equals(couplerPositionFront, positionFront)) {
-            couplerPositionFront = position.add(VecUtil.fromWrongYaw(config.couplerDistanceFront, yaw));
+            couplerPositionFront = position.add(VecUtil.fromWrongYawPitch(config.couplerDistanceFront, yaw, pitch));
         }
         if (Objects.equals(couplerPositionRear, positionRear)) {
-            couplerPositionRear = position.add(VecUtil.fromWrongYaw(config.couplerDistanceRear, yaw));
+            couplerPositionRear = position.add(VecUtil.fromWrongYawPitch(config.couplerDistanceRear, yaw, pitch));
         }
     }
 
@@ -440,8 +440,8 @@ public class SimulationState {
                 if (t >= 0) nextRear.advanceTo(lastRearEdge, t, rollRear);
             }
 
-            OffWorldMovementTrack.getNextPosition(nextFront, VecUtil.fromWrongYaw(distance, yawFront), config.gauge.value(), config.world);
-            OffWorldMovementTrack.getNextPosition(nextRear, VecUtil.fromWrongYaw(distance, yawRear), config.gauge.value(), config.world);
+            OffWorldMovementTrack.getNextPosition(nextFront, VecUtil.fromWrongYawPitch(distance, yawFront, pitch), config.gauge.value(), config.world);
+            OffWorldMovementTrack.getNextPosition(nextRear, VecUtil.fromWrongYawPitch(distance, yawRear, pitch), config.gauge.value(), config.world);
 
             Vec3d nextFrontPos = nextFront.getUMCPos();
             Vec3d nextRearPos = nextRear.getUMCPos();
@@ -538,8 +538,8 @@ public class SimulationState {
 
             IRPathingData nextFront = new IRPathingData(positionFront, rollFront);
             IRPathingData nextRear = new IRPathingData(positionRear, rollRear);
-            trackFront.getNextPosition(nextFront, VecUtil.fromWrongYaw(distance, yawFront), config.gauge.value());
-            trackRear.getNextPosition(nextRear, VecUtil.fromWrongYaw(distance, yawRear), config.gauge.value());
+            trackFront.getNextPosition(nextFront, VecUtil.fromWrongYawPitch(distance, yawFront, pitch), config.gauge.value());
+            trackRear.getNextPosition(nextRear, VecUtil.fromWrongYawPitch(distance, yawRear, pitch), config.gauge.value());
             Vec3d nextFrontPos = nextFront.getUMCPos();
             Vec3d nextRearPos = nextRear.getUMCPos();
 
