@@ -44,6 +44,7 @@ public class OffWorldMovementTrack {
         }
 
         double[] posOut = new double[4];
+        Set<TrackEdge> zeroVisited = new HashSet<>();
 
         for (int iter = 0; iter < MAX_ITERATIONS && motionDist > EPS; iter++) {
             TrackEdge edge = current.getTopoEdge();
@@ -56,6 +57,10 @@ public class OffWorldMovementTrack {
             double edgeDist = edgeDistance(edge, from, to, world);
 
             if (edgeDist < EPS) {
+                // 零边不消耗 motionDist，必须有本次调用的环路保护，
+                // 否则零边链一旦绕回来会跑满 MAX_ITERATIONS。
+                if (!zeroVisited.add(edge)) return;
+
                 TrackEdge next = pickNextEdgeFrom(data, edge, edge.to, motion, world);
                 if (next == null) {
                     next = pickNextEdgeFrom(data, edge, edge.from, motion, world);
@@ -70,13 +75,13 @@ public class OffWorldMovementTrack {
                 positionAt(next, nFrom, nTo, startT, world, posOut);
 
                 double nextDist = edgeDistance(next, nFrom, nTo, world);
-                double startRoll;
-                if (nextDist < EPS) {
-                    startRoll = posOut[3];
-                } else {
+                double startRoll = posOut[3];
+                if (nextDist >= EPS) {
                     Vec3d nextDir = edgeDirection(next, nFrom, nTo, world);
-                    double nextDot = nextDir.x * motion.x + nextDir.y * motion.y + nextDir.z * motion.z;
-                    startRoll = (nextDot >= 0) ? posOut[3] : -posOut[3];
+                    if (nextDir != null) {
+                        double nextDot = nextDir.x * motion.x + nextDir.y * motion.y + nextDir.z * motion.z;
+                        startRoll = (nextDot >= 0) ? posOut[3] : -posOut[3];
+                    }
                 }
 
                 current.advanceTo(next, startT, startRoll);
@@ -85,6 +90,7 @@ public class OffWorldMovementTrack {
             }
 
             Vec3d edgeDir = edgeDirection(edge, from, to, world);
+            if (edgeDir == null) return;
             double dot = edgeDir.x * motion.x + edgeDir.y * motion.y + edgeDir.z * motion.z;
             boolean towardTo = dot >= 0;
             double tTarget = towardTo ? 1.0 : 0.0;
@@ -125,13 +131,13 @@ public class OffWorldMovementTrack {
             positionAt(next, nFrom, nTo, startT, world, posOut);
 
             double nextDist = edgeDistance(next, nFrom, nTo, world);
-            double startRoll;
-            if (nextDist < EPS) {
-                startRoll = posOut[3];
-            } else {
+            double startRoll = posOut[3];
+            if (nextDist >= EPS) {
                 Vec3d nextDir = edgeDirection(next, nFrom, nTo, world);
-                double nextDot = nextDir.x * motion.x + nextDir.y * motion.y + nextDir.z * motion.z;
-                startRoll = (nextDot >= 0) ? posOut[3] : -posOut[3];
+                if (nextDir != null) {
+                    double nextDot = nextDir.x * motion.x + nextDir.y * motion.y + nextDir.z * motion.z;
+                    startRoll = (nextDot >= 0) ? posOut[3] : -posOut[3];
+                }
             }
 
             current.advanceTo(next, startT, startRoll);
@@ -213,42 +219,101 @@ public class OffWorldMovementTrack {
         if (edge.edgeType == TrackEdge.EdgeType.GAP) {
             double hFrom = trackHeight(from, world);
             double hTo = trackHeight(to, world);
-            double dx = to.point.x - from.point.x;
-            double dy = (to.point.y + hTo) - (from.point.y + hFrom);
-            double dz = to.point.z - from.point.z;
-            double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            if (len < EPS) return new Vec3d(0, 0, 1);
-            return new Vec3d(dx / len, dy / len, dz / len);
+            Vec3d dir = to.point.subtract(from.point).add(0, hTo - hFrom, 0).normalize();
+            if (dir.length() >= EPS) {
+                return dir;
+            }
+            // 零长度 GAP 没有弦长。不能用 (0,0,1) 伪造方向，也不能用 absPos 相减：
+            // 前者会让 +Z 运动把零边当成完全顺向，后者对同一个方块恒为零向量。
+            // 正确来源是端点所在 segment 的相邻采样点。
+            return zeroLengthEdgeDirection(from, to, world);
         }
 
         List<VecYPR> points = from.trackSingleGeometrySegment.pointsCache;
         int fi = from.index;
         int ti = to.index;
-        if (fi == ti) return new Vec3d(0, 0, 1);
+        if (fi == ti) return zeroLengthEdgeDirection(from, to, world);
         int dir = (ti > fi) ? 1 : -1;
         int adj = fi + dir;
         if (fi < 0 || fi >= points.size() || adj < 0 || adj >= points.size()) {
-            return new Vec3d(0, 0, 1);
+            return zeroLengthEdgeDirection(from, to, world);
         }
-        VecYPR a = points.get(fi);
-        VecYPR b = points.get(adj);
-        double dx = b.x - a.x;
-        double dy = b.y - a.y;
-        double dz = b.z - a.z;
-        double len = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (len < EPS) return new Vec3d(0, 0, 1);
-        return new Vec3d(dx / len, dy / len, dz / len);
+        Vec3d tangent = points.get(adj).subtract(points.get(fi)).normalize();
+        if (tangent.length() < EPS) return zeroLengthEdgeDirection(from, to, world);
+        return tangent;
+    }
+
+    /**
+     * 端点重合的边没有弦长，方向取“从节点进入自身 segment”的切线。
+     * 普通接缝用 to 端的外向切线（也就是车到达之后的继续方向）；
+     * 道岔 tie GAP（hub <-> turnStart）两侧都是 path 起点，必须用弯轨切线，
+     * 且 turnStart -> hub 时取反，不能用 hub 的直轨切线代替。
+     */
+    private static Vec3d zeroLengthEdgeDirection(TrackNode from, TrackNode to, World world) {
+        WorldData data = WorldData.get(world);
+        if (data != null) {
+            WorldData.SwitchInfo si = data.switchByHub.get(from.id);
+            if (si == null) si = data.switchByHub.get(to.id);
+            if (si != null) {
+                TrackNode turnStart = null;
+                if (si.turnStarts.contains(from.id)) {
+                    turnStart = from;
+                } else if (si.turnStarts.contains(to.id)) {
+                    turnStart = to;
+                }
+                if (turnStart != null) {
+                    Vec3d turnDir = tangentAwayFromNode(turnStart, null);
+                    if (turnDir != null) {
+                        return from.id.equals(turnStart.id) ? turnDir.scale(-1) : turnDir;
+                    }
+                }
+            }
+        }
+
+        Vec3d sourceIncoming = tangentAwayFromNode(from, null);
+        if (sourceIncoming != null) sourceIncoming = sourceIncoming.scale(-1);
+
+        Vec3d dir = tangentAwayFromNode(to, sourceIncoming);
+        if (dir != null) return dir;
+
+        return sourceIncoming;
+    }
+
+    /**
+     * 从 node 指向自己 segment 内部的单位切线。
+     * index 0 用 points[1]-points[0]；index last 用 points[last-1]-points[last]。
+     * 内部点有两个方向，preferred 非空时取和它更同向的一侧。
+     */
+    private static Vec3d tangentAwayFromNode(TrackNode node, Vec3d preferred) {
+        if (node == null) return null;
+        List<VecYPR> points = node.trackSingleGeometrySegment.pointsCache;
+        if (points == null || points.size() < 2) return null;
+
+        int i = node.index;
+        if (i < 0 || i >= points.size()) return null;
+
+        if (i == 0) {
+            return tangent(points.get(0), points.get(1));
+        }
+        if (i == points.size() - 1) {
+            return tangent(points.get(points.size() - 1), points.get(points.size() - 2));
+        }
+
+        Vec3d forward = tangent(points.get(i), points.get(i + 1));
+        Vec3d backward = tangent(points.get(i), points.get(i - 1));
+        if (forward == null) return backward;
+        if (backward == null) return forward;
+        if (preferred == null) return forward;
+        return forward.dotProduct(preferred) >= backward.dotProduct(preferred) ? forward : backward;
+    }
+
+    private static Vec3d tangent(VecYPR from, VecYPR to) {
+        Vec3d dir = to.subtract(from).normalize();
+        return dir.length() < EPS ? null : dir;
     }
 
     private static TrackEdge pickNextEdgeFrom(WorldData data, TrackEdge incoming, TrackNodeId endNodeId,
                                               Vec3d motion, World world) {
-        return pickNextEdgeFrom(data, incoming, endNodeId, motion, world, 0);
-    }
-
-    private static TrackEdge pickNextEdgeFrom(WorldData data, TrackEdge incoming, TrackNodeId endNodeId,
-                                              Vec3d motion, World world, int depth) {
-        if (depth > 8) return null;
-
         WorldData.SwitchInfo si = data.switchByHub.get(endNodeId);
         if (si != null) return pickFromHub(data, incoming, endNodeId, si);
 
@@ -265,18 +330,10 @@ public class OffWorldMovementTrack {
             TrackNode eTo = data.nodes.get(e.to);
             if (eFrom == null || eTo == null) continue;
 
-            double eDist = edgeDistance(e, eFrom, eTo, world);
-            Vec3d dir;
-            if (eDist < EPS) {
-                TrackEdge inner = pickNextEdgeFrom(data, e, e.to, motion, world, depth + 1);
-                if (inner == null) continue;
-                TrackNode innerFrom = data.nodes.get(inner.from);
-                TrackNode innerTo = data.nodes.get(inner.to);
-                if (innerFrom == null || innerTo == null) continue;
-                dir = edgeDirection(inner, innerFrom, innerTo, world);
-            } else {
-                dir = edgeDirection(e, eFrom, eTo, world);
-            }
+            // 零长度候选也直接由自身端点切线给出方向，不再递归跳到 inner。
+            // 递归会让 A->B 和 B->A 两条零边互相引用，最终掉回 +Z 回退。
+            Vec3d dir = edgeDirection(e, eFrom, eTo, world);
+            if (dir == null) continue;
 
             double cos = dir.x * motion.x + dir.y * motion.y + dir.z * motion.z;
             if (cos > bestCos) {
