@@ -3,9 +3,8 @@ package cam72cam.immersiverailroading.render.multiblock;
 import java.util.ArrayList;
 
 import cam72cam.mod.ModCore;
-import cam72cam.mod.model.common.ModelLoader;
-import cam72cam.mod.model.common.mesh.Model;
-import cam72cam.mod.render.common.ModelRenderer;
+import cam72cam.mod.model.obj.OBJModel;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 
@@ -13,7 +12,7 @@ import cam72cam.immersiverailroading.multiblock.SteamHammerMultiblock.SteamHamme
 import cam72cam.immersiverailroading.tile.TileMultiblock;
 
 public class SteamHammerRender implements IMultiblockRender {
-	private Model model;
+	private OBJModel model;
 	private ArrayList<String> hammer;
 	private ArrayList<String> rest;
 
@@ -21,7 +20,7 @@ public class SteamHammerRender implements IMultiblockRender {
 	public void render(TileMultiblock te, RenderState state, float partialTicks) {
 		if (model == null) {
 			try {
-				this.model = ModelLoader.load(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"));
+				this.model = new OBJModel(new Identifier("immersiverailroading:models/multiblocks/steam_hammer.obj"), 0, null);
 				this.hammer = new ArrayList<>();
 				this.rest = new ArrayList<>();
 				for (String group : model.groups()) {
@@ -40,8 +39,8 @@ public class SteamHammerRender implements IMultiblockRender {
 		//state.scale(2, 2, 2);
 		state.translate(0.5, 0, 0.5);
 		state.rotate(te.getRotation(), 0, 1, 0);
-		try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(model).bind(state)) {
-			vbo.enqueueOpaque(rest);
+		try (OBJRender.Binding vbo = model.binder().bind(state)) {
+			vbo.draw(rest);
 			double dist;
 			if (mb != null && mb.hasPower()) {
 				if (te.getCraftProgress() != 0) {
@@ -52,7 +51,7 @@ public class SteamHammerRender implements IMultiblockRender {
 			} else {
 				dist = 0;
 			}
-			vbo.enqueueOpaque(hammer, s -> s.translate(0, dist, 0));
+			vbo.draw(hammer, s -> s.translate(0, dist, 0));
 		}
 	}
 }

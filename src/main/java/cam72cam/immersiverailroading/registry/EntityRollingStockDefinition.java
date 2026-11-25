@@ -17,9 +17,9 @@ import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.mod.entity.EntityRegistry;
 import cam72cam.mod.entity.boundingbox.IBoundingBox;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.common.mesh.Face;
-import cam72cam.mod.model.common.mesh.Model;
-import cam72cam.mod.model.common.util.FaceAccessor;
+import cam72cam.mod.model.obj.FaceAccessor;
+import cam72cam.mod.model.obj.OBJFace;
+import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.serialization.*;
 import cam72cam.mod.serialization.ResourceCache.GenericByteBuffer;
@@ -321,8 +321,8 @@ public abstract class EntityRollingStockDefinition {
         loadData(transformData(data));
 
         this.stockModel = createModel();
-        Model model = stockModel.model;
-        this.itemGroups = model.getGroups().keySet().stream()
+        OBJModel model = stockModel.model;
+        this.itemGroups = model.groups.keySet().stream()
                                .filter(x -> !ModelComponentType.shouldRender(x))
                                .collect(Collectors.toList());
 
@@ -339,8 +339,8 @@ public abstract class EntityRollingStockDefinition {
                                                  .filter(Objects::nonNull)
                                                  .collect(Collectors.toList());
 
-        frontBounds = -model.minOfGroups(model.groups()).x;
-        rearBounds = model.maxOfGroups(model.groups()).x;
+        frontBounds = -model.minOfGroup(model.groups()).x;
+        rearBounds = model.maxOfGroup(model.groups()).x;
         widthBounds = model.widthOfGroups(model.groups());
 
         // Bad hack for height bounds
@@ -741,7 +741,7 @@ public abstract class EntityRollingStockDefinition {
                 passengerOffset.subtract(searchRange, searchRange, searchRange),
                 passengerOffset.add(searchRange, searchRange, searchRange)
         );
-        List<Face> nearby = new ArrayList<>();
+        List<OBJFace> nearby = new ArrayList<>();
         navMesh.queryBVH(navMesh.root, rayBox, nearby, gauge.scale());
         if (nearby.isEmpty()) {
             return passengerOffset.rotateYaw(90);
@@ -753,7 +753,7 @@ public abstract class EntityRollingStockDefinition {
         Vec3d nearest = null;
         double nearestDistSq = Double.MAX_VALUE;
 
-        for (Face face : nearby) {
+        for (OBJFace face : nearby) {
             Vec3d p0 = face.vertex0.pos;
             Vec3d p1 = face.vertex1.pos;
             Vec3d p2 = face.vertex2.pos;
@@ -869,7 +869,7 @@ public abstract class EntityRollingStockDefinition {
                 ModelComponent rc = components.get(i);
                 int idx = i * xRes * zRes;
                 for (String group : rc.modelIDs) {
-                    FaceAccessor grouped = accessor.ofGroup(group);
+                    FaceAccessor grouped = accessor.getSubByGroup(group);
 
                     for (FaceAccessor face : grouped) {
                         Path2D path = new Path2D.Float();
