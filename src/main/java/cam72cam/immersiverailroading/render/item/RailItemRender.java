@@ -33,8 +33,8 @@ public class RailItemRender implements ItemRender.IItemModel {
 
 		return new StandardModel().addCustom((state, pt) -> {
 			state.translate(0.5, 0.2, -0.3);
-			try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(baseRailModel.model).bind(state)) {
-                vbo.enqueueOpaque(left);
+			try (OBJRender.Binding vbo = baseRailModel.model.binder().bind(state)) {
+                vbo.draw(left);
             }
 		});
 	}
