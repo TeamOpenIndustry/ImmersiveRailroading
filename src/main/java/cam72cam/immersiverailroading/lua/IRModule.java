@@ -277,8 +277,8 @@ public class IRModule implements LuaModule {
 
         boolean flipped = false;
         for (EntityCoupleableRollingStock.DirectionalStock directionalStock : train) {
-            if (directionalStock.stock.getUUID().equals(stock.getUUID())) {
-                flipped = !directionalStock.direction;
+            if (directionalStock.stock().getUUID().equals(stock.getUUID())) {
+                flipped = !directionalStock.direction();
                 break;
             }
         }

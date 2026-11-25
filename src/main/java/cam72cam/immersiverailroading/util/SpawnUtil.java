@@ -72,7 +72,7 @@ public class SpawnUtil {
 					if (DegreeFuncs.delta(pitch, 0) > 90) {
 						pitch = 180 - pitch;
 					}
-					moveable.setRotationPitch(pitch);
+					moveable.setRotationPitch((front != null && rear != null) ? SpawnOrientation.pitch(front.x, front.y, front.z, rear.x, rear.y, rear.z, moveable.getRotationPitch()) : (pitch));
 
 					moveable.setPosition(rear.add(front.subtract(rear).scale(frontDistance / (frontDistance - rearDistance))));
 
