@@ -12,7 +12,7 @@ import cam72cam.immersiverailroading.library.ValveGearConfig;
 import cam72cam.immersiverailroading.model.ModelState;
 import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.immersiverailroading.render.ExpireableMap;
+import cam72cam.mod.util.collection.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
@@ -158,7 +158,7 @@ public abstract class ValveGear {
                 particlePos = particlePos(stock);
                 double accell = 0.3 * stock.gauge.scale();
                 Vec3d sideMotion = stock.getVelocity().add(VecUtil.rotateWrongYaw(particlePos.getLeft().apply(direction).scale(accell), stock.getRotationYaw()+180));
-                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos.getRight(), new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale(), stock.getDefinition().steamParticleTexture));
+                Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos.getRight(), new Vec3d(sideMotion.x, sideMotion.y+0.01 * stock.gauge.scale(), sideMotion.z), 80, 0, 0.6f, 0.2 * stock.gauge.scale(), stock.getDefinition().getSteamParticle()));
             }
 
             if (stock instanceof LocomotiveSteam) {

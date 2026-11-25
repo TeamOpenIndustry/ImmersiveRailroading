@@ -11,7 +11,7 @@ public enum TrackPositionType {
 	SMOOTH,
 	SMOOTH_LOCKED,
 	;
-	
+
 	@Override
 	public String toString() {
 	    return TextUtil.translate("track.immersiverailroading:position." + super.toString().toLowerCase(Locale.ROOT));

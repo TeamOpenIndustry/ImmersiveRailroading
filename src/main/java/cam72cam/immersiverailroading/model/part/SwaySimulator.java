@@ -16,7 +16,6 @@ import java.util.UUID;
 
 public class SwaySimulator {
     public SwaySimulator() {
-
     }
 
     private static class Effect {
@@ -94,20 +93,30 @@ public class SwaySimulator {
             swayMagnitude = Math.min(swayMagnitude, 3);
         }
 
-        public double getRollDegrees(float partialTicks) {
+        public double getEffectDegrees(float partialTicks, double baseRoll) {
+            return getSwayDegrees(partialTicks) + getTiltDegree(baseRoll);
+        }
+
+        public double getSwayDegrees(float partialTicks) {
             if (Math.abs(stock.getCurrentSpeed().metric() * stock.gauge.scale()) < 4) {
-                // don't calculate it
+                return 0;// don't calculate it
+            }
+            double sway = Math.cos(Math.toRadians((stock.getTickCount() + partialTicks) * 13))
+                    * swayMagnitude / 5
+                    * stock.getDefinition().getSwayMultiplier()
+                    * ConfigGraphics.StockSwayMultiplier;
+            return sway;
+        }
+
+        public double getTiltDegree(double offsetRoll) {
+            double tilt = stock.getDefinition().getTiltMultiplier() * (stock.getPrevRotationYaw() - stock.getRotationYaw()) * (stock.getCurrentSpeed().minecraft() > 0 ? 1 : -1);
+            if(tilt * offsetRoll > 0) {
+                return Math.abs(tilt) > Math.abs(offsetRoll) ? tilt - offsetRoll : 0;
+            } else if(tilt != 0){
+                return -offsetRoll + tilt;
+            } else {
                 return 0;
             }
-
-            double sway = Math.cos(Math.toRadians((stock.getTickCount() + partialTicks) * 13)) *
-                    swayMagnitude / 5 *
-                    stock.getDefinition().getSwayMultiplier() *
-                    ConfigGraphics.StockSwayMultiplier;
-
-            double tilt = stock.getDefinition().getTiltMultiplier() * (stock.getPrevRotationYaw() - stock.getRotationYaw()) * (stock.getCurrentSpeed().minecraft() > 0 ? 1 : -1);
-
-            return sway + tilt;
         }
 
         public void removed() {
@@ -123,8 +132,8 @@ public class SwaySimulator {
 
     private final Map<UUID, Effect> effects = new HashMap<>();
 
-    public double getRollDegrees(EntityMoveableRollingStock stock, float partialTicks) {
-        return effects.computeIfAbsent(stock.getUUID(), uuid -> new Effect(stock)).getRollDegrees(partialTicks);
+    public double getEffectRollDegrees(EntityMoveableRollingStock stock, float partialTicks, float baseRoll) {
+        return effects.computeIfAbsent(stock.getUUID(), _ -> new Effect(stock)).getEffectDegrees(partialTicks, baseRoll) ;
     }
 
     public void effects(EntityMoveableRollingStock stock) {

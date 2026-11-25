@@ -72,7 +72,7 @@ public class Config {
 		@Comment("Break block around the border of the tracks in creative")
 		public static boolean enableSideBlockClearing = true;
 
-		@Comment("Clear blocsk in creative mode when placing tracks")
+		@Comment("Clear blocks in creative mode when placing tracks")
 		public static boolean creativePlacementClearsBlocks = true;
 
 		@Comment("Requires solid block to be placed under the rails")
@@ -126,6 +126,17 @@ public class Config {
 		@Comment( "How heavy is a single block in Kg" )
 		@Range(min = 0, max = 100)
 		public static int blockWeight = 10;
+
+		@Comment( "Deep Snow on tracks" )
+		public static boolean deepSnow = false;
+
+		@Comment( "How fast snow should melt, 0 = disabled, 20 = fast, 400 = slow" )
+		@Range(min = 0, max = 1000)
+		public static int snowMeltRate = 0;
+
+		@Comment( "How fast snow should accumulate, 0 = disabled, 20 = fast, 400 = slow" )
+		@Range(min = 0, max = 1000)
+		public static int snowAccumulateRate = 400;
 
 		@Comment( "MilliBuckets per Liter" )
 		public static int MB_PER_LITER = 1;
@@ -215,6 +226,9 @@ public class Config {
 		@Range(min = 1, max = 90)
 		public static int AnglePlacementSegmentation = 4;
 
+		@Comment("Enable Legacy Track Setting Option")
+		public static boolean EnableLegacyTrackSettingOption = true;
+
 		@Comment("Machine power factor (0 means no power required)")
 		@Range(min = 0, max = 10)
 		public static float machinePowerFactor = 1.0f;
@@ -242,6 +256,9 @@ public class Config {
 
 		@Comment("How many MB of memory to reserve for stock loading per thread, higher numbers = safer but slower")
 		public static int megabytesReservedPerStockLoadingThread = 1024;
+
+		@Comment("Disables the Lua script implementation")
+		public static boolean disableLuaScript = false;
 	}
 
 	@Name("debug")
@@ -251,19 +268,11 @@ public class Config {
 		@Range(min = 0, max = 1)
 		public static double couplerRange = 0.3;
 
-		@Comment( "Deep Snow on tracks" )
-		public static boolean deepSnow = false;
-
-		@Comment( "How fast snow should accumulate, 0 = disabled, 20 = fast, 400 = slow" )
-		@Range(min = 0, max = 1000)
-		public static int snowAccumulateRate = 400;
-
-		@Comment( "How fast snow should melt, 0 = disabled, 20 = fast, 400 = slow" )
-		@Range(min = 0, max = 1000)
-		public static int snowMeltRate = 0;
-
 		@Comment("Keep rolling stock loaded even when it is not moving")
 		public static boolean keepStockLoaded = true;
+
+		@Comment("Break blueprint preview block after building it")
+		public static boolean breakTilePreview = true;
 
 		@Comment("Exclude unattached wagons from chunk loading when keepStockLoaded is true")
 		public static boolean excludeStandaloneWagons = false;
@@ -304,6 +313,9 @@ public class Config {
 
 		@Comment("Does stock drops itself/components when player is in creative mode?")
 		public static boolean stockDropInCreativeMode = true;
+
+		@Comment("If your map depends on strong charging of detectors then enable this, otherwise set it as false to avoid some synchronization issues")
+		public static boolean detectorOutputStrongCharging = false;
 	}
 
 	public static boolean isFuelRequired(Gauge gauge) {

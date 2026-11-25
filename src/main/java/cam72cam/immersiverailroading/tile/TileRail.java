@@ -40,7 +40,7 @@ public class TileRail extends TileRailBase {
 			return IBoundingBox.ORIGIN;
 		}
 		if (boundingBox == null) {
-			int length = info.settings.length;
+			int length = (int) info.settings.getValidSize();
 			if (info.settings.type == TrackItems.CUSTOM && !info.customInfo.placementPosition.equals(info.placementInfo.placementPosition)) {
 				length = (int) info.customInfo.placementPosition.distanceTo(info.placementInfo.placementPosition);
 			}
@@ -253,11 +253,11 @@ public class TileRail extends TileRailBase {
 	}
 
 	@Override
-	public double getTrackGauge() {
+	public double[] getTrackGauges() {
 		if (info == null) {
-			return 0;
+			return new double[]{0};
 		}
-		return info.settings.gauge.value();
+		return new double[]{info.settings.gauge.value()};
 	}
 
 

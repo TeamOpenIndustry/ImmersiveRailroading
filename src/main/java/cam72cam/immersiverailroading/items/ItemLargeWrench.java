@@ -57,7 +57,7 @@ public class ItemLargeWrench extends CustomItem {
 						ItemStack stack = new ItemStack(IRItems.ITEM_AUGMENT, 1);
 						ItemRailAugment.Data data = new ItemRailAugment.Data(stack);
 						data.augment = augment;
-						data.gauge = Gauge.from(te.getTrackGauge());
+						data.gauge = Gauge.from(te.getTrackGauges()[0]);
 						data.write();
 						world.dropItem(stack, pos);
 					}

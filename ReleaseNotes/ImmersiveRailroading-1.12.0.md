@@ -1,0 +1,34 @@
+# Features
+- Add `FLOOR` part to define walkable spaces ( @poizzy )
+  - This is a replacement of the legacy `passenger` block in json, and if `FLOOR` is defined, the `passenger` block will be ignored.
+- Add snapping of tracks to end points ( @Deepseasaltyfish )
+- Add Remote Controller for locomotives that are radio-compatible ( @Jeronimo97 )
+  - In-depth description can be found [here](https://github.com/TeamOpenIndustry/ImmersiveRailroading/pull/1687)
+- Add extra settings to tweak tracks ( @Deepseasaltyfish ). For example, 
+  - Adjust curves that control roll and position offset of actual tracks in the new `Advanced` GUI 
+  - Adjust end points' position/rotation precisely in the new `End Points` GUI 
+  - Make rail bed blocks appear cut to better match the rotated rail pieces
+  - Manual could be found [here](https://gist.github.com/Deepseasaltyfish/b40993303cb7a948b0046fbf427a085c)
+- Add new curve-based sound definition format ( @poizzy )
+  - Manual could be found [here](https://gist.github.com/poizzy/d645a9767ae9e75855615a62e51a532c)
+- Add `Transition` (or to be more specific, Cubic Parabola) as a new track type, which behaves like pre-defined custom curves ( @Deepseasaltyfish )
+  - Manual could be found [here](https://gist.github.com/Deepseasaltyfish/364776e72f8a92d5e9baf7e1ee55a5c2)
+# Fixes and Improvements
+- Closed `INTERNAL`/`CONNECTING` doors will actually block moving now ( @poizzy )
+  - Works best on axis-aligned doors
+- Replace old `Turn` with a more accurate algorithm to simulate circles ( @Deepseasaltyfish )
+  - Placed `Turn`s won't be affected, and you can manually re-enable the legacy placement method in config `balance/EnableLegacyTurn`
+- Adjust snowy track's bounding box height to better match the track's appearance
+- Refine Track Exchanger GUI to a Blueprint-like one ( @Deepseasaltyfish )
+- Make Track Exchanger able to set bed block via clicking with the offhand, similar to Track Blueprint ( @Deepseasaltyfish )
+- Fix wrong item picking implementation for `CARGO_FILL_X` and `CARGO_ITEMS_X` on `MALLET_WALSCHAERTS` stocks ( @Deepseasaltyfish )
+- Fix fluid-related augments not able to interact with some mods' pipe graphs, like Immersive Engineering
+- Changing a stock's coupler to shunting mode will decouple connected stocks
+# Changes
+- Use new format of defining units in default pack
+- Change detector augment redstone power output to weak power to avoid bugs
+  - You can manually set it back to strong power in config `debug/detectorOutputStrongCharging`
+- Move `deepSnow` from config `debug` to `balance`
+- Make Augment filter prefix `stock` able to recognize stock's name
+  - In 1.11.0, it can only parse definition names which may be too technical for players
+  - For example, `A1 Peppercorn` is named as `a1_peppercorn` in `stock.json` file, and you can now use `stock:A1 Peppercorn` as a more friendly descriptor than `stock:a1_peppercorn` to target it 

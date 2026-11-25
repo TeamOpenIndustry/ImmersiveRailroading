@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.model.part;
 
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
-import cam72cam.immersiverailroading.render.ExpireableMap;
+import cam72cam.mod.util.collection.ExpireableMap;
 import cam72cam.mod.sound.ISound;
 
 import java.util.UUID;

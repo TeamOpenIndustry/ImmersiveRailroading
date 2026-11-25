@@ -26,7 +26,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
     private double maxPSI;
     private double numSlots;
     private double width;
-    public boolean tender_auto_feed;
+    public boolean defaultTenderFeed;
     public boolean cab_forward;
 
     public LocomotiveSteamDefinition(String defID, DataBlock data) throws Exception {
@@ -47,7 +47,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
             maxPSI = 0;
             numSlots = 0;
             width = 0;
-            tender_auto_feed = false;
+            defaultTenderFeed = false;
         } else {
             DataBlock firebox = data.getBlock("firebox");
 
@@ -63,17 +63,19 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
             }
             numSlots = Math.ceil(firebox.getValue("slots").asInteger() * internal_inv_scale);
             width = Math.ceil(firebox.getValue("width").asInteger() * internal_inv_scale);
-            tender_auto_feed = properties.getValue("tender_auto_feed").asBoolean(true);
+            defaultTenderFeed = properties.getValue("tender_auto_feed").asBoolean(true);
         }
         cab_forward = properties.getValue("cab_forward").asBoolean(false);
 
         DataBlock sounds = data.getBlock("sounds");
+        boolean hasCustom = sounds.getValue("file").asIdentifier() != null;
+
         whistle = SoundDefinition.getOrDefault(sounds, "whistle");
-        idle = SoundDefinition.getOrDefault(sounds, "idle");
-        chuff = sounds.getValue("chuff").asIdentifier();
-        pressure = sounds.getValue("pressure").asIdentifier();
+        idle = hasCustom ? null : SoundDefinition.getOrDefault(sounds, "idle");
+        chuff = hasCustom ? null :  sounds.getValue("chuff").asIdentifier();
+        pressure = hasCustom ? null : sounds.getValue("pressure").asIdentifier();
         bell = SoundDefinition.getOrDefault(sounds, "bell");
-        cylinder_drain = sounds.getValue("cylinder_drain").asIdentifier();
+        cylinder_drain = hasCustom ? null : sounds.getValue("cylinder_drain").asIdentifier();
 
         List<DataBlock> quilling = sounds.getBlocks("quilling");
         if (quilling != null) {
@@ -91,7 +93,7 @@ public class LocomotiveSteamDefinition extends LocomotiveDefinition {
 
     @Override
     public StockModel<?, ?> getModel() {
-        return (SteamLocomotiveModel) super.getModel();
+        return super.getModel();
     }
 
     @Override

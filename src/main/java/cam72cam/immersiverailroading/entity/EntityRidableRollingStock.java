@@ -6,7 +6,6 @@ import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock.Coupler
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.model.part.Seat;
-import cam72cam.immersiverailroading.render.ExpireableMap;
 import cam72cam.mod.entity.Entity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.entity.custom.IRidable;
@@ -35,7 +34,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 	private Map<String, UUID> seatedPassengers = new HashMap<>();
 
 	// Hack to remount players if they were seated
-	private Map<UUID, Vec3d> remount = new HashMap<>();
+	private final Map<UUID, Vec3d> remount = new HashMap<>();
 
 
 
@@ -63,9 +62,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				.filter(x -> x.getValue().equals(passenger))
 				.map(Map.Entry::getKey).findFirst().orElse(null);
 		return this.getDefinition().getModel().getSeats().stream()
-				.filter(s -> s.part.key.equals(seat))
-				.map(s -> new Vec3d(s.part.center.z, s.part.min.y, -s.part.center.x).scale(gauge.scale()).subtract(0, 0.6, 0))
-				.findFirst().orElse(null);
+		           .filter(s -> s.part.key.equals(seat))
+		           .map(s -> new Vec3d(s.part.center.z, s.part.min.y, -s.part.center.x).scale(gauge.scale()).subtract(0, 0.6, 0))
+		           .findFirst().orElse(null);
 	}
 
 	@Override
@@ -88,9 +87,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			return seat;
 		}
 
-		int wiggle = passenger.isVillager() ? 10 : 0;
-		off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
-		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger));
+		if (passenger.isVillager()) {
+			int wiggle = 10;
+			off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
+		}
+		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger), true);
 
 		return off;
 	}
@@ -119,21 +120,23 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if (seat != null) {
 			offset = seat;
 		} else {
-			offset = this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(passenger));
+			offset = this.getDefinition().correctPassengerBounds(gauge, offset.subtract(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0),
+																 shouldRiderSit(passenger), false);
 		}
+		//TODO roll
 		offset = offset.add(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0);
 
 		return offset;
 	}
 
-	private boolean isNearestDoorOpen(Player source) {
+	private boolean isNearestConnectingDoorOpen(Player source) {
 		// Find any doors that are close enough that are closed (and then negate)
 		return !this.getDefinition().getModel().getDoors().stream()
-				.filter(d -> d.type == Door.Types.CONNECTING)
-				.filter(d -> d.center(this).distanceTo(source.getPosition()) < getDefinition().getLength(this.gauge)/3)
-				.min(Comparator.comparingDouble(d -> d.center(this).distanceTo(source.getPosition())))
-				.filter(x -> !x.isOpen(this))
-				.isPresent();
+		            .filter(d -> d.type == Door.Types.CONNECTING)
+		            .filter(d -> d.center(this).distanceTo(source.getPosition()) < getDefinition().getLength(this.gauge)/3)
+		            .min(Comparator.comparingDouble(d -> d.center(this).distanceTo(source.getPosition())))
+		            .filter(x -> !x.isOpen(this))
+		            .isPresent();
 	}
 
 	private Vec3d playerMovement(Player source, Vec3d offset) {
@@ -149,15 +152,14 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
         movement = new Vec3d(movement.x, 0, movement.z).rotateYaw(this.getRotationYaw() - source.getRotationYawHead());
 
-        offset = offset.add(movement);
+		Vec3d other = getDefinition().calculateCorrectedMovement(this, this.gauge, offset, movement);
+		offset = offset.add(other);
 
-        if (this instanceof EntityCoupleableRollingStock) {
-			EntityCoupleableRollingStock couplable = (EntityCoupleableRollingStock) this;
-
-			boolean atFront = this.getDefinition().isAtFront(gauge, offset);
+        if (this instanceof EntityCoupleableRollingStock couplable) {
+            boolean atFront = this.getDefinition().isAtFront(gauge, offset);
 			boolean atBack = this.getDefinition().isAtRear(gauge, offset);
 			// TODO config for strict doors
-			boolean atDoor = isNearestDoorOpen(source);
+			boolean atDoor = isNearestConnectingDoorOpen(source);
 
 			atFront &= atDoor;
 			atBack &= atDoor;
@@ -167,7 +169,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 				if (atCoupler && couplable.isCoupled(coupler)) {
 					EntityCoupleableRollingStock coupled = ((EntityCoupleableRollingStock) this).getCoupled(coupler);
 					if (coupled != null) {
-						if (((EntityRidableRollingStock)coupled).isNearestDoorOpen(source)) {
+						if (((EntityRidableRollingStock)coupled).isNearestConnectingDoorOpen(source)) {
 							coupled.addPassenger(source);
 						}
 					} else if (this.getTickCount() > 20) {
@@ -183,9 +185,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			}
         }
 
-        if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL)) &&
-				getWorld().isServer &&
-				!this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source)).equals(offset)
+        if (getDefinition().getModel().getDoors().stream().anyMatch(x -> x.isAtOpenDoor(source, this, Door.Types.EXTERNAL))
+			&& getWorld().isServer
+			&& !this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(source), false).equals(offset)
 		) {
         	this.removePassenger(source);
 		}

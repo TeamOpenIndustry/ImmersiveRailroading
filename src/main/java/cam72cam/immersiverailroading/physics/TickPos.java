@@ -28,8 +28,14 @@ public class TickPos {
 	public float rotationYaw;
 	@TagField("rotationPitch")
 	public float rotationPitch;
+	@TagField("frontRoll")
+	public Float frontRoll;
+	@TagField("rearRoll")
+	public Float rearRoll;
+	@TagField("rotationRoll")
+	public float rotationRoll;
 
-	public TickPos(int tickPosID, Speed speed, Vec3d position, float frontYaw, float rearYaw, float rotationYaw, float rotationPitch, boolean isOffTrack) {
+	public TickPos(int tickPosID, Speed speed, Vec3d position, float frontYaw, float rearYaw, float rotationYaw, float frontRoll, float rearRoll, float rotationRoll, float rotationPitch, boolean isOffTrack) {
 		this.tickID = tickPosID;
 		this.speed = speed;
 		this.isOffTrack = isOffTrack;
@@ -37,6 +43,9 @@ public class TickPos {
 		this.frontYaw = frontYaw;
 		this.rearYaw = rearYaw;
 		this.rotationYaw = rotationYaw;
+		this.frontRoll = frontRoll;
+		this.rearRoll = rearRoll;
+		this.rotationRoll = rotationRoll;
 		this.rotationPitch = rotationPitch;
 	}
 
@@ -48,6 +57,9 @@ public class TickPos {
 		this.rotationYaw = state.yaw;
 		this.frontYaw = state.yawFront;
 		this.rearYaw = state.yawRear;
+		this.frontRoll = state.rollFront;
+		this.rearRoll = state.rollRear;
+		this.rotationRoll = state.roll;
 		this.rotationPitch = state.pitch;
 	}
 
@@ -87,6 +99,9 @@ public class TickPos {
 				skewAngle(current.frontYaw, next.frontYaw, ratio),
 				skewAngle(current.rearYaw, next.rearYaw, ratio),
 				skewAngle(current.rotationYaw, next.rotationYaw, ratio),
+				skewAngle(current.frontRoll, next.frontRoll, ratio),
+				skewAngle(current.rearRoll, next.rearRoll, ratio),
+				skewAngle(current.rotationRoll, next.rotationRoll, ratio),
 				skewAngle(current.rotationPitch, next.rotationPitch, ratio),
 				current.isOffTrack
 		);
@@ -104,7 +119,7 @@ public class TickPos {
 
 	@Override
 	public TickPos clone() {
-		return new TickPos(tickID, speed, position, frontYaw, rearYaw, rotationYaw, rotationPitch, isOffTrack);
+		return new TickPos(tickID, speed, position, frontYaw, rearYaw, rotationYaw, frontRoll, rearRoll, rotationRoll, rotationPitch, isOffTrack);
 	}
 
     public static class ListTagMapper implements TagMapper<List<TickPos>> {

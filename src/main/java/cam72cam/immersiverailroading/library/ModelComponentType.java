@@ -105,6 +105,8 @@ public enum ModelComponentType {
 	ENGINE_START_X("ENGINE_START_#ID#"),
 	COUPLER_ENGAGED_X("COUPLER_ENGAGED_#ID#"),
 	CYLINDER_DRAIN_CONTROL_X("(CYLINDER|DRAIN)_(COCK|EXHAUST)_CONTROL_#ID#"),
+	TENDER_FEED_CONTROL_X("TENDER_FEED_#ID#"),
+	EMERGENCY_X("EMERGENCY_#ID#"),
 
 	// Gauges
 	GAUGE_LIQUID_X("GAUGE_LIQUID_#ID#"),
@@ -117,6 +119,12 @@ public enum ModelComponentType {
 	GAUGE_INDEPENDENT_BRAKE_X("GAUGE_(INDEPENDENT|IND)_BRAKE_#ID#"),
 	BRAKE_PRESSURE_X("BRAKE_PRESSURE_#ID#"),
 	COUPLED_X("COUPLED_#ID#"),
+	GAUGE_EMERGENCY_X("GAUGE_EMERGENCY_#ID#"),
+
+	// Floor
+	FLOOR("FLOOR"),
+	//TODO Find a proper way to implement this
+	//COLLISION("COLLISION"),
 
 	// REST
 	IMMERSIVERAILROADING_BASE_COMPONENT("IMMERSIVERAILROADING_BASE_COMPNOENT"),
@@ -135,7 +143,7 @@ public enum ModelComponentType {
 	}
 
 	public static boolean shouldRender(String group) {
-		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_") || group.contains("CARGO_ITEMS");
+		return group.contains("CHIMNEY_") || group.contains("CHIMINEY_") || group.contains("PRESSURE_VALVE_") || group.contains("EXHAUST_") || group.contains("CARGO_ITEMS") || group.contains("FLOOR");
 	}
 
 	public String getOverlayName() {
@@ -146,6 +154,7 @@ public enum ModelComponentType {
 			case BELL_CONTROL_X:
 			case WHISTLE_CONTROL_X:
 			case HORN_CONTROL_X:
+			case TENDER_FEED_CONTROL_X:
 				//Remove _CONTROL
 				primary = primary.substring(0, primary.length() - 8);
 				//Fallthrough

@@ -4,10 +4,12 @@ import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
 import cam72cam.immersiverailroading.items.ItemRadioCtrlCard;
+import cam72cam.immersiverailroading.items.ItemWirelessRemoteControl;
 import cam72cam.immersiverailroading.library.*;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.registry.LocomotiveDefinition;
+import cam72cam.immersiverailroading.remote_control.RemoteControlData;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.util.MathUtil;
@@ -43,6 +45,10 @@ public abstract class Locomotive extends FreightTank {
 	@TagSync
 	@TagField("AIR_BRAKE")
 	private float trainBrake = 0;
+
+	@TagSync
+	@TagField("EMERGENCY")
+	private boolean emergency = false;
 
 	@TagSync
 	@TagField("HORN")
@@ -199,7 +205,7 @@ public abstract class Locomotive extends FreightTank {
 			setTrainBrake(getTrainBrake() - trainBrakeNotch);
 			break;
 		case DEAD_MANS_SWITCH:
-			if (deadManChangeTimeout == 0) { 
+			if (deadManChangeTimeout == 0 && getWorld().isServer) {
 				deadMansSwitch = !deadMansSwitch;
 				if (deadMansSwitch) {
 					source.sendMessage(ChatText.DEADMANS_SWITCH_ENABLED.getMessage());
@@ -253,6 +259,8 @@ public abstract class Locomotive extends FreightTank {
 		super.onDragRelease(control);
 		if (!getDefinition().isLinearBrakeControl() && control.part.type == ModelComponentType.TRAIN_BRAKE_X) {
 			setControlPosition(control, 0.5f);
+		} else if (control.part.type.equals(ModelComponentType.EMERGENCY_X)) {
+			setEmergency(getControlPosition(control) > 0.5);
 		}
 	}
 
@@ -307,10 +315,29 @@ public abstract class Locomotive extends FreightTank {
 				data.write();
 			}
 			else {
-				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getDefinition().name()));;
+				player.sendMessage(ChatText.RADIO_CANT_LINK.getMessage(this.getDefinition().name()));
 			}
 			return ClickResult.ACCEPTED;
 		}
+		if (player.getHeldItem(hand).is(IRItems.ITEM_WIRELESS_REMOTECONTROL ) && player.hasPermission(Permissions.LOCOMOTIVE_CONTROL)) {
+            if (getWorld().isClient) {
+                return ClickResult.ACCEPTED;
+            }
+            if(this.gauge.isModel() || this.getDefinition().getRadioCapability() || !Config.ConfigBalance.RadioEquipmentRequired) {
+                ItemWirelessRemoteControl.Data data = new ItemWirelessRemoteControl.Data(player.getHeldItem(hand));
+                if (player.isCrouching()) {
+                    player.sendMessage(data.linked == null ? ChatText.WIRELESS_REMOTECONTROL_NOLINK.getMessage() : ChatText.WIRELESS_REMOTECONTROL_UNLINK.getMessage());
+                    data.linked = null;
+                } else {
+                    player.sendMessage(data.linked == null ? ChatText.WIRELESS_REMOTECONTROL_LINK.getMessage() : ChatText.WIRELESS_REMOTECONTROL_RELINK.getMessage());
+                    data.linked = this.getUUID();
+                }
+                data.write();
+            } else {
+                player.sendMessage(ChatText.WIRELESS_REMOTECONTROL_CANTLINK.getMessage(this.getDefinition().name()));;
+            }
+            return ClickResult.ACCEPTED;
+        }
 		return super.onClick(player, hand);
 	}
 
@@ -343,11 +370,18 @@ public abstract class Locomotive extends FreightTank {
 			}
 			
 			if (deadMansSwitch && !this.getCurrentSpeed().isZero()) {
-				boolean hasDriver = this.getPassengers().stream().anyMatch(Entity::isPlayer);
-				if (!hasDriver) {
+				boolean hasDriverOnTrain = getTrain().stream()
+											 .filter(t -> t instanceof Locomotive || t instanceof Tender)
+											 .flatMap(t -> t.getPassengers().stream())
+											 .anyMatch(Entity::isPlayer);
+				if (!hasDriverOnTrain) {
 					this.setThrottle(0);
 					this.setTrainBrake(1);
 				}
+			}
+			if (emergency) {
+				this.setThrottle(0);
+				this.setTrainBrake(1);
 			}
 			if (hornTime > 0) {
 				hornTime--;
@@ -358,9 +392,9 @@ public abstract class Locomotive extends FreightTank {
 				hornPull = 0;
 			}
 			OptionalDouble control = this.getDefinition().getModel().getControls().stream()
-					.filter(x -> x.part.type == ModelComponentType.BELL_CONTROL_X)
-					.mapToDouble(this::getControlPosition)
-					.max();
+			                             .filter(x -> x.part.type == ModelComponentType.BELL_CONTROL_X)
+			                             .mapToDouble(this::getControlPosition)
+			                             .max();
 			if (control.isPresent() && control.getAsDouble() > 0) {
 				bellTime = 10;
 				bellControl = true;
@@ -502,7 +536,7 @@ public abstract class Locomotive extends FreightTank {
 	}
 	public float getThrottleDelta() {
 		return 0.04F;
-	};
+	}
 
 	public float getReverser() {
 		return reverser;
@@ -559,9 +593,9 @@ public abstract class Locomotive extends FreightTank {
 			return (getHornPlayer().getRotationPitch() + 90) / 180;
 		}
 		double control = this.getDefinition().getModel().getControls().stream()
-				.filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
-				.mapToDouble(this::getControlPosition)
-				.max().orElse(0);
+		                     .filter(x -> x.part.type == ModelComponentType.WHISTLE_CONTROL_X)
+		                     .mapToDouble(this::getControlPosition)
+		                     .max().orElse(0);
 
 		return Math.max((float)control, hornPull);
 	}
@@ -637,5 +671,26 @@ public abstract class Locomotive extends FreightTank {
 	public float ambientTemperature() {
 	    // null during registration
 		return internal != null ? getWorld().getTemperature(getBlockPosition()) : 0f;
+	}
+
+    public void setEmergency(boolean emergency) {
+        this.emergency = emergency;
+    }
+    
+    public boolean getEmergency() {
+    	return emergency;
+    }
+    
+	public RemoteControlData getRemoteControlData() {
+		RemoteControlData data = new RemoteControlData();	    
+	    data.throttle = getThrottle();
+	    data.brakePressure = getBrakePressure();
+	    data.indBrake = getIndependentBrake();
+	    data.reverser = getReverser();
+	    data.speed = getCurrentSpeed();
+	    data.emergency = getEmergency();
+	    data.horn = hornPull;
+
+	    return data;
 	}
 }

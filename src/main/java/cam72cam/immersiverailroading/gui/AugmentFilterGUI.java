@@ -34,6 +34,15 @@ public class AugmentFilterGUI implements IScreen {
         this.properties = tileRailBase.getAugmentProperties() == null
                           ? Augment.Properties.empty()
                           : tileRailBase.getAugmentProperties();
+        if(properties.positiveFilter == null) {
+            properties.positiveFilter = "";
+        }
+        if (properties.negativeFilter == null) {
+            properties.negativeFilter = "";
+        }
+        if (properties.doorActuatorFilter == null) {
+            properties.doorActuatorFilter = "";
+        }
     }
 
     @Override
@@ -138,15 +147,6 @@ public class AugmentFilterGUI implements IScreen {
 
     @Override
     public void onClose() {
-        if(properties.positiveFilter == null) {
-            properties.positiveFilter = "";
-        }
-        if (properties.negativeFilter == null) {
-            properties.negativeFilter = "";
-        }
-        if (properties.doorActuatorFilter == null) {
-            properties.doorActuatorFilter = "";
-        }
         new AugmentFilterChangePacket(pos, properties).sendToServer();
     }
 

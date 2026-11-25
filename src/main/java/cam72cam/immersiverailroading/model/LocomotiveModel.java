@@ -88,6 +88,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         if (def.hasIndependentBrake()) {
             addGauge(provider, ModelComponentType.GAUGE_INDEPENDENT_BRAKE_X, Readouts.INDEPENDENT_BRAKE);
         }
+        addGauge(provider, ModelComponentType.GAUGE_EMERGENCY_X, Readouts.EMERGENCY);
 
         addControl(provider, ModelComponentType.BELL_CONTROL_X);
         addControl(provider, ModelComponentType.THROTTLE_BRAKE_X);
@@ -97,15 +98,16 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
         if (def.hasIndependentBrake()) {
             addControl(provider, ModelComponentType.INDEPENDENT_BRAKE_X);
         }
+        addControl(provider, ModelComponentType.EMERGENCY_X);
     }
 
     @Override
     protected void initStates() {
         super.initStates();
         frontLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getFrontLocomotiveMatrix(s)));
-        frontLocomotiveRocking = addRoll(frontLocomotive);
+        frontLocomotiveRocking = addEffectRoll(frontLocomotive);
         rearLocomotive = base.push(settings -> settings.add((EntityMoveableRollingStock s, float partialTicks) -> getRearLocomotiveMatrix(s)));
-        rearLocomotiveRocking = addRoll(rearLocomotive);
+        rearLocomotiveRocking = addEffectRoll(rearLocomotive);
     }
 
     @Override
@@ -166,7 +168,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
     public Set<ItemEntity> filterItems(EntityMoveableRollingStock stock, List<ItemEntity> entities) {
         Set<ItemEntity> result = super.filterItems(stock, entities);
         if (this.cargoFillFront != null) {
-            Matrix4 inverted = getFrontLocomotiveMatrix(stock);
+            Matrix4 inverted = getFrontLocomotiveMatrix(stock).copy();
             inverted.invert();
             entities.stream().filter(entity -> {
                 final Vec3d point1 = inverted.apply(entity.getPosition());
@@ -174,7 +176,7 @@ public class LocomotiveModel<ENTITY extends Locomotive, DEFINITION extends Locom
             }).forEach(result::add);
         }
         if (this.cargoFillRear != null) {
-            Matrix4 inverted = getRearLocomotiveMatrix(stock);
+            Matrix4 inverted = getRearLocomotiveMatrix(stock).copy();
             inverted.invert();
             entities.stream().filter(entity -> {
                 final Vec3d point1 = inverted.apply(entity.getPosition());

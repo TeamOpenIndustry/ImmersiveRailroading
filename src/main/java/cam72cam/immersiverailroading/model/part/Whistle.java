@@ -9,7 +9,7 @@ import cam72cam.immersiverailroading.model.components.ComponentProvider;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.Quilling;
-import cam72cam.immersiverailroading.render.ExpireableMap;
+import cam72cam.mod.util.collection.ExpireableMap;
 import cam72cam.immersiverailroading.render.SmokeParticle;
 import cam72cam.immersiverailroading.util.MathUtil;
 import cam72cam.immersiverailroading.util.VecUtil;
@@ -153,7 +153,7 @@ public class Whistle {
             double verticalSpeed = 0.8f * stock.gauge.scale();
             double size = 0.3 * (0.8 + smokeMod) * stock.gauge.scale();
 
-            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan, darken, thickness, size, stock.getDefinition().steamParticleTexture));
+            Particles.SMOKE.accept(new SmokeParticle.SmokeParticleData(stock.getWorld(), particlePos, new Vec3d(fakeMotion.x, fakeMotion.y + verticalSpeed, fakeMotion.z), lifespan, darken, thickness, size, stock.getDefinition().getSteamParticle()));
         }
     }
 

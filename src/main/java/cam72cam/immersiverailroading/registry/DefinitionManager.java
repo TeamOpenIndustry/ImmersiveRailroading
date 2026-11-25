@@ -2,7 +2,7 @@ package cam72cam.immersiverailroading.registry;
 
 import cam72cam.immersiverailroading.Config.ConfigPerformance;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.util.BiMultiMap;
+import cam72cam.mod.util.collection.BiMultiMap;
 import cam72cam.immersiverailroading.util.CAML;
 import cam72cam.immersiverailroading.util.DataBlock;
 import cam72cam.immersiverailroading.library.Gauge;
@@ -93,16 +93,16 @@ public class DefinitionManager {
     public static void initDefinitions() {
         if (definitions != null) {
             for (EntityRollingStockDefinition def : definitions.values()) {
-                if (def.model != null) {
-                    def.model.free();
+                if (def.stockModel.model != null) {
+                    def.stockModel.model.free();
                 }
             }
         }
 
         if (tracks != null) {
             for (TrackDefinition def : tracks.values()) {
-                for (TrackModel model : def.models) {
-                    model.free();
+                for (TrackModel trackModel : def.models) {
+                    trackModel.model.free();
                 }
             }
         }

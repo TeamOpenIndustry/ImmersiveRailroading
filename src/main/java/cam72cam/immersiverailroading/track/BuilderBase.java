@@ -14,7 +14,9 @@ import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.world.World;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 //TODO @cam72cam use Vec3i and Vec3i
 
@@ -58,9 +60,20 @@ public abstract class BuilderBase {
 			return ;
 		}
 		*/
-		for(TrackBase track : tracks) {
+		Set<Vec3i> allTrackPositions = new HashSet<>();
+		for (TrackBase track : tracks) {
+			allTrackPositions.add(track.getPos());
+		}
+
+		for (TrackBase track : tracks) {
 			if (!track.isOverTileRail()) {
 				track.placeTrack(true).markDirty();
+
+				// TODO: Advanced embankment placer
+				Vec3i bedFillPos = track.getBedFillPos();
+				if (!allTrackPositions.contains(bedFillPos)) {
+					track.tryPlaceBedFill();
+				}
 			} else {
 				// Track -> Base?
 				// To
@@ -118,7 +131,7 @@ public abstract class BuilderBase {
 		this.drops = drops;
 	}
 
-	public void clearArea() { // Clear 6-block tall right-of-way ignoring snow UNLESS the snow directly intersects with the location of a future track tile.
+	public void clearArea() { // Clear 6-block tall right-of-way ignoring snow UNLESS the snow directly intersects with the location of a future track tile. TODO: adapt bedFace
 		for (TrackBase track : tracks) {
 			for (int i = 0; i < 6 * info.settings.gauge.scale(); i++) {
 				Vec3i main = track.getPos().up(i);

@@ -1,6 +1,6 @@
 package cam72cam.immersiverailroading.render.rail;
 
-import cam72cam.immersiverailroading.render.ExpireableMap;
+import cam72cam.mod.util.collection.ExpireableMap;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.TrackBase;
@@ -95,19 +95,22 @@ public class RailRender {
 
 
 
-	public static void render(RailInfo info, World world, Vec3i pos, boolean renderOverlay, RenderState state) {
+	public static void render(RailInfo info, Vec3d originPlacementPos, World world, Vec3i pos, boolean renderOverlay, RenderState state) {
 		state.lighting(false);
 
 		RailRender renderer = get(info);
 
+		RenderState railRenderState = state.clone();
+		Vec3d off = info.placementInfo.placementPosition;
+		if(originPlacementPos != null) {
+			railRenderState.translate(0, -originPlacementPos.y, 0);//TODO: is this enough? current rail is right but renderOverlay is not
+		}
+
 		MinecraftClient.startProfiler("rail");
-		renderer.renderRailModel(state);
+		renderer.renderRailModel(railRenderState);
 		MinecraftClient.endProfiler();
 
 		if (renderOverlay) {
-			Vec3d off = info.placementInfo.placementPosition;
-			// TODO Is this needed?
-			off = off.subtract(new Vec3d(new Vec3i(off)));
 			state.translate(-off.x, -off.y, -off.z);
 
 			MinecraftClient.startProfiler("base");
