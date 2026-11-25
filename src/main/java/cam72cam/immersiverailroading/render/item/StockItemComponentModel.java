@@ -9,7 +9,6 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.common.ModelRenderer;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
