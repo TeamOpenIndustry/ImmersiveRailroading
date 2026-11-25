@@ -19,8 +19,6 @@ import cam72cam.immersiverailroading.sound.StockSound;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
-import cam72cam.mod.render.common.ModelConfig;
-import cam72cam.mod.render.common.ModelRenderer;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
