@@ -170,7 +170,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     public ModelState addEffectRoll(ModelState state) {
         return state.push(builder -> builder.add((ModelState.Animator) (stock, partialTicks) ->
-                new Matrix4().rotate(Math.toRadians(sway.getEffectRollDegrees(stock, partialTicks, stock.getRotationRoll())), 1, 0, 0)));
+                new Matrix4().rotate(Math.toRadians(sway.getEffectRollDegrees(stock, partialTicks, stock.getRotationRoll(partialTicks))), 1, 0, 0)));
     }
 
     protected void initStates() {
@@ -375,7 +375,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
 
     protected void postRender(ENTITY stock, RenderState state, float partialTicks) {
         state.scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
-        state.rotate(sway.getEffectRollDegrees(stock, partialTicks, stock.getRotationRoll()), 1, 0, 0);
+        state.rotate(sway.getEffectRollDegrees(stock, partialTicks, stock.getRotationRoll(partialTicks)), 1, 0, 0);
         controls.forEach(c -> c.postRender(stock, state, partialTicks));
         doors.forEach(c -> c.postRender(stock, state, partialTicks));
         gauges.forEach(c -> c.postRender(stock, state, partialTicks));

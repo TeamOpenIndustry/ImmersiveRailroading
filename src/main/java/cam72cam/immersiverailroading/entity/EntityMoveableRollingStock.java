@@ -42,6 +42,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     public List<SimulationState> states = new ArrayList<>();
     private RealBB boundingBox;
     private float[][] heightMapCache;
+    private float prevRenderRoll;
+    private boolean hasPrevRenderRoll = false;
     @TagSync
     @TagField("IND_BRAKE")
     private float independentBrake = 0;
@@ -433,6 +435,36 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
     }
     public void setRearRoll(float val) {
         this.rearRoll = val;
+    }
+
+    @Override
+    public void setRotationRoll(float roll) {
+        if (!hasPrevRenderRoll) {
+            prevRenderRoll = roll;
+            hasPrevRenderRoll = true;
+        } else {
+            prevRenderRoll = getRotationRoll();
+        }
+        super.setRotationRoll(roll);
+    }
+
+    @Override
+    public float getRotationRoll(float partialTicks) {
+        if (!hasPrevRenderRoll) {
+            return getRotationRoll();
+        }
+
+        float current = getRotationRoll();
+        float prev = prevRenderRoll;
+        float delta = current - prev;
+        if (delta > 180) {
+            prev += 360;
+        } else if (delta < -180) {
+            prev -= 360;
+        }
+
+        partialTicks = Math.max(0, Math.min(1, partialTicks));
+        return prev + (current - prev) * partialTicks;
     }
 
     public float getTickSkew() {
