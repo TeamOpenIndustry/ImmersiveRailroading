@@ -72,7 +72,7 @@ public class SpawnUtil {
 					if (DegreeFuncs.delta(pitch, 0) > 90) {
 						pitch = 180 - pitch;
 					}
-					moveable.setRotationPitch((front != null && rear != null) ? SpawnOrientation.pitch(front.x, front.y, front.z, rear.x, rear.y, rear.z, moveable.getRotationPitch()) : (pitch));
+					moveable.setRotationPitch((front != null && rear != null) ? pitch(front, rear, moveable.getRotationPitch()) : pitch);
 
 					moveable.setPosition(rear.add(front.subtract(rear).scale(frontDistance / (frontDistance - rearDistance))));
 
@@ -111,5 +111,14 @@ public class SpawnUtil {
 			player.setHeldItem(hand, stack);
 		}
 		return ClickResult.ACCEPTED;
+	}
+
+	private static float pitch(Vec3d front, Vec3d rear, float fallback) {
+		Vec3d chord = front.subtract(rear);
+		double horizontal = Math.hypot(chord.x, chord.z);
+		if (!Double.isFinite(horizontal) || !Double.isFinite(chord.y) || horizontal < 1e-6) {
+			return fallback;
+		}
+		return (float) Math.toDegrees(Math.atan2(chord.y, horizontal));
 	}
 }

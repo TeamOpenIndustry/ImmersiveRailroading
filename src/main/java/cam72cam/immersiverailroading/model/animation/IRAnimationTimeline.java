@@ -1,11 +1,12 @@
 package cam72cam.immersiverailroading.model.animation;
 
+import cam72cam.immersiverailroading.entity.EntityRollingStock;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 
-/** Local animation fix, 2026-11-25. No Minecraft dependencies. */
 public final class IRAnimationTimeline {
-    private final Map<Object, State> states = new WeakHashMap<>();
+    private final Map<EntityRollingStock, State> states = new WeakHashMap<>();
     private static final class State {
         boolean active;
         int startTick;
@@ -27,7 +28,7 @@ public final class IRAnimationTimeline {
     public static boolean isPlay(String mode) {
         return mode.equals("PLAY_FORWARD") || mode.equals("PLAY_REVERSE") || mode.equals("PLAY_BOTH");
     }
-    public synchronized float sample(Object stock, String mode, float value, int tick, float partial, int frames, float rate) {
+    public synchronized float sample(EntityRollingStock stock, String mode, float value, int tick, float partial, int frames, float rate) {
         // Preserve original non-triggered animation modes.
         float duration = frames / rate;
         float time = tick + partial;
@@ -66,5 +67,5 @@ public final class IRAnimationTimeline {
         s.lastTick = tick;
         return s.at((double) tick + Math.max(0, Math.min(1, partial)), duration);
     }
-    public synchronized void removed(Object stock) { states.remove(stock); }
+    public synchronized void removed(EntityRollingStock stock) { states.remove(stock); }
 }
