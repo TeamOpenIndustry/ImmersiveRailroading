@@ -485,7 +485,12 @@ public class OffWorldMovementTrack {
             double ayy = by - ay;
             double az = to.point.z - from.point.z;
             double abLen2 = ax * ax + ayy * ayy + az * az;
-            if (abLen2 < EPS) return -1;
+            if (abLen2 < EPS) {
+                // Zero-length GAP: both ends are the same point, so any t is positionally
+                // equivalent. Keep the topology if pos is close enough instead of forcing
+                // the caller back to initCurrent.
+                return from.point.distanceToSquared(pos) <= maxDistSq ? 0 : -1;
+            }
             double t = ((pos.x - from.point.x) * ax + (pos.y - ay) * ayy + (pos.z - from.point.z) * az) / abLen2;
             t = Math.max(0, Math.min(1, t));
             double cx = from.point.x + ax * t - pos.x;
