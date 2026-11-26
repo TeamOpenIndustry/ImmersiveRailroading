@@ -12,6 +12,7 @@ import cam72cam.mod.entity.custom.IRidable;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.item.ClickResult;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Matrix3;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.serialization.SerializationException;
 import cam72cam.mod.serialization.TagCompound;
@@ -84,7 +85,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 		Vec3d seat = getSeatPosition(passenger.getUUID());
 		if (seat != null) {
-			return seat;
+			return getPassengerOrientation().apply(seat);
 		}
 
 		if (passenger.isVillager()) {
@@ -93,7 +94,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger), true);
 
-		return off;
+		return getPassengerOrientation().apply(off);
 	}
 
 	@Override
@@ -112,6 +113,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	@Override
 	public Vec3d onPassengerUpdate(Entity passenger, Vec3d offset) {
+		Matrix3 orientation = getPassengerOrientation();
+		// UMC keeps the offset already rotated by pitch/roll. Convert it back to
+		// model space before bounds correction, then rotate the result forward.
+		offset = orientation.copy().transpose().apply(offset);
+
 		if (passenger.isPlayer()) {
 			offset = playerMovement(passenger.asPlayer(), offset);
 		}
@@ -120,13 +126,16 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		if (seat != null) {
 			offset = seat;
 		} else {
-			offset = this.getDefinition().correctPassengerBounds(gauge, offset.subtract(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0),
-																 shouldRiderSit(passenger), false);
+			offset = this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(passenger), false);
 		}
-		//TODO roll
-		offset = offset.add(0, Math.sin(Math.toRadians(this.getRotationPitch())) * offset.z, 0);
 
-		return offset;
+		return orientation.apply(offset);
+	}
+
+	private Matrix3 getPassengerOrientation() {
+		// The model transform is roll then pitch after the -90 yaw flip, which
+		// makes both angles negative in this entity-local frame.
+		return Matrix3.fromEuler(0, -this.getRotationPitch(), -this.getRotationRoll());
 	}
 
 	private boolean isNearestConnectingDoorOpen(Player source) {
