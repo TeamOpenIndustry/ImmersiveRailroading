@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class EntityRidableRollingStock extends EntityBuildableRollingStock implements IRidable {
+	private static final double SITTING_OFFSET = 0.6;
+
 	public float getRidingSoundModifier() {
 		return getDefinition().dampeningAmount;
 	}
@@ -36,6 +38,11 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	// Hack to remount players if they were seated
 	private final Map<UUID, Vec3d> remount = new HashMap<>();
+
+	// Floor position in the unrotated passenger frame. UMC stores the rotated
+	// offset, so keeping this separate avoids feeding pitch/roll back into the
+	// next tick's floor query.
+	private final Map<UUID, Vec3d> standingFloorOffsets = new HashMap<>();
 
 
 
@@ -58,13 +65,18 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 	}
 
-	private Vec3d getSeatPosition(UUID passenger) {
+	private Vec3d getSeatOffset(UUID passenger) {
 		String seat = seatedPassengers.entrySet().stream()
 				.filter(x -> x.getValue().equals(passenger))
 				.map(Map.Entry::getKey).findFirst().orElse(null);
 		return this.getDefinition().getModel().getSeats().stream()
 		           .filter(s -> s.part.key.equals(seat))
-		           .map(s -> new Vec3d(s.part.center.z, s.part.min.y, -s.part.center.x).scale(gauge.scale()).subtract(0, 0.6, 0))
+		           .map(s -> {
+		                   Vec3d seatPos = new Vec3d(s.part.center.z, s.part.min.y, -s.part.center.x).scale(gauge.scale());
+		                   // The player stays upright, so the sitting height is world-vertical,
+		                   // not along the rolled seat's local up axis.
+		                   return getPassengerOrientation().apply(seatPos).subtract(0, SITTING_OFFSET, 0);
+		           })
 		           .findFirst().orElse(null);
 	}
 
@@ -83,18 +95,22 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			}
 		}
 
-		Vec3d seat = getSeatPosition(passenger.getUUID());
+		Vec3d seat = getSeatOffset(passenger.getUUID());
 		if (seat != null) {
-			return getPassengerOrientation().apply(seat);
+			standingFloorOffsets.remove(passenger.getUUID());
+			return seat;
 		}
+
+		Matrix3 orientation = getPassengerOrientation();
 
 		if (passenger.isVillager()) {
 			int wiggle = 10;
 			off = off.add((Math.random()-0.5) * wiggle, 0, (Math.random()-0.5) * wiggle);
 		}
 		off = this.getDefinition().correctPassengerBounds(gauge, off, shouldRiderSit(passenger), true);
+		standingFloorOffsets.put(passenger.getUUID(), off);
 
-		return getPassengerOrientation().apply(off);
+		return orientation.apply(off);
 	}
 
 	@Override
@@ -113,23 +129,27 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 
 	@Override
 	public Vec3d onPassengerUpdate(Entity passenger, Vec3d offset) {
+		Vec3d seat = getSeatOffset(passenger.getUUID());
+		if (seat != null) {
+			standingFloorOffsets.remove(passenger.getUUID());
+			return seat;
+		}
+
 		Matrix3 orientation = getPassengerOrientation();
-		// UMC keeps the offset already rotated by pitch/roll. Convert it back to
-		// model space before bounds correction, then rotate the result forward.
-		offset = orientation.copy().transpose().apply(offset);
+		UUID passengerId = passenger.getUUID();
+		Vec3d floorOffset = standingFloorOffsets.get(passengerId);
+		if (floorOffset == null) {
+			// Only needed for offsets saved before the anchor was introduced.
+			floorOffset = orientation.copy().transpose().apply(offset);
+		}
 
 		if (passenger.isPlayer()) {
-			offset = playerMovement(passenger.asPlayer(), offset);
+			floorOffset = playerMovement(passenger.asPlayer(), floorOffset);
 		}
 
-		Vec3d seat = getSeatPosition(passenger.getUUID());
-		if (seat != null) {
-			offset = seat;
-		} else {
-			offset = this.getDefinition().correctPassengerBounds(gauge, offset, shouldRiderSit(passenger), false);
-		}
-
-		return orientation.apply(offset);
+		floorOffset = this.getDefinition().correctPassengerBounds(gauge, floorOffset, shouldRiderSit(passenger), false);
+		standingFloorOffsets.put(passengerId, floorOffset);
+		return orientation.apply(floorOffset);
 	}
 
 	private Matrix3 getPassengerOrientation() {
@@ -236,6 +256,9 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 		}
 
 		//TODO calculate better dismount offset
+		Matrix3 orientation = getPassengerOrientation();
+		Vec3d floorOffset = standingFloorOffsets.remove(passenger.getUUID());
+		offset = floorOffset != null ? floorOffset : orientation.copy().transpose().apply(offset);
 		offset = new Vec3d(Math.copySign(getDefinition().getWidth(gauge)/2 + 1, offset.x), 0, offset.z);
 
 		if (getWorld().isServer && passenger.isVillager() && payingPassengerPositions.containsKey(passenger.getUUID())) {
@@ -254,7 +277,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			payingPassengerPositions.remove(passenger.getUUID());
 		}
 
-		return offset;
+		return orientation.apply(offset);
 	}
 
 	public void onSeatClick(String seat, Player player) {
@@ -265,6 +288,7 @@ public abstract class EntityRidableRollingStock extends EntityBuildableRollingSt
 			return;
 		}
 
+		standingFloorOffsets.remove(player.getUUID());
 		seatedPassengers.put(seat, player.getUUID());
 	}
 
