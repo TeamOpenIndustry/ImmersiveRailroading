@@ -58,7 +58,7 @@ public class StockAnimation {
             case PLAY_FORWARD:
             case PLAY_REVERSE:
             case PLAY_BOTH:
-                return timeline.sample(stock, def.mode.name(), value,
+                return timeline.sample(stock, def.mode, value,
                         stock.getTickCount(), partialTicks,
                         animatrix.frameCount(), def.frames_per_tick);
             case LOOP:
@@ -82,7 +82,7 @@ public class StockAnimation {
 
     public <ENTITY extends EntityMoveableRollingStock> void effects(ENTITY stock) {
         // Observe control changes even for animations without sound or visible groups.
-        if (IRAnimationTimeline.isPlay(def.mode.name())) {
+        if (IRAnimationTimeline.isPlay(def.mode)) {
             getPercent(stock, 0);
         }
         if (sound != null) {

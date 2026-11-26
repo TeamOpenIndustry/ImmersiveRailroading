@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.model.animation;
 
 import cam72cam.immersiverailroading.entity.EntityRollingStock;
+import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.AnimationDefinition.AnimationMode;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -25,25 +26,25 @@ public final class IRAnimationTimeline {
             return (float) Math.max(target, start - distance);
         }
     }
-    public static boolean isPlay(String mode) {
-        return mode.equals("PLAY_FORWARD") || mode.equals("PLAY_REVERSE") || mode.equals("PLAY_BOTH");
+    public static boolean isPlay(AnimationMode mode) {
+        return mode == AnimationMode.PLAY_FORWARD || mode == AnimationMode.PLAY_REVERSE || mode == AnimationMode.PLAY_BOTH;
     }
-    public synchronized float sample(EntityRollingStock stock, String mode, float value, int tick, float partial, int frames, float rate) {
+    public synchronized float sample(EntityRollingStock stock, AnimationMode mode, float value, int tick, float partial, int frames, float rate) {
         // Preserve original non-triggered animation modes.
         float duration = frames / rate;
         float time = tick + partial;
         if (!isPlay(mode)) {
             switch (mode) {
-                case "VALUE": return value;
-                case "LOOP": if (value < 0.95) return 0; break;
-                case "LOOP_SPEED": if (value == 0) return 0; duration /= value; break;
+                case VALUE: return value;
+                case LOOP: if (value < 0.95) return 0; break;
+                case LOOP_SPEED: if (value == 0) return 0; duration /= value; break;
                 default: break;
             }
             return (time % duration) / duration;
         }
         boolean active = value >= 0.95;
-        boolean both = mode.equals("PLAY_BOTH");
-        boolean reverse = mode.equals("PLAY_REVERSE");
+        boolean both = mode == AnimationMode.PLAY_BOTH;
+        boolean reverse = mode == AnimationMode.PLAY_REVERSE;
         State s = states.get(stock);
         if (s == null || tick < s.lastTick) {
             // A newly tracked wagon may already be open. Do not replay a historical transition.
