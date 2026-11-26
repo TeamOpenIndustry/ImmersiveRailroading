@@ -12,6 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 public class TrackNode {
+    // Angle scores are in radians. 0.5 means a full maxDist gap costs ~28.6 degrees
+    // (for standard gauge, about 20 degrees per block), so distance can actually
+    // compete with orientation instead of only breaking exact ties.
+    private static final double CONN_DIST_WEIGHT = 0.5;
+
     public final TrackNodeId id;
     private final long regionPos;// addition, not necessary
     private final Vec3i regionBlockPos;// addition, not necessary
@@ -160,7 +165,7 @@ public class TrackNode {
                                     double angleScore = angleA + angleB;
                                     // dist should affect score more when orients are close, less if not
                                     double distNorm = d / maxDist;
-                                    double finalScore = angleScore + distNorm * 0.05;
+                                    double finalScore = angleScore + distNorm * CONN_DIST_WEIGHT;
 
                                     if (finalScore < bestScore) {
                                         bestScore = finalScore;
