@@ -64,5 +64,6 @@ public class SoundPacket extends Packet {
 		COUPLE,
 		COLLISION,
 		WHISTLE,
+		SCRIPTED
 	}
 }
