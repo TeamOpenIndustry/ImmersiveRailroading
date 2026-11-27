@@ -31,6 +31,10 @@ public class TrackMultiGeometrySegment {
         return TrackRegionUtil.toBlockPos(regionPos, regionBlockPos);
     }
 
+    public long getBuildTime() {
+        return buildTime;
+    }
+
     public List<Map<Gauge, TrackSingleGeometrySegment>> getPaths() {
         return paths;
     }

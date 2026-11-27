@@ -419,6 +419,7 @@ public class WorldData {
         TrackMultiGeometrySegment seg = region.getTrackBlock(pos);
         if (seg != null) {
             seg.updateSwitchSate(switchState, offline, currentTime);
+            region.updateBuildTime(seg);
             region.markDirty();
         }
 
@@ -434,6 +435,7 @@ public class WorldData {
         TrackMultiGeometrySegment seg = region.getTrackBlock(region.toBlockPos(regionBlockPos));
         if (seg != null) {
             seg.updateSwitchSate(state, offline, currentTime);
+            region.updateBuildTime(seg);
         }
     }
 

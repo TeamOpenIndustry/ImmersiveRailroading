@@ -37,7 +37,7 @@ public class TileRail extends TileRailBase {
 	public List<Vec3i> subInfoPos;
 
 	@TagField("buildTimeMs")
-	private long buildTimeMs;
+	private long buildTimeMs = 0;
 
 	@TagField("tableIndex")
 	private int tableIndex;
@@ -406,6 +406,7 @@ public class TileRail extends TileRailBase {
 		}
 		if (getWorld().isServer) {
 			if(WorldData.get(getWorld()) != null && WorldData.get(getWorld()).getTrackBlockEnsured(getPos()) == null && info.switchBranchIndex <= 1) {
+				if(buildTimeMs == 0) setBuildTimeMs(System.currentTimeMillis());
 				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(this, getWorld());
 				WorldData.get(getWorld()).setTrackBlock(getPos(), trackBlock);
 			}
