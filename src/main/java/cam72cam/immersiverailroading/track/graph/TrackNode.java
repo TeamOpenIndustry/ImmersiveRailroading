@@ -16,6 +16,7 @@ public class TrackNode {
     // (for standard gauge, about 20 degrees per block), so distance can actually
     // compete with orientation instead of only breaking exact ties.
     private static final double CONN_DIST_WEIGHT = 0.5;
+    public static final double GAP_MIN_DIST = 1e-2;
 
     public final TrackNodeId id;
     private final long regionPos;// addition, not necessary
@@ -110,7 +111,7 @@ public class TrackNode {
                                     if (i == 0 && trackBlock.type.isSwitch() && switchIndex > 0) continue;//唯一不可外部连接的点：switch的turn start
 
                                     // exclude self and snap to very close node
-                                    if (d < 1e-2) {
+                                    if (d < GAP_MIN_DIST) {
                                         if (seg == this.trackSingleGeometrySegment && i == this.index) {
                                             continue;
                                         }

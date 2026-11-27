@@ -220,7 +220,7 @@ public class OffWorldMovementTrack {
             double hFrom = trackHeight(from, world);
             double hTo = trackHeight(to, world);
             Vec3d dir = to.point.subtract(from.point).add(0, hTo - hFrom, 0).normalize();
-            if (dir.length() >= EPS) {
+            if (dir.length() >= TrackNode.GAP_MIN_DIST + EPS) {
                 return dir;
             }
             // 零长度 GAP 没有弦长。不能用 (0,0,1) 伪造方向，也不能用 absPos 相减：
