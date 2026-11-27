@@ -1,6 +1,7 @@
 package cam72cam.immersiverailroading.entity.physics;
 
 import cam72cam.immersiverailroading.Config;
+import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
 import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.Tender;
@@ -9,6 +10,7 @@ import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.PhysicalMaterials;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.physics.MovementTrack;
+import cam72cam.immersiverailroading.physics.TickPos;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.tile.TileRailBase;
 import cam72cam.immersiverailroading.track.graph.OffWorldMovementTrack;
@@ -75,6 +77,99 @@ public class SimulationState {
     public Consist consist;
     public float slackFrontPercent;
     public float slackRearPercent;
+
+    // True when this state was seeded from a persisted TickPos entry instead of the entity.
+    private boolean usedTickPos;
+    // Tick of the TickPos used to seed this state (-1 when unused).
+    private int tickPosTickID = -1;
+
+    /*
+     * Session tick reference, shared by every stock in a world.
+     *
+     * ServerChronoState.getServerTickID() is an in-memory counter that restarts at 0 with every
+     * server start, while the TickPos entries persisted in entity NBT keep the previous session's
+     * numbering.  After a reload the saved timeline therefore looks like it is thousands of ticks
+     * "in the future" and findTickPos() has no sample at or before the current tick.  Cars that
+     * stream back in at different ticks all land on the same fallback sample, so a car that
+     * appears five ticks after the rest starts five ticks behind it and the couplers stretch.
+     * Rebasing every stock onto the current timeline once fixes the formation regardless of when
+     * each car is loaded.
+     */
+    private static final Map<World, Integer> SESSION_START = new WeakHashMap<>();
+    private static final Map<World, Integer> TICK_OFFSET = new WeakHashMap<>();
+    private static final Map<World, Set<UUID>> REBASED_STOCK = new WeakHashMap<>();
+    // A timeline within this many ticks of the current session id is already ours.
+    private static final int SESSION_TOLERANCE_TICKS = 64;
+
+    static void noteSessionStart(World world, int startTickID) {
+        if (world == null || world.isClient) {
+            return;
+        }
+        synchronized (SESSION_START) {
+            SESSION_START.putIfAbsent(world, startTickID);
+        }
+    }
+
+    /*
+     * Move this stock's persisted TickPos timeline onto the current session's tick numbering.
+     * The offset is derived once per world and shared by every stock, so cars that load at
+     * different times keep their relative formation.
+     */
+    private static void rebaseToSession(EntityCoupleableRollingStock stock, int tickID) {
+        World world = stock.getWorld();
+        if (world == null || world.isClient) {
+            return;
+        }
+
+        Integer sessionStart;
+        Set<UUID> rebased;
+        synchronized (SESSION_START) {
+            sessionStart = SESSION_START.get(world);
+            rebased = REBASED_STOCK.computeIfAbsent(world, k -> new HashSet<>());
+        }
+        if (sessionStart == null || rebased.contains(stock.getUUID())) {
+            return;
+        }
+
+        int newest = Integer.MIN_VALUE;
+        for (TickPos tickPos : stock.positions) {
+            if (tickPos != null) {
+                newest = Math.max(newest, tickPos.tickID);
+            }
+        }
+        if (newest == Integer.MIN_VALUE) {
+            // Nothing persisted yet, look again once the stock has been simulated.
+            return;
+        }
+        if (Math.abs(newest - tickID) <= SESSION_TOLERANCE_TICKS) {
+            rebased.add(stock.getUUID());
+            return;
+        }
+
+        int offset;
+        boolean firstRebase = false;
+        synchronized (SESSION_START) {
+            Integer known = TICK_OFFSET.get(world);
+            if (known == null) {
+                known = sessionStart - newest;
+                TICK_OFFSET.put(world, known);
+                firstRebase = true;
+            }
+            offset = known;
+        }
+        rebased.add(stock.getUUID());
+        if (offset != 0) {
+            for (TickPos tickPos : stock.positions) {
+                if (tickPos != null) {
+                    tickPos.tickID += offset;
+                }
+            }
+        }
+        if (firstRebase) {
+            ImmersiveRailroading.info("Rebased persisted stock timeline by %s ticks (sessionStart=%s, newest=%s)",
+                    offset, sessionStart, newest);
+        }
+    }
 
     public static class Configuration {
         public UUID id;
@@ -180,14 +275,94 @@ public class SimulationState {
         }
     }
 
+    private static TickPos findTickPos(EntityCoupleableRollingStock stock, int tickID) {
+        TickPos best = null;
+        TickPos nearestFuture = null;
+        for (TickPos tickPos : stock.positions) {
+            if (tickPos == null || tickPos.position == null) {
+                continue;
+            }
+            if (tickPos.tickID == tickID) {
+                return tickPos;
+            }
+            if (tickPos.tickID < tickID && (best == null || tickPos.tickID > best.tickID)) {
+                best = tickPos;
+            }
+            if (tickPos.tickID > tickID && (nearestFuture == null || tickPos.tickID < nearestFuture.tickID)) {
+                nearestFuture = tickPos;
+            }
+        }
+        if (best != null) {
+            return best;
+        }
+        /*
+         * The persisted timeline can be entirely in the future right after a load, when the
+         * session clock restarted below it.  The nearest future sample is still the authoritative
+         * body position and every car of the consist uses the same timeline, so their relative
+         * formation is exact.  Falling back to stock.getPosition() here would rebuild cars from
+         * stale/last-frame bodies and tear the train apart.
+         */
+        if (nearestFuture != null) {
+            return nearestFuture;
+        }
+        return stock.getTickPos();
+    }
+
+    // Upper bound on how far a rebuilt state is marched in one go.
+    private static final int MAX_ADVANCE_TICKS = 40;
+
+    /*
+     * Build a state for an arbitrary tick.
+     *
+     * The transient states list is lost whenever the carrier entity is re-created (1.21 does
+     * that on every chunk unload/reload), but the positions list is serialized.  When the
+     * requested tick is newer than the newest persisted position, march that position forward
+     * with the normal 1D solver instead of trusting the entity's stale NBT position.
+     */
+    static SimulationState forTick(EntityCoupleableRollingStock stock, int tickID) {
+        SimulationState state = new SimulationState(stock, tickID);
+        int fromTick = state.tickPosTickID;
+        if (state.usedTickPos && fromTick >= 0 && fromTick < tickID) {
+            int advance = Math.min(tickID - fromTick, MAX_ADVANCE_TICKS);
+            List<Vec3i> broken = new ArrayList<>();
+            for (int i = 0; i < advance; i++) {
+                state = state.next(state.velocity, broken);
+                broken.clear();
+            }
+            state.dirty = true;
+            state.tickPosTickID = fromTick;
+        }
+        state.tickID = tickID;
+        return state;
+    }
+
     public SimulationState(EntityCoupleableRollingStock stock) {
-        tickID = ServerChronoState.getState(stock.getWorld()).getServerTickID();
-        position = stock.getPosition();
-        velocity = stock.getVelocity().length() *
-                (DegreeFuncs.delta(VecUtil.toWrongYaw(stock.getVelocity()), stock.getRotationYaw()) < 90 ? 1 : -1);
-        yaw = stock.getRotationYaw();
-        pitch = stock.getRotationPitch();
-        roll = stock.getRotationRoll();
+        this(stock, ServerChronoState.getState(stock.getWorld()).getServerTickID());
+    }
+
+    public SimulationState(EntityCoupleableRollingStock stock, int tickID) {
+        this.tickID = tickID;
+
+        /*
+         * 1.21 destroys and recreates the MC side of a stock entity when its chunk is reloaded.
+         * At that point stock.getPosition() is the stale NBT position (or 0,0,0 for a freshly
+         * constructed entity), while the IR TickPos list is current and travels with the entity
+         * NBT.  Rebuilding a physics state at 0,0,0 makes the 1D consist simulation think the
+         * car is hundreds of blocks away, which tears the train apart.  Prefer TickPos.
+         */
+        rebaseToSession(stock, tickID);
+        TickPos tickPos = findTickPos(stock, tickID);
+        this.usedTickPos = tickPos != null && tickPos.position != null;
+        this.tickPosTickID = this.usedTickPos ? tickPos.tickID : -1;
+
+        position = this.usedTickPos ? tickPos.position : stock.getPosition();
+        velocity = this.usedTickPos && tickPos.speed != null
+                ? tickPos.speed.minecraft()
+                : stock.getVelocity().length() *
+                        (DegreeFuncs.delta(VecUtil.toWrongYaw(stock.getVelocity()), stock.getRotationYaw()) < 90 ? 1 : -1);
+        yaw = this.usedTickPos ? tickPos.rotationYaw : stock.getRotationYaw();
+        pitch = this.usedTickPos ? tickPos.rotationPitch : stock.getRotationPitch();
+        roll = this.usedTickPos ? tickPos.rotationRoll : stock.getRotationRoll();
 
         interactingFront = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.FRONT);
         interactingRear = stock.getCoupledUUID(EntityCoupleableRollingStock.CouplerType.BACK);
@@ -203,10 +378,10 @@ public class SimulationState {
 
         bounds = config.bounds.apply(this);
 
-        yawFront = stock.getFrontYaw();
-        yawRear = stock.getRearYaw();
-        rollFront = stock.getFrontRoll();
-        rollRear = stock.getRearRoll();
+        yawFront = this.usedTickPos ? tickPos.frontYaw : stock.getFrontYaw();
+        yawRear = this.usedTickPos ? tickPos.rearYaw : stock.getRearYaw();
+        rollFront = this.usedTickPos && tickPos.frontRoll != null ? tickPos.frontRoll : stock.getFrontRoll();
+        rollRear = this.usedTickPos && tickPos.rearRoll != null ? tickPos.rearRoll : stock.getRearRoll();
 
         recalculatedAt = position;
 

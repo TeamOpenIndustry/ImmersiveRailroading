@@ -34,12 +34,69 @@ public class Simulation {
     private final List<Vec3i> blocksAlreadyBroken;
     List<EntityCoupleableRollingStock> loaded;
 
+    // How long a coupled car may stay absent before its couplers are released.
+    private static final int MISSING_STATE_GRACE_TICKS = 600;
+    // Partner uuids that have never produced a state in this world -> first tick noticed missing.
+    private static final Map<World, Map<UUID, Long>> UNSEEN_MISSING = new WeakHashMap<>();
+
+    /*
+     * states is transient while positions is serialized.  If the same carrier object survives a
+     * reload and load() replaces positions from NBT, the two lists can end up on different
+     * timelines: matching tickIDs with bodies tens of blocks apart.  Drop the transient states so
+     * they get rebuilt from the persisted positions.
+     */
+    private static boolean statesMatchPositions(EntityCoupleableRollingStock stock) {
+        if (stock.states.isEmpty()) {
+            return true;
+        }
+        if (stock.positions.isEmpty()) {
+            return false;
+        }
+        for (SimulationState state : stock.states) {
+            TickPos matching = null;
+            for (TickPos position : stock.positions) {
+                if (position.tickID == state.tickID) {
+                    matching = position;
+                    break;
+                }
+            }
+            if (matching == null || matching.position == null || state.position == null) {
+                return false;
+            }
+            if (matching.position.distanceToSquared(state.position) > 0.0001) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+     * True when a coupled uuid has never produced a state in this world and was first reported
+     * missing less than MISSING_STATE_GRACE_TICKS ago.  This is the "first pass after a world or
+     * chunk load" case, where the partner entity may not be registered with the world yet.
+     */
+    private boolean unseenWithinGrace(UUID uuid) {
+        Map<UUID, Long> unseen = UNSEEN_MISSING.computeIfAbsent(world, k -> new HashMap<>());
+        long now = world.getTicks();
+        Long first = unseen.get(uuid);
+        if (first == null) {
+            unseen.put(uuid, now);
+            return true;
+        }
+        if (now - first > MISSING_STATE_GRACE_TICKS) {
+            unseen.remove(uuid);
+            return false;
+        }
+        return true;
+    }
 
     public Simulation(World world) {
         calculatedStates = keptStates = restStates = 0;
         long startTimeMs = System.currentTimeMillis();
         this.world = world;
         this.startTickID = ((ServerChronoState)ChronoState.getState(world)).getServerTickID();
+        // Anchor the persisted TickPos timeline of this session before any stock is rebuilt.
+        SimulationState.noteSessionStart(world, startTickID);
 
         stateMaps = new ArrayList<>();
         blocksAlreadyBroken = new ArrayList<>();
@@ -116,20 +173,34 @@ public class Simulation {
 
             for (EntityCoupleableRollingStock stock : loaded) {
 
-                if (!stateMap.containsKey(stock.getUUID())) {
-                    for (SimulationState state : stock.states) {
-                        int stateIteration = state.tickID - tickID;
-                        if (stateIteration >= 0) {
-                            state.update(stock);
-                            stateMaps.get(stateIteration).put(stock.getUUID(), state);
-                        }
-                    }
+                if (!statesMatchPositions(stock)) {
+                    stock.states.clear();
+                }
 
-                    if (!stateMap.containsKey(stock.getUUID())) {
-                        // This should only ever happen right after stock is placed.
-                        SimulationState state = new SimulationState(stock);
-                        state.tickID = tickID;
-                        stateMap.put(stock.getUUID(), state);
+                if (!stateMap.containsKey(stock.getUUID())) {
+                    if (stock.states.isEmpty()) {
+                        /*
+                         * The transient states list is lost whenever the carrier entity is
+                         * re-created (1.21 destroys and recreates it on chunk unload/reload).
+                         * The persisted TickPos list survives, so rebuild from it instead of
+                         * trusting the re-created entity's NBT/zero position.
+                         */
+                        SimulationState rebuilt = SimulationState.forTick(stock, tickID);
+                        rebuilt.update(stock);
+                        stateMap.put(stock.getUUID(), rebuilt);
+                    } else {
+                        for (SimulationState state : stock.states) {
+                            int stateIteration = state.tickID - tickID;
+                            if (stateIteration >= 0 && stateIteration < stateMaps.size()) {
+                                state.update(stock);
+                                stateMaps.get(stateIteration).put(stock.getUUID(), state);
+                            }
+                        }
+
+                        if (!stateMap.containsKey(stock.getUUID())) {
+                            // Stock placed right after this pass started.
+                            stateMap.put(stock.getUUID(), SimulationState.forTick(stock, tickID));
+                        }
                     }
                 }
 
@@ -190,16 +261,63 @@ public class Simulation {
                 }
                 SimulationState other = stateMap.get(otherID);
                 if (other == null) {
-                    if (Config.ConfigDebug.enableEntityPool && EntityPool.get(world).getEntity(otherID) != null) {
+                    /*
+                     * A missing state in this pass does NOT mean the car was removed.  In 1.21
+                     * the carrier entity is destroyed/re-created when its chunk unloads (and it
+                     * may live in the offline entity pool), so the world registry can transiently
+                     * forget it.  Treating "no state this pass" as "removed" is what tears a
+                     * consist into pieces when a player leaves and re-enters the area, so rebuild
+                     * the partner from its persisted TickPos and only release the coupler once
+                     * there is really no stock left.
+                     */
+                    EntityCoupleableRollingStock otherStock = world.getEntity(otherID, EntityCoupleableRollingStock.class);
+                    if (otherStock == null && Config.ConfigDebug.enableEntityPool) {
+                        ModdedEntity pooled = EntityPool.get(world).getEntity(otherID);
+                        if (pooled != null) {
+                            if (pooled.getSelf() instanceof EntityCoupleableRollingStock) {
+                                otherStock = (EntityCoupleableRollingStock) pooled.getSelf();
+                            } else {
+                                // Still being restored into a live entity; do not drop the link.
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (otherStock != null && !otherStock.isDead()) {
+                        EntityCoupleableRollingStock partner = otherStock;
+                        Map<UUID, Long> unseen = UNSEEN_MISSING.get(world);
+                        if (unseen != null) {
+                            unseen.remove(otherID);
+                        }
+                        SimulationState rebuilt = SimulationState.forTick(partner, state.tickID);
+                        rebuilt.update(partner);
+                        rebuilt.dirty = true;
+                        stateMap.put(otherID, rebuilt);
+                        if (loaded.stream().noneMatch(x -> x.getUUID().equals(partner.getUUID()))) {
+                            loaded.add(partner);
+                        }
                         continue;
                     }
 
-                    Vec3i otherPos = loaded.stream()
+                    EntityCoupleableRollingStock meStock = loaded.stream()
                             .filter(x -> x.getUUID().equals(myID)).findFirst()
-                            .map(x -> isMyCouplerFront ? x.lastKnownFront : x.lastKnownRear).orElse(null);
+                            .orElseGet(() -> world.getEntity(myID, EntityCoupleableRollingStock.class));
+                    Vec3i otherPos = meStock == null ? null
+                            : (isMyCouplerFront ? meStock.lastKnownFront : meStock.lastKnownRear);
 
-                    if (otherPos != null && !world.isBlockLoaded(otherPos)) {
+                    if (otherPos == null) {
+                        // No state, no entity and no last known position: most likely a car whose
+                        // chunk has not been streamed back in yet, not a removed coupler.
+                        continue;
+                    }
+
+                    if (!world.isBlockLoaded(otherPos)) {
                         // Other location is not loaded, we must not need to do this check.
+                        continue;
+                    }
+
+                    if (unseenWithinGrace(otherID)) {
+                        // First pass after a load: the partner may simply not be registered yet.
                         continue;
                     }
 
