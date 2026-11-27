@@ -219,9 +219,9 @@ public class OffWorldMovementTrack {
         if (edge.edgeType == TrackEdge.EdgeType.GAP) {
             double hFrom = trackHeight(from, world);
             double hTo = trackHeight(to, world);
-            Vec3d dir = to.point.subtract(from.point).add(0, hTo - hFrom, 0).normalize();
+            Vec3d dir = to.point.subtract(from.point).add(0, hTo - hFrom, 0);
             if (dir.length() >= TrackNode.GAP_MIN_DIST + EPS) {
-                return dir;
+                return dir.normalize();
             }
             // 零长度 GAP 没有弦长。不能用 (0,0,1) 伪造方向，也不能用 absPos 相减：
             // 前者会让 +Z 运动把零边当成完全顺向，后者对同一个方块恒为零向量。
