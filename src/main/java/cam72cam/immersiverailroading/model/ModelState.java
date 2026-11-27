@@ -4,7 +4,7 @@ import cam72cam.immersiverailroading.ConfigGraphics;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.ModelComponentType;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
-import cam72cam.mod.render.common.ModelRenderer;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
@@ -268,7 +268,7 @@ public class ModelState {
         }
     }
 
-    public void render(ModelRenderer.Binding binding, EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
+    public void render(OBJRender.Binding binding, EntityMoveableRollingStock stock, List<ModelComponentType> available, float partialTicks) {
         // Get all groups that we can render from components that are available
         List<ModelComponent.ModelGroupData> groups = new ArrayList<>();
 
@@ -312,6 +312,9 @@ public class ModelState {
             }
             if (current.blockLight != null && current.skyLight != null) {
                 state.lightmap(current.blockLight, current.skyLight);
+            }
+            if (current.transparent) {
+                state.blend(ALPHA_BLEND).depth_mask(false);
             }
         };
 
@@ -358,9 +361,7 @@ public class ModelState {
             // Flush
             if (!currentGroups.isEmpty()) {
                 if (current.transparent) {
-                    binding.enqueueTransparent(currentGroups, currentModifier);
-                } else {
-                    binding.enqueueOpaque(currentGroups, currentModifier);
+                    binding.draw(currentGroups, currentModifier);
                 }
             }
 
@@ -373,9 +374,7 @@ public class ModelState {
         // Flush
         if (!currentGroups.isEmpty()) {
             if (current.transparent) {
-                binding.enqueueTransparent(currentGroups, currentModifier);
-            } else {
-                binding.enqueueOpaque(currentGroups, currentModifier);
+                binding.draw(currentGroups, currentModifier);
             }
         }
 

@@ -5,7 +5,6 @@ import cam72cam.immersiverailroading.registry.DefinitionManager;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.common.ModelRenderer;
 import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.world.World;
 
@@ -33,8 +32,8 @@ public class RailItemRender implements ItemRender.IItemModel {
 
 		return new StandardModel().addCustom((state, pt) -> {
 			state.translate(0.5, 0.2, -0.3);
-			try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(baseRailModel.model).bind(state)) {
-                vbo.enqueueOpaque(left);
+			try (OBJRender.Binding vbo = baseRailModel.model.binder().bind(state)) {
+                vbo.draw(left);
             }
 		});
 	}

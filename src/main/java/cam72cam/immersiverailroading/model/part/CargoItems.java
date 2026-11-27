@@ -12,8 +12,7 @@ import cam72cam.mod.item.Fuzzy;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.common.ModelConfig;
-import cam72cam.mod.render.common.ModelRenderer;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
@@ -142,10 +141,8 @@ public class CargoItems {
                                 s.translate(pos);
                                 s.scale(1 / stock.gauge.scale(), 1 / stock.gauge.scale(), 1 / stock.gauge.scale());
                                 s.scale(data.gauge.scale(), data.gauge.scale(), data.gauge.scale());
-                                ModelConfig cfg = new ModelConfig().variant(data.texture);
-                                ModelRenderer renderer = ModelRenderer.getRendererFor(data.def.getModel().model);
-                                try (ModelRenderer.Binding binder = renderer.bind(cfg, s)) {
-                                    binder.enqueueTransparent(data.def.itemGroups);
+                                try (OBJRender.Binding binder = data.def.getModel().model.binder().texture(data.texture).bind(s)) {
+                                    binder.draw(data.def.itemGroups);
                                 }
                             });
                             renderSlot++;
@@ -170,10 +167,8 @@ public class CargoItems {
                                 s.scale(1 / stock.gauge.scale(), 1 / stock.gauge.scale(), 1 / stock.gauge.scale());
                                 s.scale(data.gauge.scale(), data.gauge.scale(), data.gauge.scale());
                                 s.translate(0, -componentOffset, 0);
-                                ModelConfig cfg = new ModelConfig().variant(data.texture);
-                                ModelRenderer renderer = ModelRenderer.getRendererFor(data.def.getModel().model);
-                                try (ModelRenderer.Binding binder = renderer.bind(cfg, s)) {
-                                    binder.enqueueTransparent(data.def.itemGroups);
+                                try (OBJRender.Binding binder = data.def.getModel().model.binder().texture(data.texture).bind(s)) {
+                                    binder.draw(data.def.itemGroups);
                                 }
                             });
                             renderSlot++;

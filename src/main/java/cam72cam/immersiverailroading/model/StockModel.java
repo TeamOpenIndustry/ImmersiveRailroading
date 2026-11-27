@@ -17,11 +17,9 @@ import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition;
 import cam72cam.immersiverailroading.registry.EntityRollingStockDefinition.SoundDefinition;
 import cam72cam.immersiverailroading.sound.StockSound;
 import cam72cam.mod.MinecraftClient;
-import cam72cam.mod.model.common.ModelLoader;
-import cam72cam.mod.model.common.mesh.Model;
+import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.OptiFine;
-import cam72cam.mod.render.common.ModelConfig;
-import cam72cam.mod.render.common.ModelRenderer;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
@@ -31,7 +29,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION extends EntityRollingStockDefinition> {
-    public final Model model;
+    public final OBJModel model;
 
     private final DEFINITION def;
     public final List<ModelComponent> allComponents;
@@ -72,7 +70,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
     private List<StockSound> customSounds = new ArrayList<>();
 
     public StockModel(DEFINITION def) throws Exception {
-        this.model = ModelLoader.load(def.modelLoc, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds,
+        this.model = new OBJModel(def.modelLoc, def.darken, def.internal_model_scale, def.textureNames.keySet(), ConfigGraphics.textureCacheSeconds,
                                       maxSize -> {
                                           List<Integer> lodSizes = new ArrayList<>();
                                           lodSizes.add(LOD_LARGE);
@@ -312,7 +310,7 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
                 .rescale_normal(true)
                 .scale(stock.gauge.scale(), stock.gauge.scale(), stock.gauge.scale());
 
-        if ((ConfigGraphics.OptifineEntityShaderOverrideAll || !model.getNormals().isEmpty() || !model.getSpeculars().isEmpty()) &&
+        if ((ConfigGraphics.OptifineEntityShaderOverrideAll || !model.normals.isEmpty() || !model.speculars.isEmpty()) &&
                 ConfigGraphics.OptiFineEntityShader != OptiFine.Shaders.Entities) {
             state = state.shader(ConfigGraphics.OptiFineEntityShader);
         }
@@ -334,9 +332,8 @@ public class StockModel<ENTITY extends EntityMoveableRollingStock, DEFINITION ex
             }
         }
 
-        ModelConfig cfg = new ModelConfig().variant(stock.getTexture()).lod(lod_level);
         try (
-                ModelRenderer.Binding bound = ModelRenderer.getRendererFor(this.model).bind(cfg, state);
+                OBJRender.Binding bound = model.binder().lod(lod_level).texture(stock.getTexture()).bind(state);
         ) {
             double backup = stock.distanceTraveled;
 

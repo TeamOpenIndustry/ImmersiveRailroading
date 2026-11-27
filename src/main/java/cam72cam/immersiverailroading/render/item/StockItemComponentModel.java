@@ -9,7 +9,7 @@ import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.common.ModelRenderer;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.BlendMode;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.world.World;
@@ -65,8 +65,8 @@ public class StockItemComponentModel implements ItemRender.IItemModel {
                 .scale(scale, scale, scale)
                 .translate(-center.x, -center.y, -center.z);
 
-        try (ModelRenderer.Binding vbo = ModelRenderer.getRendererFor(stockModel.model).bind(state)) {
-            vbo.enqueueOpaque(groups);
+        try (OBJRender.Binding vbo = stockModel.model.binder().bind(state)) {
+            vbo.draw(groups);
         }
     }
 }

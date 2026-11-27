@@ -14,23 +14,22 @@ import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.ModCore;
 import cam72cam.mod.item.ItemStack;
 import cam72cam.mod.math.Vec3d;
-import cam72cam.mod.model.common.ModelLoader;
-import cam72cam.mod.model.common.mesh.Model;
+import cam72cam.mod.model.obj.OBJModel;
 import cam72cam.mod.render.ItemRender;
 import cam72cam.mod.render.StandardModel;
-import cam72cam.mod.render.common.ModelRenderer;
+import cam72cam.mod.render.obj.OBJRender;
 import cam72cam.mod.render.opengl.RenderState;
 import cam72cam.mod.resource.Identifier;
 import cam72cam.mod.world.World;
 
 public class TrackExchangerModel implements ItemRender.IItemModel {
-	private static Model MODEL;
+	private static OBJModel MODEL;
 
 	@Override
 	public StandardModel getModel(World world, ItemStack stack) {
 		if(MODEL == null){
 			try {
-				MODEL = ModelLoader.load(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"));
+				MODEL = new OBJModel(new Identifier("immersiverailroading:models/item/track_exchanger/track_exchanger.obj"), 0, null);
 			} catch (Exception e) {
 				ModCore.catching(e);
 			}
@@ -78,8 +77,8 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 			}
 		}
 
-		try (ModelRenderer.Binding bound = ModelRenderer.getRendererFor(MODEL).bind(state)) {
-			bound.enqueueOpaque();
+		try (OBJRender.Binding vbo = MODEL.binder().bind(state)) {
+			vbo.draw();
 		}
 
 		state.lighting(false);
