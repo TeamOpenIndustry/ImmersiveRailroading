@@ -389,7 +389,7 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	
 	public final void mapTrain(EntityCoupleableRollingStock prev, boolean direction, boolean followDisengaged, BiConsumer<EntityCoupleableRollingStock, Boolean> fn) {
 		for (DirectionalStock stock : getDirectionalTrain(followDisengaged)) {
-			fn.accept(stock.stock, stock.direction);
+			fn.accept(stock.stock(), stock.direction());
 		}
 	}
 
@@ -405,8 +405,8 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		Function<DirectionalStock, DirectionalStock> next = (DirectionalStock current) -> {
 			for (CouplerType coupler : CouplerType.values()) {
-				EntityCoupleableRollingStock stock = current.stock;
-				boolean direction = current.direction;
+				EntityCoupleableRollingStock stock = current.stock();
+				boolean direction = current.direction();
 				
 				if (stock.getCoupledUUID(coupler) == null) {
 					continue;
@@ -438,14 +438,14 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 		
 		
 		DirectionalStock start = new DirectionalStock(null, this, true);
-		trainMap.add(start.stock.getUUID());
+		trainMap.add(start.stock().getUUID());
 		trainList.add(start);
 		
 		for (int i = 0; i < 2; i ++) {
 			// Will fire for both front and back
 			
 			for (DirectionalStock current = next.apply(start); current != null; current = next.apply(current)) {
-				trainMap.add(current.stock.getUUID());
+				trainMap.add(current.stock().getUUID());
 				trainList.add(current);
 			}
 		}
