@@ -17,6 +17,8 @@ import cam72cam.immersiverailroading.model.part.Door;
 import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.BlockEntityTrackTickable;
 import cam72cam.immersiverailroading.thirdparty.trackapi.IRPathingData;
+import cam72cam.immersiverailroading.track.graph.TrackMultiGeometrySegment;
+import cam72cam.immersiverailroading.track.graph.WorldData;
 import cam72cam.immersiverailroading.util.*;
 import cam72cam.mod.block.IRedstoneProvider;
 import cam72cam.mod.entity.Player;
@@ -274,6 +276,13 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	public void setParent(Vec3i pos) {
 		this.parent = pos.subtract(this.getPos());
 	}
+
+	public Vec3i getParentWithoutDamage() {
+		if (parent == null) {
+			return null;
+		}
+		return parentCache.get(parent);
+	}
 	
 	public boolean isFlexible() {
 		return this.flexible || !(this instanceof TileRail);
@@ -384,6 +393,17 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	}
 	public TagCompound getReplaced() {
 		return replaced;
+	}
+
+	public TileRail getParentTileWithoutDamage() {
+		if (this.getParentWithoutDamage() == null) {
+			return null;
+		}
+		TileRail te = getWorld().getBlockEntity(this.getParent(), TileRail.class);
+		if (te == null || te.info == null) {
+			return null;
+		}
+		return te;
 	}
 
 	public TileRailBase getReplacedTile() {
@@ -944,6 +964,9 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 
 		if (tileSwitch != null && newForcedState != tileSwitch.info.switchForced) {
 			tileSwitch.info =  tileSwitch.info.with(b -> b.switchForced = newForcedState);
+			long currentTime = System.currentTimeMillis();
+			tileSwitch.setBuildTimeMs(currentTime);
+			WorldData.get(getWorld()).updateSwitchState(tileSwitch.getPos(), newForcedState, false, currentTime);
 		}
 	}
 
@@ -973,7 +996,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 		}
 
 		if (cur instanceof TileRail curTR) {
-            if (curTR.info.settings.type.equals(TrackItems.SWITCH)) {
+            if (curTR.info.settings.type.isSwitch()) {
 				return curTR;
 			}
 		}
@@ -1071,6 +1094,16 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 					tileRail.info = info;
 					tileRail.markAllDirty();
 				}
+
+				tileRail.setBuildTimeMs(System.currentTimeMillis());
+				TrackMultiGeometrySegment trackBlock = new TrackMultiGeometrySegment(tileRail, getWorld());
+				WorldData.get(getWorld()).setTrackBlock(tileRail.getPos(), trackBlock);
+				if(tileRail.info.switchBranchIndex > 1) { // also update parent if is switch
+					TileRail switchParent = tileRail.getParentTileWithoutDamage();
+					if(switchParent != null && switchParent.subInfos != null && !switchParent.subInfos.isEmpty()) {
+						switchParent.subInfos.set(tileRail.info.switchBranchIndex - 2, tileRail.info);
+					}
+				}
 			}
 			return true;
 		}
@@ -1103,19 +1136,20 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 	@Override
 	public ItemStack onPick() {
 		ItemStack stack = new ItemStack(IRItems.ITEM_TRACK_BLUEPRINT, 1);
-		ItemTrackBlueprint.Data.writeTo(stack, 0, true);
+		ItemTrackBlueprint.Data.writeTo(stack, 0, true, 0);
 
 		TileRail parent = this.getParentTile();
 		if (parent == null) {
 			return stack;
 		}
 
-		if(parent.info.settings.rollAndOffsetInfo != null) {
+		if (parent.info.settings.rollAndOffsetInfo != null) { // newer data
 			parent.info.settings.with(mutable -> {
 				mutable.rollAndOffsetInfo = mutable.pickRollAndOffsetInfo;
 				mutable.type = mutable.pickType;
 			}).write(stack);
-		}else {
+			if(parent.info.multiSwitchInfo != null) parent.info.multiSwitchInfo.write(stack);
+		} else { // older data
 			parent.info.settings.with(mutable -> mutable.type = mutable.pickType).write(stack);
 		}
 
@@ -1143,6 +1177,7 @@ public class TileRailBase extends BlockEntityTrackTickable implements IRedstoneP
 				}
 				SwitchState state = SwitchUtil.getSwitchState(switchTile);
 				if (state != SwitchState.NONE) {
+					state = SwitchUtil.getSwitchState(switchTile);
 					switchTile.setSwitchState(state);
 				}
 			}

@@ -22,6 +22,7 @@ base.archivesName = archive_base_name
 
 dependencies {
     umcShade 'de.poizy:luaj-ir:3.1.1'
+    umcShade 'at.yawk.lz4:lz4-java:1.11.2'
 }
 
 apply from: 'ImmersiveRailroadingIntegration/dependencies.gradle'

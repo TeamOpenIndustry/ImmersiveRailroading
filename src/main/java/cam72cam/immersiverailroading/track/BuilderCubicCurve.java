@@ -61,7 +61,7 @@ public class BuilderCubicCurve extends BuilderIterator {
 					if(subRollAndOffsetInfos != null) {
 						b.rollAndOffsetInfo = subRollAndOffsetInfos.get(finalI);
 					}
-				}), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0);
+				}), startPos, endPos, SwitchState.NONE, SwitchState.NONE, 0, info.multiSwitchInfo);
 
 				BuilderCubicCurve subBuilder = new BuilderCubicCurve(subInfo, world, sPos);
 				if (!subBuilders.isEmpty()) {

@@ -74,7 +74,7 @@ public class IRCommand extends Command {
 			}
 			return true;
 		}
-		
+
 		if (args[0].equals("debug")) {
 			if (player.isPresent()) {
 				List<EntityRollingStock> ents = player.get().getWorld().getEntities(EntityRollingStock.class);

@@ -1,4 +1,4 @@
-package cam72cam.immersiverailroading.gui.util;
+package cam72cam.immersiverailroading.render.util;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.track.CubicCurve;
@@ -11,14 +11,14 @@ import cam72cam.mod.resource.Identifier;
 
 import java.util.List;
 
-public class BezierRenderer {
+public class FlatCurveRenderer {
     private final RenderState state;
     private final List<CubicCurve> curves;
     private static final float LINE_WIDTH = 1f;
-    private static final Identifier lineImg = new Identifier(ImmersiveRailroading.MODID, "textures/line.png");
-    private static final Identifier pointImg = new Identifier(ImmersiveRailroading.MODID, "textures/point.png");
+    public static final Identifier lineImg = new Identifier(ImmersiveRailroading.MODID, "textures/line.png");
+    public static final Identifier pointImg = new Identifier(ImmersiveRailroading.MODID, "textures/point.png");
 
-    public BezierRenderer(RenderState state, List<CubicCurve> curves) {
+    public FlatCurveRenderer(RenderState state, List<CubicCurve> curves) {
         this.state = state;
         this.curves = curves;
     }

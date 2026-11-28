@@ -1,8 +1,8 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.ImmersiveRailroading;
-import cam72cam.immersiverailroading.gui.util.BezierRenderer;
-import cam72cam.immersiverailroading.gui.util.Color;
+import cam72cam.immersiverailroading.render.util.FlatCurveRenderer;
+import cam72cam.immersiverailroading.render.util.Color;
 import cam72cam.immersiverailroading.items.ItemTrackBlueprint;
 import cam72cam.immersiverailroading.items.nbt.RailSettings;
 import cam72cam.immersiverailroading.library.GuiText;
@@ -12,6 +12,7 @@ import cam72cam.immersiverailroading.net.ItemRailUpdatePacket;
 import cam72cam.immersiverailroading.tile.TileRailPreview;
 import cam72cam.immersiverailroading.track.BuilderBase;
 import cam72cam.immersiverailroading.track.VecYPR;
+import cam72cam.immersiverailroading.util.MultiSwitchInfo;
 import cam72cam.immersiverailroading.util.PlacementInfo;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.immersiverailroading.util.RollAndOffsetInfo;
@@ -25,11 +26,13 @@ import cam72cam.mod.render.opengl.RenderState;
 import util.Matrix4;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 //Advanced settings for the track
 public class TrackExtraGui implements IScreen {
     private int targetGuiOpenType;
     private boolean unlockGuiTurnDegree;
+    private int multiSwitchBranchSelected;
 
     private double rollMax;
     private double yOffsetMax;
@@ -43,6 +46,8 @@ public class TrackExtraGui implements IScreen {
 
     private TileRailPreview te;
     private RailSettings.Mutable settings;
+    private MultiSwitchInfo.Mutable multiSwitchInfo;
+    private RailSettings.Mutable selectedWaySettings;
     private RollAndOffsetInfo.Mutable rollAndOffsetInfoCache;
 
     private boolean edited;
@@ -91,7 +96,7 @@ public class TrackExtraGui implements IScreen {
     private CheckBox degreeModeCB;
     private CheckBox offsetVertByNormalCB;
 
-//    private Button wayCircleButton;
+    //    private Button wayCircleButton;
     private Button TrackGuiButton;
     public TrackExtraGui() {
         this(MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY), null);
@@ -102,13 +107,23 @@ public class TrackExtraGui implements IScreen {
     private TrackExtraGui(ItemStack stack, TileRailPreview te) {
         stack = stack.copy();
         this.settings = RailSettings.from(stack).mutable();
+        this.multiSwitchInfo = MultiSwitchInfo.from(stack).mutable();
         ItemTrackBlueprint.Data data = new ItemTrackBlueprint.Data(stack);
         this.targetGuiOpenType = data.guiOpenType;
         this.unlockGuiTurnDegree = data.unlockGuiTurnDegree;
+        this.multiSwitchBranchSelected = data.multiSwitchBranchSelected;
         this.te = te;
 
-        if(this.te != null) {//TODO:Switch and multiSwitch support
-            referenceInfo = te.getRailRenderInfo();
+        if (multiSwitchBranchSelected < 0) multiSwitchBranchSelected = 0;
+        if (multiSwitchBranchSelected > multiSwitchInfo.multiSwitchBranches.size()) {
+            multiSwitchBranchSelected = multiSwitchInfo.multiSwitchBranches.size();
+        }
+        this.selectedWaySettings = multiSwitchBranchSelected == 0
+                ? settings
+                : multiSwitchInfo.multiSwitchBranches.get(multiSwitchBranchSelected - 1).settings().mutable();
+
+        if(this.te != null) {
+            referenceInfo = te.getRailInfo();
         }else {
             referenceInfo = new RailInfo(stack, new PlacementInfo(Vec3d.ZERO, TrackDirection.LEFT, MinecraftClient.getPlayer().getRotationYawHead(), null), null);
         }
@@ -116,8 +131,8 @@ public class TrackExtraGui implements IScreen {
         referenceRenderData = referenceInfoBuilder.getRenderData();
         length = referenceRenderData.size() * referenceInfo.settings.gauge.scale() * referenceInfo.getTrackModel().spacing;
 
-        if(settings.pickRollAndOffsetInfo != null) {
-            rollAndOffsetInfoCache = settings.rollAndOffsetInfo.mutable();
+        if(selectedWaySettings.pickRollAndOffsetInfo != null) {
+            rollAndOffsetInfoCache = selectedWaySettings.rollAndOffsetInfo.mutable();
         } else {
             rollAndOffsetInfoCache = RollAndOffsetInfo.getDefault().mutable();
         }
@@ -130,9 +145,9 @@ public class TrackExtraGui implements IScreen {
         yOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
         zOffsetMax = 1;//Unit:meter(1435mm), if in gauge X mm, it will be scaled to rollMax * X / 1435 meters
 
-        curveColor = Color.CHARTREUSE;      // GREEN curve
+        curveColor = Color.LIME;      // GREEN curve
         pointColor = Color.RED;      // RED point
-        handlePointColor = Color.BLUE;      // BLUE handle point
+        handlePointColor = Color.CYAN;      // BLUE handle point
         handleLineColor = Color.MAGENTA;      // MAGENTA handle line
         arrowColor = Color.YELLOW;      //YELLOW arrow point
 
@@ -140,6 +155,45 @@ public class TrackExtraGui implements IScreen {
         editLeft = true;
     }
 
+    private void applyLocal(Consumer<RailSettings.Mutable> mod) {
+        if (multiSwitchBranchSelected == 0) {
+            mod.accept(settings);
+        } else {
+            mod.accept(selectedWaySettings);
+            syncMultiSwitchInfo();
+        }
+    }
+
+    private void syncMultiSwitchInfo() {
+        if (multiSwitchBranchSelected <= 0) return;
+        int idx = multiSwitchBranchSelected - 1;
+        if (idx >= multiSwitchInfo.multiSwitchBranches.size()) return;
+        RailSettings merged = selectedWaySettings.immutable().with(m -> {
+            m.gauge = settings.gauge;
+            m.track = settings.track;
+            m.railBed = settings.railBed;
+            m.railBedFill = settings.railBedFill;
+            m.isPreview = settings.isPreview;
+            m.isGradeCrossing = settings.isGradeCrossing;
+        });
+        multiSwitchInfo.multiSwitchBranches.set(idx,
+                multiSwitchInfo.multiSwitchBranches.get(idx).with(m -> m.settings = merged));
+    }
+
+    private void propagateGlobalsToBranches() {
+        for (int i = 0; i < multiSwitchInfo.multiSwitchBranches.size(); i++) {
+            var b = multiSwitchInfo.multiSwitchBranches.get(i);
+            var updated = b.with(m -> m.settings = m.settings.with(s -> {
+                s.gauge = settings.gauge;
+                s.track = settings.track;
+                s.railBed = settings.railBed;
+                s.railBedFill = settings.railBedFill;
+                s.isPreview = settings.isPreview;
+                s.isGradeCrossing = settings.isGradeCrossing;
+            }));
+            multiSwitchInfo.multiSwitchBranches.set(i, updated);
+        }
+    }
 
     public void init(IScreenBuilder screen) {
         int width = 200;
@@ -170,28 +224,28 @@ public class TrackExtraGui implements IScreen {
 
         //Right panel
         insertOrDeletePointButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width, ytop, 50, height, "",
-                                               (_, _) -> {
-                                                   if(rollAndOffsetInfoCache.findPhysicalIndex(format(ArcLenFactorSlider.getValue())) == -1) {//insert
-                                                       if(rollAndOffsetInfoCache.tryInsertBySubSplit(format(ArcLenFactorSlider.getValue()))) {//TODO: this is the reason why control point number is limited to 101, should we improve this?
-                                                           edited = true;
-                                                           updateSliderRelated();
-                                                       }
-                                                   } else {//delete
-                                                       edited = true;
-                                                       rollAndOffsetInfoCache.tryDeleteDirectly(format(ArcLenFactorSlider.getValue()));
-                                                       updateSliderRelated();
-                                                   }
-                                               });
+                (_, _) -> {
+                    if(rollAndOffsetInfoCache.findPhysicalIndex(format(ArcLenFactorSlider.getValue())) == -1) {//insert
+                        if(rollAndOffsetInfoCache.tryInsertBySubSplit(format(ArcLenFactorSlider.getValue()))) {//TODO: this is the reason why control point number is limited to 101, should we improve this?
+                            edited = true;
+                            updateSliderRelated();
+                        }
+                    } else {//delete
+                        edited = true;
+                        rollAndOffsetInfoCache.tryDeleteDirectly(format(ArcLenFactorSlider.getValue()));
+                        updateSliderRelated();
+                    }
+                });
 
         resetAllButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50, ytop, 50, height,
-                                    GuiText.TRACK_EXTRA_RESET.toString(), (_, _) -> {
+                GuiText.TRACK_EXTRA_RESET.toString(), (_, _) -> {
             edited = true;
             rollAndOffsetInfoCache.resetAll();
             updateSliderRelated();
         });
 
         editLeftButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 2, ytop, 50, height,
-                                    GuiText.TRACK_EXTRA_EDIT_LEFT.toString(), (_, self) -> {
+                GuiText.TRACK_EXTRA_EDIT_LEFT.toString(), (_, self) -> {
             editLeft = !editLeft;
             if(editLeft) {
                 self.setText(GuiText.TRACK_EXTRA_EDIT_LEFT.toString());
@@ -202,7 +256,7 @@ public class TrackExtraGui implements IScreen {
         });
 
         TrackGuiButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 50 * 3, ytop, 50, height,
-                                    GuiText.TRACK_EXTRA_TO_MAIN.toString(), (_, _) -> {
+                GuiText.TRACK_EXTRA_TO_MAIN.toString(), (_, _) -> {
             targetGuiOpenType = 0;
             onClose();
             if (te != null) {
@@ -216,37 +270,37 @@ public class TrackExtraGui implements IScreen {
         ytop = -GUIHelpers.getScreenHeight() / 4;
 
         rollEffectTileCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 1,
-                                        GuiText.SELECTOR_ROLL_EFFECT_TILE.toString(), rollAndOffsetInfoCache.rollEffectTile,
-                                        (_, self) -> {
-                                            edited = true;
-                                            rollAndOffsetInfoCache.rollEffectTile = self.isChecked();
-                                            if(!rollAndOffsetInfoCache.rollEffectTile) {
-                                                rollAndOffsetInfoCache.railBlockNormal = false;
-                                                railBlockNormalCB.setChecked(false);
-                                            }
-                                        });
+                GuiText.SELECTOR_ROLL_EFFECT_TILE.toString(), rollAndOffsetInfoCache.rollEffectTile,
+                (_, self) -> {
+                    edited = true;
+                    rollAndOffsetInfoCache.rollEffectTile = self.isChecked();
+                    if(!rollAndOffsetInfoCache.rollEffectTile) {
+                        rollAndOffsetInfoCache.railBlockNormal = false;
+                        railBlockNormalCB.setChecked(false);
+                    }
+                });
 
         railBlockNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 65, ytop + 1,
-                                  GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.railBlockNormal,
-                                  (_, self) -> {
-                                      if(rollAndOffsetInfoCache.rollEffectTile) {
-                                          edited = true;
-                                          rollAndOffsetInfoCache.railBlockNormal = self.isChecked();
-                                      } else if(rollAndOffsetInfoCache.railBlockNormal){
-                                          edited = true;
-                                          rollAndOffsetInfoCache.railBlockNormal = false;
-                                          self.setChecked(false);
-                                      } else {
-                                          self.setChecked(false);
-                                      }
-                                  });
+                GuiText.SELECTOR_TILE_TILT.toString(), rollAndOffsetInfoCache.railBlockNormal,
+                (_, self) -> {
+                    if(rollAndOffsetInfoCache.rollEffectTile) {
+                        edited = true;
+                        rollAndOffsetInfoCache.railBlockNormal = self.isChecked();
+                    } else if(rollAndOffsetInfoCache.railBlockNormal){
+                        edited = true;
+                        rollAndOffsetInfoCache.railBlockNormal = false;
+                        self.setChecked(false);
+                    } else {
+                        self.setChecked(false);
+                    }
+                });
 
         degreeModeCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 2, ytop + 1,
-                                           GuiText.SELECTOR_DEGREE_MODE.toString(), rollAndOffsetInfoCache.degreeMode,
-                                           (_, self) -> {
-                                               edited = true;
-                                               rollAndOffsetInfoCache.degreeMode = self.isChecked();
-                                           });
+                GuiText.SELECTOR_DEGREE_MODE.toString(), rollAndOffsetInfoCache.degreeMode,
+                (_, self) -> {
+                    edited = true;
+                    rollAndOffsetInfoCache.degreeMode = self.isChecked();
+                });
 
         offsetVertByNormalCB = new CheckBox(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 - 75, ytop + 12,
                 GuiText.SELECTOR_OFFSET_VERT_BY_NORMAL_MODE.toString(), rollAndOffsetInfoCache.offsetVertByNormal,
@@ -258,7 +312,7 @@ public class TrackExtraGui implements IScreen {
 //        wayCircleButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 - 85 , ytop, 85, height, "Selected Way: 0"){};//need multiSwitch branch merging
 
         rollOffsetTypeButton = new Button(screen, GUIHelpers.getScreenWidth() / 2 - width + 30 + 85, ytop, 85, height,
-                                      rollAndOffsetInfoCache.rollOffsetType.toString(), (hand, self) -> {
+                rollAndOffsetInfoCache.rollOffsetType.toString(), (hand, self) -> {
             edited = true;
 
             int order = rollAndOffsetInfoCache.rollOffsetType.getOrder();
@@ -534,27 +588,30 @@ public class TrackExtraGui implements IScreen {
     @Override
     public void onClose() {
         if(edited) {
-            settings = settings.immutable().with(mutable -> {
-                mutable.rollAndOffsetInfo = rollAndOffsetInfoCache.immutable();
-                mutable.pickRollAndOffsetInfo = rollAndOffsetInfoCache.immutable();
-            }).mutable();
+            applyLocal(m -> {
+                m.rollAndOffsetInfo = rollAndOffsetInfoCache.immutable();
+                m.pickRollAndOffsetInfo = rollAndOffsetInfoCache.immutable();
+            });
         }
+        propagateGlobalsToBranches();
 
         if (this.te != null) {
-            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
+            new ItemRailUpdatePacket(te.getPos(), settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
 
             //Also update client Item to update Rail information
             ItemStack clientStack = te.getItem();
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
+            multiSwitchInfo.immutable().write(clientStack);
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
             te.setItem(clientStack, MinecraftClient.getPlayer());
         } else {
-            new ItemRailUpdatePacket(settings.immutable(), targetGuiOpenType, unlockGuiTurnDegree).sendToServer();
+            new ItemRailUpdatePacket(settings.immutable(), multiSwitchInfo.immutable(), targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected).sendToServer();
 
             //Also update client Item to update Rail information
             ItemStack clientStack = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
             settings.immutable().write(clientStack);
-            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree);
+            multiSwitchInfo.immutable().write(clientStack);
+            ItemTrackBlueprint.Data.writeTo(clientStack, targetGuiOpenType, unlockGuiTurnDegree, multiSwitchBranchSelected);
             MinecraftClient.getPlayer().setHeldItem(Player.Hand.PRIMARY, clientStack);
         }
     }
@@ -579,21 +636,21 @@ public class TrackExtraGui implements IScreen {
         //If choose HIGH or LOW, half of the the roll graph will flip, need to flip it on graph?
         //roll Graph
         state.translate(5, height + 5 + height * 1.5, 0);
-        BezierRenderer rollGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
+        FlatCurveRenderer rollGraph = new FlatCurveRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.ROLL, true));
         rollGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, rollYScale, 1, 0.05f, 0.05f, 0);
         rollGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, rollYScale);
         rollGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getRawRoll(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, rollYScale);
 
         //yOffset Graph
         state.translate(0, height * 3 + 5, 0);
-        BezierRenderer yOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
+        FlatCurveRenderer yOffsetGraph = new FlatCurveRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Y_OFFSET, true));
         yOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, yOffsetYScale, 1, 0.05f, 0.05f, 0);
         yOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, yOffsetYScale);
         yOffsetGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getYOffset(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, yOffsetYScale);
 
         //zOffset Graph
         state.translate(0, height * 3 + 5, 0);
-        BezierRenderer zOffsetGraph = new BezierRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
+        FlatCurveRenderer zOffsetGraph = new FlatCurveRenderer(state, rollAndOffsetInfoCache.toCurves(RollAndOffsetInfo.ExtraInfoType.Z_OFFSET, true));
         zOffsetGraph.drawDashLine(Vec3d.ZERO, new Vec3d(1, 0, 0), Color.WHITE, xScale, zOffsetYScale, 1, 0.05f, 0.05f, 0);
         zOffsetGraph.drawBeziers(curveColor, pointColor, handlePointColor, handleLineColor, 100, xScale, zOffsetYScale);
         zOffsetGraph.drawArrow(new Vec3d(format(ArcLenFactorSlider.getValue()), immutable.getZOffset(format(ArcLenFactorSlider.getValue())), 0), Color.YELLOW, 2.4, xScale, zOffsetYScale);
@@ -609,8 +666,8 @@ public class TrackExtraGui implements IScreen {
             }
         }
         for (TextField tf : List.of(rollValueInput, rollSlopeInput, rollHandleXLenInput,
-                                     yOffsetValueInput, yOffsetSlopeInput, yOffsetHandleXLenInput,
-                                     zOffsetValueInput, zOffsetSlopeInput, zOffsetHandleXLenInput)) {
+                yOffsetValueInput, yOffsetSlopeInput, yOffsetHandleXLenInput,
+                zOffsetValueInput, zOffsetSlopeInput, zOffsetHandleXLenInput)) {
             if (tf != null) tf.setText("");
         }
         updateAllCurveInfoDisplay();
@@ -661,4 +718,4 @@ public class TrackExtraGui implements IScreen {
         // Cast precision to 0.01
         return Math.round(value * 100.0) / 100.0;
     }
- }
+}

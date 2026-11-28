@@ -11,6 +11,7 @@ import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.MinecraftClient;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.item.ItemStack;
+import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.render.StandardModel;
 import cam72cam.mod.render.cutter.BlockCutHelper;
 import cam72cam.mod.math.Plane;
@@ -33,22 +34,39 @@ public class RailBaseModel {
 
 		StandardModel model = new StandardModel();
 		if (te instanceof TileRail && ((TileRail) te).info != null) {
-			model.addCustom((state, pt) -> {
-				RailInfo info = ((TileRail) te).info;
-                if (info.settings.type == TrackItems.SWITCH) {
-                    //TODO render switch and don't render turn
-                    info = info.withSettings(b -> b.type = TrackItems.STRAIGHT);
-                }
-                if (info.settings.type.isTable()) {
-					ItemStack held = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
-                	if (held.is(IRItems.ITEM_TRACK_BLUEPRINT) || held.is(IRItems.ITEM_GOLDEN_SPIKE)) {
-						info = info.with(b -> b.itemHeld = true);
+			if(((TileRail) te).info.switchBranchIndex <= 1) {
+				model.addCustom((state, pt) -> {
+					RailInfo info = ((TileRail) te).info;
+					if (info.settings.type == TrackItems.SWITCH) {
+						info = info.withSettings(b -> b.type = TrackItems.STRAIGHT);
+					} else if (info.settings.type == TrackItems.MULTISWITCH) {
+						info = info.withSettings(b -> b.type = ((TileRail) te).info.multiSwitchInfo.realShapeType());
+					} else if (info.settings.type.isTable()) {
+						ItemStack held = MinecraftClient.getPlayer().getHeldItem(Player.Hand.PRIMARY);
+						if (held.is(IRItems.ITEM_TRACK_BLUEPRINT) || held.is(IRItems.ITEM_GOLDEN_SPIKE)) {
+							info = info.with(b -> b.itemHeld = true);
+						}
 					}
-
+					RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition));
+				});
+				if (((TileRail) te).info.settings.type == TrackItems.SWITCH && ((TileRail) te).subInfos != null && !((TileRail) te).subInfos.isEmpty()) {
+					model.addCustom((state, pt) -> {
+						RailInfo info = ((TileRail) te).subInfos.getFirst();
+						Vec3i delta = ((TileRail) te).subInfoPos.getFirst().subtract(te.getPos());
+						RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition.add(delta)));
+					});
 				}
-
-				RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition));
-			});
+				if (((TileRail) te).info.settings.type == TrackItems.MULTISWITCH && ((TileRail) te).subInfos != null && !((TileRail) te).subInfos.isEmpty()) {
+					for(int i = 0; i <  ((TileRail) te).subInfos.size(); i++) {
+						int finlalI = i;
+						model.addCustom((state, pt) -> {
+							RailInfo info = ((TileRail) te).subInfos.get(finlalI);
+							Vec3i delta = ((TileRail) te).subInfoPos.get(finlalI).subtract(te.getPos());
+							RailRender.get(info).renderRailModel(state.translate(info.placementInfo.placementPosition.add(delta)));
+						});
+					}
+				}
+			}
 		}
 
 		Matrix4 bedblockMatrix4;

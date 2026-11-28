@@ -81,8 +81,15 @@ public class VecUtil {
 		return fromWrongYaw(pos.x, rotationYaw).add(fromWrongYaw(pos.z, rotationYaw + 90).add(0, pos.y, 0));
 	}
 
-	public static Vec3d fromWrongYawPitch(float distance, float rotationYaw, float rotationPitch) {
-		return fromWrongYaw(distance, rotationYaw).add(0, Math.tan(Math.toRadians(rotationPitch)) * distance, 0);
+	public static Vec3d fromWrongYawPitch(double distance, float rotationYaw, float rotationPitch) {
+		double yawRad = Math.toRadians(rotationYaw);
+		double pitchRad = Math.toRadians(rotationPitch);
+		double horizontalDistance = Math.cos(pitchRad) * distance;
+		return new Vec3d(
+				-Math.sin(yawRad) * horizontalDistance,
+				Math.sin(pitchRad) * distance,
+				Math.cos(yawRad) * horizontalDistance
+		);
 	}
 	
 	public static Vec3d between(Vec3d front, Vec3d rear) {

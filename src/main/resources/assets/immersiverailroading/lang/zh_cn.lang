@@ -158,6 +158,9 @@ gui.immersiverailroading:track.rail_bed=道床：%s
 gui.immersiverailroading:track.rail_bed_fill=道床填方：%s
 gui.immersiverailroading:track.place_blueprint_true=放置轨道蓝图
 gui.immersiverailroading:track.place_blueprint_false=直接放置轨道
+gui.immersiverailroading:track.current_switch_branch=分支：%s/%s
+gui.immersiverailroading:track.insert_switch_branch=插入
+gui.immersiverailroading:track.remove_switch_branch=删除
 
 gui.immersiverailroading:track.arc_len_factor=曲线位置百分比：%s
 gui.immersiverailroading:track.roll_offset_type=超高垂直偏移方式
@@ -196,6 +199,9 @@ gui.immersiverailroading:label.excluded_tag=排除的标签：
 gui.immersiverailroading:overlay.on=开
 gui.immersiverailroading:overlay.off=关
 
+gui.immersiverailroading:global_track_map.switchstate.byblock=通过方块: %s
+gui.immersiverailroading:global_track_map.switchstate.offline=离线: %s
+
 immersiverailroading:gauge.brunel=布鲁内尔轨
 immersiverailroading:gauge.standard=标准轨
 immersiverailroading:gauge.narrow=窄轨
@@ -216,6 +222,7 @@ track.immersiverailroading:class.cubicparabola=缓和曲线
 track.immersiverailroading:class.turntable=转车台
 track.immersiverailroading:class.transfertable=移车台
 track.immersiverailroading:class.switch=道岔
+track.immersiverailroading:class.multiswitch=多路道岔
 track.immersiverailroading:class.custom=自定义曲线
 
 track.immersiverailroading:position.fixed=对齐方块
@@ -358,6 +365,9 @@ immersiverailroading:redstone_mode.disabled=停用
 immersiverailroading:switch_state.none=无
 immersiverailroading:switch_state.straight=直向
 immersiverailroading:switch_state.turn=侧向
+immersiverailroading:switch_state.turn_branch2=侧向2
+immersiverailroading:switch_state.turn_branch3=侧向3
+immersiverailroading:switch_state.turn_branch4=侧向4
 
 key.categories.immersiverailroading=沉浸铁路
 ir_keys.increase_throttle=增大节流阀
@@ -377,6 +387,7 @@ ir_keys.bell=鸣警铃
 ir_keys.dead_mans_switch=失能开关
 ir_keys.start_stop_engine=启动/停止发动机
 ir_keys.config=配置菜单
+ir_keys.global_map=世界地图
 
 # Default pack's train name. Translation is optional.
 immersiverailroading:entity.locomotives.a1_peppercorn=A1 Peppercorn

@@ -62,7 +62,7 @@ public class TrackExchangerModel implements ItemRender.IItemModel {
 				null,
 				SwitchState.NONE,
 				SwitchState.NONE,
-				0);
+				0, null);
 		RailInfo lookInfo = null;
 		if (MinecraftClient.getBlockMouseOver() != null) {
 			TileRailBase railSlave = world.getBlockEntity(MinecraftClient.getBlockMouseOver(), TileRailBase.class);

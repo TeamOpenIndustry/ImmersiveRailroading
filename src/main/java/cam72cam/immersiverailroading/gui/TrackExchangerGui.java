@@ -208,7 +208,7 @@ public class TrackExchangerGui implements IScreen {
 						rendered.type = TrackItems.STRAIGHT;
 					}),
 					new PlacementInfo(new Vec3d(0.5, 0, 0.5), TrackDirection.NONE, 0, null),
-					null, SwitchState.NONE, SwitchState.NONE, 0, true);
+					null, SwitchState.NONE, SwitchState.NONE, 0, true, null);
 
 			double scale = GUIHelpers.getScreenWidth() / 15.0 * zoom;
 

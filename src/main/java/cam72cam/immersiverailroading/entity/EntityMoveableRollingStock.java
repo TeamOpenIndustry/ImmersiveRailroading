@@ -58,6 +58,8 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 
     public boolean newlyPlaced = false;
 
+    public long onMovingTableUntilTick = 0;
+
     @Override
     public void load(TagCompound data) {
         super.load(data);
@@ -302,14 +304,14 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
             this.clearPositionCache();
         }
 
-        if (Math.abs(this.getCurrentSpeed().metric()) > 1) {
+        if (isAddedToChunk() && Math.abs(this.getCurrentSpeed().metric()) > 1) {
 			List<Entity> entitiesWithin = getWorld().getEntities((Entity entity) -> (entity.isLiving() || entity.isPlayer()) && this.getCollision().intersects(entity.getBounds()), Entity.class);
 			for (Entity entity : entitiesWithin) {
 				if (entity instanceof EntityMoveableRollingStock) {
 					// rolling stock collisions handled by looking at the front and
 					// rear coupler offsets
 					continue;
-				} 
+				}
 	
 				if (entity.getRiding() instanceof EntityMoveableRollingStock) {
 					// Don't apply bb to passengers
@@ -347,31 +349,33 @@ public abstract class EntityMoveableRollingStock extends EntityRidableRollingSto
 				    entity.directDamage(isDark ? DamageTypes.HIT_IN_DARKNESS : DamageTypes.HIT, speedDamage);
 				}
 			}
-	
-			// Riding on top of cars
-			final RealBB bb = this.getCollision().offset(new Vec3d(0, gauge.scale()*2, 0));
-            List<Entity> entitiesAbove = getWorld().getEntities((Entity entity) -> (entity.isLiving() || entity.isPlayer()) && bb.intersects(entity.getBounds()), Entity.class);
-			for (Entity entity : entitiesAbove) {
-				if (entity instanceof EntityMoveableRollingStock) {
-					continue;
-				}
-				if (entity.getRiding() instanceof EntityMoveableRollingStock) {
-					continue;
-				}
-	
-				// Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
-				// We need to do a forward lookup
-				if (!bb.intersects(entity.getBounds())) {
-					// miss
-					continue;
-				}
-				
-				//Vec3d pos = entity.getPositionVector();
-				//pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
-				//entity.setPosition(pos.x, pos.y, pos.z);
 
-				entity.setVelocity(this.getVelocity().add(0, entity.getVelocity().y, 0));
-			}
+            if (isAddedToChunk() || Config.ConfigDebug.offlineVehicleLoadChunks) {
+                // Riding on top of cars
+                final RealBB bb = this.getCollision().offset(new Vec3d(0, gauge.scale()*2, 0));
+                List<Entity> entitiesAbove = getWorld().getEntities((Entity entity) -> (entity.isLiving() || entity.isPlayer()) && bb.intersects(entity.getBounds()), Entity.class);
+                for (Entity entity : entitiesAbove) {
+                    if (entity instanceof EntityMoveableRollingStock) {
+                        continue;
+                    }
+                    if (entity.getRiding() instanceof EntityMoveableRollingStock) {
+                        continue;
+                    }
+
+                    // Chunk.getEntitiesOfTypeWithinAABB() does a reverse aabb intersect
+                    // We need to do a forward lookup
+                    if (!bb.intersects(entity.getBounds())) {
+                        // miss
+                        continue;
+                    }
+
+                    //Vec3d pos = entity.getPositionVector();
+                    //pos = pos.addVector(this.motionX, this.motionY, this.motionZ);
+                    //entity.setPosition(pos.x, pos.y, pos.z);
+
+                    entity.setVelocity(this.getVelocity().add(0, entity.getVelocity().y, 0));
+                }
+            }
 	    }
 
         if (getWorld().isServer) {

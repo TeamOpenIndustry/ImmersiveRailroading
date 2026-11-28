@@ -5,6 +5,8 @@ import cam72cam.immersiverailroading.Config.ConfigDamage;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.tile.TileRail;
 import cam72cam.immersiverailroading.tile.TileRailBase;
+import cam72cam.immersiverailroading.track.graph.TrackMultiGeometrySegment;
+import cam72cam.immersiverailroading.track.graph.WorldData;
 import cam72cam.immersiverailroading.util.BlockUtil;
 import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.item.ItemStack;
@@ -67,7 +69,31 @@ public abstract class BuilderBase {
 
 		for (TrackBase track : tracks) {
 			if (!track.isOverTileRail()) {
-				track.placeTrack(true).markDirty();
+
+
+				if(track instanceof TrackRail) {
+					TileRail tileRail = (TileRail) track.placeTrack(true);
+					if(info.settings.type == TrackItems.SWITCH && info.builderBranchBridge != null) {
+						tileRail.subInfos = info.builderBranchBridge;
+						tileRail.subInfoPos = new ArrayList<>();
+						tileRail.subInfoPos.add(tileRail.getPos().add(info.builderBranchPosBridge.getFirst()));
+					}
+					if(info.settings.type == TrackItems.MULTISWITCH && info.builderBranchBridge != null) {
+						tileRail.subInfos = info.builderBranchBridge;
+						tileRail.subInfoPos = new ArrayList<>();
+						for(int i = 0; i < tileRail.subInfos.size(); i++) {
+							tileRail.subInfoPos.add(tileRail.getPos().add(info.builderBranchPosBridge.get(i)));
+						}
+					}
+					tileRail.markDirty();
+					tileRail.setBuildTimeMs(System.currentTimeMillis());
+					WorldData.get(world).setTrackBlock(
+							tileRail.getPos(),
+							new TrackMultiGeometrySegment(tileRail, world)
+					);
+				} else {
+					track.placeTrack(true).markDirty();
+				}
 
 				// TODO: Advanced embankment placer
 				Vec3i bedFillPos = track.getBedFillPos();

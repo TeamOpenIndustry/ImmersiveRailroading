@@ -3,10 +3,15 @@ package cam72cam.immersiverailroading.entity.physics;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
 import cam72cam.immersiverailroading.physics.TickPos;
+import cam72cam.immersiverailroading.track.graph.WorldData;
+import cam72cam.mod.entity.CustomEntity;
+import cam72cam.mod.entity.EntityPool;
+import cam72cam.mod.entity.ModdedEntity;
 import cam72cam.mod.entity.Player;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
@@ -30,12 +35,69 @@ public class Simulation {
     private final List<Vec3i> blocksAlreadyBroken;
     List<EntityCoupleableRollingStock> loaded;
 
+    // How long a coupled car may stay absent before its couplers are released.
+    private static final int MISSING_STATE_GRACE_TICKS = 600;
+    // Partner uuids that have never produced a state in this world -> first tick noticed missing.
+    private static final Map<World, Map<UUID, Long>> UNSEEN_MISSING = new WeakHashMap<>();
+
+    /*
+     * states is transient while positions is serialized.  If the same carrier object survives a
+     * reload and load() replaces positions from NBT, the two lists can end up on different
+     * timelines: matching tickIDs with bodies tens of blocks apart.  Drop the transient states so
+     * they get rebuilt from the persisted positions.
+     */
+    private static boolean statesMatchPositions(EntityCoupleableRollingStock stock) {
+        if (stock.states.isEmpty()) {
+            return true;
+        }
+        if (stock.positions.isEmpty()) {
+            return false;
+        }
+        for (SimulationState state : stock.states) {
+            TickPos matching = null;
+            for (TickPos position : stock.positions) {
+                if (position.tickID == state.tickID) {
+                    matching = position;
+                    break;
+                }
+            }
+            if (matching == null || matching.position == null || state.position == null) {
+                return false;
+            }
+            if (matching.position.distanceToSquared(state.position) > 0.0001) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+     * True when a coupled uuid has never produced a state in this world and was first reported
+     * missing less than MISSING_STATE_GRACE_TICKS ago.  This is the "first pass after a world or
+     * chunk load" case, where the partner entity may not be registered with the world yet.
+     */
+    private boolean unseenWithinGrace(UUID uuid) {
+        Map<UUID, Long> unseen = UNSEEN_MISSING.computeIfAbsent(world, k -> new HashMap<>());
+        long now = world.getTicks();
+        Long first = unseen.get(uuid);
+        if (first == null) {
+            unseen.put(uuid, now);
+            return true;
+        }
+        if (now - first > MISSING_STATE_GRACE_TICKS) {
+            unseen.remove(uuid);
+            return false;
+        }
+        return true;
+    }
 
     public Simulation(World world) {
         calculatedStates = keptStates = restStates = 0;
         long startTimeMs = System.currentTimeMillis();
         this.world = world;
         this.startTickID = ((ServerChronoState)ChronoState.getState(world)).getServerTickID();
+        // Anchor the persisted TickPos timeline of this session before any stock is rebuilt.
+        SimulationState.noteSessionStart(world, startTickID);
 
         stateMaps = new ArrayList<>();
         blocksAlreadyBroken = new ArrayList<>();
@@ -48,9 +110,13 @@ public class Simulation {
             simulateTick(i);
         }
 
-        boolean sendPackets = world.getTicks() % (Config.ConfigDebug.physicsFutureTicks / 2) == 0;
+        long now = world.getTicks();
+        boolean lowFreqDue = now % (Config.ConfigDebug.physicsFutureTicks / 2) == 0;
+        boolean anyMovingTable = loaded != null && loaded.stream()
+                .anyMatch(s -> now < s.onMovingTableUntilTick);
+
+        List<Player> players = (lowFreqDue || anyMovingTable) ? world.getEntities(Player.class) : null;
         double syncDistanceSq = ImmersiveRailroading.ENTITY_SYNC_DISTANCE * ImmersiveRailroading.ENTITY_SYNC_DISTANCE;
-        List<Player> players = sendPackets ? world.getEntities(Player.class) : null;
 
         // Apply new states
         for (EntityCoupleableRollingStock stock : loaded) {
@@ -59,7 +125,13 @@ public class Simulation {
                 state.dirty = false;
             }
             stock.positions = stock.states.stream().map(TickPos::new).collect(Collectors.toList());
-            if (sendPackets && players.stream().anyMatch(player -> player.getPosition().distanceToSquared(stock.getPosition()) < syncDistanceSq)) {
+
+            if (players == null) {
+                continue;
+            }
+            boolean onMovingTable = now < stock.onMovingTableUntilTick;
+            if ((lowFreqDue || onMovingTable)
+                    && players.stream().anyMatch(player -> player.getPosition().distanceToSquared(stock.getPosition()) < syncDistanceSq)) {
                 new MRSSyncPacket(stock, stock.positions).sendToObserving(stock);
             }
         }
@@ -83,25 +155,53 @@ public class Simulation {
             // If this is too slow, we could hang onto the list of stock that is at rest.
             // We should only need to do this when stock is no longer at rest or changes dirty flag
             int lastCount = loaded == null ? 0 : loaded.size();
-            loaded = world.getEntities(EntityCoupleableRollingStock.class);
+            loaded = new ArrayList<>();
+            Set<UUID> pooledUuids = new HashSet<>();
+            for (ModdedEntity m : EntityPool.get(world).getAllEntities()) {
+                CustomEntity self = m.getSelf();
+                if (self instanceof EntityCoupleableRollingStock stock && !stock.isDead()) {
+                    loaded.add(stock);
+                    pooledUuids.add(stock.getUUID());
+                }
+            }
+            for (EntityCoupleableRollingStock stock : world.getEntities(EntityCoupleableRollingStock.class)) {
+                if (!pooledUuids.contains(stock.getUUID()) && !stock.isDead()) {
+                    loaded.add(stock);
+                }
+            }
+
             boolean newChunksLoaded = lastCount != loaded.size();
 
             for (EntityCoupleableRollingStock stock : loaded) {
 
-                if (!stateMap.containsKey(stock.getUUID())) {
-                    for (SimulationState state : stock.states) {
-                        int stateIteration = state.tickID - tickID;
-                        if (stateIteration >= 0) {
-                            state.update(stock);
-                            stateMaps.get(stateIteration).put(stock.getUUID(), state);
-                        }
-                    }
+                if (!statesMatchPositions(stock)) {
+                    stock.states.clear();
+                }
 
-                    if (!stateMap.containsKey(stock.getUUID())) {
-                        // This should only ever happen right after stock is placed.
-                        SimulationState state = new SimulationState(stock);
-                        state.tickID = tickID;
-                        stateMap.put(stock.getUUID(), state);
+                if (!stateMap.containsKey(stock.getUUID())) {
+                    if (stock.states.isEmpty()) {
+                        /*
+                         * The transient states list is lost whenever the carrier entity is
+                         * re-created (1.21 destroys and recreates it on chunk unload/reload).
+                         * The persisted TickPos list survives, so rebuild from it instead of
+                         * trusting the re-created entity's NBT/zero position.
+                         */
+                        SimulationState rebuilt = SimulationState.forTick(stock, tickID);
+                        rebuilt.update(stock);
+                        stateMap.put(stock.getUUID(), rebuilt);
+                    } else {
+                        for (SimulationState state : stock.states) {
+                            int stateIteration = state.tickID - tickID;
+                            if (stateIteration >= 0 && stateIteration < stateMaps.size()) {
+                                state.update(stock);
+                                stateMaps.get(stateIteration).put(stock.getUUID(), state);
+                            }
+                        }
+
+                        if (!stateMap.containsKey(stock.getUUID())) {
+                            // Stock placed right after this pass started.
+                            stateMap.put(stock.getUUID(), SimulationState.forTick(stock, tickID));
+                        }
                     }
                 }
 
@@ -113,21 +213,17 @@ public class Simulation {
                     continue;
                 }
 
-                // Keep it loaded
-                world.keepLoaded(new Vec3i(state.position));
+                boolean offline = !stock.isAddedToChunk();
+                if (!offline || Config.ConfigDebug.offlineVehicleLoadChunks) {
+                    world.keepLoaded(new Vec3i(state.position));
 
-                if (state.consist.positions == null) {
-                    continue;
-                }
-
-                // Load interacting stock locations
-                // We could in the future do a HashSet<Consist> and reduce the calls to the world.
-                for (Vec3i pos : state.consist.positions) {
-                    if (!world.isBlockLoaded(pos)) {
-                        ImmersiveRailroading.debug("Loading chunk at position %s", pos);
-                        // Load the chunk, entities should be directly injected into the world
-                        world.getBlock(pos);
-                        newChunksLoaded = true;
+                    if (state.consist.positions != null) {
+                        for (Vec3i pos : state.consist.positions) {
+                            if (!world.isBlockLoaded(pos)) {
+                                world.getBlock(pos);
+                                newChunksLoaded = true;
+                            }
+                        }
                     }
                 }
             }
@@ -166,12 +262,63 @@ public class Simulation {
                 }
                 SimulationState other = stateMap.get(otherID);
                 if (other == null) {
-                    Vec3i otherPos = loaded.stream()
-                            .filter(x -> x.getUUID().equals(myID)).findFirst()
-                            .map(x -> isMyCouplerFront ? x.lastKnownFront : x.lastKnownRear).orElse(null);
+                    /*
+                     * A missing state in this pass does NOT mean the car was removed.  In 1.21
+                     * the carrier entity is destroyed/re-created when its chunk unloads (and it
+                     * may live in the offline entity pool), so the world registry can transiently
+                     * forget it.  Treating "no state this pass" as "removed" is what tears a
+                     * consist into pieces when a player leaves and re-enters the area, so rebuild
+                     * the partner from its persisted TickPos and only release the coupler once
+                     * there is really no stock left.
+                     */
+                    EntityCoupleableRollingStock otherStock = world.getEntity(otherID, EntityCoupleableRollingStock.class);
+                    if (otherStock == null && Config.ConfigDebug.enableEntityPool) {
+                        ModdedEntity pooled = EntityPool.get(world).getEntity(otherID);
+                        if (pooled != null) {
+                            if (pooled.getSelf() instanceof EntityCoupleableRollingStock) {
+                                otherStock = (EntityCoupleableRollingStock) pooled.getSelf();
+                            } else {
+                                // Still being restored into a live entity; do not drop the link.
+                                continue;
+                            }
+                        }
+                    }
 
-                    if (otherPos != null && !world.isBlockLoaded(otherPos)) {
+                    if (otherStock != null && !otherStock.isDead()) {
+                        EntityCoupleableRollingStock partner = otherStock;
+                        Map<UUID, Long> unseen = UNSEEN_MISSING.get(world);
+                        if (unseen != null) {
+                            unseen.remove(otherID);
+                        }
+                        SimulationState rebuilt = SimulationState.forTick(partner, state.tickID);
+                        rebuilt.update(partner);
+                        rebuilt.dirty = true;
+                        stateMap.put(otherID, rebuilt);
+                        if (loaded.stream().noneMatch(x -> x.getUUID().equals(partner.getUUID()))) {
+                            loaded.add(partner);
+                        }
+                        continue;
+                    }
+
+                    EntityCoupleableRollingStock meStock = loaded.stream()
+                            .filter(x -> x.getUUID().equals(myID)).findFirst()
+                            .orElseGet(() -> world.getEntity(myID, EntityCoupleableRollingStock.class));
+                    Vec3i otherPos = meStock == null ? null
+                            : (isMyCouplerFront ? meStock.lastKnownFront : meStock.lastKnownRear);
+
+                    if (otherPos == null) {
+                        // No state, no entity and no last known position: most likely a car whose
+                        // chunk has not been streamed back in yet, not a removed coupler.
+                        continue;
+                    }
+
+                    if (!world.isBlockLoaded(otherPos)) {
                         // Other location is not loaded, we must not need to do this check.
+                        continue;
+                    }
+
+                    if (unseenWithinGrace(otherID)) {
+                        // First pass after a load: the partner may simply not be registered yet.
                         continue;
                     }
 
@@ -349,6 +496,14 @@ public class Simulation {
         // calculate new velocities
         Consist.iterate(stateMap, nextStateMap, blocksAlreadyBroken);
 
+        Map<UUID, WorldData.VehicleRef> refs = new HashMap<>();
+        for (EntityCoupleableRollingStock stock : loaded) {
+            refs.put(stock.getUUID(), new WorldData.VehicleRef(
+                    stock.getPosition(), stock.getVelocity(), stock.lastFrontEdge, stock.lastRearEdge,
+                    stock instanceof Locomotive));
+        }
+        WorldData.get(world).updateVehicleRefs(refs);
+
         long totalTimeMs = System.currentTimeMillis() - startTimeMs;
         if (totalTimeMs > Config.ConfigDebug.physicsWarnThresholdMs) {
             ImmersiveRailroading.warn("Calculating Immersive Railroading Physics Iteration took %sms (%s, %s, %s)", totalTimeMs, calculatedStates, restStates, keptStates);
@@ -358,12 +513,20 @@ public class Simulation {
 
 
 
-
+    private static final Map<World, Boolean> LAST_OFF_WORLD_PATHING = new WeakHashMap<>();
 
     public static void simulate(World world) {
         // 100KM/h ~= 28m/s which means non-loaded stationary stock may be phased through at that speed
         // I'm OK with that for now
         // We might want to chunk-load ahead of the train just to be safe?
+
+        boolean current = Config.ConfigDebug.offWorldPathing;
+        Boolean last = LAST_OFF_WORLD_PATHING.put(world, current);
+
+        // off -> non-off, clear all topo for stocks
+        if (last != null && last && !current) {
+            clearTopology(world);
+        }
 
         if (world.getTicks() % 5 != 0) {
             // Only re-check every 5 ticks
@@ -379,5 +542,32 @@ public class Simulation {
 
     public static double calculateRoll(double frontRoll, double rearRoll) {//TODO: multi bogey support?
         return (frontRoll + rearRoll) / 2;
+    }
+
+    private static void clearTopology(World world) {
+        Set<EntityCoupleableRollingStock> all =
+                new HashSet<>(world.getEntities(EntityCoupleableRollingStock.class));
+
+        EntityPool.get(world).getAllEntities().stream()
+                .map(ModdedEntity::getSelf)
+                .filter(Objects::nonNull)
+                .filter(s -> s instanceof EntityCoupleableRollingStock)
+                .map(s -> (EntityCoupleableRollingStock) s)
+                .forEach(all::add);
+
+        for (EntityCoupleableRollingStock stock : all) {
+            stock.lastFrontEdge = null;
+            stock.lastFrontT = -1;
+            stock.lastRearEdge = null;
+            stock.lastRearT = -1;
+
+            SimulationState state = stock.getCurrentState();
+            if (state != null) {
+                state.lastFrontEdge = null;
+                state.lastFrontT = -1;
+                state.lastRearEdge = null;
+                state.lastRearT = -1;
+            }
+        }
     }
 }

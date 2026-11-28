@@ -1,5 +1,6 @@
 package cam72cam.immersiverailroading.model.part;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.model.components.ModelComponent;
@@ -7,6 +8,7 @@ import cam72cam.immersiverailroading.physics.MovementTrack;
 import cam72cam.mod.util.collection.ExpireableMap;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.immersiverailroading.thirdparty.trackapi.IRPathingData;
+import cam72cam.immersiverailroading.track.graph.OffWorldMovementTrack;
 import cam72cam.immersiverailroading.util.VecUtil;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.util.DegreeFuncs;
@@ -126,6 +128,10 @@ public class TrackFollower {
 
     //Notice that we use bogeyYaw and distance to construct motion direction, so both of them affect plus-minus sign of roll
     public void nextPosition(World world, Gauge gauge, IRPathingData currentPosition, float rotationYaw, float bogeyYaw, double distance) {
+        if(Config.ConfigDebug.offWorldPathing) {
+            OffWorldMovementTrack.getNextPosition(currentPosition, VecUtil.fromWrongYaw(distance, bogeyYaw), gauge.value(), world);
+            return;
+        }
         ITrack rail = MovementTrack.findTrack(world, currentPosition.getUMCPos(), rotationYaw, gauge.value());
         if (rail == null) {
             return;

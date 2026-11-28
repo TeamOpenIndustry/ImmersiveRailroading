@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.entity.physics.Consist;
 import cam72cam.immersiverailroading.entity.physics.Simulation;
 import cam72cam.immersiverailroading.entity.physics.SimulationState;
@@ -13,6 +14,7 @@ import cam72cam.immersiverailroading.library.ModelComponentType.ModelPosition;
 import cam72cam.immersiverailroading.library.Permissions;
 import cam72cam.immersiverailroading.model.part.Control;
 import cam72cam.immersiverailroading.net.SoundPacket;
+import cam72cam.immersiverailroading.track.graph.TrackEdge;
 import cam72cam.mod.entity.sync.TagSync;
 import cam72cam.mod.serialization.StrictTagMapper;
 import cam72cam.mod.serialization.TagField;
@@ -89,6 +91,15 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
     public Vec3i lastKnownFront = null;
 	@TagField("lastKnownRear")
 	public Vec3i lastKnownRear = null;
+
+	@TagField("lastFrontEdge")
+	public TrackEdge lastFrontEdge;
+	@TagField("lastRearEdge")
+	public TrackEdge lastRearEdge;
+	@TagField("lastFrontT")
+	public double lastFrontT;
+	@TagField("lastRearT")
+	public double lastRearT;
 
 	@TagField("slackFront")
 	@TagSync
@@ -201,12 +212,12 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 
 		hadElectricalPower = hasElectricalPower();
 
-		if (this.getCurrentState() != null && !this.getCurrentState().atRest || ConfigDebug.keepStockLoaded) {
-			//Then exclude stocks not linked to any locomotive
-            if (!ConfigDebug.excludeStandaloneWagons || this.linkedToLocomotive) {
-                keepLoaded();
-            }
-        }
+		if (isAddedToChunk()
+				&& (this.getCurrentState() != null && !this.getCurrentState().atRest || ConfigDebug.keepStockLoaded)) {
+			if (!ConfigDebug.excludeStandaloneWagons || this.linkedToLocomotive) {
+				keepLoaded();
+			}
+		}
 
 		slackFrontPercent = 0;
 		slackRearPercent = 0;
@@ -216,6 +227,11 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 			setCoupledUUID(CouplerType.FRONT, state.interactingFront);
 			setCoupledUUID(CouplerType.BACK, state.interactingRear);
 			consist = state.consist;
+
+			this.lastFrontEdge = state.lastFrontEdge;
+			this.lastFrontT = state.lastFrontT;
+			this.lastRearEdge = state.lastRearEdge;
+			this.lastRearT = state.lastRearT;
 
 			if (getCoupledUUID(CouplerType.FRONT) != null) {
 				EntityCoupleableRollingStock front = getCoupled(CouplerType.FRONT);
@@ -240,6 +256,10 @@ public abstract class EntityCoupleableRollingStock extends EntityMoveableRolling
 	}
 
 	public void keepLoaded() {
+		if (!isAddedToChunk() && !Config.ConfigDebug.offlineVehicleLoadChunks) {
+			return;
+		}
+
 		World world = getWorld();
 		world.keepLoaded(getBlockPosition());
 		if (getCurrentState() != null && !getCurrentState().atRest) {
