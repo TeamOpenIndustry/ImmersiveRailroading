@@ -218,7 +218,7 @@ public class OffWorldMovementTrack {
     private static Vec3d edgeDirection(TrackEdge edge, TrackNode from, TrackNode to, World world) {
         if (edge.edgeType == TrackEdge.EdgeType.GAP) {
             Vec3d dir = to.point.subtract(from.point);
-            if (dir.length() >= TrackNode.GAP_MIN_DIST * 2) {
+            if (dir.length() >= TrackNode.GAP_MIN_DIST + EPS) {
                 return dir.normalize();
             }
             // 零长度 GAP 没有弦长。不能用 (0,0,1) 伪造方向，也不能用 absPos 相减：
