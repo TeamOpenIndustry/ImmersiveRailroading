@@ -217,9 +217,7 @@ public class OffWorldMovementTrack {
 
     private static Vec3d edgeDirection(TrackEdge edge, TrackNode from, TrackNode to, World world) {
         if (edge.edgeType == TrackEdge.EdgeType.GAP) {
-            double hFrom = trackHeight(from, world);
-            double hTo = trackHeight(to, world);
-            Vec3d dir = to.point.subtract(from.point).add(0, hTo - hFrom, 0);
+            Vec3d dir = to.point.subtract(from.point);
             if (dir.length() >= TrackNode.GAP_MIN_DIST * 2) {
                 return dir.normalize();
             }
@@ -565,11 +563,5 @@ public class OffWorldMovementTrack {
         Vec3d pp = info.placementInfo.placementPosition;
         double h = info.getTrackHeight() * single.gauge.scale();
         return new Vec3d(parentPos.x + pp.x, parentPos.y + pp.y + h, parentPos.z + pp.z);
-    }
-
-    private static double trackHeight(TrackNode node, World world) {
-        TrackSingleGeometrySegment single = node.trackSingleGeometrySegment;
-        RailInfo info = single.getAndUpdateBuilder(world).info;
-        return info.getTrackHeight() * single.gauge.scale();
     }
 }
