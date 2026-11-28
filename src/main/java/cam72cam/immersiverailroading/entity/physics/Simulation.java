@@ -3,6 +3,7 @@ package cam72cam.immersiverailroading.entity.physics;
 import cam72cam.immersiverailroading.Config;
 import cam72cam.immersiverailroading.ImmersiveRailroading;
 import cam72cam.immersiverailroading.entity.EntityCoupleableRollingStock;
+import cam72cam.immersiverailroading.entity.Locomotive;
 import cam72cam.immersiverailroading.entity.physics.chrono.ChronoState;
 import cam72cam.immersiverailroading.entity.physics.chrono.ServerChronoState;
 import cam72cam.immersiverailroading.net.MRSSyncPacket;
@@ -497,7 +498,9 @@ public class Simulation {
 
         Map<UUID, WorldData.VehicleRef> refs = new HashMap<>();
         for (EntityCoupleableRollingStock stock : loaded) {
-            refs.put(stock.getUUID(), new WorldData.VehicleRef(stock.getPosition(), stock.getVelocity(), stock.lastFrontEdge, stock.lastRearEdge));
+            refs.put(stock.getUUID(), new WorldData.VehicleRef(
+                    stock.getPosition(), stock.getVelocity(), stock.lastFrontEdge, stock.lastRearEdge,
+                    stock instanceof Locomotive));
         }
         WorldData.get(world).updateVehicleRefs(refs);
 

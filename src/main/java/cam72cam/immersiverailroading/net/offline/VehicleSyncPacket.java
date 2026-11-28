@@ -9,24 +9,29 @@ import cam72cam.mod.world.World;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class VehicleSyncPacket extends Packet {
+    private static final int ENTRY_BYTES = Long.BYTES * 2 + Double.BYTES * 3 + 1;
+
     @TagField
     private World world;
 
     public VehicleSyncPacket() {}
 
-    public VehicleSyncPacket(World world, List<Vec3d> vehicles) {
+    public VehicleSyncPacket(World world, List<WorldData.MapVehicle> vehicles) {
         this.world = world;
         if (vehicles == null || vehicles.isEmpty()) {
             this.raw = new byte[0];
         } else {
-            // only vehicle pos data yet
-            ByteBuffer buf = ByteBuffer.allocate(vehicles.size() * 24);
-            for (Vec3d v : vehicles) {
-                buf.putDouble(v.x);
-                buf.putDouble(v.y);
-                buf.putDouble(v.z);
+            ByteBuffer buf = ByteBuffer.allocate(vehicles.size() * ENTRY_BYTES);
+            for (WorldData.MapVehicle v : vehicles) {
+                buf.putLong(v.id.getMostSignificantBits());
+                buf.putLong(v.id.getLeastSignificantBits());
+                buf.putDouble(v.pos.x);
+                buf.putDouble(v.pos.y);
+                buf.putDouble(v.pos.z);
+                buf.put(v.locomotive ? (byte) 1 : (byte) 0);
             }
             this.raw = buf.array();
         }
@@ -40,11 +45,13 @@ public class VehicleSyncPacket extends Packet {
                 data.updateClientVehicles(new ArrayList<>());
                 return;
             }
-            int count = raw.length / 24;
-            List<Vec3d> vehicles = new ArrayList<>(count);
+            int count = raw.length / ENTRY_BYTES;
+            List<WorldData.MapVehicle> vehicles = new ArrayList<>(count);
             ByteBuffer buf = ByteBuffer.wrap(raw);
             for (int i = 0; i < count; i++) {
-                vehicles.add(new Vec3d(buf.getDouble(), buf.getDouble(), buf.getDouble()));
+                UUID id = new UUID(buf.getLong(), buf.getLong());
+                Vec3d pos = new Vec3d(buf.getDouble(), buf.getDouble(), buf.getDouble());
+                vehicles.add(new WorldData.MapVehicle(id, pos, buf.get() != 0));
             }
             data.updateClientVehicles(vehicles);
         }

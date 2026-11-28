@@ -118,6 +118,7 @@ public class ImmersiveRailroading extends ModCore.Mod {
 				Packet.register(TrackRegionRequestPacket::new, PacketDirection.ClientToServer);
 				Packet.register(VehicleRequestPacket::new, PacketDirection.ClientToServer);
 				Packet.register(VehicleSyncPacket::new, PacketDirection.ServerToClient);
+				Packet.register(MapLocomotiveLinkPacket::new, PacketDirection.ClientToServer);
 				Packet.register(SwitchChangePacket::new, PacketDirection.ClientToServer);
 
 				ServerChronoState.register();

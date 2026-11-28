@@ -1,18 +1,20 @@
 package cam72cam.immersiverailroading.gui;
 
 import cam72cam.immersiverailroading.ConfigGraphics;
+import cam72cam.immersiverailroading.IRItems;
 import cam72cam.immersiverailroading.library.Gauge;
 import cam72cam.immersiverailroading.library.GuiText;
 import cam72cam.immersiverailroading.library.SwitchState;
-import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.net.offline.SwitchChangePacket;
 import cam72cam.immersiverailroading.net.offline.TrackRegionRequestPacket;
 import cam72cam.immersiverailroading.net.offline.VehicleRequestPacket;
+import cam72cam.immersiverailroading.net.offline.MapLocomotiveLinkPacket;
 import cam72cam.immersiverailroading.render.util.Color;
 import cam72cam.immersiverailroading.render.util.FlatCurveRenderer;
 import cam72cam.immersiverailroading.track.VecYPR;
 import cam72cam.immersiverailroading.track.graph.*;
 import cam72cam.mod.MinecraftClient;
+import cam72cam.mod.entity.Player;
 import cam72cam.mod.event.ClientEvents;
 import cam72cam.mod.gui.helpers.GUIHelpers;
 import cam72cam.mod.gui.screen.IScreen;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class GlobalRailwayMap implements IScreen {
 
@@ -40,6 +43,9 @@ public class GlobalRailwayMap implements IScreen {
     private static final Color COLOR_TRACK_FB   = new Color(0.90, 0.60, 0.30, 1.0);
     private static final Color COLOR_PLAYER     = new Color(0.30, 0.60, 1.00, 1.0);
     private static final Color COLOR_VEHICLE    = new Color(1.00, 0.30, 0.30, 1.0);
+    private static final Color COLOR_LOCOMOTIVE       = new Color(1.00, 0.65, 0.15, 1.0);
+    private static final Color COLOR_LOCOMOTIVE_HOVER = new Color(1.00, 0.95, 0.20, 1.0);
+    private static final Color COLOR_LOCOMOTIVE_SELECT = new Color(0.20, 1.00, 1.00, 1.0);
 
     // switch
     private static final Color COLOR_SWITCH_HOVER  = new Color(1.0, 0.8, 0.2, 1.0);
@@ -48,7 +54,9 @@ public class GlobalRailwayMap implements IScreen {
     private static final int COLOR_BTN_HOVER       = 0xFF555555;
     private static final int COLOR_BTN_CLOSE       = 0xFF882222;
     private static final int COLOR_BTN_CLOSE_HOVER = 0xFFAA3333;
+    private static final int COLOR_BTN_DISABLED    = 0xFF222222;
     private static final int COLOR_BTN_TEXT        = 0xFFFFFFFF;
+    private static final int COLOR_BTN_TEXT_DISABLED = 0xFF777777;
 
     private double panX, panZ;
     private double zoom = 2.0;
@@ -70,6 +78,8 @@ public class GlobalRailwayMap implements IScreen {
     private TrackMultiGeometrySegment hoveredSwitch = null;
     private TrackMultiGeometrySegment selectedSwitch = null;
     private Vec3d teleportPos = null;
+    private UUID hoveredLocomotive = null;
+    private UUID selectedLocomotive = null;
 
     // mouse pos cache
     private int lastMouseX = 0;
@@ -156,6 +166,7 @@ public class GlobalRailwayMap implements IScreen {
         drawPlayerMarker(mapState, width, height);
         drawHud(width, height);
         drawSwitchUI(width, height);
+        drawLocomotiveUI(width, height);
         drawTeleportUI(width, height);
     }
 
@@ -202,7 +213,8 @@ public class GlobalRailwayMap implements IScreen {
         FlatCurveRenderer fr = new FlatCurveRenderer(state, null);
         double yScale = -zoom;
 
-        for (Vec3d pos : data.clientMapVehicles) {
+        for (WorldData.MapVehicle vehicle : data.clientMapVehicles) {
+            Vec3d pos = vehicle.pos;
             double dx = pos.x - panX;
             double dz = pos.z - panZ;
             if (Math.abs(dx) > (width / 2.0) / zoom + 10 || Math.abs(dz) > (height / 2.0) / zoom + 10) continue;
@@ -214,11 +226,112 @@ public class GlobalRailwayMap implements IScreen {
             Vec3d top = new Vec3d(dx, dz + h, 0), right = new Vec3d(dx + w, dz, 0);
             Vec3d bottom = new Vec3d(dx, dz - h, 0), left = new Vec3d(dx - w, dz, 0);
 
-            drawExtendedLine(fr, top, right, 1.0, zoom, yScale, COLOR_VEHICLE);
-            drawExtendedLine(fr, right, bottom, 1.0, zoom, yScale, COLOR_VEHICLE);
-            drawExtendedLine(fr, bottom, left, 1.0, zoom, yScale, COLOR_VEHICLE);
-            drawExtendedLine(fr, left, top, 1.0, zoom, yScale, COLOR_VEHICLE);
+            Color color = vehicle.locomotive ? COLOR_LOCOMOTIVE : COLOR_VEHICLE;
+            if (vehicle.locomotive && vehicle.id.equals(selectedLocomotive)) {
+                color = COLOR_LOCOMOTIVE_SELECT;
+            } else if (vehicle.locomotive && vehicle.id.equals(hoveredLocomotive)) {
+                color = COLOR_LOCOMOTIVE_HOVER;
+            }
+
+            drawExtendedLine(fr, top, right, 1.0, zoom, yScale, color);
+            drawExtendedLine(fr, right, bottom, 1.0, zoom, yScale, color);
+            drawExtendedLine(fr, bottom, left, 1.0, zoom, yScale, color);
+            drawExtendedLine(fr, left, top, 1.0, zoom, yScale, color);
         }
+    }
+
+    private void drawLocomotiveUI(int width, int height) {
+        WorldData.MapVehicle vehicle = findClientVehicle(selectedLocomotive);
+        if (vehicle == null) {
+            selectedLocomotive = null;
+            return;
+        }
+
+        int sx = (int) (width / 2.0 + (vehicle.pos.x - panX) * zoom);
+        int sy = (int) (height / 2.0 + (vehicle.pos.z - panZ) * zoom);
+
+        int btnY = sy - 15;
+        int btnW = 70;
+        int btnH = 16;
+        int gap = 4;
+        int closeW = 16;
+
+        int btnX = sx + 15;
+        int closeX = btnX + btnW + gap;
+
+        Matrix4 m = new Matrix4();
+        boolean hasRemote = hasWirelessRemote();
+        boolean hoverBtn = lastMouseX >= btnX && lastMouseX <= btnX + btnW
+                && lastMouseY >= btnY && lastMouseY <= btnY + btnH;
+
+        int btnColor = !hasRemote ? COLOR_BTN_DISABLED : (hoverBtn ? COLOR_BTN_HOVER : COLOR_BTN_BG);
+        int btnTextColor = hasRemote ? COLOR_BTN_TEXT : COLOR_BTN_TEXT_DISABLED;
+        GUIHelpers.drawRect(btnX, btnY, btnW, btnH, btnColor);
+        GUIHelpers.drawCenteredString("Link", btnX + btnW / 2, btnY + 4, btnTextColor, m);
+
+        boolean hoverClose = lastMouseX >= closeX && lastMouseX <= closeX + closeW
+                && lastMouseY >= btnY && lastMouseY <= btnY + btnH;
+        GUIHelpers.drawRect(closeX, btnY, closeW, btnH, hoverClose ? COLOR_BTN_CLOSE_HOVER : COLOR_BTN_CLOSE);
+        GUIHelpers.drawCenteredString("X", closeX + closeW / 2, btnY + 4, COLOR_BTN_TEXT, m);
+    }
+
+    private WorldData.MapVehicle findClientVehicle(UUID id) {
+        if (id == null || data == null || data.clientMapVehicles == null) return null;
+        for (WorldData.MapVehicle vehicle : data.clientMapVehicles) {
+            if (id.equals(vehicle.id)) return vehicle;
+        }
+        return null;
+    }
+
+    private UUID findLocomotiveAt(int mx, int my) {
+        if (data == null || data.clientMapVehicles == null) return null;
+        int width = GUIHelpers.getScreenWidth();
+        int height = GUIHelpers.getScreenHeight();
+        double cx = width / 2.0;
+        double cy = height / 2.0;
+        double radiusSq = 8.0 * 8.0;
+        double closestDistSq = Double.MAX_VALUE;
+        UUID closest = null;
+
+        for (WorldData.MapVehicle vehicle : data.clientMapVehicles) {
+            if (!vehicle.locomotive) continue;
+            double sx = cx + (vehicle.pos.x - panX) * zoom;
+            double sy = cy + (vehicle.pos.z - panZ) * zoom;
+            double dx = mx - sx;
+            double dy = my - sy;
+            double d2 = dx * dx + dy * dy;
+            if (d2 < radiusSq && d2 < closestDistSq) {
+                closestDistSq = d2;
+                closest = vehicle.id;
+            }
+        }
+        return closest;
+    }
+
+    private static boolean hasWirelessRemote() {
+        Player player = MinecraftClient.getPlayer();
+        return player.getHeldItem(Player.Hand.PRIMARY).is(IRItems.ITEM_WIRELESS_REMOTECONTROL)
+                || player.getHeldItem(Player.Hand.SECONDARY).is(IRItems.ITEM_WIRELESS_REMOTECONTROL);
+    }
+
+    private boolean isMouseInLocomotiveLinkBtn(int mx, int my) {
+        WorldData.MapVehicle vehicle = findClientVehicle(selectedLocomotive);
+        if (vehicle == null) return false;
+        int width = GUIHelpers.getScreenWidth(), height = GUIHelpers.getScreenHeight();
+        int sx = (int) (width / 2.0 + (vehicle.pos.x - panX) * zoom);
+        int sy = (int) (height / 2.0 + (vehicle.pos.z - panZ) * zoom);
+        int btnX = sx + 15, btnY = sy - 15;
+        return mx >= btnX && mx <= btnX + 70 && my >= btnY && my <= btnY + 16;
+    }
+
+    private boolean isMouseInLocomotiveCloseBtn(int mx, int my) {
+        WorldData.MapVehicle vehicle = findClientVehicle(selectedLocomotive);
+        if (vehicle == null) return false;
+        int width = GUIHelpers.getScreenWidth(), height = GUIHelpers.getScreenHeight();
+        int sx = (int) (width / 2.0 + (vehicle.pos.x - panX) * zoom);
+        int sy = (int) (height / 2.0 + (vehicle.pos.z - panZ) * zoom);
+        int closeX = sx + 15 + 70 + 4, btnY = sy - 15;
+        return mx >= closeX && mx <= closeX + 16 && my >= btnY && my <= btnY + 16;
     }
 
     public boolean handleMouse(ClientEvents.MouseGuiEvent evt) {
@@ -275,9 +388,33 @@ public class GlobalRailwayMap implements IScreen {
                     }
                 }
 
+                // locomotive link button
+                if (selectedLocomotive != null && isLeftClick) {
+                    if (isMouseInLocomotiveCloseBtn(evt.x, evt.y)) {
+                        selectedLocomotive = null;
+                        return false;
+                    }
+                    if (isMouseInLocomotiveLinkBtn(evt.x, evt.y)) {
+                        if (hasWirelessRemote()) {
+                            new MapLocomotiveLinkPacket(selectedLocomotive).sendToServer();
+                        }
+                        return false;
+                    }
+                }
+
+                // select locomotive marker
+                UUID clickedLocomotive = findLocomotiveAt(evt.x, evt.y);
+                if (clickedLocomotive != null && isLeftClick) {
+                    selectedLocomotive = clickedLocomotive;
+                    selectedSwitch = null;
+                    teleportPos = null;
+                    return false;
+                }
+
                 // handle selected switch
                 if (hoveredSwitch != null && isLeftClick) {
                     selectedSwitch = hoveredSwitch;
+                    selectedLocomotive = null;
                     teleportPos = null;
                     return false;
                 }
@@ -285,6 +422,7 @@ public class GlobalRailwayMap implements IScreen {
                 // map drag
                 if (isLeftClick) {
                     selectedSwitch = null;
+                    selectedLocomotive = null;
                     dragging = true;
                     dragStartScreenX = evt.x; dragStartScreenY = evt.y;
                     dragStartPanX = panX; dragStartPanZ = panZ;
@@ -302,14 +440,16 @@ public class GlobalRailwayMap implements IScreen {
                 double mouseWorldX = panX + (evt.x - cx) / zoom;
                 double mouseWorldZ = panZ + (evt.y - cy) / zoom;
 
+                // locomotive marker has priority over switch hit box
+                hoveredLocomotive = findLocomotiveAt(evt.x, evt.y);
+
                 // switch active dist
-                double radiusWorld = 15.0 / zoom;
-                double radiusSq = radiusWorld * radiusWorld;
-
                 hoveredSwitch = null;
-                double closestDistSq = Double.MAX_VALUE;
+                if (hoveredLocomotive == null && data != null) {
+                    double radiusWorld = 15.0 / zoom;
+                    double radiusSq = radiusWorld * radiusWorld;
+                    double closestDistSq = Double.MAX_VALUE;
 
-                if (data != null) {
                     // mouse Region ID
                     long regionId = TrackRegionUtil.vecToRegion(new Vec3i((int)Math.floor(mouseWorldX), 0, (int)Math.floor(mouseWorldZ)));
                     Map<Vec3i, List<Vec3i>> regionMap = data.trackBlockParentsByRegion.get(regionId);
@@ -629,7 +769,7 @@ public class GlobalRailwayMap implements IScreen {
         } else {
             GUIHelpers.drawCenteredString("No track data on client yet", width / 2, y, 0xFFFF6060, m);
         }
-        GUIHelpers.drawCenteredString("Scroll = zoom   Drag = pan   Click = teleport   ESC = close", width / 2, height - 16, 0xFFA0A0A0, m);
+        GUIHelpers.drawCenteredString("Scroll = zoom   Drag = pan   Click track = teleport   Click loco = link   ESC = close", width / 2, height - 16, 0xFFA0A0A0, m);
     }
 
     private boolean segmentVisible(double wx1, double wz1, double wx2, double wz2, double minX, double maxX, double minZ, double maxZ) {

@@ -55,7 +55,7 @@ public class WorldData {
 
     // trains
     private final Map<UUID, VehicleRef> vehicleRefs = new HashMap<>();
-    public List<Vec3d> clientMapVehicles = new ArrayList<>();
+    public List<MapVehicle> clientMapVehicles = new ArrayList<>();
 
     // internal class
     public static class DeltaOp {
@@ -102,12 +102,26 @@ public class WorldData {
         public final Vec3d velocity;
         public final TrackEdge lastFrontEdge;
         public final TrackEdge lastRearEdge;
+        public final boolean locomotive;
 
-        public VehicleRef(Vec3d pos, Vec3d velocity, TrackEdge lastFrontEdge, TrackEdge lastRearEdge) {
+        public VehicleRef(Vec3d pos, Vec3d velocity, TrackEdge lastFrontEdge, TrackEdge lastRearEdge, boolean locomotive) {
             this.pos = pos;
             this.velocity = velocity;
             this.lastFrontEdge = lastFrontEdge;
             this.lastRearEdge = lastRearEdge;
+            this.locomotive = locomotive;
+        }
+    }
+
+    public static class MapVehicle {
+        public final UUID id;
+        public final Vec3d pos;
+        public final boolean locomotive;
+
+        public MapVehicle(UUID id, Vec3d pos, boolean locomotive) {
+            this.id = id;
+            this.pos = pos;
+            this.locomotive = locomotive;
         }
     }
 
@@ -1383,7 +1397,7 @@ public class WorldData {
         return mapView.isEmpty() ? null : mapView;
     }
 
-    public void updateClientVehicles(List<Vec3d> vehicles) {
+    public void updateClientVehicles(List<MapVehicle> vehicles) {
         if (!world.isClient) return;
         this.clientMapVehicles.clear();
         this.clientMapVehicles.addAll(vehicles);
@@ -1392,10 +1406,11 @@ public class WorldData {
     public void handleVehicleRequest(Player player, int minX, int minZ, int maxX, int maxZ) {
         if (!world.isServer) return;
 
-        List<Vec3d> found = new ArrayList<>();
-        for (VehicleRef ref : vehicleRefs.values()) {
+        List<MapVehicle> found = new ArrayList<>();
+        for (Map.Entry<UUID, VehicleRef> entry : vehicleRefs.entrySet()) {
+            VehicleRef ref = entry.getValue();
             if (ref.pos.x >= minX && ref.pos.x <= maxX && ref.pos.z >= minZ && ref.pos.z <= maxZ) {
-                found.add(ref.pos);
+                found.add(new MapVehicle(entry.getKey(), ref.pos, ref.locomotive));
             }
         }
         new VehicleSyncPacket(world, found).sendToPlayer(player);
