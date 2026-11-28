@@ -4,7 +4,6 @@ import cam72cam.immersiverailroading.library.SwitchState;
 import cam72cam.immersiverailroading.library.TrackItems;
 import cam72cam.immersiverailroading.thirdparty.trackapi.IRPathingData;
 import cam72cam.immersiverailroading.track.VecYPR;
-import cam72cam.immersiverailroading.util.RailInfo;
 import cam72cam.mod.math.Vec3d;
 import cam72cam.mod.math.Vec3i;
 import cam72cam.mod.world.World;
@@ -177,8 +176,12 @@ public class OffWorldMovementTrack {
             out[1] = from.point.y * (1 - t) + to.point.y * t;
             out[2] = from.point.z * (1 - t) + to.point.z * t;
 
-            double fromRollSign = (from.index == 0) ? -1.0 : 1.0;
-            double toRollSign = (to.index == 0) ? 1.0 : -1.0;
+            Vec3d gapDir = to.point.subtract(from.point);
+            if (gapDir.length() < TrackNode.GAP_MIN_DIST + EPS) {
+                gapDir = zeroLengthEdgeDirection(from, to, world);
+            }
+            double fromRollSign = gapRollSign(from, gapDir, true);
+            double toRollSign = gapRollSign(to, gapDir, false);
             double fromRoll = from.point.getRoll() * fromRollSign;
             double toRoll = to.point.getRoll() * toRollSign;
             out[3] = fromRoll * (1 - t) + toRoll * t;
@@ -193,7 +196,7 @@ public class OffWorldMovementTrack {
         if (i < 0) { i = 0; frac = 0; }
         if (i >= lastIdx) { i = lastIdx; frac = 0; }
 
-        Vec3d offset = singleOffset(from, world);
+        Vec3d offset = segmentOffset(from);
         VecYPR a = points.get(i);
         double rawRoll;
         if (frac < EPS || i >= lastIdx) {
@@ -213,6 +216,27 @@ public class OffWorldMovementTrack {
             rawRoll = -rawRoll;
         }
         out[3] = rawRoll;
+    }
+
+    /**
+     * GAP 两端的 roll 需要统一成“沿 from -> to 方向行驶”的朝向。
+     * 端点的内外关系由 index 0 / last 决定；T 形接点会落在 segment 内部，
+     * 此时不能再用端点公式，必须按 gap 方向与该 segment 前进切线的点积决定符号。
+     */
+    private static double gapRollSign(TrackNode node, Vec3d gapDir, boolean isFrom) {
+        List<VecYPR> points = node.trackSingleGeometrySegment.pointsCache;
+        int lastIdx = points.size() - 1;
+        if (isFrom) {
+            if (node.index == 0) return -1;
+            if (node.index == lastIdx) return 1;
+        } else {
+            if (node.index == 0) return 1;
+            if (node.index == lastIdx) return -1;
+        }
+
+        Vec3d forward = tangent(points.get(node.index - 1), points.get(node.index + 1));
+        if (gapDir == null || forward == null) return 1;
+        return forward.dotProduct(gapDir) >= 0 ? 1 : -1;
     }
 
     private static Vec3d edgeDirection(TrackEdge edge, TrackNode from, TrackNode to, World world) {
@@ -499,7 +523,7 @@ public class OffWorldMovementTrack {
         }
 
         List<VecYPR> points = from.trackSingleGeometrySegment.pointsCache;
-        Vec3d offset = singleOffset(from, world);
+        Vec3d offset = segmentOffset(from);
         int fi = from.index;
         int ti = to.index;
         if (fi == ti) return -1;
@@ -556,12 +580,7 @@ public class OffWorldMovementTrack {
         return new Vec3d(out[0], out[1], out[2]);
     }
 
-    private static Vec3d singleOffset(TrackNode node, World world) {
-        TrackSingleGeometrySegment single = node.trackSingleGeometrySegment;
-        Vec3i parentPos = single.getAbsPos();
-        RailInfo info = single.getAndUpdateBuilder(world).info;
-        Vec3d pp = info.placementInfo.placementPosition;
-        double h = info.getTrackHeight() * single.gauge.scale();
-        return new Vec3d(parentPos.x + pp.x, parentPos.y + pp.y + h, parentPos.z + pp.z);
+    private static Vec3d segmentOffset(TrackNode node) {
+        return node.point.subtract(node.trackSingleGeometrySegment.pointsCache.get(node.index));
     }
 }
