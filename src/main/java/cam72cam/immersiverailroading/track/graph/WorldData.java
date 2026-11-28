@@ -580,7 +580,7 @@ public class WorldData {
             synchronized (regions) {
                 regions.put(r, region);
                 regionCooldown.put(r, Config.ConfigRegion.unloadDelayTicks);
-                System.out.println("loading chunk " + TrackRegionUtil.regionX(r) + ", " + TrackRegionUtil.regionZ(r));
+                ImmersiveRailroading.info("loading chunk " + TrackRegionUtil.regionX(r) + ", " + TrackRegionUtil.regionZ(r));
             }
 
             for (Map.Entry<Vec3i, TrackMultiGeometrySegment> e : region.trackBlocks.entrySet()) {
